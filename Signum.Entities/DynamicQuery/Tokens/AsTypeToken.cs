@@ -12,7 +12,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class AsTypeToken : QueryToken
     {
-        Type type;
+        Type entityType;
         internal AsTypeToken(QueryToken parent, Type type)
             : base(parent)
         {
@@ -22,12 +22,12 @@ namespace Signum.Entities.DynamicQuery
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            this.type = type;
+            this.entityType = type;
         }
 
         public override Type Type
         {
-            get { return BuildLite(type); }
+            get { return BuildLite(entityType); }
         }
 
         public override string ToString()
@@ -37,21 +37,21 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "({0})".Formato(type.FullName.Replace(".", ":")); }
+            get { return "({0})".Formato(entityType.FullName.Replace(".", ":")); }
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             Expression baseExpression = Parent.BuildExpression(context);
 
-            Expression result = Expression.TypeAs(ExtractEntity(baseExpression, false), type);
+            Expression result = Expression.TypeAs(ExtractEntity(baseExpression, false), entityType);
 
             return BuildLite(result);
         }
 
         protected override List<QueryToken> SubTokensInternal()
         {
-            return SubTokensBase(type, null);
+            return SubTokensBase(entityType, null);
         }
 
         public override string Format
@@ -76,17 +76,17 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
-            return PropertyRoute.Root(type);
+            return PropertyRoute.Root(entityType);
         }
 
         public override string NiceName()
         {
-            return Resources._0As1.Formato(Parent.ToString(), type.NiceName());
+            return Resources._0As1.Formato(Parent.ToString(), entityType.NiceName());
         }
 
         public override QueryToken Clone()
         {
-            return new AsTypeToken(Parent.Clone(), Type);
+            return new AsTypeToken(Parent.Clone(), entityType);
         }
     }
     
