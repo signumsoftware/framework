@@ -5,10 +5,8 @@
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div>
     <a href="@Url.Action((CacheController pc) => pc.Disable())" class="sf-button" style="@(!CacheLogic.GloballyDisabled ? "" : "display:none");color:red" id="sfCacheDisable">
-        Disable </a>
-    <a href="@Url.Action((CacheController pc) => pc.Enable())" class="sf-button"  style="@(CacheLogic.GloballyDisabled ? "" : "display:none")" id="sfCacheEnable">
-            Enable </a>
-    <a href="@Url.Action((CacheController pc) => pc.Clean())" class="sf-button" id="sfCacheClear">
+        Disable </a><a href="@Url.Action((CacheController pc) => pc.Enable())" class="sf-button"  style="@(CacheLogic.GloballyDisabled ? "" : "display:none")" id="sfCacheEnable">
+            Enable </a><a href="@Url.Action((CacheController pc) => pc.Clean())" class="sf-button" id="sfCacheClear">
                 Clean </a>
 </div>
 <table class="sf-search-results sf-stats-table">
@@ -23,6 +21,15 @@
             <th>
                 Count
             </th>
+            <th>
+                Invalidations
+            </th>
+            <th>
+                Loads
+            </th>
+            <th>
+                Hits
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -33,7 +40,13 @@
                 </td>
                 <td>@item.CacheType.NiceToString()
                 </td>
-                <td>@item.Count
+                <td>@(item.Count.TryToString() ?? "-- not loaded --")
+                </td>
+                <td>@item.Invalidations.DefaultToNull()
+                </td>
+                <td>@item.Loads.DefaultToNull()
+                </td>
+                <td>@item.Hits.DefaultToNull()
                 </td>
             </tr>
         }
