@@ -115,28 +115,17 @@ WriteLiteral("</td>\r\n        <td>\r\n");
 
                                                                
             }
+          
+
+               
+
+WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query-token\">\r\n          " +
+"          ");
 
 
-             if (tc.Value.ShouldAggregate)
-            {
-                
-           Write(Html.ValueLine(tc, ct => ct.Aggregate, vl => { vl.LabelVisible = false; vl.ValueHtmlProps["class"] = "sf-chart-token-aggregate";}));
-
-                                                                                                                                                   
-            }
-
-WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query-token\">\r\n");
-
-
-                 if (tc.Value.Aggregate != AggregateFunction.Count)
-                {
-                    
                Write(Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc));
 
-                                                                                               
-                }
-
-WriteLiteral("            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
+WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
 
 
                                                 Write(Resources.Chart_ToggleInfo);

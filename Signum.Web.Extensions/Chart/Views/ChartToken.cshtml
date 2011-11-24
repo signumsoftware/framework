@@ -29,17 +29,14 @@
                 @groupCheck.ToHtmlSelf()
                 @Html.Hidden(tc.Compose("group"), groupResults)
             }
-            @if (tc.Value.ShouldAggregate)
+          @*  @if (tc.Value.ShouldAggregate)
             {
                 @Html.ValueLine(tc, ct => ct.Aggregate, vl => { vl.LabelVisible = false; vl.ValueHtmlProps["class"] = "sf-chart-token-aggregate";})
-            }
+            }*@
         </td>
         <td>
             <div class="sf-query-token">
-                @if (tc.Value.Aggregate != AggregateFunction.Count)
-                {
                     @Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)
-                }
             </div>
             <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
         </td>

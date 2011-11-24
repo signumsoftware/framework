@@ -127,7 +127,7 @@ namespace Signum.Web.Chart
 
             if (chartRequest.Chart.GroupResults)
             {
-                var filters = chartRequest.Filters.Select(f => new FilterOption { Token = f.Token, Value = f.Value, Operation = f.Operation }).ToList();
+                var filters = chartRequest.Filters.Where(a=>!(a.Token is AggregateToken)).Select(f => new FilterOption { Token = f.Token, Value = f.Value, Operation = f.Operation }).ToList();
 
                 var chartTokenFilters = new List<FilterOption>
                 {
@@ -164,7 +164,7 @@ namespace Signum.Web.Chart
 
         private FilterOption AddFilter(ChartRequest request, ChartTokenDN chartToken, string key)
         {
-            if (chartToken == null || chartToken.Aggregate != null)
+            if (chartToken == null || chartToken.Token is AggregateToken)
                 return null;
 
             if (key == "d1" && (request.Chart.ChartType == ChartType.StackedAreas || request.Chart.ChartType == ChartType.TotalAreas))
