@@ -515,7 +515,7 @@ namespace Signum.Engine.Maps
     {
         bool Enabled { get; }
         bool IsComplete { get; }
-        bool Load();
+        void Load();
 
         IEnumerable<int> GetAllIds();
 
@@ -527,7 +527,7 @@ namespace Signum.Engine.Maps
     {
         public abstract bool Enabled { get; }
         public abstract bool IsComplete { get; }
-        public abstract bool Load();
+        public abstract void Load();
 
         public abstract IEnumerable<int> GetAllIds();
 
