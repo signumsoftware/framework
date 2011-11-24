@@ -115,14 +115,14 @@ namespace Signum.Windows.Chart
                 Header = Signum.Windows.Extensions.Properties.Resources.Edit,
                 Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Edit_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", Converters.IsNotNull));
+            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", Converters.IsNotNull));
 
             Items.Add(new MenuItem()
             {
                 Header = Signum.Windows.Extensions.Properties.Resources.Remove,
                 Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", Converters.IsNotNull));
+            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", Converters.IsNotNull));
         }
 
         private void MenuItem_Clicked(object sender, RoutedEventArgs e)

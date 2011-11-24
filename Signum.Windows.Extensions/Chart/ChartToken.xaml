@@ -29,20 +29,9 @@
                       HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
                 <Image Source="/Signum.Windows.Extensions;Component/Images/charts/groupby.png" Stretch="None" SnapsToDevicePixels="True" />
             </ToggleButton>
-            <ComboBox SelectedItem="{Binding Aggregate, ValidatesOnDataErrors=true, ValidatesOnExceptions=true, NotifyOnValidationError=true}"
-                  Visibility="{Binding ShouldAggregate, Converter={x:Static m:Converters.BoolToVisibility}}"
-                  ItemsSource="{m:EnumValues Type={x:Type dn:AggregateFunction}, Nullable=true}" 
-                  HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock TextAlignment="Right" Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" >
                 <m:QueryTokenBuilder  Style="{StaticResource toolTip}"  x:Name="token"
-                                 Visibility="{Binding Aggregate, Converter={x:Static swc:ChartToken.SumConverter}}"
                              Token="{Binding Token, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                               SubTokensEvent="token_SubTokensEvent"/>
                 <TextBox Visibility="{Binding Token, Converter={x:Static swc:ChartToken.IsInterval}}" Text="{Binding Token.Intervals, ValidatesOnDataErrors=true, NotifyOnValidationError=true }" VerticalAlignment="Center"/>
@@ -62,8 +51,6 @@
                     <m:ValueLine m:Common.Route="Format" MinWidth="100" />
                     <m:ValueLine m:Common.Route="Unit" Grid.Column="1" MinWidth="100"/>
                     <m:ValueLine m:Common.Route="DisplayName" Grid.Row="1" MinWidth="200"/>
-                    <m:ValueLine m:Common.Route="OrderPriority" Grid.Row="2" MinWidth="100" />
-                    <m:ValueLine m:Common.Route="OrderType" Grid.Row="2" Grid.Column="1" MinWidth="100"/>
                 </Grid>
             </Expander>
         </Grid>

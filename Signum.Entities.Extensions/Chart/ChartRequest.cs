@@ -92,10 +92,16 @@ namespace Signum.Entities.Chart
 
         void UpdateGroup()
         {
-            dimension1.NotifyAll();
-            dimension2.NotifyAll();
-            value1.NotifyAll();
-            value2.NotifyAll();
+            UpdateTokenGroup(dimension1);
+            UpdateTokenGroup(dimension2);
+            UpdateTokenGroup(value1);
+            UpdateTokenGroup(value2);
+        }
+
+        private void UpdateTokenGroup(ChartTokenDN token)
+        {
+            if (token != null)
+                token.NotifyAll();
         }
 
         protected void UpdateTokens()
