@@ -138,7 +138,7 @@ namespace Signum.Entities.Chart
         {
             var result = parentChart.SubTokensChart(token, columnDescriptions, this.ShouldAggregate);
 
-            if (this.Grouping && this.ShouldAggregate && token != null)
+            if (this.Grouping && !this.ShouldAggregate && token != null)
             {
                 FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
 

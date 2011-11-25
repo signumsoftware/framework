@@ -33,7 +33,7 @@ namespace Signum.Entities.Chart
 
         public override string ToString()
         {
-            return AggregateFunction.NiceToString();
+            return "[{0}]".Formato(AggregateFunction.NiceToString());
         }
 
         public override string NiceName()

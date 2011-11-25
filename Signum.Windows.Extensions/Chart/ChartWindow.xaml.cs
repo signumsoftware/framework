@@ -66,10 +66,10 @@ namespace Signum.Windows.Chart
         void ChartBuilder_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.OldValue != null)
-                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged -= ReDrawChart;
+                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged -= Request_ChartRequestChanged;
 
             if (e.NewValue != null)
-                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged += ReDrawChart;
+                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged += Request_ChartRequestChanged;
 
             qtbFilters.UpdateTokenList();
         }
@@ -104,6 +104,7 @@ namespace Signum.Windows.Chart
         void Request_ChartRequestChanged()
         {
             UpdateMultiplyMessage();
+            ReDrawChart(); 
         }
 
         void Filters_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

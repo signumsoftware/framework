@@ -47,16 +47,24 @@ namespace Signum.Entities.Chart
             private set
             {
                 if (Set(ref chartResultType, value, () => ChartResultType))
+                {
+                    if (chartResultType == Chart.ChartResultType.TypeValue || chartResultType == Chart.ChartResultType.TypeTypeValue)
+                        GroupResults = true;
+
                     NotifyChange(true);
+                }
             }
         }
 
-        bool groupResults;
+        bool groupResults = true;
         public bool GroupResults
         {
             get { return groupResults; }
             set
             {
+                if (!value && (chartResultType == Chart.ChartResultType.TypeValue || chartResultType == Chart.ChartResultType.TypeTypeValue))
+                    return;
+
                 if (Set(ref groupResults, value, () => GroupResults))
                 {
                     UpdateGroup();
@@ -98,10 +106,12 @@ namespace Signum.Entities.Chart
             UpdateTokenGroup(value2);
         }
 
-        private void UpdateTokenGroup(ChartTokenDN token)
+        private void UpdateTokenGroup(ChartTokenDN chartToken)
         {
-            if (token != null)
-                token.NotifyAll();
+            if (chartToken != null)
+            {
+                chartToken.NotifyAll();
+            }
         }
 
         protected void UpdateTokens()
