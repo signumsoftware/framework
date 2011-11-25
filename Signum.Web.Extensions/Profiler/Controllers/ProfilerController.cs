@@ -105,7 +105,7 @@ namespace Signum.Web.Profiler
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult Times(int? clear)
+        public ActionResult Times()
         {
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
@@ -122,7 +122,7 @@ namespace Signum.Web.Profiler
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult TimeTable(int? clear)
+        public ActionResult TimeTable()
         {
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
