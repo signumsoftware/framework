@@ -269,8 +269,10 @@ namespace Signum.Web.Chart
                             }).ToList()
                     };
                 case ChartResultType.TypeTypeValue:
+
+                    object NullValue = "- None -"; 
                     var dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
-                    var dic1dic0 = resultTable.Rows.AgGroupToDictionary(r=>r[1], gr=>gr.ToDictionary(r=>r[0], r=>r[2]));
+                    var dic1dic0 = resultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue, r => r[2]));
 
                     return new
                     {
@@ -283,8 +285,8 @@ namespace Signum.Web.Chart
                         dimension1 = dimension1Values.Select(d1Converter).ToList(),
                         series = dic1dic0.Select(kvp =>new
                         {
-                            dimension2 = d2Converter(kvp.Key),
-                            values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1)).ToList(),
+                            dimension2 = d2Converter(kvp.Key == NullValue ? null: kvp.Key),
+                            values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1 ?? NullValue)).ToList(),
                         }).ToList()
                     };
 
