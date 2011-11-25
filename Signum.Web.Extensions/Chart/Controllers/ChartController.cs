@@ -127,7 +127,13 @@ namespace Signum.Web.Chart
 
             if (chartRequest.Chart.GroupResults)
             {
-                var filters = chartRequest.Filters.Select(f => new FilterOption { Token = f.Token, Value = f.Value, Operation = f.Operation }).ToList();
+                var filters = chartRequest.Filters.Select(f => new FilterOption 
+                {
+                    ColumnName = f.Token.FullKey(), 
+                    Token = f.Token, 
+                    Value = f.Value, 
+                    Operation = f.Operation 
+                }).ToList();
 
                 var chartTokenFilters = new List<FilterOption>
                 {
