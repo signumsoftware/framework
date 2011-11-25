@@ -40,8 +40,8 @@ namespace Signum.Engine.Cache
         class SemiCached<T> : CacheController<T>, ICacheLogicController, IInstanceController
             where T : IdentifiableEntity
         {
-            Dictionary<Type, Dictionary<int, T>> cachedEntities = new Dictionary<Type, Dictionary<int, T>>();
-            Dictionary<Type, HashSet<Lite<T>>> sensibleLites = new Dictionary<Type, HashSet<Lite<T>>>();
+            ConcurrentDictionary<Type, Dictionary<int, T>> cachedEntities = new ConcurrentDictionary<Type, Dictionary<int, T>>();
+            ConcurrentDictionary<Type, HashSet<Lite<T>>> sensibleLites = new ConcurrentDictionary<Type, HashSet<Lite<T>>>();
 
             public int? Count
             {
@@ -106,9 +106,9 @@ namespace Signum.Engine.Cache
 
             private void InvalidateType(Type referingType)
             {
-                Interlocked.Increment(ref invalidations);
-                cachedEntities.Remove(referingType);
-                sensibleLites.Remove(referingType);
+                Interlocked.Increment(ref invalidations); 
+                cachedEntities[referingType].Clear();
+                sensibleLites[referingType].Clear();
                 CacheLogic.InvalidateAllConnected(referingType);
             }
 
