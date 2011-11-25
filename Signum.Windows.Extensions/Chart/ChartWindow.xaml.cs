@@ -70,6 +70,8 @@ namespace Signum.Windows.Chart
 
             if (e.NewValue != null)
                 ((ChartRequest)e.NewValue).Chart.ChartRequestChanged += ReDrawChart;
+
+            qtbFilters.UpdateTokenList();
         }
 
         void ChartWindow_Loaded(object sender, RoutedEventArgs e)
@@ -131,16 +133,19 @@ namespace Signum.Windows.Chart
             brMultiplications.Visibility = message.HasText() ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        List<QueryToken> qtbFilters_SubTokensEvent(QueryToken arg)
+        List<QueryToken> qtbFilters_SubTokensEvent(QueryToken token)
         {
-            return QueryUtils.SubTokens(arg, Description.Columns);
+            var cr = (ChartRequest)DataContext;
+            if (cr == null || Description == null)
+                return new List<QueryToken>();
+
+            return cr.Chart.SubTokensFilters(token, Description.Columns);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
         {
             filterBuilder.AddFilter(qtbFilters.Token);
         }
-
 
         private void Border_MouseDown(object sender, MouseButtonEventArgs e)
         {

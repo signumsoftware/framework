@@ -148,7 +148,7 @@ namespace Signum.Engine.Extensions.Chart
 
             ParameterExpression pe = Expression.Parameter(typeof(IEnumerable<object>), "e");
             resultExpressions.AddRange(aggregateTokens.Select(at => KVP.Create((QueryToken)at,
-                BuildAggregateExpression(pe, at.AggregateFunction, at.Parent == null ? null : Expression.Lambda(at.Parent.BuildExpression(context), context.Parameter)))));
+                BuildAggregateExpression(pe, at, context))));
 
             var resultConstructor = TupleReflection.TupleChainConstructor(resultExpressions.Values);
 
@@ -167,17 +167,26 @@ namespace Signum.Engine.Extensions.Chart
             return keySelector;
         }
 
-        static Expression BuildAggregateExpression(Expression collection, AggregateFunction aggregate, LambdaExpression lambda)
+        static Expression BuildAggregateExpression(Expression collection, AggregateToken at, BuildExpressionContext context)
         {
             Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(() => "expression should be a IEnumerable").GetGenericArguments()[0];
 
-            if (aggregate == AggregateFunction.Count)
+            if (at.AggregateFunction == AggregateFunction.Count)
                 return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });
 
-            if (aggregate == AggregateFunction.Min || aggregate == AggregateFunction.Max)
-                return Expression.Call(typeof(Enumerable), aggregate.ToString(), new[] { groupType, lambda.Body.Type }, new[] { collection, lambda });
+            var body = at.Parent.BuildExpression(context);
 
-            return Expression.Call(typeof(Enumerable), aggregate.ToString(), new[] { groupType }, new[] { collection, lambda });
+            var type = at.ConvertTo();
+
+            if (type != null)
+                body = body.TryConvert(type); 
+
+             var lambda = Expression.Lambda(body, context.Parameter); 
+
+            if (at.AggregateFunction == AggregateFunction.Min || at.AggregateFunction  == AggregateFunction.Max)
+                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType, lambda.Body.Type }, new[] { collection, lambda });
+
+            return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType }, new[] { collection, lambda });
         }
 
         static GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>> miExecuteChart = new GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQuery<int>)dq));

@@ -119,12 +119,8 @@ namespace Signum.Entities.Chart
                 if (should)
                 {
                     token = new ChartTokenDN();
-                    token.ChartRequestChanged += NotifyChange;
+                    token.parentChart = this;
                     token.ExternalPropertyValidation += token_ExternalPropertyValidation;
-                    token.ShouldAggregateEvent += token_ShouldAggregateEvent;
-                    token.GroupByVisibleEvent += token_GroupByVisibleEvent;
-                    token.GroupingEvent += token_GroupingEvent;
-                    token.PropertyLabeleEvent += token_PropertyLabeleEvent;
                 }
                 else
                 {
@@ -139,12 +135,7 @@ namespace Signum.Entities.Chart
                 }
                 else
                 {
-                    token.ChartRequestChanged -= NotifyChange;
                     token.ExternalPropertyValidation -= token_ExternalPropertyValidation;
-                    token.ShouldAggregateEvent -= token_ShouldAggregateEvent;
-                    token.GroupByVisibleEvent -= token_GroupByVisibleEvent;
-                    token.GroupingEvent -= token_GroupingEvent;
-                    token.PropertyLabeleEvent -= token_PropertyLabeleEvent;
                     token = null;
                 }
             }
@@ -152,15 +143,10 @@ namespace Signum.Entities.Chart
             Notify(property);
         }
 
-        bool token_GroupingEvent(ChartTokenDN arg)
-        {
-            return this.GroupResults;
-        }
-
         [field: NonSerialized, Ignore]
         public event Action ChartRequestChanged;
 
-        protected void NotifyChange(bool needNewQuery)
+        internal void NotifyChange(bool needNewQuery)
         {
             if (needNewQuery)
                 this.NeedNewQuery = true;
@@ -178,12 +164,12 @@ namespace Signum.Entities.Chart
             set { Set(ref needNewQuery, value, () => NeedNewQuery); }
         }
 
-        bool token_ShouldAggregateEvent(ChartTokenDN token)
+        internal bool token_ShouldAggregate(ChartTokenDN token)
         {
             return GroupResults && ChartUtils.ShouldAggregate(chartResultType, GetTokenName(token));
         }
 
-        string token_PropertyLabeleEvent(ChartTokenDN token)
+        internal string token_PropertyLabel(ChartTokenDN token)
         {
             var chartLavel = ChartUtils.PropertyLabel(chartType, GetTokenName(token));
             if (chartLavel == null)
@@ -192,7 +178,7 @@ namespace Signum.Entities.Chart
             return chartLavel.NiceToString();
         }
 
-        bool token_GroupByVisibleEvent(ChartTokenDN token)
+        internal bool token_GroupByVisible(ChartTokenDN token)
         {
             return ChartUtils.CanGroupBy(chartResultType, GetTokenName(token));
         }
@@ -242,13 +228,7 @@ namespace Signum.Entities.Chart
             if (token == null)
                 return;
 
-            token.ChartRequestChanged += NotifyChange;
             token.ExternalPropertyValidation += token_ExternalPropertyValidation;
-            token.ShouldAggregateEvent += token_ShouldAggregateEvent;
-            token.GroupByVisibleEvent += token_GroupByVisibleEvent;
-            token.GroupingEvent += token_GroupingEvent;
-            token.PropertyLabeleEvent += token_PropertyLabeleEvent;
-
         }
 
         public ChartTokenName GetTokenName(ChartTokenDN token)
@@ -275,6 +255,61 @@ namespace Signum.Entities.Chart
             }
 
             return null;
+        }
+
+        public List<QueryToken> SubTokensFilters(QueryToken token, List<ColumnDescription> list)
+        {
+            return SubTokensChart(token, list, true); 
+        }
+
+        public List<QueryToken> SubTokensOrders(QueryToken token, List<ColumnDescription> list)
+        {
+            return SubTokensChart(token, list, true);
+        }
+
+        internal List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions, bool canAggregate)
+        {
+            var result = QueryUtils.SubTokens(token, columnDescriptions);
+
+            if (this.groupResults)
+            {
+                if (canAggregate)
+                {
+                    if (token == null)
+                    {
+                        result.Add(new AggregateToken(null, AggregateFunction.Count));
+                    }
+                    else if (!(token is AggregateToken))
+                    {
+                        FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                        if (ft == FilterType.Number || ft == FilterType.DecimalNumber || ft == FilterType.Boolean)
+                        {
+                            result.Add(new AggregateToken(token, AggregateFunction.Average));
+                            result.Add(new AggregateToken(token, AggregateFunction.Sum));
+
+                            result.Add(new AggregateToken(token, AggregateFunction.Min));
+                            result.Add(new AggregateToken(token, AggregateFunction.Max));
+                        }
+                        else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
+                        {
+                            result.Add(new AggregateToken(token, AggregateFunction.Min));
+                            result.Add(new AggregateToken(token, AggregateFunction.Max));
+                        }
+                    }
+                }
+                else if (token != null)
+                {
+                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                    if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
+                    {
+                        result.Add(new IntervalQueryToken(token));
+                    }
+                }
+            }
+
+            return result;
         }
     }
 

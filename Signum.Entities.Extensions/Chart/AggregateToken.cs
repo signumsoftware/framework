@@ -128,5 +128,16 @@ namespace Signum.Entities.Chart
             else
                 return new AggregateToken(Parent.Clone(), AggregateFunction.Count);
         }
+
+        internal Type ConvertTo()
+        {
+            if (AggregateFunction == Chart.AggregateFunction.Count)
+                return null;
+
+            if (Parent.Type.UnNullify() == typeof(bool))
+                return Parent.Type.IsNullable() ? typeof(double?) : typeof(double);
+
+            return null;
+        }
     }
 }

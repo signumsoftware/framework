@@ -45,6 +45,12 @@ namespace Signum.Windows.Chart
         {
             InitializeComponent();
             this.Loaded += new RoutedEventHandler(OnLoad);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(ChartToken_DataContextChanged);
+        }
+
+        void ChartToken_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UpdateGroup();
         }
 
         private List<QueryToken> token_SubTokensEvent(QueryToken token)

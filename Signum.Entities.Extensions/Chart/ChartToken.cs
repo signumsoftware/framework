@@ -73,34 +73,25 @@ namespace Signum.Entities.Chart
             set { if (Set(ref displayName, value, () => DisplayName)) NotifyChange(false); }
         }
 
-
         [field: NonSerialized, Ignore]
-        internal event Func<ChartTokenDN, bool> GroupByVisibleEvent;
+        internal ChartBase parentChart;
+
         [AvoidLocalization]
-        public bool GroupByVisible { get { return GroupByVisibleEvent(this); } }
+        public bool GroupByVisible { get { return parentChart.token_GroupByVisible(this); } }
 
-        [field: NonSerialized, Ignore]
-        internal event Func<ChartTokenDN, bool> GroupingEvent;
         [AvoidLocalization]
-        public bool Grouping { get { return GroupingEvent(this); } }
+        public bool Grouping { get { return parentChart.GroupResults; } }
 
-        [field: NonSerialized, Ignore]
-        internal event Func<ChartTokenDN, bool> ShouldAggregateEvent;
         [AvoidLocalization]
-        public bool ShouldAggregate { get { return ShouldAggregateEvent(this); } }
+        public bool ShouldAggregate { get { return parentChart.token_ShouldAggregate(this); } }
 
-        [field: NonSerialized, Ignore]
-        internal event Func<ChartTokenDN, string> PropertyLabeleEvent;
         [AvoidLocalization]
-        public string PropertyLabel { get { return PropertyLabeleEvent(this); } }
+        public string PropertyLabel { get { return parentChart.token_PropertyLabel(this); } }
 
-        [field: NonSerialized, Ignore]
-        public event Action<bool> ChartRequestChanged;
 
         public void NotifyChange(bool needNewQuery)
         {
-            if (ChartRequestChanged != null)
-                ChartRequestChanged(needNewQuery);
+            parentChart.NotifyChange(needNewQuery);
         }
 
         internal void NotifyExternal<T>(Expression<Func<T>> property)
@@ -145,43 +136,15 @@ namespace Signum.Entities.Chart
 
         public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
-            var result = QueryUtils.SubTokens(token, columnDescriptions);
+            var result = parentChart.SubTokensChart(token, columnDescriptions, this.ShouldAggregate);
 
-            if (this.Grouping)
+            if (this.Grouping && this.ShouldAggregate && this.token != null)
             {
-                if (this.ShouldAggregate)
+                FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
                 {
-                    if (token == null)
-                    {
-                        result.Add(new AggregateToken(null, AggregateFunction.Count));
-                    }
-                    else
-                    {
-                        FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
-
-                        if (ft == FilterType.Number || ft == FilterType.DecimalNumber || ft == FilterType.Boolean)
-                        {
-                            result.Add(new AggregateToken(token, AggregateFunction.Average));
-                            result.Add(new AggregateToken(token, AggregateFunction.Sum));
-
-                            result.Add(new AggregateToken(token, AggregateFunction.Min));
-                            result.Add(new AggregateToken(token, AggregateFunction.Max));
-                        }
-                        else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
-                        {
-                            result.Add(new AggregateToken(token, AggregateFunction.Min));
-                            result.Add(new AggregateToken(token, AggregateFunction.Max));
-                        }
-                    }
-                }
-                else if (token != null)
-                {
-                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
-
-                    if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
-                    {
-                        result.Add(new IntervalQueryToken(token));
-                    }
+                    result.Add(new IntervalQueryToken(token));
                 }
             }
 
