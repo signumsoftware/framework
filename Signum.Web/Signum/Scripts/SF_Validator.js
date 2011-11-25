@@ -225,7 +225,7 @@ SF.registerModule("Validator", function () {
         this.constructRequestDataForSaving = function () {
             SF.log("PartialValidator constructRequestDataForSaving");
             var prefix = this.valOptions.prefix;
-            var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(SF.getInfoParams(prefix));
+            var formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(SF.getInfoParams(prefix));
             formChildren = formChildren.not(".sf-search-control *");
 
             var serializer = new SF.Serializer();
