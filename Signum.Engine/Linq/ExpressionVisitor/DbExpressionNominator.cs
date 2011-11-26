@@ -39,6 +39,17 @@ namespace Signum.Engine.Linq
 
         HashSet<Expression> candidates = new HashSet<Expression>();
 
+        T Add<T>(T expression) where T : Expression
+        {
+            this.candidates.Add(expression);
+            return expression;
+        }
+
+        bool Has(Expression expression)
+        {
+            return this.candidates.Contains(expression);
+        }
+
         private DbExpressionNominator() { }
 
         static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression)
@@ -66,7 +77,7 @@ namespace Signum.Engine.Linq
         protected override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
-            if(IsFullNominate && result != null && !candidates.Contains(result) && !IsExcluded(exp.NodeType))
+            if (IsFullNominate && result != null && !Has(result) && !IsExcluded(exp.NodeType))
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.NiceToString());
 
             return result;
@@ -100,7 +111,7 @@ namespace Signum.Engine.Linq
 
             if ((IsFullNominateOrAggresive && !innerProjection) ||
                 existingAliases.Contains(column.Alias))
-                candidates.Add(column);
+                return Add(column);
 
             return column;
         }
@@ -119,8 +130,8 @@ namespace Signum.Engine.Linq
                         nex = Expression.New(nex.Constructor, args);
                 }
 
-                if (args.All(a => candidates.Contains(a)))
-                    candidates.Add(nex);
+                if (args.All(a => Has(a)))
+                    return Add(nex);
 
                 return nex;
             }
@@ -132,7 +143,7 @@ namespace Signum.Engine.Linq
         {
             if (!innerProjection && IsFullNominateOrAggresive && (IsSimpleType(c.Type) || c.Type == typeof(object) && c.IsNull()))
             {
-                candidates.Add(c);
+                return Add(c);
             }
             return c;
         }
@@ -151,8 +162,8 @@ namespace Signum.Engine.Linq
             if (args != sqlFunction.Arguments)
                 sqlFunction = new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args); ;
 
-            if (args.All(a => candidates.Contains(a)))
-                candidates.Add(sqlFunction);
+            if (args.All(Has))
+                return Add(sqlFunction);
 
             return sqlFunction;
         }
@@ -160,7 +171,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
         {
             if (!innerProjection)
-                candidates.Add(sqlConstant);
+                return Add(sqlConstant);
             return sqlConstant;
         }
 
@@ -172,8 +183,8 @@ namespace Signum.Engine.Linq
             if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
                 cex = new CaseExpression(newWhens, newDefault);
 
-            if (newWhens.All(w => candidates.Contains(w.Condition) && candidates.Contains(w.Value)) && (newDefault == null || candidates.Contains(newDefault)))
-                candidates.Add(cex);
+            if (newWhens.All(w => Has(w.Condition) && Has(w.Value)) && (newDefault == null || Has(newDefault)))
+                return Add(cex);
 
             return cex;
         }
@@ -181,11 +192,10 @@ namespace Signum.Engine.Linq
         protected Expression TrySqlToString(Type type, Expression expression)
         {
             var newExp = Visit(expression);
-            if (candidates.Contains(newExp) && IsFullNominateOrAggresive)
+            if (Has(newExp) && IsFullNominateOrAggresive)
             {
                 var cast = new SqlCastExpression(type, newExp);
-                candidates.Add(cast);
-                return cast;
+                return Add(cast);
             }
             return null;
         }
@@ -206,13 +216,11 @@ namespace Signum.Engine.Linq
             for (int i = 0; i < expression.Length; i++)
             {
                 newExpressions[i] = Visit(expression[i]);
-                if (!candidates.Contains(newExpressions[i]))
+                if (!Has(newExpressions[i]))
                     return null;
             }
 
-            var result = new SqlFunctionExpression(type, sqlFunction.ToString(), newExpressions);
-            candidates.Add(result);
-            return result;
+            return Add(new SqlFunctionExpression(type, sqlFunction.ToString(), newExpressions));
         }
 
         private SqlFunctionExpression TrySqlDifference(SqlEnums sqlEnums, Type type, Expression expression)
@@ -226,25 +234,23 @@ namespace Signum.Engine.Linq
                 return null;
 
             Expression left = Visit(be.Left);
-            if (!candidates.Contains(left))
+            if (!Has(left))
                 return null;
 
             Expression right = Visit(be.Right);
-            if (!candidates.Contains(right))
+            if (!Has(right))
                 return null;
 
             SqlFunctionExpression result = new SqlFunctionExpression(type, SqlFunction.DATEDIFF.ToString(), new Expression[]{
                 new SqlEnumExpression(sqlEnums), right, left});
 
-            candidates.Add(result);
-
-            return result;
+            return Add(result);
         }
 
         private Expression TrySqlDate(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (innerProjection || !candidates.Contains(expr))
+            if (innerProjection || !Has(expr))
                 return null;
 
             Expression result =
@@ -253,8 +259,7 @@ namespace Signum.Engine.Linq
                         new[] { new SqlCastExpression(typeof(double), expr) }
                     ));
 
-            candidates.Add(result);
-            return result; 
+            return Add(result);
         }
 
         private Expression TrySqlDayOftheWeek(Expression expression)
@@ -263,22 +268,20 @@ namespace Signum.Engine.Linq
                 return null;
 
             Expression expr = Visit(expression);
-            if (innerProjection || !candidates.Contains(expr))
+            if (innerProjection || !Has(expr))
                 return null;
 
             Expression result = Expression.Convert(Expression.Subtract(
                     TrySqlFunction(SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
                     Expression.Constant(1)), typeof(DayOfWeek));
 
-            candidates.Add(result);
-
-            return result;
+            return Add(result);
         }
 
         private Expression TrySqlMonthStart(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (innerProjection || !candidates.Contains(expr))
+            if (innerProjection || !Has(expr))
                 return null;
 
             Expression result =
@@ -286,22 +289,20 @@ namespace Signum.Engine.Linq
                       TrySqlFunction(SqlFunction.DATEDIFF, typeof(int), new SqlEnumExpression(SqlEnums.month), new SqlConstantExpression(0), expression),
                     new SqlConstantExpression(0));
 
-            candidates.Add(result);
-            return result;
+            return Add(result);
         }
 
         private Expression TrySqlTrim(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (innerProjection || !candidates.Contains(expr))
+            if (innerProjection || !Has(expr))
                 return null;
 
             Expression result =
                 TrySqlFunction(SqlFunction.LTRIM, expression.Type,
                       TrySqlFunction(SqlFunction.RTRIM, expression.Type, expression));
 
-            candidates.Add(result);
-            return result;
+            return Add(result);
         }
 
         Expression Convert(Expression exp, Type type)
@@ -334,14 +335,13 @@ namespace Signum.Engine.Linq
                     var right = Visit(newB.Right);
 
                     newB = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-                    if (candidates.Contains(left) && candidates.Contains(right))
+                    if (Has(left) && Has(right))
                         candidates.Add(newB);
 
-                    if (candidates.Contains(newB) && IsFullNominateOrAggresive)
+                    if (Has(newB) && IsFullNominateOrAggresive)
                     {
                         Expression result = ConvertToSqlComparison(newB);
-                        candidates.Add(result);
-                        return result;
+                        return Add(result);
                     }
                     else
                     {
@@ -354,11 +354,9 @@ namespace Signum.Engine.Linq
                     if (b.NodeType == ExpressionType.Equal)
                         return result;
 
-                    bool nominated = candidates.Contains(result);
-                    result = Expression.Not(result);
-                    if (nominated)
-                        candidates.Add(result);
-                    return result;
+                    if (Has(result))
+                        return Add(Expression.Not(result));
+                    return Expression.Not(result);
                 }
             }
             else
@@ -388,7 +386,7 @@ namespace Signum.Engine.Linq
                         result = ConvertToSqlCoallesce(b);
                     }
 
-                    candidates.Add(result);
+                    return Add(result);
                 }
 
                 return result;
@@ -413,9 +411,7 @@ namespace Signum.Engine.Linq
             else
                 expressions.Add(right);
 
-            var result = new SqlFunctionExpression(b.Type, SqlFunction.COALESCE.ToString(), expressions);
-            candidates.Add(result);
-            return result;
+            return Add(new SqlFunctionExpression(b.Type, SqlFunction.COALESCE.ToString(), expressions));
         }
 
         private BinaryExpression ConvertToSqlAddition(BinaryExpression b)
@@ -524,7 +520,7 @@ namespace Signum.Engine.Linq
                 result = Expression.Condition(test, ifTrue, ifFalse);
             }
 
-            if (candidates.Contains(test) && candidates.Contains(ifTrue) && candidates.Contains(ifFalse))
+            if (Has(test) && Has(ifTrue) && Has(ifFalse))
             {
                 if (ifFalse.NodeType == (ExpressionType)DbExpressionType.Case)
                 {
@@ -539,7 +535,7 @@ namespace Signum.Engine.Linq
                     result = new CaseExpression(new[] { new When(test, ifTrue) }, @default);
                 }
 
-                candidates.Add(result);
+                return Add(result);
             }
             return result;
         }
@@ -558,11 +554,20 @@ namespace Signum.Engine.Linq
 
             UnaryExpression result = operand == u.Operand ? u : Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
 
-            if (candidates.Contains(operand) &&
-                (u.NodeType == ExpressionType.Not ||
-                 u.NodeType == ExpressionType.Negate ||
-                 u.NodeType == ExpressionType.Convert && (IsFullNominate || isAggresive && u.Operand.Type.UnNullify() == u.Type.UnNullify()))) //Expand nullability
-                candidates.Add(result);
+            if (Has(operand))
+            {
+                if(u.NodeType == ExpressionType.Not || u.NodeType == ExpressionType.Negate)
+                    return Add(result);
+
+                if (u.NodeType == ExpressionType.Convert)
+                {
+                    if ((u.Type.UnNullify() == typeof(double) || u.Type.UnNullify() == typeof(float)) && u.Operand.Type.UnNullify() == typeof(bool))
+                        return Add(new SqlCastExpression(u.Type, u.Operand));
+
+                    if (IsFullNominate || isAggresive && u.Operand.Type.UnNullify() == u.Type.UnNullify())
+                        return Add(result);
+                }
+            }
 
             return result;
         }
@@ -606,8 +611,8 @@ namespace Signum.Engine.Linq
                 result = select == null ? InExpression.FromValues(exp, inExp.Values) :
                                          new InExpression(exp, select);
 
-            if (!innerProjection && candidates.Contains(exp))
-                candidates.Add(result);
+            if (!innerProjection && Has(exp))
+                return Add(result);
 
             return result;
         }
@@ -619,7 +624,7 @@ namespace Signum.Engine.Linq
                 exists = new ExistsExpression(select);
 
             if(!innerProjection)
-                candidates.Add(exists);
+                return Add(exists);
 
             return exists;
         }
@@ -631,7 +636,7 @@ namespace Signum.Engine.Linq
                 scalar = new ScalarExpression(scalar.Type, select);
 
             if (!innerProjection)
-                candidates.Add(scalar);
+                return Add(scalar);
 
             return scalar;
         }
@@ -643,7 +648,7 @@ namespace Signum.Engine.Linq
                 aggregate = new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
 
             if (!innerProjection)
-                candidates.Add(aggregate);
+                return Add(aggregate);
 
             return aggregate;
         }
@@ -654,8 +659,8 @@ namespace Signum.Engine.Linq
             if (subquery != aggregate.AggregateAsSubquery)
                 aggregate = new AggregateSubqueryExpression(aggregate.GroupByAlias, aggregate.AggregateInGroupSelect, subquery);
 
-            if (!innerProjection) 
-                candidates.Add(aggregate);
+            if (!innerProjection)
+                return Add(aggregate);
 
             return aggregate;
         }
@@ -666,8 +671,8 @@ namespace Signum.Engine.Linq
             if (exp != isNotNull.Expression)
                 isNotNull = new IsNotNullExpression(exp);
 
-            if (candidates.Contains(exp))
-                candidates.Add(isNotNull);
+            if (Has(exp))
+                return Add(isNotNull);
 
             return isNotNull;
         }
@@ -678,8 +683,8 @@ namespace Signum.Engine.Linq
             if (exp != isNull.Expression)
                 isNull = new IsNullExpression(exp);
 
-            if (candidates.Contains(exp))
-                candidates.Add(isNull);
+            if (Has(exp))
+                return Add(isNull);
 
             return isNull;
         }
@@ -688,7 +693,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             if (!innerProjection)
-                candidates.Add(sqlEnum);
+                return Add(sqlEnum);
             return sqlEnum;
         }
 
@@ -699,8 +704,8 @@ namespace Signum.Engine.Linq
             if (exp != like.Expression || pattern != like.Pattern)
                 like = new LikeExpression(exp, pattern);
 
-            if (candidates.Contains(exp) && candidates.Contains(pattern))
-                candidates.Add(like);
+            if (Has(exp) && Has(pattern))
+                return Add(like);
 
             return like;
         }
@@ -712,12 +717,11 @@ namespace Signum.Engine.Linq
              Expression newPattern = Visit(pattern); 
              Expression newExpression = Visit(expression);
 
-             LikeExpression result = new LikeExpression(newExpression,newPattern); 
+             LikeExpression result = new LikeExpression(newExpression,newPattern);
 
-             if(candidates.Contains(newPattern) && candidates.Contains(newExpression))
+             if (Has(newPattern) && Has(newExpression))
              {
-                 candidates.Add(result); 
-                 return result;
+                 return Add(result); 
              }
              return null;
         }
@@ -733,8 +737,8 @@ namespace Signum.Engine.Linq
                 else
                     nullable = new IsNotNullExpression(expression);
 
-                if (candidates.Contains(expression))
-                    candidates.Add(nullable);
+                if (Has(expression))
+                    return Add(nullable);
 
                 return nullable;
             }
@@ -802,8 +806,8 @@ namespace Signum.Engine.Linq
                         if (charIndex == null)
                             return null;
                         Expression result = Expression.Subtract(charIndex, Expression.Constant(1));
-                        if (candidates.Contains(charIndex))
-                            candidates.Add(result);
+                        if (Has(charIndex))
+                            return Add(result);
                         return result;
                     }
                 case "string.ToLower": return TrySqlFunction(SqlFunction.LOWER, m.Type, m.Object);
