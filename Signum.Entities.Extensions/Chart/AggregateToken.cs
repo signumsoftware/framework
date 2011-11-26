@@ -73,12 +73,16 @@ namespace Signum.Entities.Chart
 
                 var pType = Parent.Type;
 
+                if (pType.UnNullify() == typeof(bool))
+                {
+                    return pType.IsNullable() ? typeof(double?) : typeof(double);
+                }
+
                 if (AggregateFunction == AggregateFunction.Average && 
                     (pType.UnNullify() == typeof(int) || 
-                     pType.UnNullify() == typeof(long) ||
-                     pType.UnNullify() == typeof(bool)))
+                     pType.UnNullify() == typeof(long)))
                 {
-                    return pType.IsNullable() ? typeof(double) : typeof(double?);
+                    return pType.IsNullable() ? typeof(double?) : typeof(double);
                 }
 
                 return pType;
