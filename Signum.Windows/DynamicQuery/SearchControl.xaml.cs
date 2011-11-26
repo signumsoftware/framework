@@ -243,15 +243,10 @@ namespace Signum.Windows
 
         ColumnDescription entityColumn;
 
-        IEnumerable<ColumnInfo> ColumnInfos
+        private static ColumnInfo GetColumnInfo(GridViewColumn gvc)
         {
-            get { return gvResults.Columns.Select(gvc => (ColumnInfo)((GridViewColumnHeader)gvc.Header).Tag); }
+            return (ColumnInfo)((GridViewColumnHeader)gvc.Header).Tag;
         }
-
-        public IEnumerable<Column> CurrentColumns
-        {
-            get { return ColumnInfos.Select(a => a.Column);  }
-        }  
 
         ResultTable resultTable;
         public ResultTable ResultTable { get { return resultTable; } }
@@ -352,14 +347,16 @@ namespace Signum.Windows
         {
             for (int i = 0; i < OrderOptions.Count; i++)
             {
-                OrderOption item = OrderOptions[i];
-                QueryToken token = (QueryToken)item.Token;
+                OrderOption oo = OrderOptions[i];
+
+                var fullKey = oo.Token.FullKey();
 
                 GridViewColumnHeader header = gvResults.Columns
                     .Select(c => (GridViewColumnHeader)c.Header)
-                    .FirstOrDefault(c => ((ColumnInfo)c.Tag).Column.Name  == token.FullKey());
+                    .FirstOrDefault(c => ((ColumnInfo)c.Tag).Column.Name == fullKey);
+
                 if (header != null)
-                    item.ColumnOrderInfo = new ColumnOrderInfo(header, item.OrderType, i);
+                    oo.ColumnOrderInfo = new ColumnOrderInfo(header, oo.OrderType, i);
             }
         }
 
@@ -405,44 +402,45 @@ namespace Signum.Windows
         }
 
         void GenerateListViewColumns()
-        {   
-            List<ColumnInfo> columnInfo = MergeColumnInfo();
+        {
+            List<Column> columns = MergeColumns();
 
             gvResults.Columns.Clear();
 
-            foreach (var ci in columnInfo)
+            foreach (var co in columns)
             {
-                AddListViewColumn(ci);
+                AddListViewColumn(co);
             }
         }
 
-        private List<ColumnInfo> MergeColumnInfo()
+        private List<Column> MergeColumns()
         {
             switch (ColumnOptionsMode)
             {
                 case ColumnOptionsMode.Add:
-                    return Description.Columns.Where(cd=>!cd.IsEntity).Select(cd => new ColumnInfo(new Column(cd))).Concat(ColumnOptions.Select(co => new ColumnInfo(co, Description))).ToList();
+                    return Description.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd)).Concat(
+                        ColumnOptions.Select(co => co.CreateColumn(Description))).ToList();
                 case ColumnOptionsMode.Remove:
-                    return Description.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.Path == cd.Name)).Select(cd => new ColumnInfo(new Column(cd))).ToList();
+                    return Description.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.Path == cd.Name)).Select(cd => new Column(cd)).ToList();
                 case ColumnOptionsMode.Replace:
-                    return ColumnOptions.Select(co => new ColumnInfo(co, Description)).ToList();
+                    return ColumnOptions.Select(co => co.CreateColumn(Description)).ToList();
                 default:
                     throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(ColumnOptionsMode));
             }
         }
 
-        void AddListViewColumn(ColumnInfo ci)
+        void AddListViewColumn(Column col)
         {
-            ci.GridViewColumn = new GridViewColumn
+            GridViewColumn gvc = new GridViewColumn
             {
                 Header = new GridViewColumnHeader
                 {
-                    Content = ci.Column.DisplayName,
-                    Tag = ci,
+                    Content = col.DisplayName,
+                    Tag = new ColumnInfo(col),
                     ContextMenu = (ContextMenu)FindResource("contextMenu")
                 },
             };
-            gvResults.Columns.Add(ci.GridViewColumn);
+            gvResults.Columns.Add(gvc);
         }
 
         DataTemplate CreateDataTemplate(ResultColumn c)
@@ -496,7 +494,7 @@ namespace Signum.Windows
                 QueryName = QueryName,
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
-                Columns = CurrentColumns.ToList(),
+                Columns = gvResults.Columns.Select(gvc => GetColumnInfo(gvc).Column).ToList(),
                 ElementsPerPage = ElementsPerPage,
                 CurrentPage = CurrentPage,
             };
@@ -506,12 +504,14 @@ namespace Signum.Windows
 
         private void SetResults()
         {
-            ColumnInfos.ZipForeach(resultTable.Columns, (ci, rc) =>
+            gvResults.Columns.ZipForeach(resultTable.Columns, (gvc, rc) =>
             {
+                var ci = GetColumnInfo(gvc);
+
                 Debug.Assert(rc.Column.Token.Equals(ci.Column.Token));
 
                 if (ci.ResultColumn == null || ci.ResultColumn.Index != rc.Index)
-                    ci.GridViewColumn.CellTemplate = CreateDataTemplate(rc);
+                    gvc.CellTemplate = CreateDataTemplate(rc);
 
                 ci.ResultColumn = rc; 
             });             
@@ -680,7 +680,7 @@ namespace Signum.Windows
                 foreach (var oo in OrderOptions)
                 {
                     if (oo.ColumnOrderInfo != null)
-                        oo.ColumnOrderInfo.Clean();
+                        oo.ColumnOrderInfo.CleanAdorner();
                 }
 
                 OrderOptions.Clear();
@@ -689,7 +689,7 @@ namespace Signum.Windows
             OrderOption order = OrderOptions.SingleOrDefault(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
             if (order != null)
             {
-                order.ColumnOrderInfo.Flip();
+                order.ColumnOrderInfo.FlipAdorner();
                 order.OrderType = order.ColumnOrderInfo.OrderType;
             }
             else
@@ -754,9 +754,7 @@ namespace Signum.Windows
             {
                 ClearResults();
 
-                ColumnInfo ci = new ColumnInfo(new Column(token, result)); 
-
-                AddListViewColumn(ci);
+                AddListViewColumn(new Column(token, result));
             }
         }
 
@@ -779,7 +777,7 @@ namespace Signum.Windows
 
         private void renameMenu_Click(object sender, RoutedEventArgs e)
         {
-            GridViewColumnHeader gvch = (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+            GridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
             ColumnInfo col = (ColumnInfo)gvch.Tag;
             string result = col.Column.DisplayName;
@@ -792,20 +790,23 @@ namespace Signum.Windows
 
         private void removeMenu_Click(object sender, RoutedEventArgs e)
         {
-            GridViewColumnHeader gvch = (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+            GridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
-            ColumnInfo co = (ColumnInfo)gvch.Tag;
-
-            gvResults.Columns.Remove(co.GridViewColumn);
+            gvResults.Columns.Remove(gvch.Column);
 
             UpdateMultiplyMessage(); 
         }
 
         private void filter_Click(object sender, RoutedEventArgs e)
         {
-            GridViewColumnHeader gvch = (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+            GridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
             FilterOptions.Add(CreateFilter(gvch)); 
+        }
+
+        private static GridViewColumnHeader GetMenuItemHeader(object sender)
+        {
+            return (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
         }
 
         public void Reinitialize(List<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders)
