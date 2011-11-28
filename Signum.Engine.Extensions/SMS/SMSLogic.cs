@@ -129,7 +129,10 @@ namespace Signum.Engine.SMS
 
         public static string GetPhoneNumber<T>(T entity) where T : IIdentifiable
         {
-            return ((Expression<Func<T, string>>)phoneNumberProviders[typeof(T)]).Invoke(entity);
+            var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders.
+                       GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider");
+
+            return phoneFunc.Invoke(entity);
         }
 
         #region Message composition
@@ -205,9 +208,6 @@ namespace Signum.Engine.SMS
                         TypeLogic.DnToType[template.AssociatedType] != typeof(T))
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
                             .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
-
-                    var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders.
-                        GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider");
 
                     template.MessageLengthExceeded = MessageLengthExceeded.Allowed;
 
