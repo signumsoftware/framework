@@ -21,6 +21,7 @@ using Signum.Utilities.DataStructures;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 
 namespace Signum.Windows.Chart
 {
@@ -37,6 +38,14 @@ namespace Signum.Windows.Chart
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+        public static readonly DependencyProperty OrderOptionsProperty =
+         DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(ChartWindow), new UIPropertyMetadata(null));
+        public ObservableCollection<OrderOption> OrderOptions
+        {
+            get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
+            set { SetValue(OrderOptionsProperty, value); }
+        }
+
         public ResultTable resultTable;
         public QueryDescription Description;
         public QuerySettings Settings { get; private set; }
@@ -48,7 +57,6 @@ namespace Signum.Windows.Chart
         {
             get { return (ChartRequest)DataContext; }
         }
-       
 
         public ChartWindow()
         {
@@ -77,18 +85,12 @@ namespace Signum.Windows.Chart
         void ChartWindow_Loaded(object sender, RoutedEventArgs e)
         {
             filterBuilder.Filters = FilterOptions = new FreezableCollection<FilterOption>();
+            OrderOptions = new ObservableCollection<OrderOption>();
 
-            if (Request.Filters != null)
-                FilterOptions.AddRange(Request.Filters.Select(f => new FilterOption
-                {
-                    Token = f.Token,
-                    Operation = f.Operation,
-                    Value = f.Value
-                }));
+            UpdateFiltersOrdersUserInterface();
 
             ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
             Request.Chart.ChartRequestChanged += Request_ChartRequestChanged;
-
 
             chartBuilder.Description = Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
             Settings = Navigator.GetQuerySettings(Request.QueryName);
@@ -99,6 +101,26 @@ namespace Signum.Windows.Chart
             qtbFilters.SubTokensEvent += new Func<QueryToken, List<QueryToken>>(qtbFilters_SubTokensEvent);
 
             SetTitle(); 
+        }
+
+        internal void UpdateFiltersOrdersUserInterface()
+        {
+            FilterOptions.Clear();
+            if (Request.Filters != null)
+                FilterOptions.AddRange(Request.Filters.Select(f => new FilterOption
+                {
+                    Token = f.Token,
+                    Operation = f.Operation,
+                    Value = f.Value
+                }));
+
+            OrderOptions.Clear();
+            if (Request.Orders != null)
+                OrderOptions.AddRange(Request.Orders.Select(o => new OrderOption
+                {
+                    Token = o.Token,
+                    OrderType = o.OrderType,
+                }));
         }
 
         void Request_ChartRequestChanged()
@@ -160,7 +182,8 @@ namespace Signum.Windows.Chart
 
         public void GenerateChart()
         { 
-            UpdateFilters();
+            UpdateFiltersAndOrdersRequests();
+
             var request = Request;
 
             if (HasErrors())
@@ -177,9 +200,10 @@ namespace Signum.Windows.Chart
                 () => execute.IsEnabled = true);
         }
 
-        private void UpdateFilters()
+        private void UpdateFiltersAndOrdersRequests()
         {
             Request.Filters = filterBuilder.Filters.Select(f => f.ToFilter()).ToList();
+            Request.Orders = OrderOptions.Select(o => o.ToOrder()).ToList();
         }
 
         private void ReDrawChart()
@@ -209,11 +233,7 @@ namespace Signum.Windows.Chart
 
         private void SetResults()
         {
-            gvResults.Columns.Clear();
-            foreach (var t in resultTable.Columns.ZipStrict(Request.ChartTokens()))
-            {
-                AddListViewColumn(t.Item1, t.Item2);
-            }
+            FillGridView();
 
             if (Request.Chart.GroupResults)
             {
@@ -288,13 +308,6 @@ namespace Signum.Windows.Chart
                 yield return new FilterOption { Path = queryToken.FullKey(), Value = interval.Max.Value, Operation = FilterOperation.LessThan };
         }
 
-        class ColumnInfo
-        {
-            public ChartTokenDN ChartToken;
-            public ResultColumn Column;
-            public ColumnOrderInfo OrderInfo; 
-        }
-
         void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
         {
             GridViewColumnHeader header = (GridViewColumnHeader)sender;
@@ -303,29 +316,42 @@ namespace Signum.Windows.Chart
             if (ci == null)
                 return;
 
-            var columnInfos = gvResults.Columns.Select(c => (ColumnInfo)((GridViewColumnHeader)c.Header).Tag).Where(c => c.OrderInfo != null).ToList();
+            string canOrder = QueryUtils.CanOrder(ci.Column.Token);
+            if (canOrder.HasText())
+            {
+                MessageBox.Show(canOrder);
+                return;
+            }
 
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (columnInfos.Count == 1 && columnInfos[0] == ci))
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (OrderOptions.Count == 1 && OrderOptions[0].ColumnOrderInfo.TryCC(coi => coi.Header) == header))
             {
 
             }
             else
             {
-                foreach (var col in columnInfos)
+                foreach (var oo in OrderOptions)
                 {
-                //    col.ChartToken.OrderPriority = null;
-                //    col.ChartToken.OrderType = null;
+                    if (oo.ColumnOrderInfo != null)
+                        oo.ColumnOrderInfo.CleanAdorner();
                 }
+
+                OrderOptions.Clear();
             }
 
-            if (ci.OrderInfo != null)
+            OrderOption order = OrderOptions.SingleOrDefault(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
+            if (order != null)
             {
-                //ci.ChartToken.OrderType = ci.ChartToken.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending; ;
+                order.ColumnOrderInfo.FlipAdorner();
+                order.OrderType = order.ColumnOrderInfo.OrderType;
             }
             else
             {
-                //ci.ChartToken.OrderType = OrderType.Ascending;
-                //ci.ChartToken.OrderPriority = 1; 
+                OrderOptions.Add(new OrderOption()
+                {
+                    Token = ci.Column.Token,
+                    OrderType = OrderType.Ascending,
+                    ColumnOrderInfo = new ColumnOrderInfo(header, OrderType.Ascending, OrderOptions.Count)
+                });
             }
 
             GenerateChart();
@@ -338,32 +364,34 @@ namespace Signum.Windows.Chart
             lvResult.Background = Brushes.WhiteSmoke;
         }
 
-        GridViewColumn AddListViewColumn(ResultColumn c, ChartTokenDN ct)
+        private void FillGridView()
         {
-            ChartTokenDN token = new ChartTokenDN();
-            
-            var columnInfo = new ColumnInfo
+            gvResults.Columns.Clear();
+            foreach (var rc in resultTable.Columns)
             {
-                Column = c,
-                ChartToken = ct,
-            };
+                gvResults.Columns.Add(new GridViewColumn
+                {
+                    Header = new GridViewColumnHeader
+                    {
+                        Content = rc.Column.DisplayName,
+                        Tag = new ColumnInfo(rc.Column)
+                    },
+                    CellTemplate = CreateDataTemplate(rc),
+                });
+            }
 
-            var header = new GridViewColumnHeader
+            for (int i = 0; i < OrderOptions.Count; i++)
             {
-                Content = c.Column.DisplayName,
-                Tag = columnInfo
-            };
+                OrderOption oo = OrderOptions[i];
+                QueryToken token = (QueryToken)oo.Token;
 
-            //if (ct.OrderPriority.HasValue)
-            //    columnInfo.OrderInfo = new ColumnOrderInfo(header, ct.OrderType.Value, ct.OrderPriority.Value); 
+                GridViewColumnHeader header = gvResults.Columns
+                    .Select(c => (GridViewColumnHeader)c.Header)
+                    .FirstOrDefault(c => ((ColumnInfo)c.Tag).Column.Name == token.FullKey());
 
-            GridViewColumn column = new GridViewColumn
-            {
-                Header = header,
-                CellTemplate = CreateDataTemplate(c),
-            };
-            gvResults.Columns.Add(column);
-            return column;
+                if (header != null)
+                    oo.ColumnOrderInfo = new ColumnOrderInfo(header, oo.OrderType, i);
+            }
         }
 
         DataTemplate CreateDataTemplate(ResultColumn c)
@@ -380,6 +408,13 @@ namespace Signum.Windows.Chart
             if (row == null)
                 return;
 
+            ShowRow(row);
+
+            e.Handled = true;
+        }
+
+        public void ShowRow(ResultRow row)
+        {
             if (row.Table.HasEntities)
             {
                 IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(row.Entity, EntityType);
@@ -393,10 +428,8 @@ namespace Signum.Windows.Chart
                 {
                     FilterOptions = getFilters(row),
                     SearchOnLoad = true,
-                }); 
+                });
             }
-
-            e.Handled = true;
         }
     }
 

@@ -321,6 +321,21 @@ namespace Signum.Entities.Chart
 
             return result;
         }
+
+        public IEnumerable<ChartTokenDN> ChartTokens()
+        {
+            if (Dimension1 != null)
+                yield return Dimension1;
+
+            if (Dimension2 != null)
+                yield return Dimension2;
+
+            if (Value1 != null)
+                yield return Value1;
+
+            if (Value2 != null)
+                yield return Value2;
+        }
     }
 
     [Serializable]
@@ -362,18 +377,8 @@ namespace Signum.Entities.Chart
         }
 
         public IEnumerable<ChartTokenDN> ChartTokens()
-        {   
-            if (chart.Dimension1 != null)
-                yield return chart.Dimension1;
-
-            if (chart.Dimension2 != null)
-                yield return chart.Dimension2;
-
-            if (chart.Value1 != null)
-                yield return chart.Value1;
-
-            if (chart.Value2 != null)
-                yield return chart.Value2;
+        {
+            return chart.ChartTokens();
         }
 
         public List<QueryToken> AllTokens()
@@ -467,7 +472,7 @@ namespace Signum.Entities.Chart
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(description);
+                    f.ParseData(t => this.Chart.SubTokensChart(t, description.Columns, true));
 
             if (chart.Dimension1 != null)
                 chart.Dimension1.ParseData(description);
@@ -480,6 +485,10 @@ namespace Signum.Entities.Chart
 
             if (chart.Value2 != null)
                 chart.Value2.ParseData(description);
+
+            if (Orders != null)
+                foreach (var o in Orders)
+                    o.ParseData(t => this.Chart.SubTokensChart(t, description.Columns, true));
         }
 
         static Func<QueryDN, object> ToQueryName;
@@ -542,8 +551,6 @@ namespace Signum.Entities.Chart
             if (request.Token != null)
                 result.Token = request.Token.Clone();
 
-            result.Unit = request.Unit;
-            result.Format = request.Format;
             result.DisplayName = request.DisplayName;
         }
 

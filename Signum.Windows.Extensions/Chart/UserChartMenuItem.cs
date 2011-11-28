@@ -138,6 +138,8 @@ namespace Signum.Windows.Chart
 
                 this.ChartRequest = UserChartDN.ToRequest(CurrentUserChart);
 
+                this.ChartWindow.UpdateFiltersOrdersUserInterface(); 
+
                 this.ChartWindow.GenerateChart();
             }
         }

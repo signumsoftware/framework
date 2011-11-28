@@ -40,30 +40,12 @@ namespace Signum.Entities.Chart
                 if (Token is IntervalQueryToken)
                     ((IntervalQueryToken)Token).PropertyChanged += (s, e) => NotifyChange(true);
 
-                Format = Token.Format;
-                Unit = Token.Unit;
                 DisplayName = Token.NiceName();
             }
             else
             {
-                Format = null;
-                Unit = null;
                 DisplayName = null;
             }
-        }
-
-        string format;
-        public string Format
-        {
-            get { return format; }
-            set { if (Set(ref format, value, () => Format))NotifyChange(false); }
-        }
-
-        string unit;
-        public string Unit
-        {
-            get { return unit; }
-            set { if (Set(ref unit, value, () => Unit))NotifyChange(false); }
         }
 
         string displayName;
@@ -73,7 +55,7 @@ namespace Signum.Entities.Chart
             set { if (Set(ref displayName, value, () => DisplayName)) NotifyChange(false); }
         }
 
-        [field: NonSerialized, Ignore]
+        [Ignore]
         internal ChartBase parentChart;
 
         [AvoidLocalization]
@@ -119,7 +101,9 @@ namespace Signum.Entities.Chart
 
         public string GetTitle()
         {
-            return DisplayName + (Unit.HasText() ? " ({0})".Formato(Unit) : null);
+            var unit = Token.TryCC(a=>a.Unit);
+
+            return DisplayName + (unit.HasText() ? " ({0})".Formato(unit) : null);
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -127,9 +111,9 @@ namespace Signum.Entities.Chart
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public override void ParseData(QueryDescription queryDescription)
+        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
         {
-            Token = QueryUtils.Parse(tokenString, token => SubTokensChart(token, queryDescription.Columns));
+            Token = QueryUtils.Parse(tokenString, subTokens);
 
             CleanSelfModified();
         }
@@ -154,6 +138,11 @@ namespace Signum.Entities.Chart
         internal Column CreateColumn()
         {
             return new Column(Token, DisplayName); 
+        }
+
+        internal new void ParseData(QueryDescription description)
+        {
+            ParseData(t => SubTokensChart(t, description.Columns));
         }
     }
 }

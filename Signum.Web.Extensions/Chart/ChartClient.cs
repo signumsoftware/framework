@@ -113,20 +113,6 @@ namespace Signum.Web.Chart
                     return ctx.None();
 
                 return ctx.Input;
-            })
-            .SetProperty(ct => ct.Format, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-
-                return ctx.Input;
-            })
-            .SetProperty(ct => ct.Unit, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-
-                return ctx.Input;
             });
 
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
@@ -271,8 +257,8 @@ namespace Signum.Web.Chart
                 case ChartResultType.TypeTypeValue:
 
                     object NullValue = "- None -"; 
-                    var dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
-                    var dic1dic0 = resultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue, r => r[2]));
+                    List<object> dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
+                    Dictionary<object, Dictionary<object, object>> dic1dic0 = resultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue, r => r[2]));
 
                     return new
                     {
@@ -331,12 +317,12 @@ namespace Signum.Web.Chart
             }
         }
 
-        private static Func<object,object> Converter(this ChartTokenDN token)
+        private static Func<object,object> Converter(this ChartTokenDN ct)
         {
-            if (token == null)
+            if (ct == null)
                 return null;
 
-            var type = token.Token.Type.UnNullify();
+            var type = ct.Token.Type.UnNullify();
 
             if (typeof(Lite).IsAssignableFrom(type))
             {
@@ -373,18 +359,18 @@ namespace Signum.Web.Chart
                     return new
                     {
                         key = e.TryToString("s"),
-                        toStr = token.Format.HasText() ? e.TryToString(token.Format) : p.TryToString()
+                        toStr = ct.Token.Format.HasText() ? e.TryToString(ct.Token.Format) : p.TryToString()
                     };
                 };
             }
-            else if (typeof(IFormattable).IsAssignableFrom(type) && token.Format.HasText())
+            else if (typeof(IFormattable).IsAssignableFrom(type) && ct.Token.Format.HasText())
             {
                 return p =>
                 {
                     return new
                     {
                         key = p,
-                        toStr = ((IFormattable)p).TryToString(token.Format)
+                        toStr = ((IFormattable)p).TryToString(ct.Token.Format)
                     };
                 };
             }

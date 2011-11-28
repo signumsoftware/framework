@@ -144,14 +144,6 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display:none\">\r\
            Write(Html.ValueLine(tc, ct => ct.DisplayName));
 
                                                          
-                
-           Write(Html.ValueLine(tc, ct => ct.Format, vl => vl.ValueHtmlProps["size"] = 4));
-
-                                                                                         
-                
-           Write(Html.ValueLine(tc, ct => ct.Unit, vl => vl.ValueHtmlProps["size"] = 2));
-
-                                                                                       
             }
 
 WriteLiteral("        </td>\r\n    </tr>\r\n");

@@ -39,18 +39,7 @@
 
             <Expander Grid.Row="1" Style="{StaticResource LineExpander}" Grid.ColumnSpan="3">
                 <Grid m:Common.LabelWidth="70">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <m:ValueLine m:Common.Route="Format" MinWidth="100" />
-                    <m:ValueLine m:Common.Route="Unit" Grid.Column="1" MinWidth="100"/>
-                    <m:ValueLine m:Common.Route="DisplayName" Grid.Row="1" MinWidth="200"/>
+                    <m:ValueLine m:Common.Route="DisplayName" MinWidth="200"/>
                 </Grid>
             </Expander>
         </Grid>

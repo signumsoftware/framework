@@ -68,6 +68,11 @@ namespace Signum.Engine.Extensions.Chart
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
+            foreach (var item in userQuery.Chart.ChartTokens())
+            {
+                item.parentChart = userQuery.Chart;
+            }
+
             userQuery.ParseData(description);
         }
 
@@ -199,6 +204,8 @@ namespace Signum.Engine.Extensions.Chart
 
             if (!request.Chart.GroupResults)
             {
+                columns.Add(new _EntityColumn(dq.EntityColumn().BuildColumnDescription()));
+
                 if (dq is AutoDynamicQuery<T>)
                 {
                     DQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())

@@ -47,8 +47,6 @@
             @using (Html.FieldInline()) 
             { 
                 @Html.ValueLine(tc, ct => ct.DisplayName)
-                @Html.ValueLine(tc, ct => ct.Format, vl => vl.ValueHtmlProps["size"] = 4)
-                @Html.ValueLine(tc, ct => ct.Unit, vl => vl.ValueHtmlProps["size"] = 2)
             }
         </td>
     </tr>
