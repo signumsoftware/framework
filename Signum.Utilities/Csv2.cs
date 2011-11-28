@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Signum.Utilities
 {
-    public static class Csv
+    public static class Csv2
     {
         public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
 
