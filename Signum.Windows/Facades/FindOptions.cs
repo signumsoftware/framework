@@ -307,7 +307,7 @@ namespace Signum.Windows
 
         internal Column CreateColumn(QueryDescription description)
         {
-            QueryToken token = QueryUtils.Parse(Path, description);
+            QueryToken token = QueryUtils.Parse(Path, t => QueryUtils.SubTokens(t, description.Columns));
             return new Column(token, DisplayName.DefaultText(token.NiceName()));
         }
     }
