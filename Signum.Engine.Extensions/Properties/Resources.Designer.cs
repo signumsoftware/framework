@@ -206,15 +206,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Executions.
-        /// </summary>
-        internal static string Executions {
-            get {
-                return ResourceManager.GetString("Executions", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Expired password.
         /// </summary>
         internal static string ExpiredPassword {
@@ -283,15 +274,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string Integer {
             get {
                 return ResourceManager.GetString("Integer", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Last Execution.
-        /// </summary>
-        internal static string LastExecution {
-            get {
-                return ResourceManager.GetString("LastExecution", resourceCulture);
             }
         }
         

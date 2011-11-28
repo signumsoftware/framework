@@ -23,11 +23,26 @@ using Signum.Entities.Authorization;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Signum.Engine.Scheduler;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Processes
 {
     public static class ProcessLogic
     {
+        static Expression<Func<ProcessDN, IQueryable<ProcessExecutionDN>>> ExecutionsExpression =
+            p => Database.Query<ProcessExecutionDN>().Where(a => a.Process == p);
+        public static IQueryable<ProcessExecutionDN> Executions(this ProcessDN p)
+        {
+            return ExecutionsExpression.Invoke(p);
+        }
+
+        static Expression<Func<ProcessDN, IQueryable<ProcessExecutionDN>>> LastExecutionExpression =
+            p => p.Executions().OrderByDescending(a => a.ExecutionStart).Take(1);
+        public static IQueryable<ProcessExecutionDN> LastExecution(this ProcessDN p)
+        {
+            return LastExecutionExpression.Invoke(p);
+        }
+
         static BlockingCollection<ExecutingProcess> processQueue = new BlockingCollection<ExecutingProcess>();
 
         static ImmutableAVLTree<int, ExecutingProcess> currentProcesses = ImmutableAVLTree<int, ExecutingProcess>.Empty;
@@ -75,14 +90,8 @@ namespace Signum.Engine.Processes
                               {
                                   Entity = p.ToLite(),
                                   p.Id,
-                                  p.Name,
-                                  NumExecutions = (int?)g.Count(),
-                                  LastExecution = (from pe2 in Database.Query<ProcessExecutionDN>()
-                                                   where pe2.Id == g.Max(a => (int?)a.Id)
-                                                   select pe2.ToLite()).FirstOrDefault()
-                              }).ToDynamic()
-                              .Column(a => a.NumExecutions, a => a.OverrideDisplayName = () => Resources.Executions)
-                              .Column(a => a.LastExecution, a => a.OverrideDisplayName = () => Resources.LastExecution);
+                                  p.Name
+                              }).ToDynamic();
 
                 dqm[typeof(ProcessExecutionDN)] =
                              (from pe in Database.Query<ProcessExecutionDN>()
@@ -103,48 +112,8 @@ namespace Signum.Engine.Processes
                                   ErrorDate = pe.ExceptionDate,
                               }).ToDynamic();
 
-                dqm[ProcessQueries.CurrentExecutions] =
-                             (from pe in Database.Query<ProcessExecutionDN>()
-                              where
-                                  pe.State == ProcessState.Queued ||
-                                  pe.State == ProcessState.Executing ||
-                                  pe.State == ProcessState.Suspending ||
-                                  pe.State == ProcessState.Suspended
-                              select new
-                              {
-                                  Entity = pe.ToLite(),
-                                  pe.Id,
-                                  Resume = pe.ToStr,
-                                  Process = pe.Process.ToLite(),
-                                  State = pe.State,
-                                  pe.QueuedDate,
-                                  pe.ExecutionStart,
-                                  pe.ExecutionEnd,
-                                  pe.Progress,
-                                  pe.SuspendDate,
-                              }).ToDynamic();
-
-                dqm[ProcessQueries.ErrorExecutions] =
-                             (from pe in Database.Query<ProcessExecutionDN>()
-                              where
-                                  pe.State == ProcessState.Error
-                              select new
-                              {
-                                  Entity = pe.ToLite(),
-                                  pe.Id,
-                                  Resume = pe.ToStr,
-                                  Process = pe.Process.ToLite(),
-                                  pe.CreationDate,
-                                  pe.PlannedDate,
-                                  pe.CancelationDate,
-                                  pe.QueuedDate,
-                                  pe.ExecutionStart,
-                                  pe.ExecutionEnd,
-                                  pe.Progress,
-                                  pe.SuspendDate,
-                                  ErrorDate = pe.ExceptionDate,
-                                  pe.Exception
-                              }).ToDynamic();
+                dqm.RegisterExpression((ProcessDN p) => p.Executions());
+                dqm.RegisterExpression((ProcessDN p) => p.LastExecution());
 
                 PackageLogic.Start(sb, dqm);
             }
