@@ -11,6 +11,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine;
 using Signum.Entities.Reflection;
+using System.Collections.Concurrent;
 
 namespace Signum.Web
 {
@@ -56,6 +57,8 @@ namespace Signum.Web
 
     internal class MemberAccessGatherer : SimpleExpressionVisitor
     {
+        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>());
+
         public Dictionary<ParameterExpression, TypeContextExpression> replacements = new Dictionary<ParameterExpression, TypeContextExpression>();
 
         public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
@@ -67,7 +70,9 @@ namespace Signum.Web
 
             TypeContextExpression result = Cast(mag.Visit(lambda.Body));
 
-            S value = lambda.Invoke(tc.Value);
+            Func<T, S> func = (Func<T, S>)compiledExpressions.GetOrAdd(lambda, ld => ld.Compile());
+
+            S value = func(tc.Value);
 
             return new TypeSubContext<S>(value, tc, result.Properties, result.Route);
         }
