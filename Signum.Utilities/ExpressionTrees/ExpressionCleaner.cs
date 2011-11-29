@@ -118,7 +118,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static Expression BindMethodExpression(MethodCallExpression m, bool allowPolymorphics)
         {
-            if (m.Method.DeclaringType == typeof(ExpressionExtensions) && m.Method.Name == "Invoke")
+            if (m.Method.DeclaringType == typeof(ExpressionExtensions) && m.Method.Name == "Evaluate")
             {
                 LambdaExpression lambda = (LambdaExpression)(ExpressionEvaluator.Eval(m.Arguments[0]));
 
