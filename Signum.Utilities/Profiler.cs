@@ -111,7 +111,15 @@ namespace Signum.Utilities
             }
         }
 
-        public static Tracer Log(string role = null, object aditionalData = null)
+        public static Tracer Log(string role, Func<string> aditionalData)
+        {
+            if (!Enabled)
+                return null;
+
+            return Log(role, aditionalData());
+        }
+
+        public static Tracer Log(string role = null, string aditionalData = null)
         {
             if (!Enabled)
                 return null;
@@ -127,13 +135,13 @@ namespace Signum.Utilities
             return new Tracer { saveCurrent = saveCurrent };
         }
 
-        private static HeavyProfilerEntry CreateNewEntry(string role, object aditionalData)
+        private static HeavyProfilerEntry CreateNewEntry(string role, string aditionalData)
         {
             Stopwatch discount = Stopwatch.StartNew();
 
             var saveCurrent = current;
 
-            if (aditionalData is string)
+            if (aditionalData != null)
                 aditionalData = string.Intern((string)aditionalData);
 
             current = new HeavyProfilerEntry()
@@ -183,7 +191,15 @@ namespace Signum.Utilities
             }
         }
 
-        public static void Switch(this Tracer tracer, string role = null, object aditionalData = null)
+        public static void Switch(this Tracer tracer, string role, Func<string> aditionalData)
+        {
+            if (tracer == null)
+                return;
+
+            tracer.Switch(role, aditionalData()); 
+        }
+
+        public static void Switch(this Tracer tracer, string role = null, string aditionalData = null)
         {
             if (tracer == null)
                 return;
@@ -298,7 +314,7 @@ namespace Signum.Utilities
             return this.FollowC(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
         }
 
-        public object AditionalData;
+        public string AditionalData;
 
         internal Stopwatch Stopwatch;
         internal Stopwatch Discount;
