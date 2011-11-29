@@ -134,4 +134,10 @@ namespace Signum.Entities.Files
     {
         public string FullWebPath;
     }
+
+    [Serializable, ForceLocalization]
+    public class WebDownload
+    {
+        public string FullWebPath;
+    }
 }
