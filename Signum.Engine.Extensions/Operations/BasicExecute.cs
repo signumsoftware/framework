@@ -101,12 +101,18 @@ namespace Signum.Engine.Operations
                     {
                         using (Transaction tr2 = new Transaction(true))
                         {
-                            log.Target = entity.ToLite<IIdentifiable>();
-                            log.Exception = ex.Message;
-                            log.End = TimeZoneManager.Now;
-                           
+                            LogOperationDN log2 = new LogOperationDN
+                            {
+                                Operation = log.Operation,
+                                Start = log.Start,
+                                User = log.User,
+                                Target = entity.ToLite<IIdentifiable>(),
+                                Exception = ex.Message,
+                                End = TimeZoneManager.Now
+                            };
+
                             using (AuthLogic.User(AuthLogic.SystemUser))
-                                log.Save();
+                                log2.Save();
 
                             tr2.Commit();
                         }

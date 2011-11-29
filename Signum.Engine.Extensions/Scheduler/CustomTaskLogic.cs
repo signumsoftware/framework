@@ -88,22 +88,34 @@ namespace Signum.Engine.Scheduler
 
             try
             {
-                cte.Save();
-
-                tasks[key]();
-
-                cte.EndTime = TimeZoneManager.Now;
-                cte.Save();
-
-            }
-            catch(Exception ex)
-            {
-                using (Transaction tr=new Transaction(true))
+                using (Transaction tr = new Transaction())
                 {
-                    cte.Exception = ex.Message;
-                    cte.Save(); 
-                    tr.Commit(); 
+                    cte.Save();
+
+                    tasks[key]();
+
+                    cte.EndTime = TimeZoneManager.Now;
+                    cte.Save();
+
+                    tr.Commit();
                 }
+            }
+            catch (Exception ex)
+            {
+                using (Transaction tr2 = new Transaction(true))
+                {
+                    CustomTaskExecutionDN cte2 = new CustomTaskExecutionDN
+                    {
+                        CustomTask = cte.CustomTask,
+                        StartTime = cte.StartTime,
+                        EndTime = TimeZoneManager.Now,
+                        Exception = ex.Message,
+                    }.Save();
+
+                    tr2.Commit();
+                }
+
+                throw;
             }
         }
 
