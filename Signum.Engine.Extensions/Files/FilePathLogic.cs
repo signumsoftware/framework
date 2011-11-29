@@ -76,7 +76,7 @@ namespace Signum.Engine.Files
             fp => new WebImage { FullWebPath = fp.FullWebPath }; 
         public static WebImage WebImage(this FilePathDN fp)
         {
-            return WebImageExpression.Invoke(fp);
+            return WebImageExpression.Evaluate(fp);
         }
 
         static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =

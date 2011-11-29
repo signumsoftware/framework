@@ -269,7 +269,7 @@ namespace Signum.Entities.Authorization
                 return;
             }
 
-            var current = Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null && filterResources.Invoke(r.Resource)).ToDictionary(a => a.Resource);
+            var current = Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
             var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
             Synchronizer.Synchronize(current, should,

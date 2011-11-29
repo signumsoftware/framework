@@ -132,7 +132,7 @@ namespace Signum.Engine.SMS
             var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders.
                        GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider");
 
-            return phoneFunc.Invoke(entity);
+            return phoneFunc.Evaluate(entity);
         }
 
         #region Message composition
@@ -174,8 +174,8 @@ namespace Signum.Engine.SMS
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
                           .Select(p => new
                           {
-                              Phone = phoneFunc.Invoke(p),
-                              Data = func.Invoke(p)
+                              Phone = phoneFunc.Evaluate(p),
+                              Data = func.Evaluate(p)
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
                     SMSSendPackageDN package = new SMSSendPackageDN { NumLines = numbers.Count, }.Save();
@@ -213,7 +213,7 @@ namespace Signum.Engine.SMS
 
                     return new SMSMessageDN
                     {
-                        Message = template.ComposeMessage(func.Invoke(provider)),
+                        Message = template.ComposeMessage(func.Evaluate(provider)),
                         From = template.From,
                         DestinationNumber = GetPhoneNumber(provider),
                         State = SMSMessageState.Created,

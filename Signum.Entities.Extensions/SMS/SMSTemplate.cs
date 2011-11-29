@@ -107,7 +107,7 @@ namespace Signum.Entities.SMS
             (mt) => mt.active && DateTime.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
         { 
-            return IsActiveNowExpression.Invoke(this);
+            return IsActiveNowExpression.Evaluate(this);
         }
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)

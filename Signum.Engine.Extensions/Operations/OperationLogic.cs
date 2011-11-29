@@ -46,7 +46,7 @@ namespace Signum.Engine.Operations
             o => Database.Query<LogOperationDN>().Where(a=>a.Operation == o);
         public static IQueryable<LogOperationDN> LogOperations(this OperationDN o)
         {
-            return LogOperationsExpression.Invoke(o);
+            return LogOperationsExpression.Evaluate(o);
         }
         
         static Polymorphic<Dictionary<Enum, IOperation>> operations = new Polymorphic<Dictionary<Enum, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
