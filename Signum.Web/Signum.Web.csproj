@@ -338,8 +338,8 @@
     <Content Include="Signum\Scripts\SF_Globals.js" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum\Images\desc.gif" />
     <Content Include="Signum\Images\asc.gif" />
+    <Content Include="Signum\Images\desc.gif" />
     <Content Include="Signum\Images\lineButtons.gif" />
     <Content Include="Signum\Images\sign_error.gif" />
     <Content Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.js" />

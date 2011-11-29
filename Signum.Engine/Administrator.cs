@@ -272,7 +272,7 @@ deallocate cur");
            where T : IdentifiableEntity
         {
             return (from f1 in Database.Query<T>()
-                    join f2 in Database.Query<T>() on key.Invoke(f1) equals key.Invoke(f2)
+                    join f2 in Database.Query<T>() on key.Evaluate(f1) equals key.Evaluate(f2)
                     where f1.Id > f2.Id
                     select f1).UnsafeDelete();
         }

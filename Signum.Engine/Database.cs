@@ -141,10 +141,16 @@ namespace Signum.Engine
         {
             CacheController<T> cc = Schema.Current.CacheController<T>();
 
-            if (cc != null && cc.Enabled && (!onlyComplete || cc.IsComplete) && (EntityCache.HasRetriever || !Schema.Current.HasQueryFilter(typeof(T))))
-                return cc;
+            if (cc == null || !cc.Enabled)
+                return null;
 
-            return null;
+            if (onlyComplete && !cc.IsComplete)
+                return null;
+
+            if (!EntityCache.HasRetriever && Schema.Current.HasQueryFilter(typeof(T)))
+                return null;
+
+            return cc;
         }
 
         public static IdentifiableEntity Retrieve(Type type, int id)
@@ -317,38 +323,36 @@ namespace Signum.Engine
                 }
             }
 
-            List<T> result = null;
+            Dictionary<int, T> result = null;
            
             if (EntityCache.Created)
             {
-                result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToList();
+                result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a=>a.Id);
                 if (result.Count > 0)
-                    ids = ids.Except(result.Select(a => a.Id)).ToList();
+                    ids.RemoveAll(result.ContainsKey);
             }
 
             if (ids.Count > 0)
             {
-                var toRetrieve = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToList();
+                var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToDictionary(a=>a.Id);
 
-                if (toRetrieve.Count != ids.Count)
-                {
-                    int[] missing = ids.Except(toRetrieve.Select(a => a.Id)).ToArray();
-                    if (missing.Any())
-                        throw new EntityNotFoundException(typeof(T), missing);
-                }
+                var missing = ids.Except(retrieved.Keys);
+
+                if (missing.Any())
+                    throw new EntityNotFoundException(typeof(T), missing.ToArray());
 
                 if (result == null)
-                    result = toRetrieve;
+                    result = retrieved;
                 else
-                    result.AddRange(toRetrieve);
+                    result.AddRange(retrieved);
             }
             else
             {
                 if (result == null)
-                    result = new List<T>();
+                    result = new Dictionary<int,T>();
             }
 
-            return result;
+            return ids.Select(id => result[id]).ToList(); //Preserve order
         }
 
         public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)
@@ -370,18 +374,18 @@ namespace Signum.Engine
 
             var cc = CanUseCache<T>(true);
             if (cc != null)
-            {   
+            {
                 return ids.Select(id => cc.RetriveLite(id)).ToList();
             }
-            var result = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToList();
 
-            if (result.Count != ids.Count)
-            {
-                int[] missing = ids.Except(result.Select(a => a.Id)).ToArray();
-                if (missing.Any())
-                    throw new EntityNotFoundException(typeof(T), missing);
-            }
-            return result;
+            var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToDictionary(a => a.Id);
+
+            var missing = ids.Except(retrieved.Keys);
+
+            if (missing.Any())
+                throw new EntityNotFoundException(typeof(T), missing.ToArray());
+
+            return ids.Select(id => retrieved[id]).ToList(); //Preserve order
         }
 
         public static List<Lite> RetrieveListLite(Type type, List<int> ids)

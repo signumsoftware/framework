@@ -112,14 +112,14 @@ namespace Signum.Test
              a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
         public string FullName
         {
-            get{ return FullNameExpression.Invoke(this); }
+            get{ return FullNameExpression.Evaluate(this); }
         }
 
         static Expression<Func<ArtistDN, bool>> LonelyExpression =
             a => !a.Friends.Any();
         public bool Lonely()
         {
-            return LonelyExpression.Invoke(this);
+            return LonelyExpression.Evaluate(this);
         }
 
         public override string ToString()
@@ -181,14 +181,14 @@ namespace Signum.Test
             b => b.Name + " (" + b.Members.Count + " members )";
         public string FullName
         {
-            get { return FullNameExpression.Invoke(this); }
+            get { return FullNameExpression.Evaluate(this); }
         }
 
         static Expression<Func<BandDN, bool>> LonelyExpression =
             b => !b.Members.Any();
         public bool Lonely()
         {
-            return LonelyExpression.Invoke(this);
+            return LonelyExpression.Evaluate(this);
         }
 
         public override string ToString()
