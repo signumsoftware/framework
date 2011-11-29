@@ -117,7 +117,7 @@ namespace Signum.Entities.Files
         {
             get
             {
-                return FullWebPathExpression.Invoke(this);
+                return FullWebPathExpression.Evaluate(this);
             }
         }
 

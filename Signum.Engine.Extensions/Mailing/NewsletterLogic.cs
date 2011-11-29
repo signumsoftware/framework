@@ -26,7 +26,7 @@ namespace Signum.Engine.Mailing
             eo => Database.Query<NewsletterDeliveryDN>().Where(d => d.Recipient.RefersTo(eo));
         public static IQueryable<NewsletterDeliveryDN> NewsletterDeliveries(this IEmailOwnerDN eo)
         {
-            return NewsletterDeliveriesExpression.Invoke(eo);
+            return NewsletterDeliveriesExpression.Evaluate(eo);
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)

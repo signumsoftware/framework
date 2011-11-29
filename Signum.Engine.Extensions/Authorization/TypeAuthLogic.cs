@@ -159,7 +159,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetTypeRules(TypeRulePack rules)
         {
-            cache.SetRules(rules, r => true);
+            cache.SetRules(rules);
         }
 
         public static TypeAllowedAndConditions GetAllowed(Type type)

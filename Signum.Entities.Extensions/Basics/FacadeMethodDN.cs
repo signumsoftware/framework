@@ -46,7 +46,7 @@ namespace Signum.Entities.Basics
             (fm, mi) => mi.DeclaringType.Name == fm.InterfaceName && mi.Name == fm.MethodName;
         public bool Match(MethodInfo mi)
         {
-            return MatchExpression.Invoke(this, mi);
+            return MatchExpression.Evaluate(this, mi);
         }
 
     }

@@ -131,7 +131,7 @@ namespace Signum.Entities.Authorization
             u => null;
         public string CultureInfo
         {
-            get { return CultureInfoExpression.Invoke(this); }
+            get { return CultureInfoExpression.Evaluate(this); }
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

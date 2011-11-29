@@ -52,7 +52,7 @@ namespace Signum.Engine.Authorization
             u => Database.Query<UserTicketDN>().Where(ut=>ut.User == u.ToLite()) ; 
         public static IQueryable<UserTicketDN> Tickets(this UserDN u)
         {
-            return TicketsExpression.Invoke(u);
+            return TicketsExpression.Evaluate(u);
         }
 
         public static string NewTicket(string device)

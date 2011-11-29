@@ -276,7 +276,7 @@ namespace Signum.Entities.Authorization
                            }).ToMList();
         }
 
-        internal void SetRules(BaseRulePack<TypeAllowedRule> rules, Expression<Func<TypeDN, bool>> filterResources)
+        internal void SetRules(BaseRulePack<TypeAllowedRule> rules)
         {
             if (rules.DefaultRule != GetDefaultRule(rules.Role))
             {
@@ -285,7 +285,7 @@ namespace Signum.Entities.Authorization
                 return;
             }
 
-            var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null && filterResources.Invoke(r.Resource)).ToDictionary(a => a.Resource);
+            var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
             var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
             Synchronizer.Synchronize(current, should,
