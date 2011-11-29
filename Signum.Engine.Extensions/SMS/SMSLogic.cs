@@ -129,7 +129,10 @@ namespace Signum.Engine.SMS
 
         public static string GetPhoneNumber<T>(T entity) where T : IIdentifiable
         {
-            return ((Expression<Func<T, string>>)phoneNumberProviders[typeof(T)]).Invoke(entity);
+            var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders.
+                       GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider");
+
+            return phoneFunc.Evaluate(entity);
         }
 
         #region Message composition
@@ -171,8 +174,8 @@ namespace Signum.Engine.SMS
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
                           .Select(p => new
                           {
-                              Phone = phoneFunc.Invoke(p),
-                              Data = func.Invoke(p)
+                              Phone = phoneFunc.Evaluate(p),
+                              Data = func.Evaluate(p)
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
                     SMSSendPackageDN package = new SMSSendPackageDN { NumLines = numbers.Count, }.Save();
@@ -206,14 +209,11 @@ namespace Signum.Engine.SMS
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
                             .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
 
-                    var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders.
-                        GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider");
-
                     template.MessageLengthExceeded = MessageLengthExceeded.Allowed;
 
                     return new SMSMessageDN
                     {
-                        Message = template.ComposeMessage(func.Invoke(provider)),
+                        Message = template.ComposeMessage(func.Evaluate(provider)),
                         From = template.From,
                         DestinationNumber = GetPhoneNumber(provider),
                         State = SMSMessageState.Created,

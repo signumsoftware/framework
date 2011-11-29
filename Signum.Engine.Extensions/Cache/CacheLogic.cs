@@ -24,7 +24,12 @@ namespace Signum.Engine.Cache
         {
             int? Count { get; }
 
-            void Invalidate(); 
+            void Invalidate(bool isClean);
+
+            int Invalidations { get; }
+            int Loads { get; }
+
+            int Hits { get; }
         }
 
         interface IInstanceController
@@ -35,18 +40,35 @@ namespace Signum.Engine.Cache
         class SemiCached<T> : CacheController<T>, ICacheLogicController, IInstanceController
             where T : IdentifiableEntity
         {
-            Dictionary<Type, Dictionary<int, T>> cachedEntities = new Dictionary<Type, Dictionary<int, T>>();
-            Dictionary<Type, HashSet<Lite<T>>> sensibleLites = new Dictionary<Type, HashSet<Lite<T>>>();
+            ConcurrentDictionary<Type, Dictionary<int, T>> cachedEntities = new ConcurrentDictionary<Type, Dictionary<int, T>>();
+            ConcurrentDictionary<Type, HashSet<Lite<T>>> sensibleLites = new ConcurrentDictionary<Type, HashSet<Lite<T>>>();
 
             public int? Count
             {
                 get { return cachedEntities.Sum(a => a.Value.Count); }
             }
 
-            public void Invalidate()
+            int invalidations;
+            public int Invalidations { get { return invalidations; } }
+            int hits;
+            public int Hits { get { return hits; } }
+            int loads;
+            public int Loads { get { return loads; } }
+
+            public void Invalidate(bool isClean)
             {
                 cachedEntities.Clear();
                 sensibleLites.Clear();
+                if (isClean)
+                {
+                    invalidations = 0;
+                    hits = 0;
+                    loads = 0;
+                }
+                else
+                {
+                    Interlocked.Increment(ref invalidations);
+                }
             }
 
             public SemiCached(Schema schema)
@@ -63,7 +85,7 @@ namespace Signum.Engine.Cache
                 {
                     if (query.Any(e => kvp.Value.Contains(e.ToLite())))
                     {
-                        InvalidateAll(kvp.Key);
+                        InvalidateType(kvp.Key);
                     }
                 }
             }
@@ -76,21 +98,24 @@ namespace Signum.Engine.Cache
                     {
                         if(kvp.Value.Contains(ident.ToLite()))
                         {
-                            InvalidateAll(kvp.Key);
+                            InvalidateType(kvp.Key);
                         }
                     }
                 }
             }
 
-            private void InvalidateAll(Type referingType)
+            private void InvalidateType(Type referingType)
             {
-                cachedEntities.Remove(referingType);
-                sensibleLites.Remove(referingType);
+                Interlocked.Increment(ref invalidations); 
+                cachedEntities[referingType].Clear();
+                sensibleLites[referingType].Clear();
                 CacheLogic.InvalidateAllConnected(referingType);
             }
 
             public void SetEntities(Type referingType, DirectedGraph<Modifiable> entities)
             {
+                Interlocked.Increment(ref loads);
+
                 var dic = entities.OfType<T>().ToDictionary(a => a.Id);
                 cachedEntities[referingType] = dic;
 
@@ -99,12 +124,12 @@ namespace Signum.Engine.Cache
                 sensibleLites[referingType] = lites;
 
                 var semis = addEntities.TryGetC(typeof(T));
-                if (semis == null)
-                    return;
-
-                foreach (var item in semis)
+                if (semis != null)
                 {
-                    item.SetEntities(typeof(T), entities); 
+                    foreach (var item in semis)
+                    {
+                        item.SetEntities(typeof(T), entities);
+                    }
                 }
             }
 
@@ -113,13 +138,12 @@ namespace Signum.Engine.Cache
                 get { return !GloballyDisabled && !tempDisabled.Value; }
             }
 
-
             public override bool IsComplete
             {
                 get { return false; }
             }
 
-            public override bool Load()
+            public override void Load()
             {
                 throw NoComplete();
             }
@@ -143,6 +167,7 @@ namespace Signum.Engine.Cache
 
             public override bool CompleteCache(T entity, IRetriever retriver)
             {
+                Interlocked.Increment(ref hits);
                 foreach (var item in cachedEntities)
                 {
                     var orig = item.Value.TryGetC(entity.Id);
@@ -205,6 +230,8 @@ namespace Signum.Engine.Cache
                             }
                         }
 
+                        Interlocked.Increment(ref loads); 
+
                         return new Pack(result);
                     }
                 }, LazyThreadSafetyMode.PublicationOnly);
@@ -232,7 +259,7 @@ namespace Signum.Engine.Cache
 
             void PreUnsafeDelete(IQueryable<T> query)
             {
-                Invalidate();
+                Invalidate(false);
             }
 
             void Saving(T ident)
@@ -241,7 +268,7 @@ namespace Signum.Engine.Cache
                 {
                     if (ident.IsNew)
                     {
-                        Invalidate();
+                        Invalidate(false);
                     }
                     else
                     {
@@ -270,31 +297,51 @@ namespace Signum.Engine.Cache
                 get { return pack.IsValueCreated ? pack.Value.List.Count : (int?)null; }
             }
 
+            int invalidations;
+            public int Invalidations { get { return invalidations; } }
+            int hits;
+            public int Hits { get { return hits; } }
+            int loads;
+            public int Loads { get { return loads; } }
+
             public event Action Invalidation;
 
-            public void Invalidate()
+            public void Invalidate(bool isClean)
             {
                 pack.ResetPublicationOnly();
                 if (Invalidation != null)
-                    Invalidation(); 
+                    Invalidation();
+
+                if (isClean)
+                {
+                    invalidations = 0;
+                    hits = 0;
+                    loads = 0;
+                }
+                else
+                {
+                    Interlocked.Increment(ref invalidations);
+                }
+
             }
 
-            public override bool Load()
+            public override void Load()
             {
                 if (pack.IsValueCreated)
-                    return false;
+                    return;
 
                 pack.Load();
-                return true;
             }
 
             public override IEnumerable<int> GetAllIds()
             {
+                Interlocked.Increment(ref hits);
                 return pack.Value.Dictionary.Keys;
             }
 
             public override Lite<T> RetriveLite(int id) 
             {
+                Interlocked.Increment(ref hits); 
                 return pack.Value.Dictionary[id].ToLite<T>(); 
             }
 
@@ -302,6 +349,7 @@ namespace Signum.Engine.Cache
 
             public override bool CompleteCache(T entity, IRetriever retriver)
             {
+                Interlocked.Increment(ref hits); 
                 var origin = pack.Value.Dictionary.TryGetC(entity.Id);
                 if(origin == null)
                     throw new EntityNotFoundException(typeof(T), entity.Id);
@@ -354,8 +402,6 @@ namespace Signum.Engine.Cache
 
         private static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
-
-
             List<Type> relatedTypes = sb.Schema.Table(type).DependentTables().Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumProxy<>))).Select(t => t.Key.Type).ToList();
 
             foreach (var rType in relatedTypes)
@@ -387,11 +433,11 @@ namespace Signum.Engine.Cache
 
         public static void InvalidateAllConnected(Type type) 
         {
-            controllers[type].Invalidate();
+            controllers[type].Invalidate(false);
 
             foreach (var stype in invalidations.IndirectlyRelatedTo(type))
             {
-                controllers[stype].Invalidate();
+                controllers[stype].Invalidate(false);
             }
         }
 
@@ -404,6 +450,9 @@ namespace Signum.Engine.Cache
                         Type = kvp.Key,
                         CacheType = CacheLogic.GetCacheType(kvp.Key).Value,
                         Count = kvp.Value.Count, 
+                        Hits = kvp.Value.Hits,
+                        Loads = kvp.Value.Loads,
+                        Invalidations = kvp.Value.Invalidations,
                     }).ToList();
         }
 
@@ -427,7 +476,7 @@ namespace Signum.Engine.Cache
         {
             foreach (var item in controllers)
             {
-                item.Value.Invalidate();
+                item.Value.Invalidate(true);
             }
         }
 
@@ -459,8 +508,7 @@ namespace Signum.Engine.Cache
     public enum CacheType
     {
         Cached,
-        Semi,
-        NotCached, 
+        Semi, 
     }
 
     public class CacheStatistics
@@ -468,5 +516,8 @@ namespace Signum.Engine.Cache
         public Type Type;
         public CacheType CacheType;
         public int? Count;
+        public int Hits;
+        public int Loads;
+        public int Invalidations; 
     }
 }

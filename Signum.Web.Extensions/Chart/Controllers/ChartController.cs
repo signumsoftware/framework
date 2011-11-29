@@ -127,7 +127,13 @@ namespace Signum.Web.Chart
 
             if (chartRequest.Chart.GroupResults)
             {
-                var filters = chartRequest.Filters.Select(f => new FilterOption { Token = f.Token, Value = f.Value, Operation = f.Operation }).ToList();
+                var filters = chartRequest.Filters.Select(f => new FilterOption 
+                {
+                    ColumnName = f.Token.FullKey(), 
+                    Token = f.Token, 
+                    Value = f.Value, 
+                    Operation = f.Operation 
+                }).ToList();
 
                 var chartTokenFilters = new List<FilterOption>
                 {
@@ -139,11 +145,13 @@ namespace Signum.Web.Chart
 
                 filters.AddRange(chartTokenFilters.NotNull());
 
-                return Navigator.Find(this, new FindOptions(chartRequest.QueryName)
+                var findOptions = new FindOptions(chartRequest.QueryName)
                 {
                     FilterOptions = filters,
                     SearchOnLoad = true
-                });
+                };
+
+                return Redirect(findOptions.ToString());
             }
             else
             {
@@ -158,7 +166,7 @@ namespace Signum.Web.Chart
                 Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
 
                 Lite lite = TypeLogic.ParseLite(entitiesType, entity);
-                return Navigator.View(this, Database.Retrieve(lite));
+                return Redirect(Navigator.ViewRoute(lite));
             }
         }
 

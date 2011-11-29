@@ -55,7 +55,7 @@ namespace Signum.Entities.Extensions.Basics
              (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
         public DateTime Add(DateTime date)
         {
-            return AddExpression.Invoke(this, date);
+            return AddExpression.Evaluate(this, date);
         }
 
         public DateSpan ToDateSpan()

@@ -68,6 +68,7 @@ namespace Signum.Engine.Files
                 sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
 
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebDownload).NiceName(), "Download");
             }
         }
 
@@ -75,7 +76,14 @@ namespace Signum.Engine.Files
             fp => new WebImage { FullWebPath = fp.FullWebPath }; 
         public static WebImage WebImage(this FilePathDN fp)
         {
-            return WebImageExpression.Invoke(fp);
+            return WebImageExpression.Evaluate(fp);
+        }
+
+        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
+           fp => new WebDownload { FullWebPath = fp.FullWebPath };
+        public static WebDownload WebDownload(this FilePathDN fp)
+        {
+            return WebDownloadExpression.Evaluate(fp);
         }
 
         static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)

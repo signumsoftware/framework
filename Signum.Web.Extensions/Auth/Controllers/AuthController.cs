@@ -340,7 +340,7 @@ namespace Signum.Web.Auth
             }
             catch (Exception ex)
             {
-                return ResetPasswordSetNewError(request.Id, ViewDataKeys.GlobalErrors, ex.Message);
+                return ResetPasswordSetNewError(request.TryCS(r => r.Id) ?? 0, ViewDataKeys.GlobalErrors, ex.Message);
             }
         }
 

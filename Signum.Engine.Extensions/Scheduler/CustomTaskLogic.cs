@@ -14,11 +14,26 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Extensions.Properties;
 using System.Reflection;
 using Signum.Entities.Authorization;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Scheduler
 {
     public static class CustomTaskLogic
     {
+        static Expression<Func<CustomTaskDN, IQueryable<CustomTaskExecutionDN>>> ExecutionsExpression =
+            ct => Database.Query<CustomTaskExecutionDN>().Where(a => a.CustomTask == ct);
+        public static IQueryable<CustomTaskExecutionDN> Executions(this CustomTaskDN e)
+        {
+            return ExecutionsExpression.Evaluate(e);
+        }
+
+        static Expression<Func<CustomTaskDN, IQueryable<CustomTaskExecutionDN>>> LastExecutionExpression =
+            e => e.Executions().OrderByDescending(a => a.StartTime).Take(1);
+        public static IQueryable<CustomTaskExecutionDN> LastExecution(this CustomTaskDN e)
+        {
+            return LastExecutionExpression.Evaluate(e);
+        }
+
         static Dictionary<Enum, Action> tasks = new Dictionary<Enum, Action>();
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -39,19 +54,12 @@ namespace Signum.Engine.Scheduler
 
                 dqm[typeof(CustomTaskDN)] =
                       (from ct in Database.Query<CustomTaskDN>()
-                       join cte in Database.Query<CustomTaskExecutionDN>().DefaultIfEmpty() on ct equals cte.CustomTask into g
                        select new
                        {
                            Entity = ct.ToLite(),
                            ct.Id,
                            ct.Name,
-                           NumExecutions = (int?) g.Count(),
-                           LastExecution = (from cte2 in g
-                                            where cte2.Id == g.Max(a => a.Id)
-                                            select cte2.ToLite()).SingleOrDefaultEx()
-                       }).ToDynamic()
-                       .Column(a => a.NumExecutions, c => c.OverrideDisplayName = () => Resources.Executions)
-                       .Column(a => a.LastExecution, c => c.OverrideDisplayName = () => Resources.LastExecution);
+                       }).ToDynamic();
 
                 dqm[typeof(CustomTaskExecutionDN)] =
                      (from cte in Database.Query<CustomTaskExecutionDN>()
@@ -59,11 +67,14 @@ namespace Signum.Engine.Scheduler
                       {
                           Entity = cte.ToLite(),
                           cte.Id,
+                          CustomTask = cte.CustomTask.ToLite(),
                           cte.StartTime,
                           cte.EndTime,
                           cte.Exception,
-                          CustomTask = cte.CustomTask.ToLite(),
                       }).ToDynamic();
+
+                dqm.RegisterExpression((CustomTaskDN ct) => ct.Executions());
+                dqm.RegisterExpression((CustomTaskDN ct) => ct.LastExecution());
             }
         }
 

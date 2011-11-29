@@ -104,26 +104,27 @@ namespace Signum.Web.Selenium
             if (seleniumProcess != null && !seleniumProcess.HasExited)
                 seleniumProcess.Kill();
 
-            if (System.Environment.MachineName.ToLower().Contains("apolo"))
-            {
-                //Kill java process so it frees application folder and the next build can delete it
-                foreach (var p in Process.GetProcessesByName("java").Where(proc => !proc.HasExited))
-                    p.Kill();
+            //if (System.Environment.MachineName.ToLower().Contains("apolo"))
+            //{
+            //    //Kill java process so it frees application folder and the next build can delete it
+            //    foreach (var p in Process.GetProcessesByName("java").Where(proc => !proc.HasExited))
+            //        p.Kill();
 
-                //Kill firefox process so it frees application folder and the next build can delete it
-                foreach (var p in Process.GetProcessesByName("firefox").Where(proc => !proc.HasExited))
-                    p.Kill();
+            //    //Kill firefox process so it frees application folder and the next build can delete it
+            //    foreach (var p in Process.GetProcessesByName("firefox").Where(proc => !proc.HasExited))
+            //        p.Kill();
 
-                //Kill IIS worker process so it frees application folder and the next build can delete it
-                //foreach (var p in Process.GetProcessesByName("w3wp").Where(proc => !proc.HasExited))
-                //    p.Dispose();
-            }
+            //    //Kill IIS worker process so it frees application folder and the next build can delete it
+            //    //foreach (var p in Process.GetProcessesByName("w3wp").Where(proc => !proc.HasExited))
+            //    //    p.Dispose();
+            //}
         }
 
         public const string DefaultPageLoadTimeout = "20000"; // 1.66666667 mins
         public const string PageLoadLongTimeout = "20000"; //  > 3 mins
 
-        public const int DefaultAjaxTimeout = 10000;
+        //public const int DefaultAjaxTimeout = 10000;
+        public const int DefaultAjaxTimeout = 15000;
 
         public static void WaitAjaxFinished(this ISelenium selenium, Func<bool> condition)
         {
@@ -204,8 +205,8 @@ namespace Signum.Web.Selenium
         public static bool EntityButtonEnabled(this ISelenium selenium, string idButton)
         {
             string locator = EntityButtonLocator(idButton);
-            Assert.IsTrue(selenium.IsElementPresent(locator));
-            return !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
+            return selenium.IsElementPresent(locator) && 
+                  !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
         }
 
         public static void EntityButtonClick(this ISelenium selenium, string idButton)

@@ -269,7 +269,7 @@ namespace Signum.Engine.Mailing
 
                 if (message != null)
                 {
-                    SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
+                    SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder();
                     client.Send(message);
                 }
 
@@ -285,6 +285,15 @@ namespace Signum.Engine.Mailing
                 emailMessage.Save();
                 throw;
             }
+        }
+
+        public static SmtpClient SafeSmtpClient()
+        {
+            //http://weblogs.asp.net/stanleygu/archive/2010/03/31/tip-14-solve-smtpclient-issues-of-delayed-email-and-high-cpu-usage.aspx
+            return new SmtpClient()
+            {
+                ServicePoint = { MaxIdleTime = 2 } 
+            };
         }
 
         public static void SendAsync(this IEmailModel model)
@@ -307,7 +316,7 @@ namespace Signum.Engine.Mailing
                 MailMessage message = CreateMailMessage(emailMessage);
                 if (message != null)
                 {
-                    SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
+                    SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder();
                     client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
 
                     emailMessage.Sent = null;
@@ -557,18 +566,18 @@ namespace Signum.Engine.Mailing
             var settings = SmtpConfigurations.TryGet(smtpSettingsName, null);
             if (settings == null)
                 if (defaultIfNotPresent)
-                    return new SmtpClient();
+                    return EmailLogic.SafeSmtpClient();
                 else
                     throw new ArgumentException("The setting {0} was not found in the SMTP settings cache".Formato(smtpSettingsName));
 
-            SmtpClient client = new SmtpClient()
-            {
-                Host = settings.Host,
-                Port = settings.Port,
-                UseDefaultCredentials = settings.UseDefaultCredentials,
-                Credentials = settings.Username.HasText() ? new NetworkCredential(settings.Username, settings.Password) : null,
-                EnableSsl = settings.EnableSSL,
-            };
+            SmtpClient client = EmailLogic.SafeSmtpClient();
+
+            client.Host = settings.Host;
+            client.Port = settings.Port;
+            client.UseDefaultCredentials = settings.UseDefaultCredentials;
+            client.Credentials = settings.Username.HasText() ? new NetworkCredential(settings.Username, settings.Password) : null;
+            client.EnableSsl = settings.EnableSSL;
+
             foreach (var cc in settings.ClientCertificationFiles)
             {
                 client.ClientCertificates.Add(cc.CertFileType == CertFileType.CertFile ?
