@@ -175,12 +175,6 @@
   <data name="ExpressedIn" xml:space="preserve">
     <value>expressed in </value>
   </data>
-  <data name="LastExecution" xml:space="preserve">
-    <value>Last Execution</value>
-  </data>
-  <data name="Executions" xml:space="preserve">
-    <value>Executions</value>
-  </data>
   <data name="IncorrectPassword" xml:space="preserve">
     <value>Incorrect password</value>
   </data>
