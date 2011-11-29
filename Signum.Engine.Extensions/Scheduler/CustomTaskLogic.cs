@@ -24,14 +24,14 @@ namespace Signum.Engine.Scheduler
             ct => Database.Query<CustomTaskExecutionDN>().Where(a => a.CustomTask == ct);
         public static IQueryable<CustomTaskExecutionDN> Executions(this CustomTaskDN e)
         {
-            return ExecutionsExpression.Invoke(e);
+            return ExecutionsExpression.Evaluate(e);
         }
 
         static Expression<Func<CustomTaskDN, IQueryable<CustomTaskExecutionDN>>> LastExecutionExpression =
             e => e.Executions().OrderByDescending(a => a.StartTime).Take(1);
         public static IQueryable<CustomTaskExecutionDN> LastExecution(this CustomTaskDN e)
         {
-            return LastExecutionExpression.Invoke(e);
+            return LastExecutionExpression.Evaluate(e);
         }
 
         static Dictionary<Enum, Action> tasks = new Dictionary<Enum, Action>();

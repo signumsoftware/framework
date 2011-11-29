@@ -33,14 +33,14 @@ namespace Signum.Engine.Processes
             p => Database.Query<ProcessExecutionDN>().Where(a => a.Process == p);
         public static IQueryable<ProcessExecutionDN> Executions(this ProcessDN p)
         {
-            return ExecutionsExpression.Invoke(p);
+            return ExecutionsExpression.Evaluate(p);
         }
 
         static Expression<Func<ProcessDN, IQueryable<ProcessExecutionDN>>> LastExecutionExpression =
             p => p.Executions().OrderByDescending(a => a.ExecutionStart).Take(1);
         public static IQueryable<ProcessExecutionDN> LastExecution(this ProcessDN p)
         {
-            return LastExecutionExpression.Invoke(p);
+            return LastExecutionExpression.Evaluate(p);
         }
 
         static BlockingCollection<ExecutingProcess> processQueue = new BlockingCollection<ExecutingProcess>();

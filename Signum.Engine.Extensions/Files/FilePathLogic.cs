@@ -83,7 +83,7 @@ namespace Signum.Engine.Files
            fp => new WebDownload { FullWebPath = fp.FullWebPath };
         public static WebDownload WebDownload(this FilePathDN fp)
         {
-            return WebDownloadExpression.Invoke(fp);
+            return WebDownloadExpression.Evaluate(fp);
         }
 
         static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
