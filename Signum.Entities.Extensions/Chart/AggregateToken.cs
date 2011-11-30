@@ -48,7 +48,7 @@ namespace Signum.Entities.Chart
         {
             get
             {
-                if (AggregateFunction == AggregateFunction.Count)
+                if (AggregateFunction == AggregateFunction.Count || AggregateFunction == AggregateFunction.Average)
                     return null;
                 return Parent.Format;
             }
@@ -72,17 +72,17 @@ namespace Signum.Entities.Chart
                     return typeof(int);
 
                 var pType = Parent.Type;
+                var pTypeUn = Parent.Type.UnNullify();
 
-                if (pType.UnNullify() == typeof(bool))
+                if (AggregateFunction == AggregateFunction.Average &&
+                    (pTypeUn == typeof(int) || pTypeUn == typeof(long) || pTypeUn == typeof(bool)))
                 {
                     return pType.IsNullable() ? typeof(double?) : typeof(double);
                 }
 
-                if (AggregateFunction == AggregateFunction.Average && 
-                    (pType.UnNullify() == typeof(int) || 
-                     pType.UnNullify() == typeof(long)))
+                if (pTypeUn == typeof(bool))
                 {
-                    return pType.IsNullable() ? typeof(double?) : typeof(double);
+                    return pType.IsNullable() ? typeof(int?) : typeof(int);
                 }
 
                 return pType;
@@ -138,8 +138,13 @@ namespace Signum.Entities.Chart
             if (AggregateFunction == Chart.AggregateFunction.Count)
                 return null;
 
-            if (Parent.Type.UnNullify() == typeof(bool))
+            var pu = Parent.Type.UnNullify();
+
+            if (AggregateFunction == Chart.AggregateFunction.Average && (pu == typeof(int) || pu == typeof(long) || pu == typeof(bool)))
                 return Parent.Type.IsNullable() ? typeof(double?) : typeof(double);
+
+            if (pu == typeof(bool))
+                return Parent.Type.IsNullable() ? typeof(int?) : typeof(int);
 
             return null;
         }

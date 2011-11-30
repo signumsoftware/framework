@@ -277,7 +277,7 @@ namespace Signum.Entities.Chart
             return SubTokensChart(token, list, true);
         }
 
-        internal List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions, bool canAggregate)
+        public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions, bool canAggregate)
         {
             var result = QueryUtils.SubTokens(token, columnDescriptions);
 
@@ -306,15 +306,6 @@ namespace Signum.Entities.Chart
                             result.Add(new AggregateToken(token, AggregateFunction.Min));
                             result.Add(new AggregateToken(token, AggregateFunction.Max));
                         }
-                    }
-                }
-                else if (token != null)
-                {
-                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
-
-                    if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
-                    {
-                        result.Add(new IntervalQueryToken(token));
                     }
                 }
             }
