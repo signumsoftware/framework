@@ -191,7 +191,7 @@ WriteLiteral(">\r\n                <div class=\"ui-widget-header ui-corner-top s
 "                    ");
 
 
-               Write(Html.TokensCombo(queryDescription, Model));
+               Write(Html.TokenOptionsCombo(queryDescription.QueryName, SearchControlHelper.RootTokensCombo(queryDescription, null), Model, 0, false));
 
 WriteLiteral("\r\n                \r\n                    ");
 

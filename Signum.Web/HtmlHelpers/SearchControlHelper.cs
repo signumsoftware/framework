@@ -46,14 +46,6 @@ namespace Signum.Web
                 helper.ViewData[ViewDataKeys.Title] :
                 Navigator.Manager.SearchTitle(findOptions.QueryName);
 
-            //helper.ViewData.Model = context;
-
-            //helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            //helper.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-
-            //if (!helper.ViewData.ContainsKey(ViewDataKeys.Title))
-            //    helper.ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
-
             return helper.Partial(Navigator.Manager.SearchControlView, viewData);
         }
 
@@ -184,7 +176,7 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString TokensCombo(this HtmlHelper helper, QueryDescription queryDescription, Context context)
+        public static MvcHtmlString RootTokensCombo(QueryDescription queryDescription, QueryToken queryToken)
         {
             var columns = new HtmlStringBuilder();
             columns.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
@@ -193,13 +185,44 @@ namespace Signum.Web
                 var option = new HtmlTag("option")
                     .Attr("value", c.Name)
                     .SetInnerText(c.DisplayName);
+
+                if (queryToken != null && c.Name == queryToken.Key)
+                    option.Attr("selected", "selected");
+
                 columns.AddLine(option.ToHtml());
             }
 
-            return TokensCombo(helper, queryDescription.QueryName, columns, context, 0, false);
+            return columns.ToHtml();
         }
 
-        public static MvcHtmlString TokensCombo(this HtmlHelper helper, object queryName, HtmlStringBuilder options, Context context, int index, bool writeExpander)
+        public static MvcHtmlString TokensCombo(List<QueryToken> queryTokens, QueryToken selected)
+        {
+            var options = new HtmlStringBuilder();
+            options.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+            foreach (var qt in queryTokens)
+            {
+                var option = new HtmlTag("option")
+                            .Attr("value", qt.Key)
+                            .SetInnerText(qt.ToString());
+
+                if (selected != null && qt.Key == selected.Key)
+                    option.Attr("selected", "selected");
+
+                string canColumn = QueryUtils.CanColumn(qt);
+                if (canColumn.HasText())
+                    option.Attr("data-column", canColumn);
+
+                string canFilter = QueryUtils.CanFilter(qt);
+                if (canFilter.HasText())
+                    option.Attr("data-filter", canFilter);
+
+                options.AddLine(option.ToHtml());
+            }
+
+            return options.ToHtml();
+        }
+
+        public static MvcHtmlString TokenOptionsCombo(this HtmlHelper helper, object queryName, MvcHtmlString options, Context context, int index, bool writeExpander)
         {
             MvcHtmlString expander = null;
             if (writeExpander)
@@ -212,13 +235,13 @@ namespace Signum.Web
                     onchange = "javascript:new SF.FindNavigator({{prefix:\"{0}\",webQueryName:\"{1}\"}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) +
                                ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');"
                 })
-                .InnerHtml(options.ToHtml())
+                .InnerHtml(options)
                 .ToHtml();
 
             return expander == null ? drop : expander.Concat(drop);
         }
 
-        private static MvcHtmlString TokensComboExpander(this HtmlHelper helper, Context context, int index)
+        static MvcHtmlString TokensComboExpander(this HtmlHelper helper, Context context, int index)
         {
             return helper.Span(
                 context.Compose("lblddlTokens_" + index),
@@ -238,19 +261,8 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            var items = new HtmlStringBuilder();
-            items.Add(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
-            foreach (var c in qd.Columns)
-            {
-                var option = new HtmlTag("option")
-                    .Attr("value", c.Name)
-                    .SetInnerText(c.DisplayName);
-                if (queryToken != null && c.Name == queryToken.Key)
-                    option.Attr("selected", "selected");
-                items.Add(option.ToHtml());
-            }
-
-            sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, items, context, 0, false));
+            sb.AddLine(SearchControlHelper.TokenOptionsCombo(
+                helper, queryName, SearchControlHelper.RootTokensCombo(qd, queryToken), context, 0, false));
 
             for (int i = 0; i < tokenPath.Count; i++)
             {
@@ -258,28 +270,9 @@ namespace Signum.Web
                 List<QueryToken> subtokens = t.SubTokens();
                 if (!subtokens.IsEmpty())
                 {
-                    var subitems = new HtmlStringBuilder();
-                    subitems.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
-                    foreach (var qt in subtokens)
-                    {
-                        var option = new HtmlTag("option")
-                            .Attr("value", qt.Key)
-                            .SetInnerText(qt.ToString());
-                        if (i + 1 < tokenPath.Count && qt.Key == tokenPath[i + 1].Key)
-                            option.Attr("selected", "selected");
-
-                        string canColumn = QueryUtils.CanColumn(qt);
-                        if (canColumn.HasText())
-                            option.Attr("data-column", canColumn);
-
-                        string canFilter = QueryUtils.CanFilter(qt);
-                        if (canFilter.HasText())
-                            option.Attr("data-filter", canFilter);
-
-                        subitems.AddLine(option.ToHtml());
-                    }
-
-                    sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
+                    bool moreTokens = i + 1 < tokenPath.Count;
+                    sb.AddLine(SearchControlHelper.TokenOptionsCombo(
+                        helper, queryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
                 }
             }
 
