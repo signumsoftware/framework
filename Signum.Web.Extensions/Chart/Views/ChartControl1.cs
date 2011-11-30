@@ -106,12 +106,17 @@ WriteLiteral("\r\n<div id=\"");
 
     Write(Model.Compose("divChartControl"));
 
-WriteLiteral("\" class=\"sf-search-control sf-chart-control\" data-prefix=\"");
+WriteLiteral("\" class=\"sf-search-control sf-chart-control\" data-subtokens-url=\"");
 
 
-                                                                                               Write(Model.ControlID);
+                                                                                                      Write(Url.Action("NewSubTokensCombo", "Chart"));
 
-WriteLiteral("\">\r\n    ");
+WriteLiteral("\" data-prefix=\"");
+
+
+                                                                                                                                                              Write(Model.ControlID);
+
+WriteLiteral("\" >\r\n    ");
 
 
 Write(Html.HiddenRuntimeInfo(Model));
@@ -131,9 +136,9 @@ WriteLiteral("\r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n       
 "filters-body\">\r\n                    ");
 
 
-               Write(Html.TokensCombo(queryDescription, Model));
+               Write(Html.ChartRootTokens(Model.Value.Chart, queryDescription, Model));
 
-WriteLiteral("\r\n                \r\n                    ");
+WriteLiteral("\r\n                    \r\n                    ");
 
 
                Write(Html.Href(

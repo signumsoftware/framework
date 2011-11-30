@@ -18,6 +18,7 @@ using Signum.Entities.Authorization;
 using Signum.Engine.Basics;
 using System.Web.Script.Serialization;
 using Signum.Engine.Reports;
+using Signum.Web.Controllers;
 
 namespace Signum.Web.Chart
 {
@@ -73,6 +74,25 @@ namespace Signum.Web.Chart
         }
 
         [HttpPost]
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
+        {
+            var request = ExtractChartRequestCtx(prefix, null).Value;
+
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            List<QueryToken> subtokens = request.Chart.SubTokensFilters(QueryUtils.Parse(tokenName, qt => request.Chart.SubTokensFilters(qt, qd.Columns)), qd.Columns);
+
+            if (subtokens.IsEmpty())
+                return Content("");
+
+            var tokenOptions = SearchControlHelper.TokensCombo(subtokens, null);
+
+            return Content(
+                SearchControlHelper.TokenOptionsCombo(
+                    SignumController.CreateHtmlHelper(this), request.QueryName, tokenOptions, new Context(null, prefix), index + 1, true).ToHtmlString());
+        }
+
+        [HttpPost]
         public ActionResult Draw(string prefix)
         {
             var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
@@ -107,16 +127,9 @@ namespace Signum.Web.Chart
             var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
                     .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
 
-            var ch = ctx.Value.Chart;
-            switch (lastTokenChanged)
-            {
-                case ChartTokenName.Dimension1: ch.Dimension1.TokenChanged(); break;
-                case ChartTokenName.Dimension2: ch.Dimension2.TokenChanged(); break;
-                case ChartTokenName.Value1: ch.Value1.TokenChanged(); break;
-                case ChartTokenName.Value2: ch.Value2.TokenChanged(); break;
-                default:
-                    break;
-            }
+            var chart = ctx.Value.Chart;
+            if (lastTokenChanged != null)
+                chart.GetToken(lastTokenChanged.Value).TokenChanged();
 
             return ctx;
         }

@@ -46,6 +46,7 @@ namespace ASP
     using Signum.Engine.DynamicQuery;
     using Signum.Entities.Reflection;
     using Signum.Entities.Chart;
+    using Signum.Web.Chart;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartToken.cshtml")]
@@ -65,6 +66,7 @@ namespace ASP
         }
         public override void Execute()
         {
+
 
 
 
@@ -115,15 +117,12 @@ WriteLiteral("</td>\r\n        <td>\r\n");
 
                                                                
             }
-          
-
-               
 
 WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query-token\">\r\n          " +
-"          ");
+"      ");
 
 
-               Write(Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc));
+           Write(Html.ChartTokenCombo(tc.Value, chart, ViewData[ViewDataKeys.QueryName], tc));
 
 WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
 

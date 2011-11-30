@@ -6,6 +6,7 @@
 @using Signum.Entities.Reflection
 @using Signum.Entities
 @using Signum.Entities.Chart
+@using Signum.Web.Chart
 
 @using (var tc = Html.TypeContext<ChartTokenDN>())
 {
@@ -29,14 +30,10 @@
                 @groupCheck.ToHtmlSelf()
                 @Html.Hidden(tc.Compose("group"), groupResults)
             }
-          @*  @if (tc.Value.ShouldAggregate)
-            {
-                @Html.ValueLine(tc, ct => ct.Aggregate, vl => { vl.LabelVisible = false; vl.ValueHtmlProps["class"] = "sf-chart-token-aggregate";})
-            }*@
         </td>
         <td>
             <div class="sf-query-token">
-                    @Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)
+                @Html.ChartTokenCombo(tc.Value, chart, ViewData[ViewDataKeys.QueryName], tc)
             </div>
             <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
         </td>

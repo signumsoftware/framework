@@ -55,10 +55,6 @@ SF.Chart.Builder = (function () {
         $(this).closest(".sf-chart-token").next().toggle();
     });
 
-    $(".sf-chart-token-aggregate").live("change", function () {
-        updateChartBuilder($(this).closest(".sf-chart-control"));
-    });
-
     $(".sf-query-token select").live("change", function () {
         var $this = $(this);
         updateChartBuilder($this.closest(".sf-chart-control"), $this.closest("tr").attr("data-token"));
@@ -119,6 +115,21 @@ SF.Chart.Builder = (function () {
         SF.EntityIsValid({ prefix: prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
             SF.submitOnly(exportUrl, data)
         });
+    };
+
+    var originalNewSubtokensCombo = SF.FindNavigator.prototype.newSubTokensCombo;
+    SF.FindNavigator.prototype.newSubTokensCombo = function (index, url) {
+        var $combo = $(this.pf("ddlTokens_0"));
+        if ($combo.closest(".sf-chart-builder").length == 0) {
+            var $chartControl = $combo.closest(".sf-chart-control");
+            if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                url = $chartControl.attr("data-subtokens-url");
+                originalNewSubtokensCombo.call(this, index, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
+            }
+            else {
+                originalNewSubtokensCombo.call(this, index, url);
+            }
+        }
     };
 
     return {
