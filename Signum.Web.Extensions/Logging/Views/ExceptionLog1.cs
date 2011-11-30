@@ -89,13 +89,6 @@ Write(Html.ValueLine(e, f => f.ThreadId));
 
                                        
     
-Write(Html.ValueLine(e, f => f.RequestUrl));
-
-                                         
-    
-Write(Html.ValueLine(e, f => f.UserAgent));
-
-                                        
     
 Write(Html.ValueLine(e, f => f.ActionName));
 
@@ -104,15 +97,43 @@ Write(Html.ValueLine(e, f => f.ActionName));
 Write(Html.ValueLine(e, f => f.ControllerName));
 
                                              
+    
+Write(Html.ValueLine(e, f => f.RequestUrl));
+
+                                         
+    
+Write(Html.ValueLine(e, f => f.UrlReferer));
+
+                                         
+    
+Write(Html.ValueLine(e, f => f.UserAgent));
+
+                                        
+    
+Write(Html.ValueLine(e, f => f.UserHostAddress));
+
+                                              
+    
+Write(Html.ValueLine(e, f => f.UserHostName));
+
+                                           
+    
+Write(Html.ValueLine(e, f => f.QueryString, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                           
+    
+Write(Html.ValueLine(e, f => f.Form, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                    
+    
+Write(Html.ValueLine(e, f => f.Session, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                           
 
     
 Write(Html.EntityLine(e, f => f.User));
 
                                     
-    
-Write(Html.EntityLine(e, f => f.Context));
-
-                                       
 
 
 WriteLiteral("    <h3>");
