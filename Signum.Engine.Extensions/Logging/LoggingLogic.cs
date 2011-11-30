@@ -71,31 +71,16 @@ namespace Signum.Engine.Logging
             }.Save();
         }
 
-        public static Func<Exception, IdentifiableEntity> GetContext;
-
         public static bool ThrowLogingErrors = true;
 
-        public static void LogException(Exception ex, string controllerName, string actionName, string userAgent, string requestUrl,string data)
+        public static void LogException(ExceptionLogDN log)
         {
             try
             {
                 using (Schema.Current.GlobalMode())
                 using (Transaction tr = new Transaction(true))
                 {
-                    var log = new ExceptionLogDN
-                    {
-                        ExceptionType = ex.GetType().Name,
-                        ExceptionMessage = ex.Message,
-                        StackTrace = ex.StackTrace,
-                        ThreadId = Thread.CurrentThread.ManagedThreadId,
-                        User = UserDN.Current,
-                        RequestUrl = requestUrl,
-                        UserAgent = userAgent,
-                        ControllerName = controllerName,
-                        ActionName = actionName,
-                        Context = GetContext == null ? null : GetContext(ex),
-                        Data=data
-                    }.Save();
+                    log.Save();
 
                     tr.Commit();
                 }
