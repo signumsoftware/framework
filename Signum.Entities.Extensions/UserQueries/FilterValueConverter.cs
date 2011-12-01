@@ -182,27 +182,35 @@ namespace Signum.Entities.UserQueries
                 minute += Math.DivRem(second, 60, out second);
                 hour += Math.DivRem(minute, 60, out minute);
                 day += Math.DivRem(hour, 24, out hour);
+                
+                DateDivRem(ref year, ref month, ref day);
 
+                return new DateTime(year, month, day, hour, minute, second);
+            }
 
-                year += MonthDivRem(ref month);
+            private static void DateDivRem(ref int year, ref int month, ref int day)
+            {
+                year += MonthDivRem(ref month); // We need right month for DaysInMonth
 
                 int daysInMonth;
                 while (day > (daysInMonth = DateTime.DaysInMonth(year, month)))
                 {
                     day -= daysInMonth;
+
                     month++;
-
-                    if (month > 12)
-                    {
-                        month -= 12;
-                        year++;
-                    }
+                    year += MonthDivRem(ref month);
                 }
+                
+                while (day <= 0)
+                {
+                    month--;
+                    year += MonthDivRem(ref month);
 
-                return new DateTime(year, month, day, hour, minute, second);
+                    day += DateTime.DaysInMonth(year, month);
+                }
             }
 
-            private int MonthDivRem(ref int month)
+            private static int MonthDivRem(ref int month)
             {
                 int year = 0;
 
