@@ -233,7 +233,7 @@ namespace Signum.Web
 
         public static EntitySettings EntitySettings(Type type)
         {
-            return Manager.EntitySettings.GetOrThrow(type, "no EntitySettings for type {0} found");
+            return Manager.EntitySettings.GetOrThrow(type, "No EntitySettings for type {0} found");
         } 
 
         public static void AddQuerySettings(List<QuerySettings> settings)

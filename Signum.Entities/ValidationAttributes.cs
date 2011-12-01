@@ -630,8 +630,10 @@ namespace Signum.Entities
             if (index == -1)
                 return null;
 
-            return dictionary.GetOrThrow(state, Resources.State0NotRegisteredInStateValidator)[index];
+            return Necessary(state, index);
         }
+
+      
 
         public string Validate(E entity, PropertyInfo pi, bool showState)
         {
@@ -641,7 +643,7 @@ namespace Signum.Entities
 
             S state = getState(entity);
 
-            bool? necessary = dictionary.GetOrThrow(state, Resources.State0NotRegisteredInStateValidator)[index];
+            bool? necessary = Necessary(state, index);
 
             if (necessary == null)
                 return null;
@@ -667,7 +669,12 @@ namespace Signum.Entities
             if (index == -1)
                 throw new ArgumentException("The property is not registered");
 
-            return dictionary[state][index];
+            return Necessary(state, index);
+        }
+
+        bool? Necessary(S state, int index)
+        {
+            return dictionary.GetOrThrow(state, "State {0} not registered in StateValidator")[index];
         }
 
         public IEnumerator GetEnumerator() //just to use object initializer

@@ -291,9 +291,6 @@
   <data name="Second" xml:space="preserve">
     <value>Second</value>
   </data>
-  <data name="State0NotRegisteredInStateValidator" xml:space="preserve">
-    <value>State {0} not registered in StateValidator</value>
-  </data>
   <data name="Telephone" xml:space="preserve">
     <value>Telephone</value>
   </data>
