@@ -202,11 +202,21 @@ namespace Signum.Web.Selenium
             EntityButtonClick(selenium, "ebSave");
         }
 
+        public static bool EntityOperationEnabled(this ISelenium selenium, Enum operationKey)
+        {
+            return selenium.EntityButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
         public static bool EntityButtonEnabled(this ISelenium selenium, string idButton)
         {
             string locator = EntityButtonLocator(idButton);
             return selenium.IsElementPresent(locator) && 
                   !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
+        }
+
+        public static void EntityOperationClick(this ISelenium selenium, Enum operationKey)
+        {
+            selenium.EntityButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
         }
 
         public static void EntityButtonClick(this ISelenium selenium, string idButton)
