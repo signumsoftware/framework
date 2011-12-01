@@ -314,15 +314,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} not registered in EmailLogic.
-        /// </summary>
-        internal static string NotRegisteredInEmailLogic {
-            get {
-                return ResourceManager.GetString("NotRegisteredInEmailLogic", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to of the {0}.
         /// </summary>
         internal static string OfThe0 {

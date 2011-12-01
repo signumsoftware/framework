@@ -217,12 +217,12 @@ namespace Signum.Engine.Mailing
 
         public static Lite<EmailTemplateDN> GetTemplateDN(Type type)
         {
-            return templateToDN.GetOrThrow(type, Resources.NotRegisteredInEmailLogic);
+            return templateToDN.GetOrThrow(type, "{0} not registered in EmailLogic");
         }
 
         public static Func<IEmailModel, EmailContent> GetTemplate(Type type)
         {
-            return templates.GetOrThrow(type, Resources.NotRegisteredInEmailLogic);
+            return templates.GetOrThrow(type, "{0} not registered in EmailLogic");
         }
 
         public static EmailMessageDN CreateEmailMessage(IEmailModel model, Lite<EmailPackageDN> package)
