@@ -202,6 +202,11 @@ namespace Signum.Web.Selenium
             EntityButtonClick(selenium, "ebSave");
         }
 
+        public static bool EntityOperationEnabled(this ISelenium selenium, Enum operationKey)
+        {
+            return selenium.EntityButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
         public static bool EntityButtonEnabled(this ISelenium selenium, string idButton)
         {
             string locator = EntityButtonLocator(idButton);
@@ -209,14 +214,29 @@ namespace Signum.Web.Selenium
                   !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
         }
 
+        public static void EntityOperationClick(this ISelenium selenium, Enum operationKey)
+        {
+            selenium.EntityButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
         public static void EntityButtonClick(this ISelenium selenium, string idButton)
         {
             selenium.Click(EntityButtonLocator(idButton));
         }
 
+        public static void EntityMenuConstrucFromClick(this ISelenium selenium, Enum construcFromKey)
+        {
+            selenium.EntityMenuOptionClick("tmConstructors", construcFromKey.GetType().Name + "_" + construcFromKey.ToString());
+        }
+
         public static void EntityMenuOptionClick(this ISelenium selenium, string menuId, string optionId)
         {
             selenium.Click(EntityMenuOptionLocator(menuId, optionId));
+        }
+
+        public static bool EntityMenuConstrucFromEnabled(this ISelenium selenium, Enum construcFromKey)
+        {
+            return selenium.EntityMenuOptionEnabled("tmConstructors", construcFromKey.GetType().Name + "_" + construcFromKey.ToString());
         }
 
         public static bool EntityMenuOptionEnabled(this ISelenium selenium, string menuId, string optionId)

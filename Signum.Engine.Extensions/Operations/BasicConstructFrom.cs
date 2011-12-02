@@ -65,38 +65,42 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
-            try
+            using (OperationLogic.AllowSave<F>())
+            using (OperationLogic.AllowSave<T>())
             {
-                using (Transaction tr = new Transaction())
+                try
                 {
-                    LogOperationDN log = new LogOperationDN
+                    using (Transaction tr = new Transaction())
                     {
-                        Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                        Start = TimeZoneManager.Now,
-                        User = UserDN.Current.ToLite()
-                    };
+                        LogOperationDN log = new LogOperationDN
+                        {
+                            Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                            Start = TimeZoneManager.Now,
+                            User = UserDN.Current.ToLite()
+                        };
 
-                    OnBeginOperation((IdentifiableEntity)entity);
+                        OnBeginOperation((IdentifiableEntity)entity);
 
-                    T result = Construct((F)entity, args);
+                        T result = Construct((F)entity, args);
 
-                    OnEndOperation(result);
+                        OnEndOperation(result);
 
-                    if (!result.IsNew)
-                    {
-                        log.Target = result.ToLite<IIdentifiable>();
-                        log.End = TimeZoneManager.Now;
-                        using (AuthLogic.User(AuthLogic.SystemUser))
-                            log.Save();
+                        if (!result.IsNew)
+                        {
+                            log.Target = result.ToLite<IIdentifiable>();
+                            log.End = TimeZoneManager.Now;
+                            using (UserDN.Scope(AuthLogic.SystemUser))
+                                log.Save();
+                        }
+
+                        return tr.Commit(result);
                     }
-
-                    return tr.Commit(result);
                 }
-            }
-            catch (Exception e)
-            {
-                OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, e);
-                throw;
+                catch (Exception e)
+                {
+                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, e);
+                    throw;
+                }
             }
         }
 

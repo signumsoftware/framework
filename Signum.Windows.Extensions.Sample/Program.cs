@@ -75,8 +75,7 @@ namespace Signum.Windows.Extensions.Sample
             {
                 string[] usernamePassword = auto.Split('/');
                 result.Login(usernamePassword[0], Security.EncodePassword(usernamePassword[1]));
-                UserDN user = result.GetCurrentUser();
-                Thread.CurrentPrincipal = user;
+                UserDN.SetSessionUser(result.GetCurrentUser());
 
                 return result;
             }
@@ -106,8 +105,6 @@ namespace Signum.Windows.Extensions.Sample
                     Settings.Default.UserName = login.UserName;
                     Settings.Default.Save();
 
-                    Thread.CurrentPrincipal = result.GetCurrentUser();
-
                     login.DialogResult = true;
                 }
                 catch (FaultException ex)
@@ -131,8 +128,7 @@ namespace Signum.Windows.Extensions.Sample
             bool? dialogResult = login.ShowDialog();
             if (dialogResult == true)
             {
-                UserDN user = result.GetCurrentUser();
-                Thread.CurrentPrincipal = user;
+                UserDN.SetSessionUser(result.GetCurrentUser());
 
                 return result;
             }

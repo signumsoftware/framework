@@ -47,8 +47,6 @@ namespace Signum.Web.Auth
             return RouteHelper.New().Action("Index", "Home");
         };
 
-        public const string SessionUserKey = "user";
-
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveNewUser(string prefix)
         {
@@ -170,27 +168,25 @@ namespace Signum.Web.Auth
 
             else
             {
-            var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
-            if (context.GlobalErrors.Any())
-            {
-                ViewData["Title"] = Resources.ChangePassword;
-                ModelState.FromContext(context);
-                RestoreCleanCurrentUser();
-                return View(AuthClient.ChangePasswordView);
-            }
+                var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
+                if (context.GlobalErrors.Any())
+                {
+                    ViewData["Title"] = Resources.ChangePassword;
+                    ModelState.FromContext(context);
+                    RollbackSessionUserChanges();
+                    return View(AuthClient.ChangePasswordView);
+                }
 
                 string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
-            if (errorPasswordValidation.HasText())
-            {
-                ModelState.AddModelError("password", errorPasswordValidation);
-                RestoreCleanCurrentUser();
-                return View(AuthClient.ChangePasswordView);
-            }
+                if (errorPasswordValidation.HasText())
+                {
+                    ModelState.AddModelError("password", errorPasswordValidation);
+                    RollbackSessionUserChanges();
+                    return View(AuthClient.ChangePasswordView);
+                }
 
                 user = context.Value;
             }
-
-
 
             AuthLogic.ChangePassword(user.UserName,Security.EncodePassword( form[UserMapping.OldPasswordKey]), Security.EncodePassword(form[UserMapping.NewPasswordKey]));
             Login(user.UserName, form[UserMapping.NewPasswordKey], false, null);
@@ -200,11 +196,9 @@ namespace Signum.Web.Auth
 
         }
 
-        private void RestoreCleanCurrentUser()
+        private void RollbackSessionUserChanges()
         {
-            //Restore clean UserDN from database
-            Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).SingleEx();
-            Session[AuthController.SessionUserKey] = Thread.CurrentPrincipal;
+            UserDN.SetSessionUser(Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).SingleEx()); 
         }
 
         public ActionResult ChangePasswordSuccess()
@@ -424,7 +418,7 @@ namespace Signum.Web.Auth
                     return result;
             }
 
-            Thread.CurrentPrincipal = user;
+            UserDN.SetSessionUser(user);
 
             //guardamos una cookie persistente si se ha seleccionado
             if (rememberMe.HasValue && rememberMe.Value)
@@ -500,8 +494,6 @@ namespace Signum.Web.Auth
                         }
                     }
 
-                    Thread.CurrentPrincipal = user;
-
                     System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(AuthClient.CookieName, ticketText)
                     {
                         Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
@@ -533,10 +525,7 @@ namespace Signum.Web.Auth
         {
             var newUser = UserDN.Current.ToLite().Retrieve();
 
-            Thread.CurrentPrincipal = newUser;
-
-            if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Session[SessionUserKey] != null)
-                System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
+            UserDN.SetSessionUser(newUser); 
 
             if (OnUpdatedSessionUser != null)
                 OnUpdatedSessionUser(newUser); 
@@ -544,7 +533,7 @@ namespace Signum.Web.Auth
 
         public static void AddUserSession(UserDN user)
         {
-            System.Web.HttpContext.Current.Session[SessionUserKey] = user;
+            UserDN.SetSessionUser(user);
 
             if (OnUserLogged != null)
                 OnUserLogged();

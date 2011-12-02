@@ -62,21 +62,19 @@ namespace Signum.Engine.Mailing
 
         public static Func<string> OverrideEmailAddress = () => null;
 
-        [ThreadStatic]
-        static string overrideEmailAddressForProcess;
+        static readonly Variable<string> overrideEmailAddressForProcess = Statics.ThreadVariable<string>("overrideEmailAddressForProcess");
         internal static IDisposable OverrideEmailAddressForProcess(string emailAddress)
         {
-            var old = overrideEmailAddressForProcess;
-            overrideEmailAddressForProcess = emailAddress;
-            return new Disposable(() => overrideEmailAddressForProcess = old);
+            var old = overrideEmailAddressForProcess.Value;
+            overrideEmailAddressForProcess.Value = emailAddress;
+            return new Disposable(() => overrideEmailAddressForProcess.Value = old);
         }
 
-        internal static string OnEmailAddress()
+        internal static string OnOverrideEmailAddress()
         {
-            if (overrideEmailAddressForProcess.HasText())
-                return overrideEmailAddressForProcess;
-
-            return OverrideEmailAddress();
+            var oea = overrideEmailAddressForProcess.Value;
+            
+            return oea ?? OverrideEmailAddress();
         }
 
         public static Func<SmtpClient> SmtpClientBuilder;
@@ -347,7 +345,7 @@ namespace Signum.Engine.Mailing
         static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
             EmailUser emailUser = (EmailUser)e.UserState;
-            using (AuthLogic.User(emailUser.User))
+            using (UserDN.Scope(emailUser.User))
             {
                 Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                 if (e.Error != null)
@@ -376,7 +374,7 @@ namespace Signum.Engine.Mailing
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
         {
-            var address = OnEmailAddress();
+            var address = OnOverrideEmailAddress();
 
             if (address == DoNotSend)
                 return null;
@@ -402,7 +400,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN
             {
                 NumLines = emails.Count,
-                OverrideEmailAddress = OnEmailAddress()
+                OverrideEmailAddress = OnOverrideEmailAddress()
             }.Save();
 
             var packLite = package.ToLite();
@@ -428,7 +426,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN
             {
                 NumLines = recipientList.Count,
-                OverrideEmailAddress = EmailLogic.OnEmailAddress()
+                OverrideEmailAddress = EmailLogic.OnOverrideEmailAddress()
             }.Save();
 
             var lite = package.ToLite();

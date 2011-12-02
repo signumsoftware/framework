@@ -14,6 +14,7 @@ using Signum.Entities.Scheduler;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Processes
 {
@@ -119,8 +120,7 @@ namespace Signum.Engine.Processes
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        
-                        using (AuthLogic.User(executingProcess.User.Retrieve()))
+                        using (UserDN.Scope(executingProcess.User.Retrieve()))
                         ExecuteLine(pl, package);
 
                         pl.FinishTime = TimeZoneManager.Now;
