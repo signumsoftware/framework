@@ -183,7 +183,8 @@ namespace Signum.Engine.Processes
                 foreach (var pe in pes)
                 {
                     pe.SetAsQueue();
-                    pe.Save();
+                    using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                        pe.Save();
                 }
 
                 Task.Factory.StartNew(DoWork, TaskCreationOptions.LongRunning); 
@@ -230,7 +231,8 @@ namespace Signum.Engine.Processes
                 foreach (var pe in pes)
                 {
                     pe.SetAsQueue();
-                    pe.Save();
+                    using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                        pe.Save();
                 }
 
                 RefreshPlan();
@@ -284,12 +286,13 @@ namespace Signum.Engine.Processes
                     data = processAlgorithm.CreateData(args);
                 }
 
-                return new ProcessExecutionDN(process)
-                {
-                    User = UserDN.Current.ToLite(),
-                    State = ProcessState.Created,
-                    ProcessData = data
-                }.Save();
+                using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                    return new ProcessExecutionDN(process)
+                    {
+                        User = UserDN.Current.ToLite(),
+                        State = ProcessState.Created,
+                        ProcessData = data
+                    }.Save();
             }
 
 
@@ -372,7 +375,6 @@ namespace Signum.Engine.Processes
                     Execute = (pe, _) =>
                     {
                         pe.SetAsQueue();
-                        pe.Save();
                     }
                 }.Register();
 
@@ -461,6 +463,7 @@ namespace Signum.Engine.Processes
         public void ProgressChanged(decimal progress)
         {
             Execution.Progress = progress;
+            using (OperationLogic.AllowSave<ProcessExecutionDN>())
             Execution.Save();
         }
 
@@ -473,7 +476,8 @@ namespace Signum.Engine.Processes
                 Execution.State = ProcessState.Executing;
                 Execution.ExecutionStart = TimeZoneManager.Now;
                 Execution.Progress = 0;
-                Execution.Save();
+                using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                    Execution.Save();
 
                 try
                 {
@@ -484,13 +488,15 @@ namespace Signum.Engine.Processes
                         Execution.ExecutionEnd = TimeZoneManager.Now;
                         Execution.State = ProcessState.Finished;
                         Execution.Progress = null;
-                        Execution.Save();
+                        using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                            Execution.Save();
                     }
                     else
                     {
                         Execution.SuspendDate = TimeZoneManager.Now;
                         Execution.State = ProcessState.Suspended;
-                        Execution.Save();
+                        using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                            Execution.Save();
                     }
 
                 }
@@ -499,7 +505,8 @@ namespace Signum.Engine.Processes
                     Execution.State = ProcessState.Error;
                     Execution.ExceptionDate = TimeZoneManager.Now;
                     Execution.Exception = e.Message;
-                    Execution.Save();
+                    using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                        Execution.Save();
                 }
             }
         }

@@ -49,6 +49,7 @@ namespace Signum.Entities.Operations
             set { Set(ref end, value, () => End); }
         }
 
+        [SqlDbType(Size=int.MaxValue)]
         string exception;
         public string Exception
         {
