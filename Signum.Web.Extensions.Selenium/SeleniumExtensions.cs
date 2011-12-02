@@ -224,9 +224,19 @@ namespace Signum.Web.Selenium
             selenium.Click(EntityButtonLocator(idButton));
         }
 
+        public static void EntityMenuConstrucFromClick(this ISelenium selenium, Enum construcFromKey)
+        {
+            selenium.EntityMenuOptionClick("tmConstructors", construcFromKey.GetType().Name + "_" + construcFromKey.ToString());
+        }
+
         public static void EntityMenuOptionClick(this ISelenium selenium, string menuId, string optionId)
         {
             selenium.Click(EntityMenuOptionLocator(menuId, optionId));
+        }
+
+        public static bool EntityMenuConstrucFromEnabled(this ISelenium selenium, Enum construcFromKey)
+        {
+            return selenium.EntityMenuOptionEnabled("tmConstructors", construcFromKey.GetType().Name + "_" + construcFromKey.ToString());
         }
 
         public static bool EntityMenuOptionEnabled(this ISelenium selenium, string menuId, string optionId)
