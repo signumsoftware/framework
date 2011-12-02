@@ -51,7 +51,7 @@
             $paramName$ => Database.Query<$returnType$>().Where($paramName2$=>$paramName2$.$type$ == $paramName$); 
         public static IQueryable<$returnType$> $methodName$(this $type$ $paramName$)
         {
-            return $methodName$Expression.Invoke($paramName$);
+            return $methodName$Expression.Evaluate($paramName$);
         }]]>
       </Code>
     </Snippet>
