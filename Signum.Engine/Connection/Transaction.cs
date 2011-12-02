@@ -15,7 +15,7 @@ namespace Signum.Engine
     /// <summary>
     /// Allows easy nesting of transaction using 'using' statement
     /// Keeps an implicit stack of Transaction objects over the StackTrace of the current Thread
-    /// and an explicit ThreadStatic stack of RealTransaction objects.
+    /// and an explicit stack of RealTransaction objects on thread variable.
     /// Usually, just the first Transaccion creates a RealTransaction, but you can create more using 
     /// forceNew = true
     /// All Transaction can cancel but only the one that created the RealTransaction can Commit 
@@ -34,8 +34,7 @@ namespace Signum.Engine
             UnexpectedBehaviourCallback("TRANSACTION ROLLBACKED!", new StackTrace(2, true));
         }
 
-        [ThreadStatic]
-        static Dictionary<BaseConnection, ICoreTransaction> currents;
+        static readonly Variable<Dictionary<BaseConnection, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<BaseConnection, ICoreTransaction>>("transactions");
 
         bool commited;
         ICoreTransaction coreTransaction; 
@@ -361,28 +360,29 @@ namespace Signum.Engine
         {
             BaseConnection bc = AssertConnection();
 
-            ICoreTransaction parent = currents.TryGetC(bc);
+            var dic = currents.Value;
+            ICoreTransaction parent = dic.TryGetC(bc);
             if (parent == null || forceNew)
             {
-                currents[bc] = coreTransaction = new RealTransaction(parent, null);
+                dic[bc] = coreTransaction = new RealTransaction(parent, null);
             }
             else
             {
                 AssertTransaction();
-                currents[bc] = coreTransaction = new FakedTransaction(parent);
+                dic[bc] = coreTransaction = new FakedTransaction(parent);
             }
         }
     
         Transaction(BaseConnection bc, ICoreTransaction transaction)
         {
-            currents[bc] = coreTransaction = transaction;
+            currents.Value[bc] = coreTransaction = transaction;
         }
 
         public static Transaction None()
         {
             BaseConnection bc = AssertConnection();
 
-            ICoreTransaction parent = currents.TryGetC(bc);
+            ICoreTransaction parent = currents.Value.TryGetC(bc);
 
             return new Transaction(bc, new NoneTransaction(parent));
         }
@@ -404,15 +404,15 @@ namespace Signum.Engine
         {
             BaseConnection bc = AssertConnection();
 
-            ICoreTransaction parent = currents.TryGetC(bc);
+            ICoreTransaction parent = currents.Value.TryGetC(bc);
 
             return new Transaction(bc, new RealTransaction(parent, isolationLevel));
         }
 
         private static BaseConnection AssertConnection()
         {
-            if (currents == null)
-                currents = new Dictionary<BaseConnection, ICoreTransaction>();
+            if (currents.Value == null)
+                currents.Value = new Dictionary<BaseConnection, ICoreTransaction>();
 
             BaseConnection bc = ConnectionScope.Current;
 
@@ -430,7 +430,7 @@ namespace Signum.Engine
 
         static ICoreTransaction GetCurrent()
         {
-            return currents.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
+            return currents.Value.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
         }
 
         public static event Action RealCommit
@@ -452,7 +452,7 @@ namespace Signum.Engine
 
         public static bool HasTransaction
         {
-            get { return currents != null && currents.ContainsKey(ConnectionScope.Current); }
+            get { return currents.Value != null && currents.Value.ContainsKey(ConnectionScope.Current); }
         }
 
         public static SqlConnection CurrentConnection
@@ -508,17 +508,17 @@ namespace Signum.Engine
             ICoreTransaction parent = coreTransaction.Finish();
 
             if (parent == null)
-                currents.Remove(ConnectionScope.Current);
+                currents.Value.Remove(ConnectionScope.Current);
             else
-                currents[ConnectionScope.Current] = parent;
+                currents.Value[ConnectionScope.Current] = parent;
         }
 
         public static void ForceClean()
         {
-            if (currents != null && currents.Count != 0)
+            if (currents != null && currents.Value.Count != 0)
             {
                 UnexpectedBehaviourCallback("DIRTY TRANSACTIONS FOUND!", new StackTrace(1));
-                currents.Clear();
+                currents.Value.Clear();
             }
         }
     }

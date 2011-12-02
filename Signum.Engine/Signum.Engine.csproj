@@ -82,7 +82,6 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Administrator.cs" />
-    <Compile Include="Connection\CommandTimeout.cs" />
     <Compile Include="Connection\Connection.cs" />
     <Compile Include="Connection\ConnectionScope.cs" />
     <Compile Include="Connection\Executor.cs" />

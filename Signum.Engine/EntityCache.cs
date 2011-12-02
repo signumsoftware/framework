@@ -80,8 +80,10 @@ namespace Signum.Engine
         }
 
 
-        [ThreadStatic]
-        private static ImmutableStack<RealEntityCache> stack;
+        static readonly Variable<RealEntityCache> currentCache = Statics.ThreadVariable<RealEntityCache>("cache");
+
+
+        RealEntityCache oldCache;
 
         private bool facked = false;
 
@@ -89,11 +91,11 @@ namespace Signum.Engine
 
         public EntityCache(bool forceNew)
         {
-            if (stack == null)
-                stack = ImmutableStack<RealEntityCache>.Empty;
-
-            if (stack.IsEmpty || forceNew)
-                stack = stack.Push(new RealEntityCache());
+            if (currentCache.Value == null || forceNew)
+            {
+                oldCache = currentCache.Value;
+                currentCache.Value = new RealEntityCache();
+            }
             else
                 facked = true;
         }
@@ -102,21 +104,22 @@ namespace Signum.Engine
         {
             get
             {
-                if (stack.IsEmpty)
+                var val = currentCache.Value;
+                if (val == null)
                     throw new InvalidOperationException("No EntityCache context has been created");
 
-                return stack.Peek(); 
+                return val;
             }
         }
 
-        public static bool Created { get { return stack != null && !stack.IsEmpty; } }
+        public static bool Created { get { return currentCache.Value != null; } }
 
-        internal static bool HasRetriever { get { return stack != null && !stack.IsEmpty && Current.HasRetriever; } }
+        internal static bool HasRetriever { get { return currentCache.Value != null && currentCache.Value.HasRetriever; } }
 
         public void Dispose()
         {
             if (!facked)
-                stack = stack.Pop();
+                currentCache.Value = oldCache;
         }
 
         public static void AddMany<T>(params T[] objects)

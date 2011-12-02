@@ -12,13 +12,12 @@ namespace Signum.Entities
         public static TimeZoneMode Mode { get; set; }
 
         //TimeZoneInfo.Local is read-only. For ASP.Net or other server providers where local time is needed. 
-        [ThreadStatic]
-        static TimeZoneInfo overrideTimeZone;
+        static readonly Variable<TimeZoneInfo> overrideTimeZone = Statics.SessionVariable<TimeZoneInfo>("timeZone");
 
         public static TimeZoneInfo OverrideTimeZone
         {
-            get { return overrideTimeZone; }
-            set { overrideTimeZone = value; }
+            get { return overrideTimeZone.Value; }
+            set { overrideTimeZone.Value = value; }
         }
 
         public static DateTime Now
