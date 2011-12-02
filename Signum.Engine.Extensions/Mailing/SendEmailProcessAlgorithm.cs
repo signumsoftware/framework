@@ -25,7 +25,7 @@ namespace Signum.Engine.Mailing
             {
                 NumLines = messages.Count,
                 Name = args.TryGetArgC<string>(1),
-                OverrideEmailAddress = EmailLogic.OnEmailAddress()
+                OverrideEmailAddress = EmailLogic.OnOverrideEmailAddress()
             }.Save();
 
             messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()

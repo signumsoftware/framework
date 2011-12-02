@@ -6,7 +6,6 @@ using System.ServiceModel;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using System.Reflection;
-using System.Threading;
 using Signum.Entities.Authorization;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
@@ -34,13 +33,12 @@ namespace Signum.Services
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, 
         ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer
     {
-        protected UserDN currentUser;
-
         protected override T Return<T>(MethodBase mi, string description, Func<T> function)
         {
             try
             {
-                using (AuthLogic.User(currentUser))
+                using (ScopeSessionFactory.OverrideSession(session))
+                using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
                 {
                     FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
 
@@ -51,6 +49,10 @@ namespace Signum.Services
             {
                 throw new FaultException(e.Message);
             }
+            finally
+            {
+                Statics.AssertCleanThreadContext();
+            }
         }
 
         #region ILoginServer Members
@@ -58,7 +60,10 @@ namespace Signum.Services
         {
             try
             {
-                currentUser = AuthLogic.Login(username, passwordHash);
+                using (ScopeSessionFactory.OverrideSession(session))
+                {
+                    UserDN.SetSessionUser(AuthLogic.Login(username, passwordHash));
+                }
             }
             catch (Exception e)
             {
@@ -87,7 +92,10 @@ namespace Signum.Services
         {
             try
             {
-                currentUser = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
+                using (ScopeSessionFactory.OverrideSession(session))
+                {
+                    UserDN.SetSessionUser(AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash));
+                }
             }
             catch (Exception e)
             {
@@ -97,22 +105,23 @@ namespace Signum.Services
 
         public void Logout()
         {
-            this.currentUser = null;
+            using (ScopeSessionFactory.OverrideSession(session))
+            {
+                UserDN.SetSessionUser(null);
+            }
         }
 
         public UserDN GetCurrentUser()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => currentUser);
+              () => UserDN.Current);
         }
 
 
         public string PasswordNearExpired()
         {
-
             return Return(MethodInfo.GetCurrentMethod(),
              () => AuthLogic.OnLoginMessage());
-            
         }
 
         #endregion

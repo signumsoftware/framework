@@ -135,7 +135,7 @@ namespace Signum.Engine.Cache
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !TemporallyDisabled; }
+                get { return !GloballyDisabled && !tempDisabled.Value; }
             }
 
             public override bool IsComplete
@@ -284,7 +284,7 @@ namespace Signum.Engine.Cache
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !disabledThis && !TemporallyDisabled; }
+                get { return !GloballyDisabled && !disabledThis && !tempDisabled.Value; }
             }
 
             public override bool IsComplete
@@ -366,14 +366,13 @@ namespace Signum.Engine.Cache
 
         public static bool GloballyDisabled { get; set; }
 
-        [ThreadStatic]
-        static bool TemporallyDisabled;
+        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
 
         public static IDisposable Disable()
         {
-            var oldDisabled = TemporallyDisabled;
-            TemporallyDisabled = true;
-            return new Disposable(() => TemporallyDisabled = oldDisabled); 
+            if (tempDisabled.Value) return null;
+            tempDisabled.Value = true;
+            return new Disposable(() => tempDisabled.Value = false); 
         }
 
         public static void Start(SchemaBuilder sb)

@@ -212,22 +212,12 @@ namespace Signum.Engine.Authorization
                     throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
             }
 
-            return User(user);
+            return UserDN.Scope(user);
         }
 
         public static UserDN RetrieveUser(string username)
         {
             return Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
-        }
-
-        public static IDisposable User(UserDN user)
-        {
-            IPrincipal old = Thread.CurrentPrincipal;
-            Thread.CurrentPrincipal = user;
-            return new Disposable(() =>
-            {
-                Thread.CurrentPrincipal = old;
-            });
         }
 
         public static IEnumerable<Lite<RoleDN>> RolesInOrder()
@@ -264,26 +254,25 @@ namespace Signum.Engine.Authorization
             set { gloaballyEnabled = value; }
         }
 
-        [ThreadStatic]
-        static bool temporallyDisabled;
+        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");  
 
         public static IDisposable Disable()
         {
-            bool lastValue = temporallyDisabled;
-            temporallyDisabled = true;
-            return new Disposable(() => temporallyDisabled = lastValue);
+            if (tempDisabled.Value) return null;
+            tempDisabled.Value = true;
+            return new Disposable(() => tempDisabled.Value = false);
         }
 
         public static IDisposable Enable()
         {
-            bool lastValue = temporallyDisabled;
-            temporallyDisabled = false;
-            return new Disposable(() => temporallyDisabled = lastValue);
+            if (!tempDisabled.Value) return null;
+            tempDisabled.Value = false;
+            return new Disposable(() => tempDisabled.Value = true);
         }
 
         public static bool IsEnabled
         {
-            get { return !temporallyDisabled && gloaballyEnabled; }
+            get { return !tempDisabled.Value && gloaballyEnabled; }
         }
 
         public static UserDN Login(string username, string passwordHash)
@@ -449,6 +438,11 @@ namespace Signum.Engine.Authorization
                 return AuthLogic.LoginMessage();
 
             return null;
+        }
+
+        public static bool IsLogged()
+        {
+            return UserDN.Current != null && !UserDN.Current.Is(AnonymousUser);
         }
     }
 }

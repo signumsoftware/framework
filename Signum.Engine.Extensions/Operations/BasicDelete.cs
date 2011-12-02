@@ -62,13 +62,15 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
+            
             LogOperationDN log = new LogOperationDN
             {
                 Operation = EnumLogic<OperationDN>.ToEntity(Key),
                 Start = TimeZoneManager.Now,
                 User = UserDN.Current.ToLite()
             };
-
+			using (OperationLogic.AllowSave<T>())
+{
             try
             {
                 using (Transaction tr = new Transaction())
@@ -81,7 +83,7 @@ namespace Signum.Engine.Operations
 
                     log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
                     log.End = TimeZoneManager.Now;
-                    using (AuthLogic.User(AuthLogic.SystemUser))
+                    using (UserDN.Scope(AuthLogic.SystemUser))
                         log.Save();
 
                     tr.Commit();
@@ -103,14 +105,15 @@ namespace Signum.Engine.Operations
                         User = log.User
                     };
 
-                    using (AuthLogic.User(AuthLogic.SystemUser))
-                        log.Save();
+                        using (UserDN.Scope(AuthLogic.SystemUser))
+                            log.Save();
 
                     tr2.Commit();
                 }
 
                 throw;
             }
+        }
         }
 
         protected virtual void OnDelete(T entity, object[] args)

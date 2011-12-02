@@ -64,7 +64,7 @@ namespace ASP
         public override void Execute()
         {
 
- if (Session[AuthController.SessionUserKey] != null)
+ if (UserDN.Current != null && !UserDN.Current.Is(Signum.Engine.Authorization.AuthLogic.AnonymousUser) )
 {
 
 WriteLiteral("    ");
@@ -72,7 +72,7 @@ WriteLiteral("    ");
 WriteLiteral("Usuario: <span class=\"sf-auth-username\">");
 
 
-                                         Write(Session[AuthController.SessionUserKey]);
+                                         Write(UserDN.Current);
 
 WriteLiteral("</span>\r\n");
 

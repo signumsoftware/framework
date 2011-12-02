@@ -1,6 +1,7 @@
 ﻿@using Signum.Web.Auth
 @using Signum.Web.Combine
 @using Signum.Entities.Authorization
+@using Signum.Engine.Authorization
 @using Signum.Web.Extensions.Sample
 
 <!doctype html>
@@ -45,7 +46,7 @@
 
         <div id="main">
             <div id="menu">
-                @if (UserDN.Current != null)
+                @if (UserDN.Current != null && !UserDN.Current.Is(AuthLogic.AnonymousUser))
                 {
                 <div class="box menu">
                     <h2>Menú</h2>
