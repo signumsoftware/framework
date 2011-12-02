@@ -19,7 +19,6 @@ namespace Signum.Entities.Logging
             this.ExceptionMessage = ex.Message;
             this.StackTrace = ex.StackTrace;
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
-            this.User = UserDN.Current;
         }
 
         DateTime creationDate = TimeZoneManager.Now;
@@ -88,8 +87,8 @@ namespace Signum.Entities.Logging
             set { Set(ref threadId, value, () => ThreadId); }
         }
 
-        UserDN user;
-        public UserDN User
+        Lite<UserDN> user;
+        public Lite<UserDN> User
         {
             get { return user; }
             set { Set(ref user, value, () => User); }
