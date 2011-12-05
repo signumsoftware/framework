@@ -68,7 +68,7 @@ namespace Signum.Engine.Files
                 sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
 
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebDownload).NiceName(), "Download");
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
         }
 

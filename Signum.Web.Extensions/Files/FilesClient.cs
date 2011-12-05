@@ -112,7 +112,7 @@ namespace Signum.Web.Files
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebDownload),
                        col => (help, obj) => ((WebDownload)obj).FullWebPath == null ? null :
-                          new MvcHtmlString("<a href='{0}'>Download</a>".Formato(RouteHelper.New().Content(((WebDownload)obj).FullWebPath)))
+                          new MvcHtmlString("<a href='{0}'>{1}</a>".Formato(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), typeof(WebDownload).NiceName()))
                 ));
 
             }

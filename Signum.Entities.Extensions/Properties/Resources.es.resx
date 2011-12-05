@@ -1395,6 +1395,9 @@
   <data name="EmailMessageDN_Cc" xml:space="preserve">
     <value>CC</value>
   </data>
+  <data name="WebDownload" xml:space="preserve">
+    <value>Descargar</value>
+  </data>
   <data name="WebImage" xml:space="preserve">
     <value>Imagen</value>
   </data>

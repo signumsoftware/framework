@@ -297,4 +297,10 @@
   <data name="ControlPanelDN_PartTitleMustBeSpecifiedForListParts" xml:space="preserve">
     <value>Part title must be specified for list parts</value>
   </data>
+  <data name="WebDownload" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="WebImage" xml:space="preserve">
+    <value>Image</value>
+  </data>
 </root>
