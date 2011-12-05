@@ -65,8 +65,8 @@ namespace Signum.Web.Chart
 
                 ButtonBarEntityHelper.RegisterEntityButtons<UserChartDN>((ctx, entity) =>
                 {
-                    var buttons = new List<ToolBarButton> {};
-                    
+                    var buttons = new List<ToolBarButton> { };
+
                     if (!entity.IsNew)
                     {
                         buttons.Add(new ToolBarButton
@@ -132,7 +132,7 @@ namespace Signum.Web.Chart
             {
                 if (string.IsNullOrEmpty(ctx.Input))
                     return ctx.None();
-                 
+
                 return ctx.Input.ToEnum<OrderType>();
             })
             .SetProperty(ct => ct.OrderPriority, ctx =>
@@ -260,16 +260,16 @@ namespace Signum.Web.Chart
             var v2Converter = chart.Value2.Converter();
 
             switch (chart.ChartResultType)
-            { 
+            {
                 case ChartResultType.TypeValue:
                     return new
                     {
-                        labels = new 
+                        labels = new
                         {
                             dimension1 = chart.Dimension1.GetTitle(),
-                            value1 = chart.Value1.GetTitle() 
+                            value1 = chart.Value1.GetTitle()
                         },
-                        serie = chart.GroupResults ? 
+                        serie = chart.GroupResults ?
                             resultTable.Rows.Select(r => new Dictionary<string, object>
                             { 
                                 { "dimension1", d1Converter(r[0]) }, 
@@ -283,8 +283,9 @@ namespace Signum.Web.Chart
                             }).ToList()
                     };
                 case ChartResultType.TypeTypeValue:
-                    var dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
-                    var dic1dic0 = resultTable.Rows.AgGroupToDictionary(r=>r[1], gr=>gr.ToDictionary(r=>r[0], r=>r[2]));
+                    object NullValue = "- None -";
+                    List<object> dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
+                    Dictionary<object, Dictionary<object, object>> dic1dic0 = resultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue, r => r[2]));
 
                     return new
                     {
@@ -295,10 +296,10 @@ namespace Signum.Web.Chart
                             value1 = chart.Value1.GetTitle()
                         },
                         dimension1 = dimension1Values.Select(d1Converter).ToList(),
-                        series = dic1dic0.Select(kvp =>new
+                        series = dic1dic0.Select(kvp => new
                         {
-                            dimension2 = d2Converter(kvp.Key),
-                            values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1)).ToList(),
+                            dimension2 = d2Converter(kvp.Key == NullValue ? null : kvp.Key),
+                            values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1 ?? NullValue)).ToList(),
                         }).ToList()
                     };
 
@@ -311,11 +312,11 @@ namespace Signum.Web.Chart
                             dimension1 = chart.Dimension1.GetTitle(),
                             dimension2 = chart.Dimension2.GetTitle(),
                         },
-                        points = resultTable.Rows.Select(r => new 
+                        points = resultTable.Rows.Select(r => new
                         {
                             value1 = v1Converter(r[2]),
                             dimension1 = d1Converter(r[0]),
-                            dimension2 = d2Converter(r[1]) 
+                            dimension2 = d2Converter(r[1])
                         }).ToList()
                     };
 
@@ -343,12 +344,12 @@ namespace Signum.Web.Chart
             }
         }
 
-        private static Func<object,object> Converter(this ChartTokenDN token)
+        private static Func<object, object> Converter(this ChartTokenDN token)
         {
             if (token == null)
                 return null;
 
-            if (typeof(Lite).IsAssignableFrom( token.Type))
+            if (typeof(Lite).IsAssignableFrom(token.Type))
             {
                 return p =>
                 {
@@ -411,7 +412,7 @@ namespace Signum.Web.Chart
 
             if (type == chart.ChartType)
                 css += " sf-chart-img-curr";
-            
+
             return css;
         }
     }
