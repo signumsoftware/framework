@@ -62,8 +62,6 @@ namespace ASP
         public override void Execute()
         {
 
-WriteLiteral("\r\n");
-
 
  using (var e = Html.TypeContext<ExceptionLogDN>())
 {
@@ -118,17 +116,65 @@ Write(Html.ValueLine(e, f => f.UserHostName));
 
                                            
     
-Write(Html.ValueLine(e, f => f.QueryString, vl => vl.ValueLineType = ValueLineType.TextArea));
+    if (e.ReadOnly)
+    {
 
-                                                                                           
+WriteLiteral("        <h3>\r\n            QueryString</h3>\r\n");
+
+
+
+WriteLiteral("        <pre>");
+
+
+        Write(e.Value.QueryString);
+
+WriteLiteral("</pre>\r\n");
+
+
     
-Write(Html.ValueLine(e, f => f.Form, vl => vl.ValueLineType = ValueLineType.TextArea));
 
-                                                                                    
-    
-Write(Html.ValueLine(e, f => f.Session, vl => vl.ValueLineType = ValueLineType.TextArea));
+WriteLiteral("        <h3>\r\n            Form</h3>\r\n");
 
-                                                                                           
+
+
+WriteLiteral("        <pre>");
+
+
+        Write(e.Value.Form);
+
+WriteLiteral("</pre>\r\n");
+
+
+
+
+WriteLiteral("        <h3>\r\n            Session</h3>\r\n");
+
+
+
+WriteLiteral("        <pre>");
+
+
+        Write(e.Value.Session);
+
+WriteLiteral("</pre>\r\n");
+
+
+    }
+    else
+    {
+        
+   Write(Html.ValueLine(e, f => f.QueryString, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                               
+        
+   Write(Html.ValueLine(e, f => f.Form, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                        
+        
+   Write(Html.ValueLine(e, f => f.Session, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                             
+    }  
 
     
 Write(Html.EntityLine(e, f => f.User));
@@ -154,7 +200,7 @@ WriteLiteral("</pre>\r\n");
 
 
 
-WriteLiteral("    <h3>StackTrace</h3>\r\n");
+WriteLiteral("    <h3>\r\n        StackTrace</h3>\r\n");
 
 
 
