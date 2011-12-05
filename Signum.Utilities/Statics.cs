@@ -33,13 +33,17 @@ namespace Signum.Utilities
             }
         }
 
-        public static void AssertCleanThreadContext()
+        public static void CleanThreadContextAndAssert()
         {
-            foreach (var item in threadVariables)
+            string errors = threadVariables.Values.Where(v => !v.IsClean).ToString(v => "{0} contains the non-default value {1}".Formato(v.Name, v.UntypedValue), "\r\n");
+
+            foreach (var v in threadVariables.Values)
             {
-                if (!item.Value.IsClean)
-                    throw new InvalidOperationException("The thread variable '{0}' contains the non-default value '{1}'".Formato(item.Value.Name, item.Value.UntypedValue));
+                v.Clean();
             }
+
+            if (errors.HasText())
+                throw new InvalidOperationException("The thread variable \r\n" + errors);
         }
 
         class ThreadLocalVariable<T> : Variable<T>
@@ -83,6 +87,7 @@ namespace Signum.Utilities
         string Name { get; }
         object UntypedValue { get; set; }
         bool IsClean {get;}
+        void Clean();
     }
 
     public abstract class Variable<T> : IUntypedVariable
@@ -126,6 +131,11 @@ namespace Signum.Utilities
 
                 return false;
             }
+        }
+
+        public void Clean()
+        {
+            Value = default(T);
         }
     }
 

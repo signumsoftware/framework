@@ -40,7 +40,7 @@ namespace Signum.Services
             }
             finally
             {
-                Statics.AssertCleanThreadContext();
+                Statics.CleanThreadContextAndAssert();
             }
         }
 

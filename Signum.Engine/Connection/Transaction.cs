@@ -512,14 +512,5 @@ namespace Signum.Engine
             else
                 currents.Value[ConnectionScope.Current] = parent;
         }
-
-        public static void ForceClean()
-        {
-            if (currents != null && currents.Value.Count != 0)
-            {
-                UnexpectedBehaviourCallback("DIRTY TRANSACTIONS FOUND!", new StackTrace(1));
-                currents.Value.Clear();
-            }
-        }
     }
 }
