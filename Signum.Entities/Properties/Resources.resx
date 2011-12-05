@@ -339,4 +339,16 @@
   <data name="TheNumberOf0IsBeingMultipliedBy1" xml:space="preserve">
     <value>The number of {0} is being multiplied by {1}</value>
   </data>
+  <data name="FilterOperation_NotContains" xml:space="preserve">
+    <value>not contains</value>
+  </data>
+  <data name="FilterOperation_NotEndsWith" xml:space="preserve">
+    <value>not ends with</value>
+  </data>
+  <data name="FilterOperation_NotLike" xml:space="preserve">
+    <value>not like</value>
+  </data>
+  <data name="FilterOperation_NotStartsWith" xml:space="preserve">
+    <value>not starts with</value>
+  </data>
 </root>

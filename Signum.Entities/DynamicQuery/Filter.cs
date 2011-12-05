@@ -80,6 +80,10 @@ namespace Signum.Entities.DynamicQuery
                 case FilterOperation.StartsWith: return Expression.Call(left, miStartsWith, right);
                 case FilterOperation.EndsWith: return Expression.Call(left, miEndsWith, right);
                 case FilterOperation.Like: return Expression.Call(miLike, left, right);
+                case FilterOperation.NotContains: return Expression.Not(Expression.Call(left, miContains, right));
+                case FilterOperation.NotStartsWith: return Expression.Not(Expression.Call(left, miStartsWith, right));
+                case FilterOperation.NotEndsWith: return Expression.Not(Expression.Call(left, miEndsWith, right));
+                case FilterOperation.NotLike: return Expression.Not(Expression.Call(miLike, left, right));
                 default:
                     throw new InvalidOperationException("Unknown operation {0}".Formato(Operation));
             }
@@ -104,6 +108,10 @@ namespace Signum.Entities.DynamicQuery
         StartsWith,
         EndsWith,
         Like,
+        NotContains,
+        NotStartsWith,
+        NotEndsWith,
+        NotLike,
     }
 
     public enum FilterType

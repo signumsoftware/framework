@@ -421,6 +421,42 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to not contains.
+        /// </summary>
+        public static string FilterOperation_NotContains {
+            get {
+                return ResourceManager.GetString("FilterOperation_NotContains", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to not ends with.
+        /// </summary>
+        public static string FilterOperation_NotEndsWith {
+            get {
+                return ResourceManager.GetString("FilterOperation_NotEndsWith", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to not like.
+        /// </summary>
+        public static string FilterOperation_NotLike {
+            get {
+                return ResourceManager.GetString("FilterOperation_NotLike", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to not starts with.
+        /// </summary>
+        public static string FilterOperation_NotStartsWith {
+            get {
+                return ResourceManager.GetString("FilterOperation_NotStartsWith", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to starts with.
         /// </summary>
         public static string FilterOperation_StartsWith {
