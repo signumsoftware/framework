@@ -281,9 +281,14 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception e)
             {
-                emailMessage.Exception = new ExceptionLogDN(e) { User = UserDN.Current.ToLite() }.Save().ToLite();
-                emailMessage.State = EmailState.SentError;
-                emailMessage.Save();
+                using (Transaction tr = new Transaction(true))
+                {
+                    emailMessage.Exception = new ExceptionLogDN(e) { User = UserDN.Current.ToLite() }.Save().ToLite();
+                    emailMessage.State = EmailState.SentError;
+                    emailMessage.Save();
+                    tr.Commit();
+                }
+
                 throw;
             }
         }

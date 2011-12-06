@@ -144,8 +144,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref newsletter, value, () => Newsletter); }
         }
 
-        ExceptionLogDN exception;
-        public ExceptionLogDN Exception
+        Lite<ExceptionLogDN> exception;
+        public Lite<ExceptionLogDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

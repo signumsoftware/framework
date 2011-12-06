@@ -135,7 +135,7 @@ namespace Signum.Engine.Processes
                     {
                         using (Transaction tr = new Transaction(true))
                         {
-                            pl.Exception = new ExceptionLogDN(e) { Enviroment = "PACKAGE LINE" };
+                            pl.Exception = new ExceptionLogDN(e);
                             pl.Save();
                             tr.Commit();
                         }

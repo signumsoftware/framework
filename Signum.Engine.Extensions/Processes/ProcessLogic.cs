@@ -501,7 +501,6 @@ namespace Signum.Engine.Processes
                     Execution.ExceptionDate = TimeZoneManager.Now;
                     Execution.Exception = new ExceptionLogDN(e)
                     {
-                        Enviroment = "PROCESS",
                         ActionName = Execution.Process.ToString()
                     }.Save().ToLite();
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())

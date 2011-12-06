@@ -15,6 +15,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
+using Signum.Entities.Logging;
 
 namespace Signum.Engine.Mailing
 {
@@ -25,7 +26,7 @@ namespace Signum.Engine.Mailing
             public ResultRow Row; 
             public Lite<NewsletterDeliveryDN> Send;
             public string Email;
-            public string Error;
+            public Exception Error;
         }
 
         public IProcessDataDN CreateData(object[] args)
@@ -125,7 +126,7 @@ namespace Signum.Engine.Mailing
                         catch (Exception ex)
                         {
                             numErrors++;
-                            s.Error = ex.Message;
+                            s.Error = ex;
                         }
                     }
                 });
@@ -142,15 +143,16 @@ namespace Signum.Engine.Mailing
                     if (numErrors != 0)
                         newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
 
-                    var failed = group.Extract(sl => sl.Error.HasText()).GroupBy(sl => sl.Error, sl => sl.Send);
+                    var failed = group.Extract(sl => sl.Error != null).GroupBy(sl => sl.Error, sl => sl.Send);
                     foreach (var f in failed)
                     {
+                        var exLog = new ExceptionLogDN(f.Key).Save().ToLite();
                         Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
                             .UnsafeUpdate(nd => new NewsletterDeliveryDN
                             {
                                 Sent = true,
                                 SendDate = DateTime.Now.TrimToSeconds(),
-                                Exception = f.Key
+                                Exception = exLog
                             });
                     }
 

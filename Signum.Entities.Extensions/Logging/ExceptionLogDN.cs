@@ -112,15 +112,6 @@ namespace Signum.Entities.Logging
         }
 
         [SqlDbType(Size = 100)]
-        string enviroment;
-        [StringLengthValidator(AllowNulls = false, Max = 100)]
-        public string Enviroment
-        {
-            get { return enviroment; }
-            set { Set(ref enviroment, value, () => Enviroment); }
-        }
-     
-        [SqlDbType(Size = 100)]
         string controllerName;
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string ControllerName
