@@ -115,8 +115,8 @@ namespace Signum.Engine.Scheduler
         {
             if (!avoidReloadPlan.Value && task.Modified.Value)
             {
-                Transaction.RealCommit -= Transaction_RealCommit;
-                Transaction.RealCommit += Transaction_RealCommit;
+                Transaction.PostRealCommit -= Transaction_RealCommit;
+                Transaction.PostRealCommit += Transaction_RealCommit;
             }
         }
 

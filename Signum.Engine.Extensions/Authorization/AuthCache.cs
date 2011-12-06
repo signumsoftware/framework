@@ -241,7 +241,7 @@ namespace Signum.Entities.Authorization
 
         void Schema_Saving(RT rule)
         {
-            Transaction.RealCommit += () => InvalidateCache();
+            Transaction.PostRealCommit += () => InvalidateCache();
         }
 
         internal void GetRules(BaseRulePack<AR> rules, IEnumerable<R> resources)
