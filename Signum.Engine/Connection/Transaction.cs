@@ -41,7 +41,8 @@ namespace Signum.Engine
 
         interface ICoreTransaction
         {
-            event Action RealCommit;
+            event Action PostRealCommit;
+            void CallPostRealCommit();
             event Action PreRealCommit;
             SqlConnection Connection { get; }
             SqlTransaction Transaction { get; }
@@ -65,10 +66,10 @@ namespace Signum.Engine
                 this.parent = parent;
             }
 
-            public event Action RealCommit
+            public event Action PostRealCommit
             {
-                add { parent.RealCommit += value; }
-                remove { parent.RealCommit -= value; }
+                add { parent.PostRealCommit += value; }
+                remove { parent.PostRealCommit -= value; }
             }
 
             public event Action PreRealCommit
@@ -98,6 +99,11 @@ namespace Signum.Engine
             {
                 get { return parent.UserData; }
             }
+
+            public void CallPostRealCommit()
+            {
+
+            }
         }
 
         class RealTransaction : ICoreTransaction
@@ -109,7 +115,7 @@ namespace Signum.Engine
             public DateTime Time { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action RealCommit;
+            public event Action PostRealCommit;
             public event Action PreRealCommit;
 
             IsolationLevel? IsolationLevel;
@@ -148,14 +154,16 @@ namespace Signum.Engine
                     }
 
                     Transaction.Commit();
+                }
+            }
 
-                    while (RealCommit != null)
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
+                {
+                    foreach (Action item in PostRealCommit.GetInvocationList())
                     {
-                        foreach (Action item in RealCommit.GetInvocationList())
-                        {
-                            item();
-                            RealCommit -= item;
-                        }
+                        item();
                     }
                 }
             }
@@ -200,7 +208,7 @@ namespace Signum.Engine
             string savePointName;
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action RealCommit;
+            public event Action PostRealCommit;
             public event Action PreRealCommit;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
@@ -244,13 +252,15 @@ namespace Signum.Engine
                         PreRealCommit -= item;
                     }
                 }
+            }
 
-                while (RealCommit != null)
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
                 {
-                    foreach (Action item in RealCommit.GetInvocationList())
+                    foreach (Action item in PostRealCommit.GetInvocationList())
                     {
                         item();
-                        RealCommit -= item;
                     }
                 }
             }
@@ -272,7 +282,7 @@ namespace Signum.Engine
             public DateTime Time { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action RealCommit;
+            public event Action PostRealCommit;
             public event Action PreRealCommit;
 
             public NoneTransaction(ICoreTransaction parent)
@@ -308,14 +318,16 @@ namespace Signum.Engine
                     }
 
                     //Transaction.Commit();
+                }
+            }
 
-                    while (RealCommit != null)
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
+                {
+                    foreach (Action item in PostRealCommit.GetInvocationList())
                     {
-                        foreach (Action item in RealCommit.GetInvocationList())
-                        {
-                            item();
-                            RealCommit -= item;
-                        }
+                        item();
                     }
                 }
             }
@@ -433,10 +445,10 @@ namespace Signum.Engine
             return currents.Value.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
         }
 
-        public static event Action RealCommit
+        public static event Action PostRealCommit
         {
-            add { GetCurrent().RealCommit += value; }
-            remove { GetCurrent().RealCommit -= value; }
+            add { GetCurrent().PostRealCommit += value; }
+            remove { GetCurrent().PostRealCommit -= value; }
         }
 
         public static event Action PreRealCommit
@@ -511,6 +523,9 @@ namespace Signum.Engine
                 currents.Value.Remove(ConnectionScope.Current);
             else
                 currents.Value[ConnectionScope.Current] = parent;
+
+            if (commited)
+                coreTransaction.CallPostRealCommit();
         }
     }
 }
