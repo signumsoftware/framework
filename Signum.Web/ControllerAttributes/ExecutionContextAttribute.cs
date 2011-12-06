@@ -30,7 +30,6 @@ namespace Signum.Web
 
         public override void OnResultExecuted(ResultExecutedContext filterContext)
         {
-            var oldContext = ExecutionContext.Current;
             IDisposable scope = (IDisposable)filterContext.Controller.ViewData["ExecutionContext"];
             if (scope != null)
             {
