@@ -15,6 +15,7 @@ using Signum.Engine.Extensions.Properties;
 using System.Reflection;
 using Signum.Entities.Authorization;
 using System.Linq.Expressions;
+using Signum.Entities.Logging;
 
 namespace Signum.Engine.Scheduler
 {
@@ -109,7 +110,7 @@ namespace Signum.Engine.Scheduler
                         CustomTask = cte.CustomTask,
                         StartTime = cte.StartTime,
                         EndTime = TimeZoneManager.Now,
-                        Exception = ex.Message,
+                        Exception = new ExceptionLogDN(ex) { User = UserDN.Current.ToLite() }.Save().ToLite(),
                     }.Save();
 
                     tr2.Commit();

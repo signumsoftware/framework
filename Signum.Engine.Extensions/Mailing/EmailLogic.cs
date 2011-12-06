@@ -24,6 +24,7 @@ using System.Web;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Linq.Expressions;
+using Signum.Entities.Logging;
 
 namespace Signum.Engine.Mailing
 {
@@ -38,7 +39,7 @@ namespace Signum.Engine.Mailing
     {
         IEmailOwnerDN To { get; set; }
         string Cc { get; set; }
-        string Bcc { get; set; }  
+        string Bcc { get; set; }
     }
 
     public class EmailModel<T> : IEmailModel
@@ -53,7 +54,7 @@ namespace Signum.Engine.Mailing
         }
 
         public string Cc { get; set; }
-        public string Bcc { get; set; }  
+        public string Bcc { get; set; }
     }
 
     public static class EmailLogic
@@ -73,7 +74,7 @@ namespace Signum.Engine.Mailing
         internal static string OnOverrideEmailAddress()
         {
             var oea = overrideEmailAddressForProcess.Value;
-            
+
             return oea ?? OverrideEmailAddress();
         }
 
@@ -280,7 +281,7 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception e)
             {
-                emailMessage.Exception = e.Message;
+                emailMessage.Exception = new ExceptionLogDN(e) { User = UserDN.Current.ToLite() }.Save().ToLite();
                 emailMessage.State = EmailState.SentError;
                 emailMessage.Save();
                 throw;
@@ -292,7 +293,7 @@ namespace Signum.Engine.Mailing
             //http://weblogs.asp.net/stanleygu/archive/2010/03/31/tip-14-solve-smtpclient-issues-of-delayed-email-and-high-cpu-usage.aspx
             return new SmtpClient()
             {
-                ServicePoint = { MaxIdleTime = 2 } 
+                ServicePoint = { MaxIdleTime = 2 }
             };
         }
 
@@ -335,10 +336,14 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception e)
             {
-                emailMessage.Sent = TimeZoneManager.Now;
-                emailMessage.State = EmailState.SentError;
-                emailMessage.Exception = e.Message;
-                emailMessage.Save();
+                using (var tr = new Transaction(true))
+                {
+                    emailMessage.Sent = TimeZoneManager.Now;
+                    emailMessage.State = EmailState.SentError;
+                    emailMessage.Exception = new ExceptionLogDN(e) { User = UserDN.Current.ToLite() }.Save().ToLite();
+                    emailMessage.Save();
+                    tr.Commit();
+                }
             }
         }
 
@@ -349,11 +354,14 @@ namespace Signum.Engine.Mailing
             {
                 Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                 if (e.Error != null)
+                {
+                    var ex = new ExceptionLogDN(e.Error) { User = UserDN.Current.ToLite() }.Save().ToLite();
                     updater = em => new EmailMessageDN
                     {
-                        Exception = e.Error.Message,
+                        Exception = ex,
                         State = EmailState.SentError
                     };
+                }
                 else
                     updater = em => new EmailMessageDN
                     {
@@ -387,8 +395,8 @@ namespace Signum.Engine.Mailing
                 IsBodyHtml = true,
             };
 
-            if(emailMessage.Bcc.HasText())
-                message.Bcc.AddRange(emailMessage.Bcc.Split( new [] {';'},StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
+            if (emailMessage.Bcc.HasText())
+                message.Bcc.AddRange(emailMessage.Bcc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
             if (emailMessage.Cc.HasText())
                 message.CC.AddRange(emailMessage.Cc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
             return message;
@@ -526,13 +534,13 @@ namespace Signum.Engine.Mailing
                                                                    }).ToDynamic();
 
                 dqm[typeof(ClientCertificationFileDN)] = (from c in Database.Query<ClientCertificationFileDN>()
-                                                          select new 
-                                                          { 
-                                                            Entity = c.ToLite(),
-                                                            c.Id,
-                                                            c.Name,
-                                                            CertFileType = c.CertFileType.NiceToString(),
-                                                            c.FullFilePath
+                                                          select new
+                                                          {
+                                                              Entity = c.ToLite(),
+                                                              c.Id,
+                                                              c.Name,
+                                                              CertFileType = c.CertFileType.NiceToString(),
+                                                              c.FullFilePath
                                                           }).ToDynamic();
 
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += SetCache;

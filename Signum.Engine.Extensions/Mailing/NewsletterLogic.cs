@@ -59,7 +59,7 @@ namespace Signum.Engine.Mailing
                                                          e.Recipient,
                                                          e.Sent,
                                                          e.SendDate,
-                                                         Error = e.Exception.Etc(50)
+                                                         e.Exception
                                                      }).ToDynamic();
 
                 NewsletterGraph.Register();
