@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Operations;
 using Signum.Utilities;
+using Signum.Entities.Logging;
 
 namespace Signum.Entities.Processes
 {
@@ -79,10 +80,8 @@ namespace Signum.Entities.Processes
             set { Set(ref finishTime, value, () => FinishTime); }
         }
 
-
-        [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        public string Exception
+        ExceptionLogDN exception;
+        public ExceptionLogDN Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

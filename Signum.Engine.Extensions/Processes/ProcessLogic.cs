@@ -24,6 +24,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Signum.Engine.Scheduler;
 using System.Linq.Expressions;
+using Signum.Entities.Logging;
 
 namespace Signum.Engine.Processes
 {
@@ -44,8 +45,6 @@ namespace Signum.Engine.Processes
         }
 
         static BlockingCollection<ExecutingProcess> processQueue = new BlockingCollection<ExecutingProcess>();
-
-        static ImmutableAVLTree<int, ExecutingProcess> currentProcesses = ImmutableAVLTree<int, ExecutingProcess>.Empty;
 
         static Dictionary<Enum, IProcessAlgorithm> registeredProcesses = new Dictionary<Enum, IProcessAlgorithm>();
 
@@ -77,7 +76,7 @@ namespace Signum.Engine.Processes
                 AuthLogic.AssertStarted(sb);
                 ProcessExecutionGraph.Register();
 
-                SchedulerLogic.ExecuteTask.Register((ProcessDN p)=>
+                SchedulerLogic.ExecuteTask.Register((ProcessDN p) =>
                     ProcessLogic.Create(p).Execute(ProcessOperation.Execute));
 
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplication;
@@ -114,7 +113,7 @@ namespace Signum.Engine.Processes
 
                 dqm.RegisterExpression((ProcessDN p) => p.Executions());
                 dqm.RegisterExpression((ProcessDN p) => p.LastExecution());
-
+                  
                 PackageLogic.Start(sb, dqm);
             }
         }
@@ -147,7 +146,7 @@ namespace Signum.Engine.Processes
 
         static void Execute(ProcessExecutionDN pe)
         {
-            if (pe.State != ProcessState.Queued || currentProcesses.Contains(pe.Id))
+            if (pe.State != ProcessState.Queued || processQueue.Any(a=>a.Execution.Id == pe.Id))
                 return; 
 
             var ep = new ExecutingProcess
@@ -158,13 +157,13 @@ namespace Signum.Engine.Processes
             };
 
             processQueue.Add(ep);
-            Sync.SafeUpdate(ref currentProcesses, tree => tree.Add(pe.Id, ep));
         }
 
         static void Suspend(int processExecutionId)
         {
-            ExecutingProcess process;
-            if (!currentProcesses.TryGetValue(processExecutionId, out process))
+            ExecutingProcess process = processQueue.SingleOrDefault(p => p.Execution.Id == processExecutionId);
+
+            if (process == null)
                 throw new ApplicationException(Resources.ProcessExecution0IsNotRunningAnymore.Formato(processExecutionId));
 
             process.Suspend();
@@ -186,6 +185,8 @@ namespace Signum.Engine.Processes
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
                         pe.Save();
                 }
+
+                
 
                 Task.Factory.StartNew(DoWork, TaskCreationOptions.LongRunning); 
            
@@ -250,25 +251,20 @@ namespace Signum.Engine.Processes
             registeredProcesses.Add(processKey, logic);
         }
 
+        public static int InitialDelayMiliseconds = 30 * 1000;
+        public static ParallelOptions ParallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 }; 
+
         static void DoWork()
         {
-            foreach (var ep in processQueue.GetConsumingEnumerable())
+            Thread.Sleep(InitialDelayMiliseconds);
+
+            Parallel.ForEach(processQueue.GetConsumingEnumerable(), ParallelOptions, ep =>
             {
-                Task.Factory.StartNew(() =>
+                using (UserDN.Scope(AuthLogic.SystemUser))
                 {
-                    using (UserDN.Scope(AuthLogic.SystemUser))
-                    {
-                        try
-                        {
-                            ep.Execute();
-                        }
-                        finally
-                        {
-                            Sync.SafeUpdate(ref currentProcesses, tree => tree.Remove(ep.Execution.Id));
-                        }
-                    }
-                });
-            }
+                    ep.Execute();
+                }
+            });
         }
 
         public class ProcessExecutionGraph : Graph<ProcessExecutionDN, ProcessState>
@@ -459,7 +455,6 @@ namespace Signum.Engine.Processes
             get { return Execution.User; }
         }
 
-
         public void ProgressChanged(decimal progress)
         {
             Execution.Progress = progress;
@@ -504,7 +499,11 @@ namespace Signum.Engine.Processes
                 {
                     Execution.State = ProcessState.Error;
                     Execution.ExceptionDate = TimeZoneManager.Now;
-                    Execution.Exception = e.Message;
+                    Execution.Exception = new ExceptionLogDN(e)
+                    {
+                        Enviroment = "PROCESS",
+                        ActionName = Execution.Process.ToString()
+                    }.Save().ToLite();
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
                         Execution.Save();
                 }
@@ -516,9 +515,9 @@ namespace Signum.Engine.Processes
             Suspended = true;
         }
 
-
-
-
-
+        public override string ToString()
+        {
+            return "Execution (ID = {0}): {1} ".Formato(Execution.Id, Execution);
+        }
     }
 }

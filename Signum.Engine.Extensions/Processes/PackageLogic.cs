@@ -15,6 +15,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
+using Signum.Entities.Logging;
 
 namespace Signum.Engine.Processes
 {
@@ -54,7 +55,7 @@ namespace Signum.Engine.Processes
                          pl.Id,
                          pl.Target,
                          pl.FinishTime,
-                         pl.Exception
+                         Exception = pl.Exception.ToLite(),
                      }).ToDynamic();
             }
         }
@@ -130,15 +131,22 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
-                    using (Transaction tr = new Transaction(true))
+                    try
                     {
-                        pl.Exception = e.Message;
-                        pl.Save();
-                        tr.Commit();
-
-                        package.NumErrors++;
-                        package.Save();
+                        using (Transaction tr = new Transaction(true))
+                        {
+                            pl.Exception = new ExceptionLogDN(e) { Enviroment = "PACKAGE LINE" };
+                            pl.Save();
+                            tr.Commit();
+                        }
                     }
+                    catch (Exception)
+                    {
+
+                    }
+
+                    package.NumErrors++;
+                    package.Save();
                 }
 
                 int percentage = (NotificationSteps * i) / lines.Count;

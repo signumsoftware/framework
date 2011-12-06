@@ -13,6 +13,7 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;
+using Signum.Entities.Logging;
 
 namespace Signum.Entities.Processes
 {
@@ -117,8 +118,8 @@ namespace Signum.Entities.Processes
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        public string Exception
+        Lite<ExceptionLogDN> exception;
+        public Lite<ExceptionLogDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }
