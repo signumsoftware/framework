@@ -82,15 +82,19 @@ namespace Signum.Entities.Authorization
             return "Type {0} has no definitions for the conditions: {1}".Formato(type.Name, conditions.CommaAnd(a => a.Condition.Name));
         }
 
-        SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
         {
             var t = Schema.Current.Table<RuleTypeDN>();
-            var f = (FieldReference)t.Fields["resource"].Field;
-
+            var rec = (FieldReference)t.Fields["resource"].Field;
+            var cond = (FieldMList)t.Fields["conditions"].Field;
             var param = SqlParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
 
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name.SqlScape(), f.Name.SqlScape(), param.ParameterName), new List<SqlParameter> { param });
-        }
+            var conditions = new SqlPreCommandSimple("DELETE cond FROM {0} cond INNER JOIN {1} r ON cond.{2} = r.{3} WHERE r.{4} = {5}".Formato(
+                cond.RelationalTable.Name.SqlScape(), t.Name.SqlScape(), cond.RelationalTable.BackReference.Name.SqlScape(), "Id", rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<SqlParameter> { param });
+            var rule = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name.SqlScape(), rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<SqlParameter> { param });
+
+            return SqlPreCommand.Combine(Spacing.Simple, conditions, rule); 
+        }    
 
         void Schema_InitializingCache()
         {
@@ -256,7 +260,7 @@ namespace Signum.Entities.Authorization
 
         void Schema_Saving(RuleTypeDN rule)
         {
-            Transaction.RealCommit += () => InvalidateCache();
+            Transaction.PostRealCommit += () => InvalidateCache();
         }
 
         internal void GetRules(BaseRulePack<TypeAllowedRule> rules, IEnumerable<TypeDN> resources)

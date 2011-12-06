@@ -56,7 +56,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.ExportToXml += () => cache.ExportXml();
                 AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x,  roles);
 
-                sb.Schema.Table<RuleTypeDN>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
+               
 
                 Signum.Entities.Audit.Register(Audit.CyclesInRoles);
                 Signum.Entities.Audit.Register(Audit.UnsafeRoles);
@@ -71,20 +71,6 @@ namespace Signum.Engine.Authorization
              where T : IdentifiableEntity
         {
             sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
-        }
-
-        static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
-        {
-            var t = Schema.Current.Table<RuleTypeDN>();
-            var rec = (FieldReference)t.Fields["resource"].Field;
-            var cond = (FieldMList)t.Fields["conditions"].Field;
-            var param = SqlParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
-
-            var conditions = new SqlPreCommandSimple("DELETE cond FROM {0} cond INNER JOIN {1} r ON cond.{2} = r.{3} WHERE r.{4} = {5}".Formato(
-                cond.RelationalTable.Name.SqlScape(), t.Name.SqlScape(), cond.RelationalTable.BackReference.Name.SqlScape(), "Id", rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<SqlParameter> { param });
-            var rule = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name.SqlScape(), rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<SqlParameter> { param });
-
-            return SqlPreCommand.Combine(Spacing.Simple, conditions, rule); 
         }
 
         public static void AssertStarted(SchemaBuilder sb)
