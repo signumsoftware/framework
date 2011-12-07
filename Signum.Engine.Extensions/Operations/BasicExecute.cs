@@ -10,6 +10,7 @@ using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
+using Signum.Engine.Logging;
 
 namespace Signum.Engine.Operations
 {
@@ -64,7 +65,7 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
-            LogOperationDN log = new LogOperationDN
+            OperationLogDN log = new OperationLogDN
             {
                 Operation = EnumLogic<OperationDN>.ToEntity(Key),
                 Start = TimeZoneManager.Now,
@@ -99,28 +100,24 @@ namespace Signum.Engine.Operations
 
                 if (!entity.IsNew)
                 {
-                    try
+                    using (Transaction tr2 = new Transaction(true))
                     {
-                        using (Transaction tr2 = new Transaction(true))
-                        {
-                            LogOperationDN log2 = new LogOperationDN
-                            {
-                                Operation = log.Operation,
-                                Start = log.Start,
-                                User = log.User,
-                                Target = entity.ToLite<IIdentifiable>(),
-                                Exception = ex.Message,
-                                End = TimeZoneManager.Now
-                            };
-                           
-                            using (UserDN.Scope(AuthLogic.SystemUser))
-                                log2.Save();
+                        var logOp = ex.LogException();
 
-                            tr2.Commit();
-                        }
-                    }
-                    catch (Exception)
-                    {
+                        OperationLogDN log2 = new OperationLogDN
+                        {
+                            Operation = log.Operation,
+                            Start = log.Start,
+                            User = log.User,
+                            Target = entity.ToLite<IIdentifiable>(),
+                            Exception = logOp.ToLite(),
+                            End = TimeZoneManager.Now
+                        };
+
+                        using (UserDN.Scope(AuthLogic.SystemUser))
+                            log2.Save();
+
+                        tr2.Commit();
                     }
                 }
                 throw;

@@ -42,9 +42,9 @@ namespace Signum.Engine.Operations
 
     public static class OperationLogic
     {
-        static Expression<Func<OperationDN, IQueryable<LogOperationDN>>> LogOperationsExpression = 
-            o => Database.Query<LogOperationDN>().Where(a=>a.Operation == o);
-        public static IQueryable<LogOperationDN> LogOperations(this OperationDN o)
+        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogOperationsExpression = 
+            o => Database.Query<OperationLogDN>().Where(a=>a.Operation == o);
+        public static IQueryable<OperationLogDN> LogOperations(this OperationDN o)
         {
             return LogOperationsExpression.Evaluate(o);
         }
@@ -101,11 +101,11 @@ namespace Signum.Engine.Operations
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<OperationDN>();
-                sb.Include<LogOperationDN>();
+                sb.Include<OperationLogDN>();
 
                 EnumLogic<OperationDN>.Start(sb, () => RegisteredOperations);
 
-                dqm[typeof(LogOperationDN)] = (from lo in Database.Query<LogOperationDN>()
+                dqm[typeof(OperationLogDN)] = (from lo in Database.Query<OperationLogDN>()
                                                select new
                                                {
                                                    Entity = lo.ToLite(),

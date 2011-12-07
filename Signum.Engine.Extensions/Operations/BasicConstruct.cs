@@ -45,7 +45,7 @@ namespace Signum.Engine.Operations
                 {
                     using (Transaction tr = new Transaction())
                     {
-                        LogOperationDN log = new LogOperationDN
+                        OperationLogDN log = new OperationLogDN
                         {
                             Operation = EnumLogic<OperationDN>.ToEntity(Key),
                             Start = TimeZoneManager.Now,
