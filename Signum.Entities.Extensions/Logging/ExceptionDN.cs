@@ -11,6 +11,8 @@ namespace Signum.Entities.Logging
     [Serializable]
     public class ExceptionDN : Entity
     {
+        public const string ExceptionDataKey = "exceptionEntity";
+
         public ExceptionDN() { }
 
         public ExceptionDN(Exception ex)
@@ -19,7 +21,7 @@ namespace Signum.Entities.Logging
             this.ExceptionMessage = ex.Message;
             this.StackTrace = ex.StackTrace;
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
-            ex.Data["exceptionEntity"] = this;
+            ex.Data[ExceptionDataKey] = this;
         }
 
         DateTime creationDate = TimeZoneManager.Now;
@@ -95,13 +97,22 @@ namespace Signum.Entities.Logging
             set { Set(ref user, value, () => User); }
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [SqlDbType(Size = 100)]
         string environment;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Environment
         {
             get { return environment; }
             set { Set(ref environment, value, () => Environment); }
+        }
+
+        [SqlDbType(Size = 100)]
+        string version;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Version
+        {
+            get { return version; }
+            set { Set(ref version, value, () => Version); }
         }
 
         [SqlDbType(Size = 300)]

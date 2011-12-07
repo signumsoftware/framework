@@ -62,12 +62,12 @@ namespace Signum.Engine.Logging
 
         public static ExceptionDN LogException(this Exception ex)
         {
-           return PreviousExceptionDN(ex) ?? LogException(new ExceptionDN(ex));
+           return PreviousExceptionDN(ex) ?? CompleteAndSave(new ExceptionDN(ex));
         }
 
         public static ExceptionDN PreviousExceptionDN(this Exception ex)
         {
-            var exEntity = ex.Data["exceptionEntity"] as ExceptionDN;
+            var exEntity = ex.Data[ExceptionDN.ExceptionDataKey] as ExceptionDN;
 
             if (exEntity != null)
                 return exEntity;
@@ -75,7 +75,7 @@ namespace Signum.Engine.Logging
             return null;
         }
 
-        public static ExceptionDN LogException(this ExceptionDN ex)
+        public static ExceptionDN CompleteAndSave(ExceptionDN ex)
         {
             ex.Environment = CurrentEnvironment;
             try
@@ -83,6 +83,8 @@ namespace Signum.Engine.Logging
                 ex.User = UserDN.Current.ToLite(); //Session special situations
             }
             catch { }
+
+            ex.Version = Schema.Current.MainAssembly.TryCC(a => a.GetName().Version.ToString()); 
 
             using (Schema.Current.GlobalMode())
             using (Transaction tr = new Transaction(true))

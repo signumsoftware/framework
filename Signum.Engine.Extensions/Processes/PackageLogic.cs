@@ -123,7 +123,7 @@ namespace Signum.Engine.Processes
                     using (Transaction tr = new Transaction(true))
                     {
                         using (UserDN.Scope(executingProcess.User.Retrieve()))
-                        ExecuteLine(pl, package);
+                            ExecuteLine(pl, package);
 
                         pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();
@@ -132,19 +132,11 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
-                    try
+                    using (Transaction tr = new Transaction(true))
                     {
-                        using (Transaction tr = new Transaction(true))
-                        {
-                            
-                            pl.Exception = e.LogException();
-                            pl.Save();
-                            tr.Commit();
-                        }
-                    }
-                    catch (Exception)
-                    {
-
+                        pl.Exception = e.LogException();
+                        pl.Save();
+                        tr.Commit();
                     }
 
                     package.NumErrors++;

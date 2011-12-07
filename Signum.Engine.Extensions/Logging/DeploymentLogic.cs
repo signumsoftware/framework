@@ -9,14 +9,13 @@ using Signum.Entities.Logging;
 using Signum.Entities;
 using System.Threading;
 using Signum.Entities.Authorization;
+using Signum.Utilities;
 
 namespace Signum.Engine.Logging
 {
     public static class DeploymentLogic
     {
-        public static Func<string> GetCurrentVersion; 
-
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool deployment,  bool exceptions)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -43,7 +42,7 @@ namespace Signum.Engine.Logging
             new DeploymentLogDN
             {
                 CreationDate = TimeZoneManager.Now,
-                Version = GetCurrentVersion(),
+                Version = Schema.Current.MainAssembly.TryCC(a => a.GetName().Version.ToString()),
                 Description = description,
                 DataSourceName = ConnectionScope.Current.DataSourceName(),
                 DatabaseName = ConnectionScope.Current.DatabaseName(),
