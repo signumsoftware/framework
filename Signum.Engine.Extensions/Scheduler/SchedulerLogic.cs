@@ -56,53 +56,29 @@ namespace Signum.Engine.Scheduler
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
 
+
+                dqm[typeof(CalendarDN)] =
+                     (from st in Database.Query<CalendarDN>()
+                      select new
+                      {
+                          Entity = st.ToLite(),
+                          st.Id,
+                          st.Name,
+                          Holidays = st.Holidays.Count,
+                      }).ToDynamic();
+                
+
                 dqm[typeof(ScheduledTaskDN)] =
                     (from st in Database.Query<ScheduledTaskDN>()
                      select new
                      {
                          Entity = st.ToLite(),
                          st.Id,
-                         //st.ToStr,
+                         Task = st.Task.ToLite(),
                          st.NextDate,
                          st.Suspended,
+                         Rule = st.Rule.ToLite(),
                      }).ToDynamic();
-
-                dqm[typeof(CalendarDN)] =
-                 (from st in Database.Query<CalendarDN>()
-                  select new
-                  {
-                      Entity = st.ToLite(),
-                      st.Id,
-                      st.Name,
-                      st.Holidays.Count,
-
-                  }).ToDynamic();
-
-                dqm[typeof(CustomTaskExecutionDN)] =
-                    (from st in Database.Query<CustomTaskExecutionDN>()
-                     select new
-                     {
-                         Entity = st.ToLite(),
-                         st.Id,
-                         st.StartTime,
-                         st.EndTime,
-                         st.Exception,
-
-                     }).ToDynamic();
-
-                dqm[typeof(ScheduledTaskDN)] =
-                (from st in Database.Query<ScheduledTaskDN>()
-                 select new
-                 {
-                     Entity = st.ToLite(),
-                     st.Id,
-                     st.NextDate,
-                     st.Suspended,
-                     Rule = st.Rule.ToLite(),
-                     Task = st.Task.ToLite(),
-
-
-                 }).ToDynamic();
             }
         }
 
