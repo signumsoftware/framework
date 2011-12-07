@@ -97,7 +97,8 @@ namespace Signum.Engine.SMS
 
                     var packLite = package.ToLite();
 
-                    numbers.Select(n => createParams.CreateStaticSMSMessage(n, packLite)).SaveList();
+                    using (OperationLogic.AllowSave<SMSMessageDN>())
+                        numbers.Select(n => createParams.CreateStaticSMSMessage(n, packLite)).SaveList();
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
@@ -334,30 +335,30 @@ namespace Signum.Engine.SMS
                 }.Register();
 
                 dqm[typeof(SMSSendPackageDN)] = (from e in Database.Query<SMSSendPackageDN>()
-                                             select new
-                                             {
-                                                 Entity = e.ToLite(),
-                                                 e.Id,
-                                                 e.Name,
-                                                 e.NumLines,
-                                                 e.NumErrors,
-                                             }).ToDynamic();
+                                                 select new
+                                                 {
+                                                     Entity = e.ToLite(),
+                                                     e.Id,
+                                                     e.Name,
+                                                     e.NumLines,
+                                                     e.NumErrors,
+                                                 }).ToDynamic();
 
                 dqm[typeof(SMSUpdatePackageDN)] = (from e in Database.Query<SMSUpdatePackageDN>()
-                                             select new
-                                             {
-                                                 Entity = e.ToLite(),
-                                                 e.Id,
-                                                 e.Name,
-                                                 e.NumLines,
-                                                 e.NumErrors,
-                                             }).ToDynamic();
+                                                   select new
+                                                   {
+                                                       Entity = e.ToLite(),
+                                                       e.Id,
+                                                       e.Name,
+                                                       e.NumLines,
+                                                       e.NumErrors,
+                                                   }).ToDynamic();
             }
         }
 
         private static ProcessExecutionDN UpdateMessages(List<SMSMessageDN> messages)
         {
-            SMSUpdatePackageDN package = new SMSUpdatePackageDN 
+            SMSUpdatePackageDN package = new SMSUpdatePackageDN
             {
                 NumLines = messages.Count,
             }.Save();
@@ -426,7 +427,7 @@ namespace Signum.Engine.SMS
             var sendDate = DateTime.Now.TrimToSeconds();
             for (int i = 0; i < phones.Count; i++)
             {
-                var message = new SMSMessageDN { Message = template.Message, From = template.From }; 
+                var message = new SMSMessageDN { Message = template.Message, From = template.From };
                 message.SendDate = sendDate;
                 //message.SendState = SendState.Sent;
                 message.DestinationNumber = phones[i];
