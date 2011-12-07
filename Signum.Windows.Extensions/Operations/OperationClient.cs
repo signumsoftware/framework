@@ -28,7 +28,7 @@ namespace Signum.Windows.Operations
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<LogOperationDN>(EntityType.ServerOnly) { View = e => new LogOperation() });
+                Navigator.AddSetting(new EntitySettings<OperationLogDN>(EntityType.ServerOnly) { View = e => new LogOperation() });
 
                 Manager = operationManager;
 

@@ -98,13 +98,13 @@ namespace Signum.Windows.Extensions.Sample
             ReportClient.Start(false, false);
 
             Links.RegisterGlobalLinks((r, c) => new[]{
-                new QuickLinkExplore(new ExploreOptions(typeof(LogOperationDN) )
-                                    {
-                                        FilterOptions = { new FilterOption("Target", r) },
-                                        OrderOptions = { new OrderOption("Start") },
-                                        ColumnOptionsMode = ColumnOptionsMode.Remove,
-                                        ColumnOptions = { new ColumnOption("Target") }
-                                    })
+                new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN) )
+                {
+                    FilterOptions = { new FilterOption("Target", r) },
+                    OrderOptions = { new OrderOption("Start") },
+                    ColumnOptionsMode = ColumnOptionsMode.Remove,
+                    ColumnOptions = { new ColumnOption("Target") }
+                })
             });
 
             UserQueryClient.Start();
