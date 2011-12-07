@@ -61,7 +61,7 @@
                     <MenuItem Tag="{m:Explore QueryName={x:Type ser:ExcelReportDN}}"/>
                 </MenuItem>
                 <MenuItem Header="Operations">
-                    <MenuItem Tag="{m:Explore QueryName={x:Type seo:LogOperationDN}}"/>
+                    <MenuItem Tag="{m:Explore QueryName={x:Type seo:OperationLogDN}}"/>
                 </MenuItem>
                 <!--<MenuItem Header="Files">
                     <MenuItem Tag="{m:Explore QueryName={x:Type sef:FileRepositoryDN}}"/>
