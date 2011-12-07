@@ -499,7 +499,7 @@ namespace Signum.Engine.Processes
                 {
                     Execution.State = ProcessState.Error;
                     Execution.ExceptionDate = TimeZoneManager.Now;
-                    Execution.Exception = new ExceptionLogDN(e)
+                    Execution.Exception = new ExceptionDN(e)
                     {
                         ActionName = Execution.Process.ToString()
                     }.Save().ToLite();

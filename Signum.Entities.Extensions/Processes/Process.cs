@@ -118,8 +118,8 @@ namespace Signum.Entities.Processes
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        Lite<ExceptionLogDN> exception;
-        public Lite<ExceptionLogDN> Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

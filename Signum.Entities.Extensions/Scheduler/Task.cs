@@ -50,8 +50,8 @@ namespace Signum.Entities.Scheduler
             set { Set(ref endTime, value, () => EndTime); }
         }
 
-        Lite<ExceptionLogDN> exception;
-        public Lite<ExceptionLogDN> Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

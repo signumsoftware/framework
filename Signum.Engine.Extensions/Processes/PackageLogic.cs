@@ -16,6 +16,7 @@ using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Logging;
+using Signum.Engine.Logging;
 
 namespace Signum.Engine.Processes
 {
@@ -135,7 +136,8 @@ namespace Signum.Engine.Processes
                     {
                         using (Transaction tr = new Transaction(true))
                         {
-                            pl.Exception = new ExceptionLogDN(e);
+                            
+                            pl.Exception = e.LogException();
                             pl.Save();
                             tr.Commit();
                         }

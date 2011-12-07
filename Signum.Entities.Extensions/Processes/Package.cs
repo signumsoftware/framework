@@ -80,8 +80,8 @@ namespace Signum.Entities.Processes
             set { Set(ref finishTime, value, () => FinishTime); }
         }
 
-        ExceptionLogDN exception;
-        public ExceptionLogDN Exception
+        ExceptionDN exception;
+        public ExceptionDN Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

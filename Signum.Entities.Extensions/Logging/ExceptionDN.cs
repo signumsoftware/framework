@@ -9,16 +9,17 @@ using System.Threading;
 namespace Signum.Entities.Logging
 {
     [Serializable]
-    public class ExceptionLogDN : Entity
+    public class ExceptionDN : Entity
     {
-        public ExceptionLogDN() { }
+        public ExceptionDN() { }
 
-        public ExceptionLogDN(Exception ex)
+        public ExceptionDN(Exception ex)
         {
             this.ExceptionType = ex.GetType().Name;
             this.ExceptionMessage = ex.Message;
             this.StackTrace = ex.StackTrace;
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
+            ex.Data["exceptionEntity"] = this;
         }
 
         DateTime creationDate = TimeZoneManager.Now;
@@ -92,6 +93,15 @@ namespace Signum.Entities.Logging
         {
             get { return user; }
             set { Set(ref user, value, () => User); }
+        }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        string environment;
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string Environment
+        {
+            get { return environment; }
+            set { Set(ref environment, value, () => Environment); }
         }
 
         [SqlDbType(Size = 300)]

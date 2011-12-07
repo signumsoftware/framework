@@ -25,6 +25,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Linq.Expressions;
 using Signum.Entities.Logging;
+using Signum.Engine.Logging;
 
 namespace Signum.Engine.Mailing
 {
@@ -283,7 +284,7 @@ namespace Signum.Engine.Mailing
             {
                 using (Transaction tr = new Transaction(true))
                 {
-                    emailMessage.Exception = new ExceptionLogDN(e) { User = UserDN.Current.ToLite() }.Save().ToLite();
+                    emailMessage.Exception = e.LogException().ToLite();
                     emailMessage.State = EmailState.SentError;
                     emailMessage.Save();
                     tr.Commit();
@@ -345,7 +346,7 @@ namespace Signum.Engine.Mailing
                 {
                     emailMessage.Sent = TimeZoneManager.Now;
                     emailMessage.State = EmailState.SentError;
-                    emailMessage.Exception = new ExceptionLogDN(e) { User = UserDN.Current.ToLite() }.Save().ToLite();
+                    emailMessage.Exception = e.LogException().ToLite();
                     emailMessage.Save();
                     tr.Commit();
                 }
@@ -360,7 +361,7 @@ namespace Signum.Engine.Mailing
                 Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                 if (e.Error != null)
                 {
-                    var ex = new ExceptionLogDN(e.Error) { User = UserDN.Current.ToLite() }.Save().ToLite();
+                    var ex = e.Error.LogException().ToLite();
                     updater = em => new EmailMessageDN
                     {
                         Exception = ex,

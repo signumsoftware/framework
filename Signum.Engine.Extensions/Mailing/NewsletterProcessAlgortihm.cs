@@ -16,6 +16,7 @@ using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using Signum.Entities.Logging;
+using Signum.Engine.Logging;
 
 namespace Signum.Engine.Mailing
 {
@@ -146,7 +147,7 @@ namespace Signum.Engine.Mailing
                     var failed = group.Extract(sl => sl.Error != null).GroupBy(sl => sl.Error, sl => sl.Send);
                     foreach (var f in failed)
                     {
-                        var exLog = new ExceptionLogDN(f.Key).Save().ToLite();
+                        var exLog = f.Key.LogException().ToLite();
                         Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
                             .UnsafeUpdate(nd => new NewsletterDeliveryDN
                             {

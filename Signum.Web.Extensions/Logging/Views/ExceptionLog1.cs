@@ -63,7 +63,7 @@ namespace ASP
         {
 
 
- using (var e = Html.TypeContext<ExceptionLogDN>())
+ using (var e = Html.TypeContext<ExceptionDN>())
 {
     
 Write(Html.ValueLine(e, f => f.CreationDate));
