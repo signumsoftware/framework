@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Properties;
 
 namespace Signum.Engine
 {
@@ -211,15 +212,16 @@ namespace Signum.Engine
             {
                 while (liteRequests.Count > 0)
                 {
-                    var group = liteRequests.GroupBy(a => a.Key.Type).OrderByDescending(a => a.Count()).FirstEx();
+                    var group = liteRequests.GroupBy(a => a.Key.Type).FirstEx();
 
-                    var lites = Database.RetrieveListLite(group.Key, group.Select(a => a.Key.Id).ToList());
+                    var dic = giGetStrings.GetInvoker(group.Key)(group.Select(a => a.Key.Id).ToList());
 
-                    foreach (var pair in group.Join(lites, g => g.Key.Id, l => l.Id, (g, l) => new { List = g.Value, l.ToStr }))
+                    foreach (var item in group)
                     {
-                        foreach (var lite in pair.List)
+                        var toStr = dic.TryGetC(item.Key.Id) ?? ("[" + Resources.EntityWithType0AndId1NotFound.Formato(item.Key.Type.NiceName(), item.Key.Id) + "]");
+                        foreach (var lite in item.Value)
                         {
-                            lite.ToStr = pair.ToStr;
+                            lite.ToStr = toStr;
                         }
                     }
 
@@ -246,6 +248,12 @@ namespace Signum.Engine
                 }
 
             entityCache.ReleaseRetriever(this);
+        }
+
+        static readonly GenericInvoker<Func<List<int>, Dictionary<int, string>>> giGetStrings = new GenericInvoker<Func<List<int>, Dictionary<int, string>>>(ids => GetStrings<IdentifiableEntity>(ids));
+        static Dictionary<int, string> GetStrings<T>(List<int> ids) where T : IdentifiableEntity
+        {
+            return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToStr)).ToDictionary();
         }
     }
 
