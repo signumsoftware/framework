@@ -31,6 +31,8 @@ namespace Signum.Engine.Maps
 
         public TimeZoneMode TimeZoneMode { get; set; }
 
+        public Assembly MainAssembly { get; set; }
+
         public SchemaSettings Settings { get; private set; }
 
         Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
