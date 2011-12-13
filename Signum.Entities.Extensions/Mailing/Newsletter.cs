@@ -96,14 +96,6 @@ namespace Signum.Entities.Mailing
         public static string DefaultFrom;
         public static string DefaultDisplayFrom;
 
-        string overrideEmail;
-        [EMailValidator]
-        public string OverrideEmail
-        {
-            get { return overrideEmail; }
-            set { Set(ref overrideEmail, value, () => OverrideEmail); }
-        }
-
         QueryDN query;
         public QueryDN Query
         {

@@ -24,8 +24,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN()
             {
                 NumLines = messages.Count,
-                Name = args.TryGetArgC<string>(1),
-                OverrideEmailAddress = EmailLogic.OnOverrideEmailAddress()
+                Name = args.TryGetArgC<string>(1)
             }.Save();
 
             messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()
@@ -49,33 +48,29 @@ namespace Signum.Engine.Mailing
                                                  where email.Package == package.ToLite() && email.State == EmailState.Created
                                                  select email.ToLite()).ToList();
 
-
-            using (EmailLogic.OverrideEmailAddressForProcess(package.OverrideEmailAddress))
+            int lastPercentage = 0;
+            for (int i = 0; i < emails.Count; i++)
             {
-                int lastPercentage = 0;
-                for (int i = 0; i < emails.Count; i++)
+                if (executingProcess.Suspended)
+                    return FinalState.Suspended;
+
+                EmailMessageDN ml = emails[i].RetrieveAndForget();
+
+                try
                 {
-                    if (executingProcess.Suspended)
-                        return FinalState.Suspended;
+                    EmailLogic.SendMail(ml);
+                }
+                catch (Exception)
+                {
+                    package.NumErrors++;
+                    package.Save();
+                }
 
-                    EmailMessageDN ml = emails[i].RetrieveAndForget();
-
-                    try
-                    {
-                        EmailLogic.SendMail(ml);
-                    }
-                    catch (Exception)
-                    {
-                        package.NumErrors++;
-                        package.Save();
-                    }
-
-                    int percentage = (NotificationSteps * i) / emails.Count;
-                    if (percentage != lastPercentage)
-                    {
-                        executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                        lastPercentage = percentage;
-                    }
+                int percentage = (NotificationSteps * i) / emails.Count;
+                if (percentage != lastPercentage)
+                {
+                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
+                    lastPercentage = percentage;
                 }
             }
 

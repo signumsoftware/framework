@@ -41,14 +41,6 @@ namespace Signum.Engine.Mailing
         {
             NewsletterDN newsletter = (NewsletterDN)executingProcess.Data;
 
-            //var lines = (from e in Database.Query<NewsletterDeliveryDN>()
-            //             where e.Newsletter.RefersTo(newsletter) && !e.Sent
-            //             select new SendLine
-            //             {
-            //                 Send = e.ToLite(),
-            //                 Email = e.Recipient.Entity.Email,
-            //             }).ToList();
-
             var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
@@ -91,6 +83,8 @@ namespace Signum.Engine.Mailing
 
             var dic = tokens.Select((t,i)=>KVP.Create(t.FullKey(), i)).ToDictionary();
 
+            string overrideEmail = EmailLogic.OverrideEmailAddress();
+
             int lastPercentage = 0;
             int numErrors = newsletter.NumErrors;
             int processed = 0;
@@ -101,21 +95,21 @@ namespace Signum.Engine.Mailing
                 if (executingProcess.Suspended)
                     return FinalState.Suspended;
 
-                Parallel.ForEach(group, s =>
+                if (overrideEmail != EmailLogic.DoNotSend)
                 {
-                    if (newsletter.OverrideEmail != EmailLogic.DoNotSend)
+                    Parallel.ForEach(group, s =>
                     {
                         try
                         {
                             var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
                             var message = new MailMessage();
                             message.From = new MailAddress(newsletter.From, newsletter.DiplayFrom);
-                            message.To.Add(newsletter.OverrideEmail ?? s.Email);
+                            message.To.Add(overrideEmail ?? s.Email);
                             message.IsBodyHtml = true;
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>
                             {
                                 var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].TryToString(); 
+                                return s.Row[index].TryToString();
                             });
                             message.Subject = NewsletterLogic.TokenRegex.Replace(newsletter.Subject, m =>
                             {
@@ -129,8 +123,8 @@ namespace Signum.Engine.Mailing
                             numErrors++;
                             s.Error = ex;
                         }
-                    }
-                });
+                    });
+                }
 
                 using (var tr = new Transaction())
                 {

@@ -62,22 +62,7 @@ namespace Signum.Engine.Mailing
     {
         public static string DoNotSend = "null@null.com";
 
-        public static Func<string> OverrideEmailAddress = () => null;
-
-        static readonly Variable<string> overrideEmailAddressForProcess = Statics.ThreadVariable<string>("overrideEmailAddressForProcess");
-        internal static IDisposable OverrideEmailAddressForProcess(string emailAddress)
-        {
-            var old = overrideEmailAddressForProcess.Value;
-            overrideEmailAddressForProcess.Value = emailAddress;
-            return new Disposable(() => overrideEmailAddressForProcess.Value = old);
-        }
-
-        internal static string OnOverrideEmailAddress()
-        {
-            var oea = overrideEmailAddressForProcess.Value;
-
-            return oea ?? OverrideEmailAddress();
-        }
+        public static Func<string> OverrideEmailAddress = () => null;     
 
         public static Func<SmtpClient> SmtpClientBuilder;
 
@@ -401,7 +386,7 @@ namespace Signum.Engine.Mailing
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
         {
-            var address = OnOverrideEmailAddress();
+            var address = OverrideEmailAddress();
 
             if (address == DoNotSend)
                 return null;
@@ -426,8 +411,7 @@ namespace Signum.Engine.Mailing
         {
             EmailPackageDN package = new EmailPackageDN
             {
-                NumLines = emails.Count,
-                OverrideEmailAddress = OnOverrideEmailAddress()
+                NumLines = emails.Count
             }.Save();
 
             var packLite = package.ToLite();
@@ -453,7 +437,6 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN
             {
                 NumLines = recipientList.Count,
-                OverrideEmailAddress = EmailLogic.OnOverrideEmailAddress()
             }.Save();
 
             var lite = package.ToLite();
