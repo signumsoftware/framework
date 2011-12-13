@@ -115,7 +115,7 @@ namespace Signum.Engine.Mailing
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>
                             {
                                 var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].TryToString(); 
+                                return s.Row[index].TryToString();
                             });
                             message.Subject = NewsletterLogic.TokenRegex.Replace(newsletter.Subject, m =>
                             {
@@ -132,43 +132,40 @@ namespace Signum.Engine.Mailing
                     }
                 });
 
-                using (var tr = new Transaction())
+
+                int percentage = (NotificationSteps * processed) / lines.Count();
+                if (percentage != lastPercentage)
                 {
-                    int percentage = (NotificationSteps * processed) / lines.Count();
-                    if (percentage != lastPercentage)
-                    {
-                        executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                        lastPercentage = percentage;
-                    }
+                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
+                    lastPercentage = percentage;
+                }
 
-                    if (numErrors != 0)
-                        newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
+                if (numErrors != 0)
+                    newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
 
-                    var failed = group.Extract(sl => sl.Error != null).GroupBy(sl => sl.Error, sl => sl.Send);
-                    foreach (var f in failed)
-                    {
-                        var exLog = f.Key.LogException().ToLite();
-                        Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
-                            .UnsafeUpdate(nd => new NewsletterDeliveryDN
-                            {
-                                Sent = true,
-                                SendDate = DateTime.Now.TrimToSeconds(),
-                                Exception = exLog
-                            });
-                    }
+                var failed = group.Extract(sl => sl.Error != null).GroupBy(sl => sl.Error, sl => sl.Send);
+                foreach (var f in failed)
+                {
+                    var exLog = f.Key.LogException().ToLite();
 
-                    if (group.Any())
-                    {
-                        var sent = group.Select(sl => sl.Send).ToList();
-                        Database.Query<NewsletterDeliveryDN>().Where(nd => sent.Contains(nd.ToLite()))
-                            .UnsafeUpdate(nd => new NewsletterDeliveryDN
-                            {
-                                Sent = true,
-                                SendDate = DateTime.Now.TrimToSeconds(),
-                            });
-                    }
+                    Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
+                        .UnsafeUpdate(nd => new NewsletterDeliveryDN
+                        {
+                            Sent = true,
+                            SendDate = DateTime.Now.TrimToSeconds(),
+                            Exception = exLog
+                        });
+                }
 
-                    tr.Commit();
+                if (group.Any())
+                {
+                    var sent = group.Select(sl => sl.Send).ToList();
+                    Database.Query<NewsletterDeliveryDN>().Where(nd => sent.Contains(nd.ToLite()))
+                        .UnsafeUpdate(nd => new NewsletterDeliveryDN
+                        {
+                            Sent = true,
+                            SendDate = DateTime.Now.TrimToSeconds(),
+                        });
                 }
             }
 
