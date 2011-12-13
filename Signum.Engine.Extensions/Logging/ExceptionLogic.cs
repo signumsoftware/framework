@@ -57,7 +57,7 @@ namespace Signum.Engine.Logging
 
             var newException = new ExceptionDN(ex);
             complete(newException);
-            return LogException(ex);
+            return CompleteAndSave(newException);
         }
 
         public static ExceptionDN LogException(this Exception ex)
