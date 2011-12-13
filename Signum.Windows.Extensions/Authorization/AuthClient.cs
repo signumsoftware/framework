@@ -14,7 +14,6 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Extensions.Authorization;
 
 namespace Signum.Windows.Authorization
 {
