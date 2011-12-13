@@ -94,10 +94,10 @@ namespace Signum.Engine.Operations
             {  
                 OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
 
+                var exLog = ex.LogException();
+
                 using (Transaction tr2 = new Transaction(true))
                 {
-                    var exLog = ex.LogException();
-
                     var log2 = new OperationLogDN
                     {
                         Operation = log.Operation,

@@ -100,17 +100,17 @@ namespace Signum.Engine.Operations
 
                 if (!entity.IsNew)
                 {
+                    var exLog = ex.LogException();
+
                     using (Transaction tr2 = new Transaction(true))
                     {
-                        var logOp = ex.LogException();
-
                         OperationLogDN log2 = new OperationLogDN
                         {
                             Operation = log.Operation,
                             Start = log.Start,
                             User = log.User,
                             Target = entity.ToLite<IIdentifiable>(),
-                            Exception = logOp.ToLite(),
+                            Exception = exLog.ToLite(),
                             End = TimeZoneManager.Now
                         };
 

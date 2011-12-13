@@ -104,6 +104,8 @@ namespace Signum.Engine.Scheduler
             }
             catch (Exception ex)
             {
+                var exLog = ex.LogException().ToLite();
+
                 using (Transaction tr2 = new Transaction(true))
                 {
                     CustomTaskExecutionDN cte2 = new CustomTaskExecutionDN
@@ -111,7 +113,7 @@ namespace Signum.Engine.Scheduler
                         CustomTask = cte.CustomTask,
                         StartTime = cte.StartTime,
                         EndTime = TimeZoneManager.Now,
-                        Exception = ex.LogException().ToLite(),
+                        Exception = exLog,
                     }.Save();
 
                     tr2.Commit();

@@ -56,7 +56,7 @@ namespace Signum.Engine.Processes
                          pl.Id,
                          pl.Target,
                          pl.FinishTime,
-                         Exception = pl.Exception.ToLite(),
+                         pl.Exception,
                      }).ToDynamic();
             }
         }
@@ -132,9 +132,11 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
+                    var exLog = e.LogException();
+
                     using (Transaction tr = new Transaction(true))
                     {
-                        pl.Exception = e.LogException();
+                        pl.Exception = exLog.ToLite();
                         pl.Save();
                         tr.Commit();
                     }

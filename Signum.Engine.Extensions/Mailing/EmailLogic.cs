@@ -282,9 +282,11 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception e)
             {
+                var exLog = e.LogException().ToLite();
+
                 using (Transaction tr = new Transaction(true))
                 {
-                    emailMessage.Exception = e.LogException().ToLite();
+                    emailMessage.Exception = exLog;
                     emailMessage.State = EmailState.SentError;
                     emailMessage.Save();
                     tr.Commit();
@@ -298,6 +300,15 @@ namespace Signum.Engine.Mailing
         {
             //http://weblogs.asp.net/stanleygu/archive/2010/03/31/tip-14-solve-smtpclient-issues-of-delayed-email-and-high-cpu-usage.aspx
             return new SmtpClient()
+            {
+                ServicePoint = { MaxIdleTime = 2 }
+            };
+        }
+
+        internal static SmtpClient SafeSmtpClient(string host, int port)
+        {
+            //http://weblogs.asp.net/stanleygu/archive/2010/03/31/tip-14-solve-smtpclient-issues-of-delayed-email-and-high-cpu-usage.aspx
+            return new SmtpClient(host, port)
             {
                 ServicePoint = { MaxIdleTime = 2 }
             };
@@ -340,13 +351,15 @@ namespace Signum.Engine.Mailing
                     emailMessage.Save();
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
+                var exLog = ex.LogException().ToLite();
+
                 using (var tr = new Transaction(true))
                 {
                     emailMessage.Sent = TimeZoneManager.Now;
                     emailMessage.State = EmailState.SentError;
-                    emailMessage.Exception = e.LogException().ToLite();
+                    emailMessage.Exception = exLog;
                     emailMessage.Save();
                     tr.Commit();
                 }
@@ -361,10 +374,10 @@ namespace Signum.Engine.Mailing
                 Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                 if (e.Error != null)
                 {
-                    var ex = e.Error.LogException().ToLite();
+                    var exLog = e.Error.LogException().ToLite();
                     updater = em => new EmailMessageDN
                     {
-                        Exception = ex,
+                        Exception = exLog,
                         State = EmailState.SentError
                     };
                 }
@@ -480,6 +493,8 @@ namespace Signum.Engine.Mailing
 
             return exceptions;
         }
+
+       
     }
 
     public struct Link
@@ -499,117 +514,5 @@ namespace Signum.Engine.Mailing
         }
     }
 
-    public static class SMTPConfigurationLogic
-    {
-        internal static void AssertStarted(SchemaBuilder sb)
-        {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => SMTPConfigurationLogic.Start(null, null)));
-        }
-
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                sb.Include<SMTPConfigurationDN>();
-                sb.Schema.EntityEvents<SMTPConfigurationDN>().Saving += new SavingEventHandler<SMTPConfigurationDN>(EmailClientSettingsLogic_Saving);
-
-                dqm[typeof(SMTPConfigurationDN)] = (from s in Database.Query<SMTPConfigurationDN>()
-                                                    select new
-                                                    {
-                                                        Entity = s.ToLite(),
-                                                        s.Id,
-                                                        s.Name,
-                                                        s.Host,
-                                                        s.Port,
-                                                        s.UseDefaultCredentials,
-                                                        s.Username,
-                                                        s.Password,
-                                                        s.EnableSSL
-                                                    }).ToDynamic();
-
-                dqm[SMTPConfigurationQueries.NoCredentialsData] = (from s in Database.Query<SMTPConfigurationDN>()
-                                                                   select new
-                                                                   {
-                                                                       Entity = s.ToLite(),
-                                                                       s.Id,
-                                                                       s.Name,
-                                                                       s.Host,
-                                                                       s.Port,
-                                                                       s.UseDefaultCredentials,
-                                                                       s.EnableSSL
-                                                                   }).ToDynamic();
-
-                dqm[typeof(ClientCertificationFileDN)] = (from c in Database.Query<ClientCertificationFileDN>()
-                                                          select new
-                                                          {
-                                                              Entity = c.ToLite(),
-                                                              c.Id,
-                                                              c.Name,
-                                                              CertFileType = c.CertFileType.NiceToString(),
-                                                              c.FullFilePath
-                                                          }).ToDynamic();
-
-                sb.Schema.Initializing[InitLevel.Level2NormalEntities] += SetCache;
-            }
-        }
-
-        static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident)
-        {
-            if (ident.Modified.Value)
-                Transaction.PostRealCommit += () => smtpConfigurations = null;
-        }
-
-        static void SetCache()
-        {
-            smtpConfigurations = Database.RetrieveAll<SMTPConfigurationDN>().ToDictionary(s => s.Name);
-        }
-
-        static Dictionary<string, SMTPConfigurationDN> smtpConfigurations;
-        public static Dictionary<string, SMTPConfigurationDN> SmtpConfigurations
-        {
-            get
-            {
-                if (smtpConfigurations == null)
-                    SetCache();
-                return SMTPConfigurationLogic.smtpConfigurations;
-            }
-        }
-
-        public static SmtpClient GenerateSmtpClient(string smtpSettingsName, bool defaultIfNotPresent)
-        {
-            var settings = SmtpConfigurations.TryGet(smtpSettingsName, null);
-            if (settings == null)
-                if (defaultIfNotPresent)
-                    return EmailLogic.SafeSmtpClient();
-                else
-                    throw new ArgumentException("The setting {0} was not found in the SMTP settings cache".Formato(smtpSettingsName));
-
-            SmtpClient client = EmailLogic.SafeSmtpClient();
-
-            client.Host = settings.Host;
-            client.Port = settings.Port;
-            client.UseDefaultCredentials = settings.UseDefaultCredentials;
-            client.Credentials = settings.Username.HasText() ? new NetworkCredential(settings.Username, settings.Password) : null;
-            client.EnableSsl = settings.EnableSSL;
-
-            foreach (var cc in settings.ClientCertificationFiles)
-            {
-                client.ClientCertificates.Add(cc.CertFileType == CertFileType.CertFile ?
-                    X509Certificate.CreateFromCertFile(cc.FullFilePath)
-                    : X509Certificate.CreateFromSignedFile(cc.FullFilePath));
-            }
-
-            return client;
-        }
-
-        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config)
-        {
-            return GenerateSmtpClient(config.ToString(), false);
-        }
-
-        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config, bool defaultIfNotPresent)
-        {
-            return GenerateSmtpClient(config.TryCC(c => c.ToString()), defaultIfNotPresent);
-        }
-    }
+    
 }
