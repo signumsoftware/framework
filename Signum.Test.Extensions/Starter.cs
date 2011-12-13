@@ -15,11 +15,11 @@ using Signum.Engine.Reports;
 using Signum.Engine.ControlPanel;
 using Signum.Entities.ControlPanel;
 using Signum.Entities.Reports;
-using Signum.Engine.Extensions.Chart;
 using Signum.Entities.Chart;
 using Signum.Engine.UserQueries;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Basics;
+using Signum.Engine.Chart;
 
 namespace Signum.Test.Extensions
 {

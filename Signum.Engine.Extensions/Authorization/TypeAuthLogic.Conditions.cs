@@ -325,8 +325,6 @@ namespace Signum.Engine.Authorization
             {
                 if (((bool)ce.Value))
                     return query;
-                else
-                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo01.Formato(allowed.NiceToString(), typeof(T).NicePluralName())); 
             }
 
             IQueryable<T> result = query.Where(Expression.Lambda<Func<T, bool>>(body, e));
