@@ -131,6 +131,7 @@
     <Compile Include="Mailing\NewsletterLogic.cs" />
     <Compile Include="Mailing\NewsletterProcessAlgortihm.cs" />
     <Compile Include="Mailing\SendEmailProcessAlgorithm.cs" />
+    <Compile Include="Mailing\SmtpConfigurationLogic.cs" />
     <Compile Include="Operations\BasicConstruct.cs" />
     <Compile Include="Operations\BasicConstructFrom.cs" />
     <Compile Include="Operations\BasicConstructFromMany.cs" />
