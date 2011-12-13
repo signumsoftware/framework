@@ -7,9 +7,9 @@ using System.Windows.Media.Imaging;
 using Signum.Entities;
 using Signum.Services;
 using System.Reflection;
-using Signum.Entities.Extensions.Basics;
 using Signum.Utilities.Reflection;
 using Signum.Windows.Basics;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows
 {
