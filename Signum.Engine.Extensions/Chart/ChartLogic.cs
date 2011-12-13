@@ -19,7 +19,7 @@ using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Entities.Reflection;
 
-namespace Signum.Engine.Extensions.Chart
+namespace Signum.Engine.Chart
 {
     public static class ChartLogic
     {

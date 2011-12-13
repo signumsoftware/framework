@@ -10,7 +10,6 @@ using System.ComponentModel;
 using System.Reflection;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Mailing;
-using Signum.Entities.Extensions.Authorization;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 

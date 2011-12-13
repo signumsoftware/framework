@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Entities;
 using Signum.Services;
 using System.Reflection;
-using Signum.Entities.Extensions.Basics;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Web.ViewsChecker

@@ -16,15 +16,15 @@ using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Utilities;
 using Signum.Engine.Basics;
-using Signum.Engine.Extensions.Chart;
 using Signum.Entities.Chart;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reports;
 using Signum.Engine.Reports;
-using Signum.Entities.Extensions.SMS;
 using Signum.Engine.SMS;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
+using Signum.Entities.SMS;
+using Signum.Engine.Chart;
 
 
 namespace Signum.Services

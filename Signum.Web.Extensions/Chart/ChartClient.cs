@@ -16,8 +16,8 @@ using System.Web.Routing;
 using System.Web.Mvc;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Signum.Engine.Extensions.Chart;
 using Signum.Web.Reports;
+using Signum.Engine.Chart;
 
 namespace Signum.Web.Chart
 {

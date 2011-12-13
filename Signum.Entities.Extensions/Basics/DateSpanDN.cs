@@ -5,7 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
-namespace Signum.Entities.Extensions.Basics
+namespace Signum.Entities.Basics
 {
     [Serializable]
     public class DateSpanDN : EmbeddedEntity

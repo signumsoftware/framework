@@ -9,7 +9,7 @@ using Signum.Engine.Operations;
 using Signum.Engine;
 using Signum.Entities.Processes;
 
-namespace Signum.Engine.Extensions.SMS
+namespace Signum.Engine.SMS
 {
     public class SMSMessageSendProcessAlgortihm : IProcessAlgorithm
     {
