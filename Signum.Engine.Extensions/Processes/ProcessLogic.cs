@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Signum.Engine.Scheduler;
 using System.Linq.Expressions;
 using Signum.Entities.Logging;
+using Signum.Engine.Logging;
 
 namespace Signum.Engine.Processes
 {
@@ -48,7 +49,6 @@ namespace Signum.Engine.Processes
 
         static Dictionary<Enum, IProcessAlgorithm> registeredProcesses = new Dictionary<Enum, IProcessAlgorithm>();
 
-        static int numberOfThreads;
 
         static Timer timer = new Timer(new TimerCallback(DispatchEvents), // main timer
                                 null,
@@ -60,7 +60,7 @@ namespace Signum.Engine.Processes
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null, null, 0)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, int numberOfThreads)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, int maxDegreeOfParallelism)
         {
 
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -68,7 +68,9 @@ namespace Signum.Engine.Processes
                 sb.Include<ProcessDN>();
                 sb.Include<ProcessExecutionDN>();
 
-                ProcessLogic.numberOfThreads = numberOfThreads;
+                ProcessLogic.MaxDegreeOfParallelism = maxDegreeOfParallelism;
+
+                PermissionAuthLogic.RegisterPermissions(ProcessPermissions.ViewProcessControlPanel);
 
                 EnumLogic<ProcessDN>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
@@ -79,7 +81,12 @@ namespace Signum.Engine.Processes
                 SchedulerLogic.ExecuteTask.Register((ProcessDN p) =>
                     ProcessLogic.Create(p).Execute(ProcessOperation.Execute));
 
-                sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplication;
+                sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += () =>
+                {
+                    Thread.Sleep(InitialDelayMiliseconds);
+                    Start();
+                };
+
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saving += ProcessExecution_Saving;
 
                 dqm[typeof(ProcessDN)] =
@@ -135,7 +142,7 @@ namespace Signum.Engine.Processes
                             RefreshPlan();
                             break;
                         case ProcessState.Suspending:
-                            Suspend(pe.Id);
+                            Suspend(pe);
                             break;
                         case ProcessState.Queued:
                             Execute(pe);
@@ -159,18 +166,27 @@ namespace Signum.Engine.Processes
             processQueue.Add(ep);
         }
 
-        static void Suspend(int processExecutionId)
+        static void Suspend(ProcessExecutionDN pe)
         {
-            ExecutingProcess process = processQueue.SingleOrDefault(p => p.Execution.Id == processExecutionId);
+            if (pe.State != ProcessState.Suspending)
+                return;
+
+            ExecutingProcess process = processQueue.SingleOrDefault(p => p.Execution.Id == pe.Id);
 
             if (process == null)
-                throw new ApplicationException(Resources.ProcessExecution0IsNotRunningAnymore.Formato(processExecutionId));
+                throw new ApplicationException(Resources.ProcessExecution0IsNotRunningAnymore.Formato(pe.Id));
 
-            process.Suspend();
+            process.Execution = pe; 
+            process.CancelationSource.Cancel();
         }
 
-        static void Schema_InitializingApplication()
+        static bool running = false;
+
+        public static void Start()
         {
+            if (running)
+                throw new InvalidOperationException("ProcessLogic is running");
+
             using (new EntityCache(true))
             {
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()
@@ -186,11 +202,38 @@ namespace Signum.Engine.Processes
                         pe.Save();
                 }
 
-                
+                Task.Factory.StartNew(() =>
+                {
+                    running = true;
 
-                Task.Factory.StartNew(DoWork, TaskCreationOptions.LongRunning); 
+                    var po = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism, CancellationToken = CancelNewProcesses.Token };
+
+                    Parallel.ForEach(processQueue.GetConsumingEnumerable(), po, ep =>
+                    {
+                        using (UserDN.Scope(AuthLogic.SystemUser))
+                        {
+                            ep.Execute();
+                        }
+                    });
+
+                    running = false;
+
+                }, TaskCreationOptions.LongRunning); 
            
                 RefreshPlan();
+            }
+        }
+
+        public static void Stop()
+        {
+            if (!running)
+                throw new InvalidOperationException("ProcessLogic is not running");
+
+            CancelNewProcesses.Cancel();
+
+            foreach (var pe in processQueue)
+            {
+                pe.CancelationSource.Cancel();
             }
         }
 
@@ -251,22 +294,11 @@ namespace Signum.Engine.Processes
             registeredProcesses.Add(processKey, logic);
         }
 
-        public static int InitialDelayMiliseconds = 30 * 1000;
-        public static ParallelOptions ParallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 }; 
+        public static int InitialDelayMiliseconds = 4;
+        public static int MaxDegreeOfParallelism = 4;
 
-        static void DoWork()
-        {
-            Thread.Sleep(InitialDelayMiliseconds);
-
-            Parallel.ForEach(processQueue.GetConsumingEnumerable(), ParallelOptions, ep =>
-            {
-                using (UserDN.Scope(AuthLogic.SystemUser))
-                {
-                    ep.Execute();
-                }
-            });
-        }
-
+        static readonly CancellationTokenSource CancelNewProcesses = new CancellationTokenSource();
+     
         public class ProcessExecutionGraph : Graph<ProcessExecutionDN, ProcessState>
         {
             static ProcessExecutionDN Create(ProcessDN process, Enum processKey, params object[] args)
@@ -295,7 +327,6 @@ namespace Signum.Engine.Processes
             public static void Register()
             {
                 GetState = e => e.State;
-
 
                 new Construct(ProcessOperation.Create)
                 {
@@ -384,7 +415,6 @@ namespace Signum.Engine.Processes
                         pe.SuspendDate = TimeZoneManager.Now;
                     }
                 }.Register();
-
             }
         }
 
@@ -420,26 +450,38 @@ namespace Signum.Engine.Processes
 
             ep.Execute();
         }
+
+        public static ProcessLogicState ExecutionState()
+        {
+            return new ProcessLogicState
+            {
+                Running = running,
+                InitialDelayMiliseconds = InitialDelayMiliseconds,
+                MaxDegreeOfParallelism = MaxDegreeOfParallelism,
+                Queue = processQueue.Select(p => new ExecutionState
+                {
+                    IsCancellationRequested = p.CancelationSource.IsCancellationRequested,
+                    ProcessExecution = p.Execution.ToLite(),
+                    State = p.Execution.State,
+                }).ToList()
+            };
+        }
     }
 
     public interface IProcessAlgorithm
     {
         IProcessDataDN CreateData(object[] args);
-        FinalState Execute(IExecutingProcess executingProcess);
+
+        void Execute(IExecutingProcess executingProcess);
     }
 
     public interface IExecutingProcess
     {
         Lite<UserDN> User { get; }
         IProcessDataDN Data { get; }
-        bool Suspended { get; }
+        CancellationToken CancellationToken { get; }
         void ProgressChanged(decimal progress);
-    }
-
-    public enum FinalState
-    {
-        Suspended,
-        Finished
+        void ProgressChanged(int position, int count);
     }
 
     internal class ExecutingProcess : IExecutingProcess
@@ -448,18 +490,36 @@ namespace Signum.Engine.Processes
         public IProcessAlgorithm Algorithm { get; set; }
         public IProcessDataDN Data { get; set; }
 
-        public bool Suspended { get; private set; }
+        public CancellationTokenSource CancelationSource { get; private set; }
+
+        public ExecutingProcess()
+        {
+            CancelationSource = new CancellationTokenSource();
+        }
+
+        public CancellationToken CancellationToken
+        {
+            get { return CancelationSource.Token; }
+        }
 
         public Lite<UserDN> User
         {
             get { return Execution.User; }
         }
 
+        public void ProgressChanged(int position, int count)
+        {
+            decimal progress = (100 * position) / count;
+
+            ProgressChanged(progress);
+        }
+
         public void ProgressChanged(decimal progress)
         {
-            Execution.Progress = progress;
-            using (OperationLogic.AllowSave<ProcessExecutionDN>())
-            Execution.Save();
+            if (progress != Execution.Progress)
+            {
+                Execution.InDB().UnsafeUpdate(a => new ProcessExecutionDN { Progress = progress });
+            }
         }
 
         public void Execute()
@@ -476,47 +536,53 @@ namespace Signum.Engine.Processes
 
                 try
                 {
-                    FinalState state = Algorithm.Execute(this);
+                    Algorithm.Execute(this);
 
-                    if (state == FinalState.Finished)
-                    {
-                        Execution.ExecutionEnd = TimeZoneManager.Now;
-                        Execution.State = ProcessState.Finished;
-                        Execution.Progress = null;
-                        using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                            Execution.Save();
-                    }
-                    else
-                    {
-                        Execution.SuspendDate = TimeZoneManager.Now;
-                        Execution.State = ProcessState.Suspended;
-                        using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                            Execution.Save();
-                    }
+                    Execution.ExecutionEnd = TimeZoneManager.Now;
+                    Execution.State = ProcessState.Finished;
+                    Execution.Progress = null;
+                    using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                        Execution.Save();
+                }
+                catch (OperationCanceledException e)
+                {
+                    if (!e.CancellationToken.Equals(this.CancellationToken))
+                        throw;
 
+                    Execution.SuspendDate = TimeZoneManager.Now;
+                    Execution.State = ProcessState.Suspended;
+                    using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                        Execution.Save();
                 }
                 catch (Exception e)
                 {
                     Execution.State = ProcessState.Error;
                     Execution.ExceptionDate = TimeZoneManager.Now;
-                    Execution.Exception = new ExceptionDN(e)
-                    {
-                        ActionName = Execution.Process.ToString()
-                    }.Save().ToLite();
+                    Execution.Exception = e.LogException(el => el.ActionName = Execution.Process.ToString()).ToLite();
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
                         Execution.Save();
                 }
             }
         }
 
-        public void Suspend()
-        {
-            Suspended = true;
-        }
-
         public override string ToString()
         {
             return "Execution (ID = {0}): {1} ".Formato(Execution.Id, Execution);
         }
+    }
+
+    public class ProcessLogicState
+    {
+        public int MaxDegreeOfParallelism;
+        public int InitialDelayMiliseconds;
+        public bool Running;
+        public List<ExecutionState> Queue; 
+    }
+
+    public class ExecutionState
+    {
+        public Lite<ProcessExecutionDN> ProcessExecution; 
+        public ProcessState State;
+        public bool IsCancellationRequested;
     }
 }

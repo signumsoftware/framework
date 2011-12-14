@@ -37,7 +37,7 @@ namespace Signum.Engine.Mailing
 
         public int NotificationSteps = 100;
 
-        public FinalState Execute(IExecutingProcess executingProcess)
+        public void Execute(IExecutingProcess executingProcess)
         {
             NewsletterDN newsletter = (NewsletterDN)executingProcess.Data;
 
@@ -79,27 +79,25 @@ namespace Signum.Engine.Mailing
                 Orders = new List<Order>(),
                 Columns = tokens.Select(t => new Column(t, t.NiceName())).ToList(),
                 ElementsPerPage = null,
-            }); 
+            });
 
-            var lines = resultTable.Rows.Select(r => 
-                new SendLine 
+            var lines = resultTable.Rows.Select(r =>
+                new SendLine
                 {
-                    Send = (Lite<NewsletterDeliveryDN>)r[0],  
-                    Email = (string)r[1],  
+                    Send = (Lite<NewsletterDeliveryDN>)r[0],
+                    Email = (string)r[1],
                     Row = r,
-                });
+                }).ToList();
 
             var dic = tokens.Select((t,i)=>KVP.Create(t.FullKey(), i)).ToDictionary();
 
-            int lastPercentage = 0;
             int numErrors = newsletter.NumErrors;
             int processed = 0;
             foreach (var group in lines.GroupsOf(20))
             {
                 processed += group.Count;
 
-                if (executingProcess.Suspended)
-                    return FinalState.Suspended;
+                executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
                 Parallel.ForEach(group, s =>
                 {
@@ -115,7 +113,7 @@ namespace Signum.Engine.Mailing
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>
                             {
                                 var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].TryToString(); 
+                                return s.Row[index].TryToString();
                             });
                             message.Subject = NewsletterLogic.TokenRegex.Replace(newsletter.Subject, m =>
                             {
@@ -134,13 +132,6 @@ namespace Signum.Engine.Mailing
 
                 using (var tr = new Transaction())
                 {
-                    int percentage = (NotificationSteps * processed) / lines.Count();
-                    if (percentage != lastPercentage)
-                    {
-                        executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                        lastPercentage = percentage;
-                    }
-
                     if (numErrors != 0)
                         newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
 
@@ -170,9 +161,9 @@ namespace Signum.Engine.Mailing
 
                     tr.Commit();
                 }
-            }
 
-            return FinalState.Finished;
+                executingProcess.ProgressChanged(processed, lines.Count);
+            }
         }
     }
 }

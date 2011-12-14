@@ -41,7 +41,7 @@ namespace Signum.Engine.Mailing
             return package;
         }
 
-        public FinalState Execute(IExecutingProcess executingProcess)
+        public void Execute(IExecutingProcess executingProcess)
         {
             EmailPackageDN package = (EmailPackageDN)executingProcess.Data;
 
@@ -52,11 +52,9 @@ namespace Signum.Engine.Mailing
 
             using (EmailLogic.OverrideEmailAddressForProcess(package.OverrideEmailAddress))
             {
-                int lastPercentage = 0;
                 for (int i = 0; i < emails.Count; i++)
                 {
-                    if (executingProcess.Suspended)
-                        return FinalState.Suspended;
+                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
                     EmailMessageDN ml = emails[i].RetrieveAndForget();
 
@@ -70,16 +68,9 @@ namespace Signum.Engine.Mailing
                         package.Save();
                     }
 
-                    int percentage = (NotificationSteps * i) / emails.Count;
-                    if (percentage != lastPercentage)
-                    {
-                        executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                        lastPercentage = percentage;
-                    }
+                    executingProcess.ProgressChanged(i, emails.Count);
                 }
             }
-
-            return FinalState.Finished;
         }
 
         public int NotificationSteps = 100;

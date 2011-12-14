@@ -25,7 +25,7 @@ namespace Signum.Entities.Processes
     [Serializable]
     public class ProcessExecutionDN : IdentifiableEntity
     {
-        private ProcessExecutionDN() { }
+        internal ProcessExecutionDN() { }
 
         public ProcessExecutionDN(ProcessDN process)
         {
@@ -225,5 +225,10 @@ namespace Signum.Entities.Processes
     {
         CurrentExecutions,
         ErrorExecutions,
+    }
+
+    public enum ProcessPermissions
+    {
+        ViewProcessControlPanel
     }
 }

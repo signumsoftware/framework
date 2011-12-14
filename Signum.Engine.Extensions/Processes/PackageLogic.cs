@@ -101,7 +101,7 @@ namespace Signum.Engine.Processes
         }
 
 
-        public FinalState Execute(IExecutingProcess executingProcess)
+        public void Execute(IExecutingProcess executingProcess)
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
@@ -110,12 +110,10 @@ namespace Signum.Engine.Processes
                  where pl.Package == package.ToLite() && pl.FinishTime == null && pl.Exception == null
                  select pl.ToLite()).ToList();
 
-            int lastPercentage = 0;
             for (int i = 0; i < lines.Count; i++)
             {
-                if (executingProcess.Suspended)
-                    return FinalState.Suspended;
-
+                executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                
                 PackageLineDN pl = lines[i].RetrieveAndForget();
 
                 try
@@ -145,15 +143,8 @@ namespace Signum.Engine.Processes
                     package.Save();
                 }
 
-                int percentage = (NotificationSteps * i) / lines.Count;
-                if (percentage != lastPercentage)
-                {
-                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                    lastPercentage = percentage;
-                }
+                executingProcess.ProgressChanged(i, lines.Count);
             }
-
-            return FinalState.Finished;
         }
 
         public int NotificationSteps = 100; 
