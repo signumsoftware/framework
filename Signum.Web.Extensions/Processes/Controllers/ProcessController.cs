@@ -17,6 +17,8 @@ using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using Signum.Web.Extensions.Properties;
 using Signum.Entities.Processes;
+using Signum.Engine.Processes;
+using Signum.Engine.Authorization;
 #endregion
 
 namespace Signum.Web.Processes
@@ -41,5 +43,37 @@ namespace Signum.Web.Processes
             return Navigator.NormalControl(this, process);
         }
 
+        [HttpGet]
+        public ActionResult View()
+        {
+            ProcessLogicState state = ProcessLogic.ExecutionState();
+
+            if (Request.IsAjaxRequest())
+            {
+                return View(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"), state);
+            }
+            else
+            {
+                return PartialView(ProcessesClient.ViewPrefix.Formato("ProcessPanel"), state);
+            }
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Start()
+        {
+            ProcessPermissions.ViewProcessControlPanel.Authorize();
+
+            ProcessLogic.Start();
+            return null;
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Stop()
+        {
+            ProcessPermissions.ViewProcessControlPanel.Authorize();
+
+            ProcessLogic.Stop();
+            return null;
+        }
     }
 }

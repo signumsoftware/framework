@@ -358,6 +358,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Processes\Views\ProcessPanel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessPanel.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\ProcessPanelTable2.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessPanelTable.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Profiler\TimeTracker.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
@@ -825,6 +835,7 @@
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
     <Content Include="Operations\Scripts\SF_Operations.js" />
+    <Content Include="Processes\Scripts\SF_Process.js" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
@@ -948,6 +959,14 @@
     <Content Include="Logging\Views\DeploymentLog.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>DeploymentLog.cs</LastGenOutput>
+    </Content>
+    <Content Include="Processes\Views\ProcessPanel.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProcessPanel.cs</LastGenOutput>
+    </Content>
+    <Content Include="Processes\Views\ProcessPanelTable.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProcessPanelTable2.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

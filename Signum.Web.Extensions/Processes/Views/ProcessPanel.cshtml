@@ -1,0 +1,29 @@
+﻿@using Signum.Utilities.ExpressionTrees
+@using Signum.Engine.Processes
+@using Signum.Web.Processes
+@model ProcessLogicState
+<div id="processMainDiv">
+    <h2>@ViewData[ViewDataKeys.Title]</h2>
+    <div>
+        <a href="@Url.Action((ProcessController pc) => pc.Stop())" class="sf-button" style="@(Model.Running ? "" : "display:none");color:red" id="sfProcessDisable">
+            Stop </a>
+        <a href="@Url.Action((ProcessController pc) => pc.Start())" class="sf-button"  style="@(!Model.Running ? "" : "display:none")" id="sfProcessEnable">
+                Start </a>
+    </div>
+    
+    @Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"))
+    @Html.ScriptsJs("~/Processes/Scripts/SF_Process.js")
+    <script language="javascript">
+        $(function () {
+            SF.Process.init(function () {
+                $.ajax({
+                    url: "@Url.Action((ProcessController p) => p.View())",
+                    success: function (data) {
+                        $("div.processMainDiv").replaceWith(data);
+                    }
+                });
+            });
+            SF.Process.initStats();
+        });
+    </script>
+</div>

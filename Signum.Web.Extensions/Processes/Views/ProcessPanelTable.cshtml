@@ -1,0 +1,45 @@
+﻿@using Signum.Utilities.ExpressionTrees
+@using Signum.Engine.Processes
+@using Signum.Web.Processes
+@model ProcessLogicState
+<div id="processMainDiv">
+    State: @(Model.Running ? "RUNNING" : "STOPPED")
+    <br />
+    MaxDegreeOfParallelism: @Model.MaxDegreeOfParallelism
+    <br />
+    InitialDelayMiliseconds: @Model.InitialDelayMiliseconds
+    <br />
+    <table class="sf-search-results sf-stats-table">
+        <thead>
+            <tr>
+                <th>
+                    Process
+                </th>
+                <th>
+                    State
+                </th>
+                <th>
+                    IsCancellationRequested
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Queue)
+            {
+                <tr>
+                    <td>
+                        <a class="sf-stats-show">Show</a>
+                    </td>
+                    <td>@Html.LightEntityLine(item.ProcessExecution, true)
+                    </td>
+                    <td>@item.State
+                    </td>
+                    <td>@item.IsCancellationRequested
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    }
+    <br />
+</div>
