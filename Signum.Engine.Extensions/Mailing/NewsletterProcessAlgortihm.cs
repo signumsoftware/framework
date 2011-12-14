@@ -41,14 +41,6 @@ namespace Signum.Engine.Mailing
         {
             NewsletterDN newsletter = (NewsletterDN)executingProcess.Data;
 
-            //var lines = (from e in Database.Query<NewsletterDeliveryDN>()
-            //             where e.Newsletter.RefersTo(newsletter) && !e.Sent
-            //             select new SendLine
-            //             {
-            //                 Send = e.ToLite(),
-            //                 Email = e.Recipient.Entity.Email,
-            //             }).ToList();
-
             var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
@@ -79,17 +71,19 @@ namespace Signum.Engine.Mailing
                 Orders = new List<Order>(),
                 Columns = tokens.Select(t => new Column(t, t.NiceName())).ToList(),
                 ElementsPerPage = null,
-            });
+            }); 
 
-            var lines = resultTable.Rows.Select(r =>
-                new SendLine
+            var lines = resultTable.Rows.Select(r => 
+                new SendLine 
                 {
-                    Send = (Lite<NewsletterDeliveryDN>)r[0],
-                    Email = (string)r[1],
+                    Send = (Lite<NewsletterDeliveryDN>)r[0],  
+                    Email = (string)r[1],  
                     Row = r,
                 }).ToList();
 
             var dic = tokens.Select((t,i)=>KVP.Create(t.FullKey(), i)).ToDictionary();
+
+            string overrideEmail = EmailLogic.OverrideEmailAddress();
 
             int numErrors = newsletter.NumErrors;
             int processed = 0;
@@ -99,21 +93,21 @@ namespace Signum.Engine.Mailing
 
                 executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
+                if (overrideEmail != EmailLogic.DoNotSend)
+                {
                 Parallel.ForEach(group, s =>
                 {
-                    if (newsletter.OverrideEmail != EmailLogic.DoNotSend)
-                    {
                         try
                         {
                             var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
                             var message = new MailMessage();
                             message.From = new MailAddress(newsletter.From, newsletter.DiplayFrom);
-                            message.To.Add(newsletter.OverrideEmail ?? s.Email);
+                            message.To.Add(overrideEmail ?? s.Email);
                             message.IsBodyHtml = true;
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>
                             {
                                 var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].TryToString();
+                                return s.Row[index].TryToString(); 
                             });
                             message.Subject = NewsletterLogic.TokenRegex.Replace(newsletter.Subject, m =>
                             {
@@ -127,11 +121,10 @@ namespace Signum.Engine.Mailing
                             numErrors++;
                             s.Error = ex;
                         }
+                    });
                     }
-                });
 
-                using (var tr = new Transaction())
-                {
+
                     if (numErrors != 0)
                         newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
 
@@ -139,6 +132,7 @@ namespace Signum.Engine.Mailing
                     foreach (var f in failed)
                     {
                         var exLog = f.Key.LogException().ToLite();
+
                         Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
                             .UnsafeUpdate(nd => new NewsletterDeliveryDN
                             {
@@ -158,9 +152,6 @@ namespace Signum.Engine.Mailing
                                 SendDate = DateTime.Now.TrimToSeconds(),
                             });
                     }
-
-                    tr.Commit();
-                }
 
                 executingProcess.ProgressChanged(processed, lines.Count);
             }

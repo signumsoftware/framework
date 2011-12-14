@@ -168,13 +168,6 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref numErrors, value, () => NumErrors); }
         }
 
-        string overrideEmailAddress;
-        public string OverrideEmailAddress
-        {
-            get { return overrideEmailAddress; }
-            set { Set(ref overrideEmailAddress, value, () => OverrideEmailAddress); }
-        }
-
         public override string ToString()
         {
             return "{0} ({1} lines{2})".Formato(Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));

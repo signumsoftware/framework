@@ -24,8 +24,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN()
             {
                 NumLines = messages.Count,
-                Name = args.TryGetArgC<string>(1),
-                OverrideEmailAddress = EmailLogic.OnOverrideEmailAddress()
+                Name = args.TryGetArgC<string>(1)
             }.Save();
 
             messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()
@@ -49,9 +48,6 @@ namespace Signum.Engine.Mailing
                                                  where email.Package == package.ToLite() && email.State == EmailState.Created
                                                  select email.ToLite()).ToList();
 
-
-            using (EmailLogic.OverrideEmailAddressForProcess(package.OverrideEmailAddress))
-            {
                 for (int i = 0; i < emails.Count; i++)
                 {
                     executingProcess.CancellationToken.ThrowIfCancellationRequested();
@@ -69,9 +65,8 @@ namespace Signum.Engine.Mailing
                     }
 
                     executingProcess.ProgressChanged(i, emails.Count);
+                    }
                 }
-            }
-        }
 
         public int NotificationSteps = 100;
     }
