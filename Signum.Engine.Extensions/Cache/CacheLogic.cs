@@ -76,7 +76,7 @@ namespace Signum.Engine.Cache
                 var ee = schema.EntityEvents<T>();
 
                 ee.Saving += Saving;
-                ee.PreUnsafeUpdated += new QueryHandler<T>(PreUnsafeUpdated);
+                ee.PreUnsafeUpdate += new QueryHandler<T>(PreUnsafeUpdated);
             }
 
             void PreUnsafeUpdated(IQueryable<T> query)
@@ -241,7 +241,7 @@ namespace Signum.Engine.Cache
                 ee.CacheController = this;
                 ee.Saving += Saving;
                 ee.PreUnsafeDelete += PreUnsafeDelete;
-                ee.PreUnsafeUpdated += UnsafeUpdated;
+                ee.PreUnsafeUpdate += UnsafeUpdated;
             }
 
             bool disabledThis; 
