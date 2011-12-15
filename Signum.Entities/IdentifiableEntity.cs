@@ -23,6 +23,7 @@ namespace Signum.Entities
         internal int? id = null; //primary key
         protected internal string toStr; //no value for new entities
 
+
         [HiddenProperty, Description("Id")]
         public int Id
         {
@@ -72,11 +73,15 @@ namespace Signum.Entities
             return base.Set<T>(ref field, value, property);
         }
 
+        static int maxToStrLenght = 200;
+
         protected internal override void PreSaving(ref bool graphModified)
         {
             base.PreSaving(ref graphModified);
 
             toStr = ToString();
+            if (toStr.HasText() && toStr.Length > maxToStrLenght)
+                toStr = toStr.Substring(0, maxToStrLenght);
         }
 
         public override string ToString()
