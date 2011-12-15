@@ -165,6 +165,26 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnRetrieved(entity);
         }
 
+        internal void OnPreUnsafeDelete<T>(IQueryable<T> query) where T : IdentifiableEntity
+        {
+            AssertAllowed(typeof(T));
+
+            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+
+            if (ee != null)
+                ee.OnPreUnsafeDelete(query);
+        }
+
+        internal void OnPreUnsafeUpdate<T>(IQueryable<T> query) where T : IdentifiableEntity
+        {
+            AssertAllowed(typeof(T));
+
+            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+
+            if (ee != null)
+                ee.OnPreUnsafeUpdate(query);
+        }
+
         internal ICacheController CacheController(Type type)
         {
             IEntityEvents ee = entityEvents.TryGetC(type);
@@ -557,7 +577,7 @@ namespace Signum.Engine.Maps
 
         public event QueryHandler<T> PreUnsafeDelete;
 
-        public event QueryHandler<T> PreUnsafeUpdated;
+        public event QueryHandler<T> PreUnsafeUpdate;
 
         internal IQueryable<T> OnFilterQuery(IQueryable<T> query)
         {
@@ -580,10 +600,10 @@ namespace Signum.Engine.Maps
                     action(query);
         }
 
-        internal void OnPreUnsafeUpdated(IQueryable<T> query)
+        internal void OnPreUnsafeUpdate(IQueryable<T> query)
         {
-            if (PreUnsafeUpdated != null)
-                foreach (QueryHandler<T> action in PreUnsafeUpdated.GetInvocationList().Reverse())
+            if (PreUnsafeUpdate != null)
+                foreach (QueryHandler<T> action in PreUnsafeUpdate.GetInvocationList().Reverse())
                     action(query);
 
         }
