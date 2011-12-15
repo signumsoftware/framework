@@ -89,6 +89,16 @@ namespace Signum.Web
             this.QueryName = queryName;
         }
 
+        public FindOptions(object queryName, string parentColumn, object parentValue)
+        {
+            this.QueryName = queryName;
+            this.FilterOptions.Add(new FilterOption(parentColumn, parentValue));
+            this.ColumnOptionsMode = Signum.Entities.DynamicQuery.ColumnOptionsMode.Remove;
+            this.ColumnOptions.Add(new ColumnOption(parentColumn));
+            this.SearchOnLoad = true;
+            this.FilterMode = FilterMode.Hidden;
+        }
+
         public bool? AllowUserColumns { get; set; }
 
         public bool SearchOnLoad { get; set; }

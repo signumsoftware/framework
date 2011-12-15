@@ -614,7 +614,7 @@ namespace Signum.Engine
 
             using (Transaction tr = new Transaction())
             {
-                Schema.Current.EntityEvents<T>().OnPreUnsafeDelete(query);
+                Schema.Current.OnPreUnsafeDelete<T>(query);
 
                 int rows = DbQueryProvider.Single.Delete(query);
 
@@ -631,7 +631,7 @@ namespace Signum.Engine
 
             using (Transaction tr = new Transaction())
             {
-                Schema.Current.EntityEvents<E>().OnPreUnsafeUpdated(query.Select(mle => mle.Parent));
+                Schema.Current.OnPreUnsafeUpdate<E>(query.Select(mle => mle.Parent));
 
                 int rows = DbQueryProvider.Single.Delete(query);
 
@@ -648,7 +648,7 @@ namespace Signum.Engine
 
             using (Transaction tr = new Transaction())
             {
-                Schema.Current.EntityEvents<T>().OnPreUnsafeUpdated(query);
+                Schema.Current.OnPreUnsafeUpdate<T>(query);
 
                 int rows = DbQueryProvider.Single.Update<T>(query, updateConstructor);
 
@@ -665,7 +665,7 @@ namespace Signum.Engine
 
             using (Transaction tr = new Transaction())
             {
-                Schema.Current.EntityEvents<E>().OnPreUnsafeUpdated(query.Select(q => q.Parent));
+                Schema.Current.OnPreUnsafeUpdate<E>(query.Select(q => q.Parent));
 
                 int rows = DbQueryProvider.Single.Update(query, updateConstructor);
 
