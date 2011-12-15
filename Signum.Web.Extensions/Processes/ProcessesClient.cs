@@ -44,25 +44,6 @@ namespace Signum.Web.Processes
             }
         }
 
-        public static void StartDemoPackage()
-        {
-            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                Constructor.AddConstructor(() => new DemoPackageDN
-                {
-                    Name = "Demo Package",
-                    RequestedLines = 100,
-                    DelayMilliseconds = 100,
-                    ErrorRate = 0.3,
-                    MainError = false,
-                });
-
-                Navigator.AddSettings(new List<EntitySettings>
-                {
-                    new EntitySettings<DemoPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("DemoPackage"), },
-                    new EntitySettings<DemoPackageLineDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("DemoPackageLine"), },
-                });
-            }
-        }
+       
     }
 }
