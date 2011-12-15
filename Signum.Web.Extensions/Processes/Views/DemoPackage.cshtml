@@ -1,0 +1,28 @@
+﻿@using Signum.Entities.Processes
+
+@using (var e = Html.TypeContext<DemoPackageDN>())
+{
+    @Html.ValueLine(e, f => f.Name)
+    @Html.ValueLine(e, f => f.MainError)
+    @Html.ValueLine(e, f => f.RequestedLines)
+    @Html.ValueLine(e, f => f.DelayMilliseconds)
+    @Html.ValueLine(e, f => f.ErrorRate)
+    @Html.ValueLine(e, f => f.NumErrors, f => f.ReadOnly = true)
+
+    if (!e.Value.IsNew)
+    {
+    <fieldset>
+        <legend>Lines</legend>
+        @Html.SearchControl(new FindOptions()
+   {
+       QueryName = typeof(DemoPackageLineDN),
+       FilterOptions = { new FilterOption("Package", e.Value) },
+       SearchOnLoad = true,
+       FilterMode = FilterMode.Hidden,
+       Create = false,
+       View = false,
+       Async = true
+   }, e)
+    </fieldset>
+    }
+}
