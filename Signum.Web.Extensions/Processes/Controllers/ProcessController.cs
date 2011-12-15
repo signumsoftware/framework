@@ -44,17 +44,17 @@ namespace Signum.Web.Processes
         }
 
         [HttpGet]
-        public ActionResult View()
+        public new ActionResult View()
         {
             ProcessLogicState state = ProcessLogic.ExecutionState();
 
             if (Request.IsAjaxRequest())
             {
-                return View(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"), state);
+                return PartialView(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"), state);
             }
             else
             {
-                return PartialView(ProcessesClient.ViewPrefix.Formato("ProcessPanel"), state);
+                return View(ProcessesClient.ViewPrefix.Formato("ProcessPanel"), state);
             }
         }
 
@@ -64,6 +64,9 @@ namespace Signum.Web.Processes
             ProcessPermissions.ViewProcessControlPanel.Authorize();
 
             ProcessLogic.Start();
+
+            Thread.Sleep(1000);
+
             return null;
         }
 
@@ -73,6 +76,9 @@ namespace Signum.Web.Processes
             ProcessPermissions.ViewProcessControlPanel.Authorize();
 
             ProcessLogic.Stop();
+
+            Thread.Sleep(1000);
+
             return null;
         }
     }

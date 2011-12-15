@@ -45,7 +45,8 @@ namespace Signum.Engine.Processes
             return LastExecutionExpression.Evaluate(p);
         }
 
-        static BlockingCollection<ExecutingProcess> processQueue = new BlockingCollection<ExecutingProcess>();
+        static BlockingCollection<ExecutingProcess> queue = new BlockingCollection<ExecutingProcess>();
+        static ConcurrentDictionary<int, ExecutingProcess> executing = new ConcurrentDictionary<int, ExecutingProcess>();
 
         static Dictionary<Enum, IProcessAlgorithm> registeredProcesses = new Dictionary<Enum, IProcessAlgorithm>();
 
@@ -153,7 +154,7 @@ namespace Signum.Engine.Processes
 
         static void Execute(ProcessExecutionDN pe)
         {
-            if (pe.State != ProcessState.Queued || processQueue.Any(a=>a.Execution.Id == pe.Id))
+            if (pe.State != ProcessState.Queued || queue.Any(a=>a.Execution.Id == pe.Id))
                 return; 
 
             var ep = new ExecutingProcess
@@ -163,7 +164,7 @@ namespace Signum.Engine.Processes
                 Execution = pe,
             };
 
-            processQueue.Add(ep);
+            queue.Add(ep);
         }
 
         static void Suspend(ProcessExecutionDN pe)
@@ -171,13 +172,13 @@ namespace Signum.Engine.Processes
             if (pe.State != ProcessState.Suspending)
                 return;
 
-            ExecutingProcess process = processQueue.SingleOrDefault(p => p.Execution.Id == pe.Id);
+            ExecutingProcess execProc;
 
-            if (process == null)
+            if (!executing.TryGetValue(pe.Id, out execProc))
                 throw new ApplicationException(Resources.ProcessExecution0IsNotRunningAnymore.Formato(pe.Id));
 
-            process.Execution = pe; 
-            process.CancelationSource.Cancel();
+            execProc.Execution = pe;
+            execProc.CancelationSource.Cancel();
         }
 
         static bool running = false;
@@ -192,7 +193,8 @@ namespace Signum.Engine.Processes
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()
                            where pe.State == ProcessState.Executing ||
                                  pe.State == ProcessState.Queued ||
-                                 pe.State == ProcessState.Suspending
+                                 pe.State == ProcessState.Suspending ||
+                                 pe.State == ProcessState.Suspended
                            select pe).AsEnumerable().OrderByDescending(pe => pe.State).ToArray();
 
                 foreach (var pe in pes)
@@ -206,17 +208,38 @@ namespace Signum.Engine.Processes
                 {
                     running = true;
 
+                    CancelNewProcesses = new CancellationTokenSource();
+
                     var po = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism, CancellationToken = CancelNewProcesses.Token };
-
-                    Parallel.ForEach(processQueue.GetConsumingEnumerable(), po, ep =>
+                    try
                     {
-                        using (UserDN.Scope(AuthLogic.SystemUser))
+                        Parallel.ForEach(queue.GetConsumingEnumerable(CancelNewProcesses.Token), po, ep =>
                         {
-                            ep.Execute();
-                        }
-                    });
+                            try
+                            {
+                                executing.TryAdd(ep.Execution.Id, ep);
 
-                    running = false;
+                                using (UserDN.Scope(AuthLogic.SystemUser))
+                                {
+                                    ep.Execute();
+                                }
+                            }
+                            finally
+                            {
+                                ExecutingProcess rubish;
+                                executing.TryRemove(ep.Execution.Id, out rubish);
+                            }
+                        });
+                    }
+                    catch (OperationCanceledException oc)
+                    {
+                        if (oc.CancellationToken != CancelNewProcesses.Token)
+                            throw;
+                    }
+                    finally
+                    {
+                        running = false;
+                    }
 
                 }, TaskCreationOptions.LongRunning); 
            
@@ -231,27 +254,29 @@ namespace Signum.Engine.Processes
 
             CancelNewProcesses.Cancel();
 
-            foreach (var pe in processQueue)
+            foreach (var pe in executing.Values)
             {
                 pe.CancelationSource.Cancel();
             }
         }
+
+        static DateTime? nextPlannedExecution; 
 
         static void RefreshPlan()
         {
             using (new EntityCache(true))
             using (AuthLogic.Disable())
             {
-                DateTime? next = Database.Query<ProcessExecutionDN>()
+                nextPlannedExecution = Database.Query<ProcessExecutionDN>()
                     .Where(pe => pe.State == ProcessState.Planned)
                     .Min(pe => pe.PlannedDate);
-                if (next == null)
+                if (nextPlannedExecution == null)
                 {
                     timer.Change(Timeout.Infinite, Timeout.Infinite);
                 }
                 else
                 {
-                    TimeSpan ts = next.Value - TimeZoneManager.Now;
+                    TimeSpan ts = nextPlannedExecution.Value - TimeZoneManager.Now;
                     if (ts < TimeSpan.Zero)
                         ts = TimeSpan.Zero;
                     else
@@ -297,7 +322,7 @@ namespace Signum.Engine.Processes
         public static int InitialDelayMiliseconds = 4;
         public static int MaxDegreeOfParallelism = 4;
 
-        static readonly CancellationTokenSource CancelNewProcesses = new CancellationTokenSource();
+        static CancellationTokenSource CancelNewProcesses;
      
         public class ProcessExecutionGraph : Graph<ProcessExecutionDN, ProcessState>
         {
@@ -458,11 +483,20 @@ namespace Signum.Engine.Processes
                 Running = running,
                 InitialDelayMiliseconds = InitialDelayMiliseconds,
                 MaxDegreeOfParallelism = MaxDegreeOfParallelism,
-                Queue = processQueue.Select(p => new ExecutionState
+                NextPlannedExecution = nextPlannedExecution,
+                Executing = executing.Values.Select(p => new ExecutionState
                 {
                     IsCancellationRequested = p.CancelationSource.IsCancellationRequested,
                     ProcessExecution = p.Execution.ToLite(),
                     State = p.Execution.State,
+                    Progress = p.Execution.Progress
+                }).ToList(),
+                Queue = queue.Select(p => new ExecutionState
+                {
+                    IsCancellationRequested = p.CancelationSource.IsCancellationRequested,
+                    ProcessExecution = p.Execution.ToLite(),
+                    State = p.Execution.State,
+                    Progress = p.Execution.Progress
                 }).ToList()
             };
         }
@@ -518,6 +552,7 @@ namespace Signum.Engine.Processes
         {
             if (progress != Execution.Progress)
             {
+                Execution.Progress = progress;
                 Execution.InDB().UnsafeUpdate(a => new ProcessExecutionDN { Progress = progress });
             }
         }
@@ -576,6 +611,8 @@ namespace Signum.Engine.Processes
         public int MaxDegreeOfParallelism;
         public int InitialDelayMiliseconds;
         public bool Running;
+        public DateTime? NextPlannedExecution; 
+        public List<ExecutionState> Executing;
         public List<ExecutionState> Queue; 
     }
 
@@ -584,5 +621,6 @@ namespace Signum.Engine.Processes
         public Lite<ProcessExecutionDN> ProcessExecution; 
         public ProcessState State;
         public bool IsCancellationRequested;
+        public decimal? Progress;
     }
 }

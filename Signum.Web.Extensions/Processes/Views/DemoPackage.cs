@@ -98,12 +98,8 @@ Write(Html.ValueLine(e, f => f.NumErrors, f => f.ReadOnly = true));
 WriteLiteral("    <fieldset>\r\n        <legend>Lines</legend>\r\n        ");
 
 
-   Write(Html.SearchControl(new FindOptions()
+   Write(Html.SearchControl(new FindOptions(typeof(DemoPackageLineDN), "Package", e.Value)
    {
-       QueryName = typeof(DemoPackageLineDN),
-       FilterOptions = { new FilterOption("Package", e.Value) },
-       SearchOnLoad = true,
-       FilterMode = FilterMode.Hidden,
        Create = false,
        View = false,
        Async = true

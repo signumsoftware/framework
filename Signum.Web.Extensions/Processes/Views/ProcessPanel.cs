@@ -95,23 +95,22 @@ WriteLiteral("\" class=\"sf-button\"  style=\"");
 WriteLiteral("\" id=\"sfProcessEnable\">\r\n                Start </a>\r\n    </div>\r\n    \r\n    ");
 
 
+Write(Html.ScriptsJs("~/signum/scripts/SF_FindNavigator.js", 
+                    "~/Processes/Scripts/SF_Process.js"));
+
+WriteLiteral("\r\n\r\n    ");
+
+
 Write(Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable")));
 
-WriteLiteral("\r\n    ");
-
-
-Write(Html.ScriptsJs("~/Processes/Scripts/SF_Process.js"));
-
 WriteLiteral("\r\n    <script language=\"javascript\">\r\n        $(function () {\r\n            SF.Pro" +
-"cess.init(function () {\r\n                $.ajax({\r\n                    url: \"");
+"cess.init(function () {\r\n                $.get(\"");
 
 
-                     Write(Url.Action((ProcessController p) => p.View()));
+                  Write(Url.Action((ProcessController p) => p.View()));
 
-WriteLiteral("\",\r\n                    success: function (data) {\r\n                        $(\"di" +
-"v.processMainDiv\").replaceWith(data);\r\n                    }\r\n                })" +
-";\r\n            });\r\n            SF.Process.initStats();\r\n        });\r\n    </scri" +
-"pt>\r\n</div>\r\n");
+WriteLiteral("\", function (data) {\r\n                    $(\"div.processMainDiv\").replaceWith(dat" +
+"a);\r\n                });\r\n            });\r\n        });\r\n    </script>\r\n</div>\r\n");
 
 
         }

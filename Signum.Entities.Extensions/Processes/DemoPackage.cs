@@ -35,7 +35,7 @@ namespace Signum.Entities.Processes
         }
 
         double errorRate;
-        [NumberBetweenValidator(0,1)]
+        [NumberBetweenValidator(0,1), Format("p")]
         public double ErrorRate
         {
             get { return errorRate; }

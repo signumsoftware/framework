@@ -13,12 +13,8 @@
     {
     <fieldset>
         <legend>Lines</legend>
-        @Html.SearchControl(new FindOptions()
+        @Html.SearchControl(new FindOptions(typeof(DemoPackageLineDN), "Package", e.Value)
    {
-       QueryName = typeof(DemoPackageLineDN),
-       FilterOptions = { new FilterOption("Package", e.Value) },
-       SearchOnLoad = true,
-       FilterMode = FilterMode.Hidden,
        Create = false,
        View = false,
        Async = true

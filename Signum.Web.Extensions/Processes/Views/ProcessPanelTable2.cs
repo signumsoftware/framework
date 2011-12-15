@@ -67,12 +67,25 @@ namespace ASP
 
 
 
-WriteLiteral("<div id=\"processMainDiv\">\r\n    State: ");
+WriteLiteral("<div id=\"processMainDiv\">\r\n        <br />\r\n    <h2>ProcessLogic state</h2>\r\n   \r\n" +
+"    State: <strong>\r\n");
 
 
-       Write(Model.Running ? "RUNNING" : "STOPPED");
+         if (Model.Running)
+        {
 
-WriteLiteral("\r\n    <br />\r\n    MaxDegreeOfParallelism: ");
+WriteLiteral("            <span style=\"color: Green\">RUNNING</span>\r\n");
+
+
+        }
+        else
+        {
+
+WriteLiteral("            <span style=\"color: Red\">STOPPED</span>\r\n");
+
+
+        }
+WriteLiteral("</strong>\r\n    <br />\r\n    MaxDegreeOfParallelism: ");
 
 
                        Write(Model.MaxDegreeOfParallelism);
@@ -81,6 +94,11 @@ WriteLiteral("\r\n    <br />\r\n    InitialDelayMiliseconds: ");
 
 
                         Write(Model.InitialDelayMiliseconds);
+
+WriteLiteral("\r\n    <br />\r\n    NextPlannedExecution: ");
+
+
+                      Write(Model.NextPlannedExecution.TryToString() ?? "-None-");
 
 WriteLiteral(@"
     <br />
@@ -94,19 +112,28 @@ WriteLiteral(@"
                     State
                 </th>
                 <th>
+                    Progress
+                </th>
+                <th>
                     IsCancellationRequested
                 </th>
             </tr>
         </thead>
         <tbody>
-");
+            <tr>
+                <td colspan=""4"">
+                    <b>Executing (");
 
 
-             foreach (var item in Model.Queue)
+                             Write(Model.Executing.Count);
+
+WriteLiteral(")</b>\r\n                </td>\r\n            </tr>\r\n");
+
+
+             foreach (var item in Model.Executing)
             {
 
-WriteLiteral("                <tr>\r\n                    <td>\r\n                        <a class=" +
-"\"sf-stats-show\">Show</a>\r\n                    </td>\r\n                    <td>");
+WriteLiteral("                <tr>\r\n                    <td>");
 
 
                    Write(Html.LightEntityLine(item.ProcessExecution, true));
@@ -119,6 +146,11 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
+                   Write(item.Progress);
+
+WriteLiteral("\r\n                    </td>\r\n                    <td>");
+
+
                    Write(item.IsCancellationRequested);
 
 WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
@@ -126,7 +158,56 @@ WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
 
             }
 
-WriteLiteral("        </tbody>\r\n    </table>\r\n    }\r\n    <br />\r\n</div>\r\n");
+WriteLiteral("            <tr>\r\n                <td colspan=\"4\">\r\n                    <b>Queued" +
+" (");
+
+
+                          Write(Model.Queue.Count);
+
+WriteLiteral(")</b>\r\n                </td>\r\n            </tr>\r\n");
+
+
+             foreach (var item in Model.Queue)
+            {
+
+WriteLiteral("                <tr>\r\n                    <td>");
+
+
+                   Write(Html.LightEntityLine(item.ProcessExecution, true));
+
+WriteLiteral("\r\n                    </td>\r\n                    <td>");
+
+
+                   Write(item.State);
+
+WriteLiteral("\r\n                    </td>\r\n                    <td>");
+
+
+                   Write(item.Progress);
+
+WriteLiteral("\r\n                    </td>\r\n                    <td>");
+
+
+                   Write(item.IsCancellationRequested);
+
+WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
+
+
+            }
+
+WriteLiteral("        </tbody>\r\n    </table>\r\n\r\n    <br />\r\n    <h2>Latest Processes</h2>\r\n\r\n  " +
+"  ");
+
+
+Write(Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessExecutionDN))
+{
+    OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
+    FilterMode = Signum.Web.FilterMode.Hidden,
+    SearchOnLoad = true,
+    ElementsPerPage = 10,
+},new Context(null, "sc")));
+
+WriteLiteral("; \r\n    <br />\r\n</div>\r\n");
 
 
         }

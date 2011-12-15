@@ -11,19 +11,17 @@
                 Start </a>
     </div>
     
+    @Html.ScriptsJs("~/signum/scripts/SF_FindNavigator.js", 
+                    "~/Processes/Scripts/SF_Process.js")
+
     @Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"))
-    @Html.ScriptsJs("~/Processes/Scripts/SF_Process.js")
     <script language="javascript">
         $(function () {
             SF.Process.init(function () {
-                $.ajax({
-                    url: "@Url.Action((ProcessController p) => p.View())",
-                    success: function (data) {
-                        $("div.processMainDiv").replaceWith(data);
-                    }
+                $.get("@Url.Action((ProcessController p) => p.View())", function (data) {
+                    $("div.processMainDiv").replaceWith(data);
                 });
             });
-            SF.Process.initStats();
         });
     </script>
 </div>

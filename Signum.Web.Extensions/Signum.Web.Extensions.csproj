@@ -358,6 +358,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Processes\Views\DemoPackage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DemoPackage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\DemoPackageLine.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DemoPackageLine.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Processes\Views\ProcessPanel.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -968,6 +978,14 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ProcessPanelTable2.cs</LastGenOutput>
     </Content>
+    <None Include="Processes\Views\DemoPackage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DemoPackage.cs</LastGenOutput>
+    </None>
+    <None Include="Processes\Views\DemoPackageLine.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DemoPackageLine.cs</LastGenOutput>
+    </None>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>
