@@ -574,7 +574,7 @@ namespace Signum.Engine.Linq
         public readonly Expression Expression;
 
         public SqlCastExpression(Type type, Expression expression)
-            : this(type, expression, Schema.Current.Settings.DefaultSqlType(type))
+            : this(type, expression, Schema.Current.Settings.DefaultSqlType(type.UnNullify()))
         {
         }
 

@@ -44,7 +44,7 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(fo.QueryName);
 
-            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, queryDescription);
+            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
             fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, queryDescription);
             fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
 
@@ -100,7 +100,7 @@ namespace Signum.Web
             "(?<token>[^;,]+),(?<op>[^;,]+),(?<value>'(?:[^']+|'')*'|[^;,]*);".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
-        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription queryDescription)
+        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, Func<QueryToken, List<QueryToken>> subTokens)
         {
             List<FilterOption> result = new List<FilterOption>();
 
@@ -116,7 +116,7 @@ namespace Signum.Web
             return matches.Select(m =>
             {
                 string name = m.Groups["token"].Value;
-                var token = QueryUtils.Parse(name, queryDescription);
+                var token = QueryUtils.Parse(name, subTokens);
                 return new FilterOption
                 {
                     ColumnName = name,

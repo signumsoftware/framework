@@ -111,6 +111,11 @@ WriteLiteral("\"\r\n     data-popup-save-url=\"");
 
                      Write(Url.SignumAction("TrySavePartial"));
 
+WriteLiteral("\"\r\n     data-add-filter-url=\"");
+
+
+                     Write(Url.Action("AddFilter", "Signum"));
+
 WriteLiteral("\"\r\n     ");
 
 

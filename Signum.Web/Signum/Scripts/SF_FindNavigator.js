@@ -605,7 +605,7 @@ SF.registerModule("FindNavigator", function () {
             return false;
         },
 
-        addFilter: function () {
+        addFilter: function (addFilterUrl, requestExtraJsonData) {
             SF.log("FindNavigator addFilter");
 
             var tableFilters = $(this.pf("tblFilters tbody"));
@@ -617,10 +617,20 @@ SF.registerModule("FindNavigator", function () {
 
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
+            var serializer = new SF.Serializer().add({
+                webQueryName: webQueryName,
+                tokenName: tokenName,
+                index: this.newFilterRowIndex(),
+                prefix: this.findOptions.prefix
+            });
+            if (!SF.isEmpty(requestExtraJsonData)) {
+                serializer.add(requestExtraJsonData);
+            }
+
             var self = this;
             $.ajax({
-                url: $(this.pf("btnAddFilter")).attr("data-url"),
-                data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
+                url: addFilterUrl || $(this.pf("btnAddFilter")).attr("data-url"),
+                data: serializer.serialize(),
                 async: false,
                 success: function (filterHtml) {
                     var $filterList = self.control().find(".sf-filters-list");

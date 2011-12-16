@@ -24,6 +24,7 @@
      data-quickfilter-url="@Url.SignumAction("QuickFilter")"
      data-search-url="@Url.SignumAction("Search")"
      data-popup-save-url="@Url.SignumAction("TrySavePartial")"
+     data-add-filter-url="@Url.Action("AddFilter", "Signum")"
      @(findOptions.EntityContextMenu ? " data-entity-ctx-menu-url=" + Url.SignumAction("GetContextualPanel") : "")
      >
 
