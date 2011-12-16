@@ -93,6 +93,27 @@ namespace Signum.Web.Chart
         }
 
         [HttpPost]
+        public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix)
+        {
+            var request = ExtractChartRequestCtx(prefix, null).Value;
+
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            object queryName = Navigator.ResolveQueryName(webQueryName);
+
+            FilterOption fo = new FilterOption(tokenName, null);
+            if (fo.Token == null)
+            {
+                fo.Token = QueryUtils.Parse(tokenName, qt => request.Chart.SubTokensFilters(qt, qd.Columns));
+            }
+            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
+
+            return Content(
+                SearchControlHelper.NewFilter(
+                    SignumController.CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
+        }
+
+        [HttpPost]
         public ActionResult Draw(string prefix)
         {
             var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();

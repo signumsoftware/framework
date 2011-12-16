@@ -111,10 +111,15 @@ WriteLiteral("\" class=\"sf-search-control sf-chart-control\" data-subtokens-url
 
                                                                                                       Write(Url.Action("NewSubTokensCombo", "Chart"));
 
+WriteLiteral("\" data-add-filter-url=\"");
+
+
+                                                                                                                                                                      Write(Url.Action("AddFilter", "Chart"));
+
 WriteLiteral("\" data-prefix=\"");
 
 
-                                                                                                                                                              Write(Model.ControlID);
+                                                                                                                                                                                                                      Write(Model.ControlID);
 
 WriteLiteral("\" >\r\n    ");
 

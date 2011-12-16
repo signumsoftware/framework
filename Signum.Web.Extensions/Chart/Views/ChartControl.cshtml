@@ -25,7 +25,7 @@
     Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
 }
 
-<div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" data-prefix="@Model.ControlID" >
+<div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" data-add-filter-url="@Url.Action("AddFilter", "Chart")" data-prefix="@Model.ControlID" >
     @Html.HiddenRuntimeInfo(Model)
     @Html.HiddenRuntimeInfo(Model, cr => cr.Chart)
     @Html.Hidden(Model.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryDescription.QueryName))

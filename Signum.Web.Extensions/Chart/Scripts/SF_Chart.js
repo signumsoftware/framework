@@ -132,6 +132,21 @@ SF.Chart.Builder = (function () {
         }
     };
 
+    var originalAddFilter = SF.FindNavigator.prototype.addFilter;
+    SF.FindNavigator.prototype.addFilter = function () {
+        var $addFilter = $(this.pf("btnAddFilter"));
+        if ($addFilter.closest(".sf-chart-builder").length == 0) {
+            var $chartControl = $addFilter.closest(".sf-chart-control");
+            if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                url = $chartControl.attr("data-add-filter-url");
+                originalAddFilter.call(this, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
+            }
+            else {
+                originalNewSubtokensCombo.call(this);
+            }
+        }
+    };
+
     return {
         requestProcessedData: requestProcessedData,
         requestData: requestData,

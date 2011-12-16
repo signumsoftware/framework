@@ -132,7 +132,9 @@ namespace Signum.Web.Chart
             var qd = DynamicQueryManager.Current.QueryDescription(
                 Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
 
-            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qd).Select(fo => fo.ToFilter()).ToList();
+            ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
+
+            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToFilter()).ToList();
         }
 
         static List<Order> ExtractChartOrders(MappingContext<List<Order>> ctx)
