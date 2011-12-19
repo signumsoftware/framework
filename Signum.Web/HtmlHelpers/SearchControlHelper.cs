@@ -228,15 +228,15 @@ namespace Signum.Web
             if (writeExpander)
                 expander = helper.TokensComboExpander(context, index);
 
-            MvcHtmlString drop = new HtmlTag("select").IdName(context.Compose("ddlTokens_" + index))
-                .Attrs(new
-                {
-                    style = (writeExpander) ? "display:none" : "",
-                    onchange = "javascript:new SF.FindNavigator({{prefix:\"{0}\",webQueryName:\"{1}\"}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) +
-                               ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');"
-                })
+            HtmlTag dropdown = new HtmlTag("select").IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options)
-                .ToHtml();
+                .Attr("onchange", "new SF.FindNavigator({{prefix:'{0}',webQueryName:'{1}'}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) +
+                    ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');");
+
+            if (writeExpander)
+                dropdown.Attr("style", "display:none");
+
+            MvcHtmlString drop = dropdown.ToHtml();
 
             return expander == null ? drop : expander.Concat(drop);
         }
