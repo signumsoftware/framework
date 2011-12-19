@@ -18,6 +18,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Chart;
 using Signum.Web.Reports;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Web.Chart
 {
@@ -50,6 +51,28 @@ namespace Signum.Web.Chart
                                 .SetProperty(cb => cb.Dimension2, mappingChartToken)
                                 .SetProperty(cb => cb.Value1, mappingChartToken)
                                 .SetProperty(cb => cb.Value2, mappingChartToken))
+                            .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterDN>
+                            {
+                                ElementMapping = new EntityMapping<QueryFilterDN>(false)
+                                    .CreateProperty(a=>a.Operation)
+                                    .CreateProperty(a=>a.ValueString)
+                                    .SetProperty(a=>a.Token, ctx =>
+                                    {
+                                        string tokenStr = "";
+                                        foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
+                                            tokenStr += ctx.Parent.Inputs[key] + ".";
+                                        while (tokenStr.EndsWith("."))
+                                            tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+
+                                        string queryKey = ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                                        object queryName = QueryLogic.ToQueryName(queryKey);
+
+                                        var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue).Chart;
+
+                                        QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                                        return QueryUtils.Parse(tokenStr, qt => chart.SubTokensChart(qt, qd.Columns, true));
+                                    })
+                            })
                     },
                 });
 
@@ -118,14 +141,16 @@ namespace Signum.Web.Chart
                 return ctx.Input;
             });
 
+        public static EntityMapping<ChartBase> MappingChartBase = new EntityMapping<ChartBase>(true)
+            .SetProperty(cb => cb.Dimension1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+            .SetProperty(cb => cb.Dimension2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+            .SetProperty(cb => cb.Value1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+            .SetProperty(cb => cb.Value2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); });
+
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
-            .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
-                .SetProperty(cb => cb.Dimension1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-                .SetProperty(cb => cb.Dimension2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-                .SetProperty(cb => cb.Value1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-                .SetProperty(cb => cb.Value2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); }));
+            .SetProperty(cr => cr.Chart, MappingChartBase);
 
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
         {
@@ -405,7 +430,7 @@ namespace Signum.Web.Chart
             return css;
         }
 
-        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, ChartTokenDN chartToken, ChartBase chart, object queryName, Context context)
+        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, QueryTokenDN chartToken, ChartBase chart, object queryName, Context context)
         {
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
@@ -417,13 +442,17 @@ namespace Signum.Web.Chart
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(SearchControlHelper.TokenOptionsCombo(
-                helper, queryName, SearchControlHelper.RootTokensCombo(qd, queryToken), context, 0, false));
+            bool canAggregate = (chartToken as ChartTokenDN).TryCS(ct => ct.ShouldAggregate) ?? true;
 
+            var rootTokens = chart.SubTokensChart(null, qd.Columns, canAggregate);
+
+            sb.AddLine(SearchControlHelper.TokenOptionsCombo(
+                helper, qd.QueryName, SearchControlHelper.TokensCombo(rootTokens, queryToken), context, 0, false));
+            
             for (int i = 0; i < tokenPath.Count; i++)
             {
                 QueryToken t = tokenPath[i];
-                List<QueryToken> subtokens = chart.SubTokensChart(t, qd.Columns, chartToken.ShouldAggregate);
+                List<QueryToken> subtokens = chart.SubTokensChart(t, qd.Columns, canAggregate);
                 if (!subtokens.IsEmpty())
                 {
                     bool moreTokens = i + 1 < tokenPath.Count;
@@ -431,13 +460,13 @@ namespace Signum.Web.Chart
                         helper, queryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
                 }
             }
-
+            
             return sb.ToHtml();
         }
 
         public static MvcHtmlString ChartRootTokens(this HtmlHelper helper, ChartBase chart, QueryDescription qd, Context context)
         {
-            var subtokens = chart.SubTokensChart(null, qd.Columns, chart.GroupResults);
+            var subtokens = chart.SubTokensChart(null, qd.Columns, true);
 
             return SearchControlHelper.TokenOptionsCombo(
                 helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, null), context, 0, false);

@@ -76,7 +76,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
         {
-            var request = ExtractChartRequestCtx(prefix, null).Value;
+            var request = ExtractChartRequestCtx("", null).Value;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 

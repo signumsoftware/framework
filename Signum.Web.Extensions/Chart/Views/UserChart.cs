@@ -101,20 +101,20 @@ WriteLiteral(@"
 }
 </style>
 
-<div class=""sf-search-control sf-chart-control"" data-subtokens-url=""");
+<div class=""sf-chart-control"" data-subtokens-url=""");
 
 
-                                                               Write(Url.Action("NewSubTokensCombo", "Chart"));
+                                             Write(Url.Action("NewSubTokensCombo", "Chart"));
 
 WriteLiteral("\" data-add-filter-url=\"");
 
 
-                                                                                                                               Write(Url.Action("AddFilter", "Chart"));
+                                                                                                             Write(Url.Action("AddFilter", "Chart"));
 
 WriteLiteral("\" data-prefix=\"");
 
 
-                                                                                                                                                                               Write(Model.ControlID);
+                                                                                                                                                             Write(Model.ControlID);
 
 WriteLiteral("\">\r\n");
 
@@ -167,9 +167,9 @@ WriteLiteral("            <div class=\"clearall\"></div>\r\n");
                                                  
 
         
-   Write(Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; }));
+   Write(Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; }));
 
-                                                                                         
+                                                                                                                                                      
 
         using (var chart = uc.SubContext(tc => tc.Chart))
         {
