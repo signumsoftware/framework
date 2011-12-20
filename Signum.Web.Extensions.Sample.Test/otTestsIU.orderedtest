@@ -10,5 +10,6 @@
     <TestLink id="67885199-033c-44d7-839e-810d0a03d73d" name="otOperations" storage="otoperations.orderedtest" type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="f893b142-001f-48ac-92fa-f6b3fbccee5d" name="otoperations_ctxmenu" storage="otoperations_ctxmenu.orderedtest" type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="d62358ac-e196-4c05-9161-d29fa0b3286c" name="otWidgets" storage="otwidgets.orderedtest" type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+    <TestLink id="7dcff2bd-ad20-41ad-b7ba-009e468ced05" name="otCharts" storage="otcharts.orderedtest" type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
   </TestLinks>
 </OrderedTest>
