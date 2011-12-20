@@ -25,6 +25,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Entities.SMS;
 using Signum.Engine.Chart;
+using Signum.Engine.Logging;
 
 
 namespace Signum.Services
@@ -47,6 +48,12 @@ namespace Signum.Services
             }
             catch (Exception e)
             {
+                e.LogException(el =>
+                {
+                    el.ControllerName = GetType().Name;
+                    el.ActionName = mi.Name;
+                    el.QueryString = description;
+                });
                 throw new FaultException(e.Message);
             }
             finally

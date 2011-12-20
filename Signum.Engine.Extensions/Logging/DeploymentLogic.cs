@@ -37,7 +37,7 @@ namespace Signum.Engine.Logging
             }
         }
 
-        public static void LogDeployment(string description)
+        public static void Log(string description)
         {
             new DeploymentLogDN
             {
