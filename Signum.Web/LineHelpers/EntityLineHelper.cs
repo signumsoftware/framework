@@ -67,6 +67,23 @@ namespace Signum.Web
                             entityLine.Compose(EntityBaseKeys.ToStr),
                             entityLine.ToStr,
                             htmlAttr));
+
+                        int? id = entityLine.IdOrNull;
+                        if (entityLine.View && id != null)
+                        {
+                            sb.AddLine(
+                                helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
+                                    entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
+                                    new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
+                        }
+                        else
+                        {
+                            sb.AddLine(
+                                helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink),
+                                    entityLine.UntypedValue.TryToString() ?? " ",
+                                    "sf-value-line",
+                                    new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
+                        }
                     }
                     else
                     {
@@ -80,23 +97,6 @@ namespace Signum.Web
                             sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine));
 
                         sb.AddLine(helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink), entityLine.UntypedValue.TryToString(), "sf-value-line"));
-                    }
-
-                    int? id = entityLine.IdOrNull;
-                    if (entityLine.View && entityLine.ViewMode == ViewMode.Navigate && id != null)
-                    {
-                        sb.AddLine(
-                            helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
-                                new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
-                    }
-                    else if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
-                    {
-                        sb.AddLine(
-                            helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                entityLine.UntypedValue.TryToString() ?? " ",
-                                "sf-value-line",
-                                new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                     }
 
                     sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine));
