@@ -26,7 +26,9 @@ namespace Signum.Web
             if (!listBase.Create)
                 return MvcHtmlString.Empty;
 
-            if (listBase.ViewMode == ViewMode.Navigate && !listBase.ElementType.CleanType().IsIIdentifiable())
+            Type type = listBase.ElementType.CleanType();
+
+            if (listBase.ViewMode == ViewMode.Navigate && (!Navigator.IsViewable(type, EntitySettingsContext.Admin) || !type.IsIIdentifiable()))
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>

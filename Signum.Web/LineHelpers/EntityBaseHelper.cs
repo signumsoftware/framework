@@ -120,7 +120,9 @@ namespace Signum.Web
             if (!entityBase.Create)
                 return MvcHtmlString.Empty;
 
-            if (entityBase.ViewMode == ViewMode.Navigate && !entityBase.Type.CleanType().IsIIdentifiable())
+            Type type = entityBase.Type.CleanType();
+
+            if (entityBase.ViewMode == ViewMode.Navigate && (!Navigator.IsViewable(type, EntitySettingsContext.Admin) || !type.IsIIdentifiable()))
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
