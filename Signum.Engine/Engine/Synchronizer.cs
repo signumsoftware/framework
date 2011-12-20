@@ -94,7 +94,7 @@ namespace Signum.Engine
         public static IDisposable RenameTable(Table table, Replacements replacements)
         {
             string tempName = replacements.TryGetC(Replacements.KeyTablesInverse).TryGetC(table.Name) ?? table.Name;
-            if (tempName == null) 
+            if (tempName == null)
                 return null;
 
             string realName = table.Name;
@@ -150,7 +150,7 @@ namespace Signum.Engine
                 List<string> sms = newOnly.OrderByDescending(n => sd.LongestCommonSubsequence(old, n)).ToList();
             retry:
                 Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(old, replacementsKey));
-                sms.Select((s, i) => "- {0}: {1} ".Formato(i + (i == 0 ? " (default)" : null), s)).ToConsole();
+                sms.Select((s, i) => "-{0}{1}: {2} ".Formato(i == 0 ? ">" : " ", i, s)).ToConsole();
                 Console.WriteLine();
                 Console.WriteLine(Properties.Resources.NNone);
 
