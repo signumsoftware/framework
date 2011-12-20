@@ -60,11 +60,11 @@ namespace Signum.Engine.Operations
         public static readonly HashSet<Type> ProtectedSaveTypes = new HashSet<Type>();
 
         static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
-        static readonly Variable<bool> saveGloballyAllowed = Statics.ThreadVariable<bool>("saveOperationsGloballyAllowed"); 
+        public static bool AllowSaveGlobally { get; set; }
 
         public static bool IsSaveProtected(Type type)
         {
-            if (saveGloballyAllowed.Value)
+            if (AllowSaveGlobally)
                 return false;
 
             var it = allowedTypes.Value;
@@ -84,12 +84,8 @@ namespace Signum.Engine.Operations
             return new Disposable(() => allowedTypes.Value = allowedTypes.Value.Pop());
         }
 
-        public static IDisposable AllowSaveGlobally()
-        {
-            if (saveGloballyAllowed.Value) return null;
-            saveGloballyAllowed.Value = true;
-            return new Disposable(() => saveGloballyAllowed.Value = false);
-        }
+       
+
 
         public static void AssertStarted(SchemaBuilder sb)
         {
