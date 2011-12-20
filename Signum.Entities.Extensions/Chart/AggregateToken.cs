@@ -130,7 +130,7 @@ namespace Signum.Entities.Chart
             if (AggregateFunction == AggregateFunction.Count)
                 return new AggregateToken(null, AggregateFunction.Count);
             else
-                return new AggregateToken(Parent.Clone(), AggregateFunction.Count);
+                return new AggregateToken(Parent.Clone(), AggregateFunction);
         }
 
         internal Type ConvertTo()

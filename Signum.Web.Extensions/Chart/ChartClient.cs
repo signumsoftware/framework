@@ -167,7 +167,9 @@ namespace Signum.Web.Chart
             var qd = DynamicQueryManager.Current.QueryDescription(
                 Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
 
-            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qd).Select(fo => fo.ToOrder()).ToList();
+            ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
+            
+            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToOrder()).ToList();
         }
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(System.Web.Mvc.ControllerContext controllerContext, object queryName, Type entityType, string prefix)

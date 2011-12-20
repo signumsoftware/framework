@@ -539,8 +539,7 @@ namespace Signum.Entities.Chart
             if (request == null || result == null)
                 return;
 
-            if (request.Token != null)
-                result.Token = request.Token.Clone();
+            result.Token = request.Token.Clone();
 
             result.DisplayName = request.DisplayName;
         }

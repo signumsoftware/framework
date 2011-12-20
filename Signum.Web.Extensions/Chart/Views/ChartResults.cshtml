@@ -43,7 +43,13 @@ else
                         {
                             foreach (ResultColumn col in queryResult.Columns)
                             {
-                                <th class="ui-state-default">
+                                var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
+                                OrderType? orderType = null;
+                                if (order != null)
+                                {
+                                    orderType = order.OrderType;
+                                }
+                                <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
                                     <input type="hidden" value="@col.Column.Name" />
                                     @col.Column.DisplayName
                                 </th>
@@ -104,6 +110,8 @@ else
             </div>
             @{ MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); }
             <script type="text/javascript">
+                SF.Chart.Builder.initOrders('@Model.ControlID');
+
                 var $chartContainer = $('@divSelector');
                 $chartContainer.closest('.sf-tabs').bind( "tabsshow", function(event, ui) {
                     if (ui.panel.id == '@(Model.Compose("sfChartContainer"))') {
