@@ -102,7 +102,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartUserOperations(SchemaBuilder sb)
+        public static void StartUserGraph(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
