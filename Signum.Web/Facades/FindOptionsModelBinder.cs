@@ -45,7 +45,7 @@ namespace Signum.Web
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(fo.QueryName);
 
             fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
-            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, queryDescription);
+            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
             fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
 
             if (parameters.AllKeys.Contains("allowMultiple"))
@@ -133,7 +133,7 @@ namespace Signum.Web
             "(?<token>-?[^;,]+);".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
-        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, QueryDescription queryDescription)
+        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, Func<QueryToken, List<QueryToken>> subTokens)
         {
             List<OrderOption> result = new List<OrderOption>();
 
@@ -152,7 +152,7 @@ namespace Signum.Web
                 string token = orderType == OrderType.Ascending ? tokenCapture : tokenCapture.Substring(1, tokenCapture.Length - 1);
                 return new OrderOption
                 {
-                    Token = QueryUtils.Parse(token, queryDescription),
+                    Token = QueryUtils.Parse(token, subTokens),
                     OrderType = orderType
                 };
             }).ToList();
