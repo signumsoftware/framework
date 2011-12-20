@@ -39,7 +39,7 @@ namespace Signum.Web.Extensions.Sample.Test
             Common.MyTestCleanup();
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void ExcelReport()
         {
             string pathAlbumSearch = FindRoute("Album");

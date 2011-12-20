@@ -17,6 +17,7 @@ using System.Web.Mvc;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Web.Reports;
+using Signum.Entities.UserQueries;
 using Signum.Engine.Chart;
 
 namespace Signum.Web.Chart
@@ -35,6 +36,23 @@ namespace Signum.Web.Chart
             {
                 Navigator.RegisterArea(typeof(ChartClient));
 
+                Mapping<QueryToken> qtMapping = ctx =>
+                {
+                    string tokenStr = "";
+                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
+                        tokenStr += ctx.Parent.Inputs[key] + ".";
+                    while (tokenStr.EndsWith("."))
+                        tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+
+                    string queryKey = ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                    object queryName = QueryLogic.ToQueryName(queryKey);
+            
+                    var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue).Chart;
+
+                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                    return QueryUtils.Parse(tokenStr, qt => chart.SubTokensChart(qt, qd.Columns, true));
+                };
+
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EmbeddedEntitySettings<ChartRequest>(),
@@ -50,6 +68,19 @@ namespace Signum.Web.Chart
                                 .SetProperty(cb => cb.Dimension2, mappingChartToken)
                                 .SetProperty(cb => cb.Value1, mappingChartToken)
                                 .SetProperty(cb => cb.Value2, mappingChartToken))
+                            .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterDN>
+                            {
+                                ElementMapping = new EntityMapping<QueryFilterDN>(false)
+                                    .CreateProperty(a=>a.Operation)
+                                    .CreateProperty(a=>a.ValueString)
+                                    .SetProperty(a=>a.Token, qtMapping)
+                            })
+                            .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
+                            {
+                                ElementMapping = new EntityMapping<QueryOrderDN>(false)
+                                    .CreateProperty(a=>a.OrderType)
+                                    .SetProperty(a=>a.Token, qtMapping)
+                            })
                     },
                 });
 
@@ -65,8 +96,8 @@ namespace Signum.Web.Chart
 
                 ButtonBarEntityHelper.RegisterEntityButtons<UserChartDN>((ctx, entity) =>
                 {
-                    var buttons = new List<ToolBarButton> { };
-
+                    var buttons = new List<ToolBarButton> {};
+                    
                     if (!entity.IsNew)
                     {
                         buttons.Add(new ToolBarButton
@@ -105,7 +136,10 @@ namespace Signum.Web.Chart
                 var qd = DynamicQueryManager.Current.QueryDescription(
                     Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
 
-                return QueryUtils.Parse(tokenName, qd);
+                var chartToken = (ChartTokenDN)ctx.Parent.UntypedValue;
+                var chart = (ChartBase)ctx.Parent.Parent.UntypedValue;
+
+                return QueryUtils.Parse(tokenName, qt => chart.SubTokensChart(qt, qd.Columns, true));
             })
             .SetProperty(ct => ct.DisplayName, ctx =>
             {
@@ -113,50 +147,37 @@ namespace Signum.Web.Chart
                     return ctx.None();
 
                 return ctx.Input;
-            })
-            .SetProperty(ct => ct.Format, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-
-                return ctx.Input;
-            })
-            .SetProperty(ct => ct.Unit, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-
-                return ctx.Input;
-            })
-            .SetProperty(ct => ct.OrderType, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-
-                return ctx.Input.ToEnum<OrderType>();
-            })
-            .SetProperty(ct => ct.OrderPriority, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-
-                return ctx.Input.ToInt();
             });
 
-        public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
-            .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
-                .SetProperty(cb => cb.Dimension1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-                .SetProperty(cb => cb.Dimension2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-                .SetProperty(cb => cb.Value1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-                .SetProperty(cb => cb.Value2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); }))
-                .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx));
+        public static EntityMapping<ChartBase> MappingChartBase = new EntityMapping<ChartBase>(true)
+            .SetProperty(cb => cb.Dimension1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+            .SetProperty(cb => cb.Dimension2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+            .SetProperty(cb => cb.Value1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+            .SetProperty(cb => cb.Value2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); });
 
+        public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
+            .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
+            .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
+            .SetProperty(cr => cr.Chart, MappingChartBase);
+                 
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
+            {
+            var qd = DynamicQueryManager.Current.QueryDescription(
+                Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+
+            ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
+
+            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToFilter()).ToList();
+        }
+
+        static List<Order> ExtractChartOrders(MappingContext<List<Order>> ctx)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(
                 Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
 
-            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qd).Select(fo => fo.ToFilter()).ToList();
+            ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
+            
+            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToOrder()).ToList();
         }
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(System.Web.Mvc.ControllerContext controllerContext, object queryName, Type entityType, string prefix)
@@ -260,16 +281,16 @@ namespace Signum.Web.Chart
             var v2Converter = chart.Value2.Converter();
 
             switch (chart.ChartResultType)
-            {
+            { 
                 case ChartResultType.TypeValue:
                     return new
                     {
-                        labels = new
+                        labels = new 
                         {
                             dimension1 = chart.Dimension1.GetTitle(),
-                            value1 = chart.Value1.GetTitle()
+                            value1 = chart.Value1.GetTitle() 
                         },
-                        serie = chart.GroupResults ?
+                        serie = chart.GroupResults ? 
                             resultTable.Rows.Select(r => new Dictionary<string, object>
                             { 
                                 { "dimension1", d1Converter(r[0]) }, 
@@ -283,7 +304,8 @@ namespace Signum.Web.Chart
                             }).ToList()
                     };
                 case ChartResultType.TypeTypeValue:
-                    object NullValue = "- None -";
+
+                    object NullValue = "- None -"; 
                     List<object> dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
                     Dictionary<object, Dictionary<object, object>> dic1dic0 = resultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue, r => r[2]));
 
@@ -296,9 +318,9 @@ namespace Signum.Web.Chart
                             value1 = chart.Value1.GetTitle()
                         },
                         dimension1 = dimension1Values.Select(d1Converter).ToList(),
-                        series = dic1dic0.Select(kvp => new
+                        series = dic1dic0.Select(kvp =>new
                         {
-                            dimension2 = d2Converter(kvp.Key == NullValue ? null : kvp.Key),
+                            dimension2 = d2Converter(kvp.Key == NullValue ? null: kvp.Key),
                             values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1 ?? NullValue)).ToList(),
                         }).ToList()
                     };
@@ -312,11 +334,11 @@ namespace Signum.Web.Chart
                             dimension1 = chart.Dimension1.GetTitle(),
                             dimension2 = chart.Dimension2.GetTitle(),
                         },
-                        points = resultTable.Rows.Select(r => new
+                        points = resultTable.Rows.Select(r => new 
                         {
                             value1 = v1Converter(r[2]),
                             dimension1 = d1Converter(r[0]),
-                            dimension2 = d2Converter(r[1])
+                            dimension2 = d2Converter(r[1]) 
                         }).ToList()
                     };
 
@@ -344,12 +366,14 @@ namespace Signum.Web.Chart
             }
         }
 
-        private static Func<object, object> Converter(this ChartTokenDN token)
+        private static Func<object,object> Converter(this ChartTokenDN ct)
         {
-            if (token == null)
+            if (ct == null)
                 return null;
 
-            if (typeof(Lite).IsAssignableFrom(token.Type))
+            var type = ct.Token.Type.UnNullify();
+
+            if (typeof(Lite).IsAssignableFrom(type))
             {
                 return p =>
                 {
@@ -361,7 +385,7 @@ namespace Signum.Web.Chart
                     };
                 };
             }
-            else if (token.Type.UnNullify().IsEnum)
+            else if (type.IsEnum)
             {
                 return p =>
                 {
@@ -373,7 +397,7 @@ namespace Signum.Web.Chart
                     };
                 };
             }
-            else if (typeof(DateTime) == token.Type.UnNullify())
+            else if (typeof(DateTime) == type)
             {
 
                 return p =>
@@ -384,18 +408,18 @@ namespace Signum.Web.Chart
                     return new
                     {
                         key = e.TryToString("s"),
-                        toStr = token.Format.HasText() ? e.TryToString(token.Format) : p.TryToString()
+                        toStr = ct.Token.Format.HasText() ? e.TryToString(ct.Token.Format) : p.TryToString()
                     };
                 };
             }
-            else if (typeof(IFormattable).IsAssignableFrom(token.Type.UnNullify()) && token.Format.HasText())
+            else if (typeof(IFormattable).IsAssignableFrom(type) && ct.Token.Format.HasText())
             {
                 return p =>
                 {
                     return new
                     {
                         key = p,
-                        toStr = ((IFormattable)p).TryToString(token.Format)
+                        toStr = ((IFormattable)p).TryToString(ct.Token.Format)
                     };
                 };
             }
@@ -412,8 +436,50 @@ namespace Signum.Web.Chart
 
             if (type == chart.ChartType)
                 css += " sf-chart-img-curr";
-
+            
             return css;
+        }
+
+        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, QueryTokenDN chartToken, ChartBase chart, object queryName, Context context)
+        {
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            var tokenPath = chartToken.Token.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
+
+            QueryToken queryToken = chartToken.Token;
+            if (tokenPath.Count > 0)
+                queryToken = tokenPath[0];
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+
+            bool canAggregate = (chartToken as ChartTokenDN).TryCS(ct => ct.ShouldAggregate) ?? true;
+
+            var rootTokens = chart.SubTokensChart(null, qd.Columns, canAggregate);
+
+            sb.AddLine(SearchControlHelper.TokenOptionsCombo(
+                helper, qd.QueryName, SearchControlHelper.TokensCombo(rootTokens, queryToken), context, 0, false));
+            
+            for (int i = 0; i < tokenPath.Count; i++)
+            {
+                QueryToken t = tokenPath[i];
+                List<QueryToken> subtokens = chart.SubTokensChart(t, qd.Columns, canAggregate);
+                if (!subtokens.IsEmpty())
+                {
+                    bool moreTokens = i + 1 < tokenPath.Count;
+                    sb.AddLine(SearchControlHelper.TokenOptionsCombo(
+                        helper, queryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
+                }
+            }
+            
+            return sb.ToHtml();
+        }
+
+        public static MvcHtmlString ChartRootTokens(this HtmlHelper helper, ChartBase chart, QueryDescription qd, Context context)
+        {
+            var subtokens = chart.SubTokensChart(null, qd.Columns, true);
+
+            return SearchControlHelper.TokenOptionsCombo(
+                helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, null), context, 0, false);
         }
     }
 }

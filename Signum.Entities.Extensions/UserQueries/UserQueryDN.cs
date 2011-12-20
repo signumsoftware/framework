@@ -155,7 +155,12 @@ namespace Signum.Entities.UserQueries
             tokenString = token.FullKey();
         }
 
-        public abstract void ParseData(QueryDescription queryDescription);
+        public void ParseData(QueryDescription desc)
+        {
+            ParseData(t => QueryUtils.SubTokens(t, desc.Columns)); 
+        }
+
+        public abstract void ParseData(Func<QueryToken, List<QueryToken>> subTokens);
     }
 
     [Serializable]
@@ -175,9 +180,9 @@ namespace Signum.Entities.UserQueries
             set { Set(ref orderType, value, () => OrderType); }
         }
 
-        public override void ParseData(QueryDescription queryDescription)
+        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
         {
-            Token = QueryUtils.Parse(tokenString, queryDescription);
+            Token = QueryUtils.Parse(tokenString, subTokens);
             CleanSelfModified();
         }
 
@@ -205,9 +210,9 @@ namespace Signum.Entities.UserQueries
         }
 
 
-        public override void ParseData(QueryDescription queryDescription)
+        public override void ParseData(Func<QueryToken,List<QueryToken>> subTokens)
         {
-            Token = QueryUtils.Parse(tokenString, queryDescription);
+            Token = QueryUtils.Parse(tokenString, subTokens);
             CleanSelfModified();
         }
     }
@@ -253,9 +258,9 @@ namespace Signum.Entities.UserQueries
             set { this.value = value; }
         }
 
-        public override void ParseData(QueryDescription queryDescription)
+        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
         {
-            Token = QueryUtils.Parse(tokenString, queryDescription);
+            Token = QueryUtils.Parse(tokenString, subTokens);
 
             if (value != null)
             {

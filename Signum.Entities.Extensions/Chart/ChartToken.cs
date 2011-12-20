@@ -26,11 +26,6 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class ChartTokenDN : QueryTokenDN
     {
-        static ChartTokenDN()
-        {
-
-        }
-
         public ChartTokenDN()
         {
 
@@ -45,67 +40,12 @@ namespace Signum.Entities.Chart
                 if (Token is IntervalQueryToken)
                     ((IntervalQueryToken)Token).PropertyChanged += (s, e) => NotifyChange(true);
 
-                Format = Token.Format;
-                Unit = Token.Unit;
-                DisplayName = Aggregate == AggregateFunction.Count ? "Count" : Token.NiceName();
+                DisplayName = Token.NiceName();
             }
             else
             {
-                Format = null;
-                Unit = null;
                 DisplayName = null;
             }
-
-            Notify(() => Aggregate);   
-        }
-
-        AggregateFunction? aggregate;
-        public AggregateFunction? Aggregate
-        {
-            get { return aggregate; }
-            set
-            {
-                if (Set(ref aggregate, value, () => Aggregate))
-                {
-                    if (aggregate == AggregateFunction.Count)
-                        Token = new CountAllToken();
-                    else if (Token is CountAllToken)
-                        Token = null; 
-
-                    NotifyChange(true);
-
-                    Notify(() => Token);
-                }
-            }
-        }
-
-        public Type Type
-        {
-
-            get
-            {
-                if (Token == null)
-                    return null;
-
-                if (aggregate == AggregateFunction.Average && QueryUtils.GetFilterType(Token.Type) == FilterType.Number)
-                    return Token.Type.IsNullable() ? typeof(double?) : typeof(double);
-
-                return Token.Type;
-            }
-        }
-
-        string format;
-        public string Format
-        {
-            get { return format; }
-            set { if (Set(ref format, value, () => Format))NotifyChange(false); }
-        }
-
-        string unit;
-        public string Unit
-        {
-            get { return unit; }
-            set { if (Set(ref unit, value, () => Unit))NotifyChange(false); }
         }
 
         string displayName;
@@ -115,42 +55,25 @@ namespace Signum.Entities.Chart
             set { if (Set(ref displayName, value, () => DisplayName)) NotifyChange(false); }
         }
 
-        OrderType? orderType;
-        public OrderType? OrderType
-        {
-            get { return orderType; }
-            set { if (Set(ref orderType, value, () => OrderType))Notify(() => OrderPriority); }
-        }
+        [Ignore]
+        internal ChartBase parentChart;
 
-        int? orderPriority;
-        public int? OrderPriority
-        {
-            get { return orderPriority; }
-            set { if (Set(ref orderPriority, value, () => OrderPriority))Notify(() => OrderType); }
-        }
-
-        [field: NonSerialized, Ignore]
-        internal event Func<ChartTokenDN, bool> GroupByVisibleEvent;
         [AvoidLocalization]
-        public bool GroupByVisible { get { return GroupByVisibleEvent(this); } }
+        public bool GroupByVisible { get { return parentChart.token_GroupByVisible(this); } }
 
-        [field: NonSerialized, Ignore]
-        internal event Func<ChartTokenDN, bool> ShouldAggregateEvent;
         [AvoidLocalization]
-        public bool ShouldAggregate { get { return ShouldAggregateEvent(this); } }
+        public bool Grouping { get { return parentChart.GroupResults; } }
 
-        [field: NonSerialized, Ignore]
-        internal event Func<ChartTokenDN, string> PropertyLabeleEvent;
         [AvoidLocalization]
-        public string PropertyLabel { get { return PropertyLabeleEvent(this); } }
+        public bool ShouldAggregate { get { return parentChart.token_ShouldAggregate(this); } }
 
-        [field: NonSerialized, Ignore]
-        public event Action<bool> ChartRequestChanged;
+        [AvoidLocalization]
+        public string PropertyLabel { get { return parentChart.token_PropertyLabel(this); } }
+
 
         public void NotifyChange(bool needNewQuery)
         {
-            if (ChartRequestChanged != null)
-                ChartRequestChanged(needNewQuery);
+            parentChart.NotifyChange(needNewQuery);
         }
 
         internal void NotifyExternal<T>(Expression<Func<T>> property)
@@ -164,18 +87,6 @@ namespace Signum.Entities.Chart
             Notify(() => GroupByVisible);
             Notify(() => PropertyLabel);
             Notify(() => ShouldAggregate);
-            Notify(() => Aggregate);
-        }
-
-        internal void NotifyGroup()
-        {
-            Notify(() => GroupByVisible);
-            Notify(() => ShouldAggregate);
-        }
-
-        public override string ToString()
-        {
-            return " ".Combine(Aggregate, Token);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -185,18 +96,14 @@ namespace Signum.Entities.Chart
                 return ((IDataErrorInfo)Token).Error;
             }
 
-            if (pi.Is(() => OrderPriority) || pi.Is(() => OrderType))
-            {
-                if ((OrderPriority == null) != (OrderType == null))
-                    return "Order properties mismatch";
-            }
-
             return base.PropertyValidation(pi);
         }
 
         public string GetTitle()
         {
-            return DisplayName + (Unit.HasText() ? " ({0})".Formato(Unit) : null);
+            var unit = Token.TryCC(a=>a.Unit);
+
+            return DisplayName + (unit.HasText() ? " ({0})".Formato(unit) : null);
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -204,26 +111,18 @@ namespace Signum.Entities.Chart
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public override void ParseData(QueryDescription queryDescription)
+        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
         {
-            if (string.IsNullOrEmpty(tokenString))
-                Token = null;
-            else if (tokenString == "All" && this.aggregate == AggregateFunction.Count)
-                Token = new CountAllToken();
-            else
-                Token = QueryUtils.Parse(tokenString, token => SubTokensChart(token, queryDescription.Columns));
+            Token = QueryUtils.Parse(tokenString, subTokens);
 
             CleanSelfModified();
         }
 
-
-        static readonly QueryToken[] Empty = new QueryToken[0];
-
-        public static List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
+        public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
-            var result = QueryUtils.SubTokens(token, columnDescriptions);
+            var result = parentChart.SubTokensChart(token, columnDescriptions, this.ShouldAggregate);
 
-            if (token != null)
+            if (this.Grouping && !this.ShouldAggregate && token != null)
             {
                 FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
 
@@ -233,16 +132,17 @@ namespace Signum.Entities.Chart
                 }
             }
 
-            return result;       
-        } 
+            return result;
+        }
 
-        internal Column CreateSimpleColumn()
+        internal Column CreateColumn()
         {
             return new Column(Token, DisplayName); 
         }
 
-
-       
-
+        internal new void ParseData(QueryDescription description)
+        {
+            ParseData(t => SubTokensChart(t, description.Columns));
+        }
     }
 }

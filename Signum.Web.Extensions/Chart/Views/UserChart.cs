@@ -87,13 +87,34 @@ WriteLiteral("\r\n");
 
 Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
 
-WriteLiteral("\r\n\r\n<style type=\"text/css\">\r\n.sf-chart-control .sf-repeater-element\r\n{\r\n    paddi" +
-"ng: 2px 10px;\r\n}\r\n.sf-chart-control .sf-repeater-element legend\r\n{\r\n    float: l" +
-"eft;\r\n    margin-right: 10px;\r\n}\r\n</style>\r\n\r\n<div class=\"sf-chart-control\" data" +
-"-prefix=\"");
+WriteLiteral(@"
+
+<style type=""text/css"">
+.sf-chart-control .sf-repeater-element
+{
+    padding: 2px 10px;
+}
+.sf-chart-control .sf-repeater-element legend
+{
+    float: left;
+    margin-right: 10px;
+}
+</style>
+
+<div class=""sf-chart-control"" data-subtokens-url=""");
 
 
-                                      Write(Model.ControlID);
+                                             Write(Url.Action("NewSubTokensCombo", "Chart"));
+
+WriteLiteral("\" data-add-filter-url=\"");
+
+
+                                                                                                             Write(Url.Action("AddFilter", "Chart"));
+
+WriteLiteral("\" data-prefix=\"");
+
+
+                                                                                                                                                             Write(Model.ControlID);
 
 WriteLiteral("\">\r\n");
 
@@ -146,9 +167,14 @@ WriteLiteral("            <div class=\"clearall\"></div>\r\n");
                                                  
 
         
-   Write(Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; }));
+   Write(Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; }));
 
-                                                                                         
+                                                                                                                                                      
+
+        
+   Write(Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; }));
+
+                                                                                                                                                    
 
         using (var chart = uc.SubContext(tc => tc.Chart))
         {

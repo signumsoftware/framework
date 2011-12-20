@@ -151,9 +151,19 @@ WriteLiteral("                            <th class=\"ui-state-default th-col-en
                         {
                             foreach (ResultColumn col in queryResult.Columns)
                             {
+                                var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
+                                OrderType? orderType = null;
+                                if (order != null)
+                                {
+                                    orderType = order.OrderType;
+                                }
 
-WriteLiteral("                                <th class=\"ui-state-default\">\r\n                  " +
-"                  <input type=\"hidden\" value=\"");
+WriteLiteral("                                <th class=\"ui-state-default ");
+
+
+                                                        Write((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"));
+
+WriteLiteral("\">\r\n                                    <input type=\"hidden\" value=\"");
 
 
                                                            Write(col.Column.Name);
@@ -278,8 +288,13 @@ WriteLiteral("\" class=\"sf-chart-code\">\r\n            <div class=\"sf-chart-c
 
                MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); 
 
-WriteLiteral("            <script type=\"text/javascript\">\r\n                var $chartContainer " +
-"= $(\'");
+WriteLiteral("            <script type=\"text/javascript\">\r\n                SF.Chart.Builder.ini" +
+"tOrders(\'");
+
+
+                                        Write(Model.ControlID);
+
+WriteLiteral("\');\r\n\r\n                var $chartContainer = $(\'");
 
 
                                     Write(divSelector);

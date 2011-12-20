@@ -45,7 +45,20 @@ namespace Signum.Windows.Chart
 
         private List<QueryToken> QueryTokenBuilderFilter_SubTokensEvent(QueryToken token)
         {
-            return QueryUtils.SubTokens(token, QueryDescription.Columns);
+            var cr = (UserChartDN)DataContext;
+            if (cr == null || QueryDescription == null)
+                return new List<QueryToken>();
+
+            return cr.Chart.SubTokensFilters(token, QueryDescription.Columns);
+        }
+
+        private List<QueryToken> QueryTokenBuilderOrders_SubTokensEvent(QueryToken token)
+        {
+            var cr = (UserChartDN)DataContext;
+            if (cr == null || QueryDescription == null)
+                return new List<QueryToken>();
+
+            return cr.Chart.SubTokensOrders(token, QueryDescription.Columns);
         }
     }
 }

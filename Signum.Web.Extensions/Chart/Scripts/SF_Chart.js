@@ -5,11 +5,16 @@ SF.Chart = SF.Chart || {};
 SF.Chart.Builder = (function () {
 
     var requestProcessedData = function (prefix) {
-        return { filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters() };
+        return {
+            filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters(),
+            orders: new SF.FindNavigator({ prefix: prefix }).serializeOrders()
+        };
     };
 
     var requestData = function (prefix) {
-        return $(".sf-chart-control[data-prefix='" + prefix + "']").find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: prefix }).serializeFilters();
+        return $(".sf-chart-control[data-prefix='" + prefix + "']").find(":input").serialize() +
+            "&filters=" + new SF.FindNavigator({ prefix: prefix }).serializeFilters() +
+            "&orders=" + new SF.FindNavigator({ prefix: prefix }).serializeOrders();
     }
 
     var updateChartBuilder = function ($chartControl, tokenChanged) {
@@ -53,10 +58,6 @@ SF.Chart.Builder = (function () {
 
     $(".sf-chart-token-config-trigger").live("click", function () {
         $(this).closest(".sf-chart-token").next().toggle();
-    });
-
-    $(".sf-chart-token-aggregate").live("change", function () {
-        updateChartBuilder($(this).closest(".sf-chart-control"));
     });
 
     $(".sf-query-token select").live("change", function () {
@@ -121,7 +122,55 @@ SF.Chart.Builder = (function () {
         });
     };
 
+    var originalNewSubtokensCombo = SF.FindNavigator.prototype.newSubTokensCombo;
+    SF.FindNavigator.prototype.newSubTokensCombo = function (index, url) {
+        var $combo = $(this.pf("ddlTokens_0"));
+        var $chartControl = $combo.closest(".sf-chart-control");
+        if ($combo.closest(".sf-chart-builder").length == 0) {
+            if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                url = $chartControl.attr("data-subtokens-url");
+                originalNewSubtokensCombo.call(this, index, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
+            }
+            else {
+                originalNewSubtokensCombo.call(this, index, url);
+            }
+        }
+        else {
+            $("#" + SF.compose($chartControl.attr("data-prefix"), "sfOrders")).val('');
+            $chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
+        }
+    };
+
+    var originalAddFilter = SF.FindNavigator.prototype.addFilter;
+    SF.FindNavigator.prototype.addFilter = function () {
+        var $addFilter = $(this.pf("btnAddFilter"));
+        if ($addFilter.closest(".sf-chart-builder").length == 0) {
+            var $chartControl = $addFilter.closest(".sf-chart-control");
+            if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                url = $chartControl.attr("data-add-filter-url");
+                originalAddFilter.call(this, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
+            }
+            else {
+                originalNewSubtokensCombo.call(this);
+            }
+        }
+    };
+
+    var initOrders = function (prefix) {
+        $("#" + SF.compose(prefix, "tblResults") + " th")
+        .mousedown(function (e) {
+            this.onselectstart = function () { return false };
+            return false;
+        })
+        .click(function (e) {
+            new SF.FindNavigator({ prefix: prefix }).newSortOrder($(e.target), e.shiftKey);
+            $(".sf-chart-control[data-prefix='" + prefix + "'] .sf-chart-draw").click();
+            return false;
+        });
+    };
+
     return {
+        initOrders: initOrders,
         requestProcessedData: requestProcessedData,
         requestData: requestData,
         reDraw: reDraw,
