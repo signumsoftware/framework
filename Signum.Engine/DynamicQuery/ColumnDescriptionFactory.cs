@@ -17,6 +17,7 @@ namespace Signum.Engine.DynamicQuery
     {
         readonly internal Meta Meta;
         public Func<string> OverrideDisplayName { get; set; }
+        public Func<bool> OverrideIsAllowed { get; set; }
 
         public string Name { get; internal set; }
         public Type Type { get; internal set; }
@@ -152,7 +153,13 @@ namespace Signum.Engine.DynamicQuery
 
         public bool IsAllowed()
         {
-            return Meta == null || Meta.IsAllowed();
+            if (OverrideIsAllowed != null)
+                return OverrideIsAllowed();
+
+            if (Meta != null)
+                return Meta.IsAllowed();
+
+            return true;
         }
 
         public ColumnDescription BuildColumnDescription()
