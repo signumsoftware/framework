@@ -75,6 +75,7 @@
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="ColorExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
+    <Compile Include="Statics.cs" />
     <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
     <Compile Include="DataStructures\ScopedDictionary.cs" />

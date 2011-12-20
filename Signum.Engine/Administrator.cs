@@ -131,26 +131,44 @@ close cur
 deallocate cur");
 
         public static readonly SqlPreCommandSimple RemoveAllViewsScript = new SqlPreCommandSimple(
-@"declare @schema nvarchar(128), @tbl nvarchar(128)
+@"declare @schema nvarchar(128), @view nvarchar(128)
 DECLARE @sql nvarchar(255) 
 
 declare cur cursor fast_forward for 
 select distinct table_schema, table_name
 from information_schema.tables where table_type = 'VIEW'
 open cur 
-    fetch next from cur into @schema, @tbl
+    fetch next from cur into @schema, @view
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP VIEW ' + @schema + '.' + @tbl + ';'
+        select @sql = 'DROP VIEW ' + @schema + '.' + @view + ';'
         exec sp_executesql @sql 
-        fetch next from cur into @schema, @tbl
+        fetch next from cur into @schema, @view
+    end 
+close cur 
+deallocate cur");
+
+        public static readonly SqlPreCommandSimple RemoveAllProceduresScript = new SqlPreCommandSimple(
+@"declare @schema nvarchar(128), @proc nvarchar(128), @type nvarchar(128)
+DECLARE @sql nvarchar(255) 
+
+declare cur cursor fast_forward for 
+select routine_schema, routine_name, routine_type
+from information_schema.routines
+open cur 
+    fetch next from cur into @schema, @proc, @type
+    while @@fetch_status <> -1 
+    begin 
+        select @sql = 'DROP '+ @type +' ' + @schema + '.' + @proc + ';'
+        exec sp_executesql @sql 
+        fetch next from cur into @schema, @proc, @type
     end 
 close cur 
 deallocate cur");
 
         public static SqlPreCommand RemoveAllScript()
         {
-            return SqlPreCommand.Combine(Spacing.Double, RemoveAllViewsScript, RemoveAllConstraintsScript, RemoveAllTablesScript);
+            return SqlPreCommand.Combine(Spacing.Double, RemoveAllProceduresScript, RemoveAllViewsScript, RemoveAllConstraintsScript, RemoveAllTablesScript);
         }
 
         public static SqlPreCommand ShrinkDataBase()
@@ -272,7 +290,7 @@ deallocate cur");
            where T : IdentifiableEntity
         {
             return (from f1 in Database.Query<T>()
-                    join f2 in Database.Query<T>() on key.Invoke(f1) equals key.Invoke(f2)
+                    join f2 in Database.Query<T>() on key.Evaluate(f1) equals key.Evaluate(f2)
                     where f1.Id > f2.Id
                     select f1).UnsafeDelete();
         }

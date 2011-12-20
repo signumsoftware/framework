@@ -17,10 +17,7 @@ namespace Signum.Services
 {
     public abstract class ServerBasic : IBaseServer, IDynamicQueryServer
     {
-        public static ExecutionContext GetDefaultExecutionContext(MethodBase mi, string desc)
-        {
-            return SuggestUserInterfaceAttribute.Suggests(mi) == true ? ExecutionContext.UserInterface : null;
-        }
+        protected Dictionary<string, object> session = new Dictionary<string, object>();
 
         protected T Return<T>(MethodBase mi, Func<T> function)
         {
@@ -31,6 +28,7 @@ namespace Signum.Services
         {
             try
             {
+                using (ScopeSessionFactory.OverrideSession(session))
                 using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
                 {
                     return function();
@@ -39,6 +37,10 @@ namespace Signum.Services
             catch (Exception e)
             {
                 throw new FaultException(e.Message);
+            }
+            finally
+            {
+                Statics.CleanThreadContextAndAssert();
             }
         }
 
@@ -50,6 +52,11 @@ namespace Signum.Services
         protected void Execute(MethodBase mi, string description, Action action)
         {
             Return(mi, description, () => { action(); return true; });
+        }
+
+        public static ExecutionContext GetDefaultExecutionContext(MethodBase mi, string desc)
+        {
+            return SuggestUserInterfaceAttribute.Suggests(mi) == true ? ExecutionContext.UserInterface : null;
         }
 
         #region IBaseServer

@@ -334,6 +334,24 @@ namespace Signum.Utilities.ExpressionTrees
             return  ReflectionTools.MethodEqual(a.AddMethod, b.AddMethod)
                 && this.CompareExpressionList(a.Arguments, b.Arguments);
         }
+
+        public static IEqualityComparer<E> GetComparer<E>() where E:Expression
+        {
+            return new ExpressionsComparer<E>(); 
+        }
+
+        class ExpressionsComparer<E> : IEqualityComparer<E> where E : Expression
+        {
+            public bool Equals(E x, E y)
+            {
+                return ExpressionComparer.AreEqual(x, y);
+            }
+
+            public int GetHashCode(E obj)
+            {
+                return obj.Type.GetHashCode() ^ obj.NodeType.GetHashCode(); 
+            }
+        }
     }
 
 }

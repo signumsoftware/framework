@@ -233,7 +233,7 @@ namespace Signum.Web
 
         public static EntitySettings EntitySettings(Type type)
         {
-            return Manager.EntitySettings.GetOrThrow(type, "no EntitySettings for type {0} found");
+            return Manager.EntitySettings.GetOrThrow(type, "No EntitySettings for type {0} found");
         } 
 
         public static void AddQuerySettings(List<QuerySettings> settings)
@@ -421,7 +421,6 @@ namespace Signum.Web
         public string FilterBuilderView = ViewPrefix.Formato("FilterBuilder");
         public string PaginationView = ViewPrefix.Formato("Pagination");
         public string ValueLineBoxView = ViewPrefix.Formato("ValueLineBox");
-        public string ErrorPageView = ViewPrefix.Formato("Error");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
         protected Dictionary<string, object> WebQueryNames { get; private set; }

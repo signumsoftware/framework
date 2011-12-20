@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 
 namespace Signum.Utilities
 {
@@ -13,20 +14,24 @@ namespace Signum.Utilities
     /// </summary>
     public static class ExpressionExtensions
     {
-        static Dictionary<LambdaExpression, Delegate> cache = new Dictionary<LambdaExpression, Delegate>();
+        static ConcurrentDictionary<LambdaExpression, Delegate> cache = new ConcurrentDictionary<LambdaExpression, Delegate>();
 
         public static T CompileAndStore<T>(this Expression<T> expression)
         {
-            lock (cache)
-                return (T)(object)cache.GetOrCreate(expression, () => (Delegate)(object)expression.Compile());
+            return (T)(object)cache.GetOrAdd(expression, exp =>
+                {
+                    using (HeavyProfiler.Log("CompiledAndStore", () => exp.NiceToString()))
+                    {
+                        return (Delegate)(object)exp.Compile();
+                    }
+                });
         }
-
 
         /// <summary>
         /// Invoke expression (compile & invoke). If you want to be able to expand
         /// call to expression you have to use this method for invocation.
         /// </summary>
-        public static T Invoke<T>(this Expression<Func<T>> expr)
+        public static T Evaluate<T>(this Expression<Func<T>> expr)
         {
             return expr.CompileAndStore()();
         }
@@ -35,7 +40,7 @@ namespace Signum.Utilities
         /// Invoke expression (compile & invoke). If you want to be able to expand
         /// call to expression you have to use this method for invocation.
         /// </summary>
-        public static T Invoke<A0, T>(this Expression<Func<A0, T>> expr, A0 a0)
+        public static T Evaluate<A0, T>(this Expression<Func<A0, T>> expr, A0 a0)
         {
             return expr.CompileAndStore()(a0);
         }
@@ -44,7 +49,7 @@ namespace Signum.Utilities
         /// Invoke expression (compile & invoke). If you want to be able to expand
         /// call to expression you have to use this method for invocation.
         /// </summary>
-        public static T Invoke<A0, A1, T>(this Expression<Func<A0, A1, T>> expr, A0 a0, A1 a1)
+        public static T Evaluate<A0, A1, T>(this Expression<Func<A0, A1, T>> expr, A0 a0, A1 a1)
         {
             return expr.CompileAndStore()(a0, a1);
         }
@@ -53,7 +58,7 @@ namespace Signum.Utilities
         /// Invoke expression (compile & invoke). If you want to be able to expand
         /// call to expression you have to use this method for invocation.
         /// </summary>
-        public static T Invoke<A0, A1, A2, T>(this Expression<Func<A0, A1, A2, T>> expr, A0 a0, A1 a1, A2 a2)
+        public static T Evaluate<A0, A1, A2, T>(this Expression<Func<A0, A1, A2, T>> expr, A0 a0, A1 a1, A2 a2)
         {
             return expr.CompileAndStore()(a0, a1, a2);
         }
@@ -62,7 +67,7 @@ namespace Signum.Utilities
         /// Invoke expression (compile & invoke). If you want to be able to expand
         /// call to expression you have to use this method for invocation.
         /// </summary>
-        public static T Invoke<A0, A1, A2, A3, T>(this Expression<Func<A0, A1, A2, A3, T>> expr, A0 a0, A1 a1, A2 a2, A3 a3)
+        public static T Evaluate<A0, A1, A2, A3, T>(this Expression<Func<A0, A1, A2, A3, T>> expr, A0 a0, A1 a1, A2 a2, A3 a3)
         {
             return expr.CompileAndStore()(a0, a1, a2, a3);
         }

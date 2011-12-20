@@ -46,9 +46,11 @@ namespace Signum.Test
 
         public static void AssertAll<T>(this IEnumerable<T> collection, Expression<Func<T, bool>> predicate)
         {
+            var func = predicate.Compile();
+
             foreach (var item in collection)
             {
-                if (!predicate.Invoke(item))
+                if (!func(item))
                     Assert.Fail("'{0}' fails on '{1}'".Formato(item, predicate.NiceToString())); 
             }
         }

@@ -15,7 +15,7 @@ namespace Signum.Engine
     /// <summary>
     /// Allows easy nesting of transaction using 'using' statement
     /// Keeps an implicit stack of Transaction objects over the StackTrace of the current Thread
-    /// and an explicit ThreadStatic stack of RealTransaction objects.
+    /// and an explicit stack of RealTransaction objects on thread variable.
     /// Usually, just the first Transaccion creates a RealTransaction, but you can create more using 
     /// forceNew = true
     /// All Transaction can cancel but only the one that created the RealTransaction can Commit 
@@ -34,15 +34,15 @@ namespace Signum.Engine
             UnexpectedBehaviourCallback("TRANSACTION ROLLBACKED!", new StackTrace(2, true));
         }
 
-        [ThreadStatic]
-        static Dictionary<BaseConnection, ICoreTransaction> currents;
+        static readonly Variable<Dictionary<BaseConnection, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<BaseConnection, ICoreTransaction>>("transactions");
 
         bool commited;
         ICoreTransaction coreTransaction; 
 
         interface ICoreTransaction
         {
-            event Action RealCommit;
+            event Action PostRealCommit;
+            void CallPostRealCommit();
             event Action PreRealCommit;
             SqlConnection Connection { get; }
             SqlTransaction Transaction { get; }
@@ -66,10 +66,10 @@ namespace Signum.Engine
                 this.parent = parent;
             }
 
-            public event Action RealCommit
+            public event Action PostRealCommit
             {
-                add { parent.RealCommit += value; }
-                remove { parent.RealCommit -= value; }
+                add { parent.PostRealCommit += value; }
+                remove { parent.PostRealCommit -= value; }
             }
 
             public event Action PreRealCommit
@@ -99,6 +99,11 @@ namespace Signum.Engine
             {
                 get { return parent.UserData; }
             }
+
+            public void CallPostRealCommit()
+            {
+
+            }
         }
 
         class RealTransaction : ICoreTransaction
@@ -110,7 +115,7 @@ namespace Signum.Engine
             public DateTime Time { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action RealCommit;
+            public event Action PostRealCommit;
             public event Action PreRealCommit;
 
             IsolationLevel? IsolationLevel;
@@ -149,14 +154,16 @@ namespace Signum.Engine
                     }
 
                     Transaction.Commit();
+                }
+            }
 
-                    while (RealCommit != null)
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
+                {
+                    foreach (Action item in PostRealCommit.GetInvocationList())
                     {
-                        foreach (Action item in RealCommit.GetInvocationList())
-                        {
-                            item();
-                            RealCommit -= item;
-                        }
+                        item();
                     }
                 }
             }
@@ -201,7 +208,7 @@ namespace Signum.Engine
             string savePointName;
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action RealCommit;
+            public event Action PostRealCommit;
             public event Action PreRealCommit;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
@@ -245,13 +252,15 @@ namespace Signum.Engine
                         PreRealCommit -= item;
                     }
                 }
+            }
 
-                while (RealCommit != null)
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
                 {
-                    foreach (Action item in RealCommit.GetInvocationList())
+                    foreach (Action item in PostRealCommit.GetInvocationList())
                     {
                         item();
-                        RealCommit -= item;
                     }
                 }
             }
@@ -273,7 +282,7 @@ namespace Signum.Engine
             public DateTime Time { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action RealCommit;
+            public event Action PostRealCommit;
             public event Action PreRealCommit;
 
             public NoneTransaction(ICoreTransaction parent)
@@ -309,14 +318,16 @@ namespace Signum.Engine
                     }
 
                     //Transaction.Commit();
+                }
+            }
 
-                    while (RealCommit != null)
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
+                {
+                    foreach (Action item in PostRealCommit.GetInvocationList())
                     {
-                        foreach (Action item in RealCommit.GetInvocationList())
-                        {
-                            item();
-                            RealCommit -= item;
-                        }
+                        item();
                     }
                 }
             }
@@ -361,28 +372,29 @@ namespace Signum.Engine
         {
             BaseConnection bc = AssertConnection();
 
-            ICoreTransaction parent = currents.TryGetC(bc);
+            var dic = currents.Value;
+            ICoreTransaction parent = dic.TryGetC(bc);
             if (parent == null || forceNew)
             {
-                currents[bc] = coreTransaction = new RealTransaction(parent, null);
+                dic[bc] = coreTransaction = new RealTransaction(parent, null);
             }
             else
             {
                 AssertTransaction();
-                currents[bc] = coreTransaction = new FakedTransaction(parent);
+                dic[bc] = coreTransaction = new FakedTransaction(parent);
             }
         }
     
         Transaction(BaseConnection bc, ICoreTransaction transaction)
         {
-            currents[bc] = coreTransaction = transaction;
+            currents.Value[bc] = coreTransaction = transaction;
         }
 
         public static Transaction None()
         {
             BaseConnection bc = AssertConnection();
 
-            ICoreTransaction parent = currents.TryGetC(bc);
+            ICoreTransaction parent = currents.Value.TryGetC(bc);
 
             return new Transaction(bc, new NoneTransaction(parent));
         }
@@ -404,15 +416,15 @@ namespace Signum.Engine
         {
             BaseConnection bc = AssertConnection();
 
-            ICoreTransaction parent = currents.TryGetC(bc);
+            ICoreTransaction parent = currents.Value.TryGetC(bc);
 
             return new Transaction(bc, new RealTransaction(parent, isolationLevel));
         }
 
         private static BaseConnection AssertConnection()
         {
-            if (currents == null)
-                currents = new Dictionary<BaseConnection, ICoreTransaction>();
+            if (currents.Value == null)
+                currents.Value = new Dictionary<BaseConnection, ICoreTransaction>();
 
             BaseConnection bc = ConnectionScope.Current;
 
@@ -430,13 +442,13 @@ namespace Signum.Engine
 
         static ICoreTransaction GetCurrent()
         {
-            return currents.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
+            return currents.Value.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
         }
 
-        public static event Action RealCommit
+        public static event Action PostRealCommit
         {
-            add { GetCurrent().RealCommit += value; }
-            remove { GetCurrent().RealCommit -= value; }
+            add { GetCurrent().PostRealCommit += value; }
+            remove { GetCurrent().PostRealCommit -= value; }
         }
 
         public static event Action PreRealCommit
@@ -452,7 +464,7 @@ namespace Signum.Engine
 
         public static bool HasTransaction
         {
-            get { return currents != null && currents.ContainsKey(ConnectionScope.Current); }
+            get { return currents.Value != null && currents.Value.ContainsKey(ConnectionScope.Current); }
         }
 
         public static SqlConnection CurrentConnection
@@ -508,18 +520,12 @@ namespace Signum.Engine
             ICoreTransaction parent = coreTransaction.Finish();
 
             if (parent == null)
-                currents.Remove(ConnectionScope.Current);
+                currents.Value.Remove(ConnectionScope.Current);
             else
-                currents[ConnectionScope.Current] = parent;
-        }
+                currents.Value[ConnectionScope.Current] = parent;
 
-        public static void ForceClean()
-        {
-            if (currents != null && currents.Count != 0)
-            {
-                UnexpectedBehaviourCallback("DIRTY TRANSACTIONS FOUND!", new StackTrace(1));
-                currents.Clear();
-            }
+            if (commited)
+                coreTransaction.CallPostRealCommit();
         }
     }
 }

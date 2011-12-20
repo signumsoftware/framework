@@ -73,6 +73,7 @@ namespace ASP
 
 
    
+    Model.ReadOnly = false; /*SearchControls Context should never inherit Readonly property of parent context */
     FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);

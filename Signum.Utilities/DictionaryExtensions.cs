@@ -5,6 +5,8 @@ using System.Text;
 using System.Diagnostics;
 using System.Collections.Specialized;
 using Signum.Utilities.Properties;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
@@ -87,11 +89,27 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string message)
+        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, Exception> exception)
         {
             V result;
             if (!dictionary.TryGetValue(key, out result))
-                throw new KeyNotFoundException(message.Formato(key));
+                throw exception(key);
+            return result;
+        }
+
+        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat)
+        {
+            V result;
+            if (!dictionary.TryGetValue(key, out result))
+                throw new KeyNotFoundException(messageWithFormat.Formato(key));
+            return result;
+        }
+
+        public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key)
+        {
+            V result;
+            if (!dictionary.TryGetValue(key, out result))
+                throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".Formato(key, key.GetType().TypeName(), dictionary.GetType().TypeName()));
             return result;
         }
 
@@ -413,15 +431,21 @@ namespace Signum.Utilities
 
         public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key)
         {
-            V value = dictionary[key];
+            V value = dictionary.GetOrThrow(key);
             dictionary.Remove(key);
             return value;
         }
 
-
         public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string message)
         {
             V value = dictionary.GetOrThrow(key, message);
+            dictionary.Remove(key);
+            return value;
+        }
+
+        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, Exception> exception)
+        {
+            V value = dictionary.GetOrThrow(key, exception);
             dictionary.Remove(key);
             return value;
         }

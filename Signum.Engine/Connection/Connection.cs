@@ -34,16 +34,16 @@ namespace Signum.Engine
         public Schema Schema { get; private set; }
         public DynamicQueryManager DynamicQueryManager { get; private set; }
 
-        [ThreadStatic]
-        static TextWriter log;
-        public static TextWriter CurrentLog
+        static readonly Variable<TextWriter> logger = Statics.ThreadVariable<TextWriter>("connectionlogger");
+        public static TextWriter CurrentLogger
         {
-            get { return log; }
-            set { log = value; }
+            get { return logger.Value; }
+            set { logger.Value = value; }
         }
 
         protected static void Log(SqlPreCommandSimple pcs)
         {
+            var log = logger.Value;
             if (log != null)
             {
                 log.WriteLine(pcs.Sql);
@@ -93,7 +93,16 @@ namespace Signum.Engine
         public int? CommandTimeout
         {
             get { return commandTimeout; }
+
             set { commandTimeout = value; }
+        }
+
+        static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout"); 
+        public static IDisposable CommandTimeoutScope(int? timeout)
+        {
+            var old = scopeTimeout.Value;
+            scopeTimeout.Value = timeout;
+            return new Disposable(() => scopeTimeout.Value = timeout); 
         }
 
         public string ConnectionString
@@ -101,9 +110,6 @@ namespace Signum.Engine
             get { return connectionString; }
             set { connectionString = value; }
         }
-
-        [ThreadStatic]
-        public static long CommandCount = 0;
 
         SqlConnection EnsureConnection()
         {
@@ -120,7 +126,7 @@ namespace Signum.Engine
         {
             SqlCommand cmd = new SqlCommand();
 
-            int? timeout = CommandTimeoutScope.Current ?? CommandTimeout;
+            int? timeout = scopeTimeout.Value ?? CommandTimeout;
             if (timeout.HasValue)
                 cmd.CommandTimeout = timeout.Value;
 
@@ -156,7 +162,6 @@ namespace Signum.Engine
                 try
                 {
                     object result = cmd.ExecuteScalar();
-                    CommandCount++;
                     return result;
                 }
                 catch (SqlException ex)
@@ -178,7 +183,6 @@ namespace Signum.Engine
                 try
                 {
                     int result = cmd.ExecuteNonQuery();
-                    CommandCount++;
                     return result;
                 }
                 catch (SqlException ex)
@@ -201,7 +205,6 @@ namespace Signum.Engine
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        CommandCount++;
                         FieldReader fr = new FieldReader(reader);
                         int row = -1;
                         try
@@ -237,7 +240,6 @@ namespace Signum.Engine
             try
             {
                 SqlCommand cmd = NewCommand(preCommand, null);
-                CommandCount++;
                 return cmd.ExecuteReader();
             }
             catch (SqlException ex)
@@ -261,7 +263,6 @@ namespace Signum.Engine
 
                     DataTable result = new DataTable();
                     da.Fill(result);
-                    CommandCount++;
                     return result;
                 }
                 catch (SqlException ex)
@@ -285,7 +286,6 @@ namespace Signum.Engine
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataSet result = new DataSet();
                     da.Fill(result);
-                    CommandCount++;
                     return result;
                 }
                 catch (SqlException ex)

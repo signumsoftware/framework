@@ -291,9 +291,6 @@
   <data name="Second" xml:space="preserve">
     <value>Second</value>
   </data>
-  <data name="State0NotRegisteredInStateValidator" xml:space="preserve">
-    <value>State {0} not registered in StateValidator</value>
-  </data>
   <data name="Telephone" xml:space="preserve">
     <value>Telephone</value>
   </data>
@@ -341,5 +338,17 @@
   </data>
   <data name="TheNumberOf0IsBeingMultipliedBy1" xml:space="preserve">
     <value>The number of {0} is being multiplied by {1}</value>
+  </data>
+  <data name="FilterOperation_NotContains" xml:space="preserve">
+    <value>not contains</value>
+  </data>
+  <data name="FilterOperation_NotEndsWith" xml:space="preserve">
+    <value>not ends with</value>
+  </data>
+  <data name="FilterOperation_NotLike" xml:space="preserve">
+    <value>not like</value>
+  </data>
+  <data name="FilterOperation_NotStartsWith" xml:space="preserve">
+    <value>not starts with</value>
   </data>
 </root>

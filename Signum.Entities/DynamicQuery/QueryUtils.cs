@@ -107,10 +107,15 @@ namespace Signum.Entities.DynamicQuery
                 FilterType.String, new List<FilterOperation>
                 {
                     FilterOperation.Contains,
-                    FilterOperation.StartsWith,
-                    FilterOperation.EndsWith,
                     FilterOperation.EqualTo,
+                    FilterOperation.StartsWith,
+                    FilterOperation.EndsWith,                    
+                    FilterOperation.Like,                    
+                    FilterOperation.NotContains,
                     FilterOperation.DistinctTo, 
+                    FilterOperation.NotStartsWith,
+                    FilterOperation.NotEndsWith,
+                    FilterOperation.NotLike,
                 }
             },
             { 

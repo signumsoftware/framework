@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using System.Threading;
 
 namespace Signum.Utilities.Synchronization
 {
@@ -13,24 +14,8 @@ namespace Signum.Utilities.Synchronization
         
         volatile bool moveNext = true;
 
-        //lo que necesitaria es una variable de instancia ThreadStatic
-        //podriamos imitarla con un diccionario por hilo de instancia
-        //pero requeriria locks asi que en lugar de Instancia->Hilo->Valor hacemos Hilo->Instancia->Valor y asi aprovechamos el thread static
-        [ThreadStatic]
-        static Dictionary<TreadSafeEnumerator<T>, T> dictionary;
-      
-        T current
-        {
-            get { return dictionary[this]; }
-            set
-            {
-                if (dictionary == null)
-                    dictionary = new Dictionary<TreadSafeEnumerator<T>, T>();
-
-                dictionary[this] = value;
-            }
-        }
-
+        readonly ThreadLocal<T> current = new ThreadLocal<T>();
+     
         public TreadSafeEnumerator(IEnumerable<T> source)
         {
             enumerator = source.GetEnumerator(); 
@@ -48,12 +33,12 @@ namespace Signum.Utilities.Synchronization
 
         public T Current
         {
-            get {return current;  }
+            get { return current.Value; }
         }
 
         object IEnumerator.Current
         {
-            get { return current; }
+            get { return current.Value; }
         }
 
         public bool MoveNext()
@@ -61,9 +46,9 @@ namespace Signum.Utilities.Synchronization
             lock (key)
             {
                 if (moveNext && (moveNext = enumerator.MoveNext()))
-                    current = enumerator.Current;
+                    current.Value = enumerator.Current;
                 else
-                    current = default(T);
+                    current.Value = default(T);
 
                 return moveNext; 
             }
@@ -76,11 +61,7 @@ namespace Signum.Utilities.Synchronization
 
         public void Dispose()
         {
-            if (dictionary != null)
-            {
-                dictionary.Remove(this);
-                if (dictionary.Count == 0) dictionary = null; 
-            }
+            current.Dispose();
         }
     }
 }

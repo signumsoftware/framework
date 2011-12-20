@@ -98,8 +98,8 @@ namespace Signum.Utilities
 
         public static bool Enabled { get; set; }
 
-        [ThreadStatic]
-        static HeavyProfilerEntry current;
+        static readonly Variable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy"); 
+
         public static readonly List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
 
         public static void Clean()
@@ -111,7 +111,15 @@ namespace Signum.Utilities
             }
         }
 
-        public static Tracer Log(string role = null, object aditionalData = null)
+        public static Tracer Log(string role, Func<string> aditionalData)
+        {
+            if (!Enabled)
+                return null;
+
+            return Log(role, aditionalData());
+        }
+
+        public static Tracer Log(string role = null, string aditionalData = null)
         {
             if (!Enabled)
                 return null;
@@ -127,16 +135,16 @@ namespace Signum.Utilities
             return new Tracer { saveCurrent = saveCurrent };
         }
 
-        private static HeavyProfilerEntry CreateNewEntry(string role, object aditionalData)
+        private static HeavyProfilerEntry CreateNewEntry(string role, string aditionalData)
         {
             Stopwatch discount = Stopwatch.StartNew();
 
-            var saveCurrent = current;
+            var saveCurrent = current.Value;
 
-            if (aditionalData is string)
+            if (aditionalData != null)
                 aditionalData = string.Intern((string)aditionalData);
 
-            current = new HeavyProfilerEntry()
+            var newCurrent = current.Value = new HeavyProfilerEntry()
             {
                 Discount = discount,
                 Role = role,
@@ -146,7 +154,7 @@ namespace Signum.Utilities
 
             discount.Stop();
 
-            current.Stopwatch = Stopwatch.StartNew();
+            newCurrent.Stopwatch = Stopwatch.StartNew();
             return saveCurrent;
         }
 
@@ -156,7 +164,8 @@ namespace Signum.Utilities
 
             public void Dispose()
             {
-                current.Stopwatch.Stop();
+                var cur = current.Value;
+                cur.Stopwatch.Stop();
 
                 TotalEntriesCount++;
 
@@ -164,9 +173,9 @@ namespace Signum.Utilities
                 {
                     lock (Entries)
                     {
-                        current.Index = Entries.Count;
-                        current.Parent = null;
-                        Entries.Add(current);
+                        cur.Index = Entries.Count;
+                        cur.Parent = null;
+                        Entries.Add(cur);
                     }
                 }
                 else
@@ -174,16 +183,24 @@ namespace Signum.Utilities
                     if (saveCurrent.Entries == null)
                         saveCurrent.Entries = new List<HeavyProfilerEntry>();
 
-                    current.Index = saveCurrent.Entries.Count;
-                    current.Parent = saveCurrent;
-                    saveCurrent.Entries.Add(current);
+                    cur.Index = saveCurrent.Entries.Count;
+                    cur.Parent = saveCurrent;
+                    saveCurrent.Entries.Add(cur);
                 }
 
-                current = saveCurrent;
+                current.Value = saveCurrent;
             }
         }
 
-        public static void Switch(this Tracer tracer, string role = null, object aditionalData = null)
+        public static void Switch(this Tracer tracer, string role, Func<string> aditionalData)
+        {
+            if (tracer == null)
+                return;
+
+            tracer.Switch(role, aditionalData()); 
+        }
+
+        public static void Switch(this Tracer tracer, string role = null, string aditionalData = null)
         {
             if (tracer == null)
                 return;
@@ -195,7 +212,7 @@ namespace Signum.Utilities
 
         public static void CleanCurrent() //To fix possible non-dispossed ones
         {
-            current = null; 
+            current.Value = null; 
         }
 
         public static IEnumerable<HeavyProfilerEntry> AllEntries()
@@ -298,7 +315,7 @@ namespace Signum.Utilities
             return this.FollowC(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
         }
 
-        public object AditionalData;
+        public string AditionalData;
 
         internal Stopwatch Stopwatch;
         internal Stopwatch Discount;

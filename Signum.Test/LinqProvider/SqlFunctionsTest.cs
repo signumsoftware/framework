@@ -29,7 +29,7 @@ namespace Signum.Test.LinqProvider
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLog = new DebugTextWriter();
+            Connection.CurrentLogger = new DebugTextWriter();
         }
 
         [TestMethod]
@@ -42,9 +42,9 @@ namespace Signum.Test.LinqProvider
             Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
             Assert.IsTrue(artists.Any(a => a.Name.Like("%Michael%")));
 
-            Dump((ArtistDN a)=> a.Name.Length);
-            Dump((ArtistDN a)=>a.Name.ToLower());
-            Dump((ArtistDN a)=>a.Name.ToUpper());
+            Dump((ArtistDN a) => a.Name.Length);
+            Dump((ArtistDN a) => a.Name.ToLower());
+            Dump((ArtistDN a) => a.Name.ToUpper());
             Dump((ArtistDN a) => a.Name.TrimStart());
             Dump((ArtistDN a) => a.Name.TrimEnd());
             Dump((ArtistDN a) => a.Name.Substring(2).InSql());
@@ -139,7 +139,7 @@ namespace Signum.Test.LinqProvider
         public void Dump<T,S>(Expression<Func<T, S>> bla)
             where T:IdentifiableEntity
         {
-            Debug.WriteLine(Database.Query<T>().Select(a => bla.Invoke(a).InSql()).ToString(","));
+            Debug.WriteLine(Database.Query<T>().Select(a => bla.Evaluate(a).InSql()).ToString(","));
         }
     }
 }

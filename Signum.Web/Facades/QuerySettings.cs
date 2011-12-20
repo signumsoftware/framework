@@ -137,10 +137,10 @@ namespace Signum.Web
         }
 
 
-        public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> property, Func<HtmlHelper, object, MvcHtmlString> formatter)
+        public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> propertyRoute, Func<HtmlHelper, object, MvcHtmlString> formatter)
          where T : IRootEntity
         {
-            PropertyFormatters.Add(PropertyRoute.Construct(property), formatter);
+            PropertyFormatters.Add(PropertyRoute.Construct(propertyRoute), formatter);
         }
     }
 

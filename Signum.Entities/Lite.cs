@@ -399,9 +399,6 @@ namespace Signum.Entities
             if (lite == null)
                 return null;
 
-            if (lite is Lite<T>)
-                return (Lite<T>)lite;
-
             if (lite.UntypedEntityOrNull != null)
                 return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = lite.ToStr };
             else
@@ -413,9 +410,6 @@ namespace Signum.Entities
         {
             if (lite == null)
                 return null;
-
-            if (lite is Lite<T>)
-                return (Lite<T>)lite;
 
             if (lite.UntypedEntityOrNull != null)
                 return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = toStr };
