@@ -10,6 +10,7 @@ using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
+using Signum.Engine.Logging;
 
 namespace Signum.Engine.Operations
 {
@@ -64,13 +65,15 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
-            LogOperationDN log = new LogOperationDN
+            OperationLogDN log = new OperationLogDN
             {
                 Operation = EnumLogic<OperationDN>.ToEntity(Key),
                 Start = TimeZoneManager.Now,
                 User = UserDN.Current.ToLite()
             };
 
+            using (OperationLogic.AllowSave<T>())
+            {
             try
             {
                 using (Transaction tr = new Transaction())
@@ -85,7 +88,7 @@ namespace Signum.Engine.Operations
 
                     log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
                     log.End = TimeZoneManager.Now;
-                    using (AuthLogic.User(AuthLogic.SystemUser))
+                    using (UserDN.Scope(AuthLogic.SystemUser))
                         log.Save();
 
                     tr.Commit();
@@ -97,26 +100,29 @@ namespace Signum.Engine.Operations
 
                 if (!entity.IsNew)
                 {
-                    try
-                    {
-                        using (Transaction tr2 = new Transaction(true))
-                        {
-                            log.Target = entity.ToLite<IIdentifiable>();
-                            log.Exception = ex.Message;
-                            log.End = TimeZoneManager.Now;
-                           
-                            using (AuthLogic.User(AuthLogic.SystemUser))
-                                log.Save();
+                    var exLog = ex.LogException();
 
-                            tr2.Commit();
-                        }
-                    }
-                    catch (Exception)
+                    using (Transaction tr2 = new Transaction(true))
                     {
+                        OperationLogDN log2 = new OperationLogDN
+                        {
+                            Operation = log.Operation,
+                            Start = log.Start,
+                            User = log.User,
+                            Target = entity.ToLite<IIdentifiable>(),
+                            Exception = exLog.ToLite(),
+                            End = TimeZoneManager.Now
+                        };
+
+                        using (UserDN.Scope(AuthLogic.SystemUser))
+                            log2.Save();
+
+                        tr2.Commit();
                     }
                 }
                 throw;
             }
+        }
         }
 
         protected virtual void OnBeginOperation(T entity)

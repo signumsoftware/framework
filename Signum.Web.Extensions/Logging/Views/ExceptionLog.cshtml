@@ -1,20 +1,44 @@
 ﻿@using Signum.Entities.Logging
-
 @using (var e = Html.TypeContext<ExceptionLogDN>())
 {
     @Html.ValueLine(e, f => f.CreationDate)<text>(</text>@e.Value.CreationDate.ToUserInterface().ToAgoString()<text>)</text>
 
     @Html.ValueLine(e, f => f.ThreadId)
-    @Html.ValueLine(e, f => f.RequestUrl)
-    @Html.ValueLine(e, f => f.UserAgent)
+    
     @Html.ValueLine(e, f => f.ActionName)
     @Html.ValueLine(e, f => f.ControllerName)
+    @Html.ValueLine(e, f => f.RequestUrl)
+    @Html.ValueLine(e, f => f.UrlReferer)
+    @Html.ValueLine(e, f => f.UserAgent)
+    @Html.ValueLine(e, f => f.UserHostAddress)
+    @Html.ValueLine(e, f => f.UserHostName)
+    
+    if (e.ReadOnly)
+    {
+        <h3>
+            QueryString</h3>
+        <pre>@e.Value.QueryString</pre>
+    
+        <h3>
+            Form</h3>
+        <pre>@e.Value.Form</pre>
+
+        <h3>
+            Session</h3>
+        <pre>@e.Value.Session</pre>
+    }
+    else
+    {
+        @Html.ValueLine(e, f => f.QueryString, vl => vl.ValueLineType = ValueLineType.TextArea)
+        @Html.ValueLine(e, f => f.Form, vl => vl.ValueLineType = ValueLineType.TextArea)
+        @Html.ValueLine(e, f => f.Session, vl => vl.ValueLineType = ValueLineType.TextArea)  
+    }  
 
     @Html.EntityLine(e, f => f.User)
-    @Html.EntityLine(e, f => f.Context)
 
     <h3>@e.Value.ExceptionType</h3>
     <pre>@e.Value.ExceptionMessage</pre>
-    <h3>StackTrace</h3>
+    <h3>
+        StackTrace</h3>
     <pre>@e.Value.StackTrace</pre>
 }

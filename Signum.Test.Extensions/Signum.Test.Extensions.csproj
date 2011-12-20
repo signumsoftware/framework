@@ -67,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreateMusicEnvironmentTest.cs" />
+    <Compile Include="DemoPackage.cs" />
+    <Compile Include="DemoPackageLogic.cs" />
     <Compile Include="EntityGroupsTest.cs" />
     <Compile Include="IServerSample.cs" />
     <Compile Include="MusicGraph.cs" />

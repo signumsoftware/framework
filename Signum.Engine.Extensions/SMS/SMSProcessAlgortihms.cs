@@ -9,7 +9,7 @@ using Signum.Engine.Operations;
 using Signum.Engine;
 using Signum.Entities.Processes;
 
-namespace Signum.Engine.Extensions.SMS
+namespace Signum.Engine.SMS
 {
     public class SMSMessageSendProcessAlgortihm : IProcessAlgorithm
     {
@@ -20,7 +20,7 @@ namespace Signum.Engine.Extensions.SMS
 
         public int NotificationSteps = 100;
 
-        public FinalState Execute(IExecutingProcess executingProcess)
+        public void Execute(IExecutingProcess executingProcess)
         {
             SMSSendPackageDN package = (SMSSendPackageDN)executingProcess.Data;
 
@@ -29,11 +29,9 @@ namespace Signum.Engine.Extensions.SMS
                                                  message.State == SMSMessageState.Created
                                                  select message.ToLite()).ToList();
 
-            int lastPercentage = 0;
             for (int i = 0; i < messages.Count; i++)
             {
-                if (executingProcess.Suspended)
-                    return FinalState.Suspended;
+                executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
                 SMSMessageDN ms = messages[i].RetrieveAndForget();
 
@@ -47,15 +45,8 @@ namespace Signum.Engine.Extensions.SMS
                     package.Save();
                 }
 
-                int percentage = (NotificationSteps * i) / messages.Count;
-                if (percentage != lastPercentage)
-                {
-                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                    lastPercentage = percentage;
-                }
+                executingProcess.ProgressChanged(i, messages.Count);
             }
-
-            return FinalState.Finished;
         }
     }
 
@@ -74,7 +65,7 @@ namespace Signum.Engine.Extensions.SMS
 
         public int NotificationSteps = 100;
 
-        public FinalState Execute(IExecutingProcess executingProcess)
+        public void Execute(IExecutingProcess executingProcess)
         {
             SMSUpdatePackageDN package = (SMSUpdatePackageDN)executingProcess.Data;
 
@@ -83,11 +74,9 @@ namespace Signum.Engine.Extensions.SMS
                                                  message.State == SMSMessageState.Sent
                                                  select message.ToLite()).ToList();
 
-            int lastPercentage = 0;
             for (int i = 0; i < messages.Count; i++)
             {
-                if (executingProcess.Suspended)
-                    return FinalState.Suspended;
+                executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
                 SMSMessageDN ms = messages[i].RetrieveAndForget();
 
@@ -101,15 +90,8 @@ namespace Signum.Engine.Extensions.SMS
                     package.Save();
                 }
 
-                int percentage = (NotificationSteps * i) / messages.Count;
-                if (percentage != lastPercentage)
-                {
-                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                    lastPercentage = percentage;
-                }
+                executingProcess.ProgressChanged(i, messages.Count);
             }
-
-            return FinalState.Finished;
         }
     }
 }

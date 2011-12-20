@@ -34,7 +34,7 @@ namespace Signum.Web.Logging
                 Navigator.RegisterArea(typeof(LoggingClient));
 
                 if (deployment)
-                    Navigator.AddSetting(new EntitySettings<ExceptionLogDN>(EntityType.ServerOnly) 
+                    Navigator.AddSetting(new EntitySettings<ExceptionDN>(EntityType.ServerOnly) 
                     { PartialViewName = e => ViewPrefix.Formato("ExceptionLog") });
                 if (exceptions)
                     Navigator.AddSetting(new EntitySettings<DeploymentLogDN>(EntityType.ServerOnly) 

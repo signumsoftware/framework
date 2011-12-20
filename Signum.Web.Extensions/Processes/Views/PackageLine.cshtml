@@ -2,10 +2,11 @@
 
 @using (var e = Html.TypeContext<PackageLineDN>())
 {
-    @Html.EntityLine(e, f => f.Package, f => f.ReadOnly = true)
-    @Html.EntityLine(e, f => f.Target, f => f.ReadOnly = true)
-    @Html.EntityLine(e, f => f.Result, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.FinishTime, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.Exception, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.IdOrNull, f => f.ReadOnly = true)
+    e.ReadOnly = true;
+    
+    @Html.EntityLine(e, f => f.Package)
+    @Html.EntityLine(e, f => f.Target)
+    @Html.EntityLine(e, f => f.Result)
+    @Html.ValueLine(e, f => f.FinishTime)
+    @Html.EntityLine(e, f => f.Exception)
 } 

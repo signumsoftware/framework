@@ -9,7 +9,6 @@ using Signum.Engine.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities;
-using Signum.Engine.Extensions.Chart;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 using System.Collections.Specialized;
@@ -19,6 +18,7 @@ using Signum.Engine.Basics;
 using System.Web.Script.Serialization;
 using Signum.Engine.Reports;
 using Signum.Web.Controllers;
+using Signum.Engine.Chart;
 
 namespace Signum.Web.Chart
 {

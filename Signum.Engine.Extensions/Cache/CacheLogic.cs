@@ -40,8 +40,8 @@ namespace Signum.Engine.Cache
         class SemiCached<T> : CacheController<T>, ICacheLogicController, IInstanceController
             where T : IdentifiableEntity
         {
-            Dictionary<Type, Dictionary<int, T>> cachedEntities = new Dictionary<Type, Dictionary<int, T>>();
-            Dictionary<Type, HashSet<Lite<T>>> sensibleLites = new Dictionary<Type, HashSet<Lite<T>>>();
+            ConcurrentDictionary<Type, Dictionary<int, T>> cachedEntities = new ConcurrentDictionary<Type, Dictionary<int, T>>();
+            ConcurrentDictionary<Type, HashSet<Lite<T>>> sensibleLites = new ConcurrentDictionary<Type, HashSet<Lite<T>>>();
 
             public int? Count
             {
@@ -76,7 +76,7 @@ namespace Signum.Engine.Cache
                 var ee = schema.EntityEvents<T>();
 
                 ee.Saving += Saving;
-                ee.PreUnsafeUpdated += new QueryHandler<T>(PreUnsafeUpdated);
+                ee.PreUnsafeUpdate += new QueryHandler<T>(PreUnsafeUpdated);
             }
 
             void PreUnsafeUpdated(IQueryable<T> query)
@@ -106,9 +106,9 @@ namespace Signum.Engine.Cache
 
             private void InvalidateType(Type referingType)
             {
-                Interlocked.Increment(ref invalidations);
-                cachedEntities.Remove(referingType);
-                sensibleLites.Remove(referingType);
+                Interlocked.Increment(ref invalidations); 
+                cachedEntities[referingType].Clear();
+                sensibleLites[referingType].Clear();
                 CacheLogic.InvalidateAllConnected(referingType);
             }
 
@@ -135,7 +135,7 @@ namespace Signum.Engine.Cache
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !TemporallyDisabled; }
+                get { return !GloballyDisabled && !tempDisabled.Value; }
             }
 
             public override bool IsComplete
@@ -241,7 +241,7 @@ namespace Signum.Engine.Cache
                 ee.CacheController = this;
                 ee.Saving += Saving;
                 ee.PreUnsafeDelete += PreUnsafeDelete;
-                ee.PreUnsafeUpdated += UnsafeUpdated;
+                ee.PreUnsafeUpdate += UnsafeUpdated;
             }
 
             bool disabledThis; 
@@ -284,7 +284,7 @@ namespace Signum.Engine.Cache
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !disabledThis && !TemporallyDisabled; }
+                get { return !GloballyDisabled && !disabledThis && !tempDisabled.Value; }
             }
 
             public override bool IsComplete
@@ -366,14 +366,13 @@ namespace Signum.Engine.Cache
 
         public static bool GloballyDisabled { get; set; }
 
-        [ThreadStatic]
-        static bool TemporallyDisabled;
+        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
 
         public static IDisposable Disable()
         {
-            var oldDisabled = TemporallyDisabled;
-            TemporallyDisabled = true;
-            return new Disposable(() => TemporallyDisabled = oldDisabled); 
+            if (tempDisabled.Value) return null;
+            tempDisabled.Value = true;
+            return new Disposable(() => tempDisabled.Value = false); 
         }
 
         public static void Start(SchemaBuilder sb)

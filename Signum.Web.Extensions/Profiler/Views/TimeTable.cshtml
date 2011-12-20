@@ -1,57 +1,78 @@
 ﻿@using System.Configuration
+@using System.Drawing
 @{  
     ViewBag.Title = "Table Times";
 }
-<script type="text/javascript">
-    $(function () {
-        $(".sf-search-results").tablesorter();
-    });
-</script>
-
 @Html.ActionLink("Clear", "ClearTimesTable")
-
 <table class="sf-search-results">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Entity</th>
-            <th>Executions</th>
-            <th>Last Time</th>
-            <th>Min</th>
-            <th>Average</th>
-            <th>Max</th>
-            <th>total</th>
+            <th>
+                Name
+            </th>
+            <th>
+                Entity
+            </th>
+            <th>
+                Executions
+            </th>
+            <th>
+                Last Time
+            </th>
+            <th>
+                Min
+            </th>
+            <th>
+                Average
+            </th>
+            <th>
+                Max
+            </th>
+            <th>
+                total
+            </th>
         </tr>
     </thead>
- @{ double[] percentiles = new double[] { 0, 0.2, 0.8 };}
- @if (TimeTracker.IdentifiedElapseds.Count > 0)
- {
-     double max = TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.Average).FirstEx().Value.Average;
-     foreach (KeyValuePair<string, TimeTrackerEntry> pair in TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.Average))
-     {
-         double percentile = pair.Value.Average / (double)max;
-         int percentileIndex = 0;
-         int i = 0;
-         bool salir = false;
-         while (i < percentiles.Length && !salir)
-         {
-             if (percentile > percentiles[i]) { percentileIndex = i; }
-             if (percentile < percentiles[i]) { salir = true; }
-             i++;
-         }
-    <tbody>
-        <tr class="percentile@percentileIndex">
-            <td><span class="processName">@pair.Key.Split(' ')[0]</span></td>
-            <td>@if (pair.Key.Split(' ').Length > 1)
-                {<span class="entityName">@pair.Key.Split(' ')[1]</span>}</td>
-            <td class="centered">@pair.Value.Count</td>
-            <td class="right">@pair.Value.LastTime</td>
-            <td class="right">@pair.Value.MinTime</td>
-            <td class="right">@pair.Value.Average</td>
-            <td class="right">@pair.Value.MaxTime</td>
-            <td class="right">@pair.Value.TotalTime</td>            
-        </tr>
-    </tbody>
+    @{ var times = TimeTracker.IdentifiedElapseds;}
+    @if (times.Count > 0)
+    {
+
+        Func<float, string> getColor = f => ColorTranslator.ToHtml(ColorExtensions.Interpolate(Color.FromArgb(255, 255, 255), f, Color.FromArgb(255, 0, 0)));
+
+        var max = new
+        {
+            Count = (float)times.Values.Max(a => a.Count),
+            LastTime = (float)times.Values.Max(a => a.LastTime),
+            MinTime = (float)times.Values.Max(a => a.MinTime),
+            Average = (float)times.Values.Max(a => a.Average),
+            MaxTime = (float)times.Values.Max(a => a.MaxTime),
+            TotalTime = (float)times.Values.Max(a => a.TotalTime),
+        };
+        <tbody>
+            @foreach (var pair in times)
+            {
+                <tr style="background: #FFFFFF">
+                    <td>
+                        <span class="processName">@pair.Key.Split(' ')[0]</span>
+                    </td>
+                    <td>
+                        @if (pair.Key.Split(' ').Length > 1)
+                        {<span class="entityName">@pair.Key.Split(' ')[1]</span>}
+                    </td>
+                    <td class="centered" style="background:@getColor(pair.Value.Count / max.Count)">@pair.Value.Count
+                    </td>
+                    <td class="right" style="background:@getColor(pair.Value.LastTime/max.LastTime)">@pair.Value.LastTime
+                    </td>
+                    <td class="right" style="background:@getColor(pair.Value.MinTime / max.MinTime)">@pair.Value.MinTime
+                    </td>
+                    <td class="right" style="background:@getColor((float)pair.Value.Average / max.Average)">@pair.Value.Average
+                    </td>
+                    <td class="right" style="background:@getColor(pair.Value.MaxTime / max.MaxTime)">@pair.Value.MaxTime
+                    </td>
+                    <td class="right" style="background:@getColor(pair.Value.TotalTime / max.TotalTime)">@pair.Value.TotalTime
+                    </td>
+                </tr>
+            }
+        </tbody>
     }
- }
 </table>

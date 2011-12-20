@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
+using Signum.Entities.Logging;
 
 namespace Signum.Entities.Operations
 {
     [Serializable]
-    public class LogOperationDN : IdentifiableEntity
+    public class OperationLogDN : IdentifiableEntity
     {
         [ImplementedByAll]
         Lite<IIdentifiable> target;
@@ -49,8 +50,8 @@ namespace Signum.Entities.Operations
             set { Set(ref end, value, () => End); }
         }
 
-        string exception;
-        public string Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

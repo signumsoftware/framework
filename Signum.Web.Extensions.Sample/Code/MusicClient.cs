@@ -9,6 +9,7 @@ using Signum.Test;
 using Signum.Web.Operations;
 using Signum.Test.Extensions;
 using System.Web.Mvc;
+using Signum.Entities.Processes;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -88,6 +89,27 @@ namespace Signum.Web.Extensions.Sample
                     {
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("CreateGreatestHitsAlbum", "Music")).submitSelected()
                     }},
+                });
+            }
+        }
+
+        public static void StartDemoPackage()
+        {
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                Constructor.AddConstructor(() => new DemoPackageDN
+                {
+                    Name = "Demo Package",
+                    RequestedLines = 100,
+                    DelayMilliseconds = 100,
+                    ErrorRate = 0.3,
+                    MainError = false,
+                });
+
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<DemoPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("DemoPackage"), },
+                    new EntitySettings<DemoPackageLineDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("DemoPackageLine"), },
                 });
             }
         }

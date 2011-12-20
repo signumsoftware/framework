@@ -8,6 +8,7 @@ using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Mailing;
+using Signum.Entities.Logging;
 
 namespace Signum.Entities.Mailing
 {
@@ -85,10 +86,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref body, value, () => Body); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        [StringLengthValidator(AllowNulls = true)]
-        public string Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }
@@ -167,13 +166,6 @@ namespace Signum.Entities.Mailing
         {
             get { return numErrors; }
             set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
-        string overrideEmailAddress;
-        public string OverrideEmailAddress
-        {
-            get { return overrideEmailAddress; }
-            set { Set(ref overrideEmailAddress, value, () => OverrideEmailAddress); }
         }
 
         public override string ToString()

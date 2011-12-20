@@ -5,7 +5,7 @@ using System.Text;
 using System.ServiceModel;
 using Signum.Services;
 
-namespace Signum.Entities.Extensions.SMS
+namespace Signum.Entities.SMS
 {
     [ServiceContract]
     public interface ISmsServer

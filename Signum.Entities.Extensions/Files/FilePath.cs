@@ -117,7 +117,7 @@ namespace Signum.Entities.Files
         {
             get
             {
-                return FullWebPathExpression.Invoke(this);
+                return FullWebPathExpression.Evaluate(this);
             }
         }
 
@@ -131,6 +131,12 @@ namespace Signum.Entities.Files
 
     [Serializable, ForceLocalization]
     public class WebImage
+    {
+        public string FullWebPath;
+    }
+
+    [Serializable, ForceLocalization]
+    public class WebDownload
     {
         public string FullWebPath;
     }

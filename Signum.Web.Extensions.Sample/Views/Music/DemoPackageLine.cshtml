@@ -1,0 +1,10 @@
+﻿@using Signum.Entities.Processes
+
+@using (var e = Html.TypeContext<DemoPackageLineDN>())
+{
+    e.ReadOnly = true;
+    
+    @Html.EntityLine(e, f => f.Package)
+    @Html.ValueLine(e, f => f.FinishTime)
+    @Html.EntityLine(e, f => f.Exception)
+} 

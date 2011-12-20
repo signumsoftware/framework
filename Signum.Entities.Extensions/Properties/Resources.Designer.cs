@@ -608,5 +608,23 @@ namespace Signum.Entities.Extensions.Properties {
                 return ResourceManager.GetString("UserQueryDN", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Download.
+        /// </summary>
+        public static string WebDownload {
+            get {
+                return ResourceManager.GetString("WebDownload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Image.
+        /// </summary>
+        public static string WebImage {
+            get {
+                return ResourceManager.GetString("WebImage", resourceCulture);
+            }
+        }
     }
 }

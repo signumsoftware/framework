@@ -6,7 +6,7 @@
     @Html.EntityLine(e, f => f.Template, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.Sent, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.Received, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.Exception, f => f.ReadOnly = true)
+    @Html.EntityLine(e, f => f.Exception, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.State, f => f.ReadOnly = true)
     @Html.EntityLine(e, f => f.Package, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.Subject)

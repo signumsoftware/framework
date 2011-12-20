@@ -192,6 +192,8 @@
     <Content Include="Scripts\widget.js" />
     <Content Include="ServerSample.svc" />
     <Content Include="Views\Music\NoteWithDate.cshtml" />
+    <Content Include="Views\Music\DemoPackage.cshtml" />
+    <Content Include="Views\Music\DemoPackageLine.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">

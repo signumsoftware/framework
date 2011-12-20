@@ -15,11 +15,11 @@ using Signum.Engine.Reports;
 using Signum.Engine.ControlPanel;
 using Signum.Entities.ControlPanel;
 using Signum.Entities.Reports;
-using Signum.Engine.Extensions.Chart;
 using Signum.Entities.Chart;
 using Signum.Engine.UserQueries;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Basics;
+using Signum.Engine.Chart;
 
 namespace Signum.Test.Extensions
 {
@@ -168,7 +168,8 @@ namespace Signum.Test.Extensions
                 }.Save();
 
                 Schema.Current.InitializeUntil(InitLevel.Level3MainEntities);
-                Signum.Test.Starter.Load();
+                using (OperationLogic.AllowSave<AlbumDN>())
+                    Signum.Test.Starter.Load();
 
                 TypeConditionUsersRoles(externalUser.ToLite());
                 

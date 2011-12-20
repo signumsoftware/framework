@@ -55,7 +55,7 @@ namespace Signum.Entities.ControlPanel
             (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
         public bool ContainsContent(IIdentifiable content)
         {
-            return ContainsContentExpression.Invoke(this, content);
+            return ContainsContentExpression.Evaluate(this, content);
         }
 
         protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)

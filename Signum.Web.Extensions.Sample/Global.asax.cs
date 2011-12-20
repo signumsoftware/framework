@@ -25,6 +25,7 @@ using System.Reflection;
 using Signum.Web.PortableAreas;
 using Signum.Web.Widgets;
 using Signum.Web.Chart;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -67,6 +68,8 @@ namespace Signum.Web.Extensions.Sample
         {   
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
+            Statics.SessionFactory = new ScopeSessionFactory(new AspNetSessionFactory());
+
             using (AuthLogic.Disable())
             {
                 Schema.Current.Initialize();
@@ -74,7 +77,6 @@ namespace Signum.Web.Extensions.Sample
             }
 
             RegisterRoutes(RouteTable.Routes);
-
         }
 
         private void WebStart()
@@ -127,24 +129,13 @@ namespace Signum.Web.Extensions.Sample
 
         protected void Application_AcquireRequestState(object sender, EventArgs e)
         {
-            UserDN user = HttpContext.Current.Session == null ? null : (UserDN)HttpContext.Current.Session[AuthController.SessionUserKey];
-
-            if (user != null)
-            {
-                Thread.CurrentPrincipal = user;
-            }
-            else
-            {
-                using (AuthLogic.Disable())
-                {
-                    //Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.UserName == "external").Single();
-                }
-            }
+          
         }
 
         protected void Session_Start(object sender, EventArgs e)
         {
-            AuthController.LoginFromCookie();
+            if (!AuthController.LoginFromCookie())
+                UserDN.SetSessionUser(AuthLogic.AnonymousUser);
         }
     }
 }

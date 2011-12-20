@@ -300,4 +300,10 @@
   <data name="ExpressionCanNotBeAnAggregate" xml:space="preserve">
     <value>Expression can not be an aggregate</value>
   </data>
+  <data name="WebDownload" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="WebImage" xml:space="preserve">
+    <value>Image</value>
+  </data>
 </root>

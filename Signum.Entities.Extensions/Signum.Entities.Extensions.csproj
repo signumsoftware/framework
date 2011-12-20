@@ -83,7 +83,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audit\Audit.cs" />
-    <Compile Include="Authorization\EmailModel.cs" />
     <Compile Include="Authorization\PasswordValidIntervalDN.cs" />
     <Compile Include="Authorization\ResetPasswordRequestDN.cs" />
     <Compile Include="Authorization\UserTicketDN.cs" />
@@ -109,7 +108,7 @@
     <Compile Include="Chart\IntervalQueryToken.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />
-    <Compile Include="Logging\ExceptionLogDN.cs" />
+    <Compile Include="Logging\ExceptionDN.cs" />
     <Compile Include="Logging\DeploymentLogDN.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />

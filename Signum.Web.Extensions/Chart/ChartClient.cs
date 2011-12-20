@@ -16,9 +16,9 @@ using System.Web.Routing;
 using System.Web.Mvc;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Signum.Engine.Extensions.Chart;
 using Signum.Web.Reports;
 using Signum.Entities.UserQueries;
+using Signum.Engine.Chart;
 
 namespace Signum.Web.Chart
 {
@@ -159,9 +159,9 @@ namespace Signum.Web.Chart
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
             .SetProperty(cr => cr.Chart, MappingChartBase);
-
+                 
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
-        {
+            {
             var qd = DynamicQueryManager.Current.QueryDescription(
                 Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
 

@@ -84,9 +84,9 @@ Write(Html.ValueLine(e, f => f.Received, f => f.ReadOnly = true));
 
                                                                
     
-Write(Html.ValueLine(e, f => f.Exception, f => f.ReadOnly = true));
+Write(Html.EntityLine(e, f => f.Exception, f => f.ReadOnly = true));
 
-                                                                
+                                                                 
     
 Write(Html.ValueLine(e, f => f.State, f => f.ReadOnly = true));
 

@@ -1,0 +1,93 @@
+﻿@using Signum.Utilities.ExpressionTrees
+@using Signum.Engine.Processes
+@using Signum.Web.Processes
+@model ProcessLogicState
+<div id="processMainDiv">
+        <br />
+    <h2>ProcessLogic state</h2>
+   
+    State: <strong>
+        @if (Model.Running)
+        {
+            <span style="color: Green">RUNNING</span>
+        }
+        else
+        {
+            <span style="color: Red">STOPPED</span>
+        }</strong>
+    <br />
+    MaxDegreeOfParallelism: @Model.MaxDegreeOfParallelism
+    <br />
+    InitialDelayMiliseconds: @Model.InitialDelayMiliseconds
+    <br />
+    NextPlannedExecution: @(Model.NextPlannedExecution.TryToString() ?? "-None-")
+    <br />
+    <table class="sf-search-results sf-stats-table">
+        <thead>
+            <tr>
+                <th>
+                    Process
+                </th>
+                <th>
+                    State
+                </th>
+                <th>
+                    Progress
+                </th>
+                <th>
+                    IsCancellationRequested
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="4">
+                    <b>Executing (@Model.Executing.Count)</b>
+                </td>
+            </tr>
+            @foreach (var item in Model.Executing)
+            {
+                <tr>
+                    <td>@Html.LightEntityLine(item.ProcessExecution, true)
+                    </td>
+                    <td>@item.State
+                    </td>
+                    <td>@item.Progress
+                    </td>
+                    <td>@item.IsCancellationRequested
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td colspan="4">
+                    <b>Queued (@Model.Queue.Count)</b>
+                </td>
+            </tr>
+            @foreach (var item in Model.Queue)
+            {
+                <tr>
+                    <td>@Html.LightEntityLine(item.ProcessExecution, true)
+                    </td>
+                    <td>@item.State
+                    </td>
+                    <td>@item.Progress
+                    </td>
+                    <td>@item.IsCancellationRequested
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <br />
+    <h2>Latest Processes</h2>
+
+    @Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessExecutionDN))
+{
+    OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
+    FilterMode = Signum.Web.FilterMode.Hidden,
+    SearchOnLoad = true,
+    ElementsPerPage = 10,
+},new Context(null, "sc")); 
+    <br />
+</div>

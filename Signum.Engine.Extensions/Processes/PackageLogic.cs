@@ -14,6 +14,9 @@ using Signum.Entities.Scheduler;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
+using Signum.Entities.Logging;
+using Signum.Engine.Logging;
 
 namespace Signum.Engine.Processes
 {
@@ -53,7 +56,7 @@ namespace Signum.Engine.Processes
                          pl.Id,
                          pl.Target,
                          pl.FinishTime,
-                         pl.Exception
+                         pl.Exception,
                      }).ToDynamic();
             }
         }
@@ -98,7 +101,7 @@ namespace Signum.Engine.Processes
         }
 
 
-        public FinalState Execute(IExecutingProcess executingProcess)
+        public void Execute(IExecutingProcess executingProcess)
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
@@ -107,21 +110,18 @@ namespace Signum.Engine.Processes
                  where pl.Package == package.ToLite() && pl.FinishTime == null && pl.Exception == null
                  select pl.ToLite()).ToList();
 
-            int lastPercentage = 0;
             for (int i = 0; i < lines.Count; i++)
             {
-                if (executingProcess.Suspended)
-                    return FinalState.Suspended;
-
+                executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                
                 PackageLineDN pl = lines[i].RetrieveAndForget();
 
                 try
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        
-                        using (AuthLogic.User(executingProcess.User.Retrieve()))
-                        ExecuteLine(pl, package);
+                        using (UserDN.Scope(executingProcess.User.Retrieve()))
+                            ExecuteLine(pl, package);
 
                         pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();
@@ -130,26 +130,21 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
+                    var exLog = e.LogException();
+
                     using (Transaction tr = new Transaction(true))
                     {
-                        pl.Exception = e.Message;
+                        pl.Exception = exLog.ToLite();
                         pl.Save();
                         tr.Commit();
-
-                        package.NumErrors++;
-                        package.Save();
                     }
+
+                    package.NumErrors++;
+                    package.Save();
                 }
 
-                int percentage = (NotificationSteps * i) / lines.Count;
-                if (percentage != lastPercentage)
-                {
-                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                    lastPercentage = percentage;
-                }
+                executingProcess.ProgressChanged(i, lines.Count);
             }
-
-            return FinalState.Finished;
         }
 
         public int NotificationSteps = 100; 

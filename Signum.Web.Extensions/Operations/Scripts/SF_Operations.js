@@ -39,7 +39,7 @@ SF.registerModule("Operations", function () {
                 if (SF.isEmpty(this.options.prefix)) //NormalWindow 
                     formChildren = SF.isEmpty(this.options.parentDiv) ? $(this.options.sender).closest("form").find(":input") : $("#" + this.options.parentDiv + " :input");
                 else //PopupWindow
-                    formChildren = $(this.pf("panelPopup *") + ", #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                    formChildren = $(this.pf("panelPopup :input") + ", #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
             else {
                 formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");

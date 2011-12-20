@@ -7,6 +7,7 @@ using Signum.Entities.Processes;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
+using Signum.Entities.Logging;
 
 namespace Signum.Entities.Mailing
 {
@@ -37,7 +38,7 @@ namespace Signum.Entities.Mailing
         }
 
         NewsletterState  state = NewsletterState.Created;
-        public NewsletterState  State
+        public NewsletterState State
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
@@ -95,14 +96,6 @@ namespace Signum.Entities.Mailing
         public static string DefaultFrom;
         public static string DefaultDisplayFrom;
 
-        string overrideEmail;
-        [EMailValidator]
-        public string OverrideEmail
-        {
-            get { return overrideEmail; }
-            set { Set(ref overrideEmail, value, () => OverrideEmail); }
-        }
-
         QueryDN query;
         public QueryDN Query
         {
@@ -143,10 +136,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref newsletter, value, () => Newsletter); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        [StringLengthValidator(AllowNulls = true, Max = int.MaxValue)]
-        public string Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

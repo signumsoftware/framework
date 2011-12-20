@@ -206,15 +206,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Executions.
-        /// </summary>
-        internal static string Executions {
-            get {
-                return ResourceManager.GetString("Executions", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Expired password.
         /// </summary>
         internal static string ExpiredPassword {
@@ -287,15 +278,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Last Execution.
-        /// </summary>
-        internal static string LastExecution {
-            get {
-                return ResourceManager.GetString("LastExecution", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Not authorized to {0} {1}.
         /// </summary>
         internal static string NotAuthorizedTo01 {
@@ -328,15 +310,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string NotAuthorizedToSave0 {
             get {
                 return ResourceManager.GetString("NotAuthorizedToSave0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} not registered in EmailLogic.
-        /// </summary>
-        internal static string NotRegisteredInEmailLogic {
-            get {
-                return ResourceManager.GetString("NotRegisteredInEmailLogic", resourceCulture);
             }
         }
         

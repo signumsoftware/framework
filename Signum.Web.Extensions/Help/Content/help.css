@@ -188,7 +188,7 @@ span.hover
 	-moz-border-radius:4px;
 	padding:0 3px;
 	border:1px solid #78a752;
-	 background: #78a752 url(../images/alert-overlay.png) repeat-x;
+	 background: #78a752 repeat-x;
 }
 
 textarea{width:100%;}

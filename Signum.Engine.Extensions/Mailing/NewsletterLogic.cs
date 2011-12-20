@@ -26,7 +26,7 @@ namespace Signum.Engine.Mailing
             eo => Database.Query<NewsletterDeliveryDN>().Where(d => d.Recipient.RefersTo(eo));
         public static IQueryable<NewsletterDeliveryDN> NewsletterDeliveries(this IEmailOwnerDN eo)
         {
-            return NewsletterDeliveriesExpression.Invoke(eo);
+            return NewsletterDeliveriesExpression.Evaluate(eo);
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -59,7 +59,7 @@ namespace Signum.Engine.Mailing
                                                          e.Recipient,
                                                          e.Sent,
                                                          e.SendDate,
-                                                         Error = e.Exception.Etc(50)
+                                                         e.Exception
                                                      }).ToDynamic();
 
                 NewsletterGraph.Register();
@@ -204,7 +204,6 @@ namespace Signum.Engine.Mailing
                     var process = ProcessLogic.Create(NewsletterOperations.Send, n);
                     process.Execute(ProcessOperation.Execute);
 
-                    n.OverrideEmail = EmailLogic.OnEmailAddress();
                     n.State = NewsletterState.Sent;
                 }
             }.Register();

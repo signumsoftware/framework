@@ -62,10 +62,8 @@ namespace ASP
         public override void Execute()
         {
 
-WriteLiteral("\r\n");
 
-
- using (var e = Html.TypeContext<ExceptionLogDN>())
+ using (var e = Html.TypeContext<ExceptionDN>())
 {
     
 Write(Html.ValueLine(e, f => f.CreationDate));
@@ -89,13 +87,6 @@ Write(Html.ValueLine(e, f => f.ThreadId));
 
                                        
     
-Write(Html.ValueLine(e, f => f.RequestUrl));
-
-                                         
-    
-Write(Html.ValueLine(e, f => f.UserAgent));
-
-                                        
     
 Write(Html.ValueLine(e, f => f.ActionName));
 
@@ -104,15 +95,91 @@ Write(Html.ValueLine(e, f => f.ActionName));
 Write(Html.ValueLine(e, f => f.ControllerName));
 
                                              
+    
+Write(Html.ValueLine(e, f => f.RequestUrl));
+
+                                         
+    
+Write(Html.ValueLine(e, f => f.UrlReferer));
+
+                                         
+    
+Write(Html.ValueLine(e, f => f.UserAgent));
+
+                                        
+    
+Write(Html.ValueLine(e, f => f.UserHostAddress));
+
+                                              
+    
+Write(Html.ValueLine(e, f => f.UserHostName));
+
+                                           
+    
+    if (e.ReadOnly)
+    {
+
+WriteLiteral("        <h3>\r\n            QueryString</h3>\r\n");
+
+
+
+WriteLiteral("        <pre>");
+
+
+        Write(e.Value.QueryString);
+
+WriteLiteral("</pre>\r\n");
+
+
+    
+
+WriteLiteral("        <h3>\r\n            Form</h3>\r\n");
+
+
+
+WriteLiteral("        <pre>");
+
+
+        Write(e.Value.Form);
+
+WriteLiteral("</pre>\r\n");
+
+
+
+
+WriteLiteral("        <h3>\r\n            Session</h3>\r\n");
+
+
+
+WriteLiteral("        <pre>");
+
+
+        Write(e.Value.Session);
+
+WriteLiteral("</pre>\r\n");
+
+
+    }
+    else
+    {
+        
+   Write(Html.ValueLine(e, f => f.QueryString, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                               
+        
+   Write(Html.ValueLine(e, f => f.Form, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                        
+        
+   Write(Html.ValueLine(e, f => f.Session, vl => vl.ValueLineType = ValueLineType.TextArea));
+
+                                                                                             
+    }  
 
     
 Write(Html.EntityLine(e, f => f.User));
 
                                     
-    
-Write(Html.EntityLine(e, f => f.Context));
-
-                                       
 
 
 WriteLiteral("    <h3>");
@@ -133,7 +200,7 @@ WriteLiteral("</pre>\r\n");
 
 
 
-WriteLiteral("    <h3>StackTrace</h3>\r\n");
+WriteLiteral("    <h3>\r\n        StackTrace</h3>\r\n");
 
 
 

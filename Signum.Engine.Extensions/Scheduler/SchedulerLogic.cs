@@ -16,6 +16,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using System.Threading.Tasks;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Scheduler
 {
@@ -32,14 +33,13 @@ namespace Signum.Engine.Scheduler
                                 Timeout.Infinite,
                                 Timeout.Infinite);
 
-        [ThreadStatic]
-        static bool isSafeSave = false;
+        static readonly Variable<bool> avoidReloadPlan = Statics.ThreadVariable<bool>("avoidReloadSchedulerPlan");
 
-        static IDisposable SafeSaving()
+        static IDisposable AvoidReloadPlanOnSave()
         {
-            bool lastSafe = isSafeSave;
-            isSafeSave = true;
-            return new Disposable(() => isSafeSave = lastSafe);
+            if (avoidReloadPlan.Value) return null;
+            avoidReloadPlan.Value = true;
+            return new Disposable(() => avoidReloadPlan.Value = false);
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -56,53 +56,29 @@ namespace Signum.Engine.Scheduler
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
 
+
+                dqm[typeof(CalendarDN)] =
+                     (from st in Database.Query<CalendarDN>()
+                      select new
+                      {
+                          Entity = st.ToLite(),
+                          st.Id,
+                          st.Name,
+                          Holidays = st.Holidays.Count,
+                      }).ToDynamic();
+                
+
                 dqm[typeof(ScheduledTaskDN)] =
                     (from st in Database.Query<ScheduledTaskDN>()
                      select new
                      {
                          Entity = st.ToLite(),
                          st.Id,
-                         //st.ToStr,
+                         Task = st.Task.ToLite(),
                          st.NextDate,
                          st.Suspended,
+                         Rule = st.Rule.ToLite(),
                      }).ToDynamic();
-
-                dqm[typeof(CalendarDN)] =
-                 (from st in Database.Query<CalendarDN>()
-                  select new
-                  {
-                      Entity = st.ToLite(),
-                      st.Id,
-                      st.Name,
-                      st.Holidays.Count,
-
-                  }).ToDynamic();
-
-                dqm[typeof(CustomTaskExecutionDN)] =
-                    (from st in Database.Query<CustomTaskExecutionDN>()
-                     select new
-                     {
-                         Entity = st.ToLite(),
-                         st.Id,
-                         st.StartTime,
-                         st.EndTime,
-                         st.Exception,
-
-                     }).ToDynamic();
-
-                dqm[typeof(ScheduledTaskDN)] =
-                (from st in Database.Query<ScheduledTaskDN>()
-                 select new
-                 {
-                     Entity = st.ToLite(),
-                     st.Id,
-                     st.NextDate,
-                     st.Suspended,
-                     Rule = st.Rule.ToLite(),
-                     Task = st.Task.ToLite(),
-
-
-                 }).ToDynamic();
             }
         }
 
@@ -113,10 +89,10 @@ namespace Signum.Engine.Scheduler
 
         static void Schema_Saving(ScheduledTaskDN task)
         {
-            if (!isSafeSave && task.Modified.Value)
+            if (!avoidReloadPlan.Value && task.Modified.Value)
             {
-                Transaction.RealCommit -= Transaction_RealCommit;
-                Transaction.RealCommit += Transaction_RealCommit;
+                Transaction.PostRealCommit -= Transaction_RealCommit;
+                Transaction.PostRealCommit += Transaction_RealCommit;
             }
         }
 
@@ -133,7 +109,7 @@ namespace Signum.Engine.Scheduler
                 {
                     List<ScheduledTaskDN> schTasks = Database.Query<ScheduledTaskDN>().Where(st => !st.Suspended).ToList();
 
-                    using (SafeSaving())
+                    using (AvoidReloadPlanOnSave())
                     {
                         schTasks.SaveList(); //Force replanification
                     }
@@ -192,7 +168,7 @@ namespace Signum.Engine.Scheduler
                         return;
                     }
 
-                    using (SafeSaving())
+                    using (AvoidReloadPlanOnSave())
                         st.Save();
                     priorityQueue.Push(st);
 
@@ -200,7 +176,7 @@ namespace Signum.Engine.Scheduler
                     {
                         try
                         {
-                            using (AuthLogic.User(AuthLogic.SystemUser))
+                            using (UserDN.Scope(AuthLogic.SystemUser))
                                 ExecuteTask.Invoke(st.Task);
                         }
                         catch (Exception e)

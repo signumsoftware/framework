@@ -175,12 +175,6 @@
   <data name="ExpressedIn" xml:space="preserve">
     <value>expressed in </value>
   </data>
-  <data name="LastExecution" xml:space="preserve">
-    <value>Last Execution</value>
-  </data>
-  <data name="Executions" xml:space="preserve">
-    <value>Executions</value>
-  </data>
   <data name="IncorrectPassword" xml:space="preserve">
     <value>Incorrect password</value>
   </data>
@@ -228,9 +222,6 @@
   </data>
   <data name="HelpNotLoaded" xml:space="preserve">
     <value>Help not loaded</value>
-  </data>
-  <data name="NotRegisteredInEmailLogic" xml:space="preserve">
-    <value>{0} not registered in EmailLogic</value>
   </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
     <value>ProcessExecution {0} is not running anymore</value>

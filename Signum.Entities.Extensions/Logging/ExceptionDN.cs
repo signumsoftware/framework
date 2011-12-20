@@ -4,12 +4,26 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
+using System.Threading;
 
 namespace Signum.Entities.Logging
 {
     [Serializable]
-    public class ExceptionLogDN : Entity
+    public class ExceptionDN : Entity
     {
+        public const string ExceptionDataKey = "exceptionEntity";
+
+        public ExceptionDN() { }
+
+        public ExceptionDN(Exception ex)
+        {
+            this.ExceptionType = ex.GetType().Name;
+            this.ExceptionMessage = ex.Message;
+            this.StackTrace = ex.StackTrace;
+            this.ThreadId = Thread.CurrentThread.ManagedThreadId;
+            ex.Data[ExceptionDataKey] = this;
+        }
+
         DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate
         {
@@ -76,65 +90,114 @@ namespace Signum.Entities.Logging
             set { Set(ref threadId, value, () => ThreadId); }
         }
 
-        [NotNullable, SqlDbType(Size = 300)]
+        Lite<UserDN> user;
+        public Lite<UserDN> User
+        {
+            get { return user; }
+            set { Set(ref user, value, () => User); }
+        }
+
+        [SqlDbType(Size = 100)]
+        string environment;
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string Environment
+        {
+            get { return environment; }
+            set { Set(ref environment, value, () => Environment); }
+        }
+
+        [SqlDbType(Size = 100)]
+        string version;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Version
+        {
+            get { return version; }
+            set { Set(ref version, value, () => Version); }
+        }
+
+        [SqlDbType(Size = 300)]
         string userAgent;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 300)]
+        [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string UserAgent
         {
             get { return userAgent; }
             set { Set(ref userAgent, value, () => UserAgent); }
         }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        [SqlDbType(Size = int.MaxValue)]
         string requestUrl;
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string RequestUrl
         {
             get { return requestUrl; }
             set { Set(ref requestUrl, value, () => RequestUrl); }
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [SqlDbType(Size = 100)]
         string controllerName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string ControllerName
         {
             get { return controllerName; }
             set { Set(ref controllerName, value, () => ControllerName); }
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [SqlDbType(Size = 100)]
         string actionName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = true,  Max = 100)]
         public string ActionName
         {
             get { return actionName; }
             set { Set(ref actionName, value, () => ActionName); }
         }
 
-        UserDN user;
-        public UserDN User
+        [SqlDbType(Size = int.MaxValue)]
+        string urlReferer;
+        public string UrlReferer
         {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
+            get { return urlReferer; }
+            set { Set(ref urlReferer, value, () => UrlReferer); }
         }
 
-        [ImplementedBy()]
-        IdentifiableEntity context;
-        public IdentifiableEntity Context
+        [SqlDbType(Size = 100)]
+        string userHostAddress;
+        [StringLengthValidator(AllowNulls = true,  Max = 100)]
+        public string UserHostAddress
         {
-            get { return context; }
-            set { Set(ref context, value, () => Context); }
+            get { return userHostAddress; }
+            set { Set(ref userHostAddress, value, () => UserHostAddress); }
         }
 
+        [SqlDbType(Size = 100)]
+        string userHostName;
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string UserHostName
+        {
+            get { return userHostName; }
+            set { Set(ref userHostName, value, () => UserHostName); }
+        }
 
         [SqlDbType(Size = int.MaxValue)]
-        string data;
-        [StringLengthValidator(AllowNulls = true, Max = int.MaxValue)]
-        public string Data
+        string form;
+        public string Form
         {
-            get { return data; }
-            set { Set(ref data, value, () => Data); }
+            get { return form; }
+            set { Set(ref form, value, () => Form); }
+        }
+
+        [SqlDbType(Size = int.MaxValue)]
+        string queryString;
+        public string QueryString
+        {
+            get { return queryString; }
+            set { Set(ref queryString, value, () => QueryString); }
+        }
+
+        [SqlDbType(Size = int.MaxValue)]
+        string session;
+        public string Session
+        {
+            get { return session; }
+            set { Set(ref session, value, () => Session); }
         }
 
         public override string ToString()

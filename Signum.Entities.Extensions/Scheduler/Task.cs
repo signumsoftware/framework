@@ -7,6 +7,7 @@ using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities.Authorization;
+using Signum.Entities.Logging;
 
 namespace Signum.Entities.Scheduler
 {
@@ -49,9 +50,8 @@ namespace Signum.Entities.Scheduler
             set { Set(ref endTime, value, () => EndTime); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        public string Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }
