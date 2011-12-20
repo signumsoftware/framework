@@ -50,6 +50,8 @@
 
         @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; })
 
+        @Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; })
+
         using (var chart = uc.SubContext(tc => tc.Chart))
         {
             @Html.HiddenRuntimeInfo(chart)

@@ -276,6 +276,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartToken.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Chart\Views\UserChartOrder.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChartOrder.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\Views\UserChart.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -957,6 +962,10 @@
     <Content Include="Chart\Views\UserChartFilter.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>UserChartFilter1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\UserChartOrder.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChartOrder.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

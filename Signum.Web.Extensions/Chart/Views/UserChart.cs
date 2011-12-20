@@ -171,6 +171,11 @@ WriteLiteral("            <div class=\"clearall\"></div>\r\n");
 
                                                                                                                                                       
 
+        
+   Write(Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; }));
+
+                                                                                                                                                    
+
         using (var chart = uc.SubContext(tc => tc.Chart))
         {
             

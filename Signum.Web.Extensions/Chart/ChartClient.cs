@@ -36,6 +36,23 @@ namespace Signum.Web.Chart
             {
                 Navigator.RegisterArea(typeof(ChartClient));
 
+                Mapping<QueryToken> qtMapping = ctx =>
+                {
+                    string tokenStr = "";
+                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
+                        tokenStr += ctx.Parent.Inputs[key] + ".";
+                    while (tokenStr.EndsWith("."))
+                        tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+
+                    string queryKey = ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                    object queryName = QueryLogic.ToQueryName(queryKey);
+            
+                    var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue).Chart;
+
+                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                    return QueryUtils.Parse(tokenStr, qt => chart.SubTokensChart(qt, qd.Columns, true));
+                };
+
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EmbeddedEntitySettings<ChartRequest>(),
@@ -56,22 +73,13 @@ namespace Signum.Web.Chart
                                 ElementMapping = new EntityMapping<QueryFilterDN>(false)
                                     .CreateProperty(a=>a.Operation)
                                     .CreateProperty(a=>a.ValueString)
-                                    .SetProperty(a=>a.Token, ctx =>
-                                    {
-                                        string tokenStr = "";
-                                        foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
-                                            tokenStr += ctx.Parent.Inputs[key] + ".";
-                                        while (tokenStr.EndsWith("."))
-                                            tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
-
-                                        string queryKey = ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                        object queryName = QueryLogic.ToQueryName(queryKey);
-
-                                        var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue).Chart;
-
-                                        QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                                        return QueryUtils.Parse(tokenStr, qt => chart.SubTokensChart(qt, qd.Columns, true));
-                                    })
+                                    .SetProperty(a=>a.Token, qtMapping)
+                            })
+                            .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
+                            {
+                                ElementMapping = new EntityMapping<QueryOrderDN>(false)
+                                    .CreateProperty(a=>a.OrderType)
+                                    .SetProperty(a=>a.Token, qtMapping)
                             })
                     },
                 });
