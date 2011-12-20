@@ -123,19 +123,24 @@ namespace Signum.Engine.Maps
 
         public Table Include<T>() where T : IdentifiableEntity
         {
-            return Include(typeof(T));
+            return Include(typeof(T), null);
         }
 
         public virtual Table Include(Type type)
+        {
+            return Include(type, null);
+        }
+
+        internal protected virtual Table Include(Type type, PropertyRoute route)
         {
             Table result;
             if (!schema.Tables.TryGetValue(type, out result))
             {
                 if (type.IsAbstract)
-                    throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is abstract".Formato(type));
+                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is abstract".Formato(type));
 
                 if (!Reflector.IsIdentifiableEntity(type))
-                    throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
+                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
 
                 result = new Table(type);
 
@@ -144,7 +149,7 @@ namespace Signum.Engine.Maps
                 string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(Reflector.ExtractEnumProxy(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
-                    throw new InvalidOperationException("Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName)); 
+                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName)); 
 
                 schema.NameToType[name] = type;
                 schema.TypeToName[type] = name;
@@ -310,7 +315,7 @@ namespace Signum.Engine.Maps
         {
             Type cleanEnum = route.Type.UnNullify();
 
-            var table = Include(Reflector.GenerateEnumProxy(cleanEnum));
+            var table = Include(Reflector.GenerateEnumProxy(cleanEnum), route);
 
             return new FieldEnum(route.Type)
             {
@@ -330,7 +335,7 @@ namespace Signum.Engine.Maps
                 IndexType = Settings.GetIndexType(route),
                 Nullable = Settings.IsNullable(route, forceNull),
                 IsLite  = route.Type.IsLite(),
-                ReferenceTable = Include(Reflector.ExtractLite(route.Type) ?? route.Type),
+                ReferenceTable = Include(Reflector.ExtractLite(route.Type) ?? route.Type, route),
             };
         }
 
@@ -348,11 +353,11 @@ namespace Signum.Engine.Maps
                 IndexType = Settings.GetIndexType(route),
                 ImplementationColumns = ib.ImplementedTypes.ToDictionary(t => t, t => new ImplementationColumn
                 {
-                    ReferenceTable = Include(t),
+                    ReferenceTable = Include(t, route),
                     Name = name.Add(TypeLogic.GetCleanName(t)).ToString(),
                     Nullable = nullable,
                 }),
-                IsLite  = route.Type.IsLite()
+                IsLite = route.Type.IsLite()
             };
         }
 
@@ -373,7 +378,7 @@ namespace Signum.Engine.Maps
                 {
                     Name = preName.Add("Type").ToString(),
                     Nullable = nullable,
-                    ReferenceTable = Include(typeof(TypeDN))
+                    ReferenceTable = Include(typeof(TypeDN), route)
                 },
                 IsLite = route.Type.IsLite()
             };
