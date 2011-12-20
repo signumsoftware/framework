@@ -77,21 +77,31 @@ namespace Signum.Entities.Reflection
 
         public static string Integrity(DirectedGraph<Modifiable> graph)
         {
-            var problems = (from m in graph.OfType<IdentifiableEntity>()
-                            group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
-                            where g.Count() > 1 && g.Count(m => m.SelfModified) > 0
-                            select g).ToList();
+            if (graph.OfType<IdentifiableEntity>().Any())
+            {
+                var problems = (from m in graph.OfType<IdentifiableEntity>()
+                                group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
+                                where g.Count() > 1 && g.Count(m => m.SelfModified) > 0
+                                select g).ToList();
 
-            if (problems.Count > 0)
-                return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".Formato(
-                    p.Count(),
-                    p.Key,
-                    p.ToString(m => "  {0}{1}".Formato(m.SelfModified ? "[SelfModified] " : "", m), "\r\n")), "\r\n\r\n");
+                if (problems.Count > 0)
+                    return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".Formato(
+                        p.Count(),
+                        p.Key,
+                        p.ToString(m => "  {0}{1}".Formato(m.SelfModified ? "[SelfModified] " : "", m), "\r\n")), "\r\n\r\n");
 
-            return (from ident in graph.OfType<IdentifiableEntity>()
-                    let error = ident.IdentifiableIntegrityCheck()
-                    where error.HasText()
-                    select new { ident, error }).ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+                return (from ident in graph.OfType<IdentifiableEntity>()
+                        let error = ident.IdentifiableIntegrityCheck()
+                        where error.HasText()
+                        select new { ident, error }).ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+            }
+            else
+            {
+                return (from me in graph.OfType<ModifiableEntity>()
+                        select me.IntegrityCheck() into error
+                        where error.HasText()
+                        select error).ToString("\r\n"); 
+            }
         }
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)

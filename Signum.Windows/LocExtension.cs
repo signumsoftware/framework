@@ -26,6 +26,8 @@ namespace Signum.Windows
         [ConstructorArgument("key")]
         public string Key { get; set; }
 
+        public Type AssemblyType { get; set; }
+
 
         public LocExtension() { }
         /// <summary>
@@ -48,8 +50,19 @@ namespace Signum.Windows
         {
             if (string.IsNullOrEmpty(Key))
                 return "[null]";
+            Assembly assembly = GetAssembly(serviceProvider);
 
-            Assembly assembly = null;
+            ResourceManager manager = new ResourceManager(assembly.GetName().Name + ".Properties.Resources", assembly);
+            if (manager == null)
+                return Key;
+
+            return manager.GetObject(Key);
+        }
+
+        private Assembly GetAssembly(IServiceProvider serviceProvider)
+        {
+            if (AssemblyType != null)
+                return AssemblyType.Assembly;
 
             IUriContext uriContext = serviceProvider.GetService(typeof(IUriContext)) as IUriContext;
             if (uriContext != null)
@@ -58,18 +71,11 @@ namespace Signum.Windows
                 if (m != null && m.Success)
                 {
                     string an = m.Groups["an"].Value;
-                    assembly = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == an);
+                    return AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == an);
                 }
             }
 
-            if (assembly == null)
-                assembly = Assembly.GetExecutingAssembly();
-
-            ResourceManager manager = new ResourceManager(assembly.GetName().Name + ".Properties.Resources", assembly);
-            if (manager == null)
-                return Key;
-
-            return manager.GetObject(Key);
+            return Assembly.GetExecutingAssembly();
         }
     }
 }

@@ -143,7 +143,8 @@ namespace Signum.Engine.DynamicQuery
             return new ManualDynamicQuery<T>(execute); 
         }
 
-#region ToDQueryable
+
+        #region ToDQueryable
 
         public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, List<ColumnDescription> descriptions)
         {
@@ -154,28 +155,29 @@ namespace Signum.Engine.DynamicQuery
             return new DQueryable<T>(query.Select(a => (object)a), new BuildExpressionContext(typeof(T), pe, dic));
         }
 
-#endregion 
+        #endregion 
 
-        #region SelectDynamic
+        #region Select
 
         public static DQueryable<T> Select<T>(this DQueryable<T> query, List<Column> columns)
         {
             HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
 
-            TupleResult result = TupleConstructor(query.Context, tokens);
+            BuildExpressionContext newContext; 
+            var selector = TupleConstructor(query.Context, tokens, out newContext);
 
-            return new DQueryable<T>(query.Query.Select(result.TupleConstructor), new BuildExpressionContext(result.TupleType, result.Parameter, result.Replacements));
+            return new DQueryable<T>(query.Query.Select(selector), newContext);
         }
 
         public static DEnumerable<T> Select<T>(this DEnumerable<T> collection, List<Column> columns)
         {
             HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
-            
-            TupleResult result = TupleConstructor(collection.Context, tokens);
 
-            return new DEnumerable<T>(collection.Collection.Select(result.TupleConstructor.Compile()), new BuildExpressionContext(result.TupleType, result.Parameter, result.Replacements));
+            BuildExpressionContext newContext;
+            var selector = TupleConstructor(collection.Context, tokens, out newContext);
+
+            return new DEnumerable<T>(collection.Collection.Select(selector.Compile()), newContext);
         }
-
 
         public static DEnumerable<T> Concat<T>(this DEnumerable<T> collection, DEnumerable<T> other)
         {
@@ -197,40 +199,29 @@ namespace Signum.Engine.DynamicQuery
             return new DEnumerableCount<T>(collection.Collection.Concat(other.Collection), collection.Context, collection.TotalElements + other.TotalElements);
         }
 
-        class TupleResult
-        {
-            public Expression<Func<object, object>> TupleConstructor;
 
-            public ParameterExpression Parameter;
-            public Type TupleType;
-            public Dictionary<QueryToken, Expression> Replacements;
-        }
-
-        static TupleResult TupleConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens)
+        static Expression<Func<object, object>> TupleConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens, out BuildExpressionContext newContext)
         {
             string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
             if (str == null)
                 throw new ApplicationException(str);
-
            
             List<Expression> expressions = tokens.Select(t => t.BuildExpression(context)).ToList();
             Expression ctor = TupleReflection.TupleChainConstructor(expressions);
 
             var pe = Expression.Parameter(typeof(object));
 
-            return new TupleResult
-            {
-                TupleType = ctor.Type,
-                Parameter = pe,
-                Replacements = tokens.Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) }).ToDictionary(t => t.Token, t => t.Expr),
-                
-                TupleConstructor = Expression.Lambda<Func<object, object>>(
-                    (Expression)Expression.Convert(ctor, typeof(object)), context.Parameter),
-            };
+            newContext =  new BuildExpressionContext(
+                    ctor.Type,pe, 
+                    tokens.Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) }).ToDictionary(t => t.Token, t => t.Expr));
+
+            return Expression.Lambda<Func<object, object>>(
+                    (Expression)Expression.Convert(ctor, typeof(object)), context.Parameter);
         }
         
 	    #endregion
 
+        #region SelectMany
         public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens)
         {
             foreach (var cet in elementTokens)
@@ -243,7 +234,7 @@ namespace Signum.Engine.DynamicQuery
 
         static MethodInfo miSelectMany = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().SelectMany(t => t.Namespace, (t, c) => t)).GetGenericMethodDefinition();
         static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().AsEnumerable().DefaultIfEmpty()).GetGenericMethodDefinition();
-     
+
         public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, CollectionElementToken cet)
         {
             Type elementType = cet.Parent.Type.ElementType();
@@ -254,28 +245,30 @@ namespace Signum.Engine.DynamicQuery
                 query.Context.Parameter);
 
             var elementParameter = cet.CreateParameter();
-            
+
             var properties = query.Context.Replacemens.Values.And(cet.CreateExpression(elementParameter));
 
-            var ctor = TupleReflection.TupleChainConstructor(properties); 
+            var ctor = TupleReflection.TupleChainConstructor(properties);
 
-            var resultSelector = Expression.Lambda(Expression.Convert(ctor,typeof(object)), query.Context.Parameter, elementParameter);
-            
-            var resultQuery = query.Query.Provider.CreateQuery<object>(Expression.Call(null, miSelectMany.MakeGenericMethod(typeof(object), elementType, typeof(object)), 
+            var resultSelector = Expression.Lambda(Expression.Convert(ctor, typeof(object)), query.Context.Parameter, elementParameter);
+
+            var resultQuery = query.Query.Provider.CreateQuery<object>(Expression.Call(null, miSelectMany.MakeGenericMethod(typeof(object), elementType, typeof(object)),
                 new Expression[] { query.Query.Expression, Expression.Quote(collectionSelector), Expression.Quote(resultSelector) }));
 
             var parameter = Expression.Parameter(typeof(object));
 
 
-            var newReplacements = query.Context.Replacemens.Keys.And(cet).Select((a,i)=>new {
-                Token = a, 
+            var newReplacements = query.Context.Replacemens.Keys.And(cet).Select((a, i) => new
+            {
+                Token = a,
                 Expression = TupleReflection.TupleChainProperty(Expression.Convert(parameter, ctor.Type), i)
-            }).ToDictionary(a=>a.Token, a=>a.Expression);
+            }).ToDictionary(a => a.Token, a => a.Expression);
 
             return new DQueryable<T>(resultQuery,
-                new BuildExpressionContext(ctor.Type, parameter, newReplacements)); 
+                new BuildExpressionContext(ctor.Type, parameter, newReplacements));
         }
 
+        #endregion
 
         #region Where
 
@@ -286,7 +279,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DQueryable<T> Where<T>(this DQueryable<T> query, List<Filter> filters)
         {
-            var where = GetWhereExpression(query.Context, filters);
+            Expression<Func<object, bool>> where = GetWhereExpression(query.Context, filters);
 
             if (where == null)
                 return query;
@@ -301,7 +294,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerable<T> Where<T>(this DEnumerable<T> collection, List<Filter> filters)
         {
-            var where = GetWhereExpression(collection.Context, filters);
+            Expression<Func<object, bool>> where = GetWhereExpression(collection.Context, filters);
 
             if (where == null)
                 return collection;
@@ -547,25 +540,12 @@ namespace Signum.Engine.DynamicQuery
 
         #endregion
 
+
         public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
         {
             return MetadataVisitor.GatherMetadata(query.Expression); 
         }
 
-        //public static DEnumerable<T> AsEnumerable<T>(this DQueryable<T> query)
-        //{
-        //    return new DEnumerable<T>(query.Query.AsEnumerable(), query.Context);
-        //}
-
-        //public static DEnumerable<T> ToArray<T>(this DQueryable<T> query)
-        //{
-        //    return new DEnumerable<T>(query.Query.ToArray(), query.Context);
-        //}
-
-        //public static DEnumerable<T> ToArray<T>(this DEnumerable<T> query)
-        //{
-        //    return new DEnumerable<T>(query.Collection.ToArray(), query.Context);
-        //}
 
         public static ResultTable ToResultTable<T>(this DEnumerableCount<T> collection, QueryRequest req)
         {
@@ -597,5 +577,7 @@ namespace Signum.Engine.DynamicQuery
             }
             return array;
         }
+
+
     }
 }
