@@ -6,6 +6,7 @@ using Signum.Engine.Operations;
 using Signum.Engine;
 using Signum.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Signum.Utilities;
 
 namespace Signum.Test.Extensions
 {
