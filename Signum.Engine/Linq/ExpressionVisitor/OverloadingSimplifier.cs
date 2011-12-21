@@ -70,8 +70,8 @@ namespace Signum.Engine.Linq
         static MethodInfo miTakeQ = ReflectionTools.GetMethodInfo(() => Queryable.Take((IQueryable<string>)null, 0)).GetGenericMethodDefinition();
         static MethodInfo miTakeE = ReflectionTools.GetMethodInfo(() => Enumerable.Take((IEnumerable<string>)null, 0)).GetGenericMethodDefinition();
 
-        static MethodInfo miFirstQ = ReflectionTools.GetMethodInfo(() => Queryable.FirstEx((IQueryable<string>)null)).GetGenericMethodDefinition();
-        static MethodInfo miFirstE = ReflectionTools.GetMethodInfo(() => Enumerable.FirstEx((IEnumerable<string>)null)).GetGenericMethodDefinition();
+        static MethodInfo miFirstQ = ReflectionTools.GetMethodInfo(() => Queryable.First((IQueryable<string>)null)).GetGenericMethodDefinition();
+        static MethodInfo miFirstE = ReflectionTools.GetMethodInfo(() => Enumerable.First((IEnumerable<string>)null)).GetGenericMethodDefinition();
 
         static MethodInfo miFirstOrDefaultQ = ReflectionTools.GetMethodInfo(() => Queryable.FirstOrDefault((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miFirstOrDefaultE = ReflectionTools.GetMethodInfo(() => Enumerable.FirstOrDefault((IEnumerable<string>)null)).GetGenericMethodDefinition();
