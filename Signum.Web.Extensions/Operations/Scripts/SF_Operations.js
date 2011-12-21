@@ -96,8 +96,6 @@ SF.registerModule("Operations", function () {
                 SF.Blocker.enable();
             }
 
-            SF.Notify.info(lang.signum.executing);
-
             if (SF.isEmpty(newPrefix))
                 newPrefix = this.options.prefix;
 
@@ -303,7 +301,6 @@ SF.registerModule("Operations", function () {
                 return false;
             }
 
-            SF.Notify.info(lang.signum.executing);
             this.ajax(this.options.prefix, function () {
                 SF.Notify.info(lang.signum.executed, 2000);
             });
@@ -346,8 +343,6 @@ SF.registerModule("Operations", function () {
 
         this.ajax = function (newPrefix, items, onSuccess) {
             SF.log("ConstructorFromMany ajax");
-
-            SF.Notify.info(lang.signum.executing);
 
             if (SF.Blocker.isEnabled()) {
                 return false;
