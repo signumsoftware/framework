@@ -276,7 +276,7 @@ namespace Signum.Windows.Operations
             Enum selected = null;
             if (list.Count == 1)
             {
-                selected = dic.Keys.Single();
+                selected = dic.Keys.SingleEx();
             }
             else
             {

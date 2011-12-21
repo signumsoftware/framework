@@ -94,7 +94,7 @@ namespace Signum.Windows.Chart
 
             chartBuilder.Description = Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
             Settings = Navigator.GetQuerySettings(Request.QueryName);
-            var entityColumn = Description.Columns.SingleOrDefault(a => a.IsEntity);
+            var entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             EntityType = Reflector.ExtractLite(entityColumn.Type);
 
             qtbFilters.Token = null;
@@ -252,7 +252,7 @@ namespace Signum.Windows.Chart
             if (resultTable.Rows.Length > 0)
             {
                 lvResult.SelectedIndex = 0;
-                lvResult.ScrollIntoView(resultTable.Rows.First());
+                lvResult.ScrollIntoView(resultTable.Rows.FirstEx());
             }
 
             lvResult.Background = Brushes.White;
@@ -338,7 +338,7 @@ namespace Signum.Windows.Chart
                 OrderOptions.Clear();
             }
 
-            OrderOption order = OrderOptions.SingleOrDefault(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
+            OrderOption order = OrderOptions.SingleOrDefaultEx(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
             if (order != null)
             {
                 order.ColumnOrderInfo.FlipAdorner();

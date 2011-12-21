@@ -150,8 +150,8 @@ namespace Signum.Windows.Authorization
 
         private void removeCondition_Click(object sender, RoutedEventArgs e)
         {
-            var node = ((Button)sender).VisualParents().OfType<TreeViewItem>().First();
-            var parentNode = node.VisualParents().Skip(1).OfType<TreeViewItem>().First();
+            var node = ((Button)sender).VisualParents().OfType<TreeViewItem>().FirstEx();
+            var parentNode = node.VisualParents().Skip(1).OfType<TreeViewItem>().FirstEx();
 
             var rules = (TypeRuleBuilder)parentNode.DataContext;
             var condition = (TypeConditionRuleBuilder)node.DataContext;

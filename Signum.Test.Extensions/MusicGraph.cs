@@ -91,7 +91,7 @@ namespace Signum.Test.Extensions
 
                     return new AlbumDN()
                     {
-                        Author = albums.First().Author,
+                        Author = albums.FirstEx().Author,
                         Year = DateTime.Now.Year,
                         Songs = albums.SelectMany(a => a.Songs).ToMList()
                     };
@@ -110,7 +110,7 @@ namespace Signum.Test.Extensions
 
                     return new AlbumDN()
                     {
-                        Author = albums.First().Author,
+                        Author = albums.FirstEx().Author,
                         Year = DateTime.Now.Year,
                     };
                 }
