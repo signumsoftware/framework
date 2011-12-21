@@ -71,7 +71,7 @@ namespace Signum.Windows
                 if (m != null && m.Success)
                 {
                     string an = m.Groups["an"].Value;
-                    return AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == an);
+                    return AppDomain.CurrentDomain.GetAssemblies().SingleEx(a => a.GetName().Name == an);
                 }
             }
 

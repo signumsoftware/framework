@@ -279,7 +279,7 @@ namespace Signum.Windows
             tokenBuilder.Token = null;
             tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
 
-            entityColumn = Description.Columns.SingleOrDefault(a => a.IsEntity);
+            entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             if (entityColumn == null)
                 throw new InvalidOperationException("Entity Column not found"); 
 
@@ -521,7 +521,7 @@ namespace Signum.Windows
             if (resultTable.Rows.Length > 0)
             {
                 lvResult.SelectedIndex = 0;
-                lvResult.ScrollIntoView(resultTable.Rows.First());
+                lvResult.ScrollIntoView(resultTable.Rows.FirstEx());
             }            
             ItemsCount = lvResult.Items.Count;
             lvResult.Background = Brushes.White;
@@ -686,7 +686,7 @@ namespace Signum.Windows
                 OrderOptions.Clear();
             }
 
-            OrderOption order = OrderOptions.SingleOrDefault(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
+            OrderOption order = OrderOptions.SingleOrDefaultEx(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
             if (order != null)
             {
                 order.ColumnOrderInfo.FlipAdorner();
@@ -860,7 +860,7 @@ namespace Signum.Windows
             this.Loaded -= SearchControlMenuItem_Loaded;
             if (this.Parent != null)
             {
-                SearchControl result = this.LogicalParents().OfType<SearchControl>().First();
+                SearchControl result = this.LogicalParents().OfType<SearchControl>().FirstEx();
              
                 if (result is SearchControl)
                 {

@@ -91,7 +91,7 @@ namespace Signum.Windows
                                     if(item.Arguments.Count != 1)
                                         throw new InvalidOperationException("Add Method {0} not supported".Formato(item.AddMethod.MethodName()));
 
-                                    list.AddRange(ProcessChild(item.Arguments.Single(), factory));
+                                    list.AddRange(ProcessChild(item.Arguments.SingleEx(), factory));
                                 }
 
                             }break;

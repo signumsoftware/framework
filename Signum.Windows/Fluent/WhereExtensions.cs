@@ -131,37 +131,37 @@ namespace Signum.Windows
         public static T Child<T>(this DependencyObject parent)
             where T : DependencyObject
         {
-            return Children<T>(parent,(Func<T,bool>)null, WhereFlags.Default).First();
+            return Children<T>(parent,(Func<T,bool>)null, WhereFlags.Default).FirstEx();
         }
 
         public static T Child<T>(this DependencyObject parent, WhereFlags flags)
             where T : DependencyObject
         {
-            return Children<T>(parent, (Func<T, bool>)null, flags).First();
+            return Children<T>(parent, (Func<T, bool>)null, flags).FirstEx();
         }
 
         public static T Child<T>(this DependencyObject parent, string route)
             where T : DependencyObject
         {
-            return Children<T>(parent, p=>p.GetRoute() == route, WhereFlags.Default).First();
+            return Children<T>(parent, p=>p.GetRoute() == route, WhereFlags.Default).FirstEx();
         }
 
         public static T Child<T>(this DependencyObject parent, Func<T, bool> predicate)
             where T : DependencyObject
         {
-            return Children<T>(parent, predicate, WhereFlags.Default).First();
+            return Children<T>(parent, predicate, WhereFlags.Default).FirstEx();
         }
 
         public static T Child<T>(this DependencyObject parent, string route, WhereFlags flags)
             where T : DependencyObject
         {
-            return Children<T>(parent, p => p.GetRoute() == route, flags).First();
+            return Children<T>(parent, p => p.GetRoute() == route, flags).FirstEx();
         }
 
         public static T Child<T>(this DependencyObject parent, Func<T, bool> predicate, WhereFlags flags)
             where T : DependencyObject
         {
-            return Children<T>(parent, predicate, flags).First();
+            return Children<T>(parent, predicate, flags).FirstEx();
         }
 
 
