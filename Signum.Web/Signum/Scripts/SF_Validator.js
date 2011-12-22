@@ -50,7 +50,6 @@ SF.registerModule("Validator", function () {
 
         trySave: function () {
             SF.log("Validator trySave");
-            SF.Notify.info(lang.signum.saving);
             var returnValue = false;
             var self = this;
             $.ajax({
@@ -257,7 +256,6 @@ SF.registerModule("Validator", function () {
 
         this.trySave = function () {
             SF.log("PartialValidator trySave");
-            SF.Notify.info(lang.signum.saving);
             var validatorResult = null;
             var self = this;
             $.ajax({
@@ -360,8 +358,6 @@ SF.registerModule("Validator", function () {
     SF.EntityIsValid = function (validationOptions, onSuccess, sender) {
         SF.log("Validator EntityIsValid");
 
-        SF.Notify.info(lang.signum.validating);
-
         var isValid;
 
         if (SF.isEmpty(validationOptions.prefix)) {
@@ -376,7 +372,6 @@ SF.registerModule("Validator", function () {
         }
 
         if (isValid) {
-            SF.Notify.clear();
             if (onSuccess != null) {
                 if (typeof sender != "undefined") {
                     onSuccess.call(sender);

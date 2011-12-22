@@ -285,19 +285,16 @@ SF.registerModule("FindNavigator", function () {
         },
 
         search: function () {
-            var $btnSearch = $(this.pf("qbSearch"));
-            $btnSearch.toggleClass("sf-loading").val(lang.signum.searching);
-
             var self = this;
             $.ajax({
                 url: (SF.isEmpty(this.findOptions.searchControllerUrl) ? this.control().attr("data-search-url") : this.findOptions.searchControllerUrl),
                 data: this.requestDataForSearch(),
                 async: this.findOptions.async,
                 success: function (r) {
-                    var idBtnSearch = $btnSearch.attr('id');
+                    var idBtnSearch = $(self.pf("qbSearch")).attr('id');
                     if (SF.FindNavigator.asyncSearchFinished[idBtnSearch])
                         SF.FindNavigator.asyncSearchFinished[idBtnSearch] = false;
-                    $btnSearch.val(lang.signum.search).toggleClass("sf-loading");
+                    
                     var $control = self.control();
                     var $tbody = $control.find(".sf-search-results-container tbody");
 
@@ -308,9 +305,6 @@ SF.registerModule("FindNavigator", function () {
                     else {
                         $tbody.html("");
                     }
-                },
-                error: function () {
-                    $btnSearch.val(lang.signum.search).toggleClass('loading');
                 }
             });
 

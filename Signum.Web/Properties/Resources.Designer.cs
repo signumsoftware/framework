@@ -493,20 +493,20 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Executing....
-        /// </summary>
-        public static string Signum_executing {
-            get {
-                return ResourceManager.GetString("Signum_executing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Hide filters.
         /// </summary>
         public static string Signum_hideFilters {
             get {
                 return ResourceManager.GetString("Signum_hideFilters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading....
+        /// </summary>
+        public static string Signum_loading {
+            get {
+                return ResourceManager.GetString("Signum_loading", resourceCulture);
             }
         }
         
@@ -583,29 +583,11 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Saving.
-        /// </summary>
-        public static string Signum_saving {
-            get {
-                return ResourceManager.GetString("Signum_saving", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Search.
         /// </summary>
         public static string Signum_search {
             get {
                 return ResourceManager.GetString("Signum_search", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Searching....
-        /// </summary>
-        public static string Signum_searching {
-            get {
-                return ResourceManager.GetString("Signum_searching", resourceCulture);
             }
         }
         
