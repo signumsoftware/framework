@@ -156,10 +156,10 @@ namespace Signum.Engine.DynamicQuery
             if (OverrideIsAllowed != null)
                 return OverrideIsAllowed();
 
-            if(Meta != null)
+            if (Meta != null)
                 return Meta.IsAllowed();
 
-            return false;
+            return true;
         }
 
         public ColumnDescription BuildColumnDescription()
