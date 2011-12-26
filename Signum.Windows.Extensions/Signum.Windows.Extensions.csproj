@@ -92,8 +92,8 @@
     <Compile Include="Authorization\NewPassword.xaml.cs">
       <DependentUpon>NewPassword.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Authorization\PasswordValidInterval.xaml.cs">
-      <DependentUpon>PasswordValidInterval.xaml</DependentUpon>
+    <Compile Include="Authorization\PasswordExpiresInterval.xaml.cs">
+      <DependentUpon>PasswordExpiresInterval.xaml</DependentUpon>
     </Compile>
     <Compile Include="Authorization\QueryAuthClient.cs" />
     <Compile Include="Authorization\FacadeMethodAuthClient.cs" />
@@ -181,6 +181,13 @@
     </Compile>
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
+    <Compile Include="Logging\DeploymentLog.xaml.cs">
+      <DependentUpon>DeploymentLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Logging\Exception.xaml.cs">
+      <DependentUpon>Exception.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Logging\ExceptionClient.cs" />
     <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
       <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
     </Compile>
@@ -300,7 +307,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Authorization\PasswordValidInterval.xaml">
+    <Page Include="Authorization\PasswordExpiresInterval.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -447,6 +454,14 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Logging\DeploymentLog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Logging\Exception.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Mailing\ClientCertificationFile.xaml">
       <SubType>Designer</SubType>

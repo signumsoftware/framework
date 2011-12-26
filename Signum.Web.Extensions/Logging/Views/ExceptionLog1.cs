@@ -65,36 +65,66 @@ namespace ASP
 
  using (var e = Html.TypeContext<ExceptionDN>())
 {
+
+WriteLiteral("    <table>\r\n        <tr>\r\n            <td>\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.Environment));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.CreationDate));
+
+WriteLiteral("<text>(</text>");
+
+
+                                                                Write(e.Value.CreationDate.ToUserInterface().ToAgoString());
+
+WriteLiteral("<text>)</text>\r\n                ");
+
+
+           Write(Html.EntityLine(e, f => f.User));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.Version));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.ThreadId));
+
+WriteLiteral("\r\n            </td>\r\n            <td>\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.ActionName));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.ControllerName));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.UserHostAddress));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.UserHostName));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.ValueLine(e, f => f.UserAgent));
+
+WriteLiteral("\r\n            </td>\r\n        </tr>\r\n    </table>\r\n");
+
+
     
-Write(Html.ValueLine(e, f => f.CreationDate));
-
-
-WriteLiteral("(");
-
-
-                                                         
-                                                    Write(e.Value.CreationDate.ToUserInterface().ToAgoString());
-
-
-WriteLiteral(")");
-
-WriteLiteral("\r\n");
-
-
-
-    
-Write(Html.ValueLine(e, f => f.ThreadId));
-
-                                       
-    
-    
-Write(Html.ValueLine(e, f => f.ActionName));
-
-                                         
-    
-Write(Html.ValueLine(e, f => f.ControllerName));
-
-                                             
     
 Write(Html.ValueLine(e, f => f.RequestUrl));
 
@@ -104,88 +134,53 @@ Write(Html.ValueLine(e, f => f.UrlReferer));
 
                                          
     
-Write(Html.ValueLine(e, f => f.UserAgent));
 
-                                        
-    
-Write(Html.ValueLine(e, f => f.UserHostAddress));
-
-                                              
-    
-Write(Html.ValueLine(e, f => f.UserHostName));
-
-                                           
-    
-    if (e.ReadOnly)
-    {
-
-WriteLiteral("        <h3>\r\n            QueryString</h3>\r\n");
+WriteLiteral("    <h3>\r\n        QueryString</h3>\r\n");
 
 
 
-WriteLiteral("        <pre>");
+WriteLiteral("    <pre>");
 
 
-        Write(e.Value.QueryString);
+    Write(e.Value.QueryString);
 
 WriteLiteral("</pre>\r\n");
 
 
     
 
-WriteLiteral("        <h3>\r\n            Form</h3>\r\n");
+WriteLiteral("    <h3>\r\n        Form</h3>\r\n");
 
 
 
-WriteLiteral("        <pre>");
+WriteLiteral("    <pre>");
 
 
-        Write(e.Value.Form);
+    Write(e.Value.Form);
+
+WriteLiteral("</pre>\r\n");
+
+
+
+
+WriteLiteral("    <h3>\r\n        Session</h3>\r\n");
+
+
+
+WriteLiteral("    <pre>");
+
+
+    Write(e.Value.Session);
 
 WriteLiteral("</pre>\r\n");
 
 
 
 
-WriteLiteral("        <h3>\r\n            Session</h3>\r\n");
+WriteLiteral("    <h3 style=\"color: rgb(139,0,0)\">");
 
 
-
-WriteLiteral("        <pre>");
-
-
-        Write(e.Value.Session);
-
-WriteLiteral("</pre>\r\n");
-
-
-    }
-    else
-    {
-        
-   Write(Html.ValueLine(e, f => f.QueryString, vl => vl.ValueLineType = ValueLineType.TextArea));
-
-                                                                                               
-        
-   Write(Html.ValueLine(e, f => f.Form, vl => vl.ValueLineType = ValueLineType.TextArea));
-
-                                                                                        
-        
-   Write(Html.ValueLine(e, f => f.Session, vl => vl.ValueLineType = ValueLineType.TextArea));
-
-                                                                                             
-    }  
-
-    
-Write(Html.EntityLine(e, f => f.User));
-
-                                    
-
-
-WriteLiteral("    <h3>");
-
-
-   Write(e.Value.ExceptionType);
+                               Write(e.Value.ExceptionType);
 
 WriteLiteral("</h3>\r\n");
 

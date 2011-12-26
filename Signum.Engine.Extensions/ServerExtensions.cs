@@ -75,7 +75,6 @@ namespace Signum.Services
             catch (Exception e)
             {
                 throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
-
             }
         }
 
