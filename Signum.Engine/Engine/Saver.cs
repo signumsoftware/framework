@@ -18,12 +18,20 @@ namespace Signum.Engine
     {
         public static void SaveAll(IdentifiableEntity[] idents)
         {
-            Save(() => GraphExplorer.FromRoots(idents));
+            Save(() => 
+            {
+                using (HeavyProfiler.Log("GRAPH"))
+                    return GraphExplorer.FromRoots(idents);
+            });
         }
 
         public static void Save(IdentifiableEntity ident)
         {
-            Save(() => GraphExplorer.FromRoot(ident));
+            Save(() =>
+            {
+                using (HeavyProfiler.Log("GRAPH"))
+                    return GraphExplorer.FromRoot(ident);
+            });
         }
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
