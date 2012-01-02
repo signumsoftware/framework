@@ -57,12 +57,14 @@ namespace Signum.Utilities.DataStructures
 
         public bool Connected(T from, T to)
         {
-            return Get(from).ContainsKey(to);
+            return RelatedTo(from).ContainsKey(to);
         }
 
         public bool TryConnected(T from, T to)
         {
-            return TryGet(from).TryCS(hs => hs.ContainsKey(to)) ?? false;
+            var dic = TryGet(from);
+
+            return dic != null && dic.ContainsKey(to);
         }
 
         public void Add(T from)
@@ -155,17 +157,15 @@ namespace Signum.Utilities.DataStructures
             return adjacency.TryGetC(node);
         }
 
-        Dictionary<T, E> Get(T node)
-        {
-            var result = adjacency.TryGetC(node);
-            if (result == null)
-                throw new InvalidOperationException("The node {0} is not in the graph".Formato(node));
-            return result;
-        }
-
         Dictionary<T, E> TryGetOrAdd(T node)
         {
-            return adjacency.GetOrCreate(node, () => new Dictionary<T, E>(Comparer));
+            Dictionary<T, E> result;
+            if (adjacency.TryGetValue(node, out result))
+                return result;
+
+            result = new Dictionary<T, E>(Comparer);
+            adjacency.Add(node, result);
+            return result;
         }
 
         public Dictionary<T, E> TryRelatedTo(T node)
@@ -175,7 +175,10 @@ namespace Signum.Utilities.DataStructures
 
         public Dictionary<T, E> RelatedTo(T node)
         {
-            return Get(node);
+            var result = adjacency.TryGetC(node);
+            if (result == null)
+                throw new InvalidOperationException("The node {0} is not in the graph".Formato(node));
+            return result;
         }
 
         /// <summary>
@@ -310,13 +313,16 @@ namespace Signum.Utilities.DataStructures
 
         public void Expand(T node, Func<T, IEnumerable<KeyValuePair<T, E>>> expandFunction)
         {
-            if (Contains(node)) return;
+            if (adjacency.ContainsKey(node))
+                return;
 
-            Add(node); //necesario para ciclos
+            var dic = new Dictionary<T, E>();
+            adjacency.Add(node, dic);
+
             foreach (var item in expandFunction(node))
             {
                 Expand(item.Key, expandFunction);
-                Add(node, item.Key, item.Value);
+                dic.Add(item.Key, item.Value);
             }
         }
 
