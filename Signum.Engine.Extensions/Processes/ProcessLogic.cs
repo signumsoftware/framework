@@ -82,11 +82,12 @@ namespace Signum.Engine.Processes
                 SchedulerLogic.ExecuteTask.Register((ProcessDN p) =>
                     ProcessLogic.Create(p).Execute(ProcessOperation.Execute));
 
-                sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += () =>
-                {
-                    Thread.Sleep(InitialDelayMiliseconds);
-                    Start();
-                };
+                if (InitialDelayMiliseconds > -1)
+                    sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += () =>
+                    {
+                        Thread.Sleep(InitialDelayMiliseconds);
+                        Start();
+                    };
 
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saving += ProcessExecution_Saving;
 
@@ -121,7 +122,7 @@ namespace Signum.Engine.Processes
 
                 dqm.RegisterExpression((ProcessDN p) => p.Executions());
                 dqm.RegisterExpression((ProcessDN p) => p.LastExecution());
-                  
+
                 PackageLogic.Start(sb, dqm);
             }
         }
@@ -154,8 +155,8 @@ namespace Signum.Engine.Processes
 
         static void Execute(ProcessExecutionDN pe)
         {
-            if (pe.State != ProcessState.Queued || queue.Any(a=>a.Execution.Id == pe.Id))
-                return; 
+            if (pe.State != ProcessState.Queued || queue.Any(a => a.Execution.Id == pe.Id))
+                return;
 
             var ep = new ExecutingProcess
             {
@@ -241,8 +242,8 @@ namespace Signum.Engine.Processes
                         running = false;
                     }
 
-                }, TaskCreationOptions.LongRunning); 
-           
+                }, TaskCreationOptions.LongRunning);
+
                 RefreshPlan();
             }
         }
@@ -260,7 +261,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        static DateTime? nextPlannedExecution; 
+        static DateTime? nextPlannedExecution;
 
         static void RefreshPlan()
         {
@@ -323,7 +324,7 @@ namespace Signum.Engine.Processes
         public static int MaxDegreeOfParallelism = 4;
 
         static CancellationTokenSource CancelNewProcesses;
-     
+
         public class ProcessExecutionGraph : Graph<ProcessExecutionDN, ProcessState>
         {
             static ProcessExecutionDN Create(ProcessDN process, Enum processKey, params object[] args)
@@ -399,7 +400,7 @@ namespace Signum.Engine.Processes
                 //}.Register();
 
                 new Execute(ProcessOperation.Plan)
-                {   
+                {
                     FromStates = new[] { ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended },
                     ToState = ProcessState.Planned,
                     Execute = (pe, args) =>
@@ -611,14 +612,14 @@ namespace Signum.Engine.Processes
         public int MaxDegreeOfParallelism;
         public int InitialDelayMiliseconds;
         public bool Running;
-        public DateTime? NextPlannedExecution; 
+        public DateTime? NextPlannedExecution;
         public List<ExecutionState> Executing;
-        public List<ExecutionState> Queue; 
+        public List<ExecutionState> Queue;
     }
 
     public class ExecutionState
     {
-        public Lite<ProcessExecutionDN> ProcessExecution; 
+        public Lite<ProcessExecutionDN> ProcessExecution;
         public ProcessState State;
         public bool IsCancellationRequested;
         public decimal? Progress;
