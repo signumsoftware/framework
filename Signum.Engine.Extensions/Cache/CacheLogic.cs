@@ -85,7 +85,7 @@ namespace Signum.Engine.Cache
                 {
                     if (query.Any(e => kvp.Value.Contains(e.ToLite())))
                     {
-                        InvalidateType(kvp.Key);
+                        DisableAndInvalidateType(kvp.Key);
                     }
                 }
             }
@@ -98,18 +98,23 @@ namespace Signum.Engine.Cache
                     {
                         if(kvp.Value.Contains(ident.ToLite()))
                         {
-                            InvalidateType(kvp.Key);
+                            DisableAndInvalidateType(kvp.Key);
                         }
                     }
                 }
             }
 
-            private void InvalidateType(Type referingType)
+            private void DisableAndInvalidateType(Type referingType)
             {
-                Interlocked.Increment(ref invalidations); 
-                cachedEntities[referingType].Clear();
-                sensibleLites[referingType].Clear();
-                CacheLogic.InvalidateAllConnected(referingType);
+                DisableInTransaction(typeof(T));
+
+                Transaction.PostRealCommit += () =>
+                {
+                    Interlocked.Increment(ref invalidations);
+                    cachedEntities[referingType].Clear();
+                    sensibleLites[referingType].Clear();
+                    CacheLogic.InvalidateAllConnected(referingType);
+                };
             }
 
             public void SetEntities(Type referingType, DirectedGraph<Modifiable> entities)
@@ -135,7 +140,7 @@ namespace Signum.Engine.Cache
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !tempDisabled.Value; }
+                get { return !GloballyDisabled && !tempDisabled.Value && !IsDisabledInTransaction(typeof(T)); }
             }
 
             public override bool IsComplete
@@ -213,10 +218,12 @@ namespace Signum.Engine.Cache
                 pack = new Lazy<Pack>(() =>
                 {
                     using (new EntityCache(true))
-                    using (DisableThis())
                     using (Schema.Current.GlobalMode())
+                    using (Transaction tr = new Transaction(true))
                     using (HeavyProfiler.Log("CACHE"))
                     {
+                        DisabledTypesInTransaction().Add(typeof(T));
+
                         List<T> result = Database.Query<T>().ToList();
 
                         var semis = addEntities.TryGetC(typeof(T));
@@ -232,7 +239,7 @@ namespace Signum.Engine.Cache
 
                         Interlocked.Increment(ref loads); 
 
-                        return new Pack(result);
+                        return tr.Commit(new Pack(result));
                     }
                 }, LazyThreadSafetyMode.PublicationOnly);
 
@@ -244,22 +251,14 @@ namespace Signum.Engine.Cache
                 ee.PreUnsafeUpdate += UnsafeUpdated;
             }
 
-            bool disabledThis; 
-            public IDisposable DisableThis()
-            {
-                bool old = disabledThis;
-                disabledThis = true;
-                return new Disposable(() => disabledThis = old); 
-            }
-
             void UnsafeUpdated(IQueryable<T> query)
             {
-                InvalidateAllConnected();
+                DisableAndInvalidateAllConnected();
             }
 
             void PreUnsafeDelete(IQueryable<T> query)
             {
-                Invalidate(false);
+                DisableAndInvalidate();
             }
 
             void Saving(T ident)
@@ -268,23 +267,24 @@ namespace Signum.Engine.Cache
                 {
                     if (ident.IsNew)
                     {
-                        Invalidate(false);
+                        DisableAndInvalidate();
                     }
                     else
                     {
-                        InvalidateAllConnected();
+                        DisableAndInvalidateAllConnected();
                     }
                 }
             }
 
-            private void InvalidateAllConnected()
+            private void DisableAndInvalidateAllConnected()
             {
-                CacheLogic.InvalidateAllConnected(typeof(T));
+                CacheLogic.DisableAndInvalidateAllConnected(typeof(T));
             }
+
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !disabledThis && !tempDisabled.Value; }
+                get { return !GloballyDisabled && !tempDisabled.Value && !IsDisabledInTransaction(typeof(T));  }
             }
 
             public override bool IsComplete
@@ -305,6 +305,12 @@ namespace Signum.Engine.Cache
             public int Loads { get { return loads; } }
 
             public event Action Invalidation;
+
+            void DisableAndInvalidate()
+            {
+                DisabledTypesInTransaction().Add(typeof(T));
+                Transaction.PostRealCommit += () => Invalidate(false);
+            }
 
             public void Invalidate(bool isClean)
             {
@@ -375,6 +381,29 @@ namespace Signum.Engine.Cache
             return new Disposable(() => tempDisabled.Value = false); 
         }
 
+        const string DisabledCachesKey = "disabledCaches";
+
+        static HashSet<Type> DisabledTypesInTransaction()
+        {
+            var hs = Transaction.UserData.TryGetC(DisabledCachesKey) as HashSet<Type>;
+            if (hs == null)
+            {
+                Transaction.UserData[DisabledCachesKey] = hs = new HashSet<Type>();
+            }
+
+            return hs; 
+        }
+
+        static bool IsDisabledInTransaction(Type type)
+        {
+            if (!Transaction.HasTransaction)
+                return false;
+
+            HashSet<Type> disabledTypes = Transaction.UserData.TryGetC(DisabledCachesKey) as HashSet<Type>;
+
+            return disabledTypes != null && disabledTypes.Contains(type);
+        }
+
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -431,14 +460,19 @@ namespace Signum.Engine.Cache
             return result;
         }
 
-        public static void InvalidateAllConnected(Type type) 
+        public static void DisableAndInvalidateAllConnected(Type type) 
         {
-            controllers[type].Invalidate(false);
+            var connected = invalidations.IndirectlyRelatedTo(type, true);
 
-            foreach (var stype in invalidations.IndirectlyRelatedTo(type))
+            DisabledTypesInTransaction().AddRange(connected);
+
+            Transaction.PostRealCommit += () =>
             {
-                controllers[stype].Invalidate(false);
-            }
+                foreach (var stype in connected)
+                {
+                    controllers[stype].Invalidate(false);
+                }
+            }; 
         }
 
         public static List<CacheStatistics> Statistics()
