@@ -58,6 +58,13 @@ namespace Signum.Windows
         public EntityDetail()
         {
             InitializeComponent();
+            this.AddHandler(Common.ChangeDataContextEvent, new ChangeDataContextHandler(ChangeEntity));
+        }
+
+        void ChangeEntity(object sender, ChangeDataContextEventArgs e)
+        {
+            this.Entity = e.NewDataContext;
+            e.Handled = true;
         }
 
         public override void OnLoad(object sender, RoutedEventArgs e)

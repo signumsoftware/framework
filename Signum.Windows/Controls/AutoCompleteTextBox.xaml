@@ -15,7 +15,7 @@
                Placement="Bottom" 
                Width="{Binding ActualWidth, ElementName=txtBox}"
                PopupAnimation="Fade">
-            <ListBox x:Name="lstBox" SelectionMode="Single" SelectionChanged="lstBox_SelectionChanged" SelectedItem="{Binding SelectedItem, ElementName=me}"/>
+            <ListBox x:Name="lstBox" SelectionMode="Single" SelectionChanged="lstBox_SelectionChanged"/>
         </Popup>
     </StackPanel>
 </UserControl>

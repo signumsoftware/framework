@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Media;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -18,7 +19,7 @@ namespace Signum.Windows
     {
         public static readonly RoutedEvent ClosedEvent =
             EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Bubble, typeof(ClosedEventHandler), typeof(AutoCompleteTextBox));
-        public event RoutedEventHandler Closed
+        public event ClosedEventHandler Closed
         {
             add { AddHandler(ClosedEvent, value); }
             remove { RemoveHandler(ClosedEvent, value); }
@@ -27,7 +28,7 @@ namespace Signum.Windows
         public event Func<string, IEnumerable> AutoCompleting;
 
         public static readonly DependencyProperty SelectedItemProperty =
-            DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutoCompleteTextBox), new UIPropertyMetadata(null));
+            DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (s, o) => ((AutoCompleteTextBox)s).txtBox.Text = o.NewValue.TryToString()));
         public object SelectedItem
         {
             get { return (object)GetValue(SelectedItemProperty); }
@@ -35,11 +36,20 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty MinTypedCharactersProperty =
-            DependencyProperty.Register("MinTypedCharacters", typeof(int), typeof(AutoCompleteTextBox), new UIPropertyMetadata(2));
+            DependencyProperty.Register("MinTypedCharacters", typeof(int), typeof(AutoCompleteTextBox), new UIPropertyMetadata(1));
         public int MinTypedCharacters
         {
             get { return (int)GetValue(MinTypedCharactersProperty); }
             set { SetValue(MinTypedCharactersProperty, value); }
+        }
+
+
+        public static readonly DependencyProperty AllowFreeTextProperty =
+            DependencyProperty.Register("AllowFreeText", typeof(bool), typeof(AutoCompleteTextBox), new UIPropertyMetadata(false));
+        public bool AllowFreeText
+        {
+            get { return (bool)GetValue(AllowFreeTextProperty); }
+            set { SetValue(AllowFreeTextProperty, value); }
         }
 
         DispatcherTimer delayTimer = new DispatcherTimer(DispatcherPriority.Normal);
@@ -66,7 +76,6 @@ namespace Signum.Windows
                 throw new NullReferenceException("SeachMethod cannot be null.");
 
             IEnumerable res = AutoCompleting(txtBox.Text);
-
 
             lstBox.ItemsSource = res;
             if (lstBox.Items.Count > 0)
@@ -119,10 +128,8 @@ namespace Signum.Windows
                 }
                 else
                     Close(CloseReason.TabExit);
-
-                 txtBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                 
-                e.Handled = true;
+                //e.Handled = true;
             }
             else if (e.Key == Key.Enter)
             {
@@ -173,6 +180,13 @@ namespace Signum.Windows
         public void Close(CloseReason reason)
         {
             pop.IsOpen = false;
+            if (SelectedItem.TryToString() != txtBox.Text)
+            {
+                if (string.IsNullOrEmpty(txtBox.Text))
+                    SelectedItem = null;
+                else if (AllowFreeText)
+                    SelectedItem = txtBox.Text;
+            }
             RaiseEvent(new CloseEventArgs(reason));
         }
 
@@ -182,7 +196,7 @@ namespace Signum.Windows
             pop.IsOpen = false;
             if (lstBox.SelectedItem != null)
             {
-                txtBox.Text = lstBox.SelectedItem.ToString();
+                SelectedItem = lstBox.SelectedItem;
 
                 Close(reason); 
 
@@ -200,7 +214,12 @@ namespace Signum.Windows
         private void txtBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (!pop.IsKeyboardFocusWithin)
+            {
+                if (string.IsNullOrEmpty(this.txtBox.Text))
+                    SelectedItem = null;
+
                 Close(CloseReason.LostFocus);
+            }
         }
 
         private void Suggest()
