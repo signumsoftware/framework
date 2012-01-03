@@ -50,7 +50,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Implementations Implementations()
         {
-            return Parent.Implementations();
+            return GetPropertyRoute().GetImplementations();
         }
 
         public override string Format
