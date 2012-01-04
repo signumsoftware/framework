@@ -42,7 +42,7 @@ namespace Signum.Web
 
         public string Compose(string nameToAppend)
         {
-            return ControlID.Add(nameToAppend, Separator);
+            return ControlID.Add(Separator, nameToAppend);
         }
 
         public string Compose(params string[] namesToAppend)

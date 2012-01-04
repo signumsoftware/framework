@@ -39,7 +39,7 @@ namespace Signum.Utilities
             return source.IndexOf(toCheck, comp) >= 0;
         }
 
-        public static string Add(this string str, string part, string separator)
+        public static string Add(this string str, string separator, string part)
         {
             if (str.HasText())
             {
@@ -54,7 +54,7 @@ namespace Signum.Utilities
 
         public static string AddLine(this string str, string part)
         {
-            return Add(str, part, "\r\n");
+            return Add(str, "\r\n", part);
         }
 
         public static string[] Lines(this string str)

@@ -51,7 +51,7 @@ namespace Signum.Entities
             Assembly assembly = property.DeclaringType.Assembly;
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
-                string key = property.DeclaringType.Name.Add(property.Name, "_").Add(validator.GetType().Name, "_");
+                string key = property.DeclaringType.Name.Add("_", property.Name).Add("_", validator.GetType().Name);
                 string result = assembly.GetDefaultResourceManager().GetString(key);
                 if (result != null)
                     return result;
@@ -137,7 +137,7 @@ namespace Signum.Entities
                     max != -1 ? Resources.HaveMaximun0Characters.Formato(max) : null;
 
                 if (allowNulls)
-                    result = result.Add(Resources.OrBeNull, " ");
+                    result = result.Add(" ", Resources.OrBeNull);
 
                 return result;
             }

@@ -246,7 +246,7 @@ namespace Signum.Engine.Linq
             string bindings2 = bindings.HasText() ? "Bindings = {{\r\n{0}\r\n}}".Formato(bindings.Indent(4)) : null;
  
             return "ImplementedBy{{\r\n{0}\r\n}}".Formato(
-                Implementations.ToString(",\r\n").Add(bindings2, ",\r\n").Indent(4)
+                Implementations.ToString(",\r\n").Add(",\r\n", bindings2).Indent(4)
                 );
         }
     }
