@@ -61,6 +61,13 @@ namespace Signum.Windows
             set { this.columnOptions = value; }
         }
 
+        int? elementsPerPage;
+        public int? ElementsPerPage
+        {
+            get { return elementsPerPage; }
+            set { this.elementsPerPage = value; }
+        }
+
         public FindOptionsBase()
         {
             this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;

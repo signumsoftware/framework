@@ -78,7 +78,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ElementsPerPageProperty =
-            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
+            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(null, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
         public int? ElementsPerPage
         {
             get { return (int?)GetValue(ElementsPerPageProperty); }
@@ -126,7 +126,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ShowFooterProperty =
-            DependencyProperty.Register("ShowFooter", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+            DependencyProperty.Register("ShowFooter", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
         public bool ShowFooter
         {
             get { return (bool)GetValue(ShowFooterProperty); }

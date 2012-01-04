@@ -62,6 +62,14 @@ namespace Signum.Windows
             set { SetValue(ColumnOptionsProperty, value); }
         }
 
+        public static readonly DependencyProperty ElementsPerPageProperty =
+          DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchWindow), new UIPropertyMetadata(200));
+        public int? ElementsPerPage
+        {
+            get { return (int?)GetValue(ElementsPerPageProperty); }
+            set { SetValue(ElementsPerPageProperty, value); }
+        }
+
         public static readonly DependencyProperty AllowUserColumnsProperty =
             DependencyProperty.Register("AllowUserColumns", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
         public bool AllowUserColumns

@@ -41,6 +41,7 @@
                          OrderOptions="{Binding OrderOptions, ElementName=me}"
                          ColumnOptions="{Binding ColumnOptions, ElementName=me}"
                          ColumnOptionsMode="{Binding ColumnOptionsMode, ElementName=me}"
+                         ElementsPerPage="{Binding ElementsPerPage, ElementName=me}"
                          AllowUserColumns="{Binding AllowUserColumns, ElementName=me}"
                          MultiSelection="{Binding MultiSelection, ElementName=me}"
                          ShowFilters="{Binding ShowFilters, ElementName=me}"

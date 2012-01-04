@@ -575,6 +575,7 @@ namespace Signum.Windows
                 OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions),
                 ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions),
                 ColumnOptionsMode = options.ColumnOptionsMode,
+                ElementsPerPage = options.ElementsPerPage,
                 ShowFilters = options.ShowFilters,
                 ShowFilterButton = options.ShowFilterButton,
                 ShowFooter = options.ShowFooter,
