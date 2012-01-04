@@ -48,7 +48,8 @@ namespace Signum.Engine.Linq
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Queryable) ||
-                m.Method.DeclaringType == typeof(Enumerable))
+                m.Method.DeclaringType == typeof(Enumerable) ||
+                m.Method.DeclaringType == typeof(EnumerableUniqueExtensions))
             {
                 switch (m.Method.Name)
                 {
@@ -98,6 +99,12 @@ namespace Signum.Engine.Linq
                     case "SingleOrDefault":
                         return BindUniqueRow(m.Type, m.Method.Name.ToEnum<UniqueFunction>(),
                             m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes());
+
+                    case "FirstEx":
+                    case "SingleEx":
+                    case "SingleOrDefaultEx":
+                        return BindUniqueRow(m.Type, m.Method.Name.RemoveRight(2).ToEnum<UniqueFunction>(),
+                           m.GetArgument("collection"), m.TryGetArgument("predicate").StripQuotes());
                     case "Distinct":
                         return BindDistinct(m.Type, m.GetArgument("source"));
                     case "Reverse":
