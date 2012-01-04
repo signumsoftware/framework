@@ -196,9 +196,9 @@ namespace Signum.Entities.DynamicQuery
                 return token.SubTokens();
         }
 
-        public static QueryToken Parse(string tokenString, QueryDescription description)
+        public static QueryToken Parse(string tokenString, QueryDescription qd)
         {
-            return Parse(tokenString, t => SubTokens(t, description.Columns));
+            return Parse(tokenString, t => SubTokens(t, qd.Columns)); 
         }
 
         public static QueryToken Parse(string tokenString, Func<QueryToken, List<QueryToken>> subTokens)

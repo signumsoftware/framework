@@ -544,7 +544,7 @@ namespace Signum.Windows
 
             foreach (var f in filters)
             {
-                f.Token = QueryUtils.Parse(f.Path, description); 
+                f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
                 f.RefreshRealValue();
             }
         }
@@ -555,7 +555,7 @@ namespace Signum.Windows
 
             foreach (var o in orders)
             {
-                o.Token = QueryUtils.Parse(o.Path, description); 
+                o.Token = QueryUtils.Parse(o.Path, t => QueryUtils.SubTokens(t, description.Columns)); 
             }
         }
 

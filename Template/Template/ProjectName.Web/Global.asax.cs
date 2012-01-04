@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using $custommessage$.Logic;
+using Signum.Utilities;
 using Signum.Engine;
 using $custommessage$.Web.Properties;
 using Signum.Engine.Maps;
@@ -50,6 +51,8 @@ namespace $custommessage$.Web
 
         protected void Application_Start()
         {
+            Statics.SessionFactory = new ScopeSessionFactory(new AspNetSessionFactory());
+            
             Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
             Schema.Current.Initialize();

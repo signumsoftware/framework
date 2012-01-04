@@ -58,5 +58,21 @@ namespace Signum.Utilities
 
             return new Page<T>(count, currentPage, elementsPerPage, list);
         }
+
+        public static IEnumerable<T> TryTake<T>(this IEnumerable<T> source, int? count)
+        {
+            if (count == null)
+                return source;
+
+            return source.Take(count.Value);
+        }
+
+        public static IQueryable<T> TryTake<T>(this IQueryable<T> source, int? count)
+        {
+            if (count == null)
+                return source;
+
+            return source.Take(count.Value);
+        }
     }
 }

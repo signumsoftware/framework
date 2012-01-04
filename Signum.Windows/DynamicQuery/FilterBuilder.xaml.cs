@@ -218,7 +218,7 @@ namespace Signum.Windows
             {
                 Token = queryToken,
                 Value = queryToken.Type.IsValueType && !queryToken.Type.IsNullable() ? Activator.CreateInstance(queryToken.Type) : null,
-                Operation = QueryUtils.GetFilterOperations(ft).First()
+                Operation = QueryUtils.GetFilterOperations(ft).FirstEx()
             };
 
             Filters.Add(f);

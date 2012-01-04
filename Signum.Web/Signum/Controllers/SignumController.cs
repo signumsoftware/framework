@@ -316,26 +316,10 @@ namespace Signum.Web.Controllers
             if (subtokens.IsEmpty())
                 return Content("");
 
-            var items = new HtmlStringBuilder();
-            items.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
-            foreach (var t in subtokens)
-            {
-                var option = new HtmlTag("option")
-                    .Attr("value", t.Key)
-                    .SetInnerText(t.ToString());
+            var tokenOptions = SearchControlHelper.TokensCombo(subtokens, null);
 
-                string canColumn = QueryUtils.CanColumn(t);
-                if (canColumn.HasText())
-                    option.Attr("data-column", canColumn);
-
-                string canFilter = QueryUtils.CanFilter(t);
-                if (canFilter.HasText())
-                    option.Attr("data-filter", canFilter);
-
-                items.AddLine(option.ToHtml());
-            }
-
-            return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), queryName, items, new Context(null, prefix), index + 1, true).ToHtmlString());
+            return Content(
+                SearchControlHelper.TokenOptionsCombo(CreateHtmlHelper(this), queryName, tokenOptions, new Context(null, prefix), index + 1, true).ToHtmlString());
         }
 
         [HttpPost]

@@ -77,7 +77,7 @@ namespace Signum.Windows
         void UpdateCombo()
         {
             sp.Children.Clear();
-            for (int i = 0; i < tokens.Count; i++)
+            for (int i = 0; i < tokens.Count + 1; i++)
             {
                 List<QueryToken> subTokens = OnSubTokens(i == 0 ? null : tokens[i - 1]);
 

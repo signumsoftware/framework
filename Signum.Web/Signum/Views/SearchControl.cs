@@ -112,6 +112,11 @@ WriteLiteral("\"\r\n     data-popup-save-url=\"");
 
                      Write(Url.SignumAction("TrySavePartial"));
 
+WriteLiteral("\"\r\n     data-add-filter-url=\"");
+
+
+                     Write(Url.Action("AddFilter", "Signum"));
+
 WriteLiteral("\"\r\n     ");
 
 
@@ -192,7 +197,7 @@ WriteLiteral(">\r\n                <div class=\"ui-widget-header ui-corner-top s
 "                    ");
 
 
-               Write(Html.TokensCombo(queryDescription, Model));
+               Write(Html.TokenOptionsCombo(queryDescription.QueryName, SearchControlHelper.RootTokensCombo(queryDescription, null), Model, 0, false));
 
 WriteLiteral("\r\n                \r\n                    ");
 

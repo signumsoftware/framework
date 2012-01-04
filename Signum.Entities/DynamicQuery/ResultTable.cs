@@ -84,12 +84,12 @@ namespace Signum.Entities.DynamicQuery
 
         public int? StartElementIndex
         {
-            get { return !ElementsPerPage.HasValue && Rows.Count() != 0 ? (int?)null : (ElementsPerPage * (CurrentPage - 1)) + 1; }
+            get { return !ElementsPerPage.HasValue ? (int?)null : (ElementsPerPage * (CurrentPage - 1)) + 1; }
         }
 
         public int? EndElementIndex
         {
-            get { return !ElementsPerPage.HasValue && Rows.Count() != 0 ? (int?)null : StartElementIndex.Value + Rows.Count() - 1; }
+            get { return !ElementsPerPage.HasValue ? (int?)null : StartElementIndex.Value + Rows.Count() - 1; }
         }
     }
 

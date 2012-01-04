@@ -97,9 +97,12 @@ SF.registerModule = (function () {
 })();
 
 (function (options) {
+    var pendingRequests = 0;
+
     $.ajaxSetup({
         type: "POST",
-        sfCheckRedirection: true
+        sfCheckRedirection: true,
+        sfNotify: true
     });
 
     var checkRedirection = function (ajaxResult) {
@@ -122,10 +125,21 @@ SF.registerModule = (function () {
         if (options.dataType == "script" && (typeof originalOptions.type == "undefined")) {
             options.type = "GET";
         }
+        if (options.sfNotify) {
+            pendingRequests++;
+            if (pendingRequests == 1) {
+                SF.Notify.info(lang.signum.loading);
+            }
+        }
         if (options.sfCheckRedirection) {
             var originalSuccess = options.success;
 
             options.success = function (result) {
+                pendingRequests--;
+                if (pendingRequests <= 0) {
+                    pendingRequests = 0;
+                    SF.Notify.clear();
+                }
                 if (typeof result === "string") {
                     result = result ? result.trim() : "";
                 }
@@ -149,6 +163,7 @@ SF.registerModule = (function () {
         //this error is documented on http://bugs.jquery.com/ticket/7189
         if (XMLHttpRequest.status !== 0) {
             $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
+            pendingRequests = 0;
         }
     });
 })();
@@ -227,18 +242,17 @@ SF.Notify = (function () {
     };
 
     var info = function (s, t, cssClass) {
-        $messageArea = $("#sf-message-area"), css = (cssClass != undefined ? cssClass : "sf-info");
+        css = (cssClass != undefined ? cssClass : "sf-info");
+        $messageArea = $("#sfMessageArea");
         if ($messageArea.length == 0) {
-            //create the message container
-            $messageArea = $("<div id=\"sf-message-area\"><div class=\"sf-message-area-text-container\"><span></span></div></div>").hide().prependTo($("body"));
+            $messageArea = $("<div id=\"sfMessageArea\"><div id=\"sfMessageAreaTextContainer\"><span></span></div></div>").hide().prependTo($("body"));
         }
 
-        $messageArea.find("span").html(s); 
-        $messageArea.children().first().addClass(css); 
-            $messageArea.css({
-                marginLeft: -parseInt($messageArea.outerWidth() / 2),
-                top: 0
-            }).show();
+        $messageArea.find("span").html(s);
+        $messageArea.children().first().addClass(css);
+        $messageArea.css({
+            marginLeft: -parseInt($messageArea.outerWidth() / 2)
+        }).show();
 
         if (t != undefined) {
             timer = setTimeout(clear, t);
@@ -247,19 +261,19 @@ SF.Notify = (function () {
 
     var clear = function () {
         if ($messageArea) {
-                $messageArea.animate({
-                    top: -30
-                }, "slow").hide().children().first().removeClass(css);
-            clearTimeout(timer);
-        timer = null;
+            $messageArea.hide().children().first().removeClass(css);
+            if (timer != null) {
+                clearTimeout(timer);
+                timer = null;
+            }
         }
     }
 
-        return {
-            error: error,
-            info: info,
-            clear: clear
-        };
+    return {
+        error: error,
+        info: info,
+        clear: clear
+    };
 })();
 
 SF.InputValidator = {

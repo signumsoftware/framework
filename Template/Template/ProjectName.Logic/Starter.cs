@@ -20,6 +20,7 @@ namespace $custommessage$.Logic
             SchemaBuilder sb = new SchemaBuilder();
             DynamicQueryManager dqm = new DynamicQueryManager();
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
+            Schema.Current.MainAssembly = typeof(Starter).Assembly;
 
             MyEntityLogic.Start(sb, dqm);
         }

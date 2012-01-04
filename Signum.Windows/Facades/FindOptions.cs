@@ -276,7 +276,7 @@ namespace Signum.Windows
         public QueryToken Token { get; set; }
         public OrderType OrderType { get; set; }
         
-        internal ColumnOrderInfo ColumnOrderInfo; 
+        public ColumnOrderInfo ColumnOrderInfo; 
 
         public Order ToOrder()
         {
@@ -304,5 +304,11 @@ namespace Signum.Windows
         //For temporaly XAML only
         public string Path { get; set; }
         public string DisplayName { get; set; }
+
+        internal Column CreateColumn(QueryDescription description)
+        {
+            QueryToken token = QueryUtils.Parse(Path, t => QueryUtils.SubTokens(t, description.Columns));
+            return new Column(token, DisplayName.DefaultText(token.NiceName()));
+        }
     }
 }

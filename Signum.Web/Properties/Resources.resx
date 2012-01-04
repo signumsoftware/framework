@@ -216,9 +216,6 @@
   <data name="Signum_error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="Signum_executing" xml:space="preserve">
-    <value>Executing...</value>
-  </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>No elements selected</value>
   </data>
@@ -234,14 +231,8 @@
   <data name="Signum_saved" xml:space="preserve">
     <value>Saved</value>
   </data>
-  <data name="Signum_saving" xml:space="preserve">
-    <value>Saving</value>
-  </data>
   <data name="Signum_search" xml:space="preserve">
     <value>Search</value>
-  </data>
-  <data name="Signum_searching" xml:space="preserve">
-    <value>Searching...</value>
   </data>
   <data name="NotPossibleToaAssign0" xml:space="preserve">
     <value>Not possible to assign {0}</value>
@@ -329,5 +320,8 @@
   </data>
   <data name="SearchControl_Pagination_All" xml:space="preserve">
     <value>All</value>
+  </data>
+  <data name="Signum_loading" xml:space="preserve">
+    <value>Loading...</value>
   </data>
 </root>

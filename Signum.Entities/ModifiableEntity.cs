@@ -353,12 +353,14 @@ namespace Signum.Entities
 
         public string FullIntegrityCheck()
         {
-            return GraphExplorer.Integrity(GraphExplorer.FromRoot(this));
+            var graph = GraphExplorer.FromRoot(this);
+            return GraphExplorer.Integrity(graph);
         }
 
         public Dictionary<ModifiableEntity, string> FullIntegrityCheckDictionary()
         {
-            return GraphExplorer.IntegrityDictionary(GraphExplorer.FromRoot(this));
+            var graph = GraphExplorer.FromRoot(this);
+            return GraphExplorer.IntegrityDictionary(graph);
         }
 
         #endregion

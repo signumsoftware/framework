@@ -22,7 +22,7 @@ namespace Signum.Utilities
                 return result;
             return defaultValue;
         }
-   
+
         public static V TryGetC<K, V>(this IDictionary<K, V> dictionary, K key) where V : class
         {
             if (dictionary == null)
@@ -133,8 +133,8 @@ namespace Signum.Utilities
 
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
         {
-             var result = new Dictionary<K,V>();
-             result.AddRange<K, V>(collection);
+            var result = new Dictionary<K, V>();
+            result.AddRange<K, V>(collection);
             return result;
         }
 
@@ -200,7 +200,7 @@ namespace Signum.Utilities
 
             return currentDictionary.ToDictionary(kvp => kvp.Key, kvp => resultSelector(kvp.Value, shouldDictionary[kvp.Key]));
         }
- 
+
         public static void JoinDictionaryForeach<K, V1, V2>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Action<K, V1, V2> action)
         {
             HashSet<K> set = new HashSet<K>();
@@ -320,7 +320,7 @@ namespace Signum.Utilities
 
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection, string errorContext)
         {
-            dictionary.AddRange(collection, kvp => kvp.Key, kvp => kvp.Value, errorContext); 
+            dictionary.AddRange(collection, kvp => kvp.Key, kvp => kvp.Value, errorContext);
         }
 
         public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> keySelector, Func<A, V> valueSelector)
@@ -345,7 +345,7 @@ namespace Signum.Utilities
                 throw new ArgumentException("There are some repeated {0}: {1}".Formato(errorContext, repetitions.ToString(", ")));
         }
 
-        public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K,V>> collection)
+        public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
         {
             foreach (var item in collection)
                 dictionary[item.Key] = item.Value;
@@ -396,7 +396,7 @@ namespace Signum.Utilities
         public static void RemoveRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys)
         {
             foreach (var k in keys)
-                dictionary.Remove(k); 
+                dictionary.Remove(k);
         }
 
         public static Dictionary<K, V> Extract<K, V>(this IDictionary<K, V> dictionary, Func<K, bool> condition)
@@ -410,13 +410,13 @@ namespace Signum.Utilities
                     dictionary.Remove(key);
                 }
             }
-            return result; 
+            return result;
         }
 
         public static Dictionary<K, V> Extract<K, V>(this IDictionary<K, V> dictionary, Func<K, V, bool> condition)
         {
             Dictionary<K, V> result = new Dictionary<K, V>();
-            var aux = new Dictionary<K,V>( dictionary);
+            var aux = new Dictionary<K, V>(dictionary);
             foreach (var kvp in aux)
             {
                 if (condition(kvp.Key, kvp.Value))
@@ -468,6 +468,29 @@ namespace Signum.Utilities
         public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer, string errorContext)
         {
             return dic.ToDictionary(k => k.Value, k => k.Key, comparer, errorContext);
+        }
+
+        public static bool Decrement<K>(this IDictionary<K, int> dic, K key)
+        {
+            int count;
+            if (!dic.TryGetValue(key, out count))
+                return false;
+
+            if (count == 1)
+                dic.Remove(key);
+            else
+                dic[key] = count - 1;
+
+            return true;
+        }
+
+        public static void Increment<K>(this IDictionary<K, int> dic, K key)
+        {
+            int count;
+            if (!dic.TryGetValue(key, out count))
+                dic[key] = 1;
+            else
+                dic[key] = count + 1;
         }
     }
 

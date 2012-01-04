@@ -285,19 +285,16 @@ SF.registerModule("FindNavigator", function () {
         },
 
         search: function () {
-            var $btnSearch = $(this.pf("qbSearch"));
-            $btnSearch.toggleClass("sf-loading").val(lang.signum.searching);
-
             var self = this;
             $.ajax({
                 url: (SF.isEmpty(this.findOptions.searchControllerUrl) ? this.control().attr("data-search-url") : this.findOptions.searchControllerUrl),
                 data: this.requestDataForSearch(),
                 async: this.findOptions.async,
                 success: function (r) {
-                    var idBtnSearch = $btnSearch.attr('id');
+                    var idBtnSearch = $(self.pf("qbSearch")).attr('id');
                     if (SF.FindNavigator.asyncSearchFinished[idBtnSearch])
                         SF.FindNavigator.asyncSearchFinished[idBtnSearch] = false;
-                    $btnSearch.val(lang.signum.search).toggleClass("sf-loading");
+                    
                     var $control = self.control();
                     var $tbody = $control.find(".sf-search-results-container tbody");
 
@@ -308,9 +305,6 @@ SF.registerModule("FindNavigator", function () {
                     else {
                         $tbody.html("");
                     }
-                },
-                error: function () {
-                    $btnSearch.val(lang.signum.search).toggleClass('loading');
                 }
             });
 
@@ -605,7 +599,7 @@ SF.registerModule("FindNavigator", function () {
             return false;
         },
 
-        addFilter: function () {
+        addFilter: function (addFilterUrl, requestExtraJsonData) {
             SF.log("FindNavigator addFilter");
 
             var tableFilters = $(this.pf("tblFilters tbody"));
@@ -617,10 +611,20 @@ SF.registerModule("FindNavigator", function () {
 
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
+            var serializer = new SF.Serializer().add({
+                webQueryName: webQueryName,
+                tokenName: tokenName,
+                index: this.newFilterRowIndex(),
+                prefix: this.findOptions.prefix
+            });
+            if (!SF.isEmpty(requestExtraJsonData)) {
+                serializer.add(requestExtraJsonData);
+            }
+
             var self = this;
             $.ajax({
-                url: $(this.pf("btnAddFilter")).attr("data-url"),
-                data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
+                url: addFilterUrl || $(this.pf("btnAddFilter")).attr("data-url"),
+                data: serializer.serialize(),
                 async: false,
                 success: function (filterHtml) {
                     var $filterList = self.control().find(".sf-filters-list");
@@ -642,7 +646,7 @@ SF.registerModule("FindNavigator", function () {
             return parseInt(lastRowIndex) + 1;
         },
 
-        newSubTokensCombo: function (index, controllerUrl) {
+        newSubTokensCombo: function (index, controllerUrl, requestExtraJsonData) {
             SF.log("FindNavigator newSubTokensCombo");
             var $selectedColumn = $(this.pf("ddlTokens_" + index));
             if ($selectedColumn.length == 0) {
@@ -689,9 +693,19 @@ SF.registerModule("FindNavigator", function () {
             var tokenName = this.constructTokenName();
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
+            var serializer = new SF.Serializer().add({
+                webQueryName: webQueryName,
+                tokenName: tokenName,
+                index: index,
+                prefix: this.findOptions.prefix
+            });
+            if (!SF.isEmpty(requestExtraJsonData)) {
+                serializer.add(requestExtraJsonData);
+            }
+
             $.ajax({
                 url: controllerUrl,
-                data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
+                data: serializer.serialize(),
                 async: false,
                 success: function (newCombo) {
                     $(self.pf("ddlTokens_" + index)).after(newCombo);
