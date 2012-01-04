@@ -20,7 +20,7 @@ namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
-        interface ICacheLogicController
+        interface ICacheLogicController : ICacheController
         {
             int? Count { get; }
 
@@ -106,14 +106,15 @@ namespace Signum.Engine.Cache
 
             private void DisableAndInvalidateType(Type referingType)
             {
-                DisableInTransaction(typeof(T));
+                DisableAllConnectedTypesInTransaction(typeof(T));
 
                 Transaction.PostRealCommit += () =>
                 {
                     Interlocked.Increment(ref invalidations);
                     cachedEntities[referingType].Clear();
                     sensibleLites[referingType].Clear();
-                    CacheLogic.InvalidateAllConnected(referingType);
+
+                    InvalidateAllConnectedTypes(typeof(T), false);
                 };
             }
 
@@ -121,7 +122,7 @@ namespace Signum.Engine.Cache
             {
                 Interlocked.Increment(ref loads);
 
-                var dic = entities.OfType<T>().ToDictionary(a => a.Id);
+                var dic = entities.OfType<T>().Where(t => t.GetType() == typeof(T)).ToDictionary(a => a.Id);
                 cachedEntities[referingType] = dic;
 
                 var lites = dic.Values.Select(a=>a.ToLite()).ToHashSet();
@@ -175,6 +176,9 @@ namespace Signum.Engine.Cache
                 Interlocked.Increment(ref hits);
                 foreach (var item in cachedEntities)
                 {
+                    if (item.Value.IsEmpty())
+                        controllers[item.Key].Load();
+
                     var orig = item.Value.TryGetC(entity.Id);
 
                     if (orig != null)
@@ -222,7 +226,7 @@ namespace Signum.Engine.Cache
                     using (Transaction tr = new Transaction(true))
                     using (HeavyProfiler.Log("CACHE"))
                     {
-                        DisabledTypesInTransaction().Add(typeof(T));
+                        DisabledTypesDuringTransaction().Add(typeof(T));
 
                         List<T> result = Database.Query<T>().ToList();
 
@@ -278,7 +282,12 @@ namespace Signum.Engine.Cache
 
             private void DisableAndInvalidateAllConnected()
             {
-                CacheLogic.DisableAndInvalidateAllConnected(typeof(T));
+                DisableAllConnectedTypesInTransaction(typeof(T));
+
+                Transaction.PostRealCommit += () =>
+                {
+                    InvalidateAllConnectedTypes(typeof(T));
+                }; 
             }
 
 
@@ -308,7 +317,7 @@ namespace Signum.Engine.Cache
 
             void DisableAndInvalidate()
             {
-                DisabledTypesInTransaction().Add(typeof(T));
+                DisabledTypesDuringTransaction().Add(typeof(T));
                 Transaction.PostRealCommit += () => Invalidate(false);
             }
 
@@ -383,7 +392,7 @@ namespace Signum.Engine.Cache
 
         const string DisabledCachesKey = "disabledCaches";
 
-        static HashSet<Type> DisabledTypesInTransaction()
+        static HashSet<Type> DisabledTypesDuringTransaction()
         {
             var hs = Transaction.UserData.TryGetC(DisabledCachesKey) as HashSet<Type>;
             if (hs == null)
@@ -460,19 +469,21 @@ namespace Signum.Engine.Cache
             return result;
         }
 
-        public static void DisableAndInvalidateAllConnected(Type type) 
+        private static void InvalidateAllConnectedTypes(Type type, bool includeParentNode)
+        {
+            var connected = invalidations.IndirectlyRelatedTo(type, includeParentNode);
+
+            foreach (var stype in connected)
+            {
+                controllers[stype].Invalidate(false);
+            }
+        }
+
+        private static void DisableAllConnectedTypesInTransaction(Type type)
         {
             var connected = invalidations.IndirectlyRelatedTo(type, true);
 
-            DisabledTypesInTransaction().AddRange(connected);
-
-            Transaction.PostRealCommit += () =>
-            {
-                foreach (var stype in connected)
-                {
-                    controllers[stype].Invalidate(false);
-                }
-            }; 
+            DisabledTypesDuringTransaction().AddRange(connected);
         }
 
         public static List<CacheStatistics> Statistics()
