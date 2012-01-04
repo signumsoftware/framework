@@ -539,9 +539,9 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)entity);
             
-            string tabID = GetOrCreateTabID(controller);
-            controller.ViewData[ViewDataKeys.TabId] = tabID;
-
+            if (controller.ViewData[ViewDataKeys.TabId] == null)
+                controller.ViewData[ViewDataKeys.TabId] = GetOrCreateTabID(controller);
+            
             if (entity is ModifiableEntity)
             {
                 if (!Navigator.IsViewable((ModifiableEntity)entity, ctx))
