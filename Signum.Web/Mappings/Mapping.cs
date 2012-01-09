@@ -665,7 +665,7 @@ namespace Signum.Web
 
                 int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Index).ToInt();
 
-                if (oldIndex.HasValue && oldList.Count > oldIndex.Value)
+                if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
                     itemCtx.Value = oldList[oldIndex.Value];
 
                 itemCtx.Value = ElementMapping(itemCtx);
