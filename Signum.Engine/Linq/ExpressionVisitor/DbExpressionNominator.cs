@@ -168,6 +168,14 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
+        protected override Expression VisitSqlCast(SqlCastExpression castExpr)
+        {
+            var expression = Visit(castExpr.Expression);
+            if (expression != castExpr.Expression)
+                castExpr = new SqlCastExpression(castExpr.Type, expression, castExpr.SqlDbType);
+            return Add(castExpr);
+        }
+
         protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
         {
             if (!innerProjection)

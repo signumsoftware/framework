@@ -68,7 +68,7 @@ namespace Signum.Utilities
             return variable;
         }
 
-        static ISessionFactory sessionFactory = new StaticSessionFactory();
+        static ISessionFactory sessionFactory = new SingletonSessionFactory();
         public static ISessionFactory SessionFactory
         {
             get
@@ -144,21 +144,32 @@ namespace Signum.Utilities
         Variable<T> CreateVariable<T>(string name);
     }
 
-    public class StaticSessionFactory : ISessionFactory
+    public class SingletonSessionFactory : ISessionFactory
     {
-        public Variable<T> CreateVariable<T>(string name)
+        public static Dictionary<string, object> singletonSession = new Dictionary<string, object>();
+
+        public static Dictionary<string, object> SinglestonSession
         {
-            return new StaticVariable<T>(name);
+            get { return singletonSession; }
+            set { singletonSession = value; }
         }
 
-        class StaticVariable<T> : Variable<T>
+        public Variable<T> CreateVariable<T>(string name)
         {
-            public StaticVariable(string name)
-                : base(name)
-            {
-            }
+            return new SingletonVariable<T>(name);
+        }
 
-            public override T Value { get; set; }
+        class SingletonVariable<T> : Variable<T>
+        {
+            public SingletonVariable(string name)
+                : base(name)
+            { }
+
+            public override T Value
+            {
+                get { return (T)(singletonSession.TryGetC(Name) ?? default(T)); }
+                set { singletonSession[Name] = value; }
+            }
         }
     }
 
