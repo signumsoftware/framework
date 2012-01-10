@@ -35,15 +35,13 @@ namespace Signum.Engine.Authorization
         public static UserDN SystemUser
         {
             get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
-            set { systemUser = value; }
         }
 
         public static string AnonymousUserName { get; set; }
         static UserDN anonymousUser;
         public static UserDN AnonymousUser
         {
-            get { return anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
-            set { anonymousUser = value; }
+            get { return string.IsNullOrEmpty(AnonymousUserName) ? null : anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
         }
 
         static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles =  Schema.GlobalLazy(Cache); 
@@ -119,8 +117,6 @@ namespace Signum.Engine.Authorization
             }
         }
 
-       
-
         static void Schema_Initializing()
         {
             var r = roles.Value;
@@ -130,8 +126,8 @@ namespace Signum.Engine.Authorization
                 using (new EntityCache())
                 using (AuthLogic.Disable())
                 {
-                    if (SystemUserName != null) SystemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
-                    if (AnonymousUserName != null) AnonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName); //TODO: OLMO hay que proporcianarlo siempre?
+                    if (SystemUserName != null) systemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
+                    if (AnonymousUserName != null) anonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName);
                 }
             }
         }
