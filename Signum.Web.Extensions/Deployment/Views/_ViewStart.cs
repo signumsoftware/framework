@@ -41,15 +41,14 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Signum.Entities.Logging;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Logging/Views/DeploymentLog.cshtml")]
-    public class _Page_Logging_Views_DeploymentLog_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Deployment/Views/_ViewStart.cshtml")]
+    public class _Page_Deployment_Views__ViewStart_cshtml : System.Web.Mvc.ViewStartPage
     {
 
 
-        public _Page_Logging_Views_DeploymentLog_cshtml()
+        public _Page_Deployment_Views__ViewStart_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -62,32 +61,9 @@ namespace ASP
         public override void Execute()
         {
 
-WriteLiteral("\r\n");
+  
+    Layout = "~/Views/Shared/_Layout.cshtml";
 
-
- using (var e = Html.TypeContext<DeploymentLogDN>())
-{   
-    
-Write(Html.ValueLine(e, f => f.CreationDate));
-
-                                           
-    
-Write(Html.ValueLine(e, f => f.DatabaseName));
-
-                                           
-    
-Write(Html.ValueLine(e, f => f.MachineName));
-
-                                          
-    
-Write(Html.ValueLine(e, f => f.Version));
-
-                                      
-    
-Write(Html.ValueLine(e, f => f.Description));
-
-                                          
-}
 
         }
     }

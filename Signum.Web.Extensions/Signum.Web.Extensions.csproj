@@ -337,18 +337,24 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>UserChartPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Logging\LoggingClient.cs" />
-    <Compile Include="Logging\Views\DeploymentLog.cs">
+    <Compile Include="Deployment\LoggingClient.cs" />
+    <Compile Include="Deployment\Views\DeploymentLog.cs">
+      <DependentUpon>DeploymentLog.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>DeploymentLog.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Logging\Views\ExceptionLog1.cs">
+    <Compile Include="Deployment\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Exception\ExceptionClient.cs" />
+    <Compile Include="Exception\Views\ExceptionLog1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ExceptionLog.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Logging\Views\_ViewStart.cs">
+    <Compile Include="Exception\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -957,18 +963,14 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>UserChartPart.cs</LastGenOutput>
     </Content>
-    <Content Include="Logging\Views\_ViewStart.cshtml">
+    <Content Include="Exception\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
-    <Content Include="Logging\Views\Web.config" />
-    <Content Include="Logging\Views\ExceptionLog.cshtml">
+    <Content Include="Exception\Views\Web.config" />
+    <Content Include="Exception\Views\ExceptionLog.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ExceptionLog1.cs</LastGenOutput>
-    </Content>
-    <Content Include="Logging\Views\DeploymentLog.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>DeploymentLog.cs</LastGenOutput>
     </Content>
     <Content Include="Chart\Views\UserChartFilter.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
@@ -986,6 +988,15 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ProcessPanelTable2.cs</LastGenOutput>
     </Content>
+    <Content Include="Deployment\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Deployment\Views\DeploymentLog.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DeploymentLog.cs</LastGenOutput>
+    </Content>
+    <Content Include="Deployment\Views\Web.config" />
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>

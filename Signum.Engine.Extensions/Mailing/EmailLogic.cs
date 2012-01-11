@@ -24,8 +24,8 @@ using System.Web;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Linq.Expressions;
-using Signum.Entities.Logging;
-using Signum.Engine.Logging;
+using Signum.Entities.Exceptions;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Mailing
 {

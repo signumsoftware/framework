@@ -19,26 +19,23 @@ using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 using System.Web.Mvc.Html;
-using Signum.Entities.Logging;
+using Signum.Entities.Exceptions;
 
-namespace Signum.Web.Logging
+namespace Signum.Web.Exceptions
 {
-    public static class LoggingClient
+    public static class ExceptionClient
     {
-        public static string ViewPrefix = "~/Logging/Views/{0}.cshtml";
+        public static string ViewPrefix = "~/Exception/Views/{0}.cshtml";
 
-        public static void Start(bool deployment, bool exceptions)
+        public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.RegisterArea(typeof(LoggingClient));
+                Navigator.RegisterArea(typeof(ExceptionClient));
 
-                if (deployment)
                     Navigator.AddSetting(new EntitySettings<ExceptionDN>(EntityType.ServerOnly) 
                     { PartialViewName = e => ViewPrefix.Formato("ExceptionLog") });
-                if (exceptions)
-                    Navigator.AddSetting(new EntitySettings<DeploymentLogDN>(EntityType.ServerOnly) 
-                    { PartialViewName = e => ViewPrefix.Formato("DeploymentLog") });
+             
             }
         }
     }
