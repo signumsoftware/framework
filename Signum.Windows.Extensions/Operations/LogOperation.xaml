@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Operations;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="d:LogOperationDN"
+    m:Common.TypeContext="d:OperationLogDN"
     MinWidth="300">
     <StackPanel m:Common.IsReadOnly="True">
         <m:EntityCombo m:Common.Route="Operation" />
@@ -11,6 +11,6 @@
         <m:ValueLine m:Common.Route="Start" />
         <m:ValueLine m:Common.Route="End" />
         <m:EntityLine m:Common.Route="User" />
-        <m:TextArea m:Common.Route="Exception" />
+        <m:EntityLine m:Common.Route="Exception" />
     </StackPanel>
 </UserControl>

@@ -214,6 +214,9 @@
     <Compile Include="Processes\ProcessExecution.xaml.cs">
       <DependentUpon>ProcessExecution.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SMS\SMSMessage.xaml.cs">
+      <DependentUpon>SMSMessage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserQueries\UserQueryClient.cs" />
     <Compile Include="UserQueries\UserQueryMenuItem.cs" />
     <Compile Include="UserQueries\UserQuery.xaml.cs">
@@ -254,9 +257,6 @@
     <Compile Include="Scheduler\CustomTaskExecution.xaml.cs">
       <DependentUpon>CustomTaskExecution.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Hour.xaml.cs">
-      <DependentUpon>Hour.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Scheduler\ScheduledTask.xaml.cs">
       <DependentUpon>ScheduledTask.xaml</DependentUpon>
     </Compile>
@@ -272,9 +272,6 @@
     </Compile>
     <Compile Include="Shapes\Arrow.cs" />
     <Compile Include="SMS\SMSClient.cs" />
-    <Compile Include="SMS\SMSMessage.xaml.cs">
-      <DependentUpon>SMSMessage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="SMS\SMSTemplate.xaml.cs">
       <DependentUpon>SMSTemplate.xaml</DependentUpon>
     </Compile>
@@ -501,6 +498,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="SMS\SMSMessage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UserQueries\UserQuery.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -531,12 +532,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\Hour.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Scheduler\ScheduledTask.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -560,10 +555,6 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="SMS\SMSMessage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SMS\SMSTemplate.xaml">
       <SubType>Designer</SubType>
@@ -758,6 +749,10 @@
     <Resource Include="Images\pptx.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

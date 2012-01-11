@@ -9,6 +9,6 @@
         <m:EntityCombo m:Common.Route="CustomTask" />
         <m:ValueLine m:Common.Route="StartTime" />
         <m:ValueLine m:Common.Route="EndTime" />
-        <m:ValueLine m:Common.Route="Exception" />
+        <m:EntityLine m:Common.Route="Exception" />
     </StackPanel>
 </UserControl>
