@@ -15,7 +15,7 @@ using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.SMS;
 
-namespace Signum.Windows.Extensions.SMS
+namespace Signum.Windows.SMS
 {
     /// <summary>
     /// Interaction logic for SMSMessage.xaml
