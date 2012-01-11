@@ -20,7 +20,7 @@ namespace Signum.Windows
     [Serializable]
     public class FakeEntityDN : Entity
     {
-        MList<IdentifiableEntity> elements;
+        MList<IdentifiableEntity> elements = new MList<IdentifiableEntity>();
         public MList<IdentifiableEntity> Elements
         {
             get { return elements; }
