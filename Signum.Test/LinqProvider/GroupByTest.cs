@@ -329,11 +329,10 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex).SelectMany(a => a).ToList();
         }
 
-
-        [TestMethod]
-        public void SumSum()
-        {
-            var songsAlbum = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => m.Id));
-        }
+        //[TestMethod]
+        //public void SumSum()
+        //{
+        //    var songsAlbum = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => m.Id));
+        //}
     }
 }
