@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Operations;
 using Signum.Utilities;
-using Signum.Entities.Logging;
+using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Processes
 {

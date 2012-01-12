@@ -337,7 +337,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>UserChartPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Deployment\LoggingClient.cs" />
+    <Compile Include="Deployment\DeploymentClient.cs" />
     <Compile Include="Deployment\Views\DeploymentLog.cs">
       <DependentUpon>DeploymentLog.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
