@@ -9,14 +9,7 @@
         <m:ValueLine m:Common.Route="Name" />
         <m:ValueLine m:Common.Route="Key" />
         <GroupBox Header="Executions">
-            <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:CustomTaskExecutionDN}" MaxHeight="400" ColumnOptionsMode="Remove">
-                <m:SearchControl.FilterOptions>
-                    <m:FilterOption Path="CustomTask" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}" Frozen="True"/>
-                </m:SearchControl.FilterOptions>
-                <m:SearchControl.ColumnOptions>
-                    <m:ColumnOption Path="CustomTask" />
-                </m:SearchControl.ColumnOptions>
-            </m:SearchControl>
+            <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:CustomTaskExecutionDN}" MaxHeight="400" FilterColumn="CustomTask"/>
         </GroupBox>
     </StackPanel>
 </UserControl>
