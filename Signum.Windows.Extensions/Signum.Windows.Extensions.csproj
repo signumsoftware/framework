@@ -169,6 +169,7 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Converters.cs" />
+    <Compile Include="Deployment\DeploymentClient.cs" />
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>
@@ -181,13 +182,13 @@
     </Compile>
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
-    <Compile Include="Logging\DeploymentLog.xaml.cs">
+    <Compile Include="Deployment\DeploymentLog.xaml.cs">
       <DependentUpon>DeploymentLog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Logging\Exception.xaml.cs">
+    <Compile Include="Exception\Exception.xaml.cs">
       <DependentUpon>Exception.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Logging\ExceptionClient.cs" />
+    <Compile Include="Exception\ExceptionClient.cs" />
     <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
       <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
     </Compile>
@@ -452,11 +453,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Logging\DeploymentLog.xaml">
+    <Page Include="Deployment\DeploymentLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Logging\Exception.xaml">
+    <Page Include="Exception\Exception.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -748,6 +749,7 @@
     <Resource Include="Images\ppt.png" />
     <Resource Include="Images\pptx.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"

@@ -5,13 +5,14 @@ using System.Text;
 using Signum.Engine.Maps;
 using System.Reflection;
 using Signum.Engine.DynamicQuery;
-using Signum.Entities.Logging;
+using Signum.Entities.Exceptions;
 using Signum.Entities;
 using System.Threading;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
+using Signum.Entities.Deployment;
 
-namespace Signum.Engine.Logging
+namespace Signum.Engine.Deployment
 {
     public static class DeploymentLogic
     {

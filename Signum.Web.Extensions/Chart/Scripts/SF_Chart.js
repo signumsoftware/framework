@@ -124,9 +124,9 @@ SF.Chart.Builder = (function () {
 
     var originalNewSubtokensCombo = SF.FindNavigator.prototype.newSubTokensCombo;
     SF.FindNavigator.prototype.newSubTokensCombo = function (index, url) {
-        var $combo = $(this.pf("ddlTokens_0"));
-        var $chartControl = $combo.closest(".sf-chart-control");
-        if ($combo.closest(".sf-chart-builder").length == 0) {
+        var $selectedCombo = $(this.pf("ddlTokens_") + index);
+        var $chartControl = $selectedCombo.closest(".sf-chart-control");
+        if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
             if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
                 url = $chartControl.attr("data-subtokens-url");
                 originalNewSubtokensCombo.call(this, index, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
@@ -136,6 +136,7 @@ SF.Chart.Builder = (function () {
             }
         }
         else {
+            this.clearChildSubtokenCombos($selectedCombo, index);
             $("#" + SF.compose($chartControl.attr("data-prefix"), "sfOrders")).val('');
             $chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
         }

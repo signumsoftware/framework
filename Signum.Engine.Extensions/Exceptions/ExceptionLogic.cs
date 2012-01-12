@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using Signum.Engine.Maps;
 using System.Reflection;
-using Signum.Entities.Logging;
+using Signum.Entities.Exceptions;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Authorization;
 
-namespace Signum.Engine.Logging
+namespace Signum.Engine.Exceptions
 {
     public static class ExceptionLogic
     {

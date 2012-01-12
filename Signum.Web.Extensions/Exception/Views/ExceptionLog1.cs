@@ -41,15 +41,15 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Signum.Entities.Logging;
+    using Signum.Entities.Exceptions;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Logging/Views/ExceptionLog.cshtml")]
-    public class _Page_Logging_Views_ExceptionLog_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Exception/Views/ExceptionLog.cshtml")]
+    public class _Page_Exception_Views_ExceptionLog_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_Logging_Views_ExceptionLog_cshtml()
+        public _Page_Exception_Views_ExceptionLog_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance

@@ -10,7 +10,7 @@ using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
-using Signum.Engine.Logging;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Operations
 {

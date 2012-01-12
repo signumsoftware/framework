@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Signum.Entities.Logging
+namespace Signum.Entities.Deployment
 {
     [Serializable]
     public class DeploymentLogDN : Entity

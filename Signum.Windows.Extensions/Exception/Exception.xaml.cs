@@ -13,16 +13,16 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
-using Signum.Entities.Logging;
+using Signum.Entities.Exceptions;
 
 namespace Signum.Windows.Logging
 {
     /// <summary>
-    /// Interaction logic for DeploymentLog.xaml
+    /// Interaction logic for Exception.xaml
     /// </summary>
-    public partial class DeploymentLog : UserControl
+    public partial class ExceptionCtrl : UserControl
     {
-        public DeploymentLog()
+        public ExceptionCtrl()
         {
             InitializeComponent();
         }

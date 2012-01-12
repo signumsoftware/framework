@@ -8,7 +8,7 @@ using System.Threading;
 using System.Collections.Specialized;
 using System.Collections;
 
-namespace Signum.Entities.Logging
+namespace Signum.Entities.Exceptions
 {
     [Serializable]
     public class ExceptionDN : Entity
