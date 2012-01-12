@@ -15,11 +15,10 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
-using Signum.Entities.Logging;
-using Signum.Engine.Logging;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Threading;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Processes
 {
