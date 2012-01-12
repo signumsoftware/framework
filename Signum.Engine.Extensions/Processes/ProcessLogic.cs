@@ -318,7 +318,7 @@ namespace Signum.Engine.Processes
 
                 return new ProcessExecutionDN(process)
                 {
-                    User = UserDN.Current.ToLite(),
+                    User =data.User!=null?data.User: UserDN.Current.ToLite(),
                     State = ProcessState.Created,
                     ProcessData = data
                 }.Save();
@@ -495,7 +495,13 @@ namespace Signum.Engine.Processes
 
             try
             {
-                FinalState state = Algorithm.Execute(this);
+                //if (this.User == null)
+                //    this.User = AuthLogic.SystemUser.ToLite();
+
+                FinalState state = FinalState.Finished;
+                using (AuthLogic.User(this.User.Retrieve()))
+                    state = Algorithm.Execute(this);
+
                 if (state == FinalState.Finished)
                 {
                     Execution.ExecutionEnd = TimeZoneManager.Now;
