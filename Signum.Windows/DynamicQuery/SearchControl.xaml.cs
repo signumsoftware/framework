@@ -197,6 +197,48 @@ namespace Signum.Windows
             set { SetValue(ViewOnCreateProperty, value); }
         }
 
+        public static readonly DependencyProperty FilterColumnProperty =
+        DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).FilterColumnChanged(e)));
+        public string FilterColumn
+        {
+            get { return (string)GetValue(FilterColumnProperty); }
+            set { SetValue(FilterColumnProperty, value); }
+        }
+
+
+        private void FilterColumnChanged(DependencyPropertyChangedEventArgs e)
+        {
+            AssetNotLoaded(e);
+
+            if (FilterColumn.HasText())
+            {
+                FilterOptions.Add(new FilterOption
+                {
+                    Path = FilterColumn,
+                    Operation = FilterOperation.EqualTo,
+                    Frozen = true,
+                }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterColumn.HasText() ? "." + FilterColumn : null)) { Source = this }));
+                ColumnOptions.Add(new ColumnOption(FilterColumn));
+                ColumnOptionsMode = ColumnOptionsMode.Add;
+                SearchOnLoad = true;
+            }
+        }
+
+        public static readonly DependencyProperty FilterRouteProperty =
+            DependencyProperty.Register("FilterRoute", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
+        public string FilterRoute
+        {
+            get { return (string)GetValue(FilterRouteProperty); }
+            set { SetValue(FilterRouteProperty, value); }
+        }
+
+        private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
+        {
+            if(IsLoaded)
+                throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
+        }
+
+
         public Type EntityType
         {
             get { return Reflector.ExtractLite(entityColumn.Type); }
@@ -234,7 +276,6 @@ namespace Signum.Windows
             FilterOptions = new FreezableCollection<FilterOption>();
             OrderOptions = new ObservableCollection<OrderOption>();
             ColumnOptions = new ObservableCollection<ColumnOption>();
-          
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(100);
