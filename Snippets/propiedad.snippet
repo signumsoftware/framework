@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>Propiedad</Title>
+			<Shortcut>propiedad</Shortcut>
+			<Description>Propiedad normal en cualquier clase</Description>
+			<Author>Olmo</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Declarations>
+				<Literal>
+					<ID>type</ID>
+					<ToolTip>Property type</ToolTip>
+					<Default>int</Default>
+				</Literal>
+				<Literal>
+					<ID>campo</ID>
+					<ToolTip>Campo</ToolTip>
+					<Default>bla</Default>
+					<Function></Function>
+				</Literal>
+				<Literal>
+					<ID>propiedad</ID>
+					<ToolTip>Propiedad</ToolTip>
+					<Default>Bla</Default>
+					<Function></Function>
+				</Literal>
+			</Declarations>
+			<Code Language="csharp">
+				<![CDATA[$type$ $campo$;
+        public $type$ $propiedad$
+        {
+            get { return $campo$; }
+            set { this.$campo$ = value; }
+        }$end$]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
