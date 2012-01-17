@@ -194,7 +194,7 @@ namespace Signum.Entities.Processes
 
     public interface IProcessDataDN : IIdentifiable
     {
-
+         Lite<UserDN> User { get; set; }
     }
 
     public enum ProcessState
