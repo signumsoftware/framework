@@ -58,11 +58,13 @@ namespace Signum.Web
 
                             List<Lite> data = entityCombo.Data ?? AutoCompleteUtils.RetrieveAllLite(entityCombo.Type.CleanType(), entityCombo.Implementations);
 
+                            bool complexCombo = entityCombo.Implementations.IsByAll || entityCombo.Implementations.Types.Length > 1;
+
                             items.AddRange(
                                 data.Select(lite => new SelectListItem()
                                     {
                                         Text = lite.ToString(),
-                                        Value = entityCombo.Implementations != null ? lite.Key() : lite.Id.ToString(),
+                                        Value = complexCombo ? lite.Key() : lite.Id.ToString(),
                                         Selected = lite.IdOrNull == entityCombo.IdOrNull
                                     })
                                 );

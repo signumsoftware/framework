@@ -38,7 +38,7 @@ namespace Signum.Web
         {
             get 
             {
-                return !Implementations.Value.IsByAll && Implementations.Value.Types.Length > 1;
+                return Implementations != null && !Implementations.Value.IsByAll && Implementations.Value.Types.Length > 1;
             }
         }
 

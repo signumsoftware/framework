@@ -80,7 +80,7 @@ namespace Signum.Web
 
                 eb.Implementations = finder.FindImplementations(route);
 
-                if (eb.Implementations != null && eb.Implementations.IsByAll)
+                if (eb.Implementations.IsByAll)
                 {
                     EntityLine el = eb as EntityLine;
                     if (el != null)

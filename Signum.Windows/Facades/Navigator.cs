@@ -205,19 +205,19 @@ namespace Signum.Windows
 
         public static DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
         {
-            DataTemplate template = GetEntitySettings(entityType).TryCC(ess => ess.DataTemplate);
-            if (template != null)
-                return template;
-
             if (entityType.IsLite())
             {
-                template = (DataTemplate)element.FindResource(typeof(Lite));
+                DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
                 if (template != null)
                     return template;
             }
 
             if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
             {
+                DataTemplate template = GetEntitySettings(entityType).TryCC(ess => ess.DataTemplate);
+                if (template != null)
+                    return template;
+
                 template = (DataTemplate)element.FindResource(typeof(ModifiableEntity));
                 if (template != null)
                     return template;

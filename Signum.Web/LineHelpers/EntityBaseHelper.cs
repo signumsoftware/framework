@@ -205,15 +205,12 @@ namespace Signum.Web
 
         public static void ConfigureEntityButtons(EntityBase eb, Type entityType)
         {
-            if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
-            {
-                eb.Create = eb.Create && Navigator.IsCreable(entityType, eb.EntitySettingsContext);
-                eb.View = eb.View && Navigator.IsViewable(entityType, eb.EntitySettingsContext);
-                eb.Find = eb.Find && Navigator.IsFindable(entityType);
+            eb.Create &= eb.Implementations.IsByAll ? false : eb.Implementations.Types.Any(t => Navigator.IsCreable(t, eb.EntitySettingsContext));
+            eb.View &= eb.Implementations.IsByAll ? true : eb.Implementations.Types.Any(t => Navigator.IsViewable(t, eb.EntitySettingsContext));
+            eb.Find &= eb.Implementations.IsByAll ? false : eb.Implementations.Types.Any(t => Navigator.IsFindable(t));
 
-                bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
-                eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
-            }
+            bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
+            eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
         }
     }
 

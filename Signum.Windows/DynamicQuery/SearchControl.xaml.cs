@@ -246,7 +246,7 @@ namespace Signum.Windows
 
         public Implementations Implementations
         {
-            get { return entityColumn.Implementations; }
+            get { return entityColumn.Implementations.Value; }
         }
 
         public static readonly DependencyProperty CollapseOnNoResultsProperty =
@@ -647,12 +647,10 @@ namespace Signum.Windows
 
         public Type SelectType()
         {
-            if (Implementations == null)
-                return EntityType;
-            else if (Implementations.IsByAll)
+            if (Implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
-            else
-                return Navigator.SelectType(this.FindCurrentWindow(), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+
+            return Navigator.SelectType(this.FindCurrentWindow(), Implementations.Types);
         }
 
 

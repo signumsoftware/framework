@@ -78,8 +78,8 @@ namespace ASP
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
-    Implementations? implementations = entityColumn.Implementations;
-    bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
+    Implementations implementations = entityColumn.Implementations.Value;
+    bool viewable = findOptions.View && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin)));
     bool? allowMultiple = findOptions.AllowMultiple;
     if (allowMultiple == null && findOptions.FilterMode != FilterMode.OnlyResults)
     {
@@ -152,9 +152,8 @@ WriteLiteral("\r\n    ");
 
 
 Write(Html.Hidden(Model.Compose("sfEntityTypeNames"), 
-        implementations == null ? Navigator.ResolveWebTypeName(entitiesType) :
                                 implementations.IsByAll ? "[All]" :
-                                ((ImplementedByAttribute)implementations).ImplementedTypes.ToString(t => Navigator.ResolveWebTypeName(t), ","), 
+                                implementations.Types.ToString(t => Navigator.ResolveWebTypeName(t), ","), 
         new { disabled = "disabled" }));
 
 WriteLiteral("\r\n    \r\n");
@@ -287,9 +286,9 @@ WriteLiteral("\">");
 WriteLiteral("</button>\r\n");
 
 
-         if (findOptions.Create && (implementations != null || Navigator.IsCreable(entitiesType, EntitySettingsContext.Admin)) && viewable)
+         if (findOptions.Create && !implementations.IsByAll && implementations.Types.Any(t=> Navigator.IsCreable(t, EntitySettingsContext.Admin)) && viewable)
         {
-            bool hasManyImplementations = implementations != null && !implementations.IsByAll && ((ImplementedByAttribute)implementations).ImplementedTypes.Length > 1;
+            bool hasManyImplementations = implementations.Types.Length > 1;
             string creating = findOptions.Creating.HasText() ? findOptions.Creating :
                 "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}},'{2}');return false;".Formato(
                     Model.ControlID, 
