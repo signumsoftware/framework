@@ -26,7 +26,7 @@ namespace Signum.Entities
     
 
     [Serializable]
-    public struct Implementations
+    public struct Implementations : IEquatable<Implementations>
     {
         Type[] types;
 
@@ -54,6 +54,23 @@ namespace Signum.Entities
             if (IsByAll)
                 return "ImplementedByAll";
             return "ImplementedBy({0})".Formato(types.ToString(t => t.Name, ", "));
+        }
+
+
+
+        public override bool Equals(object obj)
+        {
+            return  obj is Implementations || Equals((Implementations)obj);
+        }
+        
+        public bool Equals(Implementations other)
+        {
+            return other.types == null && types == null || Enumerable.SequenceEqual(other.types, this.types);
+        }
+
+        public override int GetHashCode()
+        {
+            return types == null ? 0 : types.Aggregate(0, (acum, type) => acum ^ type.GetHashCode());
         }
     }
 

@@ -441,7 +441,7 @@ namespace Signum.Windows
 
                 if (entityContext != null)
                 {
-                    eb.Implementations = entityContext.TryGetImplementations();
+                    eb.Implementations = entityContext.GetImplementations();
                 }
             }
         }

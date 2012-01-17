@@ -38,7 +38,7 @@ namespace Signum.Windows
 
         protected Implementations safeImplementations;
         public static readonly DependencyProperty ImplementationsProperty =
-            DependencyProperty.Register("Implementations", typeof(Implementations), typeof(EntityBase), new UIPropertyMetadata((d, e) => ((EntityBase)d).safeImplementations = (Implementations)e.NewValue));
+            DependencyProperty.Register("Implementations", typeof(Implementations), typeof(EntityBase), new UIPropertyMetadata(Implementations.ByAll, (d, e) => ((EntityBase)d).safeImplementations = (Implementations)e.NewValue));
         public Implementations Implementations
         {
             get { return (Implementations)GetValue(ImplementationsProperty); }
@@ -308,12 +308,10 @@ namespace Signum.Windows
 
         public Type SelectType()
         {
-            if (Implementations == null)
-                return CleanType;
-            else if (Implementations.IsByAll)
+            if (Implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
-            else
-                return Navigator.SelectType(this.FindCurrentWindow(), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+
+            return Navigator.SelectType(this.FindCurrentWindow(), Implementations.Types);
         }
 
         protected object OnCreate()
