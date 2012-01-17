@@ -31,13 +31,13 @@ namespace Signum.Engine.Help
 
             if (Reflector.IsIIdentifiable(pr.Type))
             {
-                return EntityProperty(pr, pr.Type, pr.Type.TypeLinks(imp)) + validations;
+                return EntityProperty(pr, pr.Type, imp.TypeLinks(pr.Type)) + validations;
             }
             else if (pr.Type.IsLite())
             {
                 Type cleanType = Reflector.ExtractLite(pr.Type);
 
-                return EntityProperty(pr, cleanType, cleanType.TypeLinks(imp)) + validations;
+                return EntityProperty(pr, cleanType, imp.TypeLinks(cleanType)) + validations;
             }
             else if (Reflector.IsEmbeddedEntity(pr.Type))
             {
@@ -49,11 +49,11 @@ namespace Signum.Engine.Help
 
                 if (elemType.IsIIdentifiable())
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), elemType.TypeLinks(imp)) + validations;
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
                 }
                 else if (elemType.IsLite())
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), Reflector.ExtractLite(elemType).TypeLinks(imp)) + validations;
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(Reflector.ExtractLite(elemType))) + validations;
                 }
                 else if (Reflector.IsEmbeddedEntity(elemType))
                 {
@@ -109,13 +109,12 @@ namespace Signum.Engine.Help
             return typeName.Add(" ", unit != null ? Resources.ExpressedIn + unit : null).Add(" ", orNull);
         }
 
-        static string TypeLinks(this Type type, Implementations implementations)
+        static string TypeLinks(this Implementations implementations, Type type)
         {
-            if (implementations == null)
-                return type.TypeLink();
             if (implementations.IsByAll)
                 return Resources.Any + " " + type.TypeLink();
-            return ((ImplementedByAttribute)implementations).ImplementedTypes.CommaOr(TypeLink);
+
+            return implementations.Types.CommaOr(TypeLink);
         }
 
         static string TypeLink(this Type type)
@@ -193,7 +192,7 @@ namespace Signum.Engine.Help
         {
             ColumnDescriptionFactory cdf = dynamicQuery.EntityColumn();
 
-            return Resources.QueryOf0.Formato(Reflector.ExtractLite(cdf.Type).TypeLinks(cdf.Implementations));
+            return Resources.QueryOf0.Formato(cdf.Implementations.Value.TypeLinks(Reflector.ExtractLite(cdf.Type)));
         }
 
         internal static string GetQueryColumnHelp(ColumnDescriptionFactory kvp)
@@ -210,13 +209,13 @@ namespace Signum.Engine.Help
         {
             if (Reflector.IsIIdentifiable(kvp.Type))
             {
-                return kvp.Type.TypeLinks(kvp.Implementations);
+                return kvp.Implementations.Value.TypeLinks(kvp.Type);
             }
             else if (kvp.Type.IsLite())
             {
                 Type cleanType = Reflector.ExtractLite(kvp.Type);
 
-                return cleanType.TypeLinks(kvp.Implementations);
+                return kvp.Implementations.Value.TypeLinks(cleanType);
             }
             else if (Reflector.IsEmbeddedEntity(kvp.Type))
             {
