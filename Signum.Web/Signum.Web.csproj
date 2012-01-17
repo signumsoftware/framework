@@ -12,8 +12,9 @@
     <RootNamespace>Signum.Web</RootNamespace>
     <AssemblyName>Signum.Web</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
   </PropertyGroup>
@@ -316,7 +317,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SignumFramework.pfx" />
     <Content Include="Web.config" />
     <Content Include="Signum\Views\Web.config" />
   </ItemGroup>

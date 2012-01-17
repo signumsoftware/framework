@@ -14,8 +14,9 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -165,7 +166,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Schema\Schema.cd" />
-    <None Include="SignumFramework.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">

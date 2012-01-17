@@ -14,8 +14,9 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -140,7 +141,6 @@
     <None Include="Attributes.cd" />
     <None Include="ClassDiagram1.cd" />
     <None Include="Diagram.cd" />
-    <None Include="SignumFramework.pfx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.es.resx">
