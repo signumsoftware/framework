@@ -33,7 +33,6 @@ namespace Signum.Entities.Processes
         }
 
         Lite<UserDN> user;
-        [NotNullValidator]
         public Lite<UserDN> User
         {
             get { return user; }
@@ -194,7 +193,6 @@ namespace Signum.Entities.Processes
 
     public interface IProcessDataDN : IIdentifiable
     {
-         Lite<UserDN> User { get; set; }
     }
 
     public enum ProcessState

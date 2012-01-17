@@ -562,7 +562,7 @@ namespace Signum.Engine.Processes
         {
             using (ScopeSessionFactory.OverrideSession())
             {
-                UserDN.SetSessionUser(Execution.Process.User ?? AuthLogic.SystemUser);
+                UserDN.SetSessionUser(Execution.User != null? Execution.User.Retrieve() : AuthLogic.SystemUser);
 
                 Execution.State = ProcessState.Executing;
                 Execution.ExecutionStart = TimeZoneManager.Now;
