@@ -24,6 +24,8 @@ namespace Signum.Windows.SMS
                 {
                     new EntitySettings<SMSMessageDN>(EntityType.NotSaving) { View = e => new SMSMessage() },
                     new EntitySettings<SMSTemplateDN>(EntityType.NotSaving) { View = e => new SMSTemplate() },
+                    new EntitySettings<SMSSendPackageDN>(EntityType.NotSaving) { View = e => new SMSSendPackage()},
+                    new EntitySettings<SMSUpdatePackageDN>(EntityType.NotSaving) { View = e => new SMSUpdatePackage()},
                 });
             }
         }
