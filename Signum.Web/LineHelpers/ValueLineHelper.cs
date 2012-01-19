@@ -136,10 +136,6 @@ namespace Signum.Web
 
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
 
-            if (valueLine.DatePickerOptions.ShowAge)
-                valueLine.ValueHtmlProps.AddCssClass("hasAge");
-
-
             valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");        
             
             string jsDataFormat = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g");
@@ -163,9 +159,6 @@ namespace Signum.Web
             
             if (!isDefaultDatepicker)
                 returnString = returnString.Concat(helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions));
-
-            if (valueLine.DatePickerOptions.ShowAge)
-                returnString = returnString.Concat(helper.Span(valueLine.ControlID + "Age", String.Empty, "age"));
 
             return returnString;
         }
