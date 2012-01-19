@@ -12,5 +12,8 @@ namespace Signum.Entities.SMS
     {
         [OperationContract, NetDataContract]
         string GetPhoneNumber(IdentifiableEntity ie);
+
+        [OperationContract, NetDataContract]
+        List<string> GetLiteralsFromDataObjectProvider(Type type);
     }
 }

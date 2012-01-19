@@ -87,13 +87,6 @@ namespace Signum.Entities.SMS
             set { Set(ref state, value, () => State); }
         }
 
-        //SendState sendState;
-        //public SendState SendState
-        //{
-        //    get { return sendState; }
-        //    set { Set(ref sendState, value, () => SendState); }
-        //}
-
         [NotNullable]
         string destinationNumber;
         [StringLengthValidator(AllowNulls = false, Min = 9, Max = 20), TelephoneValidator]
@@ -110,6 +103,13 @@ namespace Signum.Entities.SMS
         {
             get { return messageID; }
             set { Set(ref messageID, value, () => MessageID); }
+        }
+
+        bool certified;
+        public bool Certified
+        {
+            get { return certified; }
+            set { Set(ref certified, value, () => Certified); }
         }
 
         Lite<SMSSendPackageDN> sendpackage;

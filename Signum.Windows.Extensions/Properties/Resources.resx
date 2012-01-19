@@ -201,8 +201,8 @@
   <data name="Remove" xml:space="preserve">
     <value>Remove</value>
   </data>
-  <data name="CharactersLeft" xml:space="preserve">
-    <value>Characters left:</value>
+  <data name="RemainingCharacters" xml:space="preserve">
+    <value>Remaining characters</value>
   </data>
   <data name="SendData" xml:space="preserve">
     <value>Send Data</value>
@@ -218,5 +218,11 @@
   </data>
   <data name="Login_UserName" xml:space="preserve">
     <value>Username:</value>
+  </data>
+  <data name="Insert" xml:space="preserve">
+    <value>Insert</value>
+  </data>
+  <data name="RemoveNonValidCharacters" xml:space="preserve">
+    <value>Remove non valid characters</value>
   </data>
 </root>

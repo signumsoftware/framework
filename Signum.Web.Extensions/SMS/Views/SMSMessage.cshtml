@@ -18,6 +18,7 @@
         vl.Remove = false;
         vl.HideIfNull = true;
     })
+    @Html.ValueLine(e, s => s.Certified, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created))
     @Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew)
     @Html.ValueLine(e, s => s.Message, vl =>
         {
@@ -28,10 +29,10 @@
         })
     if(e.Value.State == SMSMessageState.Created) {
         <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
-            <p>Remaining characters: <span id="sfCharsLeft"></span></p>
+            <p><span>@Signum.Web.Extensions.Properties.Resources.RemainingCharacters</span>: <span id="sfCharsLeft"></span></p>
         </div>
         <div>
-            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="Remove non valid characters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
+            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="@Signum.Web.Extensions.Properties.Resources.RemoveNonValidCharacters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
         </div>
     }
     <br />

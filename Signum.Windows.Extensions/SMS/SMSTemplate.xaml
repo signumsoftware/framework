@@ -7,13 +7,27 @@
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" />
-        <m:TextArea x:Name="textMessage" Height="150" FontSize="14" m:Common.Route="Message" />
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <TextBlock Text="{m:Loc CharactersLeft}" />
+        <m:ValueLine m:Common.Route="Active" m:Common.IsReadOnly="True"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <m:TextArea x:Name="textMessage" Height="150" FontSize="14" m:Common.Route="Message" Grid.Column="0"/>
+            <StackPanel Grid.Column="1" Margin="10,0">
+                <m:EntityCombo m:Common.Route="AssociatedType" EntityChanged="EntityCombo_EntityChanged"/>
+                <ListBox x:Name="sfLiterals" Height="100" MouseDoubleClick="sfLiterals_MouseDoubleClick" />
+                <Button x:Name="insertLiteral" Click="insertLiteral_Click" Content="Insert"/>
+            </StackPanel>
+        </Grid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10 10" >
+            <TextBlock Text="{m:Loc RemainingCharacters}" />
             <TextBlock x:Name="charactersLeft" FontWeight="Bold">160</TextBlock>
         </StackPanel>
+        <Button x:Name="removeNonSMSChars" Click="removeNonSMSChars_Click" Content="{m:Loc RemoveNonValidCharacters}" Width="200" HorizontalAlignment="Left"/>
+        <m:ValueLine m:Common.Route="RemoveNoSMSCharacters" />
+        <m:ValueLine m:Common.Route="MessageLengthExceeded" />
         <m:ValueLine m:Common.Route="From" />
-        <m:ValueLine m:Common.Route="Active" m:Common.IsReadOnly="True"/>
         <m:ValueLine m:Common.Route="StartDate" />
         <m:ValueLine m:Common.Route="EndDate" />
     </StackPanel>
