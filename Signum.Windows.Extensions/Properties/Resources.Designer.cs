@@ -205,6 +205,15 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Message.
+        /// </summary>
+        public static string Message {
+            get {
+                return ResourceManager.GetString("Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to My Charts.
         /// </summary>
         public static string MyCharts {

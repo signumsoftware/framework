@@ -37,6 +37,7 @@ namespace Signum.Windows.SMS
                 new GradientStop(Color.FromRgb(255, 204, 204), 1)
             }, new Point(0.5, 1), new Point(0.5, 0));
             normalBackGround = text.Background;
+            VisualCharactersToEnd();
         }
 
         public SMSTemplateDN TemplateDC
@@ -80,11 +81,14 @@ namespace Signum.Windows.SMS
 
         private void EntityCombo_EntityChanged(object sender, bool userInteraction, object oldValue, object newValue)
         {
-            var literals = Server.Return((ISmsServer s) => s.GetLiteralsFromDataObjectProvider(Type.GetType(((TypeDN)newValue).FullClassName)));
             sfLiterals.Items.Clear();
-            foreach (var l in literals)
+            if (newValue != null)
             {
-                sfLiterals.Items.Add(l);
+                var literals = Server.Return((ISmsServer s) => s.GetLiteralsFromDataObjectProvider((TypeDN)newValue));
+                foreach (var l in literals)
+                {
+                    sfLiterals.Items.Add(l);
+                }
             }
         }
 
@@ -103,7 +107,17 @@ namespace Signum.Windows.SMS
             if (sfLiterals.SelectedItem == null)
                 MessageBox.Show("", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             else
-                text.SelectedText = (string)sfLiterals.SelectedItem;
+            {
+                string literal = (string)sfLiterals.SelectedItem;
+                text.SelectedText = literal;
+                text.SelectionStart = text.SelectionStart + literal.Length;
+                text.SelectionLength = 0;
+            }
+        }
+
+        private IEnumerable<Lite> EntityCombo_LoadData()
+        {
+            return Server.Return((ISmsServer s) => s.GetAssociatedTypesForTemplates());
         }
     }
 }

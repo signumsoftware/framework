@@ -274,4 +274,7 @@
   <data name="YourUsernameIs0" xml:space="preserve">
     <value>Your username is: {0}</value>
   </data>
+  <data name="StatusCanNotBeUpdatedForNonSentMessages" xml:space="preserve">
+    <value>Status can not be updated for non sent messages</value>
+  </data>
 </root>

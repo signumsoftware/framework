@@ -395,6 +395,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Status can not be updated for non sent messages.
+        /// </summary>
+        internal static string StatusCanNotBeUpdatedForNonSentMessages {
+            get {
+                return ResourceManager.GetString("StatusCanNotBeUpdatedForNonSentMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to string.
         /// </summary>
         internal static string String {

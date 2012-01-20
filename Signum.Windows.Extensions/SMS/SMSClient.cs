@@ -5,6 +5,8 @@ using System.Text;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Entities.SMS;
+using Signum.Windows.Operations;
+using Signum.Entities;
 
 namespace Signum.Windows.SMS
 {
@@ -15,7 +17,7 @@ namespace Signum.Windows.SMS
             Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => SMSClient.Start()));
         }
 
-       
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -27,7 +29,33 @@ namespace Signum.Windows.SMS
                     new EntitySettings<SMSSendPackageDN>(EntityType.NotSaving) { View = e => new SMSSendPackage()},
                     new EntitySettings<SMSUpdatePackageDN>(EntityType.NotSaving) { View = e => new SMSUpdatePackage()},
                 });
+
+                OperationClient.AddSetting(new EntityOperationSettings<IdentifiableEntity>(SMSMessageOperations.CreateSMSMessageFromTemplate)
+                {
+                    Click = FindAssociatedTemplates
+                });
             }
+        }
+
+        public static IdentifiableEntity FindAssociatedTemplates(EntityOperationEventArgs<IdentifiableEntity> e)
+        {
+            var template = Navigator.Find(new FindOptions(typeof(SMSTemplateDN))
+            {
+                FilterOptions = new List<FilterOption>
+                {
+                    { new FilterOption("IsActive", true) { Frozen = true } },
+                    { new FilterOption("AssociatedType", Server.ServerTypes[e.Entity.GetType()]) }
+                },
+                SearchOnLoad = true,
+            });
+
+            if (template == null)
+                return null;
+
+            Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate, 
+                template.ToLite<SMSTemplateDN>().Retrieve()));
+
+            return null;
         }
     }
 }

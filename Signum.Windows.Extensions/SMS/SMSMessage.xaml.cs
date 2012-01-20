@@ -29,6 +29,7 @@ namespace Signum.Windows.SMS
         {
             InitializeComponent();
             text = textMessage.Child<TextBox>();
+            text.TextWrapping = TextWrapping.WrapWithOverflow;
             text.TextChanged += new TextChangedEventHandler(SMSMessage_TextChanged);
             BrushConverter bc = new BrushConverter();
             greenBrush = (Brush)bc.ConvertFromString("Green");
@@ -40,6 +41,7 @@ namespace Signum.Windows.SMS
                 new GradientStop(Color.FromRgb(255, 204, 204), 1)
             }, new Point(0.5, 1), new Point(0.5, 0));
             normalBackGround = text.Background;
+            VisualCharactersToEnd();
         }
 
         private void SMSMessage_TextChanged(object sender, TextChangedEventArgs e)
