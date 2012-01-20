@@ -75,7 +75,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty CollapseIfNullProperty =
-                   DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false, (d, e) => CollapseIfNullChanged((FrameworkElement)d)));
+                   DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
         public static bool GetCollapseIfNull(DependencyObject obj)
         {
             return (bool)obj.GetValue(CollapseIfNullProperty);
@@ -85,14 +85,6 @@ namespace Signum.Windows
         {
             obj.SetValue(CollapseIfNullProperty, value);
         }
-
-        static object CollapseIfNullChanged(FrameworkElement frameworkElement)
-        {
-            if (GetRoute(frameworkElement) != null)
-                throw new InvalidOperationException("CollapseIfNull has to be set before Route");
-            return null;
-        }
-
 
         public static readonly DependencyProperty RouteProperty =
          DependencyProperty.RegisterAttached("Route", typeof(string), typeof(Common), new FrameworkPropertyMetadata(null, new PropertyChangedCallback(RoutePropertyChanged)));
@@ -351,11 +343,7 @@ namespace Signum.Windows
 
         public static void TaskSetValueProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
-            DependencyProperty valueProperty =
-                fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
-                fe is DataGrid ? DataGrid.ItemsSourceProperty :
-                FrameworkElement.DataContextProperty;
-
+            DependencyProperty valueProperty = ValueProperty(fe);
 
             bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
@@ -370,6 +358,13 @@ namespace Signum.Windows
                 };
                 fe.SetBinding(valueProperty, b);
             }
+        }
+
+        private static DependencyProperty ValueProperty(FrameworkElement fe)
+        {
+            return fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
+                            fe is DataGrid ? DataGrid.ItemsSourceProperty :
+                            FrameworkElement.DataContextProperty;
         }
 
 
@@ -450,11 +445,18 @@ namespace Signum.Windows
         {
             if (GetCollapseIfNull(fe) && fe.NotSet(UIElement.VisibilityProperty))
             {
-                Binding b = fe is ValueLine ? new Binding(route) : new Binding();
+                var dp = ValueProperty(fe);
 
-                b.Mode = BindingMode.OneWay;
-                b.Converter = Converters.NullToVisibility;
+                if (dp == null)
+                    throw new InvalidOperationException("Unknown value property of {0}".Formato(fe.GetType().Name));
 
+                Binding b = new Binding()
+                {
+                    Path = new PropertyPath(dp.Name),
+                    Source = fe,
+                    Mode = BindingMode.OneWay,
+                    Converter = Converters.NullToVisibility,
+                };
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }
