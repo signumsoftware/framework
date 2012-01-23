@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authorization\AuthCache.cs" />
+    <Compile Include="Authorization\SessionLogLogic.cs" />
     <Compile Include="Authorization\TypeAuthCache.cs" />
     <Compile Include="Authorization\PasswordExpiresLogic.cs" />
     <Compile Include="Authorization\ResetPasswordRequestLogic.cs" />

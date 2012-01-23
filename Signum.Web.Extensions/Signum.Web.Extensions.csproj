@@ -138,6 +138,7 @@
     </Compile>
     <Compile Include="Auth\AuthClient.cs" />
     <Compile Include="Auth\Models\SetPasswordModel.cs" />
+    <Compile Include="Auth\SessionLogClient.cs" />
     <Compile Include="Auth\UserMapping.cs" />
     <Compile Include="Auth\Controllers\AuthController.cs" />
     <Compile Include="Auth\Views\ChangePassword.cs">

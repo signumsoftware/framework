@@ -41,6 +41,7 @@ namespace Signum.Web.Auth
             return RouteHelper.New().Action("Index", "Home");
         };
 
+        public static event Action OnUserLoggingOut;
         public static event Func<Controller, string> OnUserLogoutRedirect = c =>
         {
             return RouteHelper.New().Action("Index", "Home");
@@ -547,14 +548,18 @@ namespace Signum.Web.Auth
 
         public static void LogoutDo()
         {
-            FormsAuthentication.SignOut();
-            //Session.RemoveAll();
-            //Session.Remove(SessionUserKey);
-            var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
-            if (authCookie != null && authCookie.Value.HasText())
-                System.Web.HttpContext.Current.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+            var httpContext = System.Web.HttpContext.Current;
 
-            System.Web.HttpContext.Current.Session.Abandon();
+            if (OnUserLoggingOut != null)
+                OnUserLoggingOut();
+
+            FormsAuthentication.SignOut();
+
+            var authCookie = httpContext.Request.Cookies[AuthClient.CookieName];
+            if (authCookie != null && authCookie.Value.HasText())
+                httpContext.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+
+            httpContext.Session.Abandon();
         }
     }
 }
