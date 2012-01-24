@@ -458,6 +458,13 @@ namespace Signum.Engine.Operations
             return (T)args[pos];
         }
 
+        public static string InState<T>(this T state, Enum operationKey, params T[] validStates) where T : struct
+        {
+            if (validStates.Contains(state))
+                return null;
+
+            return Resources.ImpossibleToExecute0FromState1.Formato(operationKey.NiceToString(), ((Enum)(object)state).NiceToString());
+        }
 
         public static Type[] FindTypes(Enum operation)
         {
