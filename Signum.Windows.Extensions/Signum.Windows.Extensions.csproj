@@ -218,6 +218,12 @@
     <Compile Include="SMS\SMSMessage.xaml.cs">
       <DependentUpon>SMSMessage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SMS\SMSSendPackage.xaml.cs">
+      <DependentUpon>SMSSendPackage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\SMSUpdatePackage.xaml.cs">
+      <DependentUpon>SMSUpdatePackage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserQueries\UserQueryClient.cs" />
     <Compile Include="UserQueries\UserQueryMenuItem.cs" />
     <Compile Include="UserQueries\UserQuery.xaml.cs">
@@ -500,6 +506,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SMS\SMSMessage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SMS\SMSSendPackage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SMS\SMSUpdatePackage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

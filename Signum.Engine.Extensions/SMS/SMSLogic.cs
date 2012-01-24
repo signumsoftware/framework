@@ -490,17 +490,16 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new Execute(SMSMessageOperations.UpdateStatus)
+            new BasicExecute<SMSMessageDN>(SMSMessageOperations.UpdateStatus)
             {
-                FromStates = new[] { SMSMessageState.Sent },
-                ToState = SMSMessageState.Sent,
-                Execute = (t, args) =>
+                CanExecute = m => m.State != SMSMessageState.Created ? null : Resources.StatusCanNotBeUpdatedForNonSentMessages,
+                Execute = (t, args) => 
                 {
                     var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>(0);
                     if (func != null)
                         SMSLogic.UpdateMessageStatus(t, func);
                     else
-                        SMSLogic.UpdateMessageStatus(t);
+                        SMSLogic.UpdateMessageStatus(t);                
                 }
             }.Register();
 

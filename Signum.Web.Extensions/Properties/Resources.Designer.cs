@@ -484,6 +484,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Insert.
+        /// </summary>
+        public static string Insert {
+            get {
+                return ResourceManager.GetString("Insert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Introduce your username and password.
         /// </summary>
         public static string IntroduceYourUserNameAndPassword {
@@ -781,6 +790,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remaining characters.
+        /// </summary>
+        public static string RemainingCharacters {
+            get {
+                return ResourceManager.GetString("RemainingCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remember.
         /// </summary>
         public static string Remember {
@@ -795,6 +813,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string RememberMe {
             get {
                 return ResourceManager.GetString("RememberMe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove non valid characters.
+        /// </summary>
+        public static string RemoveNonValidCharacters {
+            get {
+                return ResourceManager.GetString("RemoveNonValidCharacters", resourceCulture);
             }
         }
         

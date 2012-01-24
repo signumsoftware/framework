@@ -403,6 +403,19 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => SMSLogic.GetPhoneNumber(ie));
         }
+
+        public List<string> GetLiteralsFromDataObjectProvider(TypeDN type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType()));
+        }    
+    
+        public List<Lite> GetAssociatedTypesForTemplates()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList());
+        }
+
         #endregion
     }
 }

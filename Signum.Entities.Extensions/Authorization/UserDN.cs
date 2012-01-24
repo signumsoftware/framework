@@ -136,7 +136,9 @@ namespace Signum.Entities.Authorization
             return userName;
         }
 
-        static readonly Variable<UserDN> sessionUser = Statics.SessionVariable<UserDN>("user");
+        public static string UserSessionKey = "user";
+
+        static readonly Variable<UserDN> sessionUser = Statics.SessionVariable<UserDN>(UserSessionKey);
         static readonly Variable<UserDN> threadUser = Statics.ThreadVariable<UserDN>("threadUser");
 
         public static void SetSessionUser(UserDN user)

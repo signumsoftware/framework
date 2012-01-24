@@ -22,9 +22,65 @@ namespace Signum.Windows.SMS
     /// </summary>
     public partial class SMSMessage : UserControl
     {
+        public static IValueConverter StateToVisibility = ConverterFactory.New((SMSMessageState s) => s == SMSMessageState.Created ? Visibility.Visible : Visibility.Collapsed);
+        public static IValueConverter NotStateToVisibility = ConverterFactory.New((SMSMessageState s) => s != SMSMessageState.Created ? Visibility.Visible : Visibility.Collapsed);
+
         public SMSMessage()
         {
             InitializeComponent();
+            text = textMessage.Child<TextBox>();
+            text.TextWrapping = TextWrapping.WrapWithOverflow;
+            text.TextChanged += new TextChangedEventHandler(SMSMessage_TextChanged);
+            BrushConverter bc = new BrushConverter();
+            greenBrush = (Brush)bc.ConvertFromString("Green");
+            redBrush = (Brush)bc.ConvertFromString("Red");
+            pinkBackground = new LinearGradientBrush(new GradientStopCollection 
+            { 
+                new GradientStop(Color.FromRgb(255, 237, 237), 0),
+                new GradientStop(Color.FromRgb(255, 231, 231), 0.527),
+                new GradientStop(Color.FromRgb(255, 204, 204), 1)
+            }, new Point(0.5, 1), new Point(0.5, 0));
+            normalBackGround = text.Background;
+            VisualCharactersToEnd();
+        }
+
+        private void SMSMessage_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            VisualCharactersToEnd();
+        }
+
+        LinearGradientBrush pinkBackground = null;
+        TextBox text = null;
+        Brush greenBrush = null;
+        Brush redBrush = null;
+        Brush normalBackGround = null;
+
+        private void VisualCharactersToEnd()
+        {
+            int chLeft = SMSCharacters.RemainingLength(text.Text);
+            charactersLeft.Text = chLeft.ToString();
+            if (chLeft < 0)
+            {
+                charactersLeft.Foreground = redBrush;
+                charactersLeft.Background = pinkBackground;
+            }
+            else
+            {
+                charactersLeft.Foreground = greenBrush;
+                charactersLeft.Background = normalBackGround;
+            }
+        }
+
+        public SMSMessageDN MessageDC
+        {
+            get { return (SMSMessageDN)DataContext; }
+            set { RaiseEvent(new ChangeDataContextEventArgs(value)); }
+        }
+
+        private void removeNonSMSChars_Click(object sender, RoutedEventArgs e)
+        {
+            MessageDC.Message = SMSCharacters.RemoveNoSMSCharacters(MessageDC.Message);
+            MessageDC = MessageDC;
         }
     }
 }

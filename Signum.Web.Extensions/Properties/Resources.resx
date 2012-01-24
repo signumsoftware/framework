@@ -462,4 +462,13 @@
   <data name="UserChart_ExportData" xml:space="preserve">
     <value>Export data</value>
   </data>
+  <data name="Insert" xml:space="preserve">
+    <value>Insert</value>
+  </data>
+  <data name="RemainingCharacters" xml:space="preserve">
+    <value>Remaining characters</value>
+  </data>
+  <data name="RemoveNonValidCharacters" xml:space="preserve">
+    <value>Remove non valid characters</value>
+  </data>
 </root>
