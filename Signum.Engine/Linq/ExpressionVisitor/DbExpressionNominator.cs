@@ -362,15 +362,15 @@ namespace Signum.Engine.Linq
                     if (b.NodeType == ExpressionType.Equal)
                         return result;
 
+                    var not = SimpleNot(result) ?? Expression.Not(result);
+
                     if (Has(result))
-                        return Add(Expression.Not(result));
-                    return Expression.Not(result);
+                        return Add(not);
+                    return not;
                 }
             }
             else
             {
-
-
                 Expression left = this.Visit(b.Left);
                 Expression right = this.Visit(b.Right);
                 Expression conversion = this.Visit(b.Conversion);
@@ -399,6 +399,20 @@ namespace Signum.Engine.Linq
 
                 return result;
             }
+        }
+
+        public Expression SimpleNot(Expression e)
+        {
+            if (e.NodeType == ExpressionType.Not)
+                return ((UnaryExpression)e).Operand;
+
+            if (e.NodeType == (ExpressionType)DbExpressionType.IsNull)
+                return new IsNotNullExpression(((IsNullExpression)e).Expression);
+
+            if (e.NodeType == (ExpressionType)DbExpressionType.IsNotNull)
+                return new IsNullExpression(((IsNotNullExpression)e).Expression);
+
+            return null;
         }
 
         private Expression ConvertToSqlCoallesce(BinaryExpression b)
@@ -560,11 +574,14 @@ namespace Signum.Engine.Linq
 
             Expression operand = this.Visit(u.Operand);
 
-            UnaryExpression result = operand == u.Operand ? u : Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
+            Expression result = operand == u.Operand ? u : Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
 
             if (Has(operand))
             {
-                if(u.NodeType == ExpressionType.Not || u.NodeType == ExpressionType.Negate)
+                if (u.NodeType == ExpressionType.Not)
+                    return Add(SimpleNot(operand) ?? result);
+                
+                if(u.NodeType == ExpressionType.Negate)
                     return Add(result);
 
                 if (u.NodeType == ExpressionType.Convert)

@@ -46,21 +46,29 @@ namespace Signum.Engine.Linq
             if (result != null)
                 return result;
 
-            result = EntityEquals(exp1, exp2);
-            if(result != null)
+            result = CoalesceEquals(exp1, exp2);
+            if (result != null)
                 return result;
 
-            result =  TypeEquals(exp1, exp2); 
-            if(result != null)
-                return result; 
+            result = LiteEquals(exp1, exp2);
+            if (result != null)
+                return result;
+            
+            result = EntityEquals(exp1, exp2);
+            if (result != null)
+                return result;
+
+            result = TypeEquals(exp1, exp2);
+            if (result != null)
+                return result;
 
             return EqualNullable(exp1, exp2);
         }
 
         private static Expression ConditionalEquals(Expression exp1, Expression exp2)
         {
-            if ((Schema.Current.Settings.TypeValues.ContainsKey(exp1.Type) ||
-                Schema.Current.Settings.TypeValues.ContainsKey(exp2.Type)) && exp1.NodeType == ExpressionType.Conditional && exp2.NodeType == ExpressionType.Conditional)
+            if (Schema.Current.Settings.TypeValues.ContainsKey(exp1.Type) ||
+                Schema.Current.Settings.TypeValues.ContainsKey(exp2.Type))
                 return null;
 
             if (exp1.NodeType == ExpressionType.Conditional)
@@ -78,6 +86,31 @@ namespace Signum.Engine.Linq
             var ifFalse = PolymorphicEqual(ce.IfFalse, exp);
 
             return SmartOr(SmartAnd(ce.Test, ifTrue), SmartAnd(SmartNot(ce.Test), ifFalse));
+        }
+
+        private static Expression CoalesceEquals(Expression exp1, Expression exp2)
+        {
+            if ((Schema.Current.Settings.TypeValues.ContainsKey(exp1.Type) ||
+              Schema.Current.Settings.TypeValues.ContainsKey(exp2.Type)))
+                return null;
+
+            if (exp1.NodeType == ExpressionType.Coalesce)
+                return DispachCoalesce((BinaryExpression)exp1, exp2);
+
+            if (exp2.NodeType == ExpressionType.Coalesce)
+                return DispachCoalesce((BinaryExpression)exp2, exp1);
+
+            return null;
+        }
+
+        private static Expression DispachCoalesce(BinaryExpression be, Expression exp)
+        {
+            var leftNull = PolymorphicEqual(be.Left, Expression.Constant(null, be.Type));
+
+            var left = PolymorphicEqual(be.Left, exp);
+            var right = PolymorphicEqual(be.Right, exp);
+
+            return SmartOr(SmartAnd(SmartNot(leftNull), left), SmartAnd(leftNull, right));
         }
 
         private static Expression SmartAnd(Expression e1, Expression e2)
@@ -353,16 +386,26 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".Formato(newItem.Type.Name));
         }
 
+        public static Expression LiteEquals(Expression e1, Expression e2)
+        {
+            if (e1 is LiteReferenceExpression || e2 is LiteReferenceExpression)
+            {
+                e1 = ConstantToLite(e1) ?? e1;
+                e2 = ConstantToLite(e2) ?? e2;
+
+                e1 = e1.IsNull() ? e1 : ((LiteReferenceExpression)e1).Reference;
+                e2 = e2.IsNull() ? e2 : ((LiteReferenceExpression)e2).Reference;
+
+                return PolymorphicEqual(e1, e2); //Conditional and Coalesce could be inside
+            }
+
+            return null;
+        }
+
         public static Expression EntityEquals(Expression e1, Expression e2)
         {
             e1 = ConstantToEntity(e1) ?? e1;
             e2 = ConstantToEntity(e2) ?? e2; 
-
-            if (e1 is LiteReferenceExpression || e2 is LiteReferenceExpression )
-            {
-                e1 = e1.IsNull() ? e1 : ((LiteReferenceExpression)e1).Reference;
-                e2 = e2.IsNull() ? e2 : ((LiteReferenceExpression)e2).Reference;
-            }
 
             var tE1 = (DbExpressionType)e1.NodeType;
             var tE2 = (DbExpressionType)e2.NodeType;
@@ -472,40 +515,47 @@ namespace Signum.Engine.Linq
 
             if (c.Type.IsIIdentifiable())
             {
-                return ToFieldInitExpression((IdentifiableEntity)c.Value);// podria ser null y lo meteriamos igualmente
-            }
-            else if (c.Type.IsLite())
-            {
-                return ToLiteReferenceExpression((Lite)c.Value);
-            }
+                var ei = (IdentifiableEntity)c.Value; 
 
+                return new FieldInitExpression(
+                    ei.GetType(),
+                    null,
+                    Expression.Constant(ei.IdOrNull ?? int.MinValue),
+                    ProjectionToken.External);
+            }
+            
             return null;
         }
 
-        static Expression ToLiteReferenceExpression(Lite lite)
+        public static Expression ConstantToLite(Expression expression)
         {
-            Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
+            ConstantExpression c = expression as ConstantExpression;
+            if (c == null)
+                return null;
 
-            Type liteType = lite.GetType();
+            if (c.Value == null)
+                return c;
 
-            FieldInitExpression fie = new FieldInitExpression(lite.RuntimeType, null, id, ProjectionToken.External);
+            if (c.Type.IsLite())
+            {
+                var lite = (Lite)c.Value;
 
-            Type staticType = Reflector.ExtractLite(liteType);
-            Expression reference = staticType == fie.Type? (Expression)fie: 
-                new ImplementedByExpression(staticType, 
-                    new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
+                Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 
-            return new LiteReferenceExpression(liteType,
-                reference, id, Expression.Constant(lite.ToStr), Expression.Constant(lite.RuntimeType));
-        }
+                Type liteType = lite.GetType();
 
-        static Expression ToFieldInitExpression(IIdentifiable ei)
-        {
-            return new FieldInitExpression(
-                ei.GetType(),
-                null,
-                Expression.Constant(ei.IdOrNull ?? int.MinValue),
-                ProjectionToken.External);
+                FieldInitExpression fie = new FieldInitExpression(lite.RuntimeType, null, id, ProjectionToken.External);
+
+                Type staticType = Reflector.ExtractLite(liteType);
+                Expression reference = staticType == fie.Type ? (Expression)fie :
+                    new ImplementedByExpression(staticType,
+                        new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
+
+                return new LiteReferenceExpression(liteType,
+                    reference, id, Expression.Constant(lite.ToStr), Expression.Constant(lite.RuntimeType));
+            }
+
+            return null;
         }
     }
 }
