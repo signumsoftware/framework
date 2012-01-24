@@ -31,6 +31,8 @@ namespace Signum.Windows
 
     public abstract class FindOptionsBase 
     {
+        public static int DefaultElementsPerPage = 200; 
+
         public object QueryName { get; set; }
 
         List<FilterOption> filterOptions = new List<FilterOption>();
@@ -61,7 +63,7 @@ namespace Signum.Windows
             set { this.columnOptions = value; }
         }
 
-        int? elementsPerPage;
+        int? elementsPerPage = DefaultElementsPerPage;
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }

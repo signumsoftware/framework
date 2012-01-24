@@ -21,8 +21,7 @@ namespace Signum.Web
         
         public bool IsDefault()
         {
-            return this.ShowAge == Default.ShowAge &&
-                   this.ChangeMonth == Default.ChangeMonth &&
+            return this.ChangeMonth == Default.ChangeMonth &&
                    this.ChangeYear == Default.ChangeYear &&
                    this.FirstDay == Default.FirstDay &&
                    this.YearRange == Default.YearRange &&
@@ -76,15 +75,6 @@ namespace Signum.Web
             return dateFormat;
         }
 
-        bool showAge = false;
-        /// <summary>
-        /// If true it will show age next no datetimepicker and will refresh if the value of datepicker changes
-        /// </summary>
-        public bool ShowAge
-        {
-            get { return showAge; }
-            set { showAge = value; }
-        }
         bool changeMonth = true;
         public bool ChangeMonth
         {
