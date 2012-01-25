@@ -24,29 +24,18 @@ namespace Signum.Web.Auth
 
         static void LogSessionStart()
         {
-            var user = UserDN.Current;
-            if (SessionLogLogic.RoleTracked(user.Role))
-            {
-                var request = HttpContext.Current.Request;
-                new SessionLogDN
-                {
-                    User = user.ToLite(),
-                    SessionStart = DateTime.Now.TrimToSeconds(),
-                    UserHostAddress = request.UserHostAddress,
-                    UserAgent = request.UserAgent
-                }.Save();
-            }
+            var request = HttpContext.Current.Request;
+            SessionLogLogic.SessionStart(request.UserHostAddress, request.UserAgent);
         }
 
         static void AuthController_OnUserLoggingOut()
         {
-            LogSessionEnd(UserDN.Current, false);
+            LogSessionEnd(UserDN.Current, null);
         }
 
-        public static void LogSessionEnd(UserDN user, bool sessionTimeOut)
+        public static void LogSessionEnd(UserDN user, TimeSpan? timeOut)
         {
-            if (user != null)
-                SessionLogLogic.FinishSession(user, sessionTimeOut);
+            SessionLogLogic.SessionEnd(user, timeOut);
         }
     }
 }
