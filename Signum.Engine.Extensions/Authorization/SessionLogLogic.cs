@@ -13,21 +13,15 @@ namespace Signum.Engine.Authorization
 {
     public static class SessionLogLogic
     {
-        static List<RoleDN> rolesTracked;
-        
-        public static bool RoleTracked(RoleDN role)
-        {
-            return rolesTracked.Contains(role);
-        }
-                 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, List<RoleDN> rolesToTrack)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                rolesTracked = rolesToTrack;
-
                 AuthLogic.AssertStarted(sb);
+                
                 sb.Include<SessionLogDN>();
+
+                PermissionAuthLogic.RegisterPermissions(SessionLogPermission.TrackSession);
 
                 dqm[typeof(SessionLogDN)] = (from sl in Database.Query<SessionLogDN>()
                                              select new
@@ -42,9 +36,29 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void FinishSession(UserDN user, bool sessionTimeOut)
+        static bool RoleTracked(Lite<RoleDN> role)
         {
-            if (!RoleTracked(user.Role))
+            return SessionLogPermission.TrackSession.IsAuthorized(role);
+        }
+
+        public static void SessionStart(string userHostAddress, string userAgent)
+        {
+            var user = UserDN.Current;
+            if (SessionLogLogic.RoleTracked(user.Role.ToLite()))
+            {
+                new SessionLogDN
+                {
+                    User = user.ToLite(),
+                    SessionStart = DateTime.Now.TrimToSeconds(),
+                    UserHostAddress = userHostAddress,
+                    UserAgent = userAgent
+                }.Save();
+            }
+        }
+
+        public static void SessionEnd(UserDN user, TimeSpan? timeOut)
+        {
+            if (user == null || !RoleTracked(user.Role.ToLite()))
                 return;
 
             using (AuthLogic.Disable())
@@ -53,11 +67,11 @@ namespace Signum.Engine.Authorization
                     .Where(sl => sl.User.RefersTo(user))
                     .OrderByDescending(sl => sl.SessionStart)
                     .FirstOrDefault();
-                
+
                 if (log != null && log.SessionEnd == null)
                 {
-                    log.SessionEnd = DateTime.Now.TrimToSeconds();
-                    log.SessionTimeOut = sessionTimeOut;
+                    log.SessionEnd = timeOut.HasValue ? DateTime.Now.Subtract(timeOut.Value).TrimToSeconds() : DateTime.Now.TrimToSeconds();
+                    log.SessionTimeOut = timeOut.HasValue;
                     log.Save();
                 }
             }
