@@ -18,5 +18,15 @@ namespace Signum.Utilities
                 (int)(from.G * ratioNeg + to.G * ratio),
                 (int)(from.B * ratioNeg + to.B * ratio));
         }
+
+        public static string ToHtml(this Color color)
+        {
+            return ToHtmlColor(color.ToArgb());
+        }
+
+        public static string ToHtmlColor(int value)
+        {
+            return "#" + (value & 0xffffff).ToString("X6");
+        }
     }
 }

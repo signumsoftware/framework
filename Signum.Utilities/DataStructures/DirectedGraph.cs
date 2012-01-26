@@ -345,7 +345,7 @@ namespace Signum.Utilities.DataStructures
 
         public XDocument ToDGML()
         {
-            return ToDGML(a => a.ToString() ?? "[null]", a => ColorGenerator.ColorFor(a.GetType().FullName.GetHashCode()));
+            return ToDGML(a => a.ToString() ?? "[null]", a => ColorExtensions.ToHtmlColor(a.GetType().FullName.GetHashCode()));
         }
 
         public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor)
@@ -550,11 +550,5 @@ namespace Signum.Utilities.DataStructures
         }
     };
 
-    public static class ColorGenerator
-    {
-        public static string ColorFor(int value)
-        {
-            return "#" + (value & 0xffffff).ToString("X6");
-        }
-    }
+    
 }

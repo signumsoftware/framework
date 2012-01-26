@@ -359,7 +359,7 @@ namespace Signum.Utilities.DataStructures
         {
             return ToDGML(
                 a => a.ToString() ?? "[null]",
-                a => ColorGenerator.ColorFor(a.GetType().FullName.GetHashCode()),
+                a => ColorExtensions.ToHtmlColor(a.GetType().FullName.GetHashCode()),
                 e => e.ToString() ?? "[null]");
         }
 
