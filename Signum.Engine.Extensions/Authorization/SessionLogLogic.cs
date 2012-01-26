@@ -46,13 +46,16 @@ namespace Signum.Engine.Authorization
             var user = UserDN.Current;
             if (SessionLogLogic.RoleTracked(user.Role.ToLite()))
             {
-                new SessionLogDN
+                using (AuthLogic.Disable())
                 {
-                    User = user.ToLite(),
-                    SessionStart = DateTime.Now.TrimToSeconds(),
-                    UserHostAddress = userHostAddress,
-                    UserAgent = userAgent
-                }.Save();
+                    new SessionLogDN
+                    {
+                        User = user.ToLite(),
+                        SessionStart = DateTime.Now.TrimToSeconds(),
+                        UserHostAddress = userHostAddress,
+                        UserAgent = userAgent
+                    }.Save();
+                }
             }
         }
 
