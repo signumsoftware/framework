@@ -1452,7 +1452,7 @@ namespace Signum.Engine.Linq
             if (expression.IsNull())
                 return AssignNull(colExpression);
 
-            expression = SmartEqualizer.ConstantToEntity(expression) ?? expression;
+            expression = SmartEqualizer.ConstantToEntity(expression) ?? SmartEqualizer.ConstantToLite(expression) ?? expression;
 
             if (expression is FieldInitExpression && IsNewId(((FieldInitExpression)expression).ExternalId))
                 throw new InvalidOperationException("The entity is new");
