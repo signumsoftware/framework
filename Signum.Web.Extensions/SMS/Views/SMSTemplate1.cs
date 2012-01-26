@@ -172,6 +172,10 @@ Write(Html.ValueLine(e, s => s.MessageLengthExceeded));
 
                                                     
     
+Write(Html.ValueLine(e, s => s.Certified));
+
+                                        
+    
 Write(Html.ValueLine(e, s => s.From));
 
                                    

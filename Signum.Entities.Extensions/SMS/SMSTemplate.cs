@@ -36,6 +36,13 @@ namespace Signum.Entities.SMS
             set { Set(ref name, value, () => Name); }
         }
 
+        bool certified;
+        public bool Certified
+        {
+            get { return certified; }
+            set { Set(ref certified, value, () => Certified); }
+        }
+
         TypeDN associatedType;
         public TypeDN AssociatedType
         {
@@ -139,7 +146,8 @@ namespace Signum.Entities.SMS
                 Message = this.message,
                 From = this.from,
                 State = SMSMessageState.Created,
-                DestinationNumber = destinationNumber
+                DestinationNumber = destinationNumber,
+                Certified = this.Certified
             };            
         }
     }

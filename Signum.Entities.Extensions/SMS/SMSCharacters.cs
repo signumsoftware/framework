@@ -98,6 +98,8 @@ namespace Signum.Entities.SMS
 
         public static string RemoveNoSMSCharacters(string text)
         {
+            if (text == null)
+                return null;
             StringBuilder sb = new StringBuilder();
             foreach (var c in text.RemoveDiacritics().ToCharArray())
 	        {
