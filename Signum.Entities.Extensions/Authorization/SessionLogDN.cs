@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
 {
@@ -63,5 +64,18 @@ namespace Signum.Entities.Authorization
             return "{0} ({1}-{2})".Formato(
                 user.TryToString(), sessionStart.TryToString(), sessionEnd.TryToString());
         }
+
+        static Expression<Func<SessionLogDN, int?>> DurationExpression = 
+            sl => sl.SessionEnd != null ? (sl.SessionEnd.Value - sl.SessionStart).Seconds : (int?)null;
+        [Unit("s")]
+        public int? Duration
+        {
+            get { return DurationExpression.Evaluate(this); }
+        }
+    }
+
+    public enum SessionLogPermission
+    { 
+        TrackSession
     }
 }
