@@ -108,7 +108,7 @@
                 <td>
                 @if (type != null)
                 {
-                    var color = Signum.Utilities.DataStructures.ColorGenerator.ColorFor(type.Assembly.FullName.GetHashCode());
+                    var color = ColorExtensions.ToHtmlColor(type.Assembly.FullName.GetHashCode());
                     
                     <span style="color:@color">@frame.GetMethod().DeclaringType.TryCC(t => t.TypeName())</span>
                 }
