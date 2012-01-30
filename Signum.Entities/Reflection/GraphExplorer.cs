@@ -203,7 +203,7 @@ namespace Signum.Entities.Reflection
                 {
                     new XAttribute("Label", n.ToString() ?? "[null]"),
                     new XAttribute("TypeName", n.GetType().TypeName()), 
-                    new XAttribute("Background", ColorGenerator.ColorFor(n.GetType().FullName.GetHashCode()))
+                    new XAttribute("Background", ColorExtensions.ToHtmlColor(n.GetType().FullName.GetHashCode()))
                 });
         }
 
@@ -213,7 +213,7 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (ie.ToString() ?? "[null]")  + Modified(ie)),
                new XAttribute("TypeName", ie.GetType().TypeName()), 
-               new XAttribute("Background", ColorGenerator.ColorFor(ie.GetType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(ie.GetType().FullName.GetHashCode())),
                new XAttribute("Description", ie.IdOrNull.TryToString() ?? "New")
             };
         }
@@ -236,9 +236,9 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified(lite)),
                new XAttribute("TypeName", lite.GetType().TypeName()), 
-               new XAttribute("Stroke", ColorGenerator.ColorFor(Reflector.ExtractLite(lite.GetType()).FullName.GetHashCode())),
+               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(Reflector.ExtractLite(lite.GetType()).FullName.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
-               new XAttribute("Background", ColorGenerator.ColorFor(lite.RuntimeType.FullName.GetHashCode()).Replace("#", "#44")),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.RuntimeType.FullName.GetHashCode()).Replace("#", "#44")),
                new XAttribute("Description", " ".Combine((lite.RuntimeType == Reflector.ExtractLite(lite.GetType())? "":  lite.RuntimeType.TypeName() ),   lite.IdOrNull.TryToString() ?? "New"))
             };
         }
@@ -250,7 +250,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (ee.ToString() ?? "[null]")+  Modified(ee)),
                new XAttribute("TypeName", ee.GetType().TypeName()), 
                new XAttribute("NodeRadius", 0),
-               new XAttribute("Background", ColorGenerator.ColorFor(ee.GetType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName.GetHashCode())),
             };
         }
 
@@ -261,7 +261,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (list.ToString() ?? "[null]") +  Modified((Modifiable)list)),
                new XAttribute("TypeName", list.GetType().TypeName()), 
                new XAttribute("NodeRadius", 2),
-               new XAttribute("Background", ColorGenerator.ColorFor(list.GetType().ElementType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType().FullName.GetHashCode())),
             };
         }
     }
