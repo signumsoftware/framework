@@ -154,7 +154,7 @@ namespace Signum.Engine.Linq
             }
             else
             {
-                ColumnGenerator cg = new ColumnGenerator() { columns = sel.Columns.ToList() };
+                ColumnGenerator cg = new ColumnGenerator(sel.Columns);
                 Dictionary<OrderExpression, ColumnDeclaration> newColumns = sel.OrderBy.ToDictionary(o => o, o => cg.NewColumn(o.Expression));
 
                 innerOrders = newColumns.Select(kvp => new OrderExpression(kvp.Key.OrderType, kvp.Value.GetReference(sel.Alias))).ToList();
