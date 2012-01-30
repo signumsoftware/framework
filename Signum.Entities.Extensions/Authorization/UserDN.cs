@@ -138,12 +138,12 @@ namespace Signum.Entities.Authorization
 
         public static string UserSessionKey = "user";
 
-        static readonly Variable<UserDN> sessionUser = Statics.SessionVariable<UserDN>(UserSessionKey);
+        public static readonly SessionVariable<UserDN> SessionUserVariable = Statics.SessionVariable<UserDN>(UserSessionKey);
         static readonly Variable<UserDN> threadUser = Statics.ThreadVariable<UserDN>("threadUser");
 
         public static void SetSessionUser(UserDN user)
         {
-            sessionUser.Value = user;
+            SessionUserVariable.Value = user;
         }
 
         public static IDisposable Scope(UserDN user)
@@ -155,7 +155,7 @@ namespace Signum.Entities.Authorization
 
         public static UserDN Current
         {
-            get { return threadUser.Value ?? sessionUser.Value; }
+            get { return threadUser.Value ?? SessionUserVariable.Value; }
         }
     }
 
