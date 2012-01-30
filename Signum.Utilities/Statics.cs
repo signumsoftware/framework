@@ -13,7 +13,7 @@ namespace Signum.Utilities
     {
         static Dictionary<string, IUntypedVariable> threadVariables = new Dictionary<string, IUntypedVariable>();
 
-        public static Variable<T> ThreadVariable<T>(string name)
+        public static ThreadLocalVariable<T> ThreadVariable<T>(string name)
         {
             var variable = new ThreadLocalVariable<T>(name);
             threadVariables.AddOrThrow(name, variable, "Thread variable {0} already defined");
@@ -46,22 +46,10 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("The thread variable \r\n" + errors);
         }
 
-        class ThreadLocalVariable<T> : Variable<T>
-        {
-            ThreadLocal<T> store = new ThreadLocal<T>();
-
-            public ThreadLocalVariable(string name): base(name){}
-
-            public override T Value
-            {
-                get { return store.Value; }
-                set { store.Value = value; }
-            }
-        }
 
         static Dictionary<string, IUntypedVariable> sessionVariables = new Dictionary<string, IUntypedVariable>();
 
-        public static Variable<T> SessionVariable<T>(string name)
+        public static SessionVariable<T> SessionVariable<T>(string name)
         {
             var variable = SessionFactory.CreateVariable<T>(name);
             sessionVariables.AddOrThrow(name, variable, "Session variable {0} already defined");
@@ -139,9 +127,43 @@ namespace Signum.Utilities
         }
     }
 
+    public class ThreadLocalVariable<T> : Variable<T>
+    {
+        ThreadLocal<T> store = new ThreadLocal<T>();
+
+        public ThreadLocalVariable(string name) : base(name) { }
+
+        public override T Value
+        {
+            get { return store.Value; }
+            set { store.Value = value; }
+        }
+    }
+
+    public abstract class SessionVariable<T>: Variable<T>
+    {
+        public abstract Func<T> ValueFactory { get; set; }
+
+        public SessionVariable(string name)
+            : base(name)
+        {
+        }
+
+        public T GetDefaulValue()
+        {
+            if (ValueFactory == null)
+                return default(T);
+
+            Value = ValueFactory();
+
+            return Value;
+        }
+    }
+
+
     public interface ISessionFactory
     {
-        Variable<T> CreateVariable<T>(string name);
+        SessionVariable<T> CreateVariable<T>(string name);
     }
 
     public class SingletonSessionFactory : ISessionFactory
@@ -154,20 +176,22 @@ namespace Signum.Utilities
             set { singletonSession = value; }
         }
 
-        public Variable<T> CreateVariable<T>(string name)
+        public SessionVariable<T> CreateVariable<T>(string name)
         {
             return new SingletonVariable<T>(name);
         }
 
-        class SingletonVariable<T> : Variable<T>
+        class SingletonVariable<T> : SessionVariable<T>
         {
+            public override Func<T> ValueFactory { get; set; }
+            
             public SingletonVariable(string name)
                 : base(name)
             { }
 
             public override T Value
             {
-                get { return (T)(singletonSession.TryGetC(Name) ?? default(T)); }
+                get { return (T)(singletonSession.TryGetC(Name) ?? GetDefaulValue()); }
                 set { singletonSession[Name] = value; }
             }
         }
@@ -198,18 +222,25 @@ namespace Signum.Utilities
             return new Disposable(() => overridenSession.Value = old);
         }
 
-        public Variable<T> CreateVariable<T>(string name)
+        public SessionVariable<T> CreateVariable<T>(string name)
         {
             return new OverrideableVariable<T>(Factory.CreateVariable<T>(name));
         }
 
-        class OverrideableVariable<T> : Variable<T>
+        class OverrideableVariable<T> : SessionVariable<T>
         {
-            Variable<T> variable;
+            SessionVariable<T> variable;
 
-            public OverrideableVariable(Variable<T> variable) : base(variable.Name)
+            public OverrideableVariable(SessionVariable<T> variable)
+                : base(variable.Name)
             {
                 this.variable = variable;
+            }
+
+            public override Func<T> ValueFactory
+            {
+                get { return variable.ValueFactory; }
+                set { variable.ValueFactory = value; }
             }
 
             public override T Value
@@ -219,7 +250,7 @@ namespace Signum.Utilities
                     var dic = overridenSession.Value;
 
                     if (dic != null)
-                        return (T)(dic.TryGetC(Name) ?? default(T));
+                        return (T)(dic.TryGetC(Name) ?? GetDefaulValue());
                     else
                         return variable.Value;
                 }
@@ -231,30 +262,6 @@ namespace Signum.Utilities
                         dic[Name] = value;
                     else
                         variable.Value = value;
-                }
-            }
-        }
-
-        class ThrowSessionFactory : ISessionFactory
-        {
-            public Variable<T> CreateVariable<T>(string name)
-            {
-                return new ThrowVariable<T>(name);
-            }
-
-            class ThrowVariable<T> : Variable<T>
-            {
-                public ThrowVariable(string name) : base(name) { }
-
-                public override T Value
-                {
-                    get { throw NoSession(); }
-                    set { throw NoSession(); }
-                }
-
-                private static InvalidOperationException NoSession()
-                {
-                    return new InvalidOperationException("Session variables are not available. Call ScopeSessionFactory.Scope or determine an inner ScopeFactory");
                 }
             }
         }
