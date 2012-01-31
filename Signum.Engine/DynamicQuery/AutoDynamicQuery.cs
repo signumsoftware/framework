@@ -13,6 +13,7 @@ namespace Signum.Engine.DynamicQuery
     public class AutoDynamicQuery<T> : DynamicQuery<T>
     {
         public IQueryable<T> Query { get; private set; }
+        
         Dictionary<string, Meta> metas;
 
         public AutoDynamicQuery(IQueryable<T> query)

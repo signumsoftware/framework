@@ -111,12 +111,12 @@ namespace Signum.Entities.Reflection
             return result;
         }
 
-        internal static Type GenerateEnumProxy(Type enumType)
+        public static Type GenerateEnumProxy(Type enumType)
         {
             return typeof(EnumProxy<>).MakeGenericType(enumType);
         }
 
-        internal static Type ExtractEnumProxy(Type enumProxyType)
+        public static Type ExtractEnumProxy(Type enumProxyType)
         {
             if (enumProxyType.IsGenericType && enumProxyType.GetGenericTypeDefinition() == typeof(EnumProxy<>))
                 return enumProxyType.GetGenericArguments()[0];
