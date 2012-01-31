@@ -96,7 +96,7 @@ namespace Signum.Engine.Operations
 
                 var exLog = ex.LogException();
 
-                using (Transaction tr2 = new Transaction(true))
+                using (Transaction tr2 = Transaction.ForceNew())
                 {
                     var log2 = new OperationLogDN
                     {

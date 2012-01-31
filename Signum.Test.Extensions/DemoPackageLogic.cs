@@ -125,7 +125,7 @@ namespace Signum.Engine.Processes
                 {
                     var exLog = e.LogException();
 
-                    using (Transaction tr = new Transaction(true))
+                    using (Transaction tr = Transaction.ForceNew())
                     {
                         pl.Exception = exLog.ToLite();
                         pl.Save();

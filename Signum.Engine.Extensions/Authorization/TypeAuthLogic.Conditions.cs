@@ -91,7 +91,7 @@ namespace Signum.Engine.Authorization
                 var groups = modified.GroupBy(e => e.GetType(), e => e.Id);
 
                 //Assert before
-                using (Transaction tr = new Transaction(true))
+                using (Transaction tr = Transaction.ForceNew())
                 {
                     foreach (var gr in groups)
                         miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);

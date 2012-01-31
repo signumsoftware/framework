@@ -106,7 +106,7 @@ namespace Signum.Engine.Scheduler
             {
                 var exLog = ex.LogException().ToLite();
 
-                using (Transaction tr2 = new Transaction(true))
+                using (Transaction tr2 = Transaction.ForceNew())
                 {
                     CustomTaskExecutionDN cte2 = new CustomTaskExecutionDN
                     {
