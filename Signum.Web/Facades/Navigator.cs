@@ -425,7 +425,7 @@ namespace Signum.Web
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
         protected Dictionary<string, object> WebQueryNames { get; private set; }
 
-        public Func<string, bool> AllowUserColumns = s => s.HasText() ? false : true;
+        public Func<bool> AllowChangeColumns = () => true;
 
         public Func<List<string>> DefaultScripts = () => new List<string>
         {

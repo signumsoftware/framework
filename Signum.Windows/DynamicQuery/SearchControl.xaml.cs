@@ -69,12 +69,12 @@ namespace Signum.Windows
             set { SetValue(ColumnsOptionsProperty, value); }
         }
 
-        public static readonly DependencyProperty AllowUserColumnsProperty =
-            DependencyProperty.Register("AllowUserColumns", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
-        public bool AllowUserColumns
+        public static readonly DependencyProperty AllowChangeColumnsProperty =
+            DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+        public bool AllowChangeColumns
         {
-            get { return (bool)GetValue(AllowUserColumnsProperty); }
-            set { SetValue(AllowUserColumnsProperty, value); }
+            get { return (bool)GetValue(AllowChangeColumnsProperty); }
+            set { SetValue(AllowChangeColumnsProperty, value); }
         }
 
         public static readonly DependencyProperty ElementsPerPageProperty =
@@ -787,7 +787,7 @@ namespace Signum.Windows
 
         private void AddColumn(QueryToken token)
         {
-            if (!AllowUserColumns)
+            if (!AllowChangeColumns)
                 return;
 
             string result = token.NiceName();
@@ -818,6 +818,9 @@ namespace Signum.Windows
 
         private void renameMenu_Click(object sender, RoutedEventArgs e)
         {
+            if (!AllowChangeColumns)
+                return;
+
             GridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
             ColumnInfo col = (ColumnInfo)gvch.Tag;
@@ -831,6 +834,9 @@ namespace Signum.Windows
 
         private void removeMenu_Click(object sender, RoutedEventArgs e)
         {
+            if (!AllowChangeColumns)
+                return;
+
             GridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
             gvResults.Columns.Remove(gvch.Column);

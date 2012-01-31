@@ -31,6 +31,7 @@
 
     @Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfAllowMultiple"), allowMultiple.ToString(), new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfAllowChangeColumns"), findOptions.AllowChangeColumns.ToString(), new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfFilterMode"), findOptions.FilterMode.ToString(), new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.IsEmpty() ? "" :
@@ -71,7 +72,7 @@
                                 { "data-url", Url.SignumAction("AddFilter") }
                             })
 
-                    @if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(Model.ControlID))
+                    @if (string.IsNullOrEmpty(Model.ControlID) && findOptions.AllowChangeColumns)
                     {
                         @Html.Href(
                             Model.Compose("btnAddColumn"), 
