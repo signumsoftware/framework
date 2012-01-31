@@ -140,20 +140,25 @@ namespace Signum.Engine
                 }
             }
 
-            public void Commit()
+            public virtual void Commit()
             {
                 if (Started)
                 {
-                    while (PreRealCommit != null)
-                    {
-                        foreach (Action item in PreRealCommit.GetInvocationList())
-                        {
-                            item();
-                            PreRealCommit -= item;
-                        }
-                    }
+                    OnPreRealCommit();
 
                     Transaction.Commit();
+                }
+            }
+
+            protected void OnPreRealCommit()
+            {
+                while (PreRealCommit != null)
+                {
+                    foreach (Action item in PreRealCommit.GetInvocationList())
+                    {
+                        item();
+                        PreRealCommit -= item;
+                    }
                 }
             }
 
@@ -178,7 +183,7 @@ namespace Signum.Engine
                 }
             }
 
-            public ICoreTransaction Finish()
+            public virtual ICoreTransaction Finish()
             {
                 if (Transaction != null)
                 {
@@ -366,62 +371,43 @@ namespace Signum.Engine
             }
         }
 
-        public Transaction():this(false){}
+        static readonly Variable<bool> avoidIndependentTransactions = Statics.ThreadVariable<bool>("avoidIndependentTransactions");
 
-        public Transaction(bool forceNew)
+        class TestTransaction : RealTransaction 
         {
-            BaseConnection bc = AssertConnection();
-
-            var dic = currents.Value;
-            ICoreTransaction parent = dic.TryGetC(bc);
-            if (parent == null || forceNew)
+            public TestTransaction(ICoreTransaction parent, IsolationLevel? isolation)
+                : base(parent, isolation)
             {
-                dic[bc] = coreTransaction = new RealTransaction(parent, null);
+                avoidIndependentTransactions.Value = true;
             }
-            else
+
+            public virtual void Commit()
             {
-                AssertTransaction();
-                dic[bc] = coreTransaction = new FakedTransaction(parent);
+                if (Started)
+                {
+                    OnPreRealCommit();
+
+                    throw new InvalidOperationException("A Test transaction can not be commited"); 
+                    //Transaction.Commit();
+                }
+            }
+
+            public override ICoreTransaction Finish()
+            {
+                avoidIndependentTransactions.Value = false;
+
+                return base.Finish();
             }
         }
-    
-        Transaction(BaseConnection bc, ICoreTransaction transaction)
+
+        public Transaction()
+            : this(parent => parent == null ?
+                (ICoreTransaction)new RealTransaction(parent, null) :
+                (ICoreTransaction)new FakedTransaction(parent))
         {
-            currents.Value[bc] = coreTransaction = transaction;
         }
 
-        public static Transaction None()
-        {
-            BaseConnection bc = AssertConnection();
-
-            ICoreTransaction parent = currents.Value.TryGetC(bc);
-
-            return new Transaction(bc, new NoneTransaction(parent));
-        }
-
-        public static Transaction NamedSavePoint(string savePointName)
-        {
-            BaseConnection bc = AssertConnection();
-
-            ICoreTransaction parent = GetCurrent();
-            return new Transaction(bc, new NamedTransaction(parent, savePointName));
-        }
-
-        public static Transaction ForceNew()
-        {
-            return ForceNew(null);
-        }
-
-        public static Transaction ForceNew(IsolationLevel? isolationLevel)
-        {
-            BaseConnection bc = AssertConnection();
-
-            ICoreTransaction parent = currents.Value.TryGetC(bc);
-
-            return new Transaction(bc, new RealTransaction(parent, isolationLevel));
-        }
-
-        private static BaseConnection AssertConnection()
+        Transaction(Func<ICoreTransaction, ICoreTransaction> factory)
         {
             if (currents.Value == null)
                 currents.Value = new Dictionary<BaseConnection, ICoreTransaction>();
@@ -429,17 +415,48 @@ namespace Signum.Engine
             BaseConnection bc = ConnectionScope.Current;
 
             if (bc == null)
-                throw new InvalidOperationException("ConnectionScope.Current not established. Use ConnectionScope.Default to do it.");
-            return bc;
+                throw new InvalidOperationException("ConnectionScope.Current not established. Use ConnectionScope.Default to set it.");
+
+            ICoreTransaction parent = currents.Value.TryGetC(bc);
+
+            if(parent != null && parent.RolledBack)
+                throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+
+            var core = avoidIndependentTransactions.Value? new FakedTransaction(parent): factory(parent);
+
+            currents.Value[bc] = coreTransaction = core;
         }
 
-        
-        void AssertTransaction()
+        public static Transaction None()
         {
-            if (GetCurrent().RolledBack)
-                throw new InvalidOperationException("The transation is RolledBack");
+            return new Transaction(parent => new NoneTransaction(parent));
         }
 
+        public static Transaction NamedSavePoint(string savePointName)
+        {
+            return new Transaction(parent => new NamedTransaction(parent, savePointName));
+        }
+
+        public static Transaction ForceNew()
+        {
+            return new Transaction(parent => new RealTransaction(parent, null));
+        }
+
+        public static Transaction ForceNew(IsolationLevel? isolationLevel)
+        {
+            return new Transaction(parent => new RealTransaction(parent, isolationLevel));
+        }
+
+        public static Transaction Test()
+        {
+            return new Transaction(parent => new TestTransaction(parent, null));
+        }
+
+        public static Transaction Test(IsolationLevel? isolationLevel)
+        {
+            return new Transaction(parent => new TestTransaction(parent, isolationLevel));
+        }
+    
         static ICoreTransaction GetCurrent()
         {
             return currents.Value.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
@@ -505,7 +522,8 @@ namespace Signum.Engine
 
         public void Commit()
         {
-            AssertTransaction();
+            if (coreTransaction.RolledBack)
+                throw new InvalidOperationException("The transation is rolled back and can not be commited.");
 
             coreTransaction.Commit();
 
