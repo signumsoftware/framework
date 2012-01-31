@@ -140,7 +140,7 @@ namespace Signum.Engine.Linq
 
         private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, Alias currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
         {
-            List<ColumnDeclaration> result = columns.ToList();
+            ColumnGenerator cg = new ColumnGenerator(columns);
          
             foreach (var col in askedColumns.Keys.ToArray())
             {
@@ -156,11 +156,10 @@ namespace Signum.Engine.Linq
                     ColumnExpression colExp = expr as ColumnExpression;
                     if (colExp != null)
                     {
-                        ColumnDeclaration cd = result.FirstOrDefault(c => c.Expression.Equals(col));
+                        ColumnDeclaration cd = cg.Columns.FirstOrDefault(c => c.Expression.Equals(col));
                         if (cd == null)
                         {
-                            cd = new ColumnDeclaration(GetUniqueColumnName(result, colExp.Name), colExp);
-                            result.Add(cd);
+                            cd = cg.MapColumn(colExp);
                         }
 
                         askedColumns[col] = new ColumnExpression(col.Type, currentAlias, cd.Name);
@@ -173,8 +172,8 @@ namespace Signum.Engine.Linq
             }
 
 
-            if (columns.Count != result.Count)
-                return result.ToReadOnly();
+            if (columns.Count != cg.Columns.Count())
+                return cg.Columns.ToReadOnly();
 
             return columns;
         }

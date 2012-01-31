@@ -168,7 +168,7 @@ namespace Signum.Web
 
         protected internal virtual EntitySettingsContext EntitySettingsContext
         {
-            get { return Web.EntitySettingsContext.Default; }
+            get { return ViewMode == Web.ViewMode.Popup ? Web.EntitySettingsContext.Content : Web.EntitySettingsContext.Default; }
         }
     }
 

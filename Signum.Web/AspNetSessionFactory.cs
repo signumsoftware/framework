@@ -10,20 +10,22 @@ namespace Signum.Web
 {
     public class AspNetSessionFactory : ISessionFactory
     {
-        public Variable<T> CreateVariable<T>(string name)
+        public SessionVariable<T> CreateVariable<T>(string name)
         {
             return new AspNetSessionVariable<T>(name);
         }
 
-        class AspNetSessionVariable<T>: Variable<T>
+        class AspNetSessionVariable<T>: SessionVariable<T>
         {
             public AspNetSessionVariable(string name): base(name)
             {
             }
 
+            public override Func<T> ValueFactory { get; set; }
+
             public override T Value
             {
-                get { return (T)(HttpContext.Current.Session[Name] ?? default(T)); }
+                get { return (T)(HttpContext.Current.Session[Name] ?? GetDefaulValue()); }
                 set { HttpContext.Current.Session[Name] = value; }
             }
         }

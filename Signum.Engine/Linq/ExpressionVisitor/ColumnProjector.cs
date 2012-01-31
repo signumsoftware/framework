@@ -73,7 +73,7 @@ namespace Signum.Engine.Linq
 
             Expression e = cp.Visit(newProj);
 
-            return new ProjectedColumns(e, cp.generator.columns.AsReadOnly(), newToken);
+            return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken);
         }
 
         static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
@@ -94,7 +94,7 @@ namespace Signum.Engine.Linq
 
             Expression e = cp.Visit(newProj);
 
-            return new ProjectedColumns(e, cp.generator.columns.AsReadOnly(), newToken);
+            return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken);
         }
 
 
@@ -161,14 +161,26 @@ namespace Signum.Engine.Linq
 
     internal class ColumnGenerator
     {
-        public List<ColumnDeclaration> columns = new List<ColumnDeclaration>();
+        public ColumnGenerator()
+        {
+        }
+
+        public ColumnGenerator(IEnumerable<ColumnDeclaration> columns)
+        {
+            foreach (var item in columns)
+                this.columns.Add(item.Name, item);
+        }
+
+        public IEnumerable<ColumnDeclaration> Columns { get { return columns.Values; } }
+
+        Dictionary<string, ColumnDeclaration> columns = new Dictionary<string, ColumnDeclaration>(StringComparer.InvariantCultureIgnoreCase);
         int iColumn;
         
         public string GetUniqueColumnName(string name)
         {
             string baseName = name;
             int suffix = 1;
-            while (this.columns.Select(c => c.Name).Contains(name))
+            while (this.columns.ContainsKey(name))
                 name = baseName + (suffix++);
             return name;
         }
@@ -182,7 +194,7 @@ namespace Signum.Engine.Linq
         {
             string columnName = GetUniqueColumnName(ce.Name);
             var result = new ColumnDeclaration(columnName, ce);
-            columns.Add(result);
+            columns.Add(result.Name, result);
             return result; 
         }
 
@@ -190,7 +202,7 @@ namespace Signum.Engine.Linq
         {
             string columnName = GetNextColumnName();
             var result = new ColumnDeclaration(columnName, exp);
-            columns.Add(result);
+            columns.Add(result.Name, result);
             return result; 
         }
     }

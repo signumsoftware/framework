@@ -23,6 +23,7 @@ namespace Signum.Web
         public ViewOkOptions(TypeContext tc)
         {
             TypeContext = tc;
+            Context = EntitySettingsContext.Content;
         }
 
         internal override ViewButtons GetViewButtons()
@@ -36,6 +37,7 @@ namespace Signum.Web
         public ViewSaveOptions(TypeContext tc)
         {
             TypeContext = tc;
+            Context = EntitySettingsContext.Content;
         }
 
         internal override ViewButtons GetViewButtons()

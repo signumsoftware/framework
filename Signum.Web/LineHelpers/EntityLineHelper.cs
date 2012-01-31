@@ -69,7 +69,7 @@ namespace Signum.Web
                             htmlAttr));
 
                         int? id = entityLine.IdOrNull;
-                        if (entityLine.View && id != null)
+                        if (id != null && entityLine.View && Navigator.IsViewable(entityLine.CleanRuntimeType, EntitySettingsContext.Admin))
                         {
                             sb.AddLine(
                                 helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),

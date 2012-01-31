@@ -179,7 +179,7 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                context = mod.UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
+                context = mod.UntypedApplyChanges(ControllerContext, prefix, !prefix.HasText()).UntypedValidateGlobal();
             }
 
             this.ModelState.FromContext(context);
