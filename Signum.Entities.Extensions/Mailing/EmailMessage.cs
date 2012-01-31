@@ -154,13 +154,6 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        Lite<UserDN> user;
-        public Lite<UserDN> User
-        {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
-        }
-
         int numLines;
         public int NumLines
         {
