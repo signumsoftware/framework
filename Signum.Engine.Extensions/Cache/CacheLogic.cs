@@ -15,6 +15,9 @@ using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
+using System.Drawing;
+using Signum.Entities.Basics;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Cache
 {
@@ -502,6 +505,41 @@ namespace Signum.Engine.Cache
             }
 
             return lazy;
+        }
+
+        public static void SchemaGraph(Func<Type, bool> cacheHint)
+        {
+            var dgml = Schema.Current.ToDirectedGraph().ToDGML(t =>
+                new[]
+            {
+                new XAttribute("Label", t.Name),
+                new XAttribute("Background", GetColor(t.Type, cacheHint).ToHtml())
+            }, lite => lite ? new[]
+            {
+                new XAttribute("StrokeDashArray",  "2 3")
+            } : new XAttribute[0]);  
+
+        }
+
+        static Color GetColor(Type type, Func<Type, bool> cacheHint)
+        {
+            if (Reflector.ExtractEnumProxy(type) != null)
+                return Color.Red;
+
+            var ct = CacheLogic.GetCacheType(type);
+            if (ct == CacheType.Cached)
+                return Color.Purple;
+
+            if (ct == CacheType.Semi)
+                return Color.Pink;
+
+            if (typeof(EnumDN).IsAssignableFrom(type))
+                return Color.Orange;
+
+            if (cacheHint != null && cacheHint(type))
+                return Color.Yellow;
+
+            return Color.Green;
         }
     }
 
