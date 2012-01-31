@@ -322,7 +322,8 @@ namespace Signum.Utilities.DataStructures
             foreach (var item in expandFunction(node))
             {
                 Expand(item.Key, expandFunction);
-                dic.Add(item.Key, item.Value);
+                if (!dic.ContainsKey(item.Key))
+                    dic.Add(item.Key, item.Value);
             }
         }
 
