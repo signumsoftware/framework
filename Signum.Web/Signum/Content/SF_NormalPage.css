@@ -7,8 +7,10 @@
 /*--------------
 --dropdowns-----
 --------------*/
-.sf-dropdown .sf-menu-button {
+.sf-dropdown.sf-query-button .sf-menu-button {
     position:absolute;
+}
+.sf-dropdown .sf-menu-button {
     z-index:2;
     display:none;
     list-style:none;
