@@ -20,7 +20,7 @@
 .sf-widget-toggler
 {
     vertical-align: top;    
-    line-height: 16px;
+    line-height: 18px;
 }
 
 .sf-widget-toggler:hover,.sf-widget-toggler:hover
@@ -31,9 +31,7 @@
 .sf-widget-toggler .ui-icon, .sf-widget-toggler .sf-widget-count
 {
     display: inline-block;
-    vertical-align: top;   
-    height: 16px;
-    line-height: 16px;
+    vertical-align: top;
 }
 
 .sf-alerts-count-separator
