@@ -55,6 +55,9 @@ namespace Signum.Web
                     fo.AllowMultiple = aux;
             }
 
+            if (parameters.AllKeys.Contains("allowChangeColumns"))
+                fo.AllowChangeColumns = bool.Parse(parameters["allowChangeColumns"]);
+
             if (parameters.AllKeys.Contains("async"))
             {
                 bool aux;

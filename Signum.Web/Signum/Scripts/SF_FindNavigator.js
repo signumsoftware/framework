@@ -16,7 +16,7 @@ SF.registerModule("FindNavigator", function () {
             orders: null, //A Json array like ["columnName1","-columnName2"] => will order by columnname1 asc, then by columnname2 desc
             columns: null, //List of column names "token1,displayName1;token2,displayName2"
             columnMode: null,
-            allowUserColumns: null,
+            allowChangeColumns: true,
             navigatorControllerUrl: null,
             searchControllerUrl: null,
             onOk: null,
@@ -32,6 +32,7 @@ SF.registerModule("FindNavigator", function () {
         elems: "sfElems",
         page: "sfPage",
         allowMultiple: "sfAllowMultiple",
+        allowChangeColumns: "sfAllowChangeColumns",
         view: "sfView",
         orders: "sfOrders",
         filterMode: "sfFilterMode",
@@ -185,18 +186,21 @@ SF.registerModule("FindNavigator", function () {
             var $menu = this.createCtxMenu($th);
 
             var $itemContainer = $menu.find(".sf-search-ctxmenu");
-            $itemContainer.append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>")
-                .append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
-                .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
+            $itemContainer.append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>");
 
-            var thIndex = $th.index();
-            var extraCols = this.control().find(".th-col-entity,.th-col-selection");
+            if (SF.isTrue($(this.pf(this.allowChangeColumns)).val())) {
+                $itemContainer.append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
+                    .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
 
-            if (thIndex > extraCols.length) {
-                $itemContainer.append("<div class='sf-search-ctxitem move-column-left'>" + lang.signum.reorderColumn_MoveLeft + "</div>")
-            }
-            if (thIndex < $th.parent().children("th").length - 1) {
-                $itemContainer.append("<div class='sf-search-ctxitem move-column-right'>" + lang.signum.reorderColumn_MoveRight + "</div>");
+                var thIndex = $th.index();
+                var extraCols = this.control().find(".th-col-entity,.th-col-selection");
+
+                if (thIndex > extraCols.length) {
+                    $itemContainer.append("<div class='sf-search-ctxitem move-column-left'>" + lang.signum.reorderColumn_MoveLeft + "</div>")
+                }
+                if (thIndex < $th.parent().children("th").length - 1) {
+                    $itemContainer.append("<div class='sf-search-ctxitem move-column-right'>" + lang.signum.reorderColumn_MoveRight + "</div>");
+                }
             }
 
             $th.append($menu);
@@ -316,7 +320,7 @@ SF.registerModule("FindNavigator", function () {
             requestData["elems"] = $(this.pf(this.elems)).val();
             requestData["page"] = $(this.pf(this.page)).val();
             requestData["allowMultiple"] = $(this.pf(this.allowMultiple)).val();
-
+            
             var canView = $(this.pf(this.view)).val();
             requestData["view"] = (SF.isEmpty(canView) ? true : canView);
 
@@ -335,6 +339,7 @@ SF.registerModule("FindNavigator", function () {
             requestData["webQueryName"] = this.findOptions.webQueryName;
             requestData["elems"] = this.findOptions.elems;
             requestData["allowMultiple"] = this.findOptions.allowMultiple;
+
             if (this.findOptions.view == false)
                 requestData["view"] = this.findOptions.view;
             if (this.findOptions.searchOnLoad == true)
@@ -348,6 +353,9 @@ SF.registerModule("FindNavigator", function () {
 
             if (!this.findOptions.create)
                 requestData["create"] = this.findOptions.create;
+
+            if (!this.findOptions.allowChangeColumns)
+                requestData["allowChangeColumns"] = this.findOptions.allowChangeColumns;
 
             if (this.findOptions.filters != null)
                 requestData["filters"] = this.findOptions.filters;
@@ -504,7 +512,7 @@ SF.registerModule("FindNavigator", function () {
         addColumn: function () {
             SF.log("FindNavigator addColumn");
 
-            if (SF.isFalse(this.findOptions.allowUserColumns) || $(this.pf("tblFilters tbody")).length == 0)
+            if (SF.isFalse(this.findOptions.allowChangeColumns) || $(this.pf("tblFilters tbody")).length == 0)
                 throw "Adding columns is not allowed";
 
             var tokenName = this.constructTokenName();

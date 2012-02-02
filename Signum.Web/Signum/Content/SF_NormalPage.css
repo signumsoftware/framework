@@ -7,8 +7,10 @@
 /*--------------
 --dropdowns-----
 --------------*/
-.sf-dropdown .sf-menu-button {
+.sf-dropdown.sf-query-button .sf-menu-button {
     position:absolute;
+}
+.sf-dropdown .sf-menu-button {
     z-index:2;
     display:none;
     list-style:none;
@@ -29,7 +31,6 @@
 {
     white-space: nowrap;
     text-overflow:ellipsis;
-    overflow:hidden;
     max-width:200px;
     text-align:left;
 }
@@ -63,19 +64,20 @@
 .sf-normal-control-header
 {
     margin: auto;
-    min-height: 18px;
+    min-height: 20px;
     vertical-align: top;
     margin-bottom: 0.5em;
 }
 .sf-type-nice-name 
 {
-    float:left;
-    font-size:12px;
-    color:#000;
+    font-size: 12px;
+    color: black;
     padding: 1px 5px;
-    line-height: 18px;
+    line-height: 20px;
+    vertical-align: middle;
 }
-.sf-entity-id {
+.sf-entity-id 
+{
     clear:right;
     font-size:13px;
     color:#3E818F;

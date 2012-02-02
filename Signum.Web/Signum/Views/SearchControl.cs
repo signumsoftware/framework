@@ -135,6 +135,11 @@ Write(Html.Hidden(Model.Compose("sfAllowMultiple"), allowMultiple.ToString(), ne
 WriteLiteral("\r\n    ");
 
 
+Write(Html.Hidden(Model.Compose("sfAllowChangeColumns"), findOptions.AllowChangeColumns.ToString(), new { disabled = "disabled" }));
+
+WriteLiteral("\r\n    ");
+
+
 Write(Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" }));
 
 WriteLiteral("\r\n    ");
@@ -217,7 +222,7 @@ WriteLiteral("\r\n                \r\n                    ");
 WriteLiteral("\r\n\r\n");
 
 
-                     if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(Model.ControlID))
+                     if (string.IsNullOrEmpty(Model.ControlID) && findOptions.AllowChangeColumns)
                     {
                         
                    Write(Html.Href(
