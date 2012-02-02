@@ -120,8 +120,7 @@ namespace Signum.Engine.Processes
                 {
                     using (Transaction tr = Transaction.ForceNew())
                     {
-                        using (UserDN.Scope(executingProcess.User.Retrieve()))
-                            ExecuteLine(pl, package);
+                        ExecuteLine(pl, package);
 
                         pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();

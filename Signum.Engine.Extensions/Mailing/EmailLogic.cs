@@ -354,7 +354,7 @@ namespace Signum.Engine.Mailing
         static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
             EmailUser emailUser = (EmailUser)e.UserState;
-            using (UserDN.Scope(emailUser.User))
+            using (AuthLogic.UserSession(emailUser.User))
             {
                 Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                 if (e.Error != null)

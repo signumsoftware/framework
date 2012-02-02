@@ -220,7 +220,7 @@ namespace Signum.Engine.Processes
                             {
                                 executing.TryAdd(ep.Execution.Id, ep);
 
-                                using (UserDN.Scope(AuthLogic.SystemUser))
+                                using (AuthLogic.Disable())
                                 {
                                     ep.Execute();
                                 }
@@ -560,25 +560,23 @@ namespace Signum.Engine.Processes
 
         public void Execute()
         {
-            using (ScopeSessionFactory.OverrideSession())
+            using (AuthLogic.UserSession(Execution.User != null ? Execution.User.Retrieve() : AuthLogic.SystemUser))
             {
-                UserDN.SetSessionUser(Execution.User != null? Execution.User.Retrieve() : AuthLogic.SystemUser);
-
                 Execution.State = ProcessState.Executing;
                 Execution.ExecutionStart = TimeZoneManager.Now;
                 Execution.Progress = 0;
                 using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                Execution.Save();
+                    Execution.Save();
 
-            try
-            {
+                try
+                {
                     Algorithm.Execute(this);
 
                     Execution.ExecutionEnd = TimeZoneManager.Now;
                     Execution.State = ProcessState.Finished;
                     Execution.Progress = null;
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                    Execution.Save();
+                        Execution.Save();
                 }
                 catch (OperationCanceledException e)
                 {
@@ -588,17 +586,17 @@ namespace Signum.Engine.Processes
                     Execution.SuspendDate = TimeZoneManager.Now;
                     Execution.State = ProcessState.Suspended;
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                    Execution.Save();
+                        Execution.Save();
                 }
-            catch (Exception e)
-            {
-                Execution.State = ProcessState.Error;
-                Execution.ExceptionDate = TimeZoneManager.Now;
+                catch (Exception e)
+                {
+                    Execution.State = ProcessState.Error;
+                    Execution.ExceptionDate = TimeZoneManager.Now;
                     Execution.Exception = e.LogException(el => el.ActionName = Execution.Process.ToString()).ToLite();
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                Execution.Save();
+                        Execution.Save();
+                }
             }
-        }
         }
 
         public override string ToString()

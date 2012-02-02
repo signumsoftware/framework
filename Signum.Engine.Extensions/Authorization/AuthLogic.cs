@@ -198,7 +198,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static IDisposable UnsafeUser(string username)
+        public static IDisposable UnsafeUserSession(string username)
         {
             UserDN user;
             using (AuthLogic.Disable())
@@ -208,7 +208,14 @@ namespace Signum.Engine.Authorization
                     throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
             }
 
-            return UserDN.Scope(user);
+            return UserSession(user);
+        }
+
+        public static IDisposable UserSession(UserDN user)
+        {
+            var result = ScopeSessionFactory.OverrideSession();
+            UserDN.Current = user;
+            return result;
         }
 
         public static UserDN RetrieveUser(string username)

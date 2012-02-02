@@ -69,7 +69,7 @@ namespace Signum.Services
             {
                 using (ScopeSessionFactory.OverrideSession(session))
                 {
-                    UserDN.SetSessionUser(AuthLogic.Login(username, passwordHash));
+                    UserDN.Current = AuthLogic.Login(username, passwordHash);
                 }
             }
             catch (Exception e)
@@ -100,7 +100,7 @@ namespace Signum.Services
             {
                 using (ScopeSessionFactory.OverrideSession(session))
                 {
-                    UserDN.SetSessionUser(AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash));
+                    UserDN.Current = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
                 }
             }
             catch (Exception e)
@@ -113,7 +113,7 @@ namespace Signum.Services
         {
             using (ScopeSessionFactory.OverrideSession(session))
             {
-                UserDN.SetSessionUser(null);
+                UserDN.Current = null;
             }
         }
 

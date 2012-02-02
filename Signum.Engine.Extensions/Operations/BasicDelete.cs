@@ -84,7 +84,7 @@ namespace Signum.Engine.Operations
 
                     log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
                     log.End = TimeZoneManager.Now;
-                    using (UserDN.Scope(AuthLogic.SystemUser))
+                    using (AuthLogic.Disable())
                         log.Save();
 
                     tr.Commit();
@@ -108,7 +108,7 @@ namespace Signum.Engine.Operations
                         User = log.User
                     };
 
-                    using (UserDN.Scope(AuthLogic.SystemUser))
+                    using (AuthLogic.Disable())
                         log.Save();
 
                     tr2.Commit();
