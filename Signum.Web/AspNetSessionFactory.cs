@@ -25,7 +25,20 @@ namespace Signum.Web
 
             public override T Value
             {
-                get { return (T)(HttpContext.Current.Session[Name] ?? GetDefaulValue()); }
+                get
+                {
+                    var session = HttpContext.Current.Session;
+
+                    object result = session[Name];
+
+                    if (result != null)
+                        return (T)result;
+
+                    if (session.Keys.Cast<string>().Contains(Name))
+                        return (T)result;
+
+                    return GetDefaulValue();
+                }
                 set { HttpContext.Current.Session[Name] = value; }
             }
         }

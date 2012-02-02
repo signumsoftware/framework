@@ -191,7 +191,14 @@ namespace Signum.Utilities
 
             public override T Value
             {
-                get { return (T)(singletonSession.TryGetC(Name) ?? GetDefaulValue()); }
+                get
+                {
+                    object result;
+                    if (singletonSession.TryGetValue(Name, out result))
+                        return (T)result;
+
+                    return GetDefaulValue();
+                }
                 set { singletonSession[Name] = value; }
             }
         }
@@ -250,7 +257,13 @@ namespace Signum.Utilities
                     var dic = overridenSession.Value;
 
                     if (dic != null)
-                        return (T)(dic.TryGetC(Name) ?? GetDefaulValue());
+                    {
+                        object result;
+                        if (dic.TryGetValue(Name, out result))
+                            return (T)result;
+
+                        return GetDefaulValue();
+                    }
                     else
                         return variable.Value;
                 }
