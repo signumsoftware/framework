@@ -269,7 +269,7 @@ namespace Signum.Engine.Mailing
             {
                 var exLog = e.LogException().ToLite();
 
-                using (Transaction tr = new Transaction(true))
+                using (Transaction tr = Transaction.ForceNew())
                 {
                     emailMessage.Exception = exLog;
                     emailMessage.State = EmailState.SentError;
@@ -340,7 +340,7 @@ namespace Signum.Engine.Mailing
             {
                 var exLog = ex.LogException().ToLite();
 
-                using (var tr = new Transaction(true))
+                using (var tr = Transaction.ForceNew())
                 {
                     emailMessage.Sent = TimeZoneManager.Now;
                     emailMessage.State = EmailState.SentError;
@@ -354,7 +354,7 @@ namespace Signum.Engine.Mailing
         static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
             EmailUser emailUser = (EmailUser)e.UserState;
-            using (UserDN.Scope(emailUser.User))
+            using (AuthLogic.UserSession(emailUser.User))
             {
                 Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                 if (e.Error != null)

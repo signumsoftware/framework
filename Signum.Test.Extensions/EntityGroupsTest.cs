@@ -76,7 +76,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void TypeConditionExternal()
         {
-            using (AuthLogic.UnsafeUser("external"))
+            using (AuthLogic.UnsafeUserSession("external"))
             {
                 Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count());
                 Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.InCondition(MusicGroups.JapanEntities)));
@@ -96,7 +96,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void TypeConditionExternalQueryable()
         {
-            using (AuthLogic.UnsafeUser("external"))
+            using (AuthLogic.UnsafeUserSession("external"))
             {
                 Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count());
                 Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.InCondition(MusicGroups.JapanEntities)));
@@ -116,7 +116,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void TypeConditionRetrieve()
         {
-            using (AuthLogic.UnsafeUser("external"))
+            using (AuthLogic.UnsafeUserSession("external"))
             {
                 Assert2.Throws<EntityNotFoundException>(() => Database.Retrieve<LabelDN>(1));
                 using (TypeAuthLogic.DisableQueryFilter())
@@ -130,7 +130,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void TypeConditionUpdate()
         {
-            using (AuthLogic.UnsafeUser("external"))
+            using (AuthLogic.UnsafeUserSession("external"))
             using (Transaction tr = new Transaction())
             {
                 Assert.AreEqual(JapLab, Database.Query<LabelDN>().UnsafeUpdate(r => new LabelDN { Name = r.Name + r.Name }));
@@ -143,7 +143,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void TypeConditionDelete()
         {
-            using (AuthLogic.UnsafeUser("external"))
+            using (AuthLogic.UnsafeUserSession("external"))
             using (Transaction tr = new Transaction())
             {
                 Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().UnsafeDelete());
@@ -156,7 +156,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void TypeConditionJoin()
         {
-            using (AuthLogic.UnsafeUser("external"))
+            using (AuthLogic.UnsafeUserSession("external"))
             {
                 int coutFast = Database.Query<AlbumDN>().Count();
                 int coutSlow = (from lab in Database.Query<LabelDN>()
@@ -169,7 +169,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void TypeConditionSaveOut()
         {
-            using (AuthLogic.UnsafeUser("external"))
+            using (AuthLogic.UnsafeUserSession("external"))
             using (TypeAuthLogic.DisableQueryFilter())
             {
                 //Because of target

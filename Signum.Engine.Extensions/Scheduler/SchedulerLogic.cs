@@ -176,7 +176,7 @@ namespace Signum.Engine.Scheduler
                     {
                         try
                         {
-                            using (UserDN.Scope(AuthLogic.SystemUser))
+                            using (AuthLogic.UserSession(AuthLogic.SystemUser))
                                 ExecuteTask.Invoke(st.Task);
                         }
                         catch (Exception e)

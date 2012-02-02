@@ -118,10 +118,9 @@ namespace Signum.Engine.Processes
 
                 try
                 {
-                    using (Transaction tr = new Transaction(true))
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        using (UserDN.Scope(executingProcess.User.Retrieve()))
-                            ExecuteLine(pl, package);
+                        ExecuteLine(pl, package);
 
                         pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();
@@ -132,7 +131,7 @@ namespace Signum.Engine.Processes
                 {
                     var exLog = e.LogException();
 
-                    using (Transaction tr = new Transaction(true))
+                    using (Transaction tr = Transaction.ForceNew())
                     {
                         pl.Exception = exLog.ToLite();
                         pl.Save();

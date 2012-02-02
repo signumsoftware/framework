@@ -132,7 +132,6 @@ namespace Signum.Web.Auth
         [HttpPost]
         public ActionResult ChangePassword(FormCollection form)
         {
-
             UserDN user = null;
 
             if (UserDN.Current == null)
@@ -173,7 +172,7 @@ namespace Signum.Web.Auth
                 {
                     ViewData["Title"] = Resources.ChangePassword;
                     ModelState.FromContext(context);
-                    RollbackSessionUserChanges();
+                    RefreshSessionUserChanges();
                     return View(AuthClient.ChangePasswordView);
                 }
 
@@ -181,7 +180,7 @@ namespace Signum.Web.Auth
                 if (errorPasswordValidation.HasText())
                 {
                     ModelState.AddModelError("password", errorPasswordValidation);
-                    RollbackSessionUserChanges();
+                    RefreshSessionUserChanges();
                     return View(AuthClient.ChangePasswordView);
                 }
 
@@ -196,9 +195,9 @@ namespace Signum.Web.Auth
 
         }
 
-        private void RollbackSessionUserChanges()
+        private void RefreshSessionUserChanges()
         {
-            UserDN.SetSessionUser(Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).SingleEx()); 
+            UserDN.Current = UserDN.Current.ToLite().Retrieve(); 
         }
 
         public ActionResult ChangePasswordSuccess()
@@ -395,7 +394,7 @@ namespace Signum.Web.Auth
                     return result;
             }
 
-            UserDN.SetSessionUser(user);
+            UserDN.Current = user;
 
             //guardamos una cookie persistente si se ha seleccionado
             if (rememberMe.HasValue && rememberMe.Value)
@@ -502,7 +501,7 @@ namespace Signum.Web.Auth
         {
             var newUser = UserDN.Current.ToLite().Retrieve();
 
-            UserDN.SetSessionUser(newUser); 
+            UserDN.Current = newUser; 
 
             if (OnUpdatedSessionUser != null)
                 OnUpdatedSessionUser(newUser); 
@@ -510,7 +509,7 @@ namespace Signum.Web.Auth
 
         public static void AddUserSession(UserDN user)
         {
-            UserDN.SetSessionUser(user);
+            UserDN.Current = user;
 
             if (OnUserLogged != null)
                 OnUserLogged();
