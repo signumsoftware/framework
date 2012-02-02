@@ -16,6 +16,9 @@ using System.Windows.Documents;
 using Signum.Utilities;
 using Signum.Entities.Chart;
 using Signum.Windows.Reports;
+using Signum.Entities.Authorization;
+using Signum.Windows.Authorization;
+using System.Windows.Data;
 
 namespace Signum.Windows.Chart
 {
@@ -31,8 +34,15 @@ namespace Signum.Windows.Chart
 
         public ChartWindow ChartWindow { get; set; }
 
+        TypeAllowedBasic tab; 
+
         public UserChartMenuItem()
         {
+            tab = TypeAuthClient.GetAllowed(typeof(UserChartDN)).Max().GetUI();
+
+            if (tab < TypeAllowedBasic.Read)
+                Visibility = System.Windows.Visibility.Hidden;
+
             this.Loaded += new RoutedEventHandler(UserChartMenuItem_Loaded);
         }
 
@@ -104,26 +114,32 @@ namespace Signum.Windows.Chart
 
             Items.Add(new Separator());
 
-            Items.Add(new MenuItem()
+            if (tab == TypeAllowedBasic.Create)
             {
-                Header = Signum.Windows.Extensions.Properties.Resources.Create, 
-                Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
-            }.Handle(MenuItem.ClickEvent, New_Clicked));
+                Items.Add(new MenuItem()
+                {
+                    Header = Signum.Windows.Extensions.Properties.Resources.Create,
+                    Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
+                }.Handle(MenuItem.ClickEvent, New_Clicked));
+            }
 
             Items.Add(new MenuItem()
             {
                 Header = Signum.Windows.Extensions.Properties.Resources.Edit,
                 Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Edit_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", Converters.IsNotNull));
+            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
 
             Items.Add(new MenuItem()
             {
                 Header = Signum.Windows.Extensions.Properties.Resources.Remove,
                 Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", Converters.IsNotNull));
+            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
         }
+
+        static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
+
 
         private void MenuItem_Clicked(object sender, RoutedEventArgs e)
         {

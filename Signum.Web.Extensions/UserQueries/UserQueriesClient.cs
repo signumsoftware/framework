@@ -18,6 +18,8 @@ using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
+using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Web.UserQueries
 {
@@ -119,6 +121,10 @@ namespace Signum.Web.UserQueries
             if (prefix.HasText())
                 return null;
 
+            var allowed = TypeAuthLogic.GetAllowed(typeof(UserQueryDN)).Max().GetUI();
+            if (allowed < TypeAllowedBasic.Read)
+                return null;
+
             var items = new List<ToolBarButton>();
 
             Lite<UserQueryDN> currentUserQuery = null;
@@ -141,17 +147,20 @@ namespace Signum.Web.UserQueries
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
-            string uqNewText = Resources.UserQueries_CreateNew;
-            items.Add(new ToolBarButton
+            if (allowed == TypeAllowedBasic.Create)
             {
-                Id = TypeContextUtilities.Compose(prefix, "qbUserQueryNew"),
-                AltText = uqNewText,
-                Text = uqNewText,
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), new JsFindNavigator(prefix).requestData()).ToJS(),
-                DivCssClass = ToolBarButton.DefaultQueryCssClass
-            });
+                string uqNewText = Resources.UserQueries_CreateNew;
+                items.Add(new ToolBarButton
+                {
+                    Id = TypeContextUtilities.Compose(prefix, "qbUserQueryNew"),
+                    AltText = uqNewText,
+                    Text = uqNewText,
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), new JsFindNavigator(prefix).requestData()).ToJS(),
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                });
+            }
 
-            if (currentUserQuery != null)
+            if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
             {
                 string uqEditText = Resources.UserQueries_Edit;
                 items.Add(new ToolBarButton

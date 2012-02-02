@@ -19,6 +19,8 @@ using Signum.Engine.Basics;
 using Signum.Web.Reports;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Chart;
+using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Web.Chart
 {
@@ -182,6 +184,9 @@ namespace Signum.Web.Chart
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(System.Web.Mvc.ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {
+            if (!ChartPermissions.ViewCharting.IsAuthorized())
+                return null;
+
             string chartNewText = Resources.Chart_Chart;
             return new ToolBarButton[] {
                 new ToolBarButton
@@ -197,6 +202,10 @@ namespace Signum.Web.Chart
 
         public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {
+            var allowed = TypeAuthLogic.GetAllowed(typeof(UserChartDN)).Max().GetUI();
+            if (allowed < TypeAllowedBasic.Read)
+                return null;
+            
             var items = new List<ToolBarButton>();
 
             Lite<UserChartDN> currentUserChart = null;
@@ -219,17 +228,20 @@ namespace Signum.Web.Chart
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
-            string uqNewText = Resources.UserChart_CreateNew;
-            items.Add(new ToolBarButton
+            if (allowed == TypeAllowedBasic.Create)
             {
-                Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
-                AltText = uqNewText,
-                Text = uqNewText,
-                OnClick = Js.Submit(RouteHelper.New().Action("CreateUserChart", "Chart"), "SF.Chart.Builder.requestProcessedData({0})".Formato(prefix)).ToJS(),
-                DivCssClass = ToolBarButton.DefaultQueryCssClass
-            });
+                string uqNewText = Resources.UserChart_CreateNew;
+                items.Add(new ToolBarButton
+                {
+                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
+                    AltText = uqNewText,
+                    Text = uqNewText,
+                    OnClick = Js.Submit(RouteHelper.New().Action("CreateUserChart", "Chart"), "SF.Chart.Builder.requestProcessedData({0})".Formato(prefix)).ToJS(),
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                });
+            }
 
-            if (currentUserChart != null)
+            if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
             {
                 string ucEditText = Resources.UserChart_Edit;
                 items.Add(new ToolBarButton

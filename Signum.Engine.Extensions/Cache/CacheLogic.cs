@@ -407,6 +407,8 @@ namespace Signum.Engine.Cache
         {
             List<Type> relatedTypes = sb.Schema.Table(type).DependentTables().Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumProxy<>))).Select(t => t.Key.Type).ToList();
 
+            invalidations.Add(type); 
+
             foreach (var rType in relatedTypes)
             {
                 if (!controllers.ContainsKey(rType))
