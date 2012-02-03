@@ -63,6 +63,9 @@ namespace Signum.Engine
 
             public FakedTransaction(ICoreTransaction parent)
             {
+                if (parent != null && parent.RolledBack)
+                    throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+
                 this.parent = parent;
             }
 
@@ -218,6 +221,9 @@ namespace Signum.Engine
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
+                if (parent != null && parent.RolledBack)
+                    throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+
                 this.parent = parent;
                 this.savePointName = savePointName;
             }
@@ -418,9 +424,6 @@ namespace Signum.Engine
                 throw new InvalidOperationException("ConnectionScope.Current not established. Use ConnectionScope.Default to set it.");
 
             ICoreTransaction parent = currents.Value.TryGetC(bc);
-
-            if(parent != null && parent.RolledBack)
-                throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
 
             var core = avoidIndependentTransactions.Value? new FakedTransaction(parent): factory(parent);
 
