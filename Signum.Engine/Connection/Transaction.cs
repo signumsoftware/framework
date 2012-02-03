@@ -425,9 +425,7 @@ namespace Signum.Engine
 
             ICoreTransaction parent = currents.Value.TryGetC(bc);
 
-            var core = avoidIndependentTransactions.Value? new FakedTransaction(parent): factory(parent);
-
-            currents.Value[bc] = coreTransaction = core;
+            currents.Value[bc] = coreTransaction = factory(parent);
         }
 
         public static Transaction None()
@@ -442,12 +440,16 @@ namespace Signum.Engine
 
         public static Transaction ForceNew()
         {
-            return new Transaction(parent => new RealTransaction(parent, null));
+            return new Transaction(parent => avoidIndependentTransactions.Value ? 
+                (ICoreTransaction)new FakedTransaction(parent) : 
+                (ICoreTransaction)new RealTransaction(parent, null));
         }
 
         public static Transaction ForceNew(IsolationLevel? isolationLevel)
         {
-            return new Transaction(parent => new RealTransaction(parent, isolationLevel));
+            return new Transaction(parent => avoidIndependentTransactions.Value ? 
+                (ICoreTransaction)new FakedTransaction(parent) : 
+                (ICoreTransaction)new RealTransaction(parent, isolationLevel));
         }
 
         public static Transaction Test()
