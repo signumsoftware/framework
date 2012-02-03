@@ -163,7 +163,7 @@ namespace Signum.Engine
                     var dic = group.Value;
                     ICacheController cc = Schema.Current.CacheController(group.Key);
 
-                    if (cc != null && cc.IsComplete)
+                    if (cc != null && cc.IsComplete && cc.Enabled)
                     {
                         cc.Load();
 
@@ -179,7 +179,7 @@ namespace Signum.Engine
                     }
                     else if (cc != null && !cc.IsComplete)
                     {
-                        List<int> remaining =  new List<int>();
+                        List<int> remaining = new List<int>();
                         while (dic.Count > 0)
                         {
                             IdentifiableEntity ident = dic.Values.FirstEx();
