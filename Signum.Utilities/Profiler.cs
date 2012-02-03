@@ -137,7 +137,8 @@ namespace Signum.Utilities
 
         private static HeavyProfilerEntry CreateNewEntry(string role, string aditionalData)
         {
-            Stopwatch discount = Stopwatch.StartNew();
+            long beforeStart = PerfCounter.Ticks;
+
 
             var saveCurrent = current.Value;
 
@@ -146,15 +147,14 @@ namespace Signum.Utilities
 
             var newCurrent = current.Value = new HeavyProfilerEntry()
             {
-                Discount = discount,
+                BeforStart = beforeStart,
                 Role = role,
                 AditionalData = aditionalData,
                 StackTrace = new StackTrace(2, true),
             };
 
-            discount.Stop();
+            newCurrent.Start = PerfCounter.Ticks;
 
-            newCurrent.Stopwatch = Stopwatch.StartNew();
             return saveCurrent;
         }
 
@@ -165,7 +165,7 @@ namespace Signum.Utilities
             public void Dispose()
             {
                 var cur = current.Value;
-                cur.Stopwatch.Stop();
+                cur.End = PerfCounter.Ticks;
 
                 TotalEntriesCount++;
 
@@ -317,8 +317,9 @@ namespace Signum.Utilities
 
         public string AditionalData;
 
-        internal Stopwatch Stopwatch;
-        internal Stopwatch Discount;
+        public long BeforStart;
+        public long Start;
+        public long End; 
 
         public StackTrace StackTrace;
 
@@ -326,10 +327,10 @@ namespace Signum.Utilities
         {
             get
             {
-                return Stopwatch.Elapsed - new TimeSpan(Descendants().Sum(a => a.Discount.Elapsed.Ticks));
+                return TimeSpan.FromMilliseconds(((End - Start) - Descendants().Sum(a => a.BeforStart - a.Start)) / PerfCounter.FrequencyMilliseconds);
             }
         }
-     
+
         public Type Type { get { return StackTrace.GetFrame(0).GetMethod().TryCC(m=>m.DeclaringType); } }
         public MethodBase Method { get { return StackTrace.GetFrame(0).GetMethod(); } }
 
@@ -384,6 +385,36 @@ namespace Signum.Utilities
         }
     }
 
+    class PerfCounter
+    {
+        [DllImport("kernel32.dll")]
+        private static extern bool QueryPerformanceFrequency(out long lpFrequency);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool QueryPerformanceCounter(out long lpPerformanceCount);
+
+        public static readonly long FrequencyMilliseconds;
+
+        static PerfCounter()
+        {
+            long freq;
+            if (!QueryPerformanceFrequency(out freq))
+                throw new InvalidOperationException("Low performance performance counter");
+
+            FrequencyMilliseconds = freq / 1000; 
+        }
+
+        public static long Ticks
+        {
+            get
+            {
+                long count;
+                QueryPerformanceCounter(out count);
+                return count;
+            }
+        }
+    }
+
     public class SqlProfileResume
     {
         public string Query;
@@ -419,7 +450,7 @@ namespace Signum.Utilities
 
         public string ToString(HeavyProfilerEntry parent)
         {
-            return "{0} {1:00}% ({2})".Formato(Time.NiceToString(), (Time.Ticks * 100.0) / parent.Stopwatch.Elapsed.Ticks, Count);
+            return "{0} {1:00}% ({2})".Formato(Time.NiceToString(), (Time.Ticks * 100.0) / parent.Elapsed.Ticks, Count);
         }
     }
 }
