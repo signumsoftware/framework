@@ -373,6 +373,7 @@ namespace Signum.Engine.Maps
             Synchronizing += TypeLogic.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
+            Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.AttachLazyInvalidations;
         }
 
         public static Schema Current
@@ -486,40 +487,6 @@ namespace Signum.Engine.Maps
             inGlobalMode.Value = true;
             return new Disposable(() => inGlobalMode.Value = oldValue);
         }
-
-      
-
-        static List<object> registeredLazyList = new List<object>();  
-        public static Lazy<T> GlobalLazy<T>(Func<T> func)
-        {
-            var result =  new Lazy<T>(() =>
-            {
-                using (Schema.Current.GlobalMode())
-                using (new EntityCache(true))
-                {
-                    return func();
-                }
-            }, LazyThreadSafetyMode.PublicationOnly);
-
-            registeredLazyList.Add(result);
-
-            return result; 
-        }
-
-        public static void ResetAllLazy()
-        {
-            foreach (var lazy in registeredLazyList)
-            {
-                giReset.GetInvoker(lazy.GetType().GetGenericArguments().SingleEx())(lazy);
-            }
-        }
-
-        static GenericInvoker<Action<object>> giReset = new GenericInvoker<Action<object>>(obj => ResetPublicationOnly<int>(obj));
-
-        static void ResetPublicationOnly<T>(object obj)
-        {
-            ((Lazy<T>)obj).ResetPublicationOnly(); 
-        }
     }
 
     internal interface IEntityEvents
@@ -541,6 +508,8 @@ namespace Signum.Engine.Maps
 
         IEnumerable<int> GetAllIds();
 
+        event Action Invalidation;
+
         bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
     }
 
@@ -552,6 +521,7 @@ namespace Signum.Engine.Maps
         public abstract void Load();
 
         public abstract IEnumerable<int> GetAllIds();
+        public abstract event Action Invalidation;
 
         bool ICacheController.CompleteCache(IdentifiableEntity entity, IRetriever retriver)
         {
