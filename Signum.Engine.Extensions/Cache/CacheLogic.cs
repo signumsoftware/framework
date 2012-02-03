@@ -187,8 +187,8 @@ namespace Signum.Engine.Cache
 
             public override event Action Invalidation
             {
-                add { throw new InvalidOperationException(); }
-                remove { throw new InvalidOperationException(); }
+                add { throw NoComplete(); }
+                remove { throw NoComplete(); }
             }
         }
 
