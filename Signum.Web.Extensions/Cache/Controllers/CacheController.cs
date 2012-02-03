@@ -62,7 +62,7 @@ namespace Signum.Web.Cache
             CachePermissions.InvalidateCache.Authorize();
 
             CacheLogic.InvalidateAll();
-            Schema.ResetAllLazy(); 
+            GlobalLazy.ResetAll(); 
             return null;
         }
     }

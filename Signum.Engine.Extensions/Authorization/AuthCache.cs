@@ -54,7 +54,7 @@ namespace Signum.Entities.Authorization
 
         public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min)
         {
-            runtimeRules = Schema.GlobalLazy(this.NewCache);
+            runtimeRules = GlobalLazy.Create(this.NewCache).InvalidateWith(typeof(RT));
 
             this.ToKey = toKey;
             this.ToEntity = toEntity;
@@ -62,10 +62,6 @@ namespace Signum.Entities.Authorization
             this.Min = min;
 
             sb.Include<RT>();
-
-            sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_InitializingCache;
-            sb.Schema.EntityEvents<RT>().Saving += Schema_Saving;
-            AuthLogic.RolesModified += InvalidateCache;
 
             sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
 
@@ -82,15 +78,7 @@ namespace Signum.Entities.Authorization
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<SqlParameter> { param });
         }
 
-        void Schema_InitializingCache()
-        {
-            runtimeRules.Load();
-        }
 
-        void InvalidateCache()
-        {
-            runtimeRules.ResetPublicationOnly();
-        }
 
         DefaultRule IManualAuth<K, A>.GetDefaultRule(Lite<RoleDN> role)
         {
@@ -120,8 +108,6 @@ namespace Signum.Entities.Authorization
                         Allowed = Min.BaseAllowed,
                     }.Save();
             }
-
-            InvalidateCache();
         }
 
         A IManualAuth<K, A>.GetAllowed(Lite<RoleDN> role, K key)
@@ -158,8 +144,6 @@ namespace Signum.Entities.Authorization
                         Allowed = allowed,
                     }.Save();
             }
-
-            InvalidateCache();
         }
 
         public class ManualResourceCache
@@ -239,11 +223,6 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        void Schema_Saving(RT rule)
-        {
-            Transaction.PostRealCommit += () => InvalidateCache();
-        }
-
         internal void GetRules(BaseRulePack<AR> rules, IEnumerable<R> resources)
         {
             RoleAllowedCache cache = runtimeRules.Value[rules.Role];
@@ -281,8 +260,6 @@ namespace Signum.Entities.Authorization
                     if (pr.SelfModified)
                         pr.Save();
                 });
-
-            InvalidateCache();
         }
 
         public DefaultRule GetDefaultRule(Lite<RoleDN> role)

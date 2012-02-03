@@ -184,14 +184,15 @@ namespace Signum.Engine.Cache
 
                 return false;
             }
+
+            public override event Action Invalidation
+            {
+                add { throw new InvalidOperationException(); }
+                remove { throw new InvalidOperationException(); }
+            }
         }
 
-        interface IInvalidable
-        {
-            event Action Invalidation;
-        }
-
-        class CacheLogicController<T> : CacheController<T>, ICacheLogicController, IInvalidable
+        class CacheLogicController<T> : CacheController<T>, ICacheLogicController
             where T : IdentifiableEntity
         {
             class Pack
@@ -307,7 +308,7 @@ namespace Signum.Engine.Cache
             int loads;
             public int Loads { get { return loads; } }
 
-            public event Action Invalidation;
+            public override event Action Invalidation;
 
             public void Invalidate(bool isClean)
             {
@@ -405,7 +406,9 @@ namespace Signum.Engine.Cache
 
         private static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
-            List<Type> relatedTypes = sb.Schema.Table(type).DependentTables().Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumProxy<>))).Select(t => t.Key.Type).ToList();
+            List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
+                .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumProxy<>)))
+                .Select(t => t.Key.Type).ToList();
 
             invalidations.Add(type); 
 
@@ -421,8 +424,6 @@ namespace Signum.Engine.Cache
                 invalidations.Add(rType, type);
             }
         }
-
-         
     
         static CacheLogicController<T> GetController<T>() where T : IdentifiableEntity
         {
@@ -488,25 +489,6 @@ namespace Signum.Engine.Cache
         public static void OnInvalidation<T>(Action action) where T : IdentifiableEntity
         {
             GetController<T>().Invalidation += action;
-        }
-
-
-
-        public static Lazy<T> InvalidateWithCache<T>(this Lazy<T> lazy, params Type[] types)
-        {
-            Action action = () => lazy.ResetPublicationOnly();
-
-            foreach (var t in types)
-            {
-                var val = controllers.GetOrThrow(t, "{0} is not registered in CacheLogic") as IInvalidable;
-
-                if (val == null)
-                    throw new InvalidOperationException("{0} is Semi-Cached".Formato(t));
-
-                val.Invalidation += action;
-            }
-
-            return lazy;
         }
 
         public static void SchemaGraph(Func<Type, bool> cacheHint)

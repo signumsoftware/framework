@@ -44,9 +44,7 @@ namespace Signum.Engine.Authorization
             get { return string.IsNullOrEmpty(AnonymousUserName) ? null : anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
         }
 
-        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles =  Schema.GlobalLazy(Cache); 
-
-        public static event Action RolesModified;
+        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -156,24 +154,7 @@ namespace Signum.Engine.Authorization
                             problems.ToString("\r\n"));
                 }
             }
-
-            if (role.Modified.Value)
-            {
-                Transaction.PostRealCommit -= InvalidateCache;
-                Transaction.PostRealCommit += InvalidateCache;
-            }
         }
-
-
-
-        public static void InvalidateCache()
-        {
-            roles.ResetPublicationOnly();
-
-            if (RolesModified != null)
-                RolesModified();
-        }
-
 
         static DirectedGraph<Lite<RoleDN>> Cache()
         {
