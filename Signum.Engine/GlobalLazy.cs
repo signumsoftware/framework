@@ -13,42 +13,54 @@ namespace Signum.Engine
 {
     public static class GlobalLazy
     {
-        internal static void AttachLazyInvalidations()
+        static bool initialized; 
+
+        internal static void GlobalLazy_Initialize()
         {
+            if (initialized)
+                return;
+
+            initialized = true;
+
             var s = Schema.Current;
-            foreach (var lp in registeredLazyList.Values)
+            foreach (var lp in registeredLazyList.Values.ToList())
             {
                 if (lp.InvalidateWith != null)
                 {
-                    Action a = () => lp.Reset();
+                    AttachInvalidations(s, lp);
+                }
+            }
+        }
 
-                    List<Type> cached = new List<Type>();
-                    foreach (var type in lp.InvalidateWith)
-                    {
-                        var cc = s.CacheController(type);
-                        if (cc != null && cc.IsComplete)
-                        {
-                            cc.Invalidation += a;
-                            cached.Add(type);
-                        }
-                    }
+        private static void AttachInvalidations(Schema s, ILazyProxy lp)
+        {
+            Action a = () => lp.Reset();
 
-                    var nonCached = lp.InvalidateWith.Except(cached).ToList();
-                    if (nonCached.Any())
-                    {
-                        foreach (var type in nonCached)
-                        {
-                            giAttachInvalidations.GetInvoker(type)(s, a);
-                        }
+            List<Type> cached = new List<Type>();
+            foreach (var type in lp.InvalidateWith)
+            {
+                var cc = s.CacheController(type);
+                if (cc != null && cc.IsComplete)
+                {
+                    cc.Invalidation += a;
+                    cached.Add(type);
+                }
+            }
 
-                        var dgIn = DirectedGraph<Table>.Generate(lp.InvalidateWith.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
-                        var dgOut = DirectedGraph<Table>.Generate(cached.Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
+            var nonCached = lp.InvalidateWith.Except(cached).ToList();
+            if (nonCached.Any())
+            {
+                foreach (var type in nonCached)
+                {
+                    giAttachInvalidations.GetInvoker(type)(s, a);
+                }
 
-                        foreach (var table in dgIn.Except(dgOut))
-                        {
-                            giAttachInvalidationsDependant.GetInvoker(table.Type)(s, a);
-                        }
-                    }
+                var dgIn = DirectedGraph<Table>.Generate(lp.InvalidateWith.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
+                var dgOut = DirectedGraph<Table>.Generate(cached.Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
+
+                foreach (var table in dgIn.Except(dgOut))
+                {
+                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, a);
                 }
             }
         }
@@ -97,7 +109,12 @@ namespace Signum.Engine
 
         public static Lazy<T> InvalidateWith<T>(this Lazy<T> lazy, params Type[] types)
         {
-            registeredLazyList.GetOrThrow(lazy, "The lazy is not a GlobalLazy").InvalidateWith = types;
+            var lp = registeredLazyList.GetOrThrow(lazy, "The lazy is not a GlobalLazy");
+            
+            lp.InvalidateWith = types;
+
+            if (initialized)
+                AttachInvalidations(Schema.Current, lp);
 
             return lazy;
         }

@@ -373,7 +373,7 @@ namespace Signum.Engine.Maps
             Synchronizing += TypeLogic.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
-            Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.AttachLazyInvalidations;
+            Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.GlobalLazy_Initialize;
         }
 
         public static Schema Current
