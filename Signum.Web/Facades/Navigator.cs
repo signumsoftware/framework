@@ -427,7 +427,7 @@ namespace Signum.Web
 
         public Func<bool> AllowChangeColumns = () => true;
 
-        public Func<List<string>> DefaultScripts = () => new List<string>
+        static readonly List<string> defaultScripts = new List<string>
         {
             "~/signum/Scripts/SF_Globals.js",
             "~/signum/Scripts/SF_Popup.js",
@@ -437,6 +437,7 @@ namespace Signum.Web
             "~/signum/Scripts/SF_Validator.js",
             "~/signum/Scripts/SF_Widgets.js"
         };
+        public Func<List<string>> DefaultScripts = () => defaultScripts;
 
         public NavigationManager()
         {
