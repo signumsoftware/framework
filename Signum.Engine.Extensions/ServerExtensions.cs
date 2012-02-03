@@ -81,10 +81,12 @@ namespace Signum.Services
 
         public virtual void ChagePassword(string username, string passwordHash, string newPasswordHash)
         {
-
             try
             {
-                AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+                using (ScopeSessionFactory.OverrideSession(session))
+                {
+                    AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+                }
             }
             catch (Exception e)
             {
