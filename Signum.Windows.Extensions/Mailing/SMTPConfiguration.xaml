@@ -9,7 +9,7 @@
         <m:ValueLine m:Common.Route="Name" />
         <m:ValueLine m:Common.Route="Port" />
         <m:ValueLine m:Common.Route="Host" />
-        <m:ValueLine m:Common.Route="UseDefaultCredentials" m:Common.LabelWidth="135"/>
+        <m:ValueLine m:Common.Route="UseDefaultCredentials" m:Common.MinLabelWidth="135"/>
         <m:ValueLine m:Common.Route="Username" />
         <m:ValueLine m:Common.Route="Password" />
         <m:ValueLine m:Common.Route="EnableSSL" />

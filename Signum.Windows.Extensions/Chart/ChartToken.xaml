@@ -38,7 +38,7 @@
             </StackPanel>
 
             <Expander Grid.Row="1" Style="{StaticResource LineExpander}" Grid.ColumnSpan="3">
-                <Grid m:Common.LabelWidth="70">
+                <Grid m:Common.MinLabelWidth="70">
                     <m:ValueLine m:Common.Route="DisplayName" MinWidth="200"/>
                 </Grid>
             </Expander>

@@ -5,7 +5,7 @@
     xmlns:d="clr-namespace:Signum.Entities.SMS;assembly=Signum.Entities.Extensions"
     xmlns:swsms="clr-namespace:Signum.Windows.SMS"            
     m:Common.TypeContext="d:SMSMessageDN"
-    m:Common.LabelWidth="120"
+    m:Common.MinLabelWidth="120"
     MinWidth="300" MaxWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="MessageID" m:Common.IsReadOnly="True"/>

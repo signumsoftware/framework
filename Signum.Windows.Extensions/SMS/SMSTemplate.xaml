@@ -31,8 +31,8 @@
                 <Button x:Name="insertLiteral" Click="insertLiteral_Click" Content="{m:Loc Insert}" Margin="0,10,0,0"/>
             </StackPanel>
         </Grid>
-        <m:ValueLine m:Common.Route="RemoveNoSMSCharacters" m:Common.LabelWidth="150"/>
-        <m:ValueLine m:Common.Route="MessageLengthExceeded" m:Common.LabelWidth="150" />
+        <m:ValueLine m:Common.Route="RemoveNoSMSCharacters" m:Common.MinLabelWidth="150"/>
+        <m:ValueLine m:Common.Route="MessageLengthExceeded" m:Common.MinLabelWidth="150" />
         <m:ValueLine m:Common.Route="Certified" />
         <m:ValueLine m:Common.Route="From" />
         <m:ValueLine m:Common.Route="StartDate" />
