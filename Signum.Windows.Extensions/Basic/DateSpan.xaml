@@ -5,7 +5,7 @@
     xmlns:seeb="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities.Extensions"
     MinWidth="300">
         
-    <StackPanel Orientation="Horizontal" m:Common.LabelWidth="60">
+    <StackPanel Orientation="Horizontal" m:Common.MinLabelWidth="60">
         <m:ValueLine m:Common.Route="Years" Margin="0,0,20,0"/>
         <m:ValueLine m:Common.Route="Months" Margin="0,0,20,0"/>
         <m:ValueLine m:Common.Route="Days" Margin="0,0,20,0"/>

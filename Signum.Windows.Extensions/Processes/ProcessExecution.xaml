@@ -6,7 +6,7 @@
     xmlns:d="clr-namespace:Signum.Entities.Processes;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="d:ProcessExecutionDN"
     MinWidth="300">
-    <StackPanel m:Common.IsReadOnly="True" m:Common.LabelWidth="105">
+    <StackPanel m:Common.IsReadOnly="True" m:Common.MinLabelWidth="105">
         <m:ValueLine m:Common.Route="State" />
         <m:EntityCombo m:Common.Route="Process" />
         <m:EntityLine m:Common.Route="ProcessData"  />
