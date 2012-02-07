@@ -25,15 +25,15 @@ namespace Signum.Windows
 {
     public static class Common
     {
-        public static readonly DependencyProperty LabelWidthProperty =
-           DependencyProperty.RegisterAttached("LabelWidth", typeof(double), typeof(Common), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.Inherits));
-        public static double GetLabelWidth(DependencyObject obj)
+        public static readonly DependencyProperty MinLabelWidthProperty =
+           DependencyProperty.RegisterAttached("MinLabelWidth", typeof(double), typeof(Common), new FrameworkPropertyMetadata(120.0, FrameworkPropertyMetadataOptions.Inherits));
+        public static double GetMinLabelWidth(DependencyObject obj)
         {
-            return (double)obj.GetValue(LabelWidthProperty);
+            return (double)obj.GetValue(MinLabelWidthProperty);
         }
-        public static void SetLabelWidth(DependencyObject obj, double value)
+        public static void SetMinLabelWidth(DependencyObject obj, double value)
         {
-            obj.SetValue(LabelWidthProperty, value);
+            obj.SetValue(MinLabelWidthProperty, value);
         }
 
 
