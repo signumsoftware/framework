@@ -1,10 +1,7 @@
 ﻿@using Signum.Utilities.ExpressionTrees
 @using Signum.Web.Profiler
+@model List<HeavyProfilerEntry>
 
-@{ List<HeavyProfilerEntry> entries = (List<HeavyProfilerEntry>)Model;
-   var roles = entries.Select(a => a.GetDescendantRoles()).ToList();
-   var allKeys = roles.SelectMany(a => a.Keys).Distinct().Order().ToList();
-}
 <table class="sf-search-results sf-profiler-table">
     <thead>
         <tr>
@@ -17,15 +14,6 @@
             <th>
                 Time
             </th>
-            <th>
-                Direct Childs
-            </th>
-            @foreach (var k in allKeys)
-            {
-                <th>
-                    @k Total Time
-                </th>
-            }
              <th>
                 Method
             </th>
@@ -35,10 +23,9 @@
         </tr>
     </thead>
     <tbody>
-        @for (int i = 0; i < entries.Count; i++)
+        @for (int i = 0; i < Model.Count; i++)
         {
-            var entry = entries[i];
-            var rol = roles[i];
+            var entry = Model[i];
             <tr>
                 <td>
                     @Html.ProfilerEntry("View", entry.FullIndex())
@@ -49,15 +36,6 @@
                 <td align="right">
                     @entry.Elapsed.NiceToString()
                 </td>
-                <td align="right">
-                    @entry.GetEntriesResume().TryCC(r => r.ToString(entry))
-                </td>
-                @foreach (var k in allKeys)
-                {
-                    <td align="right">
-                        @rol.TryGetC(k).TryCC(r => r.ToString(entry))
-                    </td>
-                }
                 <td>
                     @(entry.Type.TypeName()).@entry.Method.Name
                 </td>

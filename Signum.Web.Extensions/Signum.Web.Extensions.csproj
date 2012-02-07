@@ -898,6 +898,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>LinkListPart1.cs</LastGenOutput>
     </Content>
+    <Content Include="Profiler\Content\SF_Profiler.css" />
     <Content Include="Profiler\Scripts\SF_Profiler.js" />
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
