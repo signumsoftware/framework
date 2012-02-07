@@ -20,7 +20,7 @@
 			<ColumnDefinition Width="Auto"/>
 		</Grid.ColumnDefinitions>
 		<Label Content="{Binding Path=LabelText, ElementName=me, Mode=Default}" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
-		Target="{Binding ElementName=combo, Mode=OneWay}"  Width="{Binding Path=(m:Common.LabelWidth), ElementName=me, Mode=OneWay}"
+		Target="{Binding ElementName=combo, Mode=OneWay}" MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=me, Mode=OneWay}"
 		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
         <ContentControl Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" x:Name="contentPresenter"
                         Content="{Binding EntityControl, ElementName=me, Mode=Default}"/>

@@ -198,30 +198,11 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterColumnProperty =
-        DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).FilterColumnChanged(e)));
+        DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
         public string FilterColumn
         {
             get { return (string)GetValue(FilterColumnProperty); }
             set { SetValue(FilterColumnProperty, value); }
-        }
-
-
-        private void FilterColumnChanged(DependencyPropertyChangedEventArgs e)
-        {
-            AssetNotLoaded(e);
-
-            if (FilterColumn.HasText())
-            {
-                FilterOptions.Add(new FilterOption
-                {
-                    Path = FilterColumn,
-                    Operation = FilterOperation.EqualTo,
-                    Frozen = true,
-                }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterColumn.HasText() ? "." + FilterColumn : null)) { Source = this }));
-                ColumnOptions.Add(new ColumnOption(FilterColumn));
-                ColumnOptionsMode = ColumnOptionsMode.Add;
-                SearchOnLoad = true;
-            }
         }
 
         public static readonly DependencyProperty FilterRouteProperty =
@@ -312,6 +293,20 @@ namespace Signum.Windows
                 tokenBuilder.SubTokensEvent += q => new List<QueryToken>();
                 return;
             }
+            
+            if (FilterColumn.HasText())
+            {
+                FilterOptions.Add(new FilterOption
+                {
+                    Path = FilterColumn,
+                    Operation = FilterOperation.EqualTo,
+                    Frozen = true,
+                }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));
+                ColumnOptions.Add(new ColumnOption(FilterColumn));
+                ColumnOptionsMode = ColumnOptionsMode.Remove;
+                if (ControlExtensions.NotSet(this, SearchOnLoadProperty))
+                    SearchOnLoad = true;
+            }
 
             Settings = Navigator.GetQuerySettings(QueryName);
 
@@ -363,6 +358,8 @@ namespace Signum.Windows
                 else
                     IsVisibleChanged += SearchControl_IsVisibleChanged;
             }
+
+
         }
 
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
