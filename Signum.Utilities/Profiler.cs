@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Xml.Linq;
+using System.Text.RegularExpressions;
 
 namespace Signum.Utilities
 {
@@ -147,7 +148,7 @@ namespace Signum.Utilities
 
             var newCurrent = current.Value = new HeavyProfilerEntry()
             {
-                BeforStart = beforeStart,
+                BeforeStart = beforeStart,
                 Role = role,
                 AditionalData = aditionalData,
                 StackTrace = new StackTrace(2, true),
@@ -217,9 +218,13 @@ namespace Signum.Utilities
 
         public static IEnumerable<HeavyProfilerEntry> AllEntries()
         {
-            return from pe in Entries
-                   from p in pe.Descendants().PreAnd(pe)
-                   select p;
+            List<HeavyProfilerEntry> result = new List<HeavyProfilerEntry>();
+            foreach (var item in Entries)
+            {
+                result.Add(item);
+                item.FillDescendants(result);
+            }
+            return result;
         }
 
         public static XDocument FullXDocument()
@@ -310,14 +315,26 @@ namespace Signum.Utilities
 
         public int Index;
 
+        public int Depth
+        {
+            get { return this.Parent == null ? 0 : this.Parent.Depth + 1; }
+        }
+
         public string FullIndex()
         {
             return this.FollowC(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
         }
 
         public string AditionalData;
+        public string AditionalDataPreview()
+        {
+            if (string.IsNullOrEmpty(AditionalData))
+                return "";
 
-        public long BeforStart;
+            return Regex.Match(AditionalData, @"^[^\r\n]{0,100}").Value;
+        }
+
+        public long BeforeStart;
         public long Start;
         public long End; 
 
@@ -327,48 +344,43 @@ namespace Signum.Utilities
         {
             get
             {
-                return TimeSpan.FromMilliseconds(((End - Start) - Descendants().Sum(a => a.BeforStart - a.Start)) / PerfCounter.FrequencyMilliseconds);
+                return TimeSpan.FromMilliseconds(((End - Start) - Descendants().Sum(a => a.BeforeStart - a.Start)) / PerfCounter.FrequencyMilliseconds);
             }
         }
 
         public Type Type { get { return StackTrace.GetFrame(0).GetMethod().TryCC(m=>m.DeclaringType); } }
         public MethodBase Method { get { return StackTrace.GetFrame(0).GetMethod(); } }
 
-        public ProfileResume GetEntriesResume()
-        {
-            if(Entries == null || Entries.Count == 0)
-                return null;
-
-            return new ProfileResume(Entries); 
-        }
-
-        public Dictionary<string, ProfileResume> GetDescendantRoles()
-        {
-            return Descendants()
-                .Where(a => a.Role != null)
-                .AgGroupToDictionary(a => a.Role, gr => new ProfileResume(gr));
-        }
-
         public IEnumerable<HeavyProfilerEntry> Descendants()
         {
-            if (Entries == null)
-                return Enumerable.Empty<HeavyProfilerEntry>();
+            var result = new List<HeavyProfilerEntry>();
+            FillDescendants(result);
+            return result;
+        }
 
-            return from pe in Entries
-                   from p in pe.Descendants().PreAnd(pe)
-                   select p;
+        public IEnumerable<HeavyProfilerEntry> DescendantsAndSelf()
+        {
+            var result = new List<HeavyProfilerEntry>();
+            result.Add(this);
+            FillDescendants(result);
+            return result;
+        }
+
+        public void FillDescendants(List<HeavyProfilerEntry> list)
+        {
+            if (Entries != null)
+            {
+                foreach (var item in Entries)
+                {
+                    list.Add(item);
+                    item.FillDescendants(list);
+                }
+            }
         }
 
         public override string ToString()
         {
-            string basic = "{0} {1}".Formato(Elapsed.NiceToString(), Role);
-
-            if (Entries == null)
-                return basic;
-
-            return basic + " --> (" +
-                    GetDescendantRoles().ToString(kvp => "{0} {1}".Formato(kvp.Key, kvp.Value.ToString(this)), " | ")
-                    + ")";
+            return "{0} {1}".Formato(Elapsed.NiceToString(), Role);
         }
 
         public XElement FullXml(TimeSpan elapsedParent)
@@ -379,7 +391,6 @@ namespace Signum.Utilities
                 new XAttribute("Role", Role ?? ""),
                 new XAttribute("Data", (AditionalData.TryToString() ?? "").TryLeft(100)),
                 new XAttribute("FullIndex", this.FullIndex()),
-                new XAttribute("Resume", GetDescendantRoles().ToString(kvp => "{0} {1}".Formato(kvp.Key, kvp.Value.ToString(this)), " | ")),
                 Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(this.Elapsed))
                 );
         }
@@ -430,27 +441,5 @@ namespace Signum.Utilities
     {
         public string FullKey;
         public TimeSpan Elapsed;
-    }
-
-    public class ProfileResume
-    {
-        int Count;
-        TimeSpan Time;
-
-        public ProfileResume(IEnumerable<HeavyProfilerEntry> entries)
-        {
-            Count = entries.Count();
-            Time = new TimeSpan(entries.Sum(a => a.Elapsed.Ticks)); 
-        }
-
-        public override string ToString()
-        {
-            return "{0} ({1})".Formato(Time.NiceToString(), Count);
-        }
-
-        public string ToString(HeavyProfilerEntry parent)
-        {
-            return "{0} {1:00}% ({2})".Formato(Time.NiceToString(), (Time.Ticks * 100.0) / parent.Elapsed.Ticks, Count);
-        }
     }
 }
