@@ -47,8 +47,8 @@ namespace ASP
     using Signum.Entities.DynamicQuery;
     using Signum.Entities.Chart;
     using Signum.Web.Chart;
-    using Signum.Engine.DynamicQuery;
     using Signum.Engine.Chart;
+    using Signum.Engine.DynamicQuery;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/UserChartPart.cshtml")]
