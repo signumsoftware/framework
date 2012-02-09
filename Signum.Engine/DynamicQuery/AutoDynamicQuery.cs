@@ -59,7 +59,7 @@ namespace Signum.Engine.DynamicQuery
                 .OrderBy(request.Orders)
                 .Select(new List<Column> { ex});
 
-            var exp = Expression.Lambda<Func<object, Lite>>(Expression.Convert(ex.Token.BuildExpression(orderQuery.Context), typeof(T)), orderQuery.Context.Parameter);
+            var exp = Expression.Lambda<Func<object, Lite>>(Expression.Convert(ex.Token.BuildExpression(orderQuery.Context), typeof(Lite)), orderQuery.Context.Parameter);
 
             return orderQuery.Query.Select(exp).Unique(request.UniqueType);
         }
