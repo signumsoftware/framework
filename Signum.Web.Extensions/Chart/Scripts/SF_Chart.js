@@ -747,7 +747,7 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "legendRectWidth = 10," + this.brt +
             "legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;" + this.br +
             this.br +
-            "if (legendLabelWidth + labelMargin + legendRectWidth > yAxisLabelWidth)" + this.br +
+            "if (legendLabelWidth + labelMargin + legendRectWidth > yAxisLabelWidth * 2)" + this.br +
             "{" + this.brt +
             "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')" + this.brt +
             ".enterData(data.series, 'rect', 'color-rect')" + this.brt +

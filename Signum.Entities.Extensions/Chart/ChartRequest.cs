@@ -393,7 +393,13 @@ namespace Signum.Entities.Chart
     
     [Serializable]
     public class UserChartDN : Entity
-    { 
+    {
+        public UserChartDN() { }
+        public UserChartDN(object queryName)
+        {
+            this.queryName = queryName;
+        }
+
         [HiddenProperty]
         public object QueryName
         {

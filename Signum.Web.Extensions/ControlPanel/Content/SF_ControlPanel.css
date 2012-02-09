@@ -1,5 +1,6 @@
 ﻿.sf-cp-column
 {
+    float: left;
     vertical-align: top;   
     min-width: 100px;
 }
