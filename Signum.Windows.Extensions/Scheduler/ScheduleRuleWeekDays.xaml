@@ -46,7 +46,6 @@
                 </StackPanel>
             </GroupBox>
         </Grid>
-        <sws:Hour/>
         <m:ValueLine m:Common.Route="StartingOn"/>
     </StackPanel>
 </UserControl>

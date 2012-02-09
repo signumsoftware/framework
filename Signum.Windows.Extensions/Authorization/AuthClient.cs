@@ -44,7 +44,7 @@ namespace Signum.Windows.Authorization
 
                 Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Admin) { View = e => new User() });
                 Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default) { View = e => new Role() });
-                Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Admin) { View = e => new PasswordValidInterval() });
+                Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Admin) { View = e => new PasswordExpiresInterval() });
             }
         }
     }

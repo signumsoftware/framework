@@ -5,8 +5,10 @@ using System.Text;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
 using System.Threading;
+using System.Collections.Specialized;
+using System.Collections;
 
-namespace Signum.Entities.Logging
+namespace Signum.Entities.Exceptions
 {
     [Serializable]
     public class ExceptionDN : Entity
@@ -203,6 +205,11 @@ namespace Signum.Entities.Logging
         public override string ToString()
         {
             return "{0}: {1}".Formato(exceptionType, exceptionMessage).Etc(200);
+        }
+
+        public static string Dump(NameValueCollection nameValueCollection)
+        {
+            return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\r\n");
         }
     }
 }

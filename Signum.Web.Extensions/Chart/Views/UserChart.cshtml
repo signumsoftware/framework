@@ -24,7 +24,7 @@
 }
 </style>
 
-<div class="sf-chart-control" data-prefix="@Model.ControlID">
+<div class="sf-chart-control" data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" data-add-filter-url="@Url.Action("AddFilter", "Chart")" data-prefix="@Model.ControlID">
     @using (var uc = Html.TypeContext<UserChartDN>())
     {
         object queryName = QueryLogic.ToQueryName(uc.Value.Query.Key);
@@ -48,7 +48,9 @@
         @Html.EntityLine(uc, tc => tc.Related, el => el.Create = false)
         @Html.ValueLine(uc, tc => tc.DisplayName)
 
-        @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; })
+        @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; })
+
+        @Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; })
 
         using (var chart = uc.SubContext(tc => tc.Chart))
         {

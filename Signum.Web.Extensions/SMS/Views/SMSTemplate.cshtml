@@ -19,11 +19,11 @@
         })
         <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
             <p>
-                Remaining characters: <span id="sfCharsLeft"></span>
+                <span>@Signum.Web.Extensions.Properties.Resources.RemainingCharacters</span>: <span id="sfCharsLeft"></span>
             </p>
         </div>
         <div>
-            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="Remove non valid characters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
+            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="@Signum.Web.Extensions.Properties.Resources.RemoveNonValidCharacters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
         </div>
     </div>
     
@@ -41,13 +41,14 @@
         }
         @(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml())
         <br />
-        <input type="button" class="sf-button" id="sfInsertLiteral" value="Insert" />
+        <input type="button" class="sf-button" id="sfInsertLiteral" value="@Signum.Web.Extensions.Properties.Resources.Insert" />
     </div>
     
     <div class="clearall"></div>
     
     @Html.ValueLine(e, s => s.RemoveNoSMSCharacters)
     @Html.ValueLine(e, s => s.MessageLengthExceeded)
+    @Html.ValueLine(e, s => s.Certified)
     @Html.ValueLine(e, s => s.From)
     @Html.ValueLine(e, s => s.StartDate)
     @Html.ValueLine(e, s => s.EndDate)

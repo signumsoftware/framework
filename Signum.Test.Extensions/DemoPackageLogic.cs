@@ -15,8 +15,8 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
-using Signum.Entities.Logging;
-using Signum.Engine.Logging;
+using Signum.Entities.Exceptions;
+using Signum.Engine.Exceptions;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Threading;
@@ -125,7 +125,7 @@ namespace Signum.Engine.Processes
                 {
                     var exLog = e.LogException();
 
-                    using (Transaction tr = new Transaction(true))
+                    using (Transaction tr = Transaction.ForceNew())
                     {
                         pl.Exception = exLog.ToLite();
                         pl.Save();

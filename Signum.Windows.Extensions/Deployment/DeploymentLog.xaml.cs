@@ -11,18 +11,18 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Signum.Entities.Authorization;
+using Signum.Windows;
 using Signum.Entities;
-using Signum.Services; 
+using Signum.Entities.Exceptions;
 
-namespace Signum.Windows.Authorization
+namespace Signum.Windows.Deployment
 {
     /// <summary>
-    /// Interaction logic for Usuario.xaml
+    /// Interaction logic for DeploymentLog.xaml
     /// </summary>
-    public partial class PasswordValidInterval : UserControl
+    public partial class DeploymentLog : UserControl
     {
-        public PasswordValidInterval()
+        public DeploymentLog()
         {
             InitializeComponent();
         }

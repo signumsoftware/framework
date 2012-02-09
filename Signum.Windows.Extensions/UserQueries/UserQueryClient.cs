@@ -8,6 +8,8 @@ using Signum.Services;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
+using Signum.Windows.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Windows.UserQueries
 {
@@ -19,8 +21,18 @@ namespace Signum.Windows.UserQueries
             {
                 QueryClient.Start();
                 Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Default));
-                SearchControl.GetCustomMenuItems += (qn, type) => new UserQueryMenuItem();
+                SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
+                    
             }
+        }
+
+        static SearchControlMenuItem SearchControl_GetCustomMenuItems(object queryName, Type entityType)
+        {
+            var tab = TypeAuthClient.GetAllowed(typeof(UserQueryDN)).Max().GetUI();
+            if (tab < TypeAllowedBasic.Read)
+                return null;
+
+            return new UserQueryMenuItem(tab);
         }
 
         internal static UserQueryDN FromSearchControl(SearchControl searchControl)

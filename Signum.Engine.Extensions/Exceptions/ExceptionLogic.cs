@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using Signum.Engine.Maps;
 using System.Reflection;
-using Signum.Entities.Logging;
+using Signum.Entities.Exceptions;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Authorization;
 
-namespace Signum.Engine.Logging
+namespace Signum.Engine.Exceptions
 {
     public static class ExceptionLogic
     {
@@ -38,16 +38,16 @@ namespace Signum.Engine.Logging
             }
         }
 
-        public static ExceptionDN LogException(this Exception ex, Action<ExceptionDN> complete)
+        public static ExceptionDN LogException(this Exception ex, Action<ExceptionDN> completeContext)
         {
             var prev = PreviousExceptionDN(ex);
 
             if (prev != null)
             {
-                complete(prev);
+                completeContext(prev);
 
                 using (Schema.Current.GlobalMode())
-                using (Transaction tr = new Transaction(true))
+                using (Transaction tr = Transaction.ForceNew())
                 {
                     prev.Save();
 
@@ -56,7 +56,7 @@ namespace Signum.Engine.Logging
             }
 
             var newException = new ExceptionDN(ex);
-            complete(newException);
+            completeContext(newException);
             return CompleteAndSave(newException);
         }
 
@@ -87,7 +87,7 @@ namespace Signum.Engine.Logging
             ex.Version = Schema.Current.MainAssembly.TryCC(a => a.GetName().Version.ToString()); 
 
             using (Schema.Current.GlobalMode())
-            using (Transaction tr = new Transaction(true))
+            using (Transaction tr = Transaction.ForceNew())
             {
                 ex.Save();
 
@@ -97,7 +97,7 @@ namespace Signum.Engine.Logging
 
         public static string DefaultEnvironment { get; set; }
 
-        public static string CurrentEnvironment { get { return DefaultEnvironment; } }
+        public static string CurrentEnvironment { get { return overridenEnvironment.Value ?? DefaultEnvironment; } }
 
         static readonly Variable<string> overridenEnvironment = Statics.ThreadVariable<string>("exceptionEnviroment");
 

@@ -13,16 +13,16 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
-using Signum.Entities.Scheduler;
+using Signum.Entities.SMS;
 
-namespace Signum.Windows.Scheduler
+namespace Signum.Windows.SMS
 {
     /// <summary>
-    /// Interaction logic for ScheduleRuleDaily.xaml
+    /// Interaction logic for SMSSendPackage.xaml
     /// </summary>
-    public partial class Hour : UserControl
+    public partial class SMSSendPackage : UserControl
     {
-        public Hour()
+        public SMSSendPackage()
         {
             InitializeComponent();
         }

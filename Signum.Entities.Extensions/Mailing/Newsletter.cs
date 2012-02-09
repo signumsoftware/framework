@@ -7,7 +7,7 @@ using Signum.Entities.Processes;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
-using Signum.Entities.Logging;
+using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Mailing
 {

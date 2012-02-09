@@ -91,7 +91,9 @@ namespace Signum.Web.Extensions.Sample
                 queries: true, 
                 resetPassword: true,
                 passwordExpiration: false);
-           
+
+            AuthClient.CookieName = "sfUserMusicSample";
+
             AuthAdminClient.Start(
                 types: true, 
                 properties: true, 
@@ -114,7 +116,6 @@ namespace Signum.Web.Extensions.Sample
 
             MusicClient.Start();
 
-            //Combiner.Start();
             ScriptHtmlHelper.Manager.MainAssembly = typeof(MusicClient).Assembly;
             SignumControllerFactory.MainAssembly = Assembly.GetExecutingAssembly();
 
@@ -127,15 +128,10 @@ namespace Signum.Web.Extensions.Sample
                 ctx => ctx.FilterInfo.AuthorizationFilters.OfType<AuthenticationRequiredAttribute>().Any() ? null : new AuthenticationRequiredAttribute());
         }
 
-        protected void Application_AcquireRequestState(object sender, EventArgs e)
-        {
-          
-        }
-
         protected void Session_Start(object sender, EventArgs e)
         {
             if (!AuthController.LoginFromCookie())
-                UserDN.SetSessionUser(AuthLogic.AnonymousUser);
+                UserDN.Current = AuthLogic.AnonymousUser;
         }
     }
 }

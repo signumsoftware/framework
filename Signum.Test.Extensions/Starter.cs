@@ -182,8 +182,6 @@ namespace Signum.Test.Extensions
                             new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
 
                 TypeConditionUsersRoles(internalUser.ToLite());
-
-                AuthLogic.InvalidateCache(); 
             }
         }
 

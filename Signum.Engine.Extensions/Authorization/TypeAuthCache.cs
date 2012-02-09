@@ -44,16 +44,12 @@ namespace Signum.Entities.Authorization
 
         public TypeAuthCache(SchemaBuilder sb, DefaultBehaviour<TypeAllowedAndConditions> max, DefaultBehaviour<TypeAllowedAndConditions> min)
         {
-            runtimeRules = Schema.GlobalLazy(this.NewCache);
+            runtimeRules = GlobalLazy.Create(this.NewCache).InvalidateWith(typeof(RuleTypeDN));
 
             this.Max = max;
             this.Min = min;
 
             sb.Include<RuleTypeDN>();
-
-            sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_InitializingCache;
-            sb.Schema.EntityEvents<RuleTypeDN>().Saving += Schema_Saving;
-            AuthLogic.RolesModified += InvalidateCache;
 
             sb.AddUniqueIndex<RuleTypeDN>(rt => new { rt.Resource, rt.Role });
 
@@ -96,15 +92,7 @@ namespace Signum.Entities.Authorization
             return SqlPreCommand.Combine(Spacing.Simple, conditions, rule); 
         }    
 
-        void Schema_InitializingCache()
-        {
-            runtimeRules.Load();
-        }
-
-        void InvalidateCache()
-        {
-            runtimeRules.ResetPublicationOnly();
-        }
+     
 
         DefaultRule IManualAuth<Type, TypeAllowedAndConditions>.GetDefaultRule(Lite<RoleDN> role)
         {
@@ -135,8 +123,6 @@ namespace Signum.Entities.Authorization
                     Allowed = Min.BaseAllowed.Fallback,
                 }.Save();
             }
-
-            InvalidateCache();
         }
 
         TypeAllowedAndConditions IManualAuth<Type, TypeAllowedAndConditions>.GetAllowed(Lite<RoleDN> role, Type key)
@@ -169,8 +155,6 @@ namespace Signum.Entities.Authorization
 
                 allowed.ToRuleType(role, resource).Save();
             }
-
-            InvalidateCache();
         }
 
         public class ManualResourceCache
@@ -258,11 +242,6 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        void Schema_Saving(RuleTypeDN rule)
-        {
-            Transaction.PostRealCommit += () => InvalidateCache();
-        }
-
         internal void GetRules(BaseRulePack<TypeAllowedRule> rules, IEnumerable<TypeDN> resources)
         {
             RoleAllowedCache cache = runtimeRules.Value[rules.Role];
@@ -294,7 +273,7 @@ namespace Signum.Entities.Authorization
 
             Synchronizer.Synchronize(current, should,
                 (type, pr) => pr.Delete(),
-                (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save() ,
+                (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
                 (type, pr, ar) =>
                 {
                     pr.Allowed = ar.Allowed.Fallback;
@@ -305,14 +284,12 @@ namespace Signum.Entities.Authorization
                         Condition = EnumLogic<TypeConditionNameDN>.ToEntity(a.ConditionName),
                     }).ToMList();
 
-                    if(!pr.Conditions.SequenceEqual(shouldConditions))
+                    if (!pr.Conditions.SequenceEqual(shouldConditions))
                         pr.Conditions = shouldConditions;
 
                     if (pr.SelfModified)
                         pr.Save();
                 });
-
-            InvalidateCache();
         }
 
         public DefaultRule GetDefaultRule(Lite<RoleDN> role)

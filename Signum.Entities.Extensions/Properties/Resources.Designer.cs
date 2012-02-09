@@ -205,6 +205,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Expression can not be an aggregate.
+        /// </summary>
+        public static string ExpressionCanNotBeAnAggregate {
+            get {
+                return ResourceManager.GetString("ExpressionCanNotBeAnAggregate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Expression should be some kind of aggregate.
         /// </summary>
         public static string ExpressionShouldBeSomeKindOfAggregate {

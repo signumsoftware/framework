@@ -24,8 +24,8 @@ using System.Web;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Linq.Expressions;
-using Signum.Entities.Logging;
-using Signum.Engine.Logging;
+using Signum.Entities.Exceptions;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Mailing
 {
@@ -64,7 +64,7 @@ namespace Signum.Engine.Mailing
 
         public static Func<string> OverrideEmailAddress = () => null;     
 
-        public static Func<SmtpClient> SmtpClientBuilder;
+        public static Func<EmailMessageDN, SmtpClient> SmtpClientBuilder;
 
         static Dictionary<Type, Func<IEmailModel, EmailContent>> templates = new Dictionary<Type, Func<IEmailModel, EmailContent>>();
         static Dictionary<Type, Lite<EmailTemplateDN>> templateToDN;
@@ -256,7 +256,7 @@ namespace Signum.Engine.Mailing
 
                 if (message != null)
                 {
-                    SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder();
+                    SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder(emailMessage);
                     client.Send(message);
                 }
 
@@ -269,7 +269,7 @@ namespace Signum.Engine.Mailing
             {
                 var exLog = e.LogException().ToLite();
 
-                using (Transaction tr = new Transaction(true))
+                using (Transaction tr = Transaction.ForceNew())
                 {
                     emailMessage.Exception = exLog;
                     emailMessage.State = EmailState.SentError;
@@ -319,7 +319,7 @@ namespace Signum.Engine.Mailing
                 MailMessage message = CreateMailMessage(emailMessage);
                 if (message != null)
                 {
-                    SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder();
+                    SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder(emailMessage);
                     client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
 
                     emailMessage.Sent = null;
@@ -340,7 +340,7 @@ namespace Signum.Engine.Mailing
             {
                 var exLog = ex.LogException().ToLite();
 
-                using (var tr = new Transaction(true))
+                using (var tr = Transaction.ForceNew())
                 {
                     emailMessage.Sent = TimeZoneManager.Now;
                     emailMessage.State = EmailState.SentError;
@@ -354,7 +354,7 @@ namespace Signum.Engine.Mailing
         static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
             EmailUser emailUser = (EmailUser)e.UserState;
-            using (UserDN.Scope(emailUser.User))
+            using (AuthLogic.UserSession(emailUser.User))
             {
                 Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                 if (e.Error != null)

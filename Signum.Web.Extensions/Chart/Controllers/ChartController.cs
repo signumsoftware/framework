@@ -17,6 +17,7 @@ using Signum.Entities.Authorization;
 using Signum.Engine.Basics;
 using System.Web.Script.Serialization;
 using Signum.Engine.Reports;
+using Signum.Web.Controllers;
 using Signum.Engine.Chart;
 
 namespace Signum.Web.Chart
@@ -73,6 +74,46 @@ namespace Signum.Web.Chart
         }
 
         [HttpPost]
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
+        {
+            var request = ExtractChartRequestCtx("", null).Value;
+
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            List<QueryToken> subtokens = request.Chart.SubTokensFilters(QueryUtils.Parse(tokenName, qt => request.Chart.SubTokensFilters(qt, qd.Columns)), qd.Columns);
+
+            if (subtokens.IsEmpty())
+                return Content("");
+
+            var tokenOptions = SearchControlHelper.TokensCombo(subtokens, null);
+
+            return Content(
+                SearchControlHelper.TokenOptionsCombo(
+                    SignumController.CreateHtmlHelper(this), request.QueryName, tokenOptions, new Context(null, prefix), index + 1, true).ToHtmlString());
+        }
+
+        [HttpPost]
+        public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix)
+        {
+            var request = ExtractChartRequestCtx(prefix, null).Value;
+
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            object queryName = Navigator.ResolveQueryName(webQueryName);
+
+            FilterOption fo = new FilterOption(tokenName, null);
+            if (fo.Token == null)
+            {
+                fo.Token = QueryUtils.Parse(tokenName, qt => request.Chart.SubTokensFilters(qt, qd.Columns));
+            }
+            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
+
+            return Content(
+                SearchControlHelper.NewFilter(
+                    SignumController.CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
+        }
+
+        [HttpPost]
         public ActionResult Draw(string prefix)
         {
             var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
@@ -107,16 +148,9 @@ namespace Signum.Web.Chart
             var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
                     .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
 
-            var ch = ctx.Value.Chart;
-            switch (lastTokenChanged)
-            {
-                case ChartTokenName.Dimension1: ch.Dimension1.TokenChanged(); break;
-                case ChartTokenName.Dimension2: ch.Dimension2.TokenChanged(); break;
-                case ChartTokenName.Value1: ch.Value1.TokenChanged(); break;
-                case ChartTokenName.Value2: ch.Value2.TokenChanged(); break;
-                default:
-                    break;
-            }
+            var chart = ctx.Value.Chart;
+            if (lastTokenChanged != null)
+                chart.GetToken(lastTokenChanged.Value).TokenChanged();
 
             return ctx;
         }
@@ -127,13 +161,7 @@ namespace Signum.Web.Chart
 
             if (chartRequest.Chart.GroupResults)
             {
-                var filters = chartRequest.Filters.Select(f => new FilterOption 
-                {
-                    ColumnName = f.Token.FullKey(), 
-                    Token = f.Token, 
-                    Value = f.Value, 
-                    Operation = f.Operation 
-                }).ToList();
+                var filters = chartRequest.Filters.Where(a=>!(a.Token is AggregateToken)).Select(f => new FilterOption { Token = f.Token, Value = f.Value, Operation = f.Operation }).ToList();
 
                 var chartTokenFilters = new List<FilterOption>
                 {
@@ -172,7 +200,7 @@ namespace Signum.Web.Chart
 
         private FilterOption AddFilter(ChartRequest request, ChartTokenDN chartToken, string key)
         {
-            if (chartToken == null || chartToken.Aggregate != null)
+            if (chartToken == null || chartToken.Token is AggregateToken)
                 return null;
 
             if (key == "d1" && (request.Chart.ChartType == ChartType.StackedAreas || request.Chart.ChartType == ChartType.TotalAreas))

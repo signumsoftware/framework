@@ -46,6 +46,7 @@ namespace ASP
     using Signum.Engine.DynamicQuery;
     using Signum.Entities.Reflection;
     using Signum.Entities.Chart;
+    using Signum.Web.Chart;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartToken.cshtml")]
@@ -65,6 +66,7 @@ namespace ASP
         }
         public override void Execute()
         {
+
 
 
 
@@ -116,27 +118,13 @@ WriteLiteral("</td>\r\n        <td>\r\n");
                                                                
             }
 
-
-             if (tc.Value.ShouldAggregate)
-            {
-                
-           Write(Html.ValueLine(tc, ct => ct.Aggregate, vl => { vl.LabelVisible = false; vl.ValueHtmlProps["class"] = "sf-chart-token-aggregate";}));
-
-                                                                                                                                                   
-            }
-
-WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query-token\">\r\n");
+WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query-token\">\r\n          " +
+"      ");
 
 
-                 if (tc.Value.Aggregate != AggregateFunction.Count)
-                {
-                    
-               Write(Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc));
+           Write(Html.ChartTokenCombo(tc.Value, chart, ViewData[ViewDataKeys.QueryName], tc));
 
-                                                                                               
-                }
-
-WriteLiteral("            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
+WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
 
 
                                                 Write(Resources.Chart_ToggleInfo);
@@ -155,22 +143,6 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display:none\">\r\
            Write(Html.ValueLine(tc, ct => ct.DisplayName));
 
                                                          
-                
-           Write(Html.ValueLine(tc, ct => ct.Format, vl => vl.ValueHtmlProps["size"] = 4));
-
-                                                                                         
-                
-           Write(Html.ValueLine(tc, ct => ct.Unit, vl => vl.ValueHtmlProps["size"] = 2));
-
-                                                                                       
-                
-           Write(Html.ValueLine(tc, ct => ct.OrderType));
-
-                                                        
-                
-           Write(Html.ValueLine(tc, ct => ct.OrderPriority, vl => vl.ValueHtmlProps["size"] = 2));
-
-                                                                                                
             }
 
 WriteLiteral("        </td>\r\n    </tr>\r\n");

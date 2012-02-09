@@ -15,8 +15,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
-using Signum.Entities.Logging;
-using Signum.Engine.Logging;
+using Signum.Entities.Exceptions;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Mailing
 {

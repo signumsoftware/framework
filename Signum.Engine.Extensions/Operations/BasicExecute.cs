@@ -10,7 +10,7 @@ using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
-using Signum.Engine.Logging;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Operations
 {
@@ -88,7 +88,7 @@ namespace Signum.Engine.Operations
 
                     log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
                     log.End = TimeZoneManager.Now;
-                    using (UserDN.Scope(AuthLogic.SystemUser))
+                    using (AuthLogic.Disable())
                         log.Save();
 
                     tr.Commit();
@@ -102,7 +102,7 @@ namespace Signum.Engine.Operations
                 {
                     var exLog = ex.LogException();
 
-                    using (Transaction tr2 = new Transaction(true))
+                    using (Transaction tr2 = Transaction.ForceNew())
                     {
                         OperationLogDN log2 = new OperationLogDN
                         {
@@ -114,7 +114,7 @@ namespace Signum.Engine.Operations
                             End = TimeZoneManager.Now
                         };
 
-                        using (UserDN.Scope(AuthLogic.SystemUser))
+                        using (AuthLogic.Disable())
                             log2.Save();
 
                         tr2.Commit();

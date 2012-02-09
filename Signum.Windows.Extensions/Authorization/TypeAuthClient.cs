@@ -71,9 +71,22 @@ namespace Signum.Windows.Authorization
                 entity.IsAllowedFor(TypeAllowedBasic.Read);
         }
 
+        public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic requested)
+        {
+            TypeAllowedAndConditions tac = GetAllowed(lite.RuntimeType);
+
+            if (requested <= tac.Min().GetUI())
+                return true;
+
+            if (tac.Max().GetUI() < requested)
+                return false;
+
+            return Server.Return((ITypeAuthServer s) => s.IsAllowedFor(lite, requested));
+        }
+
         public static bool IsAllowedFor(this IdentifiableEntity entity, TypeAllowedBasic requested)
         {
-            TypeAllowedAndConditions tac = typeRules.GetAllowed(entity.GetType());
+            TypeAllowedAndConditions tac = GetAllowed(entity.GetType());
 
             if (requested <= tac.Min().GetUI())
                 return true;
@@ -82,6 +95,12 @@ namespace Signum.Windows.Authorization
                 return false;
 
             return Server.Return((ITypeAuthServer s) => s.IsAllowedFor(entity.ToLite(), requested));
+        }
+
+        public static TypeAllowedAndConditions GetAllowed(Type type)
+        {
+            TypeAllowedAndConditions tac = typeRules.GetAllowed(type);
+            return tac;
         }
 
         static void AuthClient_UpdateCacheEvent()

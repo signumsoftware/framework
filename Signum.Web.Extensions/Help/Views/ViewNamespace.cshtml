@@ -16,14 +16,14 @@
 
 @using (var f = Html.BeginForm("SaveNamespace", "Help", new { @namespace = nh.Name }, FormMethod.Post, new { id = "form-save" }))
 {
-    <div class="grid_12" id="entityName">
+    <div class="help_left" id="entityName">
         <h1>@nh.Name</h1>
         @Html.TextArea("description", nh.Description, 5, 80, new { @class = "editable" })
         <span class="editor" id="description-editor">
             @Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings)
         </span>
     </div>
-    <div class="grid_4">
+    <div class="help_right">
         <div class="sidebar">
             <h3>
                 Temas relacionados</h3>
@@ -36,6 +36,6 @@
             </ul>
         </div>
     </div>
-    <div class="clear">
+    <div class="clearall">
     </div>
 } 

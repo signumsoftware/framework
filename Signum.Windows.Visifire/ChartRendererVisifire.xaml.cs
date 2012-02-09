@@ -18,6 +18,7 @@ using Signum.Utilities;
 using System.Runtime.Serialization;
 using Signum.Entities;
 using System.Globalization;
+using Signum.Windows;
 
 namespace Signum.Windows.Chart
 {
@@ -64,51 +65,63 @@ namespace Signum.Windows.Chart
             {
                 case ChartResultType.TypeValue:
                     {
-                        var list = ResultTable.Rows.Select(r => new { Key = r[0] ?? NullValue, Value = r[1] }).ToList();
-
                         return new[]
                         {
                             new DataSeries 
                             { 
                                 RenderAs = ToRenderAs(ChartRequest.Chart.ChartType),
                             }
-                            .AddPoints(list.Select(r => 
+                            .AddPoints(ResultTable.Rows.Select(r => 
                                 new DataPoint 
                                 { 
-                                    AxisXLabel = Format(r.Key, ChartRequest.Chart.Dimension1.Format), 
-                                    YValue = ToDouble(r.Value, ChartTokenName.Value1) 
-                                } 
+                                    AxisXLabel = Format(r[0] ?? NullValue, ChartRequest.Chart.Dimension1.Token.Format), 
+                                    YValue = ToDouble(r[1], ChartTokenName.Value1),
+                                    Tag = r,
+                                }.Do(p=>p.MouseLeftButtonDown+=dp_MouseDoubleClick) 
                              ))
                         };
                     }
                 case ChartResultType.TypeTypeValue:
                     {
-                        List<object> series = ResultTable.Rows.Select(r => r[0] ?? NullValue).Distinct().ToList();                     
+                        List<object> series = ResultTable.Rows.Select(r => r[0] ?? NullValue).Distinct().ToList();
 
-                        List<object> subSeries = ResultTable.Rows.Select(r => r[1] ?? NullValue).Distinct().ToList();
 
-                        double?[,] array = ResultTable.Rows.ToArray(
-                            r => (double?)ToDouble(r[2], ChartTokenName.Value1), 
-                            r => series.IndexOf(r[0] ?? NullValue), 
-                            r => subSeries.IndexOf(r[1] ?? NullValue), series.Count, subSeries.Count);
+                        Dictionary<object, Dictionary<object, ResultRow>> dic1dic0 = ResultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue));
 
-                        return subSeries.Select((ss, j) =>
+                        //List<object> subSeries = ResultTable.Rows.Select(r => r[1] ?? NullValue).Distinct().ToList();
+
+                        //double?[,] array = ResultTable.Rows.ToArray(
+                        //    r => (double?)ToDouble(r[2], ChartTokenName.Value1), 
+                        //    r => series.IndexOf(r[0] ?? NullValue), 
+                        //    r => subSeries.IndexOf(r[1] ?? NullValue), series.Count, subSeries.Count);
+
+                        return dic1dic0.Select((ss, j) =>
                             new DataSeries
                             {
-                                LegendText = ss.ToString(),
+                                LegendText = ss.Key.ToString(),
                                 RenderAs = ToRenderAs(ChartRequest.Chart.ChartType),
                                 //YValueFormatString = ChartRequest.FirstValue.Format
                             }.AddPoints(series.Select((s, i) =>
                             {
-                                double? d = array[i, j];
-                                DataPoint p = new DataPoint();
+                                DataPoint p = new DataPoint()
+                                {
+                                    AxisXLabel = Format(s, ChartRequest.Chart.Dimension1.Token.Format)
+                                };
 
-                                p.AxisXLabel = Format(s, ChartRequest.Chart.Dimension1.Format);
+                                ResultRow row = ss.Value.TryGetC(s);
+                                if (row == null)
+                                {
+                                    if (ChartRequest.Chart.ChartType == ChartType.StackedAreas || ChartRequest.Chart.ChartType == ChartType.TotalAreas)
+                                        p.YValue = 0;
 
-                                if (d != null)
-                                    p.YValue = d.Value;
-                                else if (ChartRequest.Chart.ChartType == ChartType.StackedAreas || ChartRequest.Chart.ChartType == ChartType.TotalAreas)
-                                    p.YValue = 0;
+                                    return p;
+                                }
+
+                                p.YValue = ToDouble(row[2], ChartTokenName.Value1);
+
+                                p.Tag = row;
+
+                                p.MouseLeftButtonDown += dp_MouseDoubleClick;
 
                                 return p;
                             }))).ToArray();
@@ -126,29 +139,47 @@ namespace Signum.Windows.Chart
                          XValue = ToDouble(r[0], ChartTokenName.Dimension1),
                          YValue = ToDouble(r[1], ChartTokenName.Dimension2),
                          Color = ToColor(r[2]),
-                    }))
+                         Tag = r,
+                    }.Do(p=>p.MouseLeftButtonDown+=dp_MouseDoubleClick) 
+                    ))
                     };
                 case ChartResultType.Bubbles:
-                    return new[]{ new DataSeries
-                    { 
-                        RenderAs = ToRenderAs(ChartRequest.Chart.ChartType),
-                        //XValueFormatString = ChartRequest.FirstDimension.Format,
-                        //YValueFormatString = ChartRequest.SecondDimension.Format,
-                        //ZValueFormatString = ChartRequest.SecondValue.Format,
-                    }
-                    .AddPoints(ResultTable.Rows.Select(r => new DataPoint
-                    {
-                         XValue = ToDouble(r[0], ChartTokenName.Dimension1),
-                         YValue = ToDouble(r[1], ChartTokenName.Dimension2),
-                         Color = ToColor(r[2]),
-                         ZValue = ToDouble(r[3], ChartTokenName.Value2),
-                    }))
+                    return new[]{ 
+                        new DataSeries
+                        { 
+                            RenderAs = ToRenderAs(ChartRequest.Chart.ChartType),
+                            //XValueFormatString = ChartRequest.FirstDimension.Format,
+                            //YValueFormatString = ChartRequest.SecondDimension.Format,
+                            //ZValueFormatString = ChartRequest.SecondValue.Format,
+                        }
+                        .AddPoints(ResultTable.Rows.Select(r => new DataPoint
+                        {
+                             XValue = ToDouble(r[0], ChartTokenName.Dimension1),
+                             YValue = ToDouble(r[1], ChartTokenName.Dimension2),
+                             Color = ToColor(r[2]),
+                             ZValue = ToDouble(r[3], ChartTokenName.Value2),
+                             Tag = r,
+                        }.Do(p=>p.MouseLeftButtonDown+=dp_MouseDoubleClick) 
+                    ))
                     };
             }
 
             throw new InvalidOperationException();
             
         }
+
+        void dp_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount >= 2)
+            {
+                DataPoint dp = (DataPoint)sender;
+
+                var cw = this.VisualParents().OfType<ChartWindow>().FirstOrDefault();
+
+                cw.ShowRow((ResultRow)dp.Tag);
+            }
+        }
+
 
         string Format(object val, string format)
         {

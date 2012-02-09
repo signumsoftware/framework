@@ -13,7 +13,7 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;
-using Signum.Entities.Logging;
+using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Processes
 {
@@ -33,7 +33,6 @@ namespace Signum.Entities.Processes
         }
 
         Lite<UserDN> user;
-        [NotNullValidator]
         public Lite<UserDN> User
         {
             get { return user; }
@@ -194,7 +193,6 @@ namespace Signum.Entities.Processes
 
     public interface IProcessDataDN : IIdentifiable
     {
-
     }
 
     public enum ProcessState

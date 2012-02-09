@@ -106,12 +106,22 @@ WriteLiteral("\r\n<div id=\"");
 
     Write(Model.Compose("divChartControl"));
 
-WriteLiteral("\" class=\"sf-search-control sf-chart-control\" data-prefix=\"");
+WriteLiteral("\" class=\"sf-search-control sf-chart-control\" data-subtokens-url=\"");
 
 
-                                                                                               Write(Model.ControlID);
+                                                                                                      Write(Url.Action("NewSubTokensCombo", "Chart"));
 
-WriteLiteral("\">\r\n    ");
+WriteLiteral("\" data-add-filter-url=\"");
+
+
+                                                                                                                                                                      Write(Url.Action("AddFilter", "Chart"));
+
+WriteLiteral("\" data-prefix=\"");
+
+
+                                                                                                                                                                                                                      Write(Model.ControlID);
+
+WriteLiteral("\" >\r\n    ");
 
 
 Write(Html.HiddenRuntimeInfo(Model));
@@ -126,14 +136,20 @@ WriteLiteral("\r\n    ");
 
 Write(Html.Hidden(Model.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryDescription.QueryName)));
 
-WriteLiteral("\r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"ui-wid" +
-"get sf-filters\">\r\n                <div class=\"ui-widget-header ui-corner-top sf-" +
-"filters-body\">\r\n                    ");
+WriteLiteral("\r\n\r\n    ");
 
 
-               Write(Html.TokensCombo(queryDescription, Model));
+Write(Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
+        (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
 
-WriteLiteral("\r\n                \r\n                    ");
+WriteLiteral("\r\n\r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"ui-w" +
+"idget sf-filters\">\r\n                <div class=\"ui-widget-header ui-corner-top s" +
+"f-filters-body\">\r\n                    ");
+
+
+               Write(Html.ChartRootTokens(Model.Value.Chart, queryDescription, Model));
+
+WriteLiteral("\r\n                    \r\n                    ");
 
 
                Write(Html.Href(

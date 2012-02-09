@@ -15,8 +15,8 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
-using Signum.Entities.Logging;
-using Signum.Engine.Logging;
+using Signum.Entities.Exceptions;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Processes
 {
@@ -65,15 +65,15 @@ namespace Signum.Engine.Processes
     public abstract class PackageAlgorithm<T>: IProcessAlgorithm
         where T:class, IIdentifiable
     {
-        Func<List<Lite<T>>> getLazies;
+        Func<List<Lite<T>>> getLites;
 
         public PackageAlgorithm()
         {
         }
 
-        public PackageAlgorithm(Func<List<Lite<T>>> getLazies)
+        public PackageAlgorithm(Func<List<Lite<T>>> getLites)
         {
-            this.getLazies = getLazies;
+            this.getLites = getLites;
         }
 
         public virtual IProcessDataDN CreateData(object[] args)
@@ -84,7 +84,7 @@ namespace Signum.Engine.Processes
 
             List<Lite<T>> lites = 
                 args != null && args.Length > 1? (List<Lite<T>>)args.GetArg<List<Lite<T>>>(1): 
-                getLazies != null? getLazies(): null;
+                getLites != null? getLites(): null;
 
             if (lites == null)
                 throw new InvalidOperationException("No entities to process found");
@@ -118,10 +118,9 @@ namespace Signum.Engine.Processes
 
                 try
                 {
-                    using (Transaction tr = new Transaction(true))
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        using (UserDN.Scope(executingProcess.User.Retrieve()))
-                            ExecuteLine(pl, package);
+                        ExecuteLine(pl, package);
 
                         pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();
@@ -132,7 +131,7 @@ namespace Signum.Engine.Processes
                 {
                     var exLog = e.LogException();
 
-                    using (Transaction tr = new Transaction(true))
+                    using (Transaction tr = Transaction.ForceNew())
                     {
                         pl.Exception = exLog.ToLite();
                         pl.Save();
@@ -161,8 +160,8 @@ namespace Signum.Engine.Processes
             this.OperationKey = operationKey;
         }
 
-        public PackageExecuteAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLazies)
-            : base(getLazies)
+        public PackageExecuteAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLites)
+            : base(getLites)
         {
             this.OperationKey = operationKey;
         }
@@ -193,8 +192,8 @@ namespace Signum.Engine.Processes
             this.OperationKey = operationKey;
         }
 
-        public PackageConstructFromAlgorithm(Enum operationKey, Func<List<Lite<F>>> getLazies)
-            : base(getLazies)
+        public PackageConstructFromAlgorithm(Enum operationKey, Func<List<Lite<F>>> getLites)
+            : base(getLites)
         {
             this.OperationKey = operationKey;
         }

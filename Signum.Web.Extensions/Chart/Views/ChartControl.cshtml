@@ -25,16 +25,20 @@
     Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
 }
 
-<div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-prefix="@Model.ControlID">
+<div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" data-add-filter-url="@Url.Action("AddFilter", "Chart")" data-prefix="@Model.ControlID" >
     @Html.HiddenRuntimeInfo(Model)
     @Html.HiddenRuntimeInfo(Model, cr => cr.Chart)
     @Html.Hidden(Model.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryDescription.QueryName))
+
+    @Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
+        (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
+
     <div>
         <div class="sf-fields-list">
             <div class="ui-widget sf-filters">
                 <div class="ui-widget-header ui-corner-top sf-filters-body">
-                    @Html.TokensCombo(queryDescription, Model)
-                
+                    @Html.ChartRootTokens(Model.Value.Chart, queryDescription, Model)
+                    
                     @Html.Href(
                             Model.Compose("btnAddFilter"),
                             Signum.Web.Properties.Resources.FilterBuilder_AddFilter,

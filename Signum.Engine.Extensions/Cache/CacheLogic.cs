@@ -15,6 +15,9 @@ using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
+using System.Drawing;
+using Signum.Entities.Basics;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Cache
 {
@@ -190,14 +193,15 @@ namespace Signum.Engine.Cache
 
                 return false;
             }
+
+            public override event Action Invalidation
+            {
+                add { throw NoComplete(); }
+                remove { throw NoComplete(); }
+            }
         }
 
-        interface IInvalidable
-        {
-            event Action Invalidation;
-        }
-
-        class CacheLogicController<T> : CacheController<T>, ICacheLogicController, IInvalidable
+        class CacheLogicController<T> : CacheController<T>, ICacheLogicController
             where T : IdentifiableEntity
         {
             class Pack
@@ -313,7 +317,7 @@ namespace Signum.Engine.Cache
             int loads;
             public int Loads { get { return loads; } }
 
-            public event Action Invalidation;
+            public override event Action Invalidation;
 
             void DisableAndInvalidate()
             {
@@ -440,7 +444,11 @@ namespace Signum.Engine.Cache
 
         private static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
-            List<Type> relatedTypes = sb.Schema.Table(type).DependentTables().Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumProxy<>))).Select(t => t.Key.Type).ToList();
+            List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
+                .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumProxy<>)))
+                .Select(t => t.Key.Type).ToList();
+
+            invalidations.Add(type); 
 
             foreach (var rType in relatedTypes)
             {
@@ -454,8 +462,6 @@ namespace Signum.Engine.Cache
                 invalidations.Add(rType, type);
             }
         }
-
-         
     
         static CacheLogicController<T> GetController<T>() where T : IdentifiableEntity
         {
@@ -530,23 +536,39 @@ namespace Signum.Engine.Cache
             GetController<T>().Invalidation += action;
         }
 
-
-
-        public static Lazy<T> InvalidateWithCache<T>(this Lazy<T> lazy, params Type[] types)
+        public static void SchemaGraph(Func<Type, bool> cacheHint)
         {
-            Action action = () => lazy.ResetPublicationOnly();
-
-            foreach (var t in types)
+            var dgml = Schema.Current.ToDirectedGraph().ToDGML(t =>
+                new[]
             {
-                var val = controllers.GetOrThrow(t, "{0} is not registered in CacheLogic") as IInvalidable;
+                new XAttribute("Label", t.Name),
+                new XAttribute("Background", GetColor(t.Type, cacheHint).ToHtml())
+            }, lite => lite ? new[]
+            {
+                new XAttribute("StrokeDashArray",  "2 3")
+            } : new XAttribute[0]);  
 
-                if (val == null)
-                    throw new InvalidOperationException("{0} is Semi-Cached".Formato(t));
+        }
 
-                val.Invalidation += action;
-            }
+        static Color GetColor(Type type, Func<Type, bool> cacheHint)
+        {
+            if (Reflector.ExtractEnumProxy(type) != null)
+                return Color.Red;
 
-            return lazy;
+            var ct = CacheLogic.GetCacheType(type);
+            if (ct == CacheType.Cached)
+                return Color.Purple;
+
+            if (ct == CacheType.Semi)
+                return Color.Pink;
+
+            if (typeof(EnumDN).IsAssignableFrom(type))
+                return Color.Orange;
+
+            if (cacheHint != null && cacheHint(type))
+                return Color.Yellow;
+
+            return Color.Green;
         }
     }
 

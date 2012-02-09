@@ -50,8 +50,10 @@ namespace Signum.Engine.Operations
             protected override string OnCanExecute(E entity)
             {
                 S state = Graph<E, S>.GetState(entity);
-                if (FromStates != null && !FromStates.Contains(state))
-                    return Resources.ImpossibleToExecute0FromState1.Formato(Key, state); 
+
+                string stateError = state.InState(Key, FromStates);
+                if (stateError.HasText())
+                    return stateError; 
 
                 return base.OnCanExecute(entity);
             }

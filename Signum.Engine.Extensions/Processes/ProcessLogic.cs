@@ -24,8 +24,8 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Signum.Engine.Scheduler;
 using System.Linq.Expressions;
-using Signum.Entities.Logging;
-using Signum.Engine.Logging;
+using Signum.Entities.Exceptions;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Processes
 {
@@ -84,7 +84,7 @@ namespace Signum.Engine.Processes
 
                 if (InitialDelayMiliseconds > -1)
                     sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += () =>
-                    {
+                {
                         Thread.Sleep(InitialDelayMiliseconds);
                         Start();
                     };
@@ -202,7 +202,7 @@ namespace Signum.Engine.Processes
                 {
                     pe.SetAsQueue();
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                        pe.Save();
+                    pe.Save();
                 }
 
                 Task.Factory.StartNew(() =>
@@ -213,14 +213,14 @@ namespace Signum.Engine.Processes
 
                     var po = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism, CancellationToken = CancelNewProcesses.Token };
                     try
-                    {
+                {
                         Parallel.ForEach(queue.GetConsumingEnumerable(CancelNewProcesses.Token), po, ep =>
                         {
                             try
                             {
                                 executing.TryAdd(ep.Execution.Id, ep);
 
-                                using (UserDN.Scope(AuthLogic.SystemUser))
+                                using (AuthLogic.Disable())
                                 {
                                     ep.Execute();
                                 }
@@ -229,7 +229,7 @@ namespace Signum.Engine.Processes
                             {
                                 ExecutingProcess rubish;
                                 executing.TryRemove(ep.Execution.Id, out rubish);
-                            }
+                }
                         });
                     }
                     catch (OperationCanceledException oc)
@@ -302,7 +302,7 @@ namespace Signum.Engine.Processes
                 {
                     pe.SetAsQueue();
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                        pe.Save();
+                    pe.Save();
                 }
 
                 RefreshPlan();
@@ -341,12 +341,12 @@ namespace Signum.Engine.Processes
                 }
 
                 using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                    return new ProcessExecutionDN(process)
-                    {
-                        User = UserDN.Current.ToLite(),
-                        State = ProcessState.Created,
-                        ProcessData = data
-                    }.Save();
+                return new ProcessExecutionDN(process)
+                {
+                    User = UserDN.Current.ToLite(),
+                    State = ProcessState.Created,
+                    ProcessData = data
+                }.Save();
             }
 
 
@@ -355,91 +355,91 @@ namespace Signum.Engine.Processes
                 GetState = e => e.State;
 
                 new Construct(ProcessOperation.Create)
-                {
+                    {                     
                     ToState = ProcessState.Created,
                     Construct = args =>
-                    {
-                        Enum processKey = args.GetArg<Enum>(0);
-                        return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processKey, args.Skip(1).ToArray());
-                    }
+                        {
+                            Enum processKey = args.GetArg<Enum>(0); 
+                            return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processKey, args.Skip(1).ToArray());
+                        }
                 }.Register();
 
                 new ConstructFrom<ProcessDN>(ProcessOperation.FromProcess)
-                {
-                    ToState = ProcessState.Created,
-                    Lite = false,
-                    Construct = (process, args) =>
                     {
-                        return Create(process, EnumLogic<ProcessDN>.ToEnum(process), args);
-                    }
+                    ToState = ProcessState.Created,
+                        Lite = false,
+                        Construct = (process, args)=>
+                        {
+                            return Create(process, EnumLogic<ProcessDN>.ToEnum(process), args);
+                        }
                 }.Register();
 
                 new Execute(ProcessOperation.Save)
-                {
-                    FromStates = new[] { ProcessState.Created },
-                    ToState = ProcessState.Created,
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (pe, args) =>
                     {
-
-                        pe.Save();
-                    }
+                         FromStates = new []{ProcessState.Created },
+                    ToState = ProcessState.Created,
+                         AllowsNew = true,
+                         Lite = false,
+                         Execute = (pe, args)=>
+                         {
+                            
+                             pe.Save(); 
+                         }
                 }.Register();
 
                 //new Execute(ProcessOperation.Save, ProcessState.Planned)
-                //{
-                //     FromStates = new []{ProcessState.Planned},
-                //     AllowsNew = true,
-                //     Lite = false,
-                //     Execute = (pe, args)=>
-                //     {
-                //pe.State=ProcessState.Planned ;
-                //         pe.Save(); 
-                //     }
+                    //{
+                    //     FromStates = new []{ProcessState.Planned},
+                    //     AllowsNew = true,
+                    //     Lite = false,
+                    //     Execute = (pe, args)=>
+                    //     {
+                              //pe.State=ProcessState.Planned ;
+                    //         pe.Save(); 
+                    //     }
                 //}.Register();
 
                 new Execute(ProcessOperation.Plan)
-                {
-                    FromStates = new[] { ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended },
-                    ToState = ProcessState.Planned,
-                    Execute = (pe, args) =>
                     {
-                        pe.State = ProcessState.Planned;
-                        pe.PlannedDate = (DateTime)args[0];
-                    }
+                         FromStates = new []{ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended},
+                    ToState = ProcessState.Planned,
+                         Execute = (pe, args)=>
+                         {
+                             pe.State = ProcessState.Planned;
+                             pe.PlannedDate = (DateTime)args[0]; 
+                         }
                 }.Register();
 
                 new Execute(ProcessOperation.Cancel)
-                {
-                    FromStates = new[] { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended },
-                    ToState = ProcessState.Canceled,
-                    Execute = (pe, _) =>
                     {
-                        pe.State = ProcessState.Canceled;
-                        pe.CancelationDate = TimeZoneManager.Now;
-                    }
+                         FromStates = new []{ProcessState.Planned, ProcessState.Created, ProcessState.Suspended},
+                    ToState = ProcessState.Canceled,
+                         Execute = (pe, _)=>
+                         {
+                             pe.State = ProcessState.Canceled;
+                             pe.CancelationDate = TimeZoneManager.Now; 
+                         }
                 }.Register();
 
                 new Execute(ProcessOperation.Execute)
-                {
-                    FromStates = new[] { ProcessState.Created, ProcessState.Planned, ProcessState.Canceled, ProcessState.Suspended },
-                    ToState = ProcessState.Queued,
-                    Execute = (pe, _) =>
                     {
+                         FromStates = new []{ProcessState.Created, ProcessState.Planned, ProcessState.Canceled, ProcessState.Suspended},
+                    ToState = ProcessState.Queued,
+                         Execute = (pe, _)=>
+                         {
                         pe.SetAsQueue();
-                    }
+                         }
                 }.Register();
 
                 new Execute(ProcessOperation.Suspend)
-                {
-                    FromStates = new[] { ProcessState.Queued, ProcessState.Executing },
-                    ToState = ProcessState.Suspending,
-                    Execute = (pe, _) =>
                     {
-                        pe.State = ProcessState.Suspending;
-                        pe.SuspendDate = TimeZoneManager.Now;
-                    }
+                         FromStates = new []{ProcessState.Queued, ProcessState.Executing},
+                    ToState = ProcessState.Suspending,
+                         Execute = (pe, _)=>
+                         {
+                             pe.State = ProcessState.Suspending;
+                             pe.SuspendDate = TimeZoneManager.Now;
+                         }
                 }.Register();
             }
         }
@@ -500,7 +500,7 @@ namespace Signum.Engine.Processes
                     Progress = p.Execution.Progress
                 }).ToList()
             };
-        }
+    }
     }
 
     public interface IProcessAlgorithm
@@ -553,17 +553,15 @@ namespace Signum.Engine.Processes
         {
             if (progress != Execution.Progress)
             {
-                Execution.Progress = progress;
+            Execution.Progress = progress;
                 Execution.InDB().UnsafeUpdate(a => new ProcessExecutionDN { Progress = progress });
             }
         }
 
         public void Execute()
         {
-            using (ScopeSessionFactory.OverrideSession())
+            using (AuthLogic.UserSession(Execution.User != null ? Execution.User.Retrieve() : AuthLogic.SystemUser))
             {
-                UserDN.SetSessionUser(AuthLogic.SystemUser);
-
                 Execution.State = ProcessState.Executing;
                 Execution.ExecutionStart = TimeZoneManager.Now;
                 Execution.Progress = 0;

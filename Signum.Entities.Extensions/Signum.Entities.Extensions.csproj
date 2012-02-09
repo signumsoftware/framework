@@ -69,6 +69,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -80,12 +81,11 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audit\Audit.cs" />
     <Compile Include="Authorization\PasswordValidIntervalDN.cs" />
     <Compile Include="Authorization\ResetPasswordRequestDN.cs" />
+    <Compile Include="Authorization\SessionLogDN.cs" />
     <Compile Include="Authorization\UserTicketDN.cs" />
     <Compile Include="Authorization\Services.cs" />
     <Compile Include="Authorization\PermissionDN.cs" />
@@ -101,6 +101,8 @@
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
     <Compile Include="Cache\CachePermissions.cs" />
+    <Compile Include="Chart\AggregateToken.cs" />
+    <Compile Include="Chart\ChartPermissions.cs" />
     <Compile Include="Chart\ChartToken.cs" />
     <Compile Include="Chart\ChartRequest.cs" />
     <Compile Include="Chart\ChartUtils.cs" />
@@ -108,8 +110,8 @@
     <Compile Include="Chart\IntervalQueryToken.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />
-    <Compile Include="Logging\ExceptionDN.cs" />
-    <Compile Include="Logging\DeploymentLogDN.cs" />
+    <Compile Include="Exceptions\ExceptionDN.cs" />
+    <Compile Include="Deployment\DeploymentLogDN.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
@@ -194,6 +196,10 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

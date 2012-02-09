@@ -5,11 +5,16 @@ SF.Chart = SF.Chart || {};
 SF.Chart.Builder = (function () {
 
     var requestProcessedData = function (prefix) {
-        return { filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters() };
+        return {
+            filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters(),
+            orders: new SF.FindNavigator({ prefix: prefix }).serializeOrders()
+        };
     };
 
     var requestData = function (prefix) {
-        return $(".sf-chart-control[data-prefix='" + prefix + "']").find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: prefix }).serializeFilters();
+        return $(".sf-chart-control[data-prefix='" + prefix + "']").find(":input").serialize() +
+            "&filters=" + new SF.FindNavigator({ prefix: prefix }).serializeFilters() +
+            "&orders=" + new SF.FindNavigator({ prefix: prefix }).serializeOrders();
     }
 
     var updateChartBuilder = function ($chartControl, tokenChanged) {
@@ -53,10 +58,6 @@ SF.Chart.Builder = (function () {
 
     $(".sf-chart-token-config-trigger").live("click", function () {
         $(this).closest(".sf-chart-token").next().toggle();
-    });
-
-    $(".sf-chart-token-aggregate").live("change", function () {
-        updateChartBuilder($(this).closest(".sf-chart-control"));
     });
 
     $(".sf-query-token select").live("change", function () {
@@ -121,7 +122,56 @@ SF.Chart.Builder = (function () {
         });
     };
 
+    var originalNewSubtokensCombo = SF.FindNavigator.prototype.newSubTokensCombo;
+    SF.FindNavigator.prototype.newSubTokensCombo = function (index, url) {
+        var $selectedCombo = $(this.pf("ddlTokens_") + index);
+        var $chartControl = $selectedCombo.closest(".sf-chart-control");
+        if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
+            if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                url = $chartControl.attr("data-subtokens-url");
+                originalNewSubtokensCombo.call(this, index, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
+            }
+            else {
+                originalNewSubtokensCombo.call(this, index, url);
+            }
+        }
+        else {
+            this.clearChildSubtokenCombos($selectedCombo, index);
+            $("#" + SF.compose($chartControl.attr("data-prefix"), "sfOrders")).val('');
+            $chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
+        }
+    };
+
+    var originalAddFilter = SF.FindNavigator.prototype.addFilter;
+    SF.FindNavigator.prototype.addFilter = function () {
+        var $addFilter = $(this.pf("btnAddFilter"));
+        if ($addFilter.closest(".sf-chart-builder").length == 0) {
+            var $chartControl = $addFilter.closest(".sf-chart-control");
+            if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                url = $chartControl.attr("data-add-filter-url");
+                originalAddFilter.call(this, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
+            }
+            else {
+                originalNewSubtokensCombo.call(this);
+            }
+        }
+    };
+
+    var initOrders = function (prefix) {
+        $("#" + SF.compose(prefix, "tblResults") + " th")
+        .mousedown(function (e) {
+            this.onselectstart = function () { return false };
+            return false;
+        })
+        .click(function (e) {
+            new SF.FindNavigator({ prefix: prefix }).newSortOrder($(e.target), e.shiftKey);
+            $(".sf-chart-control[data-prefix='" + prefix + "'] .sf-chart-draw").click();
+            return false;
+        });
+    };
+
     return {
+        initOrders: initOrders,
         requestProcessedData: requestProcessedData,
         requestData: requestData,
         reDraw: reDraw,
@@ -571,6 +621,10 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
     },
 
     createCountArray: function (series) {
+        if (series.length == 0) {
+            return [];
+        }
+
         var dimensionCount = series[0].values.length;
         var countArray = this.createEmptyCountArray(dimensionCount);
 
@@ -647,7 +701,7 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('y', function (v, i) { return (i%2 == 0 ? 0 : (fontSize + labelMargin)); })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v); });" + this.br +
-            "}" + this.br + 
+            "}" + this.br +
             this.br +
             "//paint x-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')" + this.brt +
@@ -843,12 +897,12 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "var yHalf = (xAxisTopPosition - padding) / 2;" + this.br +
             "if (x.rangeBand() > fontSize) {" + this.brt +
             "chart.append('svg:g').attr('class', 'x-axis-tick-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') rotate(270)')" + this.brt +
-            ".enterData(data.series[0].values, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
+            ".enterData(data.dimension1, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
             ".attr('x', function (v, i) { var posy = y(countArray[i]); return posy >= yHalf ? posy - labelMargin : posy + labelMargin; })" + this.brt +
-            ".attr('y', function (v, i) { return x(JSON.stringify(data.dimension1[i])) })" + this.brt +
+            ".attr('y', function (v, i) { return x(JSON.stringify(v)) })" + this.brt +
             ".attr('text-anchor', function (v, i) { var posy = y(countArray[i]); return posy >= yHalf ? 'end' : 'start'; })" + this.brt +
             ".attr('fill', function(v, i) { return y(countArray[i]) >= yHalf ? '#fff' : '#000'; })" + this.brt +
-            ".text(function (v, i) { return myChart.getTokenLabel(data.dimension1[i]); });" + this.br +
+            ".text(function (v, i) { return myChart.getTokenLabel(v); });" + this.br +
             "}" + this.br +
             this.br;
     }
@@ -887,12 +941,12 @@ SF.Chart.TotalColumns.prototype = $.extend({}, new SF.Chart.StackedColumns(), {
             "var yHalf = (xAxisTopPosition - padding) / 2;" + this.br +
             "if (x.rangeBand() > fontSize) {" + this.brt +
             "chart.append('svg:g').attr('class', 'x-axis-tick-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', 0) rotate(270)')" + this.brt +
-            ".enterData(data.series[0].values, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
+            ".enterData(data.dimension1, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
             ".attr('x', -yHalf)" + this.brt +
-            ".attr('y', function (v, i) { return x(JSON.stringify(data.dimension1[i])) })" + this.brt +
+            ".attr('y', function (v, i) { return x(JSON.stringify(v)) })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
-            ".text(function (v, i) { return myChart.getTokenLabel(data.dimension1[i]); });" + this.br +
+            ".text(function (v, i) { return myChart.getTokenLabel(v); });" + this.br +
             "}" + this.br +
             this.br;
     }
@@ -904,7 +958,8 @@ SF.Chart.HorizontalTypeTypeValue = function () {
 SF.Chart.HorizontalTypeTypeValue.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     init: function () {
         return "//config variables" + this.br +
-            "var fontSize= " + this.fontSize + "," + this.brt +
+            "var yAxisLabelWidth= 60," + this.brt +
+            "fontSize= " + this.fontSize + "," + this.brt +
             "ticksLength= " + this.ticksLength + "," + this.brt +
             "labelMargin= " + this.labelMargin + "," + this.brt +
             "chartAxisPadding= " + this.chartAxisPadding + "," + this.brt +

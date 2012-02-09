@@ -62,7 +62,7 @@ namespace Signum.Engine.Operations
                         {
                             log.Target = entity.ToLite<IIdentifiable>();
                             log.End = TimeZoneManager.Now;
-                            using (UserDN.Scope(AuthLogic.SystemUser))
+                            using (AuthLogic.Disable())
                                 log.Save();
                         }
 

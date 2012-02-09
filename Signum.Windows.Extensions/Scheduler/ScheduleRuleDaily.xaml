@@ -7,7 +7,6 @@
     m:Common.TypeContext="d:ScheduleRuleDailyDN"
     Padding="2">
     <StackPanel>
-        <sws:Hour />
         <m:ValueLine m:Common.Route="StartingOn"/>
     </StackPanel>
 </UserControl>

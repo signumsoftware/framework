@@ -1,6 +1,6 @@
 ﻿@Html.ScriptsJs("~/help/scripts/help.js")
 
-<div class="grid_16" id="syntax-help">
+<div id="syntax-help">
     <div id="syntax-list">
         Utiliza la siguiente sintaxis:
         <h2>Textos</h2>
@@ -40,14 +40,14 @@
         Los enlaces admiten un parámetro adicional con el texto que se mostrará en el enlace. Ejemplo: <a href="http://www.google.es">Web de Google</a> con [h:http://www.google.es|Web de Google]
     </div>
 </div>
-<div class="clear"></div>
-<div class="grid_12" style="min-height:1px;">
+<div class="clearall"></div>
+<div class="help_left" style="min-height:1px;">
     <div id="saving-error"><img src="@Url.Content("~/help/Images/icon-warning.png")" /><span class="text"></span></div> 
 </div>
-<div class="grid_4">
+<div class="help_right">
    <!-- <a id="refresh" href="javascript:location.reload(true);">Refresca la página para wikificar correctamente el texto modificado</a> -->
     <a id="edit-action" class="action" href="javascript:SF.Help.edit();">Editar</a>
     <a id="syntax-action" class="action" style="display: none">Sintaxis</a>    
     <a id="save-action" class="action" href="javascript:SF.Help.save();" style="display: none">Guardar</a>    
 </div>
-<div class="clear"></div>
+<div class="clearall"></div>

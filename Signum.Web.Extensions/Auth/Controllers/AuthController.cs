@@ -41,6 +41,7 @@ namespace Signum.Web.Auth
             return RouteHelper.New().Action("Index", "Home");
         };
 
+        public static event Action OnUserLoggingOut;
         public static event Func<Controller, string> OnUserLogoutRedirect = c =>
         {
             return RouteHelper.New().Action("Index", "Home");
@@ -131,7 +132,6 @@ namespace Signum.Web.Auth
         [HttpPost]
         public ActionResult ChangePassword(FormCollection form)
         {
-
             UserDN user = null;
 
             if (UserDN.Current == null)
@@ -172,7 +172,7 @@ namespace Signum.Web.Auth
                 {
                     ViewData["Title"] = Resources.ChangePassword;
                     ModelState.FromContext(context);
-                    RollbackSessionUserChanges();
+                    RefreshSessionUserChanges();
                     return View(AuthClient.ChangePasswordView);
                 }
 
@@ -180,7 +180,7 @@ namespace Signum.Web.Auth
                 if (errorPasswordValidation.HasText())
                 {
                     ModelState.AddModelError("password", errorPasswordValidation);
-                    RollbackSessionUserChanges();
+                    RefreshSessionUserChanges();
                     return View(AuthClient.ChangePasswordView);
                 }
 
@@ -195,9 +195,9 @@ namespace Signum.Web.Auth
 
         }
 
-        private void RollbackSessionUserChanges()
+        private void RefreshSessionUserChanges()
         {
-            UserDN.SetSessionUser(Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).SingleEx()); 
+            UserDN.Current = UserDN.Current.ToLite().Retrieve(); 
         }
 
         public ActionResult ChangePasswordSuccess()
@@ -218,50 +218,37 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordView);
         }
 
-     
+
 
         [HttpPost]
         public ActionResult ResetPassword(string email)
         {
-            try
+
+            if (string.IsNullOrEmpty(email))
             {
-                if (string.IsNullOrEmpty(email))
-                    return ResetPasswordError("email", Resources.EmailMustHaveAValue);
-
-                using (AuthLogic.Disable())
-                {
-                    //Check the email belongs to a user
-                    UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx(() => Resources.EmailNotExistsDatabase);
-
-                    if (user == null)
-                        throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
-
-                    //since this is an url sent by email, it should contain the domain name
-                    ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, rpr => 
-                        Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port ) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
-                }
-
-                ViewData["email"] = email;
-                return RedirectToAction("ResetPasswordSend");
+                ModelState.AddModelError("email", Resources.EmailMustHaveAValue);
+                return View(AuthClient.ResetPasswordView);
             }
-            catch (Exception ex)
+
+            using (AuthLogic.Disable())
             {
-                return ResetPasswordError("_FORM", ex.Message);
+                //Check the email belongs to a user
+                UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx(() => Resources.EmailNotExistsDatabase);
+
+                if (user == null)
+                    throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
+
+                //since this is an url sent by email, it should contain the domain name
+                ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, rpr =>
+                    Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
             }
+
+            ViewData["email"] = email;
+            return RedirectToAction("ResetPasswordSend");
         }
 
-        ViewResult ResetPasswordError(string key, string error)
-        {
-            ModelState.AddModelError("_FORM", error);
-            return View(AuthClient.ResetPasswordView);
-        }
-
-        ViewResult ResetPasswordSetNewError(int idResetPasswordRequest, string key, string error)
-        {
-            ModelState.AddModelError("_FORM", error);
-            ViewData["rpr"] = idResetPasswordRequest;
-            return View(AuthClient.ResetPasswordSetNewView);
-        }
+      
+      
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPasswordSend()
@@ -303,44 +290,44 @@ namespace Signum.Web.Auth
         public ActionResult ResetPasswordSetNew(Lite<ResetPasswordRequestDN> rpr)
         {
             ResetPasswordRequestDN request = null;
-            try
+            UserDN user = null;
+            using (AuthLogic.Disable())
             {
-                UserDN user = null;
-                using (AuthLogic.Disable())
-                {
-                    request = rpr.Retrieve();
-                    user = Database.Query<UserDN>()
-                        .Where(u => u.Email == request.User.Email)
-                        .SingleEx();
-                }
-
-                var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
-
-                if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
-                    !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
-                {
-                    ViewData["Title"] = Resources.ChangePassword;
-                    ModelState.FromContext(context);
-                    return ResetPasswordSetNewError(request.Id, "", "");
-                }
-
-                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
-                if (errorPasswordValidation.HasText())
-                    return ResetPasswordSetNewError(request.Id, "NewPassword", errorPasswordValidation);
-
-                using (AuthLogic.Disable())
-                {
-                    Database.Save(context.Value);
-                    //remove pending requests
-                    Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == request.Code).UnsafeDelete();
-                }
-
-                return RedirectToAction("ResetPasswordSuccess");
+                request = rpr.Retrieve();
+                user = Database.Query<UserDN>()
+                    .Where(u => u.Email == request.User.Email)
+                    .SingleEx();
             }
-            catch (Exception ex)
+
+            var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
+
+            if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
+                !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
             {
-                return ResetPasswordSetNewError(request.TryCS(r => r.Id) ?? 0, ViewDataKeys.GlobalErrors, ex.Message);
+                ViewData["Title"] = Resources.ChangePassword;
+                ModelState.FromContext(context);
+                return ResetPasswordSetNewError(request.Id, "");
             }
+
+            string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+            if (errorPasswordValidation.HasText())
+                return ResetPasswordSetNewError(request.Id, errorPasswordValidation);
+
+            using (AuthLogic.Disable())
+            {
+                context.Value.Execute(UserOperation.Save);
+                //remove pending requests
+                Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == request.Code).UnsafeDelete();
+            }
+
+            return RedirectToAction("ResetPasswordSuccess");
+        }
+
+        ViewResult ResetPasswordSetNewError(int idResetPasswordRequest, string error)
+        {
+            ModelState.AddModelError("_FORM", error);
+            ViewData["rpr"] = idResetPasswordRequest;
+            return View(AuthClient.ResetPasswordSetNewView);
         }
 
         public ActionResult ResetPasswordSuccess()
@@ -395,16 +382,6 @@ namespace Signum.Web.Auth
             {
                 return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
             }
-            catch (Exception ex)
-            {
-
-                throw new Exception(Resources.ExpectedUserLogged, ex);
-            }
-
-
-            //if (user == null) //if it's an ajax request the error will match the password field
-            //    return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
-
 
             if (user == null)
                 throw new Exception(Resources.ExpectedUserLogged);
@@ -417,7 +394,7 @@ namespace Signum.Web.Auth
                     return result;
             }
 
-            UserDN.SetSessionUser(user);
+            UserDN.Current = user;
 
             //guardamos una cookie persistente si se ha seleccionado
             if (rememberMe.HasValue && rememberMe.Value)
@@ -524,7 +501,7 @@ namespace Signum.Web.Auth
         {
             var newUser = UserDN.Current.ToLite().Retrieve();
 
-            UserDN.SetSessionUser(newUser); 
+            UserDN.Current = newUser; 
 
             if (OnUpdatedSessionUser != null)
                 OnUpdatedSessionUser(newUser); 
@@ -532,7 +509,7 @@ namespace Signum.Web.Auth
 
         public static void AddUserSession(UserDN user)
         {
-            UserDN.SetSessionUser(user);
+            UserDN.Current = user;
 
             if (OnUserLogged != null)
                 OnUserLogged();
@@ -547,14 +524,18 @@ namespace Signum.Web.Auth
 
         public static void LogoutDo()
         {
-            FormsAuthentication.SignOut();
-            //Session.RemoveAll();
-            //Session.Remove(SessionUserKey);
-            var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
-            if (authCookie != null && authCookie.Value.HasText())
-                System.Web.HttpContext.Current.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+            var httpContext = System.Web.HttpContext.Current;
 
-            System.Web.HttpContext.Current.Session.Abandon();
+            if (OnUserLoggingOut != null)
+                OnUserLoggingOut();
+
+            FormsAuthentication.SignOut();
+
+            var authCookie = httpContext.Request.Cookies[AuthClient.CookieName];
+            if (authCookie != null && authCookie.Value.HasText())
+                httpContext.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+
+            httpContext.Session.Abandon();
         }
     }
 }

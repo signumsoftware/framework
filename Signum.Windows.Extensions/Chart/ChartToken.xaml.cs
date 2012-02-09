@@ -22,7 +22,6 @@ namespace Signum.Windows.Chart
     /// </summary>
     public partial class ChartToken : UserControl, IPreLoad
     {
-        public static IValueConverter SumConverter = ConverterFactory.New((AggregateFunction? af) => af == AggregateFunction.Count ? Visibility.Hidden : Visibility.Visible);
         public event EventHandler PreLoad;
         public static IValueConverter IsInterval = ConverterFactory.New((QueryToken t) => t is IntervalQueryToken ? Visibility.Visible : Visibility.Hidden);
 
@@ -46,11 +45,21 @@ namespace Signum.Windows.Chart
         {
             InitializeComponent();
             this.Loaded += new RoutedEventHandler(OnLoad);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(ChartToken_DataContextChanged);
+        }
+
+        void ChartToken_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UpdateGroup();
         }
 
         private List<QueryToken> token_SubTokensEvent(QueryToken token)
         {
-            return ChartTokenDN.SubTokensChart(token, ColumnDescriptions);
+            var ct = DataContext as ChartTokenDN;
+            if (ct == null)
+                return new List<QueryToken>();
+
+            return ct.SubTokensChart(token, ColumnDescriptions);
         }
 
         private void UpdateGroup()
@@ -64,6 +73,8 @@ namespace Signum.Windows.Chart
 
             if (PreLoad != null)
                 PreLoad(this, EventArgs.Empty);
+
+            UpdateGroup(); 
         }
     }
 }

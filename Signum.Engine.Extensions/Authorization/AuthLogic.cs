@@ -35,20 +35,16 @@ namespace Signum.Engine.Authorization
         public static UserDN SystemUser
         {
             get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
-            set { systemUser = value; }
         }
 
         public static string AnonymousUserName { get; set; }
         static UserDN anonymousUser;
         public static UserDN AnonymousUser
         {
-            get { return anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
-            set { anonymousUser = value; }
+            get { return string.IsNullOrEmpty(AnonymousUserName) ? null : anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
         }
 
-        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles =  Schema.GlobalLazy(Cache); 
-
-        public static event Action RolesModified;
+        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -102,7 +98,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartUserOperations(SchemaBuilder sb)
+        public static void StartUserGraph(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -119,8 +115,6 @@ namespace Signum.Engine.Authorization
             }
         }
 
-       
-
         static void Schema_Initializing()
         {
             var r = roles.Value;
@@ -130,8 +124,8 @@ namespace Signum.Engine.Authorization
                 using (new EntityCache())
                 using (AuthLogic.Disable())
                 {
-                    if (SystemUserName != null) SystemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
-                    if (AnonymousUserName != null) AnonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName); //TODO: OLMO hay que proporcianarlo siempre?
+                    if (SystemUserName != null) systemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
+                    if (AnonymousUserName != null) anonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName);
                 }
             }
         }
@@ -160,24 +154,7 @@ namespace Signum.Engine.Authorization
                             problems.ToString("\r\n"));
                 }
             }
-
-            if (role.Modified.Value)
-            {
-                Transaction.PostRealCommit -= InvalidateCache;
-                Transaction.PostRealCommit += InvalidateCache;
-            }
         }
-
-
-
-        public static void InvalidateCache()
-        {
-            roles.ResetPublicationOnly();
-
-            if (RolesModified != null)
-                RolesModified();
-        }
-
 
         static DirectedGraph<Lite<RoleDN>> Cache()
         {
@@ -202,7 +179,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static IDisposable UnsafeUser(string username)
+        public static IDisposable UnsafeUserSession(string username)
         {
             UserDN user;
             using (AuthLogic.Disable())
@@ -212,7 +189,14 @@ namespace Signum.Engine.Authorization
                     throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
             }
 
-            return UserDN.Scope(user);
+            return UserSession(user);
+        }
+
+        public static IDisposable UserSession(UserDN user)
+        {
+            var result = ScopeSessionFactory.OverrideSession();
+            UserDN.Current = user;
+            return result;
         }
 
         public static UserDN RetrieveUser(string username)

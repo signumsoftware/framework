@@ -3,3 +3,12 @@
     max-width:40px;
     max-height:40px;
 }
+.sf-file-repeater-element
+{
+    padding: 0;
+    margin-bottom: 0;    
+}
+.sf-file-repeater-element legend, .sf-file-repeater-element .sf-field
+{
+    float: left;
+}

@@ -15,11 +15,20 @@ using Signum.Services;
 using System.Windows.Documents;
 using Signum.Utilities;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Authorization;
+using System.Windows.Data;
+using Signum.Windows.Authorization;
 
 namespace Signum.Windows.UserQueries
 {
     public class UserQueryMenuItem : SearchControlMenuItem
     {
+        TypeAllowedBasic tab;
+        public UserQueryMenuItem(TypeAllowedBasic tab)
+        {
+            this.tab = tab;
+        }
+
         public static readonly DependencyProperty CurrentUserQueryProperty =
             DependencyProperty.Register("CurrentUserQuery", typeof(UserQueryDN), typeof(UserQueryMenuItem), new UIPropertyMetadata((d, e) => ((UserQueryMenuItem)d).UpdateCurrent((UserQueryDN)e.NewValue)));
         public UserQueryDN CurrentUserQuery
@@ -80,26 +89,31 @@ namespace Signum.Windows.UserQueries
 
             Items.Add(new Separator());
 
-            Items.Add(new MenuItem()
+            if (tab == TypeAllowedBasic.Create)
             {
-                Header = Signum.Windows.Extensions.Properties.Resources.Create, 
-                Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
-            }.Handle(MenuItem.ClickEvent, New_Clicked));
-
+                Items.Add(new MenuItem()
+                {
+                    Header = Signum.Windows.Extensions.Properties.Resources.Create,
+                    Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
+                }.Handle(MenuItem.ClickEvent, New_Clicked));
+            }
+            
             Items.Add(new MenuItem()
             {
                 Header = Signum.Windows.Extensions.Properties.Resources.Edit, 
                 Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Edit_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", Converters.IsNotNull));
+            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", notNullAndEditable));
 
             Items.Add(new MenuItem()
             {
                 Header = Signum.Windows.Extensions.Properties.Resources.Remove, 
                 Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", Converters.IsNotNull));
+            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", notNullAndEditable));
         }
+
+        static IValueConverter notNullAndEditable = ConverterFactory.New((UserQueryDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
 
         private void MenuItem_Clicked(object sender, RoutedEventArgs e)
         {

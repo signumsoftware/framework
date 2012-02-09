@@ -101,7 +101,7 @@ namespace Signum.Engine.Basics
             return dic.Keys;
         }
 
-        internal static LambdaExpression GetExpression(Type type, Enum conditionName)
+        public static LambdaExpression GetExpression(Type type, Enum conditionName)
         {
             var expression = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").TryGetC(conditionName);
 
@@ -111,7 +111,7 @@ namespace Signum.Engine.Basics
             return expression;
         }
 
-        internal static bool IsDefined(Type type, Enum conditionName)
+        public static bool IsDefined(Type type, Enum conditionName)
         {
             return infos.TryGetC(type).TryGetC(conditionName) != null;
         }

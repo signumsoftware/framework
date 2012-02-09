@@ -25,6 +25,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Entities.SMS;
 using Signum.Engine.Chart;
+using Signum.Engine.Exceptions;
 
 
 namespace Signum.Services
@@ -47,6 +48,12 @@ namespace Signum.Services
             }
             catch (Exception e)
             {
+                e.LogException(el =>
+                {
+                    el.ControllerName = GetType().Name;
+                    el.ActionName = mi.Name;
+                    el.QueryString = description;
+                });
                 throw new FaultException(e.Message);
             }
             finally
@@ -62,23 +69,24 @@ namespace Signum.Services
             {
                 using (ScopeSessionFactory.OverrideSession(session))
                 {
-                    UserDN.SetSessionUser(AuthLogic.Login(username, passwordHash));
+                    UserDN.Current = AuthLogic.Login(username, passwordHash);
                 }
             }
             catch (Exception e)
             {
                 throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
-
             }
         }
 
 
         public virtual void ChagePassword(string username, string passwordHash, string newPasswordHash)
         {
-
             try
             {
-                AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+                using (ScopeSessionFactory.OverrideSession(session))
+                {
+                    AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+                }
             }
             catch (Exception e)
             {
@@ -94,7 +102,7 @@ namespace Signum.Services
             {
                 using (ScopeSessionFactory.OverrideSession(session))
                 {
-                    UserDN.SetSessionUser(AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash));
+                    UserDN.Current = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
                 }
             }
             catch (Exception e)
@@ -107,7 +115,7 @@ namespace Signum.Services
         {
             using (ScopeSessionFactory.OverrideSession(session))
             {
-                UserDN.SetSessionUser(null);
+                UserDN.Current = null;
             }
         }
 
@@ -397,6 +405,19 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => SMSLogic.GetPhoneNumber(ie));
         }
+
+        public List<string> GetLiteralsFromDataObjectProvider(TypeDN type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType()));
+        }    
+    
+        public List<Lite> GetAssociatedTypesForTemplates()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList());
+        }
+
         #endregion
     }
 }

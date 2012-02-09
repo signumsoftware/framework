@@ -75,7 +75,7 @@ namespace Signum.Windows.Extensions.Sample
             {
                 string[] usernamePassword = auto.Split('/');
                 result.Login(usernamePassword[0], Security.EncodePassword(usernamePassword[1]));
-                UserDN.SetSessionUser(result.GetCurrentUser());
+                UserDN.Current = result.GetCurrentUser();
 
                 return result;
             }
@@ -128,7 +128,7 @@ namespace Signum.Windows.Extensions.Sample
             bool? dialogResult = login.ShowDialog();
             if (dialogResult == true)
             {
-                UserDN.SetSessionUser(result.GetCurrentUser());
+                UserDN.Current = result.GetCurrentUser();
 
                 return result;
             }

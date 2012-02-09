@@ -79,23 +79,36 @@ namespace Signum.Engine.Help
 
         public static void Synchronize(string fileName, string nameSpace)
         {
-            XElement loaded = XDocument.Load(fileName).Element(_Namespace);
-            XDocument createdDoc = NamespaceHelp.Create(nameSpace).ToXDocument();
-            XElement created = createdDoc.Element(_Namespace);
+            XDocument loadedDoc = XDocument.Load(fileName);
+            XElement loadedNs = loadedDoc.Element(_Namespace);
 
-            string loadedNameSpace = loaded.Attribute(_Name).Value;
+            XDocument createdDoc = NamespaceHelp.Create(nameSpace).ToXDocument();
+            XElement createdNs = createdDoc.Element(_Namespace); 
+            XElement createdDesc = createdDoc.Element(_Description);
+
+            string loadedNameSpace = loadedNs.Attribute(_Name).Value;
             if (nameSpace != loadedNameSpace)
             {
-                created.Value = loaded.Value;
-
                 string goodFileName = DefaultFileName(nameSpace);
+
+                if (loadedNs != null)
+                {
+                    XElement loadedDesc = loadedDoc.Element(_Description);
+                    if (loadedDesc != null)
+                        createdDesc.Value = loadedDesc.Value;
+                }
 
                 Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, goodFileName));
                 File.Delete(fileName);
-                created.Save(goodFileName);
+                createdDoc.Save(goodFileName);
                 Console.WriteLine();
             }
-
+            else if (loadedNs == null || loadedNs.Element(_Description) == null)
+            {
+                Console.WriteLine("FilModified {0}".Formato(fileName));
+                createdNs.Save(fileName);
+                Console.WriteLine();
+            }
         }
 
         public IEnumerable<SearchResult> Search(Regex regex)

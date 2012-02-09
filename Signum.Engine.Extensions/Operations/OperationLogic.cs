@@ -60,11 +60,11 @@ namespace Signum.Engine.Operations
         public static readonly HashSet<Type> ProtectedSaveTypes = new HashSet<Type>();
 
         static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
-        static readonly Variable<bool> saveGloballyAllowed = Statics.ThreadVariable<bool>("saveOperationsGloballyAllowed"); 
+        public static bool AllowSaveGlobally { get; set; }
 
         public static bool IsSaveProtected(Type type)
         {
-            if (saveGloballyAllowed.Value)
+            if (AllowSaveGlobally)
                 return false;
 
             var it = allowedTypes.Value;
@@ -84,12 +84,8 @@ namespace Signum.Engine.Operations
             return new Disposable(() => allowedTypes.Value = allowedTypes.Value.Pop());
         }
 
-        public static IDisposable AllowSaveGlobally()
-        {
-            if (saveGloballyAllowed.Value) return null;
-            saveGloballyAllowed.Value = true;
-            return new Disposable(() => saveGloballyAllowed.Value = false);
-        }
+       
+
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -398,7 +394,7 @@ namespace Signum.Engine.Operations
             {
                 var list = GraphExplorer.FromRoot(entity).Where(a => a.SelfModified);
                 if (list.Any())
-                    throw new InvalidOperationException("Operation {0} needs a Lite or a fresh entity, but the entity has changes:\r\n {0}".Formato(result.Key, list.ToString("\r\n")));
+                    throw new InvalidOperationException("Operation {0} needs a Lite or a fresh entity, but the entity has changes:\r\n {1}".Formato(result.Key, list.ToString("\r\n")));
             }
 
             return result;
@@ -462,6 +458,13 @@ namespace Signum.Engine.Operations
             return (T)args[pos];
         }
 
+        public static string InState<T>(this T state, Enum operationKey, params T[] validStates) where T : struct
+        {
+            if (validStates.Contains(state))
+                return null;
+
+            return Resources.ImpossibleToExecute0FromState1.Formato(operationKey.NiceToString(), ((Enum)(object)state).NiceToString());
+        }
 
         public static Type[] FindTypes(Enum operation)
         {

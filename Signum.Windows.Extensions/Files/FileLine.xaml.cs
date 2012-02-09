@@ -157,12 +157,8 @@ namespace Signum.Windows.Files
             else if (typeof(IFile).IsAssignableFrom(cleanType))
             {
                 IFile file = (IFile)Server.Convert(entity, cleanType);
-
-                if (file.BinaryFile == null)
-                    file.BinaryFile = OnResolveBinaryFile(file); 
-
                 string filePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), file.FileName);
-                File.WriteAllBytes(filePath, file.BinaryFile);
+                File.WriteAllBytes(filePath, file.BinaryFile ?? OnResolveBinaryFile(file));
                 Process.Start(filePath);
             }
             else
@@ -180,17 +176,12 @@ namespace Signum.Windows.Files
             {
                 IFile file = (IFile)Server.Convert(entity, cleanType);
 
-                if (file.BinaryFile == null)
-                    file.BinaryFile = OnResolveBinaryFile(file); 
-
                 SaveFileDialog sfd = new SaveFileDialog();
                 if (CustomizeFileDialog != null)
                     CustomizeFileDialog(sfd); 
 
                 if (sfd.ShowDialog() == true)
-                {
-                    File.WriteAllBytes(sfd.FileName, file.BinaryFile);
-                }                
+                    File.WriteAllBytes(sfd.FileName, file.BinaryFile ?? OnResolveBinaryFile(file));
             }
             else
                 throw new NotSupportedException(Signum.Windows.Extensions.Properties.Resources.SavingHasNotDefaultImplementationFor0.Formato(Type)); 

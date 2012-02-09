@@ -22,18 +22,15 @@ namespace Signum.Windows.SMS
     /// </summary>
     public partial class SMSMessage : UserControl
     {
+        public static IValueConverter StateToVisibility = ConverterFactory.New((SMSMessageState s) => s == SMSMessageState.Created ? Visibility.Visible : Visibility.Collapsed);
+        public static IValueConverter NotStateToVisibility = ConverterFactory.New((SMSMessageState s) => s != SMSMessageState.Created ? Visibility.Visible : Visibility.Collapsed);
+
         public SMSMessage()
         {
             InitializeComponent();
-            foreach (var ch in LogicalTreeHelper.GetChildren(textMessage))
-            {
-                if (ch is TextBox)
-                {
-                    ((TextBox)ch).TextChanged += new TextChangedEventHandler(SMSMessage_TextChanged);
-                    text = (TextBox)ch;
-                    break;
-                }
-            }
+            text = textMessage.Child<TextBox>();
+            text.TextWrapping = TextWrapping.WrapWithOverflow;
+            text.TextChanged += new TextChangedEventHandler(SMSMessage_TextChanged);
             BrushConverter bc = new BrushConverter();
             greenBrush = (Brush)bc.ConvertFromString("Green");
             redBrush = (Brush)bc.ConvertFromString("Red");
@@ -44,6 +41,7 @@ namespace Signum.Windows.SMS
                 new GradientStop(Color.FromRgb(255, 204, 204), 1)
             }, new Point(0.5, 1), new Point(0.5, 0));
             normalBackGround = text.Background;
+            VisualCharactersToEnd();
         }
 
         private void SMSMessage_TextChanged(object sender, TextChangedEventArgs e)
@@ -71,6 +69,18 @@ namespace Signum.Windows.SMS
                 charactersLeft.Foreground = greenBrush;
                 charactersLeft.Background = normalBackGround;
             }
+        }
+
+        public SMSMessageDN MessageDC
+        {
+            get { return (SMSMessageDN)DataContext; }
+            set { RaiseEvent(new ChangeDataContextEventArgs(value)); }
+        }
+
+        private void removeNonSMSChars_Click(object sender, RoutedEventArgs e)
+        {
+            MessageDC.Message = SMSCharacters.RemoveNoSMSCharacters(MessageDC.Message);
+            MessageDC = MessageDC;
         }
     }
 }
