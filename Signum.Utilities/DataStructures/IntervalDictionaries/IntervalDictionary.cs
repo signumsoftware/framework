@@ -20,11 +20,11 @@ namespace Signum.Utilities.DataStructures
         {
         }
 
-        public IntervalDictionary(IEnumerable<Tuple<Interval<K>,V>> pairs)
+        public IntervalDictionary(IEnumerable<KeyValuePair<Interval<K>,V>> pairs)
         {
-            foreach (var item in pairs)
+            foreach (var kvp in pairs)
             {
-                Add(item.Item1, item.Item2);
+                Add(kvp.Key, kvp.Value);
             }
         }
 
@@ -288,21 +288,21 @@ namespace Signum.Utilities.DataStructures
             Interval<K>[] keys = me.Intervals.Concat(other.Intervals).SelectMany(a => a.Elements()).Distinct().Order().BiSelect((min, max) => new Interval<K>(min, max)).ToArray();
             return new IntervalDictionary<K, VR>(keys
                 .Select(k => new { Intervalo = k, Valor = mixer(k, me.TryGetValue(k.Min), other.TryGetValue(k.Min)) })
-                .Where(a => a.Valor.HasInterval).Select(a => new Tuple<Interval<K>, VR>(a.Intervalo, a.Valor.Value)));
+                .Where(a => a.Valor.HasInterval).Select(a => KVP.Create(a.Intervalo, a.Valor.Value)));
         }
 
         public static IntervalDictionary<K, VR> Collapse<K, V, VR>(this IEnumerable<IntervalDictionary<K, V>> collection, Func<Interval<K>, IEnumerable<V>, VR> mixer)
             where K : struct, IComparable<K>, IEquatable<K>
         {
             Interval<K>[] keys = collection.SelectMany(a => a).SelectMany(a => a.Key.Elements()).Distinct().Order().BiSelect((min, max) => new Interval<K>(min, max)).ToArray();
-            return new IntervalDictionary<K, VR>(keys.Select(k => new Tuple<Interval<K>, VR>(k, mixer(k, collection.Select(intDic => intDic.TryGetValue(k.Min)).Where(vi => vi.HasInterval).Select(vi => vi.Value)))));
+            return new IntervalDictionary<K, VR>(keys.Select(k => KVP.Create(k, mixer(k, collection.Select(intDic => intDic.TryGetValue(k.Min)).Where(vi => vi.HasInterval).Select(vi => vi.Value)))));
         }
 
         public static IntervalDictionary<K, VR> AggregateIntervalDictionary<K, V, VR>(this IEnumerable<Tuple<Interval<K>, V>> collection, Func<Interval<K>, IEnumerable<V>, VR> mixer)
            where K : struct, IComparable<K>, IEquatable<K>
         {
             Interval<K>[] keys = collection.SelectMany(a => a.Item1.Elements()).Distinct().Order().BiSelect((min, max) => new Interval<K>(min, max)).ToArray();
-            return new IntervalDictionary<K, VR>(keys.Select(k => new Tuple<Interval<K>, VR>(k, mixer(k, collection.Where(a => a.Item1.Subset(k)).Select(a => a.Item2)))));
+            return new IntervalDictionary<K, VR>(keys.Select(k => KVP.Create(k, mixer(k, collection.Where(a => a.Item1.Subset(k)).Select(a => a.Item2)))));
         }
 
         public static IntervalDictionary<K, VR> Filter<K, V, VR>(this IntervalDictionary<K, V> me, Interval<K> filter, Func<Interval<K>, V, VR> mapper)
@@ -318,10 +318,11 @@ namespace Signum.Utilities.DataStructures
             return result; 
         }
 
-        public static IntervalDictionary<K, V> ToIntervalDictionary<K, V, T>(this IEnumerable<T> collection, Func<T, Interval<K>> intervalSelector, Func<T, V> valueSelector)
-           where K : struct, IEquatable<K>, IComparable<K>
+
+        public static IntervalDictionary<K, V> ToIntervalDictionary<K, V>(this IEnumerable<KeyValuePair<Interval<K>, V>> collection)
+       where K : struct, IEquatable<K>, IComparable<K>
         {
-            return new IntervalDictionary<K, V>(collection.Select(p => new Tuple<Interval<K>, V>(intervalSelector(p), valueSelector(p))));
+            return new IntervalDictionary<K, V>(collection);
         }
 
         internal static IntervalDictionary<K, int> ToIndexIntervalDictinary<Q, K>(this IEnumerable<Q> squares, Func<Q, IEnumerable<K>> func)
