@@ -387,7 +387,8 @@ namespace Signum.Engine
                 avoidIndependentTransactions.Value = true;
             }
 
-            public virtual void Commit()
+
+            public override void Commit()
             {
                 if (Started)
                 {
