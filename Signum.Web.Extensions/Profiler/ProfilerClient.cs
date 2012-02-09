@@ -19,6 +19,9 @@ using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 using System.Web.Mvc.Html;
+using System.Collections;
+using System.Web.Script.Serialization;
+using System.Drawing;
 
 namespace Signum.Web.Profiler
 {
@@ -32,6 +35,43 @@ namespace Signum.Web.Profiler
             {
                 Navigator.RegisterArea(typeof(ProfilerClient));
             }
+        }
+
+        public static Dictionary<string, Color> RoleColors = new Dictionary<string, Color>
+        {
+            { "SQL", Color.Gold },
+            { "DB", Color.MediumSlateBlue },
+            { "LINQ", Color.Violet },
+            { "MvcRequest", Color.LimeGreen },
+            { "MvcResult", Color.SeaGreen }
+        };
+
+        public static string HeavyDetailsToJson(this IEnumerable<HeavyProfilerEntry> entries)
+        {
+            return new JavaScriptSerializer().Serialize(entries.Select(e => new 
+            {
+                e.BeforeStart,
+                e.Start,
+                e.End,
+                Elapsed = e.Elapsed.NiceToString(),
+                e.Role,
+                Color = GetColor(e.Role),
+                e.Depth,
+                AditionalData = e.AditionalDataPreview(),
+                FullIndex = e.FullIndex()
+            }));
+        }
+
+        private static string GetColor(string role)
+        {
+            if (role == null)
+                return Color.Gray.ToHtml();
+
+            Color color;
+            if (RoleColors.TryGetValue(role, out color))
+                return color.ToHtml();
+
+            return ColorExtensions.ToHtmlColor(StringHashEncoder.GetHashCode32(role));
         }
 
         public static MvcHtmlString ProfilerEntry(this HtmlHelper htmlHelper, string linkText,  string indices)

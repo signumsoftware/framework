@@ -46,7 +46,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Profiler/Views/HeavyDetails.cshtml")]
-    public class _Page_Profiler_Views_HeavyDetails_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Profiler_Views_HeavyDetails_cshtml : System.Web.Mvc.WebViewPage<HeavyProfilerEntry>
     {
 
 
@@ -64,17 +64,14 @@ namespace ASP
         {
 
 
-WriteLiteral("\r\n");
-
-
-   HeavyProfilerEntry entry = (HeavyProfilerEntry)Model;
 
 WriteLiteral("<h2>\r\n    Profiler Entry (\r\n");
 
 
-     foreach (var e in entry.FollowC(a => a.Parent).Skip(1).Reverse())
+     foreach (var e in Model.FollowC(a => a.Parent).Skip(1).Reverse())
     {
-Write(Html.ProfilerEntry(e.Index.ToString(), e.FullIndex()));
+        
+   Write(Html.ProfilerEntry(e.Index.ToString(), e.FullIndex()));
 
 
 WriteLiteral(".\r\n");
@@ -85,86 +82,52 @@ WriteLiteral(".\r\n");
 WriteLiteral("    ");
 
 
-Write(entry.Index.ToString());
+Write(Model.Index.ToString());
 
-WriteLiteral(")</h2>\r\n");
+WriteLiteral(")\r\n</h2>\r\n");
 
 
 Write(Html.ActionLink("(View all)",(ProfilerController  pc)=>pc.Heavy()));
 
-WriteLiteral("\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>\r\n            Method\r\n" +
-"        </th>\r\n        <td>\r\n            ");
+WriteLiteral("\r\n<br />\r\n\r\n<h3>Breakdown</h3>\r\n<div class=\"sf-profiler-chart\" data-detail-url=\"");
 
 
-        Write(entry.Type.TryCC(t => t.TypeName()));
+                                           Write(Url.Action("HeavyRoute", "Profiler"));
+
+WriteLiteral("\">\r\n</div>\r\n<br />\r\n\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>\r\n" +
+"            Method\r\n        </th>\r\n        <td>\r\n            ");
+
+
+        Write(Model.Type.TryCC(t => t.TypeName()));
 
 WriteLiteral(".");
 
 
-                                              Write(entry.Method.Name);
+                                              Write(Model.Method.Name);
 
 WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            File Line\r\n      " +
 "  </th>\r\n        <td>\r\n            ");
 
 
-       Write(entry.StackTrace.GetFrame(0).GetFileLineAndNumber());
+       Write(Model.StackTrace.GetFrame(0).GetFileLineAndNumber());
 
 WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            Role\r\n        </t" +
 "h>\r\n        <td>\r\n            ");
 
 
-       Write(entry.Role);
+       Write(Model.Role);
 
 WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            Time\r\n        </t" +
 "h>\r\n        <td>\r\n            ");
 
 
-       Write(entry.Elapsed.NiceToString());
+       Write(Model.Elapsed.NiceToString());
 
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            Direct Childs\r\n  " +
-"      </th>\r\n        <td>\r\n            ");
-
-
-       Write(entry.GetEntriesResume().TryToString());
-
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n");
+WriteLiteral("\r\n        </td>\r\n    </tr>\r\n</table>\r\n<br />\r\n\r\n<h3>Aditional Data</h3>\r\n<div>\r\n " +
+"   <pre>\r\n    <code>\r\n        ");
 
 
-     foreach (var kvp in entry.GetDescendantRoles())
-    { 
-
-WriteLiteral("        <tr>\r\n            <th>\r\n                ");
-
-
-           Write(kvp.Key);
-
-WriteLiteral(" Childs\r\n            </th>\r\n            <td>\r\n                ");
-
-
-           Write(kvp.Value.ToString(entry));
-
-WriteLiteral("\r\n            </td>\r\n        </tr>\r\n");
-
-
-    }
-
-WriteLiteral("</table>\r\n<br />\r\n");
-
-
- if (entry.Entries != null)
-{
-
-WriteLiteral("    <h3>\r\n        Childs</h3>\r\n");
-
-
-    Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), entry.Entries);
-}
-
-WriteLiteral("<h3>\r\n    Aditional Data</h3>\r\n\r\n    <div>\r\n    \r\n    </div>\r\n<div>\r\n    <pre>\r\n " +
-"   <code>\r\n        ");
-
-
-   Write(entry.AditionalData);
+   Write(Model.AditionalData);
 
 WriteLiteral(@"
     </code>
@@ -191,9 +154,9 @@ WriteLiteral(@"
 ");
 
 
-         for (int i = 0; i < entry.StackTrace.FrameCount; i++)
+         for (int i = 0; i < Model.StackTrace.FrameCount; i++)
         {
-            var frame = entry.StackTrace.GetFrame(i);
+            var frame = Model.StackTrace.GetFrame(i);
             var type = frame.GetMethod().DeclaringType;
 
 WriteLiteral("            <tr>\r\n                <td>\r\n");
@@ -235,6 +198,38 @@ WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
         }
 
 WriteLiteral("    </tbody>\r\n</table>\r\n<br />\r\n");
+
+
+Write(Html.ScriptCss("~/Profiler/Content/SF_Profiler.css"));
+
+WriteLiteral("\r\n");
+
+
+Write(Html.ScriptsJs("~/scripts/d3/d3.min.js",
+                "~/scripts/d3/d3.geom.min.js",
+                "~/scripts/d3/d3.layout.min.js",
+                "~/Profiler/Scripts/SF_Profiler.js"));
+
+WriteLiteral("\r\n");
+
+
+   
+    var fullTree = Model.FollowC(e => e.Parent).ToList();
+    fullTree.AddRange(Model.DescendantsAndSelf()); 
+
+
+WriteLiteral("<script type=\"text/javascript\">\r\n    $(function() {\r\n        SF.Profiler.heavyDet" +
+"ailsChart(");
+
+
+                                 Write(Html.Raw(fullTree.Distinct().HeavyDetailsToJson()));
+
+WriteLiteral(", ");
+
+
+                                                                                      Write(Model.Depth);
+
+WriteLiteral(");\r\n    });\r\n</script>\r\n\r\n");
 
 
         }

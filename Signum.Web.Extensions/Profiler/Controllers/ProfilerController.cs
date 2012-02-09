@@ -20,8 +20,6 @@ using Signum.Entities.Profiler;
 
 namespace Signum.Web.Profiler
 {
-  
-
     public class ProfilerController : Controller
     {
         public ActionResult Heavy()
@@ -34,7 +32,6 @@ namespace Signum.Web.Profiler
                 return PartialView(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), HeavyProfiler.Entries); 
             else
                 return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), HeavyProfiler.Entries); 
-          
         }
 
         public ActionResult Statistics(SqlProfileResumeOrder order)
