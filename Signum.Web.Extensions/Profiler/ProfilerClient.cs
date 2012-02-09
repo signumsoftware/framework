@@ -55,11 +55,23 @@ namespace Signum.Web.Profiler
                 e.End,
                 Elapsed = e.Elapsed.NiceToString(),
                 e.Role,
-                Color = RoleColors.TryGetS(e.Role).TrySC(c => c.ToHtml()) ?? ColorExtensions.ToHtmlColor(StringHashEncoder.GetHashCode32(e.Role)),
+                Color = GetColor(e.Role),
                 e.Depth,
                 AditionalData = e.AditionalDataPreview(),
                 FullIndex = e.FullIndex()
             }));
+        }
+
+        private static string GetColor(string role)
+        {
+            if (role == null)
+                return Color.Gray.ToHtml();
+
+            Color color;
+            if (RoleColors.TryGetValue(role, out color))
+                return color.ToHtml();
+
+            return ColorExtensions.ToHtmlColor(StringHashEncoder.GetHashCode32(role));
         }
 
         public static MvcHtmlString ProfilerEntry(this HtmlHelper htmlHelper, string linkText,  string indices)
