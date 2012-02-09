@@ -118,8 +118,6 @@ namespace Signum.Windows
 
             base.OnLoad(sender, e);
 
-            combo.IsEnabled = !Common.GetIsReadOnly(this);
-
             if (LoadDataTrigger == LoadDataTrigger.OnLoad)
                 OnLoadData(sender, e);
             else

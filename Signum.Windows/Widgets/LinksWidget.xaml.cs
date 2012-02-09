@@ -186,6 +186,11 @@ namespace Signum.Windows
         {
         }
 
+        public QuickLinkNavigate(string columnName, object value, UniqueType unique)
+            : this(typeof(T), columnName, value, unique)
+        {
+        }
+
         public QuickLinkNavigate(object queryName, string columnName, object value, UniqueType unique): 
             this(new FindUniqueOptions(queryName)
             {

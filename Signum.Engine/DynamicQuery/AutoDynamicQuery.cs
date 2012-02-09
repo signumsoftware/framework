@@ -51,14 +51,17 @@ namespace Signum.Engine.DynamicQuery
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            var columns = new List<Column> { new _EntityColumn(EntityColumn().BuildColumnDescription()) };
+            var ex = new _EntityColumn(EntityColumn().BuildColumnDescription());
+
             DQueryable<T> orderQuery = Query
                 .ToDQueryable(GetColumnDescriptions())
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
-                .Select(columns);
+                .Select(new List<Column> { ex});
 
-            return (Lite)orderQuery.Query.Unique(request.UniqueType);
+            var exp = Expression.Lambda<Func<object, Lite>>(Expression.Convert(ex.Token.BuildExpression(orderQuery.Context), typeof(Lite)), orderQuery.Context.Parameter);
+
+            return orderQuery.Query.Select(exp).Unique(request.UniqueType);
         }
         public override Expression Expression
         {
