@@ -227,7 +227,7 @@ namespace Signum.Engine.Cache
                 {
                     using (new EntityCache(true))
                     using (Schema.Current.GlobalMode())
-                    using (Transaction tr = new Transaction(true))
+                    using (Transaction tr = Transaction.ForceNew())
                     using (HeavyProfiler.Log("CACHE"))
                     {
                         DisabledTypesDuringTransaction().Add(typeof(T));
@@ -290,7 +290,7 @@ namespace Signum.Engine.Cache
 
                 Transaction.PostRealCommit += () =>
                 {
-                    InvalidateAllConnectedTypes(typeof(T));
+                    InvalidateAllConnectedTypes(typeof(T), true);
                 }; 
             }
 

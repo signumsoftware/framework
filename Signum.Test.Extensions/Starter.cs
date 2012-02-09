@@ -20,6 +20,7 @@ using Signum.Engine.UserQueries;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Basics;
 using Signum.Engine.Chart;
+using Signum.Engine.Cache;
 
 namespace Signum.Test.Extensions
 {
@@ -70,6 +71,8 @@ namespace Signum.Test.Extensions
                 UserTicketLogic.Start(sb, dqm);
                 OperationLogic.Start(sb, dqm);
 
+                CacheLogic.Start(sb);
+
                 AuthLogic.StartAllModules(sb, dqm, typeof(IServerSample));
 
                 QueryLogic.Start(sb);
@@ -86,6 +89,9 @@ namespace Signum.Test.Extensions
                 ReportsLogic.Start(sb, dqm, true);
 
                 Signum.Test.Starter.StartMusic(sb, dqm);
+
+                
+                CacheLogic.CacheTable<LabelDN>(sb);
 
                 AlbumGraph.Register();
                 OperationLogic.Register(new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
