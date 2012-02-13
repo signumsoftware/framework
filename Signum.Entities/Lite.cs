@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.Diagnostics;
 
 namespace Signum.Entities
 {
@@ -83,7 +84,7 @@ namespace Signum.Entities
         }
     }
 
-    [Serializable]
+    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
     public abstract class Lite : Modifiable, IComparable, IComparable<Lite>
     {
         Type runtimeType;
