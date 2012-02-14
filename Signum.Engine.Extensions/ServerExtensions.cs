@@ -26,6 +26,8 @@ using Signum.Engine.UserQueries;
 using Signum.Entities.SMS;
 using Signum.Engine.Chart;
 using Signum.Engine.Exceptions;
+using System.IO;
+using System.Xml;
 
 
 namespace Signum.Services
@@ -250,6 +252,21 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
              () => TypeAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
+        }
+
+        public byte[] DownloadAuthRules()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+              () =>
+              {
+                  using (MemoryStream ms = new MemoryStream())
+                  using (XmlWriter wr = new XmlTextWriter(ms, Encoding.UTF8))
+                  {
+                      AuthLogic.ExportRules().WriteTo(wr);
+
+                      return ms.ToArray();
+                  }
+              });
         }
 
         #endregion
