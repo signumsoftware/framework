@@ -68,8 +68,14 @@ namespace Signum.Windows
         public static readonly IValueConverter NotBoolToVisibility =
             ConverterFactory.New((bool b) => b ? Visibility.Collapsed : Visibility.Visible);
 
+        public static readonly IValueConverter ZeroToVisibility =
+            ConverterFactory.New((int count) => count == 0 ? Visibility.Visible : Visibility.Collapsed);
+
+        public static readonly IValueConverter NotZeroToVisibility =
+            ConverterFactory.New((int count) => count == 0 ? Visibility.Collapsed : Visibility.Visible);
+
         public static readonly IValueConverter NullToVisibility =
-            ConverterFactory.New((object o) => o != null ? Visibility.Visible : Visibility.Collapsed);
+          ConverterFactory.New((object o) => o != null ? Visibility.Visible : Visibility.Collapsed);
 
         public static readonly IValueConverter NotNullToVisibility =
            ConverterFactory.New((object o) => o != null ? Visibility.Collapsed : Visibility.Visible);

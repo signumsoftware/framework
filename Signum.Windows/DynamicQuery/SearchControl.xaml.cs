@@ -388,7 +388,7 @@ namespace Signum.Windows
                 OrderOption oo = OrderOptions[i];
 
                 var fullKey = oo.Token.FullKey();
-
+                
                 GridViewColumnHeader header = gvResults.Columns
                     .Select(c => (GridViewColumnHeader)c.Header)
                     .FirstOrDefault(c => ((ColumnInfo)c.Tag).Column.Name == fullKey);

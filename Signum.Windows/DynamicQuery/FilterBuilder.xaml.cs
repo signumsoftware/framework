@@ -160,25 +160,9 @@ namespace Signum.Windows
 
         private void btRemove_Click(object sender, RoutedEventArgs e)
         {
-            RemoveFilters();
+            Filters.Remove((FilterOption)((Button)sender).DataContext);
         }
 
-        private void RemoveFilters()
-        {
-            var toRemove = lvFilters.SelectedItems.Cast<FilterOption>().ToList();
-            foreach (var f in toRemove)
-            {
-                Filters.Remove(f);
-            }
-        }
-
-        private void lvFilters_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == Key.Delete)
-            {
-                RemoveFilters();
-            }
-        }
 
         private void lvFilters_DragOver(object sender, DragEventArgs e)
         {
@@ -192,23 +176,15 @@ namespace Signum.Windows
                 FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
 
                 Filters.Add(filter);
-
-                RefreshFirstColumn();
             }
         }
 
-        public void RefreshFirstColumn()
-        {
-            firstColumn.Width = 0;
-            firstColumn.Width = double.NaN;
-        }
 
         public void AddFilter(QueryToken queryToken)
         {
-
             if (queryToken == null)
             {
-                MessageBox.Show(Properties.Resources.NoFilterSelected);
+                MessageBox.Show(Properties.Resources.NoColumnSelected);
                 return;
             }
 
@@ -222,8 +198,6 @@ namespace Signum.Windows
             };
 
             Filters.Add(f);
-
-            RefreshFirstColumn();
         }
     }
 }

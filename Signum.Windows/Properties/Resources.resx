@@ -129,8 +129,8 @@
   <data name="NullValueNotAllowed" xml:space="preserve">
     <value>Null value not allowed</value>
   </data>
-  <data name="NoFilterSelected" xml:space="preserve">
-    <value>No filter selected</value>
+  <data name="NoColumnSelected" xml:space="preserve">
+    <value>No column selected</value>
   </data>
   <data name="CreateNew" xml:space="preserve">
     <value>Create new</value>
@@ -352,5 +352,8 @@ Lose changes?</value>
   </data>
   <data name="Of" xml:space="preserve">
     <value>of</value>
+  </data>
+  <data name="NoFiltersSpecified" xml:space="preserve">
+    <value>No filters specified</value>
   </data>
 </root>
