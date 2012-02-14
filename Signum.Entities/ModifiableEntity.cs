@@ -16,10 +16,12 @@ using System.Collections.ObjectModel;
 using Signum.Entities.Reflection;
 using System.Threading;
 using System.Collections;
+using System.Diagnostics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
-    [Serializable]
+    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
         [Ignore]
@@ -378,5 +380,75 @@ namespace Signum.Entities
         }
 
         #endregion
+    }
+
+    //Based on: http://blogs.msdn.com/b/jaredpar/archive/2010/02/19/flattening-class-hierarchies-when-debugging-c.aspx
+    internal sealed class FlattenHierarchyProxy
+    {
+        [DebuggerDisplay("{Value}", Name = "{Name,nq}", Type = "{TypeName,nq}")]
+        internal struct Member
+        {
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            internal string Name;
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            internal object Value;
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            internal Type Type;
+            internal Member(string name, object value, Type type)
+            {
+                Name = name;
+                Value = value;
+                Type = type;
+            }
+
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            internal string TypeName
+            {
+                get { return Type.TypeName(); }
+            }
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly object target;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private Member[] memberList;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        internal Member[] Items
+        {
+            get
+            {
+                if (memberList == null)
+                {
+                    memberList = BuildMemberList().ToArray();
+                }
+                return memberList;
+            }
+        }
+
+        public FlattenHierarchyProxy(object target)
+        {
+            this.target = target;
+        }
+
+        private List<Member> BuildMemberList()
+        {
+            var list = new List<Member>();
+            if (target == null)
+                return list;
+
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+            var type = target.GetType();
+            foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t=> t!= typeof(ModifiableEntity) && t!= typeof(Modifiable)).Reverse())
+            {
+                foreach (var fi in t.GetFields(flags).OrderBy(f => f.MetadataToken))
+                {
+                    object value = fi.GetValue(target);
+                    list.Add(new Member(fi.Name, value, fi.FieldType));
+                }
+            }
+
+            return list;
+        }
     }
 }
