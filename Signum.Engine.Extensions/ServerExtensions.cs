@@ -28,13 +28,15 @@ using Signum.Engine.Chart;
 using Signum.Engine.Exceptions;
 using System.IO;
 using System.Xml;
+using Signum.Engine.Profiler;
 
 
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, 
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, 
-        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer
+        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
+        IProfilerServer
     {
         protected override T Return<T>(MethodBase mi, string description, Func<T> function)
         {
@@ -139,7 +141,7 @@ namespace Signum.Services
         #region IOperationServer Members
         public List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetEntityOperationInfos {0}".Formato(entity.GetType()),
+            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
                 () => OperationLogic.ServiceGetEntityOperationInfos(entity));
         }
 
@@ -157,43 +159,43 @@ namespace Signum.Services
 
         public IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperation {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
         public IIdentifiable ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperationLite {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
         }
 
         public IIdentifiable Delete(Lite lite, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "Delete {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceDelete(lite, operationKey, args));
         }
 
         public IIdentifiable Construct(Type type, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "Construct {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstruct(type, operationKey, args));
         }
 
         public IIdentifiable ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ConstructFrom {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
         public IIdentifiable ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ConstructFromLite {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
         }
 
         public IIdentifiable ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ConstructFromMany {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
         #endregion
@@ -435,6 +437,14 @@ namespace Signum.Services
                 () => SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList());
         }
 
+        #endregion
+
+        #region Profiler
+        public void PushProfilerEntries(List<HeavyProfilerEntry> entries)
+        {
+            Execute(MethodInfo.GetCurrentMethod(), () =>
+                ProfilerLogic.ProfilerEntries(entries)); 
+        }
         #endregion
     }
 }

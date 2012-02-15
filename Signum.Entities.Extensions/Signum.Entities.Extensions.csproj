@@ -126,6 +126,7 @@
     <Compile Include="Operations\LogOperationDN.cs" />
     <Compile Include="Processes\Process.cs" />
     <Compile Include="Processes\Package.cs" />
+    <Compile Include="Profiler\IProfilerServer.cs" />
     <Compile Include="Profiler\ProfilerPermissions.cs" />
     <Compile Include="SMS\SMSCharacters.cs" />
     <Compile Include="UserQueries\IUserQueryServer.cs" />

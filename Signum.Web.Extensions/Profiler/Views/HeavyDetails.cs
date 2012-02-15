@@ -77,7 +77,7 @@ WriteLiteral("<h2>\r\n    Profiler Entry (\r\n");
 WriteLiteral(".\r\n");
 
 
-    }
+        }
 
 WriteLiteral("    ");
 
@@ -87,32 +87,16 @@ Write(Model.Index.ToString());
 WriteLiteral(")\r\n</h2>\r\n");
 
 
-Write(Html.ActionLink("(View all)",(ProfilerController  pc)=>pc.Heavy()));
+Write(Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy()));
 
-WriteLiteral("\r\n<br />\r\n\r\n<h3>Breakdown</h3>\r\n<div class=\"sf-profiler-chart\" data-detail-url=\"");
+WriteLiteral("\r\n<br />\r\n<h3>\r\n    Breakdown</h3>\r\n<div class=\"sf-profiler-chart\" data-detail-ur" +
+"l=\"");
 
 
                                            Write(Url.Action("HeavyRoute", "Profiler"));
 
-WriteLiteral("\">\r\n</div>\r\n<br />\r\n\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>\r\n" +
-"            Method\r\n        </th>\r\n        <td>\r\n            ");
-
-
-        Write(Model.Type.TryCC(t => t.TypeName()));
-
-WriteLiteral(".");
-
-
-                                              Write(Model.Method.Name);
-
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            File Line\r\n      " +
-"  </th>\r\n        <td>\r\n            ");
-
-
-       Write(Model.StackTrace.GetFrame(0).GetFileLineAndNumber());
-
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            Role\r\n        </t" +
-"h>\r\n        <td>\r\n            ");
+WriteLiteral("\">\r\n</div>\r\n<br />\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>\r\n  " +
+"          Role\r\n        </th>\r\n        <td>\r\n            ");
 
 
        Write(Model.Role);
@@ -123,81 +107,92 @@ WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n    
 
        Write(Model.Elapsed.NiceToString());
 
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n</table>\r\n<br />\r\n\r\n<h3>Aditional Data</h3>\r\n<div>\r\n " +
-"   <pre>\r\n    <code>\r\n        ");
+WriteLiteral("\r\n        </td>\r\n    </tr>\r\n</table>\r\n<br />\r\n<h3>\r\n    Aditional Data</h3>\r\n<div" +
+">\r\n    <pre>\r\n    <code>\r\n        ");
 
 
    Write(Model.AditionalData);
 
-WriteLiteral(@"
-    </code>
-    </pre>
-</div>
-<br />
-<h3>
-    StackTrace</h3>
-<table class=""sf-search-results"">
-    <thead>
-        <tr>
-            <th>
-                Type
-            </th>
-            <th>
-                Method
-            </th>
-            <th>
-                FileLine
-            </th>
-        </tr>
-    </thead>
-    <tbody>
+WriteLiteral("\r\n    </code>\r\n    </pre>\r\n</div>\r\n<br />\r\n<h3>\r\n    StackTrace</h3>\r\n");
+
+
+ if (Model.StackTrace == null)
+{
+
+WriteLiteral("    <span>No StackTrace</span>\r\n");
+
+
+}
+else
+{
+
+WriteLiteral(@"    <table class=""sf-search-results"">
+        <thead>
+            <tr>
+                <th>
+                    Type
+                </th>
+                <th>
+                    Method
+                </th>
+                <th>
+                    FileLine
+                </th>
+            </tr>
+        </thead>
+        <tbody>
 ");
 
 
-         for (int i = 0; i < Model.StackTrace.FrameCount; i++)
-        {
-            var frame = Model.StackTrace.GetFrame(i);
-            var type = frame.GetMethod().DeclaringType;
+             for (int i = 0; i < Model.StackTrace.FrameCount; i++)
+            {
+                var frame = Model.StackTrace.GetFrame(i);
+                var type = frame.GetMethod().DeclaringType;
 
-WriteLiteral("            <tr>\r\n                <td>\r\n");
+WriteLiteral("                <tr>\r\n                    <td>\r\n");
 
 
-                 if (type != null)
-                {
-                    var color = ColorExtensions.ToHtmlColor(type.Assembly.FullName.GetHashCode());
+                         if (type != null)
+                        {
+                            var color = ColorExtensions.ToHtmlColor(type.Assembly.FullName.GetHashCode());
                     
 
-WriteLiteral("                    <span style=\"color:");
+WriteLiteral("                            <span style=\"color:");
 
 
-                                  Write(color);
+                                          Write(color);
 
 WriteLiteral("\">");
 
 
-                                          Write(frame.GetMethod().DeclaringType.TryCC(t => t.TypeName()));
+                                                  Write(frame.GetMethod().DeclaringType.TryCC(t => t.TypeName()));
 
 WriteLiteral("</span>\r\n");
 
 
-                }
+                        }
 
-WriteLiteral("                </td>\r\n                <td>\r\n                    ");
-
-
-               Write(frame.GetMethod().Name);
-
-WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    ");
+WriteLiteral("                    </td>\r\n                    <td>\r\n                        ");
 
 
-               Write(frame.GetFileLineAndNumber());
+                   Write(frame.GetMethod().Name);
 
-WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
+WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n                        ");
 
 
-        }
+                   Write(frame.GetFileLineAndNumber());
 
-WriteLiteral("    </tbody>\r\n</table>\r\n<br />\r\n");
+WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
+
+
+            }
+
+WriteLiteral("        </tbody>\r\n    </table>\r\n");
+
+
+}
+
+WriteLiteral("<br />\r\n");
 
 
 Write(Html.ScriptCss("~/Profiler/Content/SF_Profiler.css"));
@@ -229,7 +224,7 @@ WriteLiteral(", ");
 
                                                                                       Write(Model.Depth);
 
-WriteLiteral(");\r\n    });\r\n</script>\r\n\r\n");
+WriteLiteral(");\r\n    });\r\n</script>\r\n");
 
 
         }

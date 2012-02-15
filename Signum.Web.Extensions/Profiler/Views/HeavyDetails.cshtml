@@ -6,34 +6,17 @@
     @foreach (var e in Model.FollowC(a => a.Parent).Skip(1).Reverse())
     {
         @Html.ProfilerEntry(e.Index.ToString(), e.FullIndex())@:.
-    }
+        }
     @Model.Index.ToString())
 </h2>
-@Html.ActionLink("(View all)",(ProfilerController  pc)=>pc.Heavy())
+@Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy())
 <br />
-
-<h3>Breakdown</h3>
+<h3>
+    Breakdown</h3>
 <div class="sf-profiler-chart" data-detail-url="@Url.Action("HeavyRoute", "Profiler")">
 </div>
 <br />
-
 <table class="sf-search-results">
-    <tr>
-        <th>
-            Method
-        </th>
-        <td>
-            @(Model.Type.TryCC(t => t.TypeName())).@Model.Method.Name
-        </td>
-    </tr>
-    <tr>
-        <th>
-            File Line
-        </th>
-        <td>
-            @Model.StackTrace.GetFrame(0).GetFileLineAndNumber()
-        </td>
-    </tr>
     <tr>
         <th>
             Role
@@ -52,8 +35,8 @@
     </tr>
 </table>
 <br />
-
-<h3>Aditional Data</h3>
+<h3>
+    Aditional Data</h3>
 <div>
     <pre>
     <code>
@@ -64,44 +47,51 @@
 <br />
 <h3>
     StackTrace</h3>
-<table class="sf-search-results">
-    <thead>
-        <tr>
-            <th>
-                Type
-            </th>
-            <th>
-                Method
-            </th>
-            <th>
-                FileLine
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @for (int i = 0; i < Model.StackTrace.FrameCount; i++)
-        {
-            var frame = Model.StackTrace.GetFrame(i);
-            var type = frame.GetMethod().DeclaringType;
+@if (Model.StackTrace == null)
+{
+    <span>No StackTrace</span>
+}
+else
+{
+    <table class="sf-search-results">
+        <thead>
             <tr>
-                <td>
-                @if (type != null)
-                {
-                    var color = ColorExtensions.ToHtmlColor(type.Assembly.FullName.GetHashCode());
-                    
-                    <span style="color:@color">@frame.GetMethod().DeclaringType.TryCC(t => t.TypeName())</span>
-                }
-                </td>
-                <td>
-                    @frame.GetMethod().Name
-                </td>
-                <td>
-                    @frame.GetFileLineAndNumber()
-                </td>
+                <th>
+                    Type
+                </th>
+                <th>
+                    Method
+                </th>
+                <th>
+                    FileLine
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.StackTrace.FrameCount; i++)
+            {
+                var frame = Model.StackTrace.GetFrame(i);
+                var type = frame.GetMethod().DeclaringType;
+                <tr>
+                    <td>
+                        @if (type != null)
+                        {
+                            var color = ColorExtensions.ToHtmlColor(type.Assembly.FullName.GetHashCode());
+                    
+                            <span style="color:@color">@frame.GetMethod().DeclaringType.TryCC(t => t.TypeName())</span>
+                        }
+                    </td>
+                    <td>
+                        @frame.GetMethod().Name
+                    </td>
+                    <td>
+                        @frame.GetFileLineAndNumber()
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 <br />
 @Html.ScriptCss("~/Profiler/Content/SF_Profiler.css")
 @Html.ScriptsJs("~/scripts/d3/d3.min.js",
@@ -117,4 +107,3 @@
         SF.Profiler.heavyDetailsChart(@Html.Raw(fullTree.Distinct().HeavyDetailsToJson()), @Model.Depth);
     });
 </script>
-

@@ -560,11 +560,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>HeavyList.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Profiler\Views\ProfilerTable.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ProfilerTable.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Profiler\Views\Times.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1014,10 +1009,6 @@
     <None Include="Profiler\Views\HeavyList.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>HeavyList.cs</LastGenOutput>
-    </None>
-    <None Include="Profiler\Views\ProfilerTable.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ProfilerTable.cs</LastGenOutput>
     </None>
     <Content Include="Profiler\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

@@ -28,10 +28,7 @@ namespace Signum.Web.Profiler
 
             ViewData[ViewDataKeys.Title] = "Root entries";
 
-            if (Request.IsAjaxRequest())
-                return PartialView(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), HeavyProfiler.Entries); 
-            else
-                return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), HeavyProfiler.Entries); 
+            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), HeavyProfiler.Entries);
         }
 
         public ActionResult Statistics(SqlProfileResumeOrder order)
