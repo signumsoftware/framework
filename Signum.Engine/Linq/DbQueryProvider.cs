@@ -44,12 +44,12 @@ namespace Signum.Engine.Linq
         }
 
         T Translate<T>(Expression expression, Func<ITranslateResult, T> continuation) //For debugging purposes
-        {   
+        {
             using (Alias.NewGenerator())
             {
                 ITranslateResult result;
 
-                using (HeavyProfiler.Log("LINQ"))
+                using (HeavyProfiler.Log("LINQ", () => expression.NiceToString()))
                 {
                     Expression cleaned = Clean(expression, true);
 

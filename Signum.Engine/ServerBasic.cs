@@ -63,28 +63,28 @@ namespace Signum.Services
         [SuggestUserInterface]
         public virtual IdentifiableEntity Retrieve(Type type, int id)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "Retrieve {0}".Formato(type.Name),
+            return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () =>Database.Retrieve(type, id));
         }
 
         [SuggestUserInterface]
         public virtual IdentifiableEntity Save(IdentifiableEntity entidad)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "Save {0}".Formato(entidad.GetType()),
+            return Return(MethodInfo.GetCurrentMethod(), entidad.GetType().Name,
                 () =>Database.Save(entidad));
         }
 
         [SuggestUserInterface]
         public virtual List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLite {0}".Formato(liteType),
+            return Return(MethodInfo.GetCurrentMethod(), liteType.Name,
                 () =>AutoCompleteUtils.RetrieveAllLite(liteType, implementations));
         }
 
         [SuggestUserInterface]
         public virtual List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "FindLiteLike {0}".Formato(liteType),
+            return Return(MethodInfo.GetCurrentMethod(), liteType.Name,
                 () =>AutoCompleteUtils.FindLiteLike(liteType, implementations, subString, count));
         }
 
@@ -98,7 +98,7 @@ namespace Signum.Services
         [SuggestUserInterface]
         public virtual List<IdentifiableEntity> RetrieveAll(Type type)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "RetrieveAll {0}".Formato(type),
+            return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () => Database.RetrieveAll(type));
         }
 
@@ -150,21 +150,21 @@ namespace Signum.Services
         [SuggestUserInterface]
         public virtual ResultTable ExecuteQuery(QueryRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryResult {0}".Formato(request.QueryName),
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQuery(request));
         }
 
         [SuggestUserInterface]
         public virtual int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryCount {0}".Formato(request.QueryName),
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQueryCount(request));
         }
 
         [SuggestUserInterface]
         public virtual Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryEntity {0}".Formato(request.QueryName),
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteUniqueEntity(request));
         }
 

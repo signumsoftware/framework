@@ -307,6 +307,7 @@ namespace Signum.Utilities
         }
     }
 
+    [Serializable]
     public class HeavyProfilerEntry
     {
         public List<HeavyProfilerEntry> Entries;
@@ -347,9 +348,6 @@ namespace Signum.Utilities
                 return TimeSpan.FromMilliseconds(((End - Start) - Descendants().Sum(a => a.BeforeStart - a.Start)) / PerfCounter.FrequencyMilliseconds);
             }
         }
-
-        public Type Type { get { return StackTrace.GetFrame(0).GetMethod().TryCC(m=>m.DeclaringType); } }
-        public MethodBase Method { get { return StackTrace.GetFrame(0).GetMethod(); } }
 
         public IEnumerable<HeavyProfilerEntry> Descendants()
         {
@@ -393,6 +391,14 @@ namespace Signum.Utilities
                 new XAttribute("FullIndex", this.FullIndex()),
                 Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(this.Elapsed))
                 );
+        }
+
+        public void CleanStackTrace()
+        {
+            this.StackTrace = null;
+            if (this.Entries != null)
+                foreach (var item in this.Entries)
+                    item.CleanStackTrace();
         }
     }
 

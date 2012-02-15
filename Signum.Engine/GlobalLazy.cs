@@ -8,6 +8,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Threading;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine
 {
@@ -95,6 +96,7 @@ namespace Signum.Engine
             var result = new Lazy<T>(() =>
             {
                 using (Schema.Current.GlobalMode())
+                using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
                 using (new EntityCache(true))
                 {
                     return func();
@@ -105,7 +107,6 @@ namespace Signum.Engine
 
             return result;
         }
-
 
         public static Lazy<T> InvalidateWith<T>(this Lazy<T> lazy, params Type[] types)
         {

@@ -11,6 +11,7 @@ using System.Reflection;
 using System.ServiceModel;
 using System.Windows;
 using System.ServiceModel.Security;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Windows
 {
@@ -70,7 +71,10 @@ namespace Signum.Windows
             
             try
             {
-                action(server);
+                using (HeavyProfiler.Log("WCFClient", "{0}".Formato(typeof(S).TypeName())))
+                {
+                    action(server);
+                }
             }
             catch (MessageSecurityException e)
             {
@@ -92,7 +96,10 @@ namespace Signum.Windows
 
             try
             {
-                return function(server);
+                using (HeavyProfiler.Log("WCFClient", "{0} --> {1}".Formato(typeof(S).TypeName(), typeof(R).TypeName())))
+                {
+                    return function(server);
+                }
             }
             catch (MessageSecurityException e)
             {
