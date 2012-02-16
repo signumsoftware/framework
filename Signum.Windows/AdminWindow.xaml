@@ -10,7 +10,7 @@
 	ResizeMode="CanResizeWithGrip" 
 	WindowStartupLocation="CenterScreen"
     m:Monitors.AdjustToMonitor="true"
-
+    m:Monitors.CenterOnSizedToContent="true"
 	MinHeight="180"
     SizeToContent="WidthAndHeight"
 	SnapsToDevicePixels="True" >

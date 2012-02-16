@@ -150,9 +150,9 @@ namespace Signum.Windows
 
         // Using a DependencyProperty as the backing store for AdjustToMonitor.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty AdjustToMonitorProperty =
-            DependencyProperty.RegisterAttached("AdjustToMonitor", typeof(bool), typeof(Common), new UIPropertyMetadata(false, (d, e) => AdjustChanged(d, (bool)e.NewValue)));
+            DependencyProperty.RegisterAttached("AdjustToMonitor", typeof(bool), typeof(Common), new UIPropertyMetadata(false, (d, e) => AdjustToMonitorChanged(d, (bool)e.NewValue)));
 
-        static void AdjustChanged(DependencyObject dep, bool newValue)
+        static void AdjustToMonitorChanged(DependencyObject dep, bool newValue)
         {
             if (!(dep is Window))
                 throw new InvalidOperationException("AdjustToMonitor is only compatible with Window");
@@ -169,9 +169,82 @@ namespace Signum.Windows
 
             var info = Monitors.GetMonitorFromWindow(win, NotFoundOptions.DefaultToNearest);
 
-            win.MaxWidth = info.WorkingArea.Width;
-            win.MaxHeight = info.WorkingArea.Height;
+            if (win.MaxWidth != info.WorkingArea.Width || win.MaxHeight != info.WorkingArea.Height)
+            {
+                win.MaxWidth = info.WorkingArea.Width;
+                win.MaxHeight = info.WorkingArea.Height;
+
+                SetJustChangedMonitor(win, DateTime.Now);
+            }
         }
+
+        public static bool GetCenterOnSizedToContent(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(CenterOnSizedToContentProperty);
+        }
+
+        public static void SetCenterOnSizedToContent(DependencyObject obj, bool value)
+        {
+            obj.SetValue(CenterOnSizedToContentProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for CenterOnSizedToContent.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CenterOnSizedToContentProperty =
+            DependencyProperty.RegisterAttached("CenterOnSizedToContent", typeof(bool), typeof(Monitors), new UIPropertyMetadata(false, (d, e) => CenterOnSizedToContentChanged(d, (bool)e.NewValue)));
+
+        private static void CenterOnSizedToContentChanged(DependencyObject dep, bool newValue)
+        {
+            if (!(dep is Window))
+                throw new InvalidOperationException("CenterOnSizedToContent is only compatible with Window");
+
+            if (newValue)
+                ((Window)dep).SizeChanged += Window_SizeChanged;
+            else
+                ((Window)dep).SizeChanged -= Window_SizeChanged;
+        }
+
+
+        static void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Window win = (Window)sender;
+
+            if (win.SizeToContent != SizeToContent.WidthAndHeight)
+                return;
+
+            if (!GetCenterOnSizedToContent(win))
+                return;
+
+            var dt = GetJustChangedMonitor(win);
+            if (dt.HasValue)
+            {
+                if (dt.Value.Add(TimeSpan.FromSeconds(1)) < DateTime.Now)
+                    SetJustChangedMonitor(win, null);
+                else
+                    return;
+            }
+
+            var info = Monitors.GetMonitorFromWindow(win, NotFoundOptions.DefaultToNearest);
+
+            if (info.WorkingArea.Contains(new Rect(win.Left, win.Top, e.NewSize.Width, e.NewSize.Height)))
+                return;
+
+            win.Left = info.WorkingArea.Left + (info.WorkingArea.Width / 2) - (e.NewSize.Width / 2);
+            win.Top = info.WorkingArea.Top + (info.WorkingArea.Height / 2) - (e.NewSize.Height / 2);
+        }
+
+
+        static DateTime? GetJustChangedMonitor(DependencyObject obj)
+        {
+            return (DateTime?)obj.GetValue(JustChangedMonitorProperty);
+        }
+
+        static void SetJustChangedMonitor(DependencyObject obj, DateTime? value)
+        {
+            obj.SetValue(JustChangedMonitorProperty, value);
+        }
+
+        static readonly DependencyProperty JustChangedMonitorProperty =
+            DependencyProperty.RegisterAttached("JustChangedMonitor", typeof(DateTime?), typeof(Monitors), new UIPropertyMetadata(null)); //HACK
     }
 
     public enum NotFoundOptions
