@@ -131,12 +131,28 @@ namespace Signum.Utilities
                 return null;
             }
 
-            var saveCurrent = CreateNewEntry(role, aditionalData);
+            var saveCurrent = CreateNewEntry(role, aditionalData, true);
 
             return new Tracer { saveCurrent = saveCurrent };
         }
 
-        private static HeavyProfilerEntry CreateNewEntry(string role, string aditionalData)
+        public static Tracer LogNoStackTrace(string role)
+        {
+            if (!Enabled)
+                return null;
+
+            if (TotalEntriesCount > MaxTotalEntriesCount)
+            {
+                Enabled = false;
+                return null;
+            }
+
+            var saveCurrent = CreateNewEntry(role, null, false);
+
+            return new Tracer { saveCurrent = saveCurrent };
+        }
+
+        private static HeavyProfilerEntry CreateNewEntry(string role, string aditionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
 
@@ -151,7 +167,7 @@ namespace Signum.Utilities
                 BeforeStart = beforeStart,
                 Role = role,
                 AditionalData = aditionalData,
-                StackTrace = new StackTrace(2, true),
+                StackTrace = stackTrace ? new StackTrace(2, true) : null,
             };
 
             newCurrent.Start = PerfCounter.Ticks;
@@ -208,7 +224,7 @@ namespace Signum.Utilities
 
             tracer.Dispose();
 
-            tracer.saveCurrent = CreateNewEntry(role, aditionalData); 
+            tracer.saveCurrent = CreateNewEntry(role, aditionalData, tracer.saveCurrent.StackTrace != null); 
         }
 
         public static void CleanCurrent() //To fix possible non-dispossed ones
