@@ -64,6 +64,8 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_Initializing;
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
+                AuthLogic.StartUserGraph(sb);
+
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
                                        select new
                                        {
@@ -98,7 +100,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartUserGraph(SchemaBuilder sb)
+        private static void StartUserGraph(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
