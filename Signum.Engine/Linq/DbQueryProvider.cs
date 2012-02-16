@@ -50,16 +50,17 @@ namespace Signum.Engine.Linq
                 ITranslateResult result;
 
                 using (HeavyProfiler.Log("LINQ", () => expression.NiceToString()))
+                using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
                 {
                     Expression cleaned = Clean(expression, true);
-
                     BinderTools tools = new BinderTools();
-
+                    log.Switch("Bind");
                     ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(cleaned, tools);
+                    log.Switch("Optimice");
                     ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools);
-
+                    log.Switch("Flatten");
                     ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
-
+                    log.Switch("Build");
                     result = TranslatorBuilder.Build(flat);
                 }
                 return continuation(result);
