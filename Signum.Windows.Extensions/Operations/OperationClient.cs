@@ -24,6 +24,8 @@ namespace Signum.Windows.Operations
     {
         public static OperationManager Manager { get; private set; }
 
+        static Dictionary<Type, List<OperationInfo>> QueryOperationInfoCache = new Dictionary<Type, List<OperationInfo>>();
+
         public static void Start(OperationManager operationManager)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -41,7 +43,9 @@ namespace Signum.Windows.Operations
                     if (type == null)
                         return null;
 
-                    var list = Server.Return((IOperationServer o) => o.GetQueryOperationInfos(type)).Where(oi =>
+                    var infos = QueryOperationInfoCache.GetOrCreate(type, ()=> Server.Return((IOperationServer o) => o.GetQueryOperationInfos(type)));
+
+                    var list = infos.Where(oi =>
                     {
                         ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
                         return set == null || set.IsVisible == null || set.IsVisible(qn, oi);
