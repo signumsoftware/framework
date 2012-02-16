@@ -190,7 +190,7 @@ namespace Signum.Windows.Chart
                 return;
 
             execute.IsEnabled = false;
-            Async.Do(this.FindCurrentWindow(),
+            Async.Do(
                 () => resultTable = Server.Return((IChartServer cs) => cs.ExecuteChart(request)),
                 () =>
                 {
