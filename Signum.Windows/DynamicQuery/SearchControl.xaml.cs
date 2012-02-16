@@ -293,7 +293,7 @@ namespace Signum.Windows
                 tokenBuilder.SubTokensEvent += q => new List<QueryToken>();
                 return;
             }
-            
+
             if (FilterColumn.HasText())
             {
                 FilterOptions.Add(new FilterOption
@@ -317,7 +317,7 @@ namespace Signum.Windows
 
             entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             if (entityColumn == null)
-                throw new InvalidOperationException("Entity Column not found"); 
+                throw new InvalidOperationException("Entity Column not found");
 
             if (this.NotSet(ViewProperty) && View && entityColumn.Implementations == null)
                 View = Navigator.IsViewable(EntityType, IsAdmin);
@@ -341,25 +341,10 @@ namespace Signum.Windows
 
             CompleteOrderColumns();
 
-            if (GetCustomMenuItems != null)
-            {
-                MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
-                menu.Items.Clear();
-                foreach (MenuItem mi in menus)
-                {
-                    menu.Items.Add(mi);
-                }
-            }
+            if (SearchOnLoad && IsVisible)
+                Search();
 
-            if (SearchOnLoad)
-            {
-                if (IsVisible)
-                    Search();
-                else
-                    IsVisibleChanged += SearchControl_IsVisibleChanged;
-            }
-
-
+            IsVisibleChanged += SearchControl_IsVisibleChanged;
         }
 
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -424,7 +409,19 @@ namespace Signum.Windows
             if (((bool)e.NewValue) == true)
             {
                 IsVisibleChanged -= SearchControl_IsVisibleChanged;
-                Search();
+
+                if (GetCustomMenuItems != null)
+                {
+                    MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
+                    menu.Items.Clear();
+                    foreach (MenuItem mi in menus)
+                    {
+                        menu.Items.Add(mi);
+                    }
+                }
+
+                if (SearchOnLoad)
+                    Search();
             }
         }
 

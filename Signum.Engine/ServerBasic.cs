@@ -91,7 +91,7 @@ namespace Signum.Services
         [SuggestUserInterface]
         public Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), root.Name,
                 () => Schema.Current.FindAllImplementations(root));
         }
 
