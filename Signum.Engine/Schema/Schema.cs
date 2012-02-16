@@ -428,6 +428,16 @@ namespace Signum.Engine.Maps
             return result;
         }
 
+        public Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
+        {
+            if (!Tables.ContainsKey(root))
+                return null;
+
+            var table = Table(root);
+
+            return PropertyRoute.GenerateRoutes(root).Select(r=> KVP.Create(r, FindImplementations(r))).Where(r=>r.Value != null).ToDictionary();
+        }
+
         public Implementations FindImplementations(PropertyRoute route)
         {
             Type type = route.RootType;

@@ -21,7 +21,7 @@ namespace Signum.Services
 
         protected T Return<T>(MethodBase mi, Func<T> function)
         {
-            return Return(mi, mi.Name, function);
+            return Return(mi, null, function);
         }
 
         protected virtual T Return<T>(MethodBase mi, string description, Func<T> function)
@@ -46,7 +46,7 @@ namespace Signum.Services
 
         protected void Execute(MethodBase mi, Action action)
         {
-            Return(mi, mi.Name, () => { action(); return true; });
+            Return(mi, null, () => { action(); return true; });
         }
 
         protected void Execute(MethodBase mi, string description, Action action)
@@ -89,10 +89,10 @@ namespace Signum.Services
         }
 
         [SuggestUserInterface]
-        public virtual Implementations FindImplementations(PropertyRoute entityPath)
+        public Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => Schema.Current.FindImplementations(entityPath));
+                () => Schema.Current.FindAllImplementations(root));
         }
 
         [SuggestUserInterface]

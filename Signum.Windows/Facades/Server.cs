@@ -200,14 +200,19 @@ namespace Signum.Windows
             return Return((IBaseServer s)=>s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
         }
 
-        static Dictionary<PropertyRoute, Implementations> implementations = new Dictionary<PropertyRoute, Implementations>(); 
+        static Dictionary<Type, Dictionary<PropertyRoute, Implementations>> implementations = new Dictionary<Type, Dictionary<PropertyRoute, Implementations>>();
 
         public static Implementations FindImplementations(PropertyRoute propertyRoute)
         {
-            if (Server.ServerTypes.ContainsKey(propertyRoute.RootType))
-                return implementations.GetOrCreate(propertyRoute, () => Server.Return((IBaseServer s) => s.FindImplementations(propertyRoute)));
+            var dic = implementations.GetOrCreate(propertyRoute.RootType, () =>
+            {
+                if (!Server.ServerTypes.ContainsKey(propertyRoute.RootType))
+                    return null;
 
-            return null;
+                return Server.Return((IBaseServer s) => s.FindAllImplementations(propertyRoute.Type));
+            });
+
+            return dic.TryGetC(propertyRoute);
         }
 
         public static object Convert(object obj, Type type)
