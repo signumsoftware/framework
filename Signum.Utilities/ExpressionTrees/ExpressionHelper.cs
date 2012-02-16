@@ -14,11 +14,11 @@ namespace Signum.Utilities.ExpressionTrees
     public static class ExpressionHelper
     {
         [DebuggerStepThrough]
-        public static ReadOnlyCollection<T> NewIfChange<T>( this ReadOnlyCollection<T> collection, Func<T,T> newValue)
-            where T:class
+        public static ReadOnlyCollection<T> NewIfChange<T>(this ReadOnlyCollection<T> collection, Func<T, T> newValue)
+            where T : class
         {
             if (collection == null)
-                return null; 
+                return null;
 
             List<T> alternate = null;
             for (int i = 0, n = collection.Count; i < n; i++)
@@ -27,7 +27,9 @@ namespace Signum.Utilities.ExpressionTrees
                 T newItem = newValue(item);
                 if (alternate == null && item != newItem)
                 {
-                    alternate = collection.Take(i).ToList();
+                    alternate = new List<T>(n);
+                    for (int j = 0; j < i; j++)
+                        alternate.Add(collection[j]);
                 }
                 if (alternate != null && newItem != null)
                 {
