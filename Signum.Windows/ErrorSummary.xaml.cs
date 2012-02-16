@@ -30,7 +30,7 @@ namespace Signum.Windows
 
 
         public static readonly DependencyProperty ValidationTargetProperty =
-            DependencyProperty.Register("ValidationTarget", typeof(UIElement), typeof(ErrorSummary), new UIPropertyMetadata(null));
+            DependencyProperty.Register("ValidationTarget", typeof(UIElement), typeof(ErrorSummary), new UIPropertyMetadata((s, arg) => ((ErrorSummary)s).Load()));
         public UIElement ValidationTarget
         {
             get { return (UIElement)GetValue(ValidationTargetProperty); }
@@ -68,7 +68,12 @@ namespace Signum.Windows
 
         void ErrorSummary_Loaded(object sender, RoutedEventArgs e)
         {
-            if (DesignerProperties.GetIsInDesignMode(this))
+            Load();
+        }
+
+        private void Load()
+        {
+ 	       if (DesignerProperties.GetIsInDesignMode(this) || !this.IsLoaded || ValidationTarget == null)
                 return;
 
             if (this.NotSet(ValidationTargetProperty))

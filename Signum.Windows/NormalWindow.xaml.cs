@@ -215,6 +215,11 @@ namespace Signum.Windows
         {
             this.SizeToContent = SizeToContent.WidthAndHeight;
         }
+
+        public void SetTitleText(string text)
+        {
+            this.entityTitle.SetTitleText(text);
+        }
     }
 
     public enum AllowErrors

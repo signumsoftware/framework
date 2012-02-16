@@ -342,6 +342,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Loading {0}....
+        /// </summary>
+        internal static string Loading0 {
+            get {
+                return ResourceManager.GetString("Loading0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There are changes that hasn&apos;t been saved. 
         ///Lose changes?.
         /// </summary>

@@ -356,4 +356,7 @@ Lose changes?</value>
   <data name="NoFiltersSpecified" xml:space="preserve">
     <value>No filters specified</value>
   </data>
+  <data name="Loading0" xml:space="preserve">
+    <value>Loading {0}...</value>
+  </data>
 </root>

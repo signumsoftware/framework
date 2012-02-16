@@ -614,27 +614,40 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            ModifiableEntity entity = entityOrLite as ModifiableEntity;
-            if (entity == null)
-            {
-                Lite lite = (Lite)entityOrLite;
-                entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
-            }
+            Type type = entityOrLite is Lite? ((Lite)entityOrLite).RuntimeType :entityOrLite.GetType();
 
-            AssertViewable(entity, true);
-            EntitySettings es = EntitySettings[entity.GetType()];
-
-            if (entity is EmbeddedEntity)
-                throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
-
-            Control ctrl = options.View ?? es.CreateView(entity, null);
-
-            Window win = CreateNormalWindow((ModifiableEntity)entity, options, es, ctrl);
-
-            if (options.Closed != null)
-                win.Closed += options.Closed;
-
+            NormalWindow win = CreateNormalWindow();
+            win.SetTitleText(Resources.Loading0.Formato(type.NiceName()));
             win.Show();
+
+
+            try
+            {
+                ModifiableEntity entity = entityOrLite as ModifiableEntity;
+                if (entity == null)
+                {
+                    Lite lite = (Lite)entityOrLite;
+                    entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
+                }
+
+                AssertViewable(entity, true);
+                EntitySettings es = EntitySettings[entity.GetType()];
+
+                if (entity is EmbeddedEntity)
+                    throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
+
+                Control ctrl = options.View ?? es.CreateView(entity, null);
+
+                SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
+
+                if (options.Closed != null)
+                    win.Closed += options.Closed;
+            }
+            catch
+            {
+                win.Close();
+                throw;
+            }
         }
 
         public virtual object View(object entityOrLite, ViewOptions options)
@@ -655,7 +668,9 @@ namespace Signum.Windows
 
             Control ctrl = options.View ?? es.CreateView(entity, options.TypeContext);
 
-            NormalWindow win = CreateNormalWindow((ModifiableEntity)entity, options, es, ctrl);
+            NormalWindow win = CreateNormalWindow();
+                
+            SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
 
             if (options.AllowErrors != AllowErrors.Ask)
                 win.AllowErrors = options.AllowErrors; 
@@ -673,25 +688,24 @@ namespace Signum.Windows
 
         }
 
-        protected virtual NormalWindow CreateNormalWindow(ModifiableEntity entity, ViewOptionsBase options, EntitySettings es, Control ctrl)
+        protected virtual NormalWindow CreateNormalWindow()
+        {
+            return new NormalWindow();
+        }
+
+        protected virtual NormalWindow SetNormalWindowEntity(NormalWindow win, ModifiableEntity entity, ViewOptionsBase options, EntitySettings es, Control ctrl)
         {
             Type entityType = entity.GetType();
 
             ViewButtons buttons = options.GetViewButtons();
 
-            bool isReadOnly = options.ReadOnly ?? IsReadOnly(entity, options.Admin);
+            bool isReadOnly = options.ReadOnly ?? es.OnIsReadOnly(entity, options.Admin);
 
-            NormalWindow win = new NormalWindow()
-            {
-                MainControl = ctrl,
-                ButtonBar =
-                {
-                    ViewButtons = buttons,
-                    SaveVisible = buttons == ViewButtons.Save && ShowSave(entityType) && !isReadOnly,
-                    OkVisible = buttons == ViewButtons.Ok
-                },
-                DataContext = options.Clone ?((ICloneable)entity).Clone(): entity,
-            };
+            win.MainControl = ctrl;
+            win.ButtonBar.ViewButtons = buttons;
+            win.ButtonBar.SaveVisible = buttons == ViewButtons.Save && es.OnShowSave() && !isReadOnly;
+            win.ButtonBar.OkVisible = buttons == ViewButtons.Ok;
+            win.DataContext = options.Clone ? ((ICloneable)entity).Clone() : entity;
 
             if (isReadOnly)
                 Common.SetIsReadOnly(win, true);
