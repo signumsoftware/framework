@@ -9,7 +9,7 @@ namespace Signum.Utilities.DataStructures
 {
     public class RecentDictionary<K, V>: IEnumerable<KeyValuePair<K,V>> 
     {
-        int capacity = 50;
+        int capacity;
         LinkedList<V> orderList = new LinkedList<V>();
         Dictionary<LinkedListNode<V>, K> linkToKey = new Dictionary<LinkedListNode<V>, K>();
         Dictionary<K, LinkedListNode<V>> keyToLink = new Dictionary<K, LinkedListNode<V>>();
@@ -17,7 +17,7 @@ namespace Signum.Utilities.DataStructures
         /// <summary>
         /// Default constructor for the most recently used items using the default size (50)
         /// </summary>
-        public RecentDictionary()
+        public RecentDictionary(): this(50, null)
         {
         }
 
@@ -26,9 +26,14 @@ namespace Signum.Utilities.DataStructures
         /// allowed in the list.
         /// </summary>
         /// <param name="maxItems">Maximum number of items allowed</param>
-        public RecentDictionary(int capacity)
+        public RecentDictionary(int capacity): this(capacity, null)
+        {
+        }
+
+        public RecentDictionary(int capacity, IEqualityComparer<K> comparer)
         {
             this.capacity = capacity;
+            keyToLink = new Dictionary<K, LinkedListNode<V>>(comparer);
         }
 
         void MoveToHead(LinkedListNode<V> value)
@@ -39,6 +44,9 @@ namespace Signum.Utilities.DataStructures
 
         public void Add(K key, V value)
         {
+            if (keyToLink.ContainsKey(key))
+                throw new ArgumentException("Key allready in the dictionary");
+
             LinkedListNode<V> link = orderList.AddFirst(value);
 
             if (keyToLink.Keys.Count >= capacity)

@@ -111,8 +111,6 @@ namespace Signum.Windows
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
         }
 
-        int queryCount;
-
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
             this.Loaded -= SearchControl_Loaded;
@@ -127,36 +125,31 @@ namespace Signum.Windows
 
         public void Search()
         {
-            queryCount = 0;
-
-            
+       
             var request = new QueryCountRequest
             {
                 QueryName = QueryName, 
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList()
-            }; 
+            };
 
-            Async.Do(this.FindCurrentWindow(),
-                () =>
-                    queryCount = Server.Return((IDynamicQueryServer s)=>s.ExecuteQueryCount(request)),
-                () =>
+            DynamicQueryBachRequest.Enqueue(request, obj =>
+            {
+                ItemsCount = (int)obj;
+                if (ItemsCount == 0)
                 {
-                    ItemsCount = queryCount;
-                    if (ItemsCount == 0)
-                    {
-                        FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
-                            .Formato(QueryUtils.GetNiceName(QueryName));
-                        tb.FontWeight = FontWeights.Regular;
-                    }
-                    else
-                    {
-                        FormattedText = (Text ?? "{1}: {0}")
-                            .Formato(ItemsCount, QueryUtils.GetNiceName(QueryName));
-                        tb.FontWeight = FontWeights.Bold;
+                    FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
+                        .Formato(QueryUtils.GetNiceName(QueryName));
+                    tb.FontWeight = FontWeights.Regular;
+                }
+                else
+                {
+                    FormattedText = (Text ?? "{1}: {0}")
+                        .Formato(ItemsCount, QueryUtils.GetNiceName(QueryName));
+                    tb.FontWeight = FontWeights.Bold;
 
-                    }
-                },
-                () => { });
+                }
+            }, 
+            () => { });
         }
 
 

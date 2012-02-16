@@ -501,10 +501,11 @@ namespace Signum.Windows
 
             var request = UpdateMultiplyMessage();
 
-            Async.Do(this.FindCurrentWindow(),
-                () => resultTable = Server.Return((IDynamicQueryServer s) => s.ExecuteQuery(request)),
-                () =>
+            DynamicQueryBachRequest.Enqueue(request,          
+                obj =>
                 {
+                    resultTable = (ResultTable)obj;
+
                     if (resultTable != null)
                     {
                         SetResults();

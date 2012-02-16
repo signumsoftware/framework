@@ -143,7 +143,7 @@ namespace Signum.Windows
             buttonBar.SaveButton.IsEnabled = false;
             IdentifiableEntity ei = (IdentifiableEntity)base.DataContext;
             IdentifiableEntity nueva = null;
-            Async.Do(this,
+            Async.Do(
                 () => nueva = Server.Save(ei),
                 () => { base.DataContext = null; base.DataContext = nueva; },
                 () => buttonBar.SaveButton.IsEnabled = true);

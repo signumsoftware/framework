@@ -269,7 +269,6 @@ namespace Signum.Entities
             get { return IntegrityCheck(); }
         }
 
-        //override for full entitity integrity check. Remember to call base. 
         public string IntegrityCheck()
         {
             return Validator.GetPropertyPacks(GetType()).Select(k => PropertyCheck(k.Value)).NotNull().ToString("\r\n");

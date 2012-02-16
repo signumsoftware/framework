@@ -9,24 +9,26 @@ namespace Signum.Windows
 {
     public static class Async
     {
-        public static Action<Exception, Window> ExceptionHandler;
+        public static Action<Exception> ExceptionHandler;
 
-        public static IAsyncResult Do(Window win, Action otherThread, Action endAction, Action finallyAction)
-        {          
+        public static IAsyncResult Do(Action otherThread, Action endAction, Action finallyAction)
+        {
+            var disp = Dispatcher.CurrentDispatcher;
+
             Action action = () =>
             {
                 try
                 {
                     otherThread();
-                    win.Dispatcher.BeginInvoke(DispatcherPriority.Normal, endAction);
+                    disp.BeginInvoke(DispatcherPriority.Normal, endAction);
                 }
                 catch (Exception e)
                 {
-                    win.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() => ExceptionHandler(e, win)));
+                    disp.BeginInvoke(DispatcherPriority.Normal, (Action)(() => ExceptionHandler(e)));
                 }
                 finally
                 {
-                    win.Dispatcher.BeginInvoke(DispatcherPriority.Normal, finallyAction);
+                    disp.BeginInvoke(DispatcherPriority.Normal, finallyAction);
                 }
             };
 

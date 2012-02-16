@@ -181,7 +181,17 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                () => DynamicQueryManager.Current.GetExtensions(type, parent).ToList());
         }
+
+        [SuggestUserInterface]
+        public object[] BatchExecute(BaseQueryRequest[] requests)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => DynamicQueryManager.Current.BatchExecute(requests));
+        }
         #endregion
+
+
+
 
 
        

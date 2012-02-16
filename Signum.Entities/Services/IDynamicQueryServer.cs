@@ -24,6 +24,9 @@ namespace Signum.Services
         Lite ExecuteUniqueEntity(UniqueEntityRequest request);
 
         [OperationContract, NetDataContract]
+        object[] BatchExecute(BaseQueryRequest[] requests);
+
+        [OperationContract, NetDataContract]
         List<object> GetQueryNames();
 
         [OperationContract, NetDataContract]

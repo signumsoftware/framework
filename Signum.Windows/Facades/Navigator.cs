@@ -118,6 +118,11 @@ namespace Signum.Windows
             return Manager.QueryCount(options);
         }
 
+        public static void QueryCountBatch(CountOptions options, Action<int> onResult, Action @finally)
+        {
+            Manager.QueryCountBatch(options, onResult, @finally);
+        }
+
         public static void NavigateUntyped(object entity)
         {
             Manager.Navigate(entity, new NavigateOptions());
@@ -536,6 +541,21 @@ namespace Signum.Windows
             };
 
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryCount(request));
+        }
+
+        public void QueryCountBatch(CountOptions options, Action<int> onResult, Action @finally)
+        {
+            AssertFindable(options.QueryName);
+
+            SetFilterTokens(options.QueryName, options.FilterOptions);
+
+            var request = new QueryCountRequest
+            {
+                QueryName = options.QueryName,
+                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
+            };
+
+            DynamicQueryBachRequest.Enqueue(request, obj => onResult((int)obj), @finally);
         }
 
         public void SetFilterTokens(object queryName, IEnumerable<FilterOption> filters)

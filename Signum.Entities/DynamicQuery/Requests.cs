@@ -7,13 +7,17 @@ using Signum.Utilities;
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
-    public class QueryRequest
+    public abstract class BaseQueryRequest
     {
         public object QueryName { get; set; }
 
-        public List<Column> Columns { get; set; }
-
         public List<Filter> Filters { get; set; }
+    }
+
+    [Serializable]
+    public class QueryRequest : BaseQueryRequest
+    {
+        public List<Column> Columns { get; set; }
 
         public List<Order> Orders { get; set; }
 
@@ -47,12 +51,8 @@ namespace Signum.Entities.DynamicQuery
     }
 
     [Serializable]
-    public class QueryCountRequest
+    public class QueryCountRequest : BaseQueryRequest
     {
-        public object QueryName { get; set; }
-
-        public List<Filter> Filters { get; set; }
-
         public List<CollectionElementToken> Multiplications
         {
             get { return CollectionElementToken.GetElements(Filters.Select(a => a.Token).ToHashSet()); }
@@ -60,12 +60,8 @@ namespace Signum.Entities.DynamicQuery
     }
 
     [Serializable]
-    public class UniqueEntityRequest
+    public class UniqueEntityRequest : BaseQueryRequest
     {
-        public object QueryName { get; set; }
-
-        public List<Filter> Filters { get; set; }
-
         public List<Order> Orders { get; set; }
 
         public UniqueType UniqueType { get; set; }

@@ -189,6 +189,23 @@ namespace Signum.Engine.DynamicQuery
 
             return extension;
         }
+
+        internal object[] BatchExecute(BaseQueryRequest[] requests)
+        {
+            return requests.Select(r =>
+            {
+                if (r is QueryCountRequest)
+                    return ExecuteQueryCount((QueryCountRequest)r);
+
+                if (r is QueryRequest)
+                    return ExecuteQuery((QueryRequest)r);
+
+                if (r is UniqueEntityRequest)
+                    return ExecuteUniqueEntity((UniqueEntityRequest)r);
+
+                return (object)null;
+            }).ToArray(); 
+        }
     }
 
     public class ExtensionInfo
