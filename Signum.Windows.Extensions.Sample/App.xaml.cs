@@ -42,7 +42,7 @@ namespace Signum.Windows.Extensions.Sample
         }
 
 
-        void UnhandledAsyncException(Exception e, Window win)
+        void UnhandledAsyncException(Exception e)
         {
             Program.HandleException("Error en llamada asíncrona", e);
         }
