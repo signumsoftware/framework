@@ -341,10 +341,18 @@ namespace Signum.Windows
 
             CompleteOrderColumns();
 
-            if (SearchOnLoad && IsVisible)
-                Search();
 
-            IsVisibleChanged += SearchControl_IsVisibleChanged;
+            if (IsVisible)
+            {
+                LoadCustomMenuItems();
+
+                if (SearchOnLoad)
+                    Search();
+            }
+            else
+            {
+                IsVisibleChanged += SearchControl_IsVisibleChanged;
+            }
         }
 
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -409,19 +417,24 @@ namespace Signum.Windows
             if (((bool)e.NewValue) == true)
             {
                 IsVisibleChanged -= SearchControl_IsVisibleChanged;
-
-                if (GetCustomMenuItems != null)
-                {
-                    MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
-                    menu.Items.Clear();
-                    foreach (MenuItem mi in menus)
-                    {
-                        menu.Items.Add(mi);
-                    }
-                }
+                
+                LoadCustomMenuItems();
 
                 if (SearchOnLoad)
                     Search();
+            }
+        }
+
+        private void LoadCustomMenuItems()
+        {
+            if (GetCustomMenuItems != null)
+            {
+                MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
+                menu.Items.Clear();
+                foreach (MenuItem mi in menus)
+                {
+                    menu.Items.Add(mi);
+                }
             }
         }
 
