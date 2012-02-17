@@ -66,7 +66,7 @@ namespace Signum.Utilities.ExpressionTrees
                     else
                     {
                         if (call.Arguments.Count == 0)
-                            return GetInstanceGetter(call.Method)(call.Object);
+                            return GetInstanceMethodCaller(call.Method)(call.Object);
                     }
                     break;
                 }
@@ -122,7 +122,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             public bool Equals(MethodKey other)
             {
-                if (mi.Name != other.mi.Name)
+                if (mi.MetadataToken != other.mi.MetadataToken)
                     return false;
 
                 if(arguments == null)
@@ -143,7 +143,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             public override int GetHashCode()
             {
-                var result = mi.Name.GetHashCode();
+                var result = mi.MetadataToken;
                 if (!mi.IsGenericMethod)
                     return result;
                 Type[] types = arguments;
@@ -175,7 +175,7 @@ namespace Signum.Utilities.ExpressionTrees
 
 
         static Dictionary<Type, Dictionary<MethodKey, Func<object, object>>> cachedInstanceMethods = new Dictionary<Type, Dictionary<MethodKey, Func<object, object>>>();
-        private static Func<object, object> GeInstanceMethodCaller(MethodInfo mi)
+        private static Func<object, object> GetInstanceMethodCaller(MethodInfo mi)
         {
             return cachedInstanceMethods.GetOrCreate(mi.DeclaringType).GetOrCreate(new MethodKey(mi), () =>
             {
