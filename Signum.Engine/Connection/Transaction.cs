@@ -387,18 +387,7 @@ namespace Signum.Engine
                 avoidIndependentTransactions.Value = true;
             }
 
-
-            public override void Commit()
-            {
-                if (Started)
-                {
-                    OnPreRealCommit();
-
-                    //throw new InvalidOperationException("A Test transaction can not be commited"); 
-                    Transaction.Commit();
-                }
-            }
-
+    
             public override ICoreTransaction Finish()
             {
                 avoidIndependentTransactions.Value = false;
