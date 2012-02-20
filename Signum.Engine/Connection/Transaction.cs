@@ -394,8 +394,8 @@ namespace Signum.Engine
                 {
                     OnPreRealCommit();
 
-                    throw new InvalidOperationException("A Test transaction can not be commited"); 
-                    //Transaction.Commit();
+                    //throw new InvalidOperationException("A Test transaction can not be commited"); 
+                    Transaction.Commit();
                 }
             }
 
