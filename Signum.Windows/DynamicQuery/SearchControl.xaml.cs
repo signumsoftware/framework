@@ -250,6 +250,8 @@ namespace Signum.Windows
 
         public SearchControl()
         {
+
+            this.Initialized += new EventHandler(SearchControl_Initialized);
             //ColumnDragController = new DragController(col => CreateFilter((GridViewColumnHeader)col), DragDropEffects.Copy);
 
             this.InitializeComponent();
@@ -261,6 +263,25 @@ namespace Signum.Windows
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(100);
             timer.Tick += new EventHandler(timer_Tick);
+        }
+
+        void SearchControl_Initialized(object sender, EventArgs e)
+        {
+            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
+            {
+                return;
+            }
+
+            Settings = Navigator.GetQuerySettings(QueryName);
+
+            Description = Navigator.Manager.GetQueryDescription(QueryName);
+
+            tokenBuilder.Token = null;
+            tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
+
+            entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
+            if (entityColumn == null)
+                throw new InvalidOperationException("Entity Column not found");
         }
 
         ColumnDescription entityColumn;
@@ -294,6 +315,7 @@ namespace Signum.Windows
                 return;
             }
 
+          
             if (FilterColumn.HasText())
             {
                 FilterOptions.Add(new FilterOption
@@ -308,16 +330,6 @@ namespace Signum.Windows
                     SearchOnLoad = true;
             }
 
-            Settings = Navigator.GetQuerySettings(QueryName);
-
-            Description = Navigator.Manager.GetQueryDescription(QueryName);
-
-            tokenBuilder.Token = null;
-            tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
-
-            entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
-            if (entityColumn == null)
-                throw new InvalidOperationException("Entity Column not found");
 
             if (this.NotSet(ViewProperty) && View && entityColumn.Implementations == null)
                 View = Navigator.IsViewable(EntityType, IsAdmin);
@@ -341,11 +353,17 @@ namespace Signum.Windows
 
             CompleteOrderColumns();
 
-            if (SearchOnLoad && IsVisible)
-                Search();
+            if (IsVisible)
+            {
+                FillMenuItems();
 
-            IsVisibleChanged += SearchControl_IsVisibleChanged;
+                if (SearchOnLoad)
+                    Search();
+            }
+            else
+                IsVisibleChanged += SearchControl_IsVisibleChanged;
         }
+
 
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -410,18 +428,23 @@ namespace Signum.Windows
             {
                 IsVisibleChanged -= SearchControl_IsVisibleChanged;
 
-                if (GetCustomMenuItems != null)
-                {
-                    MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
-                    menu.Items.Clear();
-                    foreach (MenuItem mi in menus)
-                    {
-                        menu.Items.Add(mi);
-                    }
-                }
+                FillMenuItems();
 
                 if (SearchOnLoad)
                     Search();
+            }
+        }
+
+        private void FillMenuItems()
+        {
+            if (GetCustomMenuItems != null)
+            {
+                MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
+                menu.Items.Clear();
+                foreach (MenuItem mi in menus)
+                {
+                    menu.Items.Add(mi);
+                }
             }
         }
 
@@ -875,8 +898,6 @@ namespace Signum.Windows
         {
             rowFilters.Height = new GridLength(); //Auto
         }
-
-
     }
 
     public delegate SearchControlMenuItem MenuItemForQueryName(object queryName, Type entityType);
