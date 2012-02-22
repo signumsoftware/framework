@@ -43,7 +43,7 @@ namespace Signum.Windows.Operations
                     if (type == null)
                         return null;
 
-                    var infos = QueryOperationInfoCache.GetOrCreate(type, ()=> Server.Return((IOperationServer o) => o.GetQueryOperationInfos(type)));
+                    var infos = QueryOperationInfoCache.GetOrCreate(type, () => Server.Return((IOperationServer o) => o.GetQueryOperationInfos(type)));
 
                     var list = infos.Where(oi =>
                     {
@@ -58,6 +58,18 @@ namespace Signum.Windows.Operations
                 };
 
             }
+        }
+
+        public static readonly DependencyProperty ConstructFromOperationKeyProperty =
+            DependencyProperty.RegisterAttached("ConstructFromOperationKey", typeof(Enum), typeof(OperationClient), new UIPropertyMetadata(null));
+        public static Enum GetConstructFromOperationKey(DependencyObject obj)
+        {
+            return (Enum)obj.GetValue(ConstructFromOperationKeyProperty);
+        }
+
+        public static void SetConstructFromOperationKey(DependencyObject obj, Enum value)
+        {
+            obj.SetValue(ConstructFromOperationKeyProperty, value);
         }
 
         public static Brush GetBackground(Enum key)
@@ -142,6 +154,46 @@ namespace Signum.Windows.Operations
             if (viewButtons == ViewButtons.Ok && (os == null || !os.VisibleOnOk))
                 return null;
 
+            
+            if(operationInfo.OperationType == OperationType.ConstructorFrom)
+            {
+                var controls = entityControl.Children<SearchControl>()
+                    .Where(sc => operationInfo.Key.Equals(OperationClient.GetConstructFromOperationKey(sc)) ||
+                    sc.NotSet(OperationClient.ConstructFromOperationKeyProperty) && sc.EntityType == operationInfo.ReturnType).ToList();
+
+                if (controls.Any())
+                {
+                    foreach (var sc in controls)
+                    {
+                        if (sc.NotSet(OperationClient.ConstructFromOperationKeyProperty))
+                        {
+                            OperationClient.SetConstructFromOperationKey(sc, operationInfo.Key);
+                        }
+
+                        sc.Create = false;
+
+                        var panel = (StackPanel)sc.Child<Button>("btCreate").Parent;
+
+                        var oldButton = panel.Child<ToolBarButton>(tb => tb.Tag is OperationInfo && ((OperationInfo)tb.Tag).Key.Equals(operationInfo.Key));
+
+                        panel.Children.IndexOf(oldButton);
+
+                        var button = CreateButton<T>(operationInfo, os, args);
+                        panel.Children.Insert(2, button);
+                    }
+
+                    return null;
+                }
+            }
+
+
+            ToolBarButton result = CreateButton<T>(operationInfo, os, args);
+
+            return result;
+        }
+
+        private ToolBarButton CreateButton<T>(OperationInfo operationInfo, EntityOperationSettings<T> os, EntityOperationEventArgs<T> args) where T : class, IIdentifiable
+        {
             ToolBarButton button = new ToolBarButton
             {
                 Content = GetText(operationInfo.Key, os),
@@ -161,7 +213,7 @@ namespace Signum.Windows.Operations
             }
             else
             {
-                button.Click += (_ , __) =>
+                button.Click += (_, __) =>
                 {
                     if (args.OperationInfo.CanExecute != null)
                         throw new ApplicationException("Operation {0} is disabled: {1}".Formato(args.OperationInfo.Key, args.OperationInfo.CanExecute));
@@ -176,9 +228,8 @@ namespace Signum.Windows.Operations
                     {
                         DefaultOperationExecute(args);
                     }
-                }; 
+                };
             }
-
             return button;
         }
 
