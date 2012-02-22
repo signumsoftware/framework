@@ -30,7 +30,7 @@ namespace Signum.Windows
     public partial class SearchControl
     {
         public static readonly DependencyProperty QueryNameProperty =
-            DependencyProperty.Register("QueryName", typeof(object), typeof(SearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("QueryName", typeof(object), typeof(SearchControl), new UIPropertyMetadata((o,s)=>((SearchControl)o).QueryNameChanged(s)));
         public object QueryName
         {
             get { return (object)GetValue(QueryNameProperty); }
@@ -250,8 +250,6 @@ namespace Signum.Windows
 
         public SearchControl()
         {
-
-            this.Initialized += new EventHandler(SearchControl_Initialized);
             //ColumnDragController = new DragController(col => CreateFilter((GridViewColumnHeader)col), DragDropEffects.Copy);
 
             this.InitializeComponent();
@@ -265,16 +263,16 @@ namespace Signum.Windows
             timer.Tick += new EventHandler(timer_Tick);
         }
 
-        void SearchControl_Initialized(object sender, EventArgs e)
+        private void QueryNameChanged(DependencyPropertyChangedEventArgs s)
         {
-            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
+            if (DesignerProperties.GetIsInDesignMode(this) || s.NewValue == null)
             {
                 return;
             }
 
-            Settings = Navigator.GetQuerySettings(QueryName);
+            Settings = Navigator.GetQuerySettings(s.NewValue);
 
-            Description = Navigator.Manager.GetQueryDescription(QueryName);
+            Description = Navigator.Manager.GetQueryDescription(s.NewValue);
 
             tokenBuilder.Token = null;
             tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
