@@ -49,19 +49,21 @@ namespace Signum.Windows
 		{
 			this.InitializeComponent();
             this.Loaded += new RoutedEventHandler(ErrorSummary_Loaded);
-            this.expander.IsEnabledChanged += new DependencyPropertyChangedEventHandler(expander_IsEnabledChanged);
+            this.expander.Expanded += new RoutedEventHandler(expander_Expanded);
 		}
 
-        void expander_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        void expander_Expanded(object sender, RoutedEventArgs e)
         {
         }
+
+      
 
         void ErrorSummary_Loaded(object sender, RoutedEventArgs e)
         {
             if (DesignerProperties.GetIsInDesignMode(this))
                 return;
 
-            var parent = (UIElement)this.Parent;
+            var parent = (FrameworkElement)this.Parent;
 
             parent.AddHandler(Validation.ErrorEvent, new EventHandler<ValidationErrorEventArgs>(ErrorHandler));
             var multi = new MultiBinding { Converter = DoubleListConverter.Instance };
@@ -70,6 +72,13 @@ namespace Signum.Windows
             lb.SetBinding(ItemsControl.ItemsSourceProperty, multi);
             
             this.SetBinding(HasErrorsProperty, new Binding("ItemsSource") {  Source = lb, Converter = Converters.ErrorListToBool });
+        }
+
+        object GetAllErrors()
+        {
+            return (from fe in this.Parent.Children<FrameworkElement>(WhereFlags.VisualTree | WhereFlags.Recursive)
+                    from e in Validation.GetErrors(fe)
+                    select new { fe, e });
         }
 
         void ErrorHandler(object sender, ValidationErrorEventArgs args)
