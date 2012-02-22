@@ -34,16 +34,19 @@
             <m:ToolBarButton x:Name="btReload" Image="Images\reload.png" Background="RoyalBlue" Content="{m:Loc Reload}" Visibility="{Binding ReloadVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" MinWidth="50" Click="Reload_Click"/>
         </StackPanel>
         <m:WidgetPanel x:Name="WidgetPanel" DockPanel.Dock="Left" ExpandedCollapsed="WidgetPanel_ExpandedCollapsed" />
-		<m:ErrorSummary ValidationTarget="{Binding Path=MainControl, ElementName=Window}" DockPanel.Dock="Bottom"/>
+		
 		<Grid Margin="5" m:Common.TypeContext="m:FakeEntityDN">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition MinWidth="200" />
                 <ColumnDefinition MinWidth="200" />
 			</Grid.ColumnDefinitions>
             <m:EntityList x:Name="entityList" Remove="False" Find="False" View="False" ViewOnCreate="False" Margin="5,0,5,5" Entities="{Binding DataContext.Elements, ElementName=Window}"/>
-            <m:DataBorder Margin="5,0,5,5" Grid.Column="1"  BorderBrush="Gray"   BorderThickness="1" DataContext="{Binding DataContext.Elements/, ElementName=Window}" Padding="5">
-				<ContentControl Content="{Binding Path=MainControl, ElementName=Window}" x:Name="contentControl"/>
-			</m:DataBorder>
+            <DockPanel DataContext="{Binding DataContext.Elements/, ElementName=Window}">
+                <m:ErrorSummary DockPanel.Dock="Bottom"/>
+                <m:DataBorder Margin="5,0,5,5" Grid.Column="1"  BorderBrush="Gray"   BorderThickness="1"  Padding="5">
+                    <ContentControl Content="{Binding Path=MainControl, ElementName=Window}" x:Name="contentControl"/>
+                </m:DataBorder>
+            </DockPanel>
 			<GridSplitter Grid.Column="1"  HorizontalAlignment="Left"  x:Name="gridSplitter1" Width="6" Margin="-3,0,0,0" />
 		</Grid>
 	</DockPanel>

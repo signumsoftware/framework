@@ -109,6 +109,7 @@ namespace Signum.Windows
             {
                 Binding binding = bindingExpression.ParentBinding;
                 Validation.ClearInvalid(bindingExpression);
+                Validation.SetErrorTemplate(this, null);
                 BindingOperations.ClearBinding(this, ValueProperty);
                 b = new Binding(binding.Path.Path)
                 {

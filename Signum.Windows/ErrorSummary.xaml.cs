@@ -28,16 +28,6 @@ namespace Signum.Windows
             get { return bindingExceptions;  }
         }
 
-
-        public static readonly DependencyProperty ValidationTargetProperty =
-            DependencyProperty.Register("ValidationTarget", typeof(UIElement), typeof(ErrorSummary), new UIPropertyMetadata((s, arg) => ((ErrorSummary)s).Load()));
-        public UIElement ValidationTarget
-        {
-            get { return (UIElement)GetValue(ValidationTargetProperty); }
-            set { SetValue(ValidationTargetProperty, value); }
-        }
-
-
         public static readonly DependencyProperty HasErrorsProperty =
             DependencyProperty.Register("HasErrors", typeof(bool), typeof(ErrorSummary), new UIPropertyMetadata(false));
         public bool HasErrors
@@ -59,32 +49,36 @@ namespace Signum.Windows
 		{
 			this.InitializeComponent();
             this.Loaded += new RoutedEventHandler(ErrorSummary_Loaded);
-            this.expander.IsEnabledChanged += new DependencyPropertyChangedEventHandler(expander_IsEnabledChanged);
+            this.expander.Expanded += new RoutedEventHandler(expander_Expanded);
 		}
 
-        void expander_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        void expander_Expanded(object sender, RoutedEventArgs e)
         {
         }
+
+      
 
         void ErrorSummary_Loaded(object sender, RoutedEventArgs e)
         {
-            Load();
-        }
-
-        private void Load()
-        {
- 	       if (DesignerProperties.GetIsInDesignMode(this) || !this.IsLoaded || ValidationTarget == null)
+            if (DesignerProperties.GetIsInDesignMode(this))
                 return;
 
-            if (this.NotSet(ValidationTargetProperty))
-                ValidationTarget = (UIElement)this.Parent;
-            ValidationTarget.AddHandler(Validation.ErrorEvent, new EventHandler<ValidationErrorEventArgs>(ErrorHandler));
+            var parent = (FrameworkElement)this.Parent;
+
+            parent.AddHandler(Validation.ErrorEvent, new EventHandler<ValidationErrorEventArgs>(ErrorHandler));
             var multi = new MultiBinding { Converter = DoubleListConverter.Instance };
             multi.Bindings.Add(new Binding("BindingExceptions") { Source = this });
-            multi.Bindings.Add(new Binding("DataContext.Error") { Source = ValidationTarget });
+            multi.Bindings.Add(new Binding("DataContext.Error") { Source = parent });
             lb.SetBinding(ItemsControl.ItemsSourceProperty, multi);
             
             this.SetBinding(HasErrorsProperty, new Binding("ItemsSource") {  Source = lb, Converter = Converters.ErrorListToBool });
+        }
+
+        object GetAllErrors()
+        {
+            return (from fe in this.Parent.Children<FrameworkElement>(WhereFlags.VisualTree | WhereFlags.Recursive)
+                    from e in Validation.GetErrors(fe)
+                    select new { fe, e });
         }
 
         void ErrorHandler(object sender, ValidationErrorEventArgs args)
