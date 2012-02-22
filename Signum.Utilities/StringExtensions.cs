@@ -84,7 +84,7 @@ namespace Signum.Utilities
         public static string Right(this string str, int numChars)
         {
             if (numChars > str.Length)
-                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+                throw new InvalidOperationException("String '{0}' is too short".Formato(str));
 
             return str.Substring(str.Length - numChars, numChars);
         }
@@ -100,7 +100,7 @@ namespace Signum.Utilities
         public static string RemoveLeft(this string str, int numChars)
         {
             if (numChars > str.Length)
-                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+                throw new InvalidOperationException("String '{0}' is too short".Formato(str));
 
             return str.Substring(numChars);
         }
