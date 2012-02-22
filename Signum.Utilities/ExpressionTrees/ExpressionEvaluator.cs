@@ -42,45 +42,45 @@ namespace Signum.Utilities.ExpressionTrees
                     return ((ConstantExpression)expression).Value;
 
                 case ExpressionType.MemberAccess:
-                {
-                    var me = (MemberExpression)expression;
-                    if (me.Expression == null)
-                        return GetStaticGetter(me.Member)();
-                    else
-                        return GetInstanceGetter(me.Member)(Eval(me.Expression));
-                }
+                    {
+                        var me = (MemberExpression)expression;
+                        if (me.Expression == null)
+                            return GetStaticGetter(me.Member)();
+                        else
+                            return GetInstanceGetter(me.Member)(Eval(me.Expression));
+                    }
 
                 case ExpressionType.Convert:
                     var conv = (UnaryExpression)expression;
                     return ReflectionTools.ChangeType(Eval(conv.Operand), conv.Type);
                 case ExpressionType.Call:
-                {
-                    var call = (MethodCallExpression)expression;
-                    if (call.Method.IsStatic)
                     {
-                        if (call.Arguments.Count == 0)
-                            return GetStaticMethodCaller(call.Method)();
-                        if (call.Arguments.Count == 1)
-                            return GetExtensionMethodCaller(call.Method)(Eval(call.Arguments[0]));
+                        var call = (MethodCallExpression)expression;
+                        if (call.Method.IsStatic)
+                        {
+                            if (call.Arguments.Count == 0)
+                                return GetStaticMethodCaller(call.Method)();
+                            if (call.Arguments.Count == 1)
+                                return GetExtensionMethodCaller(call.Method)(Eval(call.Arguments[0]));
+                        }
+                        else
+                        {
+                            if (call.Arguments.Count == 0)
+                                return GetInstanceMethodCaller(call.Method)(Eval(call.Object));
+                        }
+                        break;
                     }
-                    else
-                    {
-                        if (call.Arguments.Count == 0)
-                            return GetInstanceMethodCaller(call.Method)(call.Object);
-                    }
-                    break;
-                }
 
                 case ExpressionType.Equal:
-                {
-                    var be = (BinaryExpression)expression;
-                    return object.Equals(Eval(be.Left), Eval(be.Right));
-                }
+                    {
+                        var be = (BinaryExpression)expression;
+                        return object.Equals(Eval(be.Left), Eval(be.Right));
+                    }
                 case ExpressionType.NotEqual:
-                {
-                    var be = (BinaryExpression)expression;
-                    return !object.Equals(Eval(be.Left), Eval(be.Right));
-                }
+                    {
+                        var be = (BinaryExpression)expression;
+                        return !object.Equals(Eval(be.Left), Eval(be.Right));
+                    }
             }
 
             Delegate fn;
@@ -88,7 +88,7 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 fn = Expression.Lambda(expression).Compile();
             }
-            
+
             try
             {
                 return fn.DynamicInvoke(null);
@@ -104,7 +104,7 @@ namespace Signum.Utilities.ExpressionTrees
             }
         }
 
-        struct MethodKey: IEquatable<MethodKey>
+        struct MethodKey : IEquatable<MethodKey>
         {
             MethodInfo mi;
             Type[] arguments;
@@ -125,13 +125,13 @@ namespace Signum.Utilities.ExpressionTrees
                 if (mi.MetadataToken != other.mi.MetadataToken)
                     return false;
 
-                if(arguments == null)
+                if (arguments == null)
                     return other.arguments == null;
 
-                if(other.arguments == null)
+                if (other.arguments == null)
                     return false;
 
-                if(arguments.Length != other.arguments.Length)
+                if (arguments.Length != other.arguments.Length)
                     return false;
 
                 for (int i = 0; i < arguments.Length; i++)
@@ -160,7 +160,7 @@ namespace Signum.Utilities.ExpressionTrees
             return cachedStaticMethods.GetOrCreate(mi.DeclaringType).GetOrCreate(new MethodKey(mi), () =>
             {
                 return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Call(mi), typeof(object))).Compile();
-            }); 
+            });
         }
 
         static Dictionary<Type, Dictionary<MethodKey, Func<object, object>>> cachedExtensionMethods = new Dictionary<Type, Dictionary<MethodKey, Func<object, object>>>();
@@ -190,7 +190,7 @@ namespace Signum.Utilities.ExpressionTrees
             return cachedStaticGetters.GetOrCreate(mi.DeclaringType).GetOrCreate(mi.Name, () =>
             {
                 return Expression.Lambda<Func<object>>(Expression.Convert(Expression.MakeMemberAccess(null, mi), typeof(object))).Compile();
-            }); 
+            });
         }
 
         static Dictionary<Type, Dictionary<string, Func<object, object>>> cachedInstanceGetters = new Dictionary<Type, Dictionary<string, Func<object, object>>>();
