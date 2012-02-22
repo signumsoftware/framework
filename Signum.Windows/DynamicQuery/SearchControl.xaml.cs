@@ -53,6 +53,16 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+
+        public static readonly DependencyProperty SimpleFilterBuilderProperty =
+          DependencyProperty.Register("SimpleFilterBuilder", typeof(Control), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).SimpleFilterBuilderChanged(e)));
+        public Control SimpleFilterBuilder
+        {
+            get { return (Control)GetValue(SimpleFilterBuilderProperty); }
+            set { SetValue(SimpleFilterBuilderProperty, value); }
+        }
+
+
         public static readonly DependencyProperty ColumnOptionsModeProperty =
             DependencyProperty.Register("ColumnOptionsMode", typeof(ColumnOptionsMode), typeof(SearchControl), new UIPropertyMetadata(ColumnOptionsMode.Add));
         public ColumnOptionsMode ColumnOptionsMode
@@ -102,7 +112,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ShowFiltersProperty =
-            DependencyProperty.Register("ShowFilters", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+            DependencyProperty.Register("ShowFilters", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false, (s, e) => ((SearchControl)s).ShowFiltersChanged(e)));
         public bool ShowFilters
         {
             get { return (bool)GetValue(ShowFiltersProperty); }
@@ -189,6 +199,14 @@ namespace Signum.Windows
             set { SetValue(CreateProperty, value); }
         }
 
+        public static readonly DependencyProperty RemoveProperty =
+            DependencyProperty.Register("Remove", typeof(bool), typeof(SearchControl), new FrameworkPropertyMetadata(false, (d, e) => ((SearchControl)d).UpdateVisibility()));
+        public bool Remove
+        {
+            get { return (bool)GetValue(RemoveProperty); }
+            set { SetValue(RemoveProperty, value); }
+        }
+
         public static readonly DependencyProperty ViewOnCreateProperty =
           DependencyProperty.Register("ViewOnCreate", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
         public bool ViewOnCreate
@@ -212,13 +230,36 @@ namespace Signum.Windows
             get { return (string)GetValue(FilterRouteProperty); }
             set { SetValue(FilterRouteProperty, value); }
         }
-
+        
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
         {
             if(IsLoaded)
                 throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
         }
 
+
+        private void SimpleFilterBuilderChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue != null)
+            {
+                if (!(e.NewValue is ISimpleFilterBuilder))
+                    throw new InvalidOperationException("SimpleFilterBuilder should implement ISimpleFilterBuilder");
+
+                ShowFilters = false;
+            }
+        }
+
+        private void ShowFiltersChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == true && SimpleFilterBuilder != null)
+            {
+                FilterOptions.Clear();
+                FilterOptions.AddRange(((ISimpleFilterBuilder)SimpleFilterBuilder).GenerateFilterOptions());
+
+                SimpleFilterBuilder = null;
+            }
+        }
+     
 
         public Type EntityType
         {
@@ -246,6 +287,7 @@ namespace Signum.Windows
 
         public event Func<IdentifiableEntity> Creating;
         public event Action<IdentifiableEntity> Viewing;
+        public event Action<List<Lite>> Removing;
         public event Action DoubleClick;
 
         public SearchControl()
@@ -360,6 +402,8 @@ namespace Signum.Windows
             }
             else
                 IsVisibleChanged += SearchControl_IsVisibleChanged;
+
+            UpdateVisibility();
         }
 
 
@@ -448,7 +492,8 @@ namespace Signum.Windows
 
         void UpdateViewSelection()
         {
-            btView.Visibility = lvResult.SelectedItem != null && View ? Visibility.Visible : Visibility.Collapsed;
+            btView.Visibility = View && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
+            btRemove.Visibility = Remove && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
 
             SelectedItem = ((ResultRow)lvResult.SelectedItem).TryCC(r => r.Entity);
             if (MultiSelection)
@@ -546,6 +591,12 @@ namespace Signum.Windows
 
         public QueryRequest GetQueryRequest()
         {
+            if (SimpleFilterBuilder != null)
+            {
+                FilterOptions.Clear();
+                FilterOptions.AddRange(((ISimpleFilterBuilder)SimpleFilterBuilder).GenerateFilterOptions());
+            }
+
             var request = new QueryRequest
             {
                 QueryName = QueryName,
@@ -697,6 +748,19 @@ namespace Signum.Windows
                 Navigator.NavigateUntyped(entity, new NavigateOptions { Admin = IsAdmin });
             else
                 this.Viewing(entity);
+        }
+
+        void btRemove_Click(object sender, RoutedEventArgs e)
+        {
+            if (lvResult.SelectedItems.Count == 0)
+                return;
+
+            var lites = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToList();
+
+            if (this.Removing == null)
+                throw new InvalidOperationException("Remove event not set");
+
+            this.Removing(lites);
         }
 
         void lvResult_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -879,6 +943,9 @@ namespace Signum.Windows
             ColumnOptionsMode = columnOptionsMode; 
             GenerateListViewColumns();
 
+            if (SimpleFilterBuilder != null)
+                SimpleFilterBuilder = null;
+
             FilterOptions.Clear();
             FilterOptions.AddRange(filters);
             Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
@@ -959,5 +1026,10 @@ namespace Signum.Windows
 
     }
 
-   
+    
+
+    public interface ISimpleFilterBuilder
+    {
+        List<FilterOption> GenerateFilterOptions();
+    }
 }
