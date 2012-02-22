@@ -172,14 +172,16 @@ namespace Signum.Windows.Operations
 
                         sc.Create = false;
 
-                        var panel = (StackPanel)sc.Child<Button>("btCreate").Parent;
+                        var menu = sc.Child<Menu>(b => b.Name == "menu");
 
-                        var oldButton = panel.Child<ToolBarButton>(tb => tb.Tag is OperationInfo && ((OperationInfo)tb.Tag).Key.Equals(operationInfo.Key));
+                        var panel = (StackPanel)menu.Parent;
 
-                        panel.Children.IndexOf(oldButton);
+                        var oldButton = panel.Children<ToolBarButton>(tb => tb.Tag is OperationInfo && ((OperationInfo)tb.Tag).Key.Equals(operationInfo.Key)).FirstOrDefault();
+                        if (oldButton != null)
+                            panel.Children.Remove(oldButton);
 
-                        var button = CreateButton<T>(operationInfo, os, args);
-                        panel.Children.Insert(2, button);
+                        var index = panel.Children.IndexOf(menu);
+                        panel.Children.Insert(index, CreateButton<T>(operationInfo, os, args));
                     }
 
                     return null;
