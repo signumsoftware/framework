@@ -133,45 +133,48 @@ namespace Signum.Test.Extensions
                 RoleDN externalUser = new RoleDN { Name = "ExternalUser" }.Save();
 
                 // crear los usuarios base
-                new UserDN
+                using (OperationLogic.AllowSave<UserDN>())
                 {
-                    State=UserState.Created,
-                    UserName = AuthLogic.SystemUserName,
-                    PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                    Role = superUser
-                }.Save();
+                    new UserDN
+                    {
+                        State = UserState.Created,
+                        UserName = AuthLogic.SystemUserName,
+                        PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
+                        Role = superUser
+                    }.Save();
 
-                new UserDN
-                {
-                    State = UserState.Created,
-                    UserName = AuthLogic.AnonymousUserName,
-                    PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                    Role = anonymousUser
-                }.Save();
+                    new UserDN
+                    {
+                        State = UserState.Created,
+                        UserName = AuthLogic.AnonymousUserName,
+                        PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
+                        Role = anonymousUser
+                    }.Save();
 
-                new UserDN
-                {
-                    State = UserState.Created,
-                    UserName = "su",
-                    PasswordHash = Security.EncodePassword("su"),
-                    Role = superUser
-                }.Save();
+                    new UserDN
+                    {
+                        State = UserState.Created,
+                        UserName = "su",
+                        PasswordHash = Security.EncodePassword("su"),
+                        Role = superUser
+                    }.Save();
 
-                new UserDN
-                {
-                    State = UserState.Created,
-                    UserName = "internal",
-                    PasswordHash = Security.EncodePassword("internal"),
-                    Role = internalUser
-                }.Save();
+                    new UserDN
+                    {
+                        State = UserState.Created,
+                        UserName = "internal",
+                        PasswordHash = Security.EncodePassword("internal"),
+                        Role = internalUser
+                    }.Save();
 
-                new UserDN
-                {
-                    State = UserState.Created,
-                    UserName = "external",
-                    PasswordHash = Security.EncodePassword("external"),
-                    Role = externalUser
-                }.Save();
+                    new UserDN
+                    {
+                        State = UserState.Created,
+                        UserName = "external",
+                        PasswordHash = Security.EncodePassword("external"),
+                        Role = externalUser
+                    }.Save();
+                }
 
                 Schema.Current.InitializeUntil(InitLevel.Level3MainEntities);
                 using (OperationLogic.AllowSave<AlbumDN>())
