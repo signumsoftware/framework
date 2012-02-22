@@ -209,7 +209,7 @@ namespace Signum.Windows
                 if (!Server.ServerTypes.ContainsKey(propertyRoute.RootType))
                     return null;
 
-                return Server.Return((IBaseServer s) => s.FindAllImplementations(propertyRoute.Type));
+                return Server.Return((IBaseServer s) => s.FindAllImplementations(propertyRoute.RootType));
             });
 
             return dic.TryGetC(propertyRoute);
