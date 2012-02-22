@@ -43,7 +43,7 @@ namespace Signum.Engine.Authorization
             return new Disposable(() => saveDisabled.Value = false);
         }
 
-        static IQueryable<T> EntityGroupAuthLogic_FilterQuery<T>(IQueryable<T> query)
+        static IQueryable<T> TypeAuthLogic_FilterQuery<T>(IQueryable<T> query)
             where T : IdentifiableEntity
         {
             if (!queryFilterDisabled.Value)

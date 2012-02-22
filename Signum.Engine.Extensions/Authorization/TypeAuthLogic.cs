@@ -64,7 +64,7 @@ namespace Signum.Engine.Authorization
         static void RegisterSchemaEvent<T>(Schema sender)
              where T : IdentifiableEntity
         {
-            sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
+            sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(TypeAuthLogic_FilterQuery);
         }
 
         public static void AssertStarted(SchemaBuilder sb)
