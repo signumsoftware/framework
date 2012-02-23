@@ -77,14 +77,14 @@ namespace Signum.Test.Extensions
 
                 QueryLogic.Start(sb);
                 UserQueryLogic.Start(sb, dqm);
-                UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-                UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+                UserQueryLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
+                UserQueryLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
                 ControlPanelLogic.Start(sb, dqm);
-                ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-                ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+                ControlPanelLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
+                ControlPanelLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
                 ChartLogic.Start(sb, dqm);
-                ChartLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-                ChartLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+                ChartLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
+                ChartLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
 
                 ReportsLogic.Start(sb, dqm, true);
 
