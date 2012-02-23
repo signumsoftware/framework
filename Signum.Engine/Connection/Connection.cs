@@ -15,11 +15,6 @@ using System.Data.SqlTypes;
 
 namespace Signum.Engine
 {
-    public enum DBMS
-    {
-        SqlServer2005, 
-        SqlServer2008
-    }
 
     public abstract class BaseConnection
     {
@@ -28,8 +23,6 @@ namespace Signum.Engine
             this.Schema = schema;
             this.DynamicQueryManager = dqm;
         }
-
-        public DBMS DBMS { get; set; }
 
         public Schema Schema { get; private set; }
         public DynamicQueryManager DynamicQueryManager { get; private set; }

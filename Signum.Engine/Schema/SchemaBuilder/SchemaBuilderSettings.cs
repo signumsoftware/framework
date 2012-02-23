@@ -10,11 +10,34 @@ using System.Linq.Expressions;
 using Signum.Engine.Properties;
 using System.Data;
 using Signum.Entities.Reflection;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine.Maps
 {
+    public enum DBMS
+    {
+        SqlServer2005,
+        SqlServer2008
+    }
+
     public class SchemaSettings
     {
+
+        public SchemaSettings()
+        { 
+        }
+
+        public SchemaSettings(DBMS dbms)
+        {
+            DBMS = dbms;
+            if (dbms == Maps.DBMS.SqlServer2008)
+            {
+                TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+            }
+        }
+
+        public DBMS DBMS { get; private set; }
+
         public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
 
         public Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
@@ -36,7 +59,7 @@ namespace Signum.Engine.Maps
 
             {typeof(Byte[]), SqlDbType.VarBinary},
 
-            {typeof(Guid), SqlDbType.UniqueIdentifier}
+            {typeof(Guid), SqlDbType.UniqueIdentifier},
         };
 
         internal Dictionary<Type, string> desambiguatedNames;

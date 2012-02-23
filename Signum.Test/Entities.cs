@@ -364,9 +364,8 @@ namespace Signum.Test
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        int? duration;
-        [Unit("s")]
-        public int? Duration
+        TimeSpan? duration;
+        public TimeSpan? Duration
         {
             get { return duration; }
             set { Set(ref duration, value, () => Duration); }

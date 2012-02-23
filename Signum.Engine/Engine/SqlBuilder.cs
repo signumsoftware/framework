@@ -250,7 +250,7 @@ namespace Signum.Engine
         {
             return  
                 new[]{
-                    ConnectionScope.Current.DBMS == DBMS.SqlServer2005 ?  
+                    Schema.Current.Settings.DBMS == DBMS.SqlServer2005 ?  
                         new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)):
                         new []
                         {

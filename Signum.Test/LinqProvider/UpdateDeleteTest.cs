@@ -185,7 +185,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 SongDN song = new SongDN
                 {
                     Name = "Mana Mana",
-                    Duration = 184,
+                    Duration = TimeSpan.FromSeconds(184),
                 };
 
 
@@ -378,14 +378,12 @@ namespace Signum.Test.LinqProviderUpdateDelete
             {
                 int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeUpdate(b => new MListElement<AlbumDN, SongDN>
                 {
-                    Element = { Duration = 3 }
+                    Element = { Duration = TimeSpan.FromSeconds(3) }
                 });
 
                 var list = Database.MListQuery((AlbumDN a) => a.Songs);
                 //tr.Commit();
             }
-
         }
-
     }
 }

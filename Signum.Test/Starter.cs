@@ -37,7 +37,7 @@ namespace Signum.Test
 
         public static void Start(string connectionString)
         {
-            SchemaBuilder sb = new SchemaBuilder();
+            SchemaBuilder sb = new SchemaBuilder(DBMS.SqlServer2008);
             DynamicQueryManager dqm = new DynamicQueryManager();
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
@@ -251,9 +251,9 @@ namespace Signum.Test
                 Author = smashingPumpkins,
                 Songs = 
                 { 
-                    new SongDN { Name = "Zero", Duration = 123 }, 
+                    new SongDN { Name = "Zero", Duration = TimeSpan.FromSeconds(123) }, 
                     new SongDN { Name = "1976" }, 
-                    new SongDN { Name = "Tonight, Tonight", Duration = 376 } 
+                    new SongDN { Name = "Tonight, Tonight", Duration = TimeSpan.FromSeconds(376) } 
                 },
                 BonusTrack = new SongDN { Name = "Jellybelly" },
                 Label = virgin
@@ -280,7 +280,7 @@ namespace Signum.Test
                 Name = "American Gothic", 
                 Year = 2008,
                 Author = smashingPumpkins,
-                Songs = { new SongDN { Name = "The Rose March", Duration = 276 } },
+                Songs = { new SongDN { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
                 Label = wea,
             }.Save();
 

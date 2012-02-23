@@ -51,7 +51,7 @@ namespace Signum.Engine.Maps
         {
             get
             {
-                if (string.IsNullOrEmpty(Where) || ConnectionScope.Current.DBMS != DBMS.SqlServer2005)
+                if (string.IsNullOrEmpty(Where) || Schema.Current.Settings.DBMS != DBMS.SqlServer2005)
                     return null;
 
                 return "VIX_{0}_{1}".Formato(Table.Name, ColumnSignature()).TryLeft(ConnectionScope.Current.MaxNameLength);
