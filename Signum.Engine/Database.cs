@@ -547,6 +547,7 @@ namespace Signum.Engine
             return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>());
         }
 
+        [MethodExpander(typeof(MListQueryExpander))]
         public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mlistProperty)
             where E : IdentifiableEntity
         {
@@ -555,6 +556,16 @@ namespace Signum.Engine
             var list = (FieldMList)Schema.Current.Table<E>().GetField(pi);
 
             return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, list.RelationalTable);
+        }
+
+        class MListQueryExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                var query = Expression.Lambda<Func<IQueryable>>(Expression.Call(mi, arguments)).Compile()();
+
+                return Expression.Constant(query, mi.ReturnType);
+            }
         }
 
         public static IQueryable<S> InDB<S>(this S entity)
