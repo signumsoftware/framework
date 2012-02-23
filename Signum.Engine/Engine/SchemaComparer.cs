@@ -12,9 +12,11 @@ using Signum.Engine.Properties;
 
 namespace Signum.Engine
 {
-    internal static class SchemaComparer
+    public static class SchemaComparer
     {
         static readonly Dictionary<string, DiffViewIndex> defaultIndexes = new Dictionary<string, DiffViewIndex>();
+
+        public static Func<Dictionary<string, DiffTable>> GetDatabaseDescription = DefaultGetDatabaseDescription;
 
         public static SqlPreCommand SynchronizeSchema(Replacements replacements)
         {
@@ -120,13 +122,15 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, addForeingKeys, addIndices);
         }
 
-        static Dictionary<string, DiffTable> GetDatabaseDescription()
+        public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription()
         {
             var database = (from t in Database.View<SysTables>()
+                            join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
                             where !Database.View<SysExtendedProperties>().Any(a => a.major_id == t.object_id && a.name == "microsoft_database_tools_support")
                             select new DiffTable
                             {
                                 Name = t.name,
+                                Schema = s.name,
                                 Colums = (from c in Database.View<SysColumns>().Where(c => c.object_id == t.object_id)
                                           join type in Database.View<SysTypes>() on c.user_type_id equals type.user_type_id
                                           join ctr in Database.View<SysObjects>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
@@ -158,7 +162,7 @@ namespace Signum.Engine
                                             where v.name.StartsWith("VIX_" + t.name + "_")
                                             join i in Database.View<SysIndexes>() on v.object_id equals i.object_id
                                             where !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
-                                            select new DiffViewIndex { IndexName = i.name, ViewName = v.name }).ToList()).ToDictionary(a=>a.IndexName),
+                                            select new DiffViewIndex { IndexName = i.name, ViewName = v.name }).ToList()).ToDictionary(a => a.IndexName),
 
 
                                 FreeIndices = (from i in Database.View<SysIndexes>()
@@ -207,16 +211,17 @@ namespace Signum.Engine
         }
     }
 
-    internal class DiffTable
+    public class DiffTable
     {
         public string Name;
+        public string Schema;
         public Dictionary<string, DiffColumn> Colums;
 
         public Dictionary<string, DiffViewIndex> Indices;
         public List<DiffFreeIndex> FreeIndices;
     }
 
-    internal class DiffFreeIndex
+    public class DiffFreeIndex
     {
         public string IndexName; 
         public List<string> Columns;
@@ -227,7 +232,7 @@ namespace Signum.Engine
         }
     }
 
-    internal class DiffViewIndex
+    public class DiffViewIndex
     {
         public string IndexName; 
         public string ViewName;
@@ -241,7 +246,7 @@ namespace Signum.Engine
         }
     }
 
-    internal class DiffColumn : IEquatable<IColumn>
+    public class DiffColumn : IEquatable<IColumn>
     {
         public string Name;
         public SqlDbType DbType;

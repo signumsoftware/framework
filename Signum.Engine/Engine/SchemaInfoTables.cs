@@ -16,12 +16,20 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
+    [SqlViewName("sys.schemas")]
+    public class SysSchemas : IView
+    {
+        public int schema_id;
+        public string name;
+    }
+
 
     [SqlViewName("sys.tables")]
     public class SysTables : IView
     {
         public string name;
         public int object_id;
+        public int schema_id;
     }
 
     [SqlViewName("sys.views")]
