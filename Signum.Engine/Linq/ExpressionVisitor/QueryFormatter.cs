@@ -361,7 +361,7 @@ namespace Signum.Engine.Linq
 
         internal static bool IsSupported(Type type)
         {
-            return Schema.Current.Settings.TypeValues.ContainsKey(type);
+            return type.IsEnum || Schema.Current.Settings.TypeValues.ContainsKey(type);
         }
 
         protected override Expression VisitConstant(ConstantExpression c)
