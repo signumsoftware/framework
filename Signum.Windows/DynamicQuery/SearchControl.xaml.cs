@@ -55,10 +55,10 @@ namespace Signum.Windows
 
 
         public static readonly DependencyProperty SimpleFilterBuilderProperty =
-          DependencyProperty.Register("SimpleFilterBuilder", typeof(Control), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).SimpleFilterBuilderChanged(e)));
-        public Control SimpleFilterBuilder
+          DependencyProperty.Register("SimpleFilterBuilder", typeof(ISimpleFilterBuilder), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).SimpleFilterBuilderChanged(e)));
+        public ISimpleFilterBuilder SimpleFilterBuilder
         {
-            get { return (Control)GetValue(SimpleFilterBuilderProperty); }
+            get { return (ISimpleFilterBuilder)GetValue(SimpleFilterBuilderProperty); }
             set { SetValue(SimpleFilterBuilderProperty, value); }
         }
 
@@ -242,9 +242,6 @@ namespace Signum.Windows
         {
             if (e.NewValue != null)
             {
-                if (!(e.NewValue is ISimpleFilterBuilder))
-                    throw new InvalidOperationException("SimpleFilterBuilder should implement ISimpleFilterBuilder");
-
                 ShowFilters = false;
             }
         }
@@ -253,8 +250,7 @@ namespace Signum.Windows
         {
             if ((bool)e.NewValue == true && SimpleFilterBuilder != null)
             {
-                FilterOptions.Clear();
-                FilterOptions.AddRange(((ISimpleFilterBuilder)SimpleFilterBuilder).GenerateFilterOptions());
+                RefreshSimpleFilters();
 
                 SimpleFilterBuilder = null;
             }
@@ -314,7 +310,13 @@ namespace Signum.Windows
 
             Settings = Navigator.GetQuerySettings(s.NewValue);
 
+
             Description = Navigator.Manager.GetQueryDescription(s.NewValue);
+
+            if (Settings.SimpleFilterBuilder != null)
+            {
+                SimpleFilterBuilder = Settings.SimpleFilterBuilder(Description);
+            }
 
             tokenBuilder.Token = null;
             tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
@@ -409,7 +411,7 @@ namespace Signum.Windows
 
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            UpdateMultiplyMessage();                       
+            UpdateMultiplyMessage(false);                       
         }
 
         List<QueryToken> tokenBuilder_SubTokensEvent(QueryToken arg)
@@ -562,7 +564,7 @@ namespace Signum.Windows
 
             btFind.IsEnabled = false;
 
-            var request = UpdateMultiplyMessage();
+            var request = UpdateMultiplyMessage(true);
 
             DynamicQueryBachRequest.Enqueue(request,          
                 obj =>
@@ -577,9 +579,9 @@ namespace Signum.Windows
                 () => { btFind.IsEnabled = true; });
         }
 
-        public QueryRequest UpdateMultiplyMessage()
+        public QueryRequest UpdateMultiplyMessage(bool updateSimpleFilters)
         {
-            var result = GetQueryRequest();
+            var result = GetQueryRequest(updateSimpleFilters);
 
             string message = CollectionElementToken.MultipliedMessage(result.Multiplications, EntityType);
 
@@ -589,13 +591,10 @@ namespace Signum.Windows
             return result;
         }
 
-        public QueryRequest GetQueryRequest()
+        public QueryRequest GetQueryRequest(bool updateSimpleFilters)
         {
-            if (SimpleFilterBuilder != null)
-            {
-                FilterOptions.Clear();
-                FilterOptions.AddRange(((ISimpleFilterBuilder)SimpleFilterBuilder).GenerateFilterOptions());
-            }
+            if (updateSimpleFilters)
+                RefreshSimpleFilters();
 
             var request = new QueryRequest
             {
@@ -608,6 +607,18 @@ namespace Signum.Windows
             };
 
             return request;
+        }
+
+        private void RefreshSimpleFilters()
+        {
+            if (SimpleFilterBuilder != null)
+            {
+                FilterOptions.Clear();
+                var newFilters = SimpleFilterBuilder.GenerateFilterOptions();
+
+                Navigator.Manager.SetFilterTokens(QueryName, newFilters);
+                FilterOptions.AddRange(newFilters);
+            }
         }
 
         private void SetResults()
@@ -862,7 +873,7 @@ namespace Signum.Windows
 
             AddColumn(token);
 
-            UpdateMultiplyMessage(); 
+            UpdateMultiplyMessage(true); 
         }
 
         private void AddColumn(QueryToken token)
@@ -921,7 +932,7 @@ namespace Signum.Windows
 
             gvResults.Columns.Remove(gvch.Column);
 
-            UpdateMultiplyMessage(); 
+            UpdateMultiplyMessage(true); 
         }
 
         private void filter_Click(object sender, RoutedEventArgs e)
@@ -956,7 +967,7 @@ namespace Signum.Windows
             CompleteOrderColumns();
 
 
-            UpdateMultiplyMessage(); 
+            UpdateMultiplyMessage(true); 
         }
 
         private void btFilters_Unchecked(object sender, RoutedEventArgs e)

@@ -39,6 +39,7 @@
                          Grid.Row="1"
                          QueryName="{Binding QueryName, ElementName=me}"
                          FilterOptions="{Binding FilterOptions, ElementName=me}"
+                         SimpleFilterBuilder="{Binding SimpleFilterBuilder, ElementName=me}"
                          OrderOptions="{Binding OrderOptions, ElementName=me}"
                          ColumnOptions="{Binding ColumnOptions, ElementName=me}"
                          ColumnOptionsMode="{Binding ColumnOptionsMode, ElementName=me}"

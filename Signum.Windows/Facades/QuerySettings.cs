@@ -112,6 +112,8 @@ namespace Signum.Windows
 
             return fr.Formatter(column);
         }
+
+        public Func<QueryDescription, ISimpleFilterBuilder> SimpleFilterBuilder;
     }
 
     public class FormatterPriority
