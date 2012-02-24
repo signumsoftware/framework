@@ -31,7 +31,7 @@ namespace Signum.Web.Extensions.Sample.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Common.Start(testContext);
+            Common.Start();
         }
 
         [ClassCleanup]
@@ -81,7 +81,26 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void Operations003_ConstructFrom_OpenPopup()
+        public void Operations003_ConstructFrom()
+        {
+            //Album.Clone
+            CheckLoginAndOpen(ViewRoute("Album", 1));
+
+            Assert.IsFalse(selenium.EntityButtonEnabled("AlbumOperation_Save"));
+
+            selenium.EntityMenuOptionClick(constructorsMenuId, "AlbumOperation_Clone");
+            selenium.WaitAjaxFinished(() => selenium.EntityButtonEnabled("AlbumOperation_Save"));
+
+            selenium.Type("Name", "test3");
+            selenium.Type("Year", "2010");
+
+            selenium.EntityButtonClick("AlbumOperation_Save");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
+        }
+
+        [TestMethod]
+        public void Operations004_ConstructFrom_OpenPopup()
         {
             //Album.CreateFromBand
             CheckLoginAndOpen(ViewRoute("Band", 1));
@@ -95,30 +114,30 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.LineFindAndSelectElements("{0}Label_".Formato(popupPrefix), false, new int[] { 0 });
 
             //When clicking Ok (Save) => Custom controller that returns a url => navigate
-            selenium.Click("jq=#{0}btnOk".Formato(popupPrefix)); //Dont't call PopupOk helper => it makes an ajaxWait and then waitPageLoad fails
+            selenium.PopupSave(popupPrefix);
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.MainEntityHasId();
         }
 
         [TestMethod]
-        public void Operations004_ConstructFrom_Submit()
+        public void Operations005_ConstructFrom_OpenPopupAndSubmitFormAndPopup()
         {
             //Album.Clone
             CheckLoginAndOpen(ViewRoute("Album", 1));
 
-            selenium.EntityMenuOptionClick(constructorsMenuId, "AlbumOperation_Clone");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.EntityButtonClick("CloneWithData");
 
-            selenium.Type("Name", "test3");
-            selenium.Type("Year", "2010");
+            string popupPrefix = "New_";
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(SeleniumExtensions.PopupSelector(popupPrefix))));
 
-            selenium.EntityButtonClick("AlbumOperation_Save");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.MainEntityHasId();
+            selenium.Type("{0}StringValue".Formato(popupPrefix), "test popup");
+            selenium.PopupOk(popupPrefix);
+
+            selenium.IsTextPresent("test popup");
         }
 
         [TestMethod]
-        public void Operations005_Delete()
+        public void Operations006_Delete()
         {
             //Album.Delete
             CheckLoginAndOpen(ViewRoute("Album", 13));
@@ -136,7 +155,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void Operations006_ConstructFromMany_OpenPopup()
+        public void Operations007_ConstructFromMany()
         {
             //Album.CreateGreatestHits
             CheckLoginAndOpen("{0}?allowMultiple=true".Formato(FindRoute("Album")));
@@ -147,19 +166,17 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.SelectRowCheckbox(1);
 
             selenium.QueryMenuOptionClick(constructorsMenuId, "AlbumOperation_CreateEmptyGreatestHitsAlbum");
-            string popupPrefix = "New_";
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.EntityButtonLocator("AlbumOperation_Save")));
 
-            selenium.Type("{0}Name".Formato(popupPrefix), "test greatest empty");
-            selenium.Select("{0}Label".Formato(popupPrefix), "label=Virgin");
+            selenium.Type("New_Name", "test greatest empty");
+            selenium.Select("New_Label", "label=Virgin");
 
             selenium.EntityButtonClick("AlbumOperation_Save");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.EntityButtonLocator("AlbumOperation_Modify")));
-            Assert.IsTrue(selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
         }
 
         [TestMethod]
-        public void Operations007_ConstructFromMany_Submit_UseSessionWhenNew()
+        public void Operations008_ConstructFromMany_Submit()
         {
             //Album.CreateGreatestHits
             CheckLoginAndOpen("{0}?allowMultiple=true".Formato(FindRoute("Album")));
@@ -178,23 +195,6 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.EntityButtonClick("AlbumOperation_Save");
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.MainEntityHasId();
-        }
-
-        [TestMethod]
-        public void Operations008_OpenPopupAndSubmitFormAndPopup()
-        {
-            //Album.Clone
-            CheckLoginAndOpen(ViewRoute("Album", 1));
-
-            selenium.EntityButtonClick("CloneWithData");
-
-            string popupPrefix = "New_";
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(SeleniumExtensions.PopupSelector(popupPrefix))));
-
-            selenium.Type("{0}StringValue".Formato(popupPrefix), "test popup");
-            selenium.PopupOk(popupPrefix);
-
-            selenium.IsTextPresent("test popup");
         }
     }
 }

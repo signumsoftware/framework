@@ -1,0 +1,101 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Signum.Entities.Operations;
+using Signum.Entities;
+using Signum.Entities.Authorization;
+using System.Threading;
+using Signum.Utilities;
+using Signum.Engine.Basics;
+using Signum.Engine.Extensions.Properties;
+using Signum.Engine.Authorization;
+
+namespace Signum.Engine.Operations
+{
+    public interface IConstructOperation : IOperation
+    {
+        IIdentifiable Construct(params object[] parameters);
+    }
+
+    public class BasicConstruct<T> : IConstructOperation
+        where T: class, IIdentifiable
+    {
+        public Enum Key { get; private set; }        
+        public Type Type { get { return typeof(T); } }
+        public OperationType OperationType { get { return OperationType.Constructor; } }
+        public bool Returns { get { return true; } }
+        public Type ReturnType { get { return typeof(T); } }
+
+        public bool Lite { get { return false; } }
+        public Func<object[], T> Construct { get; set; }
+
+        public BasicConstruct(Enum key)
+        {
+            this.Key = key; 
+        }
+
+        IIdentifiable IConstructOperation.Construct(params object[] args)
+        {
+            OperationLogic.AssertOperationAllowed(Key);
+
+            using (OperationLogic.AllowSave<T>())
+            {
+                try
+                {
+                    using (Transaction tr = new Transaction())
+                    {
+                        OperationLogDN log = new OperationLogDN
+                        {
+                            Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                            Start = TimeZoneManager.Now,
+                            User = UserDN.Current.ToLite()
+                        };
+
+                        OnBeginOperation();
+
+                        T entity = Construct(args);
+
+                        OnEndOperation(entity);
+
+                        if (!entity.IsNew)
+                        {
+                            log.Target = entity.ToLite<IIdentifiable>();
+                            log.End = TimeZoneManager.Now;
+                            using (AuthLogic.Disable())
+                                log.Save();
+                        }
+
+                        return tr.Commit(entity);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    OperationLogic.OnErrorOperation(this, null, ex);
+                    throw;
+                }
+            }
+        }
+
+        protected virtual void OnBeginOperation()
+        {
+            OperationLogic.OnBeginOperation(this, null);
+        }
+
+        protected virtual void OnEndOperation(T entity)
+        {
+            OperationLogic.OnEndOperation(this, entity);
+        }
+
+        public virtual void AssertIsValid()
+        {
+            if (Construct == null)
+                throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(Key));
+        }
+
+        public override string ToString()
+        {
+            return "{0} Construct {1}".Formato(Key, typeof(T));
+        }
+    }
+}

@@ -6,18 +6,19 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using System.IO;
 using Signum.Utilities;
+using Signum.Services;
 
 namespace Signum.Entities.Files
 {
     [Serializable]
-    public class FileDN : Entity, IFile
+    public class FileDN : ImmutableEntity, IFile
     {
         public FileDN() { }
 
         public FileDN(string path)
         {
             this.fileName = Path.GetFileName(path);
-            this.binaryFile = File.ReadAllBytes(path); 
+            this.binaryFile = File.ReadAllBytes(path);
         }
 
         [NotNullable, SqlDbType(Size = 254)]
@@ -29,11 +30,22 @@ namespace Signum.Entities.Files
             set { SetToStr(ref fileName, value, () => FileName); }
         }
 
+        string hash;
+        public string Hash
+        {
+            get { return hash; }
+            private set { Set(ref hash, value, () => Hash); }
+        }
+
         byte[] binaryFile;
         public byte[] BinaryFile
         {
             get { return binaryFile; }
-            set { Set(ref binaryFile, value, () => BinaryFile); }
+            set
+            {
+                if (Set(ref binaryFile, value, () => BinaryFile))
+                    Hash = CryptorEngine.CalculateMD5Hash(binaryFile);
+            }
         }
 
         public override string ToString()

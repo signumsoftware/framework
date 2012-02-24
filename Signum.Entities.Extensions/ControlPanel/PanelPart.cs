@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reports;
+using Signum.Entities.UserQueries;
+using Signum.Entities.Chart;
+using System.Reflection;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -11,7 +15,6 @@ namespace Signum.Entities.ControlPanel
     public class PanelPart : EmbeddedEntity
     {
         string title;
-        [StringLengthValidator(AllowNulls=false, Min=1)]
         public string Title
         {
             get { return title; }
@@ -34,19 +37,62 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref column, value, () => Column); }
         }
 
-        bool fill;
-        public bool Fill
-        {
-            get { return fill; }
-            set { Set(ref fill, value, () => Fill); }
-        }
-
-        [ImplementedBy(typeof(UserQueryDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
+        [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
         IIdentifiable content;
         public IIdentifiable Content
         {
             get { return content; }
             set { Set(ref content, value, () => Content); }
+        }
+
+        public override string ToString()
+        {
+            return title.HasText() ? title : content.ToString();
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
+            {
+                if (content != null && (content.GetType() == typeof(CountSearchControlPartDN) || content.GetType() == typeof(LinkListPartDN)))
+                    return Resources.ControlPanelDN_PartTitleMustBeSpecifiedForListParts;
+            }
+
+            return base.PropertyValidation(pi);
+        }
+    }
+
+    [Serializable]
+    public class UserQueryPartDN : Entity
+    {
+        UserQueryDN userQuery;
+        [NotNullValidator]
+        public UserQueryDN UserQuery
+        {
+            get { return userQuery; }
+            set { Set(ref userQuery, value, () => UserQuery); }
+        }
+
+        public override string ToString()
+        {
+            return userQuery.TryCC(uq => uq.DisplayName);
+        }
+    }
+
+    [Serializable]
+    public class UserChartPartDN : Entity
+    {
+        UserChartDN userChart;
+        [NotNullValidator]
+        public UserChartDN UserChart
+        {
+            get { return userChart; }
+            set { Set(ref userChart, value, () => UserChart); }
+        }
+
+        public override string ToString()
+        {
+            return userChart.TryCC(uq => uq.DisplayName);
         }
     }
 
@@ -62,7 +108,7 @@ namespace Signum.Entities.ControlPanel
 
         public override string ToString()
         {
-            return UserQueries.ToString(uq => uq.Label, ", ");
+            return "{0} {1}".Formato(userQueries.Count, typeof(UserQueryDN).NicePluralName());
         }
     }
 
@@ -97,7 +143,7 @@ namespace Signum.Entities.ControlPanel
 
         public override string ToString()
         {
-            return Links.ToString(uq => uq.Label, ", ");
+            return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
         }
     }
 
@@ -113,7 +159,7 @@ namespace Signum.Entities.ControlPanel
         }
 
         string link;
-        [StringLengthValidator(AllowNulls=false, Min=2)]
+        [URLValidator, NotNullValidator]
         public string Link
         {
             get { return link; }

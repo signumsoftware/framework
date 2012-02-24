@@ -5,9 +5,9 @@ using System.Text;
 using Signum.Entities;
 using Signum.Services;
 using System.Reflection;
-using Signum.Entities.Extensions.Basics;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Web.Basic
 {
@@ -20,8 +20,12 @@ namespace Signum.Web.Basic
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(BasicClient));
-               
-                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => ViewPrefix.Formato("DateSpan") });
+
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => ViewPrefix.Formato("DateSpan") },
+                    new EmbeddedEntitySettings<HourMinuteDN>() { PartialViewName = _ => ViewPrefix.Formato("HourMinute") }
+                });
             }
         }
     }

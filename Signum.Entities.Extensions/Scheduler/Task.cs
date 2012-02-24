@@ -7,20 +7,15 @@ using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities.Authorization;
+using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Scheduler
 {
-    public enum TaskOperation
-    {
-        ExecutePrivate
-    }
-
     public enum CustomTaskOperation
     {
         Execute,
     }
 
-    [ImplementedBy(typeof(CustomTaskDN), typeof(ProcessDN)), ]
     public interface ITaskDN : IIdentifiable
     {
     }
@@ -41,15 +36,6 @@ namespace Signum.Entities.Scheduler
             set { Set(ref customTask, value, () => CustomTask); }
         }
 
-
-        Lite<UserDN> User;
-        [NotNullValidator]
-        public Lite<UserDN> user
-        {
-            get { return User; }
-            set { Set(ref User, value, () => user); }
-        }
-
         DateTime startTime;
         public DateTime StartTime
         {
@@ -64,9 +50,8 @@ namespace Signum.Entities.Scheduler
             set { Set(ref endTime, value, () => EndTime); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        public string Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

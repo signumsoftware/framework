@@ -9,6 +9,6 @@
         <m:EntityLine m:Common.Route="Package" />
         <m:EntityLine m:Common.Route="Target" />
         <m:ValueLine m:Common.Route="FinishTime" />
-        <m:ValueLine m:Common.Route="Exception" />
+        <m:EntityLine m:Common.Route="Exception" />
     </StackPanel>
 </UserControl>

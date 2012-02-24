@@ -14,55 +14,58 @@ namespace Signum.Engine.Authorization
 {
     public class UserGraph : Graph<UserDN, UserState>
     {
-        public UserGraph()
+        public static void Register()
         {
-            this.GetState = u => u.State;
-            this.Operations = new List<IGraphOperation>
+            GetState = u => u.State;
+
+            new Construct(UserOperation.Create)
             {
-                new Construct(UserOperation.Create, UserState.New)
-                {
-                    Constructor = args =>new UserDN {State = UserState.New}
-                },
+                ToState = UserState.New,
+                Construct = args => new UserDN { State = UserState.New }
+            }.Register();
 
-                new Goto(UserOperation.SaveNew, UserState.Created)
-                {
-                   FromStates = new []{UserState.New},
-                   Execute = (u,_) => {u.State=UserState.Created;},
-                   AllowsNew = true,
-                   Lite = false
-                },
+            new Execute(UserOperation.SaveNew)
+            {
+                FromStates = new[] { UserState.New },
+                ToState = UserState.Created,
+                Execute = (u, _) => { u.State = UserState.Created; },
+                AllowsNew = true,
+                Lite = false
+            }.Register();
 
-                new Goto(UserOperation.Save, UserState.Created)
-                {
-                   FromStates = new []{UserState.Created},
-                   Execute = (u,_) => {},
-                   Lite = false
-                },
+            new Execute(UserOperation.Save)
+            {
+                FromStates = new[] { UserState.Created },
+                ToState = UserState.Created,
+                Execute = (u, _) => { },
+                Lite = false
+            }.Register();
 
-                new Goto(UserOperation.Disable, UserState.Disabled)
+            new Execute(UserOperation.Disable)
+            {
+                FromStates = new[] { UserState.Created },
+                ToState = UserState.Disabled,
+                Execute = (u, _) =>
                 {
-                   FromStates = new []{UserState.Created},
-                   Execute = (u,_) =>
-                   {
-                       u.AnulationDate = TimeZoneManager.Now;
-                       u.State = UserState.Disabled;
-                   },
-                   AllowsNew = false,
-                   Lite = true
+                    u.AnulationDate = TimeZoneManager.Now;
+                    u.State = UserState.Disabled;
                 },
+                AllowsNew = false,
+                Lite = true
+            }.Register();
 
-                new Goto(UserOperation.Enable, UserState.Created)
+            new Execute(UserOperation.Enable)
+            {
+                FromStates = new[] { UserState.Disabled },
+                ToState = UserState.Created,
+                Execute = (u, _) =>
                 {
-                   FromStates = new []{UserState.Disabled },
-                   Execute = (u,_) =>
-                   {
-                       u.AnulationDate = null;
-                       u.State = UserState.Created;
-                   },
-                   AllowsNew = false,
-                   Lite = true
+                    u.AnulationDate = null;
+                    u.State = UserState.Created;
                 },
-            };
+                AllowsNew = false,
+                Lite = true
+            }.Register();
         }
     }
 }

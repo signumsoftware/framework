@@ -3,28 +3,33 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.SMS;assembly=Signum.Entities.Extensions"
+    xmlns:swsms="clr-namespace:Signum.Windows.SMS"            
     m:Common.TypeContext="d:SMSMessageDN"
-    MinWidth="300">
+    m:Common.MinLabelWidth="120"
+    MinWidth="300" MaxWidth="300">
     <StackPanel>
-        <GroupBox m:Common.LabelOnlyRoute="Message">
+        <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="MessageID" m:Common.IsReadOnly="True"/>
+        <m:EntityLine m:Common.CollapseIfNull="True" m:Common.Route="Template" m:Common.IsReadOnly="True"/>
+        <m:ValueLine m:Common.Route="Certified" m:Common.IsReadOnly="{Binding State, Converter={m:NotEquals {x:Static d:SMSMessageState.Created}}}" />
+        <m:ValueLine m:Common.Route="DestinationNumber" m:Common.IsReadOnly="{Binding IsNew, Converter={x:Static m:Converters.Not}}"/>
+        <GroupBox Header="{m:Loc Message}" Margin="0,10">
             <StackPanel>
-                <m:TextArea x:Name="textMessage" Height="150" FontSize="14" m:Common.Route="Message" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="{m:Loc CharactersLeft}" />
-                    <TextBlock x:Name="charactersLeft" FontWeight="Bold">160</TextBlock>
+                <m:TextArea x:Name="textMessage" Height="150" FontSize="14" m:Common.Route="Message"  Margin="0,3,0,0"
+                    m:Common.IsReadOnly="{Binding State, Converter={m:NotEquals {x:Static d:SMSMessageState.Created}}}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10 10"
+                    Visibility="{Binding State, Converter={x:Static swsms:SMSMessage.StateToVisibility}}" >
+                    <TextBlock Text="{m:Loc RemainingCharacters}"/>
+                    <TextBlock x:Name="charactersLeft" FontWeight="Bold" Margin="4,0,0,0">160</TextBlock>
                 </StackPanel>
-                <m:ValueLine m:Common.Route="From" />
+                <Button x:Name="removeNonSMSChars" Click="removeNonSMSChars_Click"  
+                        Content="{m:Loc RemoveNonValidCharacters}" Width="200" HorizontalAlignment="Left"
+                        Visibility="{Binding State, Converter={x:Static swsms:SMSMessage.StateToVisibility}}"/>
             </StackPanel>
         </GroupBox>
-        <m:ValueLine m:Common.Route="DestinationNumber" m:Common.LabelWidth="250"/>
-        <GroupBox Header="{m:Loc SendData}">
-            <StackPanel>
-                <m:ValueLine m:Common.Route="SourceNumber" />
-                <m:ValueLine m:Common.Route="State" m:Common.IsReadOnly="True"/>
-                <m:ValueLine m:Common.Route="SendDate" m:Common.IsReadOnly="True"/>
-                <m:ValueLine m:Common.Route="SendState" m:Common.IsReadOnly="True"/>
-            </StackPanel>
-        </GroupBox>
-        <m:EntityLine m:Common.Route="Template" m:Common.IsReadOnly="True"/>
+        <m:ValueLine m:Common.Route="From" m:Common.IsReadOnly="{Binding State, Converter={m:NotEquals {x:Static d:SMSMessageState.Created}}}"/>
+        <StackPanel Visibility="{Binding State, Converter={x:Static swsms:SMSMessage.NotStateToVisibility}}">
+            <m:ValueLine m:Common.Route="SendDate" m:Common.IsReadOnly="True"/>
+            <m:ValueLine m:Common.Route="State" m:Common.IsReadOnly="True"/>
+        </StackPanel>
     </StackPanel>
 </UserControl>

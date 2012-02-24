@@ -2,27 +2,44 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 
 namespace Signum.Entities.SMS
 {
+    public enum SMSProviderOperations
+    {
+        SendSMSMessage,
+        SendSMSMessagesFromTemplate
+    }
+
     public enum SMSMessageState
     {
         Created,
-        Sent
-    }
-
-    public enum SendState
-    { 
-        None,
+        Sent,
         Delivered,
         Failed,
-        Queued,
-        Sent    
     }
 
+    //public enum SendState
+    //{
+    //    None,
+    //    Queued,
+    //    Sent,
+    //    Delivered,
+    //    Failed,
+    //}
+
     public enum SMSMessageOperations
-    { 
-        Create,
+    {
+        CreateSMS,
+        Send,
+        UpdateStatus,
+        CreateUpdateStatusPackage,
+        CreateSMSMessageFromTemplate
+    }
+
+    public enum SMSMessageProcess
+    {
         Send,
         UpdateStatus
     }
@@ -30,6 +47,8 @@ namespace Signum.Entities.SMS
     [Serializable]
     public class SMSMessageDN : Entity
     {
+        public static string DefaultFrom;
+
         Lite<SMSTemplateDN> template;
         public Lite<SMSTemplateDN> Template
         {
@@ -45,7 +64,7 @@ namespace Signum.Entities.SMS
             set { Set(ref message, value, () => Message); }
         }
 
-        string from;
+        string from = DefaultFrom;
         [StringLengthValidator(AllowNulls = false)]
         public string From
         {
@@ -68,22 +87,9 @@ namespace Signum.Entities.SMS
             set { Set(ref state, value, () => State); }
         }
 
-        SendState sendState;
-        public SendState SendState
-        {
-            get { return sendState; }
-            set { Set(ref sendState, value, () => SendState); }
-        }
-
-        string sourceNumber;
-        public string SourceNumber
-        {
-            get { return sourceNumber; }
-            set { Set(ref sourceNumber, value, () => SourceNumber); }
-        }
-
+        [NotNullable]
         string destinationNumber;
-        [StringLengthValidator(AllowNulls=false)]
+        [StringLengthValidator(AllowNulls = false, Min = 9, Max = 20), TelephoneValidator]
         public string DestinationNumber
         {
             get { return destinationNumber; }
@@ -97,6 +103,32 @@ namespace Signum.Entities.SMS
         {
             get { return messageID; }
             set { Set(ref messageID, value, () => MessageID); }
+        }
+
+        bool certified;
+        public bool Certified
+        {
+            get { return certified; }
+            set { Set(ref certified, value, () => Certified); }
+        }
+
+        Lite<SMSSendPackageDN> sendpackage;
+        public Lite<SMSSendPackageDN> SendPackage
+        {
+            get { return sendpackage; }
+            set { Set(ref sendpackage, value, () => SendPackage); }
+        }
+
+        Lite<SMSUpdatePackageDN> updatePackage;
+        public Lite<SMSUpdatePackageDN> UpdatePackage
+        {
+            get { return updatePackage; }
+            set { Set(ref updatePackage, value, () => UpdatePackage); }
+        }
+
+        public override string ToString()
+        {
+            return "SMS " + MessageID;
         }
     }
 }

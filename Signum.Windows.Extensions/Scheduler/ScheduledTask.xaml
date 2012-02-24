@@ -12,7 +12,7 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</UserControl.Resources>
-    <StackPanel m:Common.LabelWidth="110">
+    <StackPanel m:Common.MinLabelWidth="110">
         <m:EntityCombo m:Common.Route="Task" Find="False" View="False" Create="False"/>
         <GroupBox Style="{DynamicResource EntityGroupBox}">
             <GroupBox.Header>

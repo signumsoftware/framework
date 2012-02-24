@@ -1,0 +1,50 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+
+@using (var tc = Html.TypeContext<ChartTokenDN>())
+{
+    if (tc.Value == null)
+    {
+        tc.Value = new ChartTokenDN();
+    }
+    ChartBase chart = ((TypeContext<ChartBase>)tc.Parent).Value;
+    
+    <tr class="sf-chart-token" data-token="@chart.GetTokenName(tc.Value)">
+        <td>@tc.Value.PropertyLabel</td>
+        <td>
+            @if (tc.Value.GroupByVisible)
+            { 
+                var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
+                bool groupResults = chart.GroupResults;
+                if (groupResults)
+                {
+                    groupCheck.Attr("checked", "checked");
+                }
+                @groupCheck.ToHtmlSelf()
+                @Html.Hidden(tc.Compose("group"), groupResults)
+            }
+        </td>
+        <td>
+            <div class="sf-query-token">
+                @Html.ChartTokenCombo(tc.Value, chart, ViewData[ViewDataKeys.QueryName], tc)
+            </div>
+            <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
+        </td>
+    </tr>
+    <tr class="sf-chart-token-config" style="display:none">
+        <td></td>
+        <td colspan="2">
+            @using (Html.FieldInline()) 
+            { 
+                @Html.ValueLine(tc, ct => ct.DisplayName)
+            }
+        </td>
+    </tr>
+}

@@ -1,0 +1,10 @@
+﻿@using Signum.Web.Profiler;
+<a href="@Url.Action((ProfilerController pc) => pc.Disable())" class="sf-button" style="@(HeavyProfiler.Enabled ? "" : "display:none");color:red" id="sfProfileDisable">
+Disable
+</a>
+<a href="@Url.Action((ProfilerController pc) => pc.Enable())" class="sf-button"  style="@(!HeavyProfiler.Enabled ? "" : "display:none")" id="sfProfileEnable">
+Enable
+</a>
+<a href="@Url.Action((ProfilerController pc) => pc.Clean())" class="sf-button" id="sfProfileClear">
+Clean
+</a>

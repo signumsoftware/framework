@@ -13,6 +13,7 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;
+using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Processes
 {
@@ -24,7 +25,7 @@ namespace Signum.Entities.Processes
     [Serializable]
     public class ProcessExecutionDN : IdentifiableEntity
     {
-        private ProcessExecutionDN() { }
+        internal ProcessExecutionDN() { }
 
         public ProcessExecutionDN(ProcessDN process)
         {
@@ -32,7 +33,6 @@ namespace Signum.Entities.Processes
         }
 
         Lite<UserDN> user;
-        [NotNullValidator]
         public Lite<UserDN> User
         {
             get { return user; }
@@ -117,8 +117,8 @@ namespace Signum.Entities.Processes
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        public string Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }
@@ -178,7 +178,7 @@ namespace Signum.Entities.Processes
             }
         }
 
-        public void Queue()
+        internal void SetAsQueue()
         {
             State = ProcessState.Queued;
             QueuedDate = TimeZoneManager.Now;
@@ -193,7 +193,6 @@ namespace Signum.Entities.Processes
 
     public interface IProcessDataDN : IIdentifiable
     {
-
     }
 
     public enum ProcessState
@@ -224,5 +223,10 @@ namespace Signum.Entities.Processes
     {
         CurrentExecutions,
         ErrorExecutions,
+    }
+
+    public enum ProcessPermissions
+    {
+        ViewProcessControlPanel
     }
 }

@@ -1,7 +1,7 @@
-@if (Session[AuthController.SessionUserKey] != null)
+﻿@if (UserDN.Current != null && !UserDN.Current.Is(Signum.Engine.Authorization.AuthLogic.AnonymousUser) )
 {
-    @:Usuario: <span class="username">@Session[AuthController.SessionUserKey]</span>
-    <span class="separator">|</span>@Html.ActionLink("Logout", "Logout", "Auth", null, new { @class = "sf-logout" })
+    @:Usuario: <span class="sf-auth-username">@UserDN.Current</span>
+    <span class="sf-auth-separator"> | </span>@Html.ActionLink("Logout", "Logout", "Auth", null, new { @class = "sf-logout" })
 }
 else
 { 

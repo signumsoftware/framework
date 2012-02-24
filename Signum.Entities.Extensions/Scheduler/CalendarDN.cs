@@ -21,7 +21,7 @@ namespace Signum.Entities.Scheduler
         }
         
         [NotNullable]
-        MList<HolidayDN> holidays;
+        MList<HolidayDN> holidays = new MList<HolidayDN>();
         [NotNullValidator]
         public MList<HolidayDN> Holidays
         {

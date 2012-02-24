@@ -1,0 +1,19 @@
+﻿@using Signum.Entities.ControlPanel
+@using Signum.Web.ControlPanel
+@using System.Reflection
+
+@Html.ScriptsJs("~/ControlPanel/Scripts/SF_ControlPanel.js")
+@Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css")
+
+<div>
+    @using (var tc = Html.TypeContext<ControlPanelDN>())
+    {
+        @Html.EntityLine(tc, cp => cp.Related, el => el.Create = false)
+        @Html.ValueLine(tc, cp => cp.DisplayName)
+        @Html.ValueLine(tc, cp => cp.HomePage)
+        @Html.ValueLine(tc, cp => cp.NumberOfColumns)
+    
+        Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);
+        <div class="clearall"></div>   
+    }
+</div>

@@ -95,9 +95,10 @@ namespace Signum.Web.Files
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
                 sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(formFieldId, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(new TypeContext<FilePathDN>(fp, "")).ToString()));
+                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(formFieldId, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(fp).ToString()));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(TypeContextUtilities.Compose(formFieldId,"DivNew")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(formFieldId,"DivOld")));
+                sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(formFieldId, "btnRemove")));
             }
             else
             {
@@ -135,7 +136,8 @@ namespace Signum.Web.Files
             //HttpContext.Response.TransmitFile(path);
 
             string path = fp.FullPhysicalPath;
-            return File(path,  MimeType.FromFileName(path));
+            return File(FilePathLogic.GetByteArray(fp), MimeType.FromExtension(path), fp.FileName);
+            //return File(path,  MimeType.FromFileName(path)); <--this cannot handle dots inside path
         }
     }
 }

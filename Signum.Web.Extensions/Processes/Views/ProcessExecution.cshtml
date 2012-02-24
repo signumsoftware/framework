@@ -15,7 +15,7 @@
     @Html.ValueLine(e, f => f.ExecutionEnd, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.ValueLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    @Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.ValueLine(e, f => f.Progress, f => f.ReadOnly = true)
     
     if (e.Value.State == ProcessState.Executing)
@@ -47,7 +47,7 @@
                 }
                 else {
                     if (SF.isEmpty(idPrefix)) {
-                        SF.reloadEntity("@Url.Action("FinishProcessNormalPage", "Process")", idPrefix);
+                        /*SF.reloadEntity("@Url.Action("FinishProcessNormalPage", "Process")", idPrefix);*/
                     }
                     else {
                         $("#" + idPrefix.compose("externalPopupDiv")).remove();

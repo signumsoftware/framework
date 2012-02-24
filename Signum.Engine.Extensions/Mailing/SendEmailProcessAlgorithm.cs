@@ -24,8 +24,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN()
             {
                 NumLines = messages.Count,
-                Name = args.TryGetArgC<string>(1),
-                OverrideEmailAddress = EmailLogic.OnEmailAddress()
+                Name = args.TryGetArgC<string>(1)
             }.Save();
 
             messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()
@@ -41,7 +40,7 @@ namespace Signum.Engine.Mailing
             return package;
         }
 
-        public FinalState Execute(IExecutingProcess executingProcess)
+        public void Execute(IExecutingProcess executingProcess)
         {
             EmailPackageDN package = (EmailPackageDN)executingProcess.Data;
 
@@ -49,14 +48,9 @@ namespace Signum.Engine.Mailing
                                                  where email.Package == package.ToLite() && email.State == EmailState.Created
                                                  select email.ToLite()).ToList();
 
-
-            using (EmailLogic.OverrideEmailAddressForProcess(package.OverrideEmailAddress))
-            {
-                int lastPercentage = 0;
                 for (int i = 0; i < emails.Count; i++)
                 {
-                    if (executingProcess.Suspended)
-                        return FinalState.Suspended;
+                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
                     EmailMessageDN ml = emails[i].RetrieveAndForget();
 
@@ -70,17 +64,9 @@ namespace Signum.Engine.Mailing
                         package.Save();
                     }
 
-                    int percentage = (NotificationSteps * i) / emails.Count;
-                    if (percentage != lastPercentage)
-                    {
-                        executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                        lastPercentage = percentage;
+                    executingProcess.ProgressChanged(i, emails.Count);
                     }
                 }
-            }
-
-            return FinalState.Finished;
-        }
 
         public int NotificationSteps = 100;
     }

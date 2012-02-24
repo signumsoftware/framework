@@ -7,6 +7,8 @@ using Signum.Windows.Chart;
 using Signum.Entities.Chart;
 using System.Reflection;
 using Signum.Entities.Reports;
+using Signum.Entities.Authorization;
+using Signum.Windows.Authorization;
 
 namespace Signum.Windows.Chart
 {
@@ -27,12 +29,17 @@ namespace Signum.Windows.Chart
 
                 Navigator.AddSetting(new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart() });
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
+
+                UserChartDN.SetConverters(query => QueryClient.GetQueryName(query.Key), queryname => QueryClient.GetQuery(queryname));
             }
         }
 
         static SearchControlMenuItem SearchControl_GetCustomMenuItems(object queryName, Type entityType)
         {
-            return new ChartMenuItem(); 
+            if (ChartPermissions.ViewCharting.IsAuthorized())
+                return new ChartMenuItem();
+
+            return null; 
         }
 
         internal static ChartRendererBase GetChartRenderer()
@@ -43,6 +50,10 @@ namespace Signum.Windows.Chart
 
     internal class ChartMenuItem : SearchControlMenuItem
     {
+        public ChartMenuItem()
+        {
+        }
+
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);

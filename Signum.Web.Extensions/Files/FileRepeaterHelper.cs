@@ -30,7 +30,7 @@ namespace Signum.Web.Files
             sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
 
             sb.AddLine(helper.HiddenStaticInfo(fileRepeater));
-            sb.AddLine(helper.Hidden(fileRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, fileRepeater).TryToString() ?? ""));
+            sb.AddLine(helper.Hidden(fileRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
 
             sb.AddLine(ListBaseHelper.CreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));
             using (sb.Surround(new HtmlTag("div").IdName(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
@@ -48,18 +48,21 @@ namespace Signum.Web.Files
         private static MvcHtmlString InternalRepeaterElement(this HtmlHelper helper, TypeElementContext<FilePathDN> itemTC, FileRepeater fileRepeater)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Attr("class", "sf-repeater-element")))
+            using (sb.Surround(new HtmlTag("fieldset").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Attr("class", "sf-repeater-element sf-file-repeater-element")))
             {
-                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+                using (sb.Surround(new HtmlTag("legend")))
+                {
+                    if (fileRepeater.Remove)
+                        sb.AddLine(
+                            helper.Href(itemTC.Compose("btnRemove"),
+                                          fileRepeater.RemoveElementLinkText,
+                                          "javascript:new SF.ERep({0}).remove('{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
+                                          fileRepeater.RemoveElementLinkText,
+                                          "sf-line-button sf-remove",
+                                          new Dictionary<string, object> { { "data-icon", "ui-icon-circle-close" }, { "data-text", false } }));
+                }
 
-                if (fileRepeater.Remove)
-                    sb.AddLine(
-                        helper.Href(itemTC.Compose("btnRemove"),
-                                      fileRepeater.RemoveElementLinkText,
-                                      "javascript:new SF.ERep({0}).remove('{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
-                                      fileRepeater.RemoveElementLinkText,
-                                      "sf-line-button sf-remove",
-                                      new Dictionary<string, object> { { "data-icon", "ui-icon-circle-close" }, { "data-text", false } }));
+                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
                 //Render FileLine for the current item
                 using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityBaseKeys.Entity))))

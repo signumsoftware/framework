@@ -18,13 +18,14 @@ using Signum.Engine;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities.Files;
+using Signum.Entities.UserQueries;
 #endregion
 
 namespace Signum.Web.Reports
 {
     public class ReportsClient
     {
-        static bool ToExcelPlain;
+        public static bool ToExcelPlain { get; private set; }
         static bool ExcelReport;
 
         public static void Start(bool toExcelPlain, bool excelReport)
@@ -43,26 +44,7 @@ namespace Signum.Web.Reports
                         new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
                         { 
                             PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
-                            MappingAdmin = new EntityMapping<ExcelReportDN>(true)  
-                            { 
-                                GetEntity = ctx => 
-                                {
-                                    RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                                    if (runtimeInfo.IsNew)
-                                    {
-                                        ctx.Value = new ExcelReportDN();
-                                    
-                                        string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                        object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
-                               
-                                        ctx.Value.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
-                                    }
-                                    else
-                                        ctx.Value = Database.Retrieve<ExcelReportDN>(runtimeInfo.IdOrNull.Value);
-
-                                    return ctx.Value;
-                                }
-                            }
+                            MappingAdmin = new ExcelReportMapping()
                         }
                     });
 
@@ -71,13 +53,13 @@ namespace Signum.Web.Reports
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                         Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
 
-                    ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((controllerContext, entity, partialViewName, prefix) =>
+                    ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((ctx, entity) =>
                     {
                         var buttons = new List<ToolBarButton>
                         {
                             new ToolBarButton 
                             { 
-                                Id = TypeContextUtilities.Compose(prefix, "ebReportSave"),
+                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportSave"),
                                 Text = Signum.Web.Properties.Resources.Save, 
                                 OnClick = Js.Submit(RouteHelper.New().Action("Save", "Report")).ToJS()
                             }
@@ -87,7 +69,7 @@ namespace Signum.Web.Reports
                         {
                             buttons.Add(new ToolBarButton
                             {
-                                Id = TypeContextUtilities.Compose(prefix, "ebReportDelete"),
+                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportDelete"),
                                 Text = Resources.Delete,
                                 OnClick = Js.Confirm(Resources.AreYouSureOfDeletingReport0.Formato(entity.DisplayName),
                                                     Js.AjaxCall(RouteHelper.New().Action("Delete", "Report"), "{{excelReport:{0}}}".Formato(entity.Id), null)).ToJS(),
@@ -95,7 +77,7 @@ namespace Signum.Web.Reports
 
                             buttons.Add(new ToolBarButton
                             {
-                                Id = TypeContextUtilities.Compose(prefix, "ebReportDownload"),
+                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportDownload"),
                                 Text = Resources.Download,
                                 OnClick = "window.open('" + RouteHelper.New().Action("DownloadTemplate", "Report", new { excelReport = entity.Id } ) + "');",
                             });
@@ -110,19 +92,42 @@ namespace Signum.Web.Reports
             }
         }
 
+        public class ExcelReportMapping : EntityMapping<ExcelReportDN>
+        {
+            public ExcelReportMapping() : base(true) { }
+
+            public override ExcelReportDN GetEntity(MappingContext<ExcelReportDN> ctx)
+            {
+                RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                if (runtimeInfo.IsNew)
+                {
+                    var result = new ExcelReportDN();
+
+                    string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                    object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
+
+                    result.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
+
+                    return result;
+                }
+                else
+                    return Database.Retrieve<ExcelReportDN>(runtimeInfo.IdOrNull.Value);
+            }
+        }
+
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {
-            int idCurrentUserQuery = 0;
+            Lite<UserQueryDN> currentUserQuery = null;
             string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                idCurrentUserQuery = int.Parse(controllerContext.RouteData.Values["id"].ToString());
+                currentUserQuery = new Lite<UserQueryDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
 
             ToolBarButton plain = new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(prefix, "qbToExcelPlain"),
                 AltText = Resources.ExcelReport,
                 Text = Resources.ExcelReport,
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix)).ToJS(),
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((currentUserQuery != null ? currentUserQuery.IdOrNull : null), prefix)).ToJS(),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 

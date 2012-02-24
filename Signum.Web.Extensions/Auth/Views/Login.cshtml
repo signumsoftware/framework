@@ -1,9 +1,10 @@
-@{  
+﻿@{  
     ViewBag.Title = Resources.LoginEnter;
 }
 <script type="text/javascript">
     $(function () { $("#username").focus(); });
 </script>
+<div class="sf-login-page">
 <h2>
     Login</h2>
 <p>
@@ -42,23 +43,23 @@
                     }
                 </td>
             </tr>
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <input class="sf-button login" type="submit" value="@Resources.LoginEnter" />
+                </td>
+            </tr>
             @if (AuthClient.ResetPasswordStarted)
             {
                 <tr>
                     <td>
                     </td>
                     <td>
-                        <div id="login-others">@Html.ActionLink(Resources.IHaveForgottenMyPassword, "resetPassword", "auth")</div>
+                        <div id="sf-login-reset-password">@Html.ActionLink(Resources.IHaveForgottenMyPassword, "resetPassword", "auth")</div>
                     </td>
                 </tr>
             }
-            <tr>
-                <td>
-                </td>
-                <td>
-                    <input class="login" type="submit" value="@Resources.LoginEnter" />
-                </td>
-            </tr>
         </table>
         @if (ViewData.ContainsKey("referrer"))
         { 
@@ -66,3 +67,4 @@
         }
     </div>
 } 
+</div>

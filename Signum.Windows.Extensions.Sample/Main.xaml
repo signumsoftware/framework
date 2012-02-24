@@ -9,6 +9,7 @@
     xmlns:seo="clr-namespace:Signum.Entities.Operations;assembly=Signum.Entities.Extensions"
     xmlns:sef="clr-namespace:Signum.Entities.Files;assembly=Signum.Entities.Extensions"
     xmlns:ser="clr-namespace:Signum.Entities.Reports;assembly=Signum.Entities.Extensions"
+    xmlns:seuq="clr-namespace:Signum.Entities.UserQueries;assembly=Signum.Entities.Extensions"
     xmlns:st="clr-namespace:Signum.Test;assembly=Signum.Test"
     Title="Music Database" 
     SizeToContent="WidthAndHeight"
@@ -23,7 +24,8 @@
 
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:ArtistDN}}"/>
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:BandDN}}"/>
-                <MenuItem Tag="{m:Explore QueryName={x:Type st:NoteDN}}"/>
+                <MenuItem Tag="{m:Explore QueryName={x:Type st:IAuthorDN}}"/>
+                <MenuItem Tag="{m:Explore QueryName={x:Type st:NoteWithDateDN}}"/>
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:LabelDN}}"/>
 
                 <MenuItem Header="Awards">
@@ -55,11 +57,11 @@
                     </MenuItem>
                 </MenuItem>-->
                 <MenuItem Header="Reports">
-                    <MenuItem Tag="{m:Explore QueryName={x:Type ser:UserQueryDN}}"/>
+                    <MenuItem Tag="{m:Explore QueryName={x:Type seuq:UserQueryDN}}"/>
                     <MenuItem Tag="{m:Explore QueryName={x:Type ser:ExcelReportDN}}"/>
                 </MenuItem>
                 <MenuItem Header="Operations">
-                    <MenuItem Tag="{m:Explore QueryName={x:Type seo:LogOperationDN}}"/>
+                    <MenuItem Tag="{m:Explore QueryName={x:Type seo:OperationLogDN}}"/>
                 </MenuItem>
                 <!--<MenuItem Header="Files">
                     <MenuItem Tag="{m:Explore QueryName={x:Type sef:FileRepositoryDN}}"/>

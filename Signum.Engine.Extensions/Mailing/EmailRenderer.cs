@@ -49,12 +49,12 @@ namespace Signum.Engine.Mailing
             if (exceptions.Count != 0)
                 throw new AggregateException(exceptions);
 
-            return result; 
+            return result;
         }
 
         static string GetToken(string capture, IEmailModel model, object extendedData, ResourceManager resourceManager)
         {
-            Match m = tokenRegex.Match(capture); 
+            Match m = tokenRegex.Match(capture);
 
             char prefix = m.Groups["prefix"].Value[0];
 
@@ -96,26 +96,11 @@ namespace Signum.Engine.Mailing
                 MemberInfo mi = (MemberInfo)type.GetField(p, flags) ?? type.GetProperty(p, flags);
 
                 if (mi == null)
-                    throw new KeyNotFoundException("{0} not found on model of type {1}".Formato(literal,  type.TypeName()));
+                    throw new KeyNotFoundException("{0} not found on model of type {1}".Formato(literal, type.TypeName()));
                 return ReflectionTools.CreateGetterUntyped(type, mi);
             });
 
-            return f(value).TryToString(); 
-        }
-
-        public static string ReadFromResourceStream(Assembly assembly, string name)
-        {
-            using (Stream stream = assembly.GetManifestResourceStream(name))
-            {
-                if (stream == null)
-                    throw new MissingManifestResourceException("{0} not found on {1}".Formato(name, assembly));
-
-                using (StreamReader reader = new StreamReader(stream))
-                    return reader.ReadToEnd();
-
-            }
-
-           
+            return f(value).TryToString();
         }
     }
 }

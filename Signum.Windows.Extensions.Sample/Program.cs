@@ -75,12 +75,19 @@ namespace Signum.Windows.Extensions.Sample
             {
                 string[] usernamePassword = auto.Split('/');
                 result.Login(usernamePassword[0], Security.EncodePassword(usernamePassword[1]));
-                UserDN user = result.GetCurrentUser();
-                Thread.CurrentPrincipal = user;
+                UserDN.Current = result.GetCurrentUser();
 
                 return result;
             }
 
+            if (Application.Current == null || Application.Current.CheckAccess())
+                return Login(result);
+            else
+                return Application.Current.Dispatcher.Return(() => Login(result));       
+        }
+
+        private static IServerSample Login(IServerSample result)
+        {
             Login login = new Login
             {
                 Title = "Music Database",
@@ -97,8 +104,6 @@ namespace Signum.Windows.Extensions.Sample
                     result.Login(login.UserName, Security.EncodePassword(login.Password));
                     Settings.Default.UserName = login.UserName;
                     Settings.Default.Save();
-
-                    Thread.CurrentPrincipal = result.GetCurrentUser();
 
                     login.DialogResult = true;
                 }
@@ -123,8 +128,7 @@ namespace Signum.Windows.Extensions.Sample
             bool? dialogResult = login.ShowDialog();
             if (dialogResult == true)
             {
-                UserDN user = result.GetCurrentUser();
-                Thread.CurrentPrincipal = user;
+                UserDN.Current = result.GetCurrentUser();
 
                 return result;
             }

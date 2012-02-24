@@ -17,6 +17,8 @@ using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using Signum.Web.Extensions.Properties;
 using Signum.Entities.Processes;
+using Signum.Engine.Processes;
+using Signum.Engine.Authorization;
 #endregion
 
 namespace Signum.Web.Processes
@@ -27,7 +29,7 @@ namespace Signum.Web.Processes
         public ContentResult GetProgressExecution(int id)
         {
             decimal progress = Database.Query<ProcessExecutionDN>().Where(pe => 
-                    pe.Id == id).Select(pe => pe.Progress).Single() ?? 100;
+                    pe.Id == id).Select(pe => pe.Progress).SingleEx() ?? 100;
 
             return Content(Math.Round(progress, 0).ToString());
         }
@@ -41,5 +43,43 @@ namespace Signum.Web.Processes
             return Navigator.NormalControl(this, process);
         }
 
+        [HttpGet]
+        public new ActionResult View()
+        {
+            ProcessLogicState state = ProcessLogic.ExecutionState();
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"), state);
+            }
+            else
+            {
+                return View(ProcessesClient.ViewPrefix.Formato("ProcessPanel"), state);
+            }
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Start()
+        {
+            ProcessPermissions.ViewProcessControlPanel.Authorize();
+
+            ProcessLogic.Start();
+
+            Thread.Sleep(1000);
+
+            return null;
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Stop()
+        {
+            ProcessPermissions.ViewProcessControlPanel.Authorize();
+
+            ProcessLogic.Stop();
+
+            Thread.Sleep(1000);
+
+            return null;
+        }
     }
 }

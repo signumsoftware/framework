@@ -14,6 +14,9 @@ using Signum.Entities.Scheduler;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
+using Signum.Entities.Exceptions;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Processes
 {
@@ -53,7 +56,7 @@ namespace Signum.Engine.Processes
                          pl.Id,
                          pl.Target,
                          pl.FinishTime,
-                         pl.Exception
+                         pl.Exception,
                      }).ToDynamic();
             }
         }
@@ -62,15 +65,15 @@ namespace Signum.Engine.Processes
     public abstract class PackageAlgorithm<T>: IProcessAlgorithm
         where T:class, IIdentifiable
     {
-        Func<List<Lite<T>>> getLazies;
+        Func<List<Lite<T>>> getLites;
 
         public PackageAlgorithm()
         {
         }
 
-        public PackageAlgorithm(Func<List<Lite<T>>> getLazies)
+        public PackageAlgorithm(Func<List<Lite<T>>> getLites)
         {
-            this.getLazies = getLazies;
+            this.getLites = getLites;
         }
 
         public virtual IProcessDataDN CreateData(object[] args)
@@ -81,7 +84,7 @@ namespace Signum.Engine.Processes
 
             List<Lite<T>> lites = 
                 args != null && args.Length > 1? (List<Lite<T>>)args.GetArg<List<Lite<T>>>(1): 
-                getLazies != null? getLazies(): null;
+                getLites != null? getLites(): null;
 
             if (lites == null)
                 throw new InvalidOperationException("No entities to process found");
@@ -98,7 +101,7 @@ namespace Signum.Engine.Processes
         }
 
 
-        public FinalState Execute(IExecutingProcess executingProcess)
+        public void Execute(IExecutingProcess executingProcess)
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
@@ -107,20 +110,16 @@ namespace Signum.Engine.Processes
                  where pl.Package == package.ToLite() && pl.FinishTime == null && pl.Exception == null
                  select pl.ToLite()).ToList();
 
-            int lastPercentage = 0;
             for (int i = 0; i < lines.Count; i++)
             {
-                if (executingProcess.Suspended)
-                    return FinalState.Suspended;
-
+                executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                
                 PackageLineDN pl = lines[i].RetrieveAndForget();
 
                 try
                 {
-                    using (Transaction tr = new Transaction(true))
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        
-                        using (AuthLogic.User(executingProcess.User.Retrieve()))
                         ExecuteLine(pl, package);
 
                         pl.FinishTime = TimeZoneManager.Now;
@@ -130,26 +129,21 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
-                    using (Transaction tr = new Transaction(true))
+                    var exLog = e.LogException();
+
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        pl.Exception = e.Message;
+                        pl.Exception = exLog.ToLite();
                         pl.Save();
                         tr.Commit();
-
-                        package.NumErrors++;
-                        package.Save();
                     }
+
+                    package.NumErrors++;
+                    package.Save();
                 }
 
-                int percentage = (NotificationSteps * i) / lines.Count;
-                if (percentage != lastPercentage)
-                {
-                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                    lastPercentage = percentage;
-                }
+                executingProcess.ProgressChanged(i, lines.Count);
             }
-
-            return FinalState.Finished;
         }
 
         public int NotificationSteps = 100; 
@@ -166,15 +160,15 @@ namespace Signum.Engine.Processes
             this.OperationKey = operationKey;
         }
 
-        public PackageExecuteAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLazies)
-            : base(getLazies)
+        public PackageExecuteAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLites)
+            : base(getLites)
         {
             this.OperationKey = operationKey;
         }
 
         public override void ExecuteLine(PackageLineDN pl, PackageDN package)
         {
-            OperationLogic.ExecuteLite<T>(pl.Target.ToLite<T>(), OperationKey);
+            pl.Target.ToLite<T>().ExecuteLite<T>(OperationKey);
         }
 
         protected override PackageDN CreatePackage(object[] args)
@@ -198,8 +192,8 @@ namespace Signum.Engine.Processes
             this.OperationKey = operationKey;
         }
 
-        public PackageConstructFromAlgorithm(Enum operationKey, Func<List<Lite<F>>> getLazies)
-            : base(getLazies)
+        public PackageConstructFromAlgorithm(Enum operationKey, Func<List<Lite<F>>> getLites)
+            : base(getLites)
         {
             this.OperationKey = operationKey;
         }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -69,6 +69,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -80,12 +81,11 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\EmailModel.cs" />
     <Compile Include="Authorization\PasswordValidIntervalDN.cs" />
     <Compile Include="Authorization\ResetPasswordRequestDN.cs" />
+    <Compile Include="Authorization\SessionLogDN.cs" />
     <Compile Include="Authorization\UserTicketDN.cs" />
     <Compile Include="Authorization\Services.cs" />
     <Compile Include="Authorization\PermissionDN.cs" />
@@ -95,11 +95,14 @@
     <Compile Include="Authorization\UserDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
-    <Compile Include="Basics\EntityGroupDN.cs" />
+    <Compile Include="Basics\TypeConditionDN.cs" />
     <Compile Include="Basics\EnumDN.cs" />
     <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
+    <Compile Include="Cache\CachePermissions.cs" />
+    <Compile Include="Chart\AggregateToken.cs" />
+    <Compile Include="Chart\ChartPermissions.cs" />
     <Compile Include="Chart\ChartToken.cs" />
     <Compile Include="Chart\ChartRequest.cs" />
     <Compile Include="Chart\ChartUtils.cs" />
@@ -107,7 +110,8 @@
     <Compile Include="Chart\IntervalQueryToken.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />
-    <Compile Include="DeploymentLog\DeploymentLogDN.cs" />
+    <Compile Include="Exceptions\ExceptionDN.cs" />
+    <Compile Include="Deployment\DeploymentLogDN.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
@@ -115,14 +119,17 @@
     <Compile Include="Files\IFileServer.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
+    <Compile Include="Mailing\Newsletter.cs" />
     <Compile Include="Mailing\SMTPConfiguration.cs" />
     <Compile Include="Operations\IOperationServer.cs" />
     <Compile Include="Operations\OperationDN.cs" />
     <Compile Include="Operations\LogOperationDN.cs" />
     <Compile Include="Processes\Process.cs" />
     <Compile Include="Processes\Package.cs" />
+    <Compile Include="Profiler\IProfilerServer.cs" />
     <Compile Include="Profiler\ProfilerPermissions.cs" />
-    <Compile Include="Reports\IUserQueryServer.cs" />
+    <Compile Include="SMS\SMSCharacters.cs" />
+    <Compile Include="UserQueries\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -130,15 +137,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Reports\FilterValueConverter.cs" />
+    <Compile Include="UserQueries\FilterValueConverter.cs" />
     <Compile Include="Reports\IExcelReportServer.cs" />
-    <Compile Include="Reports\UserQueryDN.cs" />
+    <Compile Include="UserQueries\UserQueryDN.cs" />
     <Compile Include="Scheduler\CalendarDN.cs" />
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />
     <Compile Include="Scheduler\ScheduleRule.cs" />
     <Compile Include="Scheduler\Task.cs" />
+    <Compile Include="SMS\ISmsServer.cs" />
     <Compile Include="SMS\SMSMessage.cs" />
-    <Compile Include="SMS\SMSMessageTemplate.cs" />
+    <Compile Include="SMS\SMSTemplate.cs" />
+    <Compile Include="SMS\SMSPackages.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
@@ -151,7 +160,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.es.resx" />
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -187,7 +198,8 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked" if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

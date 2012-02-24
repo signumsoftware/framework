@@ -33,6 +33,29 @@
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
-        <c:ChartBuilder/>
+        <c:ChartBuilder m:Common.Route="Chart" x:Name="chartBuilder"/>
+
+        <GroupBox Margin="4" Style="{StaticResource EntityGroupBox}">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="../Images/order.png" Stretch="None"/>
+                    <TextBlock m:Common.LabelOnlyRoute="Orders"/>
+                </StackPanel>
+            </GroupBox.Header>
+            <m:EntityList m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True"  >
+                <m:EntityList.EntityTemplate>
+                    <DataTemplate>
+                        <Grid m:Common.LabelVisible="False" m:Common.TypeContext="{m:ContinueRoute /}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
+                                <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent"  Token="{Binding Token}"/>
+                            <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </m:EntityList.EntityTemplate>
+            </m:EntityList>
+        </GroupBox>
     </StackPanel>
 </UserControl>

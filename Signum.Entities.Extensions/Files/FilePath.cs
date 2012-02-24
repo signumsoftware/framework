@@ -13,7 +13,7 @@ using System.Web;
 namespace Signum.Entities.Files
 {
     [Serializable]
-    public class FilePathDN : Entity, IFile
+    public class FilePathDN : ImmutableEntity, IFile
     {
         public FilePathDN() { }
 
@@ -30,8 +30,8 @@ namespace Signum.Entities.Files
         public FilePathDN(Enum fileType, string path)
             : this(fileType)
         {
-            this.fileName = Path.GetFileName(path);
-            this.binaryFile = File.ReadAllBytes(path);
+            this.FileName = Path.GetFileName(path);
+            this.BinaryFile = File.ReadAllBytes(path);
         }
 
         [NotNullable, SqlDbType(Size = 260)]
@@ -117,7 +117,7 @@ namespace Signum.Entities.Files
         {
             get
             {
-                return FullWebPathExpression.Invoke(this);
+                return FullWebPathExpression.Evaluate(this);
             }
         }
 
@@ -129,5 +129,15 @@ namespace Signum.Entities.Files
         }
     }
 
+    [Serializable, ForceLocalization]
+    public class WebImage
+    {
+        public string FullWebPath;
+    }
 
+    [Serializable, ForceLocalization]
+    public class WebDownload
+    {
+        public string FullWebPath;
+    }
 }

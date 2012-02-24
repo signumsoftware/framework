@@ -106,7 +106,7 @@ namespace Signum.Engine.Help
 
             string orNull = Nullable.GetUnderlyingType(type) != null ? Resources.OrNull : null;
 
-            return typeName.Add(unit != null ? Resources.ExpressedIn + unit : null, " ").Add(orNull, " ");
+            return typeName.Add(" ", unit != null ? Resources.ExpressedIn + unit : null).Add(" ", orNull);
         }
 
         static string TypeLinks(this Type type, Implementations implementations)

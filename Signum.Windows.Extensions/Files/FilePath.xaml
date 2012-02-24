@@ -5,7 +5,7 @@
     xmlns:d="clr-namespace:Signum.Entities.Files;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="d:FilePathDN"
     MinWidth="300">
-    <StackPanel m:Common.LabelWidth="115">
+    <StackPanel m:Common.MinLabelWidth="115">
         <m:ValueLine m:Common.Route="FileName" />
         <m:ValueLine m:Common.Route="FileLengthString" m:Common.IsReadOnly="True"/>
         <m:EntityCombo m:Common.Route="FileType" m:Common.IsReadOnly="True"/>
@@ -15,7 +15,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Label  x:Name="lblFullWP" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
-		                    Width="{Binding Path=(m:Common.LabelWidth), ElementName=grFWP, Mode=OneWay}"
+		                    MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=grFWP, Mode=OneWay}"
 		                    Visibility="{Binding ElementName=grFWP, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
             <TextBlock Margin="1" Grid.Column="1">
                 <Hyperlink x:Name="hypFullWebPath" Click="hypFullWebPath_Click">
@@ -32,7 +32,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Label  x:Name="lblFullFP" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
-		                    Width="{Binding Path=(m:Common.LabelWidth), ElementName=grFPP, Mode=OneWay}"
+		                    MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=grFPP, Mode=OneWay}"
 		                    Visibility="{Binding ElementName=grFPP, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
                         <TextBlock Margin="1" Grid.Column="1">
                             <Hyperlink x:Name="hypFullPhysicalPath" Click="hypFullPhysicalPath_Click">

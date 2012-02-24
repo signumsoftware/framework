@@ -10,14 +10,7 @@
         <m:ValueLine m:Common.Route="Name" m:Common.IsReadOnly="False" />
         <m:EntityCombo m:Common.Route="Operation" />
         <GroupBox Header="Lines">
-            <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:PackageLineDN}" MaxHeight="400" ColumnOptionsMode="Remove">
-                <m:SearchControl.FilterOptions>
-                    <m:FilterOption Path="Package" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}" Frozen="True"/>
-                </m:SearchControl.FilterOptions>
-                <m:SearchControl.ColumnOptions>
-                    <m:ColumnOption Path="Package"/>
-                </m:SearchControl.ColumnOptions>
-            </m:SearchControl>
+            <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:PackageLineDN}" MaxHeight="400" FilterColumn="Package"/>
         </GroupBox>
     </StackPanel>
 </UserControl>

@@ -26,59 +26,77 @@ namespace Signum.Engine.Operations
     {
         public interface IGraphOperation : IOperation
         {
-            Graph<E, S> Graph { get;set; } 
         }
 
         public interface IGraphInnerOperation : IGraphOperation
         { 
-            S TargetState { get; }
+            S ToState { get; }
         }
 
-        public class Goto : BasicExecute<E>, IGraphInnerOperation
+        public class Execute : BasicExecute<E>, IGraphInnerOperation
         {
-            public Graph<E, S> Graph { get; set; } 
-            public S TargetState { get; private set; }
+            S? toState;
+            public S ToState
+            {
+                get { return toState.Value; }
+                set { toState = value; }
+            }
             public S[] FromStates { get; set; }
 
-            public Goto(Enum key, S targetState) : base(key)
+            public Execute(Enum key) : base(key)
             {
-                this.TargetState = targetState;
             }
 
             protected override string OnCanExecute(E entity)
             {
-                S state = Graph.GetState(entity);
-                if (FromStates != null && !FromStates.Contains(state))
-                    return Resources.ImpossibleToExecute0FromState1.Formato(Key, state); 
+                S state = Graph<E, S>.GetState(entity);
+
+                string stateError = state.InState(Key, FromStates);
+                if (stateError.HasText())
+                    return stateError; 
 
                 return base.OnCanExecute(entity);
             }
 
-            protected override void OnExecute(E entity, object[] args)
+            protected override void OnBeginOperation(E entity)
             {
-                S oldState = Graph.GetState(entity);
+                base.OnBeginOperation(entity);
 
-                Graph.OnExitState(oldState, entity);
+                S oldState = Graph<E, S>.GetState(entity);
 
-                base.OnExecute(entity, args);
+                Graph<E, S>.OnExitState(oldState, entity);
+            }
 
-                Graph.AssertEnterState(entity, this);
+            protected override void OnEndOperation(E entity)
+            {
+                Graph<E, S>.AssertEnterState(entity, this);
+
+                base.OnEndOperation(entity);
+            }
+        
+            public override void AssertIsValid()
+            {
+                base.AssertIsValid();
+
+                if (toState == null)
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Key));
+
+                if (FromStates == null)
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Key));
             }
         }
 
         public class Delete : BasicDelete<E>, IGraphOperation
         {
-            public Graph<E, S> Graph { get; set; }
             public S[] FromStates { get; set; }
 
             public Delete(Enum key) : base(key)
             {
-
             }
 
             protected override string OnCanDelete(E entity)
             {
-                S state = Graph.GetState(entity);
+                S state = Graph<E, S>.GetState(entity);
                 if (FromStates != null && !FromStates.Contains(state))
                     return Resources.ImpossibleToExecute0FromState1.Formato(Key, state);
 
@@ -87,91 +105,128 @@ namespace Signum.Engine.Operations
 
             protected override void OnDelete(E entity, object[] args)
             {
-                S oldState = Graph.GetState(entity);
+                S oldState = Graph<E, S>.GetState(entity);
 
-                Graph.OnExitState(oldState, entity);
+                Graph<E, S>.OnExitState(oldState, entity);
 
                 base.OnDelete(entity, args);
             }
+
+            public override void AssertIsValid()
+            {
+                base.AssertIsValid();
+
+                if (FromStates == null)
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Key));
+            }
         }
 
-        public class Construct : BasicConstructor<E>, IGraphInnerOperation
+        public class Construct : BasicConstruct<E>, IGraphInnerOperation
         {
-            public Graph<E, S> Graph { get; set; }
-            public S TargetState { get; private set; }
-
-            public Construct(Enum key, S targetState)
-                : base(key)
+            S? toState;
+            public S ToState
             {
-                this.TargetState = targetState;
+                get { return toState.Value; }
+                set { toState = value; }
             }
 
-            protected override E OnConstruct(object[] args)
+            public Construct(Enum key)
+                : base(key)
             {
-                E result = base.OnConstruct(args);
+            }
 
-                Graph.AssertEnterState(result, this);
+            protected override void OnEndOperation(E entity)
+            {
+                Graph<E, S>.AssertEnterState((E)entity, this);
 
-                return result;
+                base.OnEndOperation(entity);
             }
 
             public override string ToString()
             {
-                return base.ToString() + " in state " + TargetState;
+                return base.ToString() + " in state " + ToState;
+            }
+
+            public override void AssertIsValid()
+            {
+                base.AssertIsValid();
+
+                if (toState == null)
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Key));
+             
             }
         }
 
-        public class ConstructFrom<F> : BasicConstructorFrom<F, E>, IGraphInnerOperation
+        public class ConstructFrom<F> : BasicConstructFrom<F, E>, IGraphInnerOperation
             where F : class, IIdentifiable
         {
-            public Graph<E, S> Graph { get; set; }
-            public S TargetState { get; private set; }
+            S? toState;
+            public S ToState
+            {
+                get { return toState.Value; }
+                set { toState = value; }
+            }
 
-            public ConstructFrom(Enum key, S targetState)
+            public ConstructFrom(Enum key)
                 : base(key)
             {
-                this.TargetState = targetState;
             }
 
-            protected override E OnConstruct(F entity, object[] args)
+            protected override void OnEndOperation(E result)
             {
-                E result = base.OnConstruct(entity, args);
+                Graph<E, S>.AssertEnterState(result, this);
 
-                Graph.AssertEnterState(result, this);
-
-                return result;
+                base.OnEndOperation(result);
             }
+
 
             public override string ToString()
             {
-                return base.ToString() + " in state " + TargetState;
+                return base.ToString() + " in state " + ToState;
+            }
+
+            public override void AssertIsValid()
+            {
+                base.AssertIsValid();
+
+                if (toState == null)
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Key));
             }
         }
 
-        public class ConstructFromMany<F> : BasicConstructorFromMany<F, E>, IGraphInnerOperation
+        public class ConstructFromMany<F> : BasicConstructFromMany<F, E>, IGraphInnerOperation
             where F : class, IIdentifiable
         {
-            public Graph<E, S> Graph { get; set; }
-            public S TargetState { get; private set; }
-
-            public ConstructFromMany(Enum key, S targetState)
-                : base(key)
+            S? toState;
+            public S ToState
             {
-                this.TargetState = targetState;
+                get { return toState.Value; }
+                set { toState = value; }
             }
 
-            protected override E OnConstructor(List<Lite<F>> lites, object[] args)
+            public ConstructFromMany(Enum key)
+                : base(key)
             {
-                E result = base.OnConstructor(lites, args);
+            }
 
-                Graph.AssertEnterState(result, this);
+            protected override void OnEndOperation(E result)
+            {
+                Graph<E, S>.AssertEnterState(result, this);
 
-                return result;
+                base.OnEndOperation(result);
             }
 
             public override string ToString()
             {
-                return base.ToString() + " in state " + TargetState;
+                return base.ToString() + " in state " + ToState;
+            }
+
+            public override void AssertIsValid()
+            {
+                base.AssertIsValid();
+
+                if (toState == null)
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Key));
             }
         }
 
@@ -181,35 +236,25 @@ namespace Signum.Engine.Operations
             public Action<E> Exit { get; set; }
         }
 
-        protected Func<E, S> GetState { get; set; }
-
-        protected Action<E, S> EnterState { get; set; }
-        protected Action<E, S> ExitState { get; set; }
-
-        protected List<IGraphOperation> Operations { get; set; }
-        protected Dictionary<S, StateOptions> States { get; set; }
-
-
-        public virtual void Register()
+        protected Graph()
         {
-            var errors = Operations.GroupCount(a => a.Key).Where(kvp => kvp.Value > 1).ToList();
-
-            if (errors.Count != 0)
-                throw new InvalidOperationException("The following keys have been repeated in {0}: {1}".Formato(GetType(), errors.ToString(a => " - {0} ({1})".Formato(a.Key, a.Value), "\r\n")));
-
-            foreach (var operation in Operations)
-	        {
-                operation.Graph = this;
-
-                OperationLogic.Register(operation);
-	        }
+            throw new InvalidOperationException("OperationGraphs should not be instantiated");
         }
 
-       
+        public static Func<E, S> GetState { get; set; }
 
-        public DirectedEdgedGraph<string, string> ToDirectedGraph()
+        public static Action<E, S> EnterState { get; set; }
+        public static Action<E, S> ExitState { get; set; }
+
+        public static Dictionary<S, StateOptions> States { get; set; }
+
+        public static XDocument ToDGML()
         {
+            return ToDirectedGraph().ToDGML();
+        }
 
+        public static DirectedEdgedGraph<string, string> ToDirectedGraph()
+        {
             DirectedEdgedGraph<string, string> result = new DirectedEdgedGraph<string, string>();
 
             Action<string, string, Enum> Add = (from, to, key) =>
@@ -221,52 +266,52 @@ namespace Signum.Engine.Operations
                         result.Add(from, to, dic[to] + ", " + key.ToString()); 
                 }; 
             
-            foreach (var item in Operations)
+            foreach (var item in OperationLogic.GraphOperations<E,S>())
             {
                 switch (item.OperationType)
                 {
                     case OperationType.Execute:
-                        {
-                            Goto gOp = (Goto)item;
+                    {
+                        Execute gOp = (Execute)item;
 
-                            if (gOp.FromStates == null)
-                                Add("[All States]", gOp.TargetState.ToString(), item.Key);
-                            else
-                                foreach (var s in gOp.FromStates)
-                                    Add(s.ToString(), gOp.TargetState.ToString(), item.Key);
+                        if (gOp.FromStates == null)
+                            Add("[All States]", gOp.ToState.ToString(), item.Key);
+                        else
+                            foreach (var s in gOp.FromStates)
+                                Add(s.ToString(), gOp.ToState.ToString(), item.Key);
 
 
-                        } break;
+                    } break;
                     case OperationType.Delete:
-                        {
-                            Delete dOp = (Delete)item;
-                            if (dOp.FromStates == null)
-                                Add("[All States]", "[Deleted]", item.Key);
-                            else
-                                foreach (var s in dOp.FromStates)
-                                    Add(s.ToString(), "[Deleted]", dOp.Key);
+                    {
+                        Delete dOp = (Delete)item;
+                        if (dOp.FromStates == null)
+                            Add("[All States]", "[Deleted]", item.Key);
+                        else
+                            foreach (var s in dOp.FromStates)
+                                Add(s.ToString(), "[Deleted]", dOp.Key);
 
 
-                        } break;
+                    } break;
                     case OperationType.Constructor:
                     case OperationType.ConstructorFrom:
                     case OperationType.ConstructorFromMany:
-                        {
-                            string from = item.OperationType == OperationType.Constructor ? "[New]" :
-                                          item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
-                                          item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
+                    {
+                        string from = item.OperationType == OperationType.Constructor ? "[New]" :
+                                        item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
+                                        item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
 
-                            Add(from, ((IGraphInnerOperation)item).TargetState.ToString(), item.Key);
+                        Add(from, ((IGraphInnerOperation)item).ToState.ToString(), item.Key);
 
 
-                        } break;
+                    } break;
                 }
             }
 
             return result;
         }
 
-        internal void OnExitState(S state, E entity)
+        internal static void OnExitState(S state, E entity)
         {
             StateOptions so = States.TryGetC(state);
             if (so != null && so.Exit != null)
@@ -276,7 +321,7 @@ namespace Signum.Engine.Operations
                 ExitState(entity, state);
         }
 
-        internal void OnEnterState(S state, E entity)
+        internal static void OnEnterState(S state, E entity)
         {
             if (EnterState != null)
                 EnterState(entity, state);
@@ -286,12 +331,12 @@ namespace Signum.Engine.Operations
                 sn.Enter(entity);
         }
 
-        internal void AssertEnterState(E entity, IGraphInnerOperation operation)
+        internal static void AssertEnterState(E entity, IGraphInnerOperation operation)
         {
             S state = GetState(entity);
 
-            if (!state.Equals(operation.TargetState))
-                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".Formato(operation.Key ,operation.TargetState, state));
+            if (!state.Equals(operation.ToState))
+                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".Formato(operation.Key ,operation.ToState, state));
 
             OnEnterState(state, entity);
         }

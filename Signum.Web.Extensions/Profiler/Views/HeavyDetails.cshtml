@@ -1,38 +1,28 @@
-@using Signum.Utilities.ExpressionTrees
+﻿@using Signum.Utilities.ExpressionTrees
 @using Signum.Web.Profiler
-
-@{ HeavyProfilerEntry entry = (HeavyProfilerEntry)Model;}
+@model HeavyProfilerEntry
 <h2>
     Profiler Entry (
-    @foreach (var e in entry.FollowC(a => a.Parent).Skip(1).Reverse())
+    @foreach (var e in Model.FollowC(a => a.Parent).Skip(1).Reverse())
     {
         @Html.ProfilerEntry(e.Index.ToString(), e.FullIndex())@:.
         }
-    @entry.Index.ToString())</h2>
-@Html.ActionLink("(View all)", "ViewAll")
+    @Model.Index.ToString())
+</h2>
+@Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy())
+<br />
+<h3>
+    Breakdown</h3>
+<div class="sf-profiler-chart" data-detail-url="@Url.Action("HeavyRoute", "Profiler")">
+</div>
+<br />
 <table class="sf-search-results">
-    <tr>
-        <th>
-            Method
-        </th>
-        <td>
-            @(entry.Type.TryCC(t => t.TypeName())).@entry.Method.Name
-        </td>
-    </tr>
-    <tr>
-        <th>
-            File Line
-        </th>
-        <td>
-            @entry.StackTrace.GetFrame(0).GetFileLineAndNumber()
-        </td>
-    </tr>
     <tr>
         <th>
             Role
         </th>
         <td>
-            @entry.Role
+            @Model.Role
         </td>
     </tr>
     <tr>
@@ -40,82 +30,80 @@
             Time
         </th>
         <td>
-            @entry.Elapsed.NiceToString()
+            @Model.Elapsed.NiceToString()
         </td>
     </tr>
-    <tr>
-        <th>
-            Direct Childs
-        </th>
-        <td>
-            @entry.GetEntriesResume().TryToString()
-        </td>
-    </tr>
-    @foreach (var kvp in entry.GetDescendantRoles())
-    { 
-        <tr>
-            <th>
-                @kvp.Key Childs
-            </th>
-            <td>
-                @kvp.Value.ToString(entry)
-            </td>
-        </tr>
-    }
 </table>
 <br />
-@if (entry.Entries != null)
-{
-    <h3>
-        Childs</h3>
-    Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), entry.Entries);
-}
 <h3>
     Aditional Data</h3>
-
-    <div>
-    
-    </div>
 <div>
     <pre>
     <code>
-        @entry.AditionalData
+        @Model.AditionalData
     </code>
     </pre>
 </div>
 <br />
 <h3>
     StackTrace</h3>
-<table class="sf-search-results">
-    <thead>
-        <tr>
-            <th>
-                Type
-            </th>
-            <th>
-                Method
-            </th>
-            <th>
-                FileLine
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @for (int i = 0; i < entry.StackTrace.FrameCount; i++)
-        {
-            var frame = entry.StackTrace.GetFrame(i);
+@if (Model.StackTrace == null)
+{
+    <span>No StackTrace</span>
+}
+else
+{
+    <table class="sf-search-results">
+        <thead>
             <tr>
-                <td>
-                    @frame.GetMethod().DeclaringType.TryCC(t => t.TypeName())
-                </td>
-                <td>
-                    @frame.GetMethod().Name
-                </td>
-                <td>
-                    @frame.GetFileLineAndNumber()
-                </td>
+                <th>
+                    Type
+                </th>
+                <th>
+                    Method
+                </th>
+                <th>
+                    FileLine
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.StackTrace.FrameCount; i++)
+            {
+                var frame = Model.StackTrace.GetFrame(i);
+                var type = frame.GetMethod().DeclaringType;
+                <tr>
+                    <td>
+                        @if (type != null)
+                        {
+                            var color = ColorExtensions.ToHtmlColor(type.Assembly.FullName.GetHashCode());
+                    
+                            <span style="color:@color">@frame.GetMethod().DeclaringType.TryCC(t => t.TypeName())</span>
+                        }
+                    </td>
+                    <td>
+                        @frame.GetMethod().Name
+                    </td>
+                    <td>
+                        @frame.GetFileLineAndNumber()
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 <br />
+@Html.ScriptCss("~/Profiler/Content/SF_Profiler.css")
+@Html.ScriptsJs("~/scripts/d3/d3.min.js",
+                "~/scripts/d3/d3.geom.min.js",
+                "~/scripts/d3/d3.layout.min.js",
+                "~/Profiler/Scripts/SF_Profiler.js")
+@{ 
+    var fullTree = Model.FollowC(e => e.Parent).ToList();
+    fullTree.AddRange(Model.DescendantsAndSelf()); 
+}
+<script type="text/javascript">
+    $(function() {
+        SF.Profiler.heavyDetailsChart(@Html.Raw(fullTree.Distinct().HeavyDetailsToJson()), @Model.Depth);
+    });
+</script>

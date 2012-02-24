@@ -23,17 +23,17 @@ namespace Signum.Web.Selenium
         public static void Search(this ISelenium selenium, string prefix)
         {
             selenium.Click(SearchSelector(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RowSelector(1, prefix)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RowSelector(selenium, 1, prefix)));
         }
 
-        public static void SetTopToFinder(this ISelenium selenium, string top)
+        public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage)
         {
-            SetTopToFinder(selenium, top, "");
+            SetElementsPerPageToFinder(selenium, elementsPerPage, "");
         }
 
-        public static void SetTopToFinder(this ISelenium selenium, string top, string prefix)
+        public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage, string prefix)
         {
-            selenium.Type("{0}sfTop".Formato(prefix), top);
+            selenium.Select("{0}sfElems".Formato(prefix), "value=" + elementsPerPage);
         }
 
         public static void ToggleFilters(this ISelenium selenium, bool show)
@@ -79,6 +79,20 @@ namespace Signum.Web.Selenium
             return "jq=#{0}ddlSelector_{1}".Formato(prefix, filterIndexBase0);
         }
 
+        public static void CheckAddFilterEnabled(this ISelenium selenium, bool isEnabled)
+        {
+            CheckAddFilterEnabled(selenium, isEnabled, "");
+        }
+
+        public static void CheckAddFilterEnabled(this ISelenium selenium, bool isEnabled, string prefix)
+        {
+            bool enabled = selenium.IsElementPresent("jq=#{0}btnAddFilter:not(.ui-button-disabled)".Formato(prefix));
+            if (isEnabled)
+                Assert.IsTrue(enabled);
+            else
+                Assert.IsFalse(enabled);
+        }        
+
         public static void AddFilter(this ISelenium selenium, int filterIndexBase0)
         {
             AddFilter(selenium, filterIndexBase0, "");
@@ -117,9 +131,12 @@ namespace Signum.Web.Selenium
 
         public static void QuickFilter(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, int filterIndexBase0, string prefix)
         {
-            string cellSelector = SearchTestExtensions.CellSelector(rowIndexBase1, columnIndexBase1, prefix);
+            string cellSelector = SearchTestExtensions.CellSelector(selenium, rowIndexBase1, columnIndexBase1, prefix);
             selenium.ContextMenu(cellSelector);
-            selenium.Click("{0} .quickfilter".Formato(cellSelector));
+            
+            string quickFilterSelector = "{0} .quickfilter".Formato(cellSelector);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(quickFilterSelector));
+            selenium.Click(quickFilterSelector);
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
         }
 
@@ -212,34 +229,37 @@ namespace Signum.Web.Selenium
             return "jq=#{0}tblResults > tbody > tr".Formato(prefix);
         }
 
-        public static string RowSelector(int rowIndexBase1)
+        public static string RowSelector(ISelenium selenium, int rowIndexBase1)
         {
-            return RowSelector(rowIndexBase1, "");
+            return RowSelector(selenium, rowIndexBase1, "");
         }
 
-        public static string RowSelector(int rowIndexBase1, string prefix)
+        public static string RowSelector(ISelenium selenium, int rowIndexBase1, string prefix)
         {
+            if (selenium.HasMultiplyMessage(true, prefix))
+                rowIndexBase1 += 1;
             return "{0}:nth-child({1})".Formato(RowSelector(prefix), rowIndexBase1);
+            //return "{0}:not(.sf-tr-multiply):eq({1})".Formato(RowSelector(prefix), rowIndexBase1 - 1);
         }
 
-        public static string CellSelector(int rowIndexBase1, int columnIndexBase1)
+        public static string CellSelector(ISelenium selenium, int rowIndexBase1, int columnIndexBase1)
         {
-            return CellSelector(rowIndexBase1, columnIndexBase1, "");
+            return CellSelector(selenium, rowIndexBase1, columnIndexBase1, "");
         }
 
-        public static string CellSelector(int rowIndexBase1, int columnIndexBase1, string prefix)
+        public static string CellSelector(ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string prefix)
         {
-            return "{0} > td:nth-child({1})".Formato(RowSelector(rowIndexBase1, prefix), columnIndexBase1);
+            return "{0} > td:nth-child({1})".Formato(RowSelector(selenium, rowIndexBase1, prefix), columnIndexBase1);
         }
 
         public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0)
         {
-            SelectRowRadioButton(selenium, rowIndexBase0);
+            SelectRowRadioButton(selenium, rowIndexBase0, "");
         }
 
         public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0, string prefix)
         {
-            selenium.Click("{0} > input:radio".Formato(CellSelector(rowIndexBase0 + 1, 1, prefix)));
+            selenium.Click("{0} > input:radio".Formato(CellSelector(selenium, rowIndexBase0 + 1, 1, prefix)));
         }
 
         public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0)
@@ -280,6 +300,44 @@ namespace Signum.Web.Selenium
         public static void TableHasColumn(this ISelenium selenium, string tokenName, string prefix)
         {
             Assert.IsTrue(selenium.IsElementPresent("{0} > :hidden[value={1}]".Formato(TableHeaderSelector(prefix), tokenName)));
+        }
+
+        public static void AssertMultiplyMessage(this ISelenium selenium, bool isPresent)
+        {
+            AssertMultiplyMessage(selenium, isPresent, "");
+        }
+
+        public static void AssertMultiplyMessage(this ISelenium selenium, bool isPresent, string prefix)
+        {
+            bool present = HasMultiplyMessage(selenium, isPresent, prefix);
+            if (isPresent)
+                Assert.IsTrue(present);
+            else
+                Assert.IsFalse(present);
+        }
+
+        public static bool HasMultiplyMessage(this ISelenium selenium, bool isPresent)
+        {
+            return HasMultiplyMessage(selenium, isPresent, "");
+        }
+
+        public static bool HasMultiplyMessage(this ISelenium selenium, bool isPresent, string prefix)
+        {
+            return selenium.IsElementPresent("jq=#{0}tblResults > tbody > tr.sf-tr-multiply".Formato(prefix));
+        }
+
+        public static void CheckAddColumnEnabled(this ISelenium selenium, bool isEnabled)
+        {
+            CheckAddColumnEnabled(selenium, isEnabled, "");
+        }
+
+        public static void CheckAddColumnEnabled(this ISelenium selenium, bool isEnabled, string prefix)
+        {
+            bool enabled = selenium.IsElementPresent("jq=#{0}btnAddColumn:not(.ui-button-disabled)".Formato(prefix));
+            if (isEnabled)
+                Assert.IsTrue(enabled);
+            else
+                Assert.IsFalse(enabled);
         }
 
         public static void AddColumn(this ISelenium selenium, string columnTokenName)
@@ -341,7 +399,7 @@ namespace Signum.Web.Selenium
 
         public static bool IsElementInCell(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string selector, string prefix)
         {
-            return selenium.IsElementPresent(CellSelector(rowIndexBase1, columnIndexBase1, prefix) + " " + selector);
+            return selenium.IsElementPresent(CellSelector(selenium, rowIndexBase1, columnIndexBase1, prefix) + " " + selector);
         }
 
         public static bool IsEntityInRow(this ISelenium selenium, int rowIndexBase1, string liteKey)
@@ -351,7 +409,7 @@ namespace Signum.Web.Selenium
 
         public static bool IsEntityInRow(this ISelenium selenium, int rowIndexBase1, string liteKey, string prefix)
         {
-            return selenium.IsElementPresent("{0}[data-entity='{1}']".Formato(RowSelector(rowIndexBase1, prefix), liteKey));
+            return selenium.IsElementPresent("{0}[data-entity='{1}']".Formato(RowSelector(selenium, rowIndexBase1, prefix), liteKey));
         }
 
         public static string EntityRowSelector(string liteKey)
@@ -386,19 +444,19 @@ namespace Signum.Web.Selenium
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1,bool multiSel, string prefix)
         {
             if (multiSel)
-            selenium.Click("{0} > a".Formato(CellSelector(rowIndexBase1, 2, prefix)));
+                selenium.Click("{0} > a".Formato(CellSelector(selenium, rowIndexBase1, 2, prefix)));
             else
-            selenium.Click("{0} > a".Formato(CellSelector(rowIndexBase1, 1, prefix)));
+                selenium.Click("{0} > a".Formato(CellSelector(selenium, rowIndexBase1, 1, prefix)));
         }
 
-        public static string EntityContextMenuSelector(int rowIndexBase1)
+        public static string EntityContextMenuSelector(ISelenium selenium, int rowIndexBase1)
         {
-            return EntityContextMenuSelector(rowIndexBase1, "");
+            return EntityContextMenuSelector(selenium, rowIndexBase1, "");
         }
 
-        public static string EntityContextMenuSelector(int rowIndexBase1, string prefix)
+        public static string EntityContextMenuSelector(ISelenium selenium, int rowIndexBase1, string prefix)
         {
-            return "{0} .sf-search-ctxmenu".Formato(CellSelector(rowIndexBase1, 1));
+            return "{0} td:nth-child({1}) .sf-search-ctxmenu:visible".Formato(RowSelector(prefix), 1);
         }
 
         public static void EntityContextMenu(this ISelenium selenium, int rowIndexBase1)
@@ -408,31 +466,42 @@ namespace Signum.Web.Selenium
 
         public static void EntityContextMenu(this ISelenium selenium, int rowIndexBase1, string prefix)
         {
-            selenium.ContextMenu(CellSelector(rowIndexBase1, 1, prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(EntityContextMenuSelector(rowIndexBase1, prefix)));
+            selenium.ContextMenu(CellSelector(selenium, rowIndexBase1, 1, prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(EntityContextMenuSelector(selenium, rowIndexBase1, prefix)));
         }
 
-        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, int contextualElementIndexBase1)
+        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, string itemId)
         {
-            EntityContextMenuClick(selenium, rowIndexBase1, contextualElementIndexBase1, "");
+            EntityContextMenuClick(selenium, rowIndexBase1, itemId, "");
         }
 
-        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, int contextualElementIndexBase1, string prefix)
+        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, string itemId, string prefix)
         {
-            selenium.Click("{0} li:nth-child({1}) a".Formato(EntityContextMenuSelector(rowIndexBase1, prefix), contextualElementIndexBase1));
+            selenium.Click("{0} li.sf-search-ctxitem a#{1}".Formato(EntityContextMenuSelector(selenium, rowIndexBase1, prefix), itemId));
+        }
+
+        public static void EntityContextQuickLinkClick(this ISelenium selenium, int rowIndexBase1, int quickLinkIndexBase1)
+        {
+            EntityContextQuickLinkClick(selenium, rowIndexBase1, quickLinkIndexBase1, "");
+        }
+
+        public static void EntityContextQuickLinkClick(this ISelenium selenium, int rowIndexBase1, int quickLinkIndexBase1, string prefix)
+        {
+            selenium.Click("{0} .sf-search-ctxmenu-quicklinks .sf-search-ctxitem a:nth-child({1})".Formato(
+                EntityContextMenuSelector(selenium, rowIndexBase1, prefix), 
+                quickLinkIndexBase1));
         }
 
         public static Func<bool> ThereAreNRows(this ISelenium selenium, int n, string prefix)
         {
             if (n == 0)
-            {
-                return () => !selenium.IsElementPresent(RowSelector(n, prefix));
-            }
-            else
-            {
-                return () => selenium.IsElementPresent(RowSelector(n, prefix)) &&
-                             !selenium.IsElementPresent(RowSelector(n + 1, prefix));
-            }
+                n = 1; //there will be a row with the "no results" message
+
+            string footerRow = RowSelector(selenium, n + 1, prefix);
+            string noRow = RowSelector(selenium, n + 2, prefix);
+
+            return () => selenium.IsElementPresent(footerRow) &&
+                !selenium.IsElementPresent(noRow);
         }
 
         public static Func<bool> ThereAreNRows(this ISelenium selenium, int n)
@@ -458,6 +527,21 @@ namespace Signum.Web.Selenium
         public static void SearchCreate(this ISelenium selenium, string prefix)
         {
             selenium.Click(SearchCreateLocator(prefix));
+        }
+
+        public static void SearchCreateWithImpl(this ISelenium selenium, string typeToChoose)
+        {
+            SearchCreateWithImpl(selenium, typeToChoose, "");
+        }
+
+        public static void SearchCreateWithImpl(this ISelenium selenium, string typeToChoose, string prefix)
+        {
+            selenium.Click(SearchCreateLocator(prefix));
+
+            //implementation popup opens
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+            selenium.Click(typeToChoose);
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
         }
 
         public static string QueryButtonLocator(string id) {

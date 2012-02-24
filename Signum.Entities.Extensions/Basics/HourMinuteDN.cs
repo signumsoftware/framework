@@ -37,7 +37,7 @@ namespace Signum.Entities
             h => "{0:00}:{1:00}".Formato(h.Hour, h.Minute); 
         public override string ToString()
         {
-            return ToStringExpression.Invoke(this);
+            return ToStringExpression.Evaluate(this);
         }
     }
 }

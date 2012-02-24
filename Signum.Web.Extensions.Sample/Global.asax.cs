@@ -14,7 +14,7 @@ using System.Threading;
 using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Entities;
-using Signum.Web.Queries;
+using Signum.Web.UserQueries;
 using Signum.Web.Reports;
 using Signum.Web.Auth;
 using Signum.Web.AuthAdmin;
@@ -23,6 +23,9 @@ using Signum.Entities.ControlPanel;
 using Signum.Web.Combine;
 using System.Reflection;
 using Signum.Web.PortableAreas;
+using Signum.Web.Widgets;
+using Signum.Web.Chart;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -65,6 +68,8 @@ namespace Signum.Web.Extensions.Sample
         {   
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
+            Statics.SessionFactory = new ScopeSessionFactory(new AspNetSessionFactory());
+
             using (AuthLogic.Disable())
             {
                 Schema.Current.Initialize();
@@ -72,7 +77,6 @@ namespace Signum.Web.Extensions.Sample
             }
 
             RegisterRoutes(RouteTable.Routes);
-
         }
 
         private void WebStart()
@@ -80,9 +84,23 @@ namespace Signum.Web.Extensions.Sample
             Navigator.Start(new NavigationManager());
             Constructor.Start(new ConstructorManager());
             OperationsClient.Start(new OperationManager(), true);
-            
-            AuthClient.Start(true, true, true, true, false);
-            AuthAdminClient.Start(true, true, true, true, true, true, true);
+
+            AuthClient.Start(
+                types: true, 
+                property: true, 
+                queries: true, 
+                resetPassword: true,
+                passwordExpiration: false);
+
+            AuthClient.CookieName = "sfUserMusicSample";
+
+            AuthAdminClient.Start(
+                types: true, 
+                properties: true, 
+                queries: true, 
+                operations: true, 
+                permissions: true, 
+                facadeMethods: false);
 
             ContextualItemsHelper.Start();
             UserQueriesClient.Start();
@@ -90,9 +108,14 @@ namespace Signum.Web.Extensions.Sample
 
             ReportsClient.Start(true, true);
 
+            ChartClient.Start();
+
+            QuickLinkWidgetHelper.Start();
+            NotesClient.Start();
+            AlertsClient.Start();
+
             MusicClient.Start();
 
-            //Combiner.Start();
             ScriptHtmlHelper.Manager.MainAssembly = typeof(MusicClient).Assembly;
             SignumControllerFactory.MainAssembly = Assembly.GetExecutingAssembly();
 
@@ -105,26 +128,10 @@ namespace Signum.Web.Extensions.Sample
                 ctx => ctx.FilterInfo.AuthorizationFilters.OfType<AuthenticationRequiredAttribute>().Any() ? null : new AuthenticationRequiredAttribute());
         }
 
-        protected void Application_AcquireRequestState(object sender, EventArgs e)
-        {
-            UserDN user = HttpContext.Current.Session == null ? null : (UserDN)HttpContext.Current.Session[AuthController.SessionUserKey];
-
-            if (user != null)
-            {
-                Thread.CurrentPrincipal = user;
-            }
-            else
-            {
-                using (AuthLogic.Disable())
-                {
-                    //Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.UserName == "external").Single();
-                }
-            }
-        }
-
         protected void Session_Start(object sender, EventArgs e)
         {
-            AuthController.LoginFromCookie();
+            if (!AuthController.LoginFromCookie())
+                UserDN.Current = AuthLogic.AnonymousUser;
         }
     }
 }

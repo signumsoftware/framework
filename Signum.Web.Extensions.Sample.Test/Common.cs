@@ -29,9 +29,10 @@ namespace Signum.Web.Extensions.Sample.Test
             return "/Signum.Web.Extensions.Sample/View/{0}/{1}".Formato(webTypeName, id.HasValue ? id.Value.ToString() : "");
         }
 
-        public static void Start(TestContext testContext)
+        public static void Start()
         {
-            Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
+            Signum.Test.Extensions.Starter.Dirty(); //Force generate database
+            Signum.Test.Extensions.Starter.StartAndLoad(UserConnections.Replace(Settings.Default.ConnectionString));
 
             using (AuthLogic.Disable())
                 Schema.Current.Initialize();

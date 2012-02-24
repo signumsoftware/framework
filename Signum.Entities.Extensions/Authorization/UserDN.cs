@@ -10,24 +10,20 @@ using System.ComponentModel;
 using System.Reflection;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Mailing;
-using Signum.Entities.Extensions.Authorization;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Authorization
 {
     [Serializable]
-    public class UserDN : Entity, IPrincipal, IEmailOwnerDN
+    public class UserDN : Entity, IEmailOwnerDN
     {
-
         public UserDN()
         {
             PasswordHash = Guid.NewGuid().ToString();
         }
 
-
-        public static Func<string, string> ValidatePassword;
-        public static Func<string, string> ValidatePasswordDefauld = p =>
+        public static Func<string, string> ValidatePassword = p =>
         {
             if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
                 return null;
@@ -79,9 +75,9 @@ namespace Signum.Entities.Authorization
             get { return passwordNeverExpires; }
             set { Set(ref passwordNeverExpires, value, () => PasswordNeverExpires); }
         }
-
-        IUserRelatedDN related;
-        public IUserRelatedDN Related
+       
+        IIdentifiable related;
+        public IIdentifiable Related
         {
             get { return related; }
             set { Set(ref related, value, () => Related); }
@@ -103,17 +99,6 @@ namespace Signum.Entities.Authorization
             set { Set(ref email, value, () => Email); }
         }
 
-        IIdentity IPrincipal.Identity
-        {
-            get { return null; }
-        }
-
-        bool IPrincipal.IsInRole(string role)
-        {
-            return this.role.Name == role;
-        }
-
-
         DateTime? anulationDate;
         public DateTime? AnulationDate
         {
@@ -121,7 +106,7 @@ namespace Signum.Entities.Authorization
             set { Set(ref anulationDate, value, () => AnulationDate); }
         }
 
-        UserState state;
+        UserState state = UserState.New;
         public UserState State
         {
             get { return state; }
@@ -132,12 +117,11 @@ namespace Signum.Entities.Authorization
             u => null;
         public string CultureInfo
         {
-            get { return CultureInfoExpression.Invoke(this); }
+            get { return CultureInfoExpression.Evaluate(this); }
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-
             if (pi.Is(() => State))
             {
                 if (anulationDate != null && state != UserState.Disabled)
@@ -152,9 +136,12 @@ namespace Signum.Entities.Authorization
             return userName;
         }
 
+        public static string UserSessionKey = "user";
+        public static readonly SessionVariable<UserDN> CurrentUserVariable = Statics.SessionVariable<UserDN>(UserSessionKey);
         public static UserDN Current
         {
-            get { return Thread.CurrentPrincipal as UserDN; }
+            get { return CurrentUserVariable.Value; }
+            set { CurrentUserVariable.Value = value; }
         }
     }
 
@@ -174,13 +161,7 @@ namespace Signum.Entities.Authorization
         Save,
         Enable,
         Disable,
-        //NewPassword,
         SetPassword
-    }
-
-    public interface IUserRelatedDN : IIdentifiable
-    {
-
     }
 
 

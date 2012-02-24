@@ -1,7 +1,7 @@
-@using Signum.Engine
-@using Signum.Entities.Reports
+﻿@using Signum.Engine
+@using Signum.Entities.UserQueries
 
 @using (var e = Html.TypeContext<QueryTokenDN>())
 {
-    @Html.QueryTokenCombo(e.Value.Token, e)
+    @Html.QueryTokenCombo(e.Value.Token, ViewData[ViewDataKeys.QueryName], e)
 }

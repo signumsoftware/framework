@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -50,7 +50,7 @@ namespace Signum.Web.Help
 
             ViewData["nameSpace"] = relatedTypes;
 
-            //Buscamos en qué fichero se encuentra
+            //Buscamos en quï¿½ fichero se encuentra
             EntityHelp eh = HelpLogic.GetEntityHelp(type);
 
             return View(HelpClient.ViewEntityUrl, eh);
@@ -101,7 +101,7 @@ namespace Signum.Web.Help
                              where result.Any()
                              select result.ToList());
 
-            results.Sort(a => a.First());
+            results.Sort(a => a.FirstEx());
 
             sp.Stop();
             ViewData["time"] = sp.ElapsedMilliseconds;
@@ -130,7 +130,7 @@ namespace Signum.Web.Help
                 else if (key.StartsWith("o-"))
                 {
                     subKey = subKey.Replace("_", ".");
-                    Enum e = eh.Operations.Keys.Where(k => OperationDN.UniqueKey(k).Equals(subKey)).Single();
+                    Enum e = eh.Operations.Keys.Where(k => OperationDN.UniqueKey(k).Equals(subKey)).SingleEx();
                     eh.Operations[e].UserDescription = Request.Form[key].ToString();
                     entityModified = true;
                 }
@@ -147,7 +147,7 @@ namespace Signum.Web.Help
                     string query = subKey.Substring(0, subKey.LastIndexOf("."));
                     string column = subKey.Substring(subKey.LastIndexOf(".") + 1);
                     QueryHelp qh = processedQueryHelp.ContainsKey(query) ? processedQueryHelp[query] : HelpLogic.GetQueryHelp(query);
-                    qh.Columns.Where(c=>c.Key == column).Single().Value.UserDescription = Request.Form[key].ToString();
+                    qh.Columns.Where(c=>c.Key == column).SingleEx().Value.UserDescription = Request.Form[key].ToString();
                     processedQueryHelp[subKey] = qh;
                 }
                 else if (key.Equals("description"))

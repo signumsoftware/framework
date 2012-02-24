@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -58,7 +58,7 @@ namespace Signum.Windows.Extensions
 
                 int i;
 
-                if (finalSize.Width < tol || finalSize.Height < tol)
+                if (strip.Width < tol || strip.Height < tol)
                     return finalSize;
 
                 if (strip.Width > strip.Height)

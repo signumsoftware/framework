@@ -1,9 +1,12 @@
-@using Signum.Engine
+﻿@using Signum.Engine
 @using Signum.Entities.Scheduler
+@using System.Globalization
 
 @using (var e = Html.TypeContext<ScheduleRuleDailyDN>())
-{
-    @Html.ValueLine(e, f => f.StartingOn)
-    @Html.ValueLine(e, f => f.Hour)
-    @Html.ValueLine(e, f => f.Minute)
+{    
+    using (Html.FieldInline())
+    {        
+        @Html.ValueLine(e, srd => srd.StartingOn, vl => { vl.Format = "d"; })
+        @Html.HourMinute(e, srd => srd.StartingOn)
+    }
 }

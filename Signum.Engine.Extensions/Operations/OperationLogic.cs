@@ -17,6 +17,8 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
+using System.Linq.Expressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Operations
 {
@@ -40,12 +42,50 @@ namespace Signum.Engine.Operations
 
     public static class OperationLogic
     {
-        static Dictionary<Type, Dictionary<Enum, IOperation>> operations = new Dictionary<Type, Dictionary<Enum, IOperation>>();
-
-        public static IEnumerable<Enum> RegisteredOperations
+        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogOperationsExpression = 
+            o => Database.Query<OperationLogDN>().Where(a=>a.Operation == o);
+        public static IQueryable<OperationLogDN> LogOperations(this OperationDN o)
         {
-            get { return operations.Values.SelectMany(b => b.Keys); }
+            return LogOperationsExpression.Evaluate(o);
         }
+
+        static Polymorphic<Dictionary<Enum, IOperation>> operations = new Polymorphic<Dictionary<Enum, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
+
+        public static HashSet<Enum> RegisteredOperations
+        {
+            get { return operations.OverridenValues.SelectMany(a => a.Keys).ToHashSet(); }
+        }
+
+
+        public static readonly HashSet<Type> ProtectedSaveTypes = new HashSet<Type>();
+
+        static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
+        public static bool AllowSaveGlobally { get; set; }
+
+        public static bool IsSaveProtected(Type type)
+        {
+            if (AllowSaveGlobally)
+                return false;
+
+            var it = allowedTypes.Value;
+
+            return ProtectedSaveTypes.Contains(type) && (it == null || !it.Contains(type));
+        }
+
+        public static IDisposable AllowSave<T>() where T : class, IIdentifiable
+        {
+            return AllowSave(typeof(T));
+        }
+
+        private static IDisposable AllowSave(Type type)
+        {
+            allowedTypes.Value = (allowedTypes.Value ?? ImmutableStack<Type>.Empty).Push(type);
+
+            return new Disposable(() => allowedTypes.Value = allowedTypes.Value.Pop());
+        }
+
+       
+
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -57,11 +97,11 @@ namespace Signum.Engine.Operations
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<OperationDN>();
-                sb.Include<LogOperationDN>();
+                sb.Include<OperationLogDN>();
 
-                EnumLogic<OperationDN>.Start(sb, () => RegisteredOperations.ToHashSet());
+                EnumLogic<OperationDN>.Start(sb, () => RegisteredOperations);
 
-                dqm[typeof(LogOperationDN)] = (from lo in Database.Query<LogOperationDN>()
+                dqm[typeof(OperationLogDN)] = (from lo in Database.Query<OperationLogDN>()
                                                select new
                                                {
                                                    Entity = lo.ToLite(),
@@ -73,19 +113,28 @@ namespace Signum.Engine.Operations
                                                    lo.End,
                                                    lo.Exception
                                                }).ToDynamic();
-
-
+             
                 dqm[typeof(OperationDN)] = (from lo in Database.Query<OperationDN>()
-                                               select new
-                                               {
-                                                   Entity = lo.ToLite(),
-                                                   lo.Id,
-                                                   lo.Name,
-                                                   lo.Key,
-                                                   
-                                           
-                                               }).ToDynamic(); 
+                                            select new
+                                            {
+                                                Entity = lo.ToLite(),
+                                                lo.Id,
+                                                lo.Name,
+                                                lo.Key,
+                                            }).ToDynamic();
+
+                dqm.RegisterExpression((OperationDN o) => o.LogOperations());
+
+                sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
             }
+        }
+
+        static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
+        {
+            if (ident.Modified == true && IsSaveProtected(ident.GetType()))
+                throw new InvalidOperationException("Saving {0} is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
+                    ident.GetType().NiceName(),
+                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => EnumDN.UniqueKey(k)))); 
         }
 
         #region Events
@@ -124,19 +173,35 @@ namespace Signum.Engine.Operations
         public static void AssertOperationAllowed(Enum operationKey)
         {
             if (!OperationAllowed(operationKey))
-                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(operationKey.NiceToString()));
+                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), EnumDN.UniqueKey(operationKey)));
         }
         #endregion
+
 
 
         public static void Register(this IOperation operation)
         {
             if (!operation.Type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at tleast {1}".Formato(operation.Type));
+                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
 
-            operation.AssertIsValid(); 
+            operation.AssertIsValid();
 
-            operations.GetOrCreate(operation.Type)[operation.Key] = operation;
+            operations.GetOrAdd(operation.Type).Add(operation.Key, operation);
+
+            if (operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false)
+            {
+                ProtectedSaveTypes.Add(operation.Type); 
+            }
+        }
+
+        public static void RegisterOverride(this IOperation operation)
+        {
+            if (!operation.Type.IsIIdentifiable())
+                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
+
+            operation.AssertIsValid();
+
+            operations.GetOrAdd(operation.Type)[operation.Key] = operation;
         }
 
         static OperationInfo ToOperationInfo(IOperation operation, string canExecute)
@@ -155,7 +220,7 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> ServiceGetConstructorOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where o is IConstructorOperation && OperationAllowed(o.Key)
+                    where o is IConstructOperation && OperationAllowed(o.Key)
                     select ToOperationInfo(o, null)).ToList();
         }
 
@@ -182,51 +247,41 @@ namespace Signum.Engine.Operations
         #region Execute
         public static IdentifiableEntity ServiceExecute(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            Find<IExecuteOperation>(entity.GetType(), operationKey).AssertLite(false).Execute(entity, args);
+            var op = Find<IExecuteOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
+            op.Execute(entity, args);
             return (IdentifiableEntity)entity;
         }
 
         public static IdentifiableEntity ServiceExecuteLite(Lite lite, Enum operationKey, params object[] args)
         {
             IdentifiableEntity entity = Database.RetrieveAndForget(lite);
-            Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite(true).Execute(entity, args);
+            var op = Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite();
+            op.Execute(entity, args);
             return entity;
         }
 
         public static T Execute<T>(this T entity, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
-            Find<IExecuteOperation>(entity.GetType(), operationKey).AssertLite(false).Execute(entity, args);
+            var op = Find<IExecuteOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
+            op.Execute(entity, args);
             return (T)(IIdentifiable)entity;
         }
 
         public static T ExecuteLite<T>(this Lite<T> lite, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            T  entity = lite.RetrieveAndForget();
-            Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite(true).Execute(entity, args);
+            T entity = lite.RetrieveAndForget();
+            var op = Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite();
+            op.Execute(entity, args);
             return entity;
         }
 
         public static string CanExecute<T>(this T entity, Enum operationKey)
            where T : class, IIdentifiable
         {
-            return Find<IEntityOperation>(entity.GetType(), operationKey).CanExecute(entity);
-        }
-
-        public static T ExecuteBase<T>(this T entity, Type baseType, Enum operationKey, params object[] args)
-             where T : class, IIdentifiable
-        {
-            Find<IExecuteOperation>(baseType, operationKey).AssertLite(false).Execute(entity, args);
-            return entity;
-        }
-
-        public static T ExecuteLiteBase<T>(this Lite<T> lite, Type baseType, Enum operationKey, params object[] args)
-            where T:class, IIdentifiable
-        {
-            T entity = lite.RetrieveAndForget();
-            Find<IExecuteOperation>(baseType, operationKey).AssertLite(true).Execute(entity, args);
-            return entity;
+            var op = Find<IEntityOperation>(entity.GetType(), operationKey); 
+            return op.CanExecute(entity);
         }
         #endregion
 
@@ -234,7 +289,8 @@ namespace Signum.Engine.Operations
         public static IdentifiableEntity ServiceDelete(Lite lite, Enum operationKey, params object[] args)
         {
             IdentifiableEntity entity = Database.RetrieveAndForget(lite);
-            Find<IDeleteOperation>(lite.RuntimeType, operationKey).Delete(entity, args);
+            var op = Find<IDeleteOperation>(lite.RuntimeType, operationKey);
+            op.Delete(entity, args);
             return entity;
         }
 
@@ -242,64 +298,51 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable
         {
             T entity = lite.RetrieveAndForget();
-            Find<IDeleteOperation>(lite.RuntimeType, operationKey).Delete(entity, args);
-        }
-
-        public static void DeleteBase<T>(this Lite<T> lite, Type baseType, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
-        {
-            T entity = lite.RetrieveAndForget();
-            Find<IDeleteOperation>(baseType, operationKey).Delete(entity, args);
+            var op = Find<IDeleteOperation>(lite.RuntimeType, operationKey);
+            op.Delete(entity, args);
         }
         #endregion
 
         #region Construct
         public static IIdentifiable ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
-            return Find<IConstructorOperation>(type, operationKey).Construct(args);
+            var op = Find<IConstructOperation>(type, operationKey); 
+            return op.Construct(args);
         }
 
         public static T Construct<T>(Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorOperation>(typeof(T), operationKey).Construct(args);
+            var op = Find<IConstructOperation>(typeof(T), operationKey);
+            return (T)op.Construct(args);
         }
         #endregion
 
         #region ConstructFrom
         public static IIdentifiable ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertLite(false).Construct(entity, args);
+            var op = Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
+            return op.Construct(entity, args);
         }
 
         public static IIdentifiable ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
-            return Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
+            var op = Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite();
+            return op.Construct(Database.RetrieveAndForget(lite), args);
         }
-
 
         public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
               where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertLite(false).Construct(entity, args);
+            var op = Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
+            return (T)op.Construct(entity, args);
         }
 
         public static T ConstructFromLite<T>(this Lite lite, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
-        }
-
-        public static T ConstructFromBase<T>(this IIdentifiable entity, Type baseType, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
-        {
-            return (T)Find<IConstructorFromOperation>(baseType, operationKey).AssertLite(false).Construct(entity, args);
-        }
-
-        public static T ConstructFromLiteBase<T>(this Lite lite, Type baseType, Enum operationKey, params object[] args)
-               where T : class, IIdentifiable
-        {
-            return (T)Find<IConstructorFromOperation>(baseType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
+            var op = Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite();
+            return (T)op.Construct(Database.RetrieveAndForget(lite), args);
         }
         #endregion
 
@@ -317,10 +360,10 @@ namespace Signum.Engine.Operations
         }
         #endregion
 
-        static T Find<T>(Type type, Enum operationKey)
+        public static T Find<T>(Type type, Enum operationKey)
             where T : IOperation
         {
-            IOperation result = TryFind(type, operationKey);
+            IOperation result = operations.TryGetValue(type).TryGetC(operationKey);
             if (result == null)
                 throw new InvalidOperationException("Operation {0} not found for type {1}".Formato(operationKey, type));
 
@@ -328,65 +371,50 @@ namespace Signum.Engine.Operations
                 throw new InvalidOperationException("Operation {0} is a {1} not a {2} use {3} instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
                     result is IExecuteOperation ? "Execute" :
                     result is IDeleteOperation ? "Delete" :
-                    result is IConstructorOperation ? "Construct" :
+                    result is IConstructOperation ? "Construct" :
                     result is IConstructorFromOperation ? "ConstructFrom" :
                     result is IConstructorFromManyOperation ? "ConstructFromMany" : null));
 
             return (T)result;
         }
 
-        static T AssertLite<T>(this T result, bool isLite)
+        static T AssertLite<T>(this T result)
              where T : IEntityOperation
         {
-            if (isLite && !result.Lite)
+            if (!result.Lite)
                 throw new InvalidOperationException("Operation {0} is not allowed for Lites".Formato(result.Key));
 
-            if (!isLite && result.Lite)
-               throw new InvalidOperationException("Operation {0} needs a Lite".Formato(result.Key));
-
-            return result; 
+            return result;
         }
 
-        static IOperation TryFind(Type type, Enum operationKey)
+        static T AssertEntity<T>(this T result, IdentifiableEntity entity)
+            where T : IEntityOperation
         {
-            if (!type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(type, typeof(IIdentifiable)));
+            if (result.Lite)
+            {
+                var list = GraphExplorer.FromRoot(entity).Where(a => a.SelfModified);
+                if (list.Any())
+                    throw new InvalidOperationException("Operation {0} needs a Lite or a fresh entity, but the entity has changes:\r\n {1}".Formato(result.Key, list.ToString("\r\n")));
+            }
 
-            IOperation result = type.FollowC(t => t.BaseType)
-                .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
-                .Select(t => operations.TryGetC(t).TryGetC(operationKey)).NotNull().FirstOrDefault();
-
-            if (result != null)
-                return result;
-
-            List<Type> interfaces = type.GetInterfaces()
-                .Where(t => t.IsIIdentifiable() && operations.TryGetC(t).TryGetC(operationKey) != null)
-                .ToList();
-
-            if (interfaces.Count > 1)
-                throw new InvalidOperationException("Ambiguity between interfaces: {0}".Formato(interfaces.ToString(", ")));
-
-            if (interfaces.Count < 1)
-                return null;
-
-            return operations[interfaces.Single()][operationKey];
+            return result;
         }
 
-        static List<IOperation> TypeOperations(Type type)
+        public static bool IsLite(Enum operationKey)
         {
-            if (!type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(type, typeof(IIdentifiable)));
+            return operations.OverridenTypes.Select(t => operations.GetDefinition(t)).NotNull()
+                .Select(d => d.TryGetC(operationKey)).NotNull().OfType<IEntityOperation>().Select(a => a.Lite).FirstOrDefault();
+        }
 
-            HashSet<Enum> result = type.FollowC(t => t.BaseType)
-                    .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
-                    .Select(t => operations.TryGetC(t)).NotNull().SelectMany(d=>d.Keys).ToHashSet();
 
-            result.UnionWith(type.GetInterfaces()
-                .Where(t => t.IsIIdentifiable())
-                .Select(t => operations.TryGetC(t))
-                .NotNull().SelectMany(d => d.Keys));
+        static IEnumerable<IOperation> TypeOperations(Type type)
+        {
+            var dic = operations.TryGetValue(type);
 
-            return result.Select(a => TryFind(type, a)).ToList();
+            if (dic == null)
+                return Enumerable.Empty<IOperation>();
+
+            return dic.Values;
         }
 
         public static T GetArg<T>(this object[] args, int pos)
@@ -430,14 +458,37 @@ namespace Signum.Engine.Operations
             return (T)args[pos];
         }
 
+        public static string InState<T>(this T state, Enum operationKey, params T[] validStates) where T : struct
+        {
+            if (validStates.Contains(state))
+                return null;
+
+            return Resources.ImpossibleToExecute0FromState1.Formato(operationKey.NiceToString(), ((Enum)(object)state).NiceToString());
+        }
 
         public static Type[] FindTypes(Enum operation)
         {
-            return operations.Where(o => o.Value.ContainsKey(operation)).Select(a => a.Key).ToArray();
+            return TypeLogic.DnToType.Values.Where(t => operations.TryGetValue(t).ContainsKey(operation)).ToArray();
         }
+
+        internal static IEnumerable<Graph<E, S>.IGraphOperation> GraphOperations<E, S>()
+            where E : IdentifiableEntity
+            where S : struct
+        {
+            return operations.OverridenValues.SelectMany(d => d.Values).OfType<Graph<E, S>.IGraphOperation>();
+        }
+
+        public static bool IsDefined(Type type, Enum operation)
+        {
+            return operations.TryGetValue(type).TryGetC(operation) != null;
+        }
+
+     
     }
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
     public delegate bool AllowOperationHandler(Enum operationKey);
+
+   
 }

@@ -193,19 +193,19 @@ namespace Signum.Entities.Chart
             return new IntervalQueryToken(this.Parent) { Intervals = m.Groups["pattern"].Value.Replace(',', '.') };
         }
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
             return null;
         }
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             string error;
             IntervalDefinition intervals = ParseInterval(Intervals, isDecimal, out error);
             if (intervals == null)
                 throw new InvalidOperationException(error);
 
-            Expression exp = Parent.BuildExpression(expression);
+            Expression exp = Parent.BuildExpression(context);
 
             Type t = Parent.Type.UnNullify();
             Expression sqlExpression = CreateSqlExpression(intervals, exp, t);
@@ -354,72 +354,6 @@ namespace Signum.Entities.Chart
         public override QueryToken Clone()
         {
             return new IntervalQueryToken(Parent.Clone()) { Intervals = Intervals };
-        }
-    }
-
-    [Serializable]
-    public class CountAllToken: QueryToken
-    {
-        public CountAllToken() : base(null) { }
-
-        public override string ToString()
-        {
-            return "All"; 
-        }
-
-        public override string NiceName()
-        {
-            return "All";
-        }
-
-        public override string Format
-        {
-            get { return null; }
-        }
-
-        public override string Unit
-        {
-            get { return null; }
-        }
-
-        public override Type Type
-        {
-            get { return typeof(int); }
-        }
-
-        public override string Key
-        {
-            get { return "All"; }
-        }
-
-        protected override QueryToken[] SubTokensInternal()
-        {
-            return null;
-        }
-
-        public override Expression BuildExpression(Expression expression)
-        {
-            return Expression.Constant(1); 
-        }
-
-        public override PropertyRoute GetPropertyRoute()
-        {
-            return null;
-        }
-
-        public override Implementations Implementations()
-        {
-            return null;
-        }
-
-        public override bool IsAllowed()
-        {
-            return true; 
-        }
-
-        public override QueryToken Clone()
-        {
-            return new CountAllToken(); 
         }
     }
 }

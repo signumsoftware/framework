@@ -24,11 +24,13 @@ namespace Signum.Windows.Operations
     {
         public static OperationManager Manager { get; private set; }
 
+        static Dictionary<Type, List<OperationInfo>> QueryOperationInfoCache = new Dictionary<Type, List<OperationInfo>>();
+
         public static void Start(OperationManager operationManager)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<LogOperationDN>(EntityType.ServerOnly) { View = e => new LogOperation() });
+                Navigator.AddSetting(new EntitySettings<OperationLogDN>(EntityType.ServerOnly) { View = e => new LogOperation() });
 
                 Manager = operationManager;
 
@@ -41,7 +43,9 @@ namespace Signum.Windows.Operations
                     if (type == null)
                         return null;
 
-                    var list = Server.Return((IOperationServer o) => o.GetQueryOperationInfos(type)).Where(oi =>
+                    var infos = QueryOperationInfoCache.GetOrCreate(type, ()=> Server.Return((IOperationServer o) => o.GetQueryOperationInfos(type)));
+
+                    var list = infos.Where(oi =>
                     {
                         ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
                         return set == null || set.IsVisible == null || set.IsVisible(qn, oi);
@@ -111,15 +115,18 @@ namespace Signum.Windows.Operations
 
                     type = supraType; 
                 }
-                return (FrameworkElement)miGenerateButton.GetInvoker(type)(this, oi, ident, entityControl, viewButtons, settings);
+                return miGenerateButton.GetInvoker(type)(this, oi, ident, entityControl, viewButtons, settings);
             }).NotNull().ToList();
 
             return result;
         }
 
-        static GenericInvoker miGenerateButton = GenericInvoker.Create(() => ((OperationManager)null).GenerateButton<IdentifiableEntity>(null, null, null, ViewButtons.Ok, null));
+        delegate Win.FrameworkElement GenerateButtonDelegate(OperationManager manager, OperationInfo operationInfo, IdentifiableEntity entity, FrameworkElement entityControl, ViewButtons viewButtons, OperationSettings os); 
 
-        protected internal virtual Win.FrameworkElement GenerateButton<T>(OperationInfo operationInfo, T entity, Win.FrameworkElement entityControl, ViewButtons viewButtons, EntityOperationSettings<T> os)
+        static GenericInvoker<GenerateButtonDelegate> miGenerateButton = new GenericInvoker<GenerateButtonDelegate>(
+            (ma, oi, e, ec, vb, os) => ma.GenerateButton<TypeDN>(oi, (TypeDN)e, ec,vb, (EntityOperationSettings<TypeDN>)os));
+
+        protected internal virtual Win.FrameworkElement GenerateButton<T>(OperationInfo operationInfo, T entity, FrameworkElement entityControl, ViewButtons viewButtons, EntityOperationSettings<T> os)
             where T:class, IIdentifiable
         {
             EntityOperationEventArgs<T> args = new EntityOperationEventArgs<T>
@@ -273,7 +280,7 @@ namespace Signum.Windows.Operations
             Enum selected = null;
             if (list.Count == 1)
             {
-                selected = dic.Keys.Single();
+                selected = dic.Keys.SingleEx();
             }
             else
             {

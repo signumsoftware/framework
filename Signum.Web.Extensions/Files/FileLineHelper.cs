@@ -38,18 +38,21 @@ namespace Signum.Web.Files
                     .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
                     .ToHtml());
 
-                FilePathDN filePath = value as FilePathDN;
-                if (filePath != null)
+                if (fileLine.PropertyRoute.Type == typeof(FilePathDN))
                 {
-                    if (fileLine.FileType == null)
-                        fileLine.FileType = FileLineHelper.GetFileTypeFromValue(filePath);
-                    if (fileLine.FileType == null)
-                        throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
-
-                    sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
-                        EnumDN.UniqueKey((value != null) ?
-                            filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType) :
-                            fileLine.FileType)));
+                    FilePathDN filePath = value as FilePathDN;
+                    if (filePath != null)
+                    {
+                        sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
+                            EnumDN.UniqueKey(filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
+                    }
+                    else
+                    {
+                        if (fileLine.FileType == null)
+                            throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));                    
+                        
+                        sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), EnumDN.UniqueKey(fileLine.FileType)));
+                    }
                 }
 
                 if (value != null)
@@ -119,10 +122,10 @@ namespace Signum.Web.Files
             return sb.ToHtml();
         }
 
-        public static void FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
             where S : IFile
         {
-            helper.FileLine<T, S>(tc, property, null);
+            return helper.FileLine<T, S>(tc, property, null);
         }
 
         public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<FileLine> settingsModifier)

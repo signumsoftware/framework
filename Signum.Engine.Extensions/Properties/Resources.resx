@@ -120,9 +120,6 @@
   <data name="TheEntity0IsNew" xml:space="preserve">
     <value>The entity {0} is new</value>
   </data>
-  <data name="QueryOf0Connecting1" xml:space="preserve">
-    <value>Query of {0} connecting {1}</value>
-  </data>
   <data name="QueryOf0" xml:space="preserve">
     <value>Query of {0}</value>
   </data>
@@ -134,12 +131,6 @@
   </data>
   <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
     <value>Removes the {0} from the database</value>
-  </data>
-  <data name="ConstructsANew0_f" xml:space="preserve">
-    <value>Constructs a new {0}</value>
-  </data>
-  <data name="From0OfThe1_f" xml:space="preserve">
-    <value>from {0} of the {1}</value>
   </data>
   <data name="NotAuthorizedToSave0" xml:space="preserve">
     <value>Not authorized to Save '{0}'</value>
@@ -178,20 +169,11 @@
   <data name="Should" xml:space="preserve">
     <value>. Should  </value>
   </data>
-  <data name="_0IsA1_f" xml:space="preserve">
-    <value>{0} is a {1}</value>
-  </data>
   <data name="Amount" xml:space="preserve">
     <value>amount</value>
   </data>
   <data name="ExpressedIn" xml:space="preserve">
     <value>expressed in </value>
-  </data>
-  <data name="LastExecution" xml:space="preserve">
-    <value>Last Execution</value>
-  </data>
-  <data name="Executions" xml:space="preserve">
-    <value>Executions</value>
   </data>
   <data name="IncorrectPassword" xml:space="preserve">
     <value>Incorrect password</value>
@@ -202,44 +184,11 @@
   <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
     <value>Impossible to execute {0} from state {1}</value>
   </data>
-  <data name="Operation0IsNotAuthorized" xml:space="preserve">
-    <value>Operation {0} is not Authorized</value>
-  </data>
-  <data name="ConstructsANew0_m" xml:space="preserve">
-    <value>Constructs a new {0}</value>
+  <data name="Operation01IsNotAuthorized" xml:space="preserve">
+    <value>Operation {0} ({1}) is not Authorized</value>
   </data>
   <data name="Date" xml:space="preserve">
     <value>date</value>
-  </data>
-  <data name="From0OfThe1_m" xml:space="preserve">
-    <value>from {0} of the {1}</value>
-  </data>
-  <data name="FromMany0_f" xml:space="preserve">
-    <value>from many {0}</value>
-  </data>
-  <data name="FromMany0_m" xml:space="preserve">
-    <value>from many {0}</value>
-  </data>
-  <data name="_0IsA1_m" xml:space="preserve">
-    <value>{0} is a {1}</value>
-  </data>
-  <data name="OfThe0_f" xml:space="preserve">
-    <value>of the {0}</value>
-  </data>
-  <data name="OfThe0_m" xml:space="preserve">
-    <value>of the {0}</value>
-  </data>
-  <data name="The0_f" xml:space="preserve">
-    <value>the {0}</value>
-  </data>
-  <data name="The0_m" xml:space="preserve">
-    <value>The {0}</value>
-  </data>
-  <data name="Call0Over1OfThe2_f" xml:space="preserve">
-    <value>Executes {0} over {1} of the {2}</value>
-  </data>
-  <data name="Call0Over1OfThe2_m" xml:space="preserve">
-    <value>Executes {0} over {1} of the {2}</value>
   </data>
   <data name="ValueLike0" xml:space="preserve">
     <value>value like {0}</value>
@@ -249,9 +198,6 @@
   </data>
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
     <value>{0} is a collection of elements {1}</value>
-  </data>
-  <data name="EmailIsNotValid" xml:space="preserve">
-    <value>The email is different from the stored email</value>
   </data>
   <data name="ConstructsANew0" xml:space="preserve">
     <value>Constructs a new {0}</value>
@@ -274,20 +220,8 @@
   <data name="Call0Over1OfThe2" xml:space="preserve">
     <value>Call {0} over {1} of the {2}</value>
   </data>
-  <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
-    <value>{0} belongs to another kind of Linq Provider</value>
-  </data>
   <data name="HelpNotLoaded" xml:space="preserve">
     <value>Help not loaded</value>
-  </data>
-  <data name="NoHelpFor0" xml:space="preserve">
-    <value>No help for {0}</value>
-  </data>
-  <data name="NotRegisteredInEmailLogic" xml:space="preserve">
-    <value>{0} not registered in EmailLogic</value>
-  </data>
-  <data name="NotRegistered" xml:space="preserve">
-    <value>{0} not registered</value>
   </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
     <value>ProcessExecution {0} is not running anymore</value>
@@ -330,5 +264,17 @@
   </data>
   <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
     <value>The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter</value>
+  </data>
+  <data name="TheTemplateMustBeActiveToConstructSMSMessages" xml:space="preserve">
+    <value>The template must be Active to construct SMS messages</value>
+  </data>
+  <data name="NotAuthorizedTo01" xml:space="preserve">
+    <value>Not authorized to {0} {1}</value>
+  </data>
+  <data name="YourUsernameIs0" xml:space="preserve">
+    <value>Your username is: {0}</value>
+  </data>
+  <data name="StatusCanNotBeUpdatedForNonSentMessages" xml:space="preserve">
+    <value>Status can not be updated for non sent messages</value>
   </data>
 </root>

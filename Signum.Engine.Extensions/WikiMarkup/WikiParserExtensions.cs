@@ -68,7 +68,7 @@ namespace Signum.Engine.WikiMarkup
                         .Cast<Func<string, string>>()
                         .Select(a => a(text))
                         .NotNull()
-                        .First();
+                        .FirstEx();
                 }
                 catch
                 {
@@ -80,34 +80,34 @@ namespace Signum.Engine.WikiMarkup
         static string ProcessFormat(string content, WikiSettings settings)
         {
             // Replacing both
-                content = Regex.Replace(content,
-                "(?<begin>''''')(?<content>.+?)(?<end>''''')",
-                (settings.Strong && settings.Em) ? "<strong><em>${content}</em></strong>" : "${content}",
-                RegexOptions.Compiled | RegexOptions.Singleline);
+            content = Regex.Replace(content,
+            "(?<begin>''''')(?<content>.+?)(?<end>''''')",
+            (settings.Strong && settings.Em) ? "<strong><em>${content}</em></strong>" : "${content}",
+            RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing bolds
-                content = Regex.Replace(content,
-                "(?<begin>''')(?<content>.+?)(?<end>''')",
-                settings.Strong ? "<strong>${content}</strong>" : "${content}",
-                RegexOptions.Compiled | RegexOptions.Singleline);
+            content = Regex.Replace(content,
+            "(?<begin>''')(?<content>.+?)(?<end>''')",
+            settings.Strong ? "<strong>${content}</strong>" : "${content}",
+            RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing italics
-                content = Regex.Replace(content,
-                "(?<begin>'')(?<content>.+?)(?<end>'')",
-                settings.Em ? "<em>${content}</em>" : "${content}",
-                RegexOptions.Compiled | RegexOptions.Singleline);
+            content = Regex.Replace(content,
+            "(?<begin>'')(?<content>.+?)(?<end>'')",
+            settings.Em ? "<em>${content}</em>" : "${content}",
+            RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing underlined
-                content = Regex.Replace(content,
-                "(?<begin>__)(?<content>.+?)(?<end>__)",
-                settings.Underlined ? "<u>${content}</u>" : "${content}",
-                RegexOptions.Compiled | RegexOptions.Singleline);
+            content = Regex.Replace(content,
+            "(?<begin>__)(?<content>.+?)(?<end>__)",
+            settings.Underlined ? "<u>${content}</u>" : "${content}",
+            RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing strike
             content = Regex.Replace(content,
             "(?<begin>\\-\\-)(?<content>.+?)(?<end>\\-\\-)",
             settings.Strike ? "<s>${content}</s>" : "${content}",
-            RegexOptions.Compiled| RegexOptions.Singleline);
+            RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing lists
             content = Regex.Replace(content,
@@ -135,14 +135,12 @@ namespace Signum.Engine.WikiMarkup
        "li>",
        RegexOptions.Compiled);
 
-            // Assign the replace method to the MatchEvaluator delegate.
-            MatchEvaluator meTitle = new MatchEvaluator(ReplaceTitle);
 
             // Replacing titles
             if (settings.Titles)
                 content = Regex.Replace(content,
                 "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})[\\n]*",
-                meTitle,
+                m => "<h" + m.Groups["begin"].Length + ">" + m.Groups["content"].ToString().Trim() + "</h" + m.Groups["end"].Length + ">",
                 RegexOptions.Compiled);
             else
                 content = Regex.Replace(content,
@@ -154,10 +152,10 @@ namespace Signum.Engine.WikiMarkup
             if (settings.MaxTwoLineBreaks)
             {
                 content = Regex.Replace(content,
-                    "(?<content>\n{3,})","\n\n", 
+                    "(?<content>\n{3,})", "\n\n",
                     RegexOptions.Compiled);
             }
-      
+
             content = Regex.Replace(content,
                 "(?<content>\n)", settings.LineBreaks ? "<br/>" : ". ",
                 RegexOptions.Compiled);
@@ -167,12 +165,5 @@ namespace Signum.Engine.WikiMarkup
                 RegexOptions.Compiled);
             return content;
         }
-
-        public static string ReplaceTitle(Match m)
-        {
-            return "<h" + m.Groups["begin"].Length + ">" + m.Groups["content"].ToString().Trim() + "</h" + m.Groups["end"].Length + ">";
-        }
     }
-
-   
 }

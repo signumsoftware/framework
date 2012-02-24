@@ -72,9 +72,12 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(role, property);
         }
 
-        public static PropertyAllowed GetPropertyAllowed(PropertyRoute property)
+        public static PropertyAllowed GetPropertyAllowed(this PropertyRoute property)
         {
-            return cache.GetAllowed(property);
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+                return PropertyAllowed.Modify;
+
+            return cache.GetAllowed(RoleDN.Current.ToLite(), property);
         }
 
         public static DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()

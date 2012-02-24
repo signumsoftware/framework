@@ -13,22 +13,42 @@ namespace Signum.Web.Profiler
         {
             var action = filterContext.RouteData.Values["controller"] + "." + filterContext.RouteData.Values["action"];
 
-            filterContext.Controller.ViewData["elapsed"] = TimeTracker.Start(action);
+            ViewDataDictionary viewData = filterContext.Controller.ViewData;
 
-            IDisposable profiler = HeavyProfiler.Log(aditionalData: action);
+            viewData.Add("elapsed", TimeTracker.Start(action));
+
+            IDisposable profiler = HeavyProfiler.Log(role: "MvcRequest", aditionalData: filterContext.HttpContext.Request.Url.PathAndQuery);
             if (profiler != null)
-                filterContext.Controller.ViewData["profiler"] = profiler;
+                viewData.Add("profiler", profiler);
         }
 
-        public override void OnActionExecuted(ActionExecutedContext filterContext)
+        public override void OnResultExecuting(ResultExecutingContext filterContext)
         {
-            IDisposable elapsed = (IDisposable)filterContext.Controller.ViewData.TryGetC("elapsed");
-            if (elapsed != null)
-                elapsed.Dispose();
+            if (filterContext.Controller.ViewData.ContainsKey("profiler"))
+            {
+                IDisposable viewProfiler = HeavyProfiler.Log(role: "MvcResult", aditionalData: filterContext.Result.ToString());
+                if (viewProfiler != null)
+                    filterContext.Controller.ViewData.Add("viewProfiler", viewProfiler);
+            }
+        }
 
-            IDisposable profiler = (IDisposable)filterContext.Controller.ViewData.TryGetC("profiler");
-            if (profiler != null)
-                profiler.Dispose();
+        public override void OnResultExecuted(ResultExecutedContext filterContext)
+        {
+            ViewDataDictionary viewData = filterContext.Controller.ViewData;
+
+            Dispose(viewData, "viewProfiler");
+            Dispose(viewData, "profiler");
+            Dispose(viewData, "elapsed");
+        }
+
+        private void Dispose(ViewDataDictionary viewData, string key)
+        {
+            IDisposable elapsed = (IDisposable)viewData.TryGetC(key);
+            if (elapsed != null)
+            {
+                elapsed.Dispose();
+                viewData.Remove(key);
+            }
         }
     }
 }

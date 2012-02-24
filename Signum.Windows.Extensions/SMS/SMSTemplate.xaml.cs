@@ -25,15 +25,8 @@ namespace Signum.Windows.SMS
         public SMSTemplate()
         {
             InitializeComponent();
-            foreach (var ch in LogicalTreeHelper.GetChildren(textMessage))
-            {
-                if (ch is TextBox)
-                {
-                    ((TextBox)ch).TextChanged += new TextChangedEventHandler(SMSMessage_TextChanged);
-                    text = (TextBox)ch;
-                    break;
-                }
-            }
+            text = textMessage.Child<TextBox>();
+            text.TextChanged += new TextChangedEventHandler(SMSMessage_TextChanged);
             BrushConverter bc = new BrushConverter();
             greenBrush = (Brush)bc.ConvertFromString("Green");
             redBrush = (Brush)bc.ConvertFromString("Red");
@@ -44,6 +37,13 @@ namespace Signum.Windows.SMS
                 new GradientStop(Color.FromRgb(255, 204, 204), 1)
             }, new Point(0.5, 1), new Point(0.5, 0));
             normalBackGround = text.Background;
+            VisualCharactersToEnd();
+        }
+
+        public SMSTemplateDN TemplateDC
+        {
+            get { return (SMSTemplateDN)DataContext; }
+            set { RaiseEvent(new ChangeDataContextEventArgs(value)); }
         }
 
         private void SMSMessage_TextChanged(object sender, TextChangedEventArgs e)
@@ -59,7 +59,7 @@ namespace Signum.Windows.SMS
 
         private void VisualCharactersToEnd()
         {
-            int chLeft = SMSCharacters.CharactersToEnd(text.Text);
+            int chLeft = SMSCharacters.RemainingLength(text.Text);
             charactersLeft.Text = chLeft.ToString();
             if (chLeft < 0)
             {
@@ -71,6 +71,53 @@ namespace Signum.Windows.SMS
                 charactersLeft.Foreground = greenBrush;
                 charactersLeft.Background = normalBackGround;
             }
+        }
+
+        private void removeNonSMSChars_Click(object sender, RoutedEventArgs e)
+        {
+            TemplateDC.Message = SMSCharacters.RemoveNoSMSCharacters(TemplateDC.Message);
+            TemplateDC = TemplateDC;
+        }
+
+        private void EntityCombo_EntityChanged(object sender, bool userInteraction, object oldValue, object newValue)
+        {
+            sfLiterals.Items.Clear();
+            if (newValue != null)
+            {
+                var literals = Server.Return((ISmsServer s) => s.GetLiteralsFromDataObjectProvider((TypeDN)newValue));
+                foreach (var l in literals)
+                {
+                    sfLiterals.Items.Add(l);
+                }
+            }
+        }
+
+        private void insertLiteral_Click(object sender, RoutedEventArgs e)
+        {
+            InsertSelectedLiteral();
+        }
+
+        private void sfLiterals_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            InsertSelectedLiteral();
+        }
+
+        private void InsertSelectedLiteral()
+        {
+            if (sfLiterals.SelectedItem == null)
+                MessageBox.Show("", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            else
+            {
+                string literal = (string)sfLiterals.SelectedItem;
+                text.SelectedText = literal;
+                text.SelectionStart = text.SelectionStart + literal.Length;
+                text.SelectionLength = 0;
+            }
+        }
+
+        private IEnumerable<Lite> EntityCombo_LoadData()
+        {
+            return Server.Return((ISmsServer s) => s.GetAssociatedTypesForTemplates());
         }
     }
 }

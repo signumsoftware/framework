@@ -1,5 +1,5 @@
-@using Signum.Engine
-@using Signum.Entities.Reports
+﻿@using Signum.Engine
+@using Signum.Entities.UserQueries
 
 @using (var e = Html.TypeContext<QueryColumnDN>())
 {
@@ -8,7 +8,7 @@
         style.OnlyValue = true;
         @Html.ValueLine(style, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20)
         <div style="float: left">
-            @Html.QueryTokenCombo(e.Value.Token, e)
+            @Html.QueryTokenCombo(e.Value.Token, ViewData[ViewDataKeys.QueryName], e)
         </div>
     }
 } 

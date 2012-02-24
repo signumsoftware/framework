@@ -1,0 +1,10 @@
+﻿@using Signum.Entities.Mailing
+
+@using (var nc = Html.TypeContext<NewsletterDeliveryDN>()) 
+{
+	@Html.ValueLine(nc, n => n.Sent)
+	@Html.ValueLine(nc, n => n.SendDate)
+	@Html.EntityLine(nc, n => n.Recipient)
+	@Html.EntityLine(nc, n => n.Newsletter)
+	@Html.ValueLine(nc, n => n.Exception)
+}

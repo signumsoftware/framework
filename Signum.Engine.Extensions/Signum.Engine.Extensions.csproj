@@ -72,6 +72,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -90,10 +91,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authorization\AuthCache.cs" />
+    <Compile Include="Authorization\SessionLogLogic.cs" />
+    <Compile Include="Authorization\TypeAuthCache.cs" />
+    <Compile Include="Authorization\PasswordExpiresLogic.cs" />
+    <Compile Include="Authorization\ResetPasswordRequestLogic.cs" />
     <Compile Include="Authorization\UserTicketLogic.cs" />
     <Compile Include="Authorization\AuthUtils.cs" />
     <Compile Include="Authorization\AuthLogic.cs" />
-    <Compile Include="Authorization\EntityGroupAuthLogic.cs" />
+    <Compile Include="Authorization\TypeAuthLogic.Conditions.cs" />
     <Compile Include="Authorization\PropertyAuthLogic.cs" />
     <Compile Include="Authorization\OperationAuthLogic.cs" />
     <Compile Include="Authorization\PermissionAuthLogic.cs" />
@@ -101,16 +106,18 @@
     <Compile Include="Authorization\FacadeMethodAuthLogic.cs" />
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
-    <Compile Include="Basics\EntityGroupLogic.cs" />
+    <Compile Include="Basics\TypeConditionLogic.cs" />
     <Compile Include="Basics\EnumLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
+    <Compile Include="Cache\CacheLogic.cs" />
+    <Compile Include="Cache\Completer.cs" />
     <Compile Include="Chart\ChartLogic.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ControlPanel\ControlPanelLogic.cs" />
-    <Compile Include="DeploymentLog\DeploymentLogLogic.cs" />
+    <Compile Include="Deployment\DeploymentLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\QueryHelp.cs" />
@@ -120,18 +127,21 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
+    <Compile Include="Exceptions\ExceptionLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailRenderer.cs" />
+    <Compile Include="Mailing\NewsletterLogic.cs" />
+    <Compile Include="Mailing\NewsletterProcessAlgortihm.cs" />
     <Compile Include="Mailing\SendEmailProcessAlgorithm.cs" />
-    <Compile Include="Operations\Constructor.cs" />
-    <Compile Include="Operations\ConstructorFrom.cs" />
-    <Compile Include="Operations\ConstructorFromMany.cs" />
-    <Compile Include="Operations\Delete.cs" />
-    <Compile Include="Operations\Execute.cs" />
+    <Compile Include="Mailing\SmtpConfigurationLogic.cs" />
+    <Compile Include="Operations\BasicConstruct.cs" />
+    <Compile Include="Operations\BasicConstructFrom.cs" />
+    <Compile Include="Operations\BasicConstructFromMany.cs" />
+    <Compile Include="Operations\BasicDelete.cs" />
+    <Compile Include="Operations\BasicExecute.cs" />
     <Compile Include="Operations\Graph.cs" />
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
-    <Compile Include="Processes\BlockingQueue.cs" />
     <Compile Include="Processes\PackageLogic.cs" />
     <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Profiler\ProfilerLogic.cs" />
@@ -146,11 +156,12 @@
     <Compile Include="Reports\ExcelExtensions.cs" />
     <Compile Include="Reports\PlainExcelGenerator.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
-    <Compile Include="Reports\UserQueryLogic.cs" />
+    <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\CustomTaskLogic.cs" />
     <Compile Include="ServerExtensions.cs" />
     <Compile Include="SMS\SMSLogic.cs" />
+    <Compile Include="SMS\SMSProcessAlgortihms.cs" />
     <Compile Include="SMS\SMSTemplateGraph.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
   </ItemGroup>
@@ -177,7 +188,9 @@
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
     <EmbeddedResource Include="Properties\Resources.de.resx" />
-    <EmbeddedResource Include="Properties\Resources.es.resx" />
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <None Include="Operations\Operations.cd" />
     <EmbeddedResource Include="Reports\plainExcelTemplate.xlsx" />

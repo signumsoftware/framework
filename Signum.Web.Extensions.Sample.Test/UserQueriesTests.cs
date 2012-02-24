@@ -12,6 +12,7 @@ using Signum.Test;
 using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -26,7 +27,7 @@ namespace Signum.Web.Extensions.Sample.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Common.Start(testContext);
+            Common.Start();
         }
 
         [ClassCleanup]
@@ -36,7 +37,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void UserQuery_Create()
+        public void UserQueries001_Create()
         {
             string pathAlbumSearch = FindRoute("Album");
 
@@ -54,7 +55,6 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.LineFindAndSelectElements("value_1_", false, new int[] { 1 });
 
             //add user column
-            selenium.FilterSelectToken(0, "label=Label", true);
             selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "label=Owner", true);
             selenium.AddColumn("Label.Owner");
@@ -97,7 +97,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void UserQuery_Edit()
+        public void UserQueries002_Edit()
         {
             string pathAlbumSearch = FindRoute("Album");
 
@@ -114,7 +114,18 @@ namespace Signum.Web.Extensions.Sample.Test
             //edit it
             selenium.QueryMenuOptionClick(uqMenuId, editId);
             selenium.WaitForPageToLoad(PageLoadTimeout);
+            //remove filter
             selenium.LineRemove("Filters_1_");
+            //add column
+            selenium.LineCreate("Columns_", false, 1);
+            string prefix = "Columns_1_";
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(prefix + "DisplayName"));
+            selenium.Type(prefix + "DisplayName", "Label owner's country");
+            selenium.FilterSelectToken(0, "value=Label", true, prefix);
+            selenium.ExpandTokens(1, prefix);
+            selenium.FilterSelectToken(1, "value=Owner", true, prefix);
+            selenium.ExpandTokens(2, prefix);
+            selenium.FilterSelectToken(2, "value=Country", true, prefix);
 
             //save it
             string saveId = "ebUserQuerySave";
@@ -133,13 +144,15 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsFalse(selenium.IsElementPresent(LinesTestExtensions.EntityLineToStrSelector("value_1_"))); //Filter has been removed
             //Column present
             selenium.TableHasColumn("Label.Owner");
+            //New column present
+            selenium.TableHasColumn("Label.Owner.Country");
             //Sort present
             int yearCol = 6;
             selenium.TableHeaderMarkedAsSorted(yearCol, false, true);
         }
 
         [TestMethod]
-        public void UserQuery_Delete()
+        public void UserQueries003_Delete()
         {
             string pathAlbumSearch = FindRoute("Album");
 

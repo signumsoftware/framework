@@ -29,7 +29,6 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         string PasswordNearExpired();
-
     }
 
     [ServiceContract]
@@ -42,7 +41,13 @@ namespace Signum.Services
         void SetTypesRules(TypeRulePack rules);
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<Type, TypeAllowed> AuthorizedTypes();
+        DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes();
+
+        [OperationContract, NetDataContract]
+        bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed);
+
+        [OperationContract, NetDataContract]
+        byte[] DownloadAuthRules();
     }
 
     [ServiceContract]
@@ -106,21 +111,5 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         DefaultDictionary<Enum, bool> OperationRules();
-    }
-
-    [ServiceContract]
-    public interface IEntityGroupAuthServer
-    {
-        [OperationContract, NetDataContract]
-        EntityGroupRulePack GetEntityGroupAllowedRules(Lite<RoleDN> role);
-
-        [OperationContract, NetDataContract]
-        void SetEntityGroupAllowedRules(EntityGroupRulePack rules);
-
-        [OperationContract, NetDataContract]
-        Dictionary<Type, MinMax<TypeAllowedBasic>> GetEntityGroupTypesAllowed();
-
-        [OperationContract, NetDataContract]
-        bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed);
     }
 }

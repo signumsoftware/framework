@@ -8,12 +8,14 @@ using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Mailing;
+using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable]
     public class EmailMessageDN : Entity
     {
+        [ImplementedBy(typeof(UserDN))]
         Lite<IEmailOwnerDN> recipient;
         [NotNullValidator]
         public Lite<IEmailOwnerDN> Recipient
@@ -21,6 +23,21 @@ namespace Signum.Entities.Mailing
             get { return recipient; }
             set { Set(ref recipient, value, () => Recipient); }
         }
+
+        string bcc;
+        public string Bcc
+        {
+            get { return bcc; }
+            set { Set(ref bcc, value, () => Bcc); }
+        }
+
+        string cc;
+        public string Cc
+        {
+            get { return cc; }
+            set { Set(ref cc, value, () => Cc); }
+        }
+
 
         Lite<EmailTemplateDN> template;
         [NotNullValidator]
@@ -51,9 +68,9 @@ namespace Signum.Entities.Mailing
             set { Set(ref received, value, () => Received); }
         }
 
-        [SqlDbType(Size = 400)]
+        [SqlDbType(Size = int.MaxValue)]
         string subject;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 400)]
+        [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string Subject
         {
             get { return subject; }
@@ -62,16 +79,15 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string body;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string Body
         {
             get { return body; }
             set { Set(ref body, value, () => Body); }
         }
 
-        string exception;
-        [StringLengthValidator(AllowNulls = true, Max = int.MaxValue)]
-        public string Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }
@@ -110,7 +126,6 @@ namespace Signum.Entities.Mailing
         Received
     }
 
-    [ImplementedBy(typeof(UserDN))]
     public interface IEmailOwnerDN : IIdentifiable
     {
         string Email { get; }
@@ -151,13 +166,6 @@ namespace Signum.Entities.Mailing
         {
             get { return numErrors; }
             set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
-        string overrideEmailAddress;
-        public string OverrideEmailAddress
-        {
-            get { return overrideEmailAddress; }
-            set { Set(ref overrideEmailAddress, value, () => OverrideEmailAddress); }
         }
 
         public override string ToString()

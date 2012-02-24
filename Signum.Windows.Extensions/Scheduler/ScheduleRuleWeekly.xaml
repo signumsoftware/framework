@@ -8,7 +8,6 @@
     Padding="2">
     <StackPanel>
         <m:ValueLine m:Common.Route="DayOfTheWeek" />
-        <sws:Hour/>
         <m:ValueLine m:Common.Route="StartingOn"/>
     </StackPanel>
 </UserControl>

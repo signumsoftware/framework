@@ -361,11 +361,11 @@
   <data name="RememberMe" xml:space="preserve">
     <value>Lembrar-me</value>
   </data>
-  <data name="RememberPassword" xml:space="preserve">
-    <value>Lembrar password</value>
+  <data name="ExpiredPasswordMessage" xml:space="preserve">
+    <value>Sua senha expirou. Você deve alterá-la</value>
   </data>
-  <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Escrever o nome de usuário e endereço de E-mail para receber um E-mail com a recuperaração da password</value>
+  <data name="ExpectedUserLogged" xml:space="preserve">
+    <value>Espera-se que um utilizador se conecte</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Restaurar password</value>
@@ -388,8 +388,8 @@
   <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
     <value>O código de confirmação fornecido é inválido</value>
   </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>A password deve ter entre 7 e 15 caracteres, números de 0 a 9 ou letras</value>
+  <data name="EnterTheNewPassword" xml:space="preserve">
+    <value>Digite a nova senha</value>
   </data>
   <data name="ThereAreATotalOf0Errors" xml:space="preserve">
     <value>Há um total de {0} erros</value>
@@ -431,7 +431,7 @@
     <value>Tipo</value>
   </data>
   <data name="User" xml:space="preserve">
-    <value>Usuário</value>
+    <value>Utilizador</value>
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
     <value>O nome de utilizador já existe, escolhe outro</value>
@@ -456,5 +456,20 @@
   </data>
   <data name="YourNewPasswordIs0" xml:space="preserve">
     <value>A nova password é {0}</value>
+  </data>
+  <data name="PasswordsAreDifferent" xml:space="preserve">
+    <value>As senhas são diferentes</value>
+  </data>
+  <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
+    <value>Operações</value>
+  </data>
+  <data name="UserQueries_CreateNew" xml:space="preserve">
+    <value>Criar</value>
+  </data>
+  <data name="UserQueries_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="UserQueries_UserQueries" xml:space="preserve">
+    <value>Consultas do utilizador</value>
   </data>
 </root>

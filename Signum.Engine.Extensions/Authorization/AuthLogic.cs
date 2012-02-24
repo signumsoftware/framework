@@ -26,44 +26,32 @@ namespace Signum.Engine.Authorization
 {
     public static class AuthLogic
     {
-        public static int MinRequiredPasswordLength = 6;
-        public static event Func<UserDN, bool> PasswordExpiresLogic;
-        public static event Func<string> PasswordNearExpiredLogic;
-
-
+        public static event Action<UserDN> UserLogingIn;
+        public static event Func<string> LoginMessage;
 
 
         public static string SystemUserName { get; set; }
-        public static UserDN systemUser;
+        static UserDN systemUser;
         public static UserDN SystemUser
         {
             get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
-            set { systemUser = value; }
         }
 
         public static string AnonymousUserName { get; set; }
-        public static UserDN anonymousUser;
+        static UserDN anonymousUser;
         public static UserDN AnonymousUser
         {
-            get { return anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
-            set { anonymousUser = value; }
+            get { return string.IsNullOrEmpty(AnonymousUserName) ? null : anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
         }
 
-
-        static DirectedGraph<Lite<RoleDN>> _roles;
-        static DirectedGraph<Lite<RoleDN>> Roles
-        {
-            get { return Sync.Initialize(ref _roles, () => Cache()); }
-        }
-
-        public static event Action RolesModified;
+        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null, false)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName, string anonymousUserName, bool defaultPasswordExpiresLogic)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName, string anonymousUserName)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -76,6 +64,8 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_Initializing;
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
+                AuthLogic.StartUserGraph(sb);
+
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
                                        select new
                                        {
@@ -85,15 +75,14 @@ namespace Signum.Engine.Authorization
                                        }).ToDynamic();
 
                 dqm[RoleQueries.ReferedBy] = (from r in Database.Query<RoleDN>()
-                                              from rc in Database.Query<RoleDN>()
-                                              where r.Roles.Contains(rc.ToLite())
+                                              from rc in r.Roles
                                               select new
                                               {
                                                   Entity = r.ToLite(),
                                                   r.Id,
                                                   r.Name,
 
-                                                  Refered = rc.ToLite(),
+                                                  Refered = rc,
                                               }).ToDynamic();
 
                 dqm[typeof(UserDN)] = (from e in Database.Query<UserDN>()
@@ -108,119 +97,42 @@ namespace Signum.Engine.Authorization
                                            e.PasswordSetDate,
                                            Related = e.Related.ToLite(),
                                        }).ToDynamic();
-
-
-                if (defaultPasswordExpiresLogic)
-                {
-                    sb.Include<PasswordValidIntervalDN>();
-
-                    dqm[typeof(PasswordValidIntervalDN)] =
-                        (from e in Database.Query<PasswordValidIntervalDN>()
-                         select new
-                         {
-                             Entity = e.ToLite(),
-                             e.Id,
-                             e.Enabled,
-                             e.Days,
-                             e.DaysWarning
-                         }).ToDynamic();
-
-                    PasswordExpiresLogic += (u =>
-                    {
-                        var ivp = Database.Query<PasswordValidIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
-                        if (ivp == null)
-                            return false;
-
-                        return !(DateTime.Now.AddDays(-(double)ivp.Days) < u.PasswordSetDate);
-                    });
-
-                    PasswordNearExpiredLogic = (() =>
-                    {
-                        using (AuthLogic.Disable())
-                        {
-                            var ivp = Database.Query<PasswordValidIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
-                            if (ivp == null || UserDN.Current.PasswordNeverExpires)
-                                return null;
-
-                            if (DateTime.Now > UserDN.Current.PasswordSetDate.AddDays((double)ivp.Days).AddDays((double)-ivp.DaysWarning))
-                                return Resources.PasswordNearExpired;
-
-                            return null;
-                        }
-                    });
-
-                    UserDN.ValidatePassword = UserDN.ValidatePasswordDefauld;
-
-                }
-
             }
         }
 
-        public static void StartUserOperations(SchemaBuilder sb)
+        private static void StartUserGraph(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                new UserGraph().Register();
-                OperationLogic.Register(new BasicExecute<UserDN>(UserOperation.SetPassword)
+                UserGraph.Register();
+                new BasicExecute<UserDN>(UserOperation.SetPassword)
                 {
                     Lite = true,
                     Execute = (u, args) =>
                     {
-                        string newPassword = args.TryGetArgC<string>(0);
-                        AuthLogic.ChangePassword(u.UserName, u.PasswordHash, Security.EncodePassword(newPassword));
+                        string passwordHash = args.TryGetArgC<string>(0);
+                        u.PasswordHash = passwordHash;
                     }
-                });
-            }
-        }
-
-        public static void StartResetPasswordRequest(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                sb.Include<ResetPasswordRequestDN>();
-
-                dqm[typeof(ResetPasswordRequestDN)] = (from e in Database.Query<ResetPasswordRequestDN>()
-                                                       select new
-                                                       {
-                                                           Entity = e.ToLite(),
-                                                           e.Id,
-                                                           e.RequestDate,
-                                                           e.Code,
-                                                           User = e.User.ToLite(),
-                                                           e.User.Email
-                                                       }).ToDynamic();
-
-                EmailLogic.AssertStarted(sb);
-
-                EmailLogic.RegisterTemplate<ResetPasswordRequestMail>(model =>
-                {
-                    return new EmailContent
-                    {
-                        Subject = Resources.ResetPasswordCode,
-                        Body = EmailRenderer.Replace(EmailRenderer.ReadFromResourceStream(typeof(AuthLogic).Assembly,
-                           "Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
-                               model, null, Resources.ResourceManager)
-                    };
-                });
+                }.Register();
             }
         }
 
         static void Schema_Initializing()
         {
-            _roles = Cache();
+            var r = roles.Value;
 
             if (SystemUserName != null || AnonymousUserName != null)
             {
                 using (new EntityCache())
                 using (AuthLogic.Disable())
                 {
-                    if (SystemUserName != null) SystemUser = Database.Query<UserDN>().Single(a => a.UserName == SystemUserName);
-                    if (AnonymousUserName != null) AnonymousUser = Database.Query<UserDN>().Single(a => a.UserName == AnonymousUserName); //TODO: OLMO hay que proporcianarlo siempre?
+                    if (SystemUserName != null) systemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
+                    if (AnonymousUserName != null) anonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName);
                 }
             }
         }
 
-        static void Schema_Saving(RoleDN role, bool isRoot)
+        static void Schema_Saving(RoleDN role)
         {
             if (!role.IsNew && role.Roles != null && role.Roles.SelfModified)
             {
@@ -244,24 +156,7 @@ namespace Signum.Engine.Authorization
                             problems.ToString("\r\n"));
                 }
             }
-
-            if (role.Modified.Value)
-            {
-                Transaction.RealCommit -= InvalidateCache;
-                Transaction.RealCommit += InvalidateCache;
-            }
         }
-
-
-
-        public static void InvalidateCache()
-        {
-            _roles = null;
-
-            if (RolesModified != null)
-                RolesModified();
-        }
-
 
         static DirectedGraph<Lite<RoleDN>> Cache()
         {
@@ -286,7 +181,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static IDisposable UnsafeUser(string username)
+        public static IDisposable UnsafeUserSession(string username)
         {
             UserDN user;
             using (AuthLogic.Disable())
@@ -296,35 +191,38 @@ namespace Signum.Engine.Authorization
                     throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
             }
 
-            return User(user);
+            return UserSession(user);
+        }
+
+        public static IDisposable UserSession(UserDN user)
+        {
+            var result = ScopeSessionFactory.OverrideSession();
+            UserDN.Current = user;
+            return result;
         }
 
         public static UserDN RetrieveUser(string username)
         {
-            return Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
-        }
-
-        public static IDisposable User(UserDN user)
-        {
-            IPrincipal old = Thread.CurrentPrincipal;
-            Thread.CurrentPrincipal = user;
-            return new Disposable(() =>
-            {
-                Thread.CurrentPrincipal = old;
-            });
+            return Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
         }
 
         public static IEnumerable<Lite<RoleDN>> RolesInOrder()
         {
-            return Roles.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.ToStr));
+            return roles.Value.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.ToStr));
         }
+
+        internal static DirectedGraph<Lite<RoleDN>> RolesGraph()
+        {
+            return roles.Value;
+        }
+
 
         public static int Compare(Lite<RoleDN> role1, Lite<RoleDN> role2)
         {
-            if (Roles.IndirectlyRelatedTo(role1).Contains(role2))
+            if (roles.Value.IndirectlyRelatedTo(role1).Contains(role2))
                 return 1;
 
-            if (Roles.IndirectlyRelatedTo(role2).Contains(role1))
+            if (roles.Value.IndirectlyRelatedTo(role2).Contains(role1))
                 return -1;
 
             return 0;
@@ -332,7 +230,7 @@ namespace Signum.Engine.Authorization
 
         public static IEnumerable<Lite<RoleDN>> RelatedTo(Lite<RoleDN> role)
         {
-            return Roles.RelatedTo(role);
+            return roles.Value.RelatedTo(role);
         }
 
         static bool gloaballyEnabled = true;
@@ -342,26 +240,25 @@ namespace Signum.Engine.Authorization
             set { gloaballyEnabled = value; }
         }
 
-        [ThreadStatic]
-        static bool temporallyDisabled;
+        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");  
 
         public static IDisposable Disable()
         {
-            bool lastValue = temporallyDisabled;
-            temporallyDisabled = true;
-            return new Disposable(() => temporallyDisabled = lastValue);
+            if (tempDisabled.Value) return null;
+            tempDisabled.Value = true;
+            return new Disposable(() => tempDisabled.Value = false);
         }
 
-        public static IDisposable Enabled()
+        public static IDisposable Enable()
         {
-            bool lastValue = temporallyDisabled;
-            temporallyDisabled = false;
-            return new Disposable(() => temporallyDisabled = lastValue);
+            if (!tempDisabled.Value) return null;
+            tempDisabled.Value = false;
+            return new Disposable(() => tempDisabled.Value = true);
         }
 
         public static bool IsEnabled
         {
-            get { return !temporallyDisabled && gloaballyEnabled; }
+            get { return !tempDisabled.Value && gloaballyEnabled; }
         }
 
         public static UserDN Login(string username, string passwordHash)
@@ -370,8 +267,8 @@ namespace Signum.Engine.Authorization
             {
                 UserDN user = RetrieveUser(username, passwordHash);
 
-                if (!user.PasswordNeverExpires && PasswordExpiresLogic != null && PasswordExpiresLogic(user))
-                    throw new ExpiredPasswordApplicationException(Signum.Engine.Extensions.Properties.Resources.ExpiredPassword);
+                if (UserLogingIn != null)
+                    UserLogingIn(user);
 
                 return user;
             }
@@ -406,27 +303,12 @@ namespace Signum.Engine.Authorization
                 user.Save();
         }
 
-        //public static UserDN UserToRememberPassword(string username, string email)
-        //{
-        //    UserDN user = null;
-        //    using (AuthLogic.Disable())
-        //    {
-        //        user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
-        //        if (user == null)
-        //            throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
-
-        //        if (user.Email != email)
-        //            throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.EmailIsNotValid);
-        //    }
-        //    return user;
-        //}
-
         public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] serviceInterfaces)
         {
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
 
-            if (serviceInterfaces != null)
+            if (serviceInterfaces != null && serviceInterfaces.Any())
                 FacadeMethodAuthLogic.Start(sb, serviceInterfaces);
 
             QueryAuthLogic.Start(sb, dqm);
@@ -434,36 +316,14 @@ namespace Signum.Engine.Authorization
             PermissionAuthLogic.Start(sb);
         }
 
-        public static void ResetPasswordRequest(UserDN user, Func<ResetPasswordRequestDN, string> urlGenerator)
+        public static HashSet<Lite<RoleDN>> CurrentRoles()
         {
-            //Remove old previous requests
-            Database.Query<ResetPasswordRequestDN>()
-                .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
-                .UnsafeDelete();
-
-            ResetPasswordRequestDN rpr = new ResetPasswordRequestDN()
-            {
-                Code = MyRandom.Current.NextString(5),
-                User = user,
-                RequestDate = TimeZoneManager.Now,
-            }.Save();
-
-
-            new ResetPasswordRequestMail
-            {
-                To = user,
-                Link = urlGenerator(rpr),
-            }.Send();
-        }
-
-        internal static Lite<RoleDN>[] CurrentRoles()
-        {
-            return Roles.IndirectlyRelatedTo(RoleDN.Current.ToLite()).And(RoleDN.Current.ToLite()).ToArray();
+            return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite(), true);
         }
 
         internal static int Rank(Lite<RoleDN> role)
         {
-            return Roles.IndirectlyRelatedTo(role).Count;
+            return roles.Value.IndirectlyRelatedTo(role).Count;
         }
 
         public static event Func<XElement> ExportToXml;
@@ -477,13 +337,13 @@ namespace Signum.Engine.Authorization
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToStr),
-                            new XAttribute("Contains", Roles.RelatedTo(r).ToString(","))))),
+                            new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
                      ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
         {
-            var rolesDic = Roles.ToDictionary(a => a.ToStr);
+            var rolesDic = roles.Value.ToDictionary(a => a.ToStr);
             var rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
 
             var xmlOnly = rolesXml.Keys.Except(rolesDic.Keys).ToList();
@@ -495,7 +355,7 @@ namespace Signum.Engine.Authorization
                 var r = rolesDic[kvp.Key];
 
                 EnumerableExtensions.JoinStrict(
-                    Roles.RelatedTo(r),
+                    roles.Value.RelatedTo(r),
                     kvp.Value.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                     sr => sr.ToStr,
                     s => s,
@@ -514,10 +374,13 @@ namespace Signum.Engine.Authorization
             if (result == null && dbOnlyWarnings == null)
                 return null;
 
+            var declareParent = result.Leaves().Any(l => l.Sql.StartsWith("SET @idParent")) ? new SqlPreCommandSimple("DECLARE @idParent INT") : null;
+
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
                 new SqlPreCommandSimple("use {0}".Formato(ConnectionScope.Current.DatabaseName())),
                 dbOnlyWarnings,
+                declareParent,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
         }
@@ -555,18 +418,17 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static string OnPasswordNearExpiredLogic()
+        public static string OnLoginMessage()
         {
-            if (AuthLogic.PasswordNearExpiredLogic != null)
-                return AuthLogic.PasswordNearExpiredLogic();
+            if (AuthLogic.LoginMessage != null)
+                return AuthLogic.LoginMessage();
 
             return null;
         }
 
-    }
-
-    public class ResetPasswordRequestMail : EmailModel<UserDN>
-    {
-        public string Link;
+        public static bool IsLogged()
+        {
+            return UserDN.Current != null && !UserDN.Current.Is(AnonymousUser);
+        }
     }
 }

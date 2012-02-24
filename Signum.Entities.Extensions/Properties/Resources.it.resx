@@ -129,14 +129,14 @@
   <data name="CalendarDN_Name" xml:space="preserve">
     <value>Nome</value>
   </data>
-  <data name="CompositeReportDN" xml:space="preserve">
-    <value>Rapporto composito</value>
+  <data name="ClientCertificationFileDN_CertFileType" xml:space="preserve">
+    <value>Tipo di file del certificato</value>
   </data>
-  <data name="CompositeReportDN_ExcelReports" xml:space="preserve">
-    <value>Relazioni</value>
+  <data name="ClientCertificationFileDN" xml:space="preserve">
+    <value>File di certificazione del cliente</value>
   </data>
-  <data name="CompositeReportDN_Name" xml:space="preserve">
-    <value>Nome</value>
+  <data name="CertFileType_SignedFile" xml:space="preserve">
+    <value>File firmato</value>
   </data>
   <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
     <value>La parte {0} è nella colonna {1} ma il pannello ha solo {2} colonne</value>
@@ -888,8 +888,8 @@
   <data name="UserDN_AnulationDate" xml:space="preserve">
     <value>Data di Anulation</value>
   </data>
-  <data name="UserOperation_NewPassword" xml:space="preserve">
-    <value>Nuova password</value>
+  <data name="CertFileType_CertFile" xml:space="preserve">
+    <value>File certificato</value>
   </data>
   <data name="UserQueryDN_Query" xml:space="preserve">
     <value>Query</value>
@@ -1079,5 +1079,188 @@
   </data>
   <data name="EmailMessageDN_CreationTime" xml:space="preserve">
     <value>Data di creazione</value>
+  </data>
+  <data name="ClientCertificationFileDN_FullFilePath" xml:space="preserve">
+    <value>Percorso completo del file</value>
+  </data>
+  <data name="ClientCertificationFileDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="EndDateMustBeHigherThanStartDate" xml:space="preserve">
+    <value>La data di scadenza deve essere maggiore della data di inizio</value>
+  </data>
+  <data name="SMSTemplateDN_Active" xml:space="preserve">
+    <value>Attivo</value>
+  </data>
+  <data name="SMSMessageDN_MessageID" xml:space="preserve">
+    <value>ID messaggio</value>
+  </data>
+  <data name="PasswordExpiresIntervalDN_Enabled" xml:space="preserve">
+    <value>Attivato</value>
+  </data>
+  <data name="PasswordExpiresIntervalDN_DaysWarning" xml:space="preserve">
+    <value>Giorni di preavviso</value>
+  </data>
+  <data name="SendState_Delivered" xml:space="preserve">
+    <value>Consegnato</value>
+  </data>
+  <data name="SendState_Failed" xml:space="preserve">
+    <value>Errore</value>
+  </data>
+  <data name="SendState_None" xml:space="preserve">
+    <value>Nessuno</value>
+  </data>
+  <data name="SendState_Queued" xml:space="preserve">
+    <value>In coda</value>
+  </data>
+  <data name="SendState_Sent" xml:space="preserve">
+    <value>Inviato</value>
+  </data>
+  <data name="SMSMessageDN" xml:space="preserve">
+    <value>Messaggio SMS</value>
+  </data>
+  <data name="SMSMessageDN_DestinationNumber" xml:space="preserve">
+    <value>Numero di destinazione</value>
+  </data>
+  <data name="SMSMessageDN_From" xml:space="preserve">
+    <value>Da</value>
+  </data>
+  <data name="SMSMessageDN_Message" xml:space="preserve">
+    <value>Messaggio</value>
+  </data>
+  <data name="SMSMessageDN_SendDate" xml:space="preserve">
+    <value>Data di invio</value>
+  </data>
+  <data name="SMSMessageDN_SendState" xml:space="preserve">
+    <value>Stato di invio</value>
+  </data>
+  <data name="SMSMessageDN_SourceNumber" xml:space="preserve">
+    <value>Numero di origine</value>
+  </data>
+  <data name="SMSMessageDN_State" xml:space="preserve">
+    <value>Stato</value>
+  </data>
+  <data name="SMSMessageDN_Template" xml:space="preserve">
+    <value>Modello</value>
+  </data>
+  <data name="SMSMessageOperations_Create" xml:space="preserve">
+    <value>Creare</value>
+  </data>
+  <data name="SMSMessageOperations_Send" xml:space="preserve">
+    <value>Invia</value>
+  </data>
+  <data name="SMSMessageOperations_UpdateStatus" xml:space="preserve">
+    <value>Aggiornare lo stato</value>
+  </data>
+  <data name="SMSMessageState_Created" xml:space="preserve">
+    <value>Creato</value>
+  </data>
+  <data name="SMSMessageState_Sent" xml:space="preserve">
+    <value>Inviato</value>
+  </data>
+  <data name="SMSTemplateDN" xml:space="preserve">
+    <value>Modello di SMS</value>
+  </data>
+  <data name="SMSTemplateDN_EndDate" xml:space="preserve">
+    <value>Data di scadenza</value>
+  </data>
+  <data name="SMSTemplateDN_From" xml:space="preserve">
+    <value>Da</value>
+  </data>
+  <data name="SMSTemplateDN_Message" xml:space="preserve">
+    <value>Messaggio</value>
+  </data>
+  <data name="SMSTemplateDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="SMSTemplateDN_StartDate" xml:space="preserve">
+    <value>Data di inizio</value>
+  </data>
+  <data name="SMSTemplateDN_State" xml:space="preserve">
+    <value>Stato</value>
+  </data>
+  <data name="SMSTemplateOperations_Create" xml:space="preserve">
+    <value>Creare</value>
+  </data>
+  <data name="SMSTemplateOperations_Disable" xml:space="preserve">
+    <value>Disattivare</value>
+  </data>
+  <data name="SMSTemplateOperations_Enable" xml:space="preserve">
+    <value>Attivare</value>
+  </data>
+  <data name="SMSTemplateOperations_Modify" xml:space="preserve">
+    <value>Modificare</value>
+  </data>
+  <data name="PasswordExpiresIntervalDN_Days" xml:space="preserve">
+    <value>Giorni</value>
+  </data>
+  <data name="PasswordExpiresIntervalDN" xml:space="preserve">
+    <value>Intervallo di scadenza password</value>
+  </data>
+  <data name="SMTPConfigurationDN" xml:space="preserve">
+    <value>Configurazione SMTP</value>
+  </data>
+  <data name="SMTPConfigurationDN_ClientCertificationFiles" xml:space="preserve">
+    <value>File di certificazione del cliente</value>
+  </data>
+  <data name="SMTPConfigurationDN_EnableSSL" xml:space="preserve">
+    <value>Attivare SSL</value>
+  </data>
+  <data name="SMTPConfigurationDN_Host" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="SMTPConfigurationDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="SMTPConfigurationDN_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="SMTPConfigurationDN_Port" xml:space="preserve">
+    <value>Porta</value>
+  </data>
+  <data name="SMTPConfigurationDN_UseDefaultCredentials" xml:space="preserve">
+    <value>Utilizzare credenziali predefinite</value>
+  </data>
+  <data name="SMTPConfigurationDN_Username" xml:space="preserve">
+    <value>Nome utente</value>
+  </data>
+  <data name="SMTPConfigurationQueries_NoCredentialsData" xml:space="preserve">
+    <value>Nessun dato di credenziali</value>
+  </data>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>La password deve essere compresa tra 7 e 15 caratteri, ognuno dei quali è un numero da 0 a 9 o una lettera</value>
+  </data>
+  <data name="TypeAllowedBasic" xml:space="preserve">
+    <value>Tipo consentito base</value>
+  </data>
+  <data name="TypeAllowedBasic_Create" xml:space="preserve">
+    <value>Creare</value>
+  </data>
+  <data name="TypeAllowedBasic_Modify" xml:space="preserve">
+    <value>Modificare</value>
+  </data>
+  <data name="TypeAllowedBasic_None" xml:space="preserve">
+    <value>Nessuno</value>
+  </data>
+  <data name="TypeAllowedBasic_Read" xml:space="preserve">
+    <value>Lettura</value>
+  </data>
+  <data name="UserDN_PasswordNeverExpires" xml:space="preserve">
+    <value>Nessuna scadenza password</value>
+  </data>
+  <data name="UserDN_PasswordSetDate" xml:space="preserve">
+    <value>Impostare la data della password</value>
+  </data>
+  <data name="UserOperation_SetPassword" xml:space="preserve">
+    <value>Impostare la password</value>
+  </data>
+  <data name="UserState_New" xml:space="preserve">
+    <value>Nuovo</value>
+  </data>
+  <data name="SMSTemplateState_Created" xml:space="preserve">
+    <value>Creato</value>
+  </data>
+  <data name="SMSTemplateState_Modified" xml:space="preserve">
+    <value>Modificato</value>
   </data>
 </root>

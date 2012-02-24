@@ -54,7 +54,7 @@ namespace Signum.Engine.Authorization
 
         static bool dqm_AllowQuery(object queryName)
         {
-            return cache.GetAllowed(queryName);
+            return GetQueryAllowed(queryName);
         }
 
         public static DefaultDictionary<object, bool> QueryRules()
@@ -78,7 +78,10 @@ namespace Signum.Engine.Authorization
 
         public static bool GetQueryAllowed(object queryName)
         {
-            return cache.GetAllowed(queryName);
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+                return true;
+
+            return cache.GetAllowed(RoleDN.Current.ToLite(), queryName);
         }
 
         public static bool GetQueryAllowed(Lite<RoleDN> role, object queryName)

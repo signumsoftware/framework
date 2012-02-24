@@ -91,11 +91,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="AuthAdmin\Views\EntityGroups.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EntityGroups.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="AuthAdmin\Views\FacadeMethods.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -143,6 +138,7 @@
     </Compile>
     <Compile Include="Auth\AuthClient.cs" />
     <Compile Include="Auth\Models\SetPasswordModel.cs" />
+    <Compile Include="Auth\SessionLogClient.cs" />
     <Compile Include="Auth\UserMapping.cs" />
     <Compile Include="Auth\Controllers\AuthController.cs" />
     <Compile Include="Auth\Views\ChangePassword.cs">
@@ -211,10 +207,33 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DateSpan.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Basic\Views\HourMinute.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HourMinute.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Basic\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Cache\Controllers\CacheController.cs" />
+    <Compile Include="Cache\CacheClient.cs" />
+    <Compile Include="Cache\Views\Statistics1.cs">
+      <DependentUpon>Statistics.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Cache\Views\_ViewStart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendar\CalendarClient.cs" />
+    <Compile Include="Calendar\Views\Calendar.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Calendar.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Captcha\CaptchaClient.cs" />
     <Compile Include="Captcha\Controllers\CaptchaController.cs" />
@@ -236,42 +255,170 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Chart\ChartClient.cs" />
+    <Compile Include="Chart\Controllers\ChartController.cs" />
+    <Compile Include="Chart\Views\ChartBuilder.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartBuilder.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartControl1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartControl.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartResults.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartResults.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartToken1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartToken.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\UserChartOrder.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChartOrder.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\UserChart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\UserChartFilter1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChartFilter.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="ControllerFilters\GZipFilter.cs" />
+    <Compile Include="ControlPanel\Views\Admin\PanelParts1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PanelParts.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\Admin\SearchControlPart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SearchControlPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\Admin\UserChartPart1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChartPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\CountSearchControlPart1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CountSearchControlPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\LinkListPart1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LinkListPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\PanelPart1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PanelPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\PanelParts.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PanelParts.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\SearchControlPart2.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SearchControlPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\UserChartPart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChartPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Deployment\DeploymentClient.cs" />
+    <Compile Include="Deployment\Views\DeploymentLog.cs">
+      <DependentUpon>DeploymentLog.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Deployment\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Exception\ExceptionClient.cs" />
+    <Compile Include="Exception\Views\ExceptionLog1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ExceptionLog.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Exception\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Mailing\Views\Newsletter.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Newsletter.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\NewsletterDelivery1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NewsletterDelivery.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\SMTPConfiguration.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\ProcessPanel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessPanel.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\ProcessPanelTable2.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessPanelTable.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Profiler\TimeTracker.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
-    <Compile Include="ControlPanel\PanelPartRenderer.cs" />
     <Compile Include="ControlPanel\Views\ControlPanel.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ControlPanel.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\ControlPanelAdmin.cs">
+    <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ControlPanelAdmin.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\CountSearchControlPart.cs">
+    <Compile Include="ControlPanel\Views\Admin\CountSearchControlPart.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CountSearchControlPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\CountUserQueryElement.cs">
+    <Compile Include="ControlPanel\Views\Admin\CountUserQueryElement.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CountUserQueryElement.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\LinkElement.cs">
+    <Compile Include="ControlPanel\Views\Admin\LinkElement.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>LinkElement.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\LinkListPart.cs">
+    <Compile Include="ControlPanel\Views\Admin\LinkListPart.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>LinkListPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\PanelPart.cs">
+    <Compile Include="ControlPanel\Views\Admin\PanelPart.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PanelPart.cshtml</DependentUpon>
@@ -388,6 +535,21 @@
     </Compile>
     <Compile Include="Profiler\ProfilerClient.cs" />
     <Compile Include="Profiler\Controllers\ProfilerController.cs" />
+    <Compile Include="Profiler\Views\StatisticsTable1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StatisticsTable.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\ProfilerButtons.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProfilerButtons.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\Statistics1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Statistics.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Profiler\Views\HeavyDetails.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -397,11 +559,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>HeavyList.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Profiler\Views\ProfilerTable.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ProfilerTable.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Profiler\Views\Times.cs">
       <AutoGen>True</AutoGen>
@@ -429,12 +586,56 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Scheduler\CustomTaskClient.cs" />
+    <Compile Include="Scheduler\Views\CustomTask1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CustomTask.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\ScheduleRuleHourly1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScheduleRuleHourly.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\ScheduleRuleMinutely1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScheduleRuleMinutely.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Scheduler\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="UserQueries\Controller\QueriesController.cs" />
+    <Compile Include="SMS\Controllers\SMSController.cs" />
+    <Compile Include="SMS\Models\MultipleSMSModel.cs" />
+    <Compile Include="SMS\SMSClient.cs" />
+    <Compile Include="SMS\Views\MultipleSMS.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MultipleSMS.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\Views\SMSMessage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSMessage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\Views\SMSSendPackage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSSendPackage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\Views\SMSTemplate1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSTemplate.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\Views\SMSUpdatePackage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
     <Compile Include="UserQueries\UserQueriesHelper.cs" />
     <Compile Include="UserQueries\Views\QueryColumn.cs">
@@ -559,8 +760,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AuthAdmin\Content\authAdmin.css" />
-    <Content Include="AuthAdmin\Images\class.png" />
+    <Content Include="AuthAdmin\Content\SF_AuthAdmin.css" />
     <Content Include="AuthAdmin\Images\namespace.png" />
     <Content Include="AuthAdmin\Images\operation.png" />
     <Content Include="AuthAdmin\Images\property.png" />
@@ -571,15 +771,11 @@
     <Content Include="AuthAdmin\Images\radioYellow.png" />
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="AuthAdmin\Images\treeView.png" />
-    <Content Include="AuthAdmin\Scripts\authAdmin.js" />
+    <Content Include="AuthAdmin\Scripts\SF_AuthAdmin.js" />
     <Content Include="AuthAdmin\Views\PasswordValidInterval.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.cs</LastGenOutput>
     </Content>
-    <None Include="AuthAdmin\Views\EntityGroups.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>EntityGroups.cs</LastGenOutput>
-    </None>
     <None Include="AuthAdmin\Views\FacadeMethods.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>FacadeMethods.cs</LastGenOutput>
@@ -624,10 +820,19 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </None>
+    <Content Include="Cache\Scripts\SF_Cache.js" />
+    <Content Include="Calendar\Content\calendar.css" />
+    <Content Include="Calendar\Scripts\calendar.js" />
+    <Content Include="Chart\Content\SF_Chart.css" />
+    <Content Include="Chart\Images\chartType.png" />
+    <Content Include="Chart\Scripts\SF_Chart.js" />
+    <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
+    <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
     <Content Include="ControlPanel\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Files\Content\SF_Files.css" />
     <Content Include="Files\Images\loading.gif" />
     <Content Include="Files\Scripts\SF_Files.js" />
     <Content Include="Help\Scripts\help.js" />
@@ -635,23 +840,160 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Mailing\Content\Mail.css" />
+    <Content Include="Mailing\Scripts\SF_Mail.js" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
     <Content Include="Operations\Scripts\SF_Operations.js" />
+    <Content Include="Processes\Scripts\SF_Process.js" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <None Include="Basic\Views\HourMinute.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>HourMinute.cs</LastGenOutput>
+    </None>
     <None Include="Basic\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </None>
+    <Content Include="Calendar\Views\Calendar.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Calendar.cs</LastGenOutput>
+    </Content>
+    <Content Include="Cache\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Cache\Views\Statistics.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Statistics1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Cache\Views\Web.config" />
     <None Include="Captcha\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </None>
+    <Content Include="ControlPanel\Views\PanelPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelPart1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\SearchControlPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SearchControlPart2.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\CountSearchControlPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>CountSearchControlPart1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\LinkListPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>LinkListPart1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Profiler\Content\SF_Profiler.css" />
+    <Content Include="Profiler\Scripts\SF_Profiler.js" />
+    <Content Include="Profiler\Views\Statistics.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Statistics1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\PanelParts.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelParts1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\SearchControlPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SearchControlPart.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\PanelParts.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelParts.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartControl.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartControl1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartBuilder.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartBuilder.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartToken.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartToken1.cs</LastGenOutput>
+    </Content>
+    <None Include="Chart\Images\chartType.psd" />
+    <Content Include="Chart\Views\ChartResults.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartResults.cs</LastGenOutput>
+    </Content>
+    <Content Include="Profiler\Views\ProfilerButtons.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProfilerButtons.cs</LastGenOutput>
+    </Content>
+    <Content Include="Profiler\Views\StatisticsTable.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>StatisticsTable1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\SMTPConfiguration.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMTPConfiguration.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\Newsletter.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Newsletter.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\NewsletterDelivery.cshtml">
+      <LastGenOutput>NewsletterDelivery1.cs</LastGenOutput>
+      <Generator>MvcRazorClassGenerator</Generator>
+    </Content>
+    <Content Include="Chart\Views\UserChart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChart.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\UserChartPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChartPart1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\UserChartPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChartPart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Exception\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Exception\Views\Web.config" />
+    <Content Include="Exception\Views\ExceptionLog.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ExceptionLog1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\UserChartFilter.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChartFilter1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\UserChartOrder.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChartOrder.cs</LastGenOutput>
+    </Content>
+    <Content Include="Processes\Views\ProcessPanel.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProcessPanel.cs</LastGenOutput>
+    </Content>
+    <Content Include="Processes\Views\ProcessPanelTable.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProcessPanelTable2.cs</LastGenOutput>
+    </Content>
+    <Content Include="Deployment\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Deployment\Views\DeploymentLog.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DeploymentLog.cs</LastGenOutput>
+    </Content>
+    <Content Include="Deployment\Views\Web.config" />
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>
@@ -668,10 +1010,6 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>HeavyList.cs</LastGenOutput>
     </None>
-    <None Include="Profiler\Views\ProfilerTable.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ProfilerTable.cs</LastGenOutput>
-    </None>
     <Content Include="Profiler\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
@@ -684,6 +1022,18 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Calendar.cs</LastGenOutput>
     </None>
+    <Content Include="Scheduler\Views\ScheduleRuleMinutely.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ScheduleRuleMinutely1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Scheduler\Views\ScheduleRuleHourly.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ScheduleRuleHourly1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Scheduler\Views\CustomTask.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>CustomTask1.cs</LastGenOutput>
+    </Content>
     <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ScheduleRuleDaily.cs</LastGenOutput>
@@ -708,6 +1058,8 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Holiday.cs</LastGenOutput>
     </None>
+    <Content Include="SMS\Content\SMS.css" />
+    <Content Include="SMS\Scripts\SF_SMS.js" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Captcha\Views\Web.config" />
@@ -793,27 +1145,27 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ControlPanel.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\ControlPanelAdmin.cshtml">
+    <None Include="ControlPanel\Views\Admin\ControlPanelAdmin.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ControlPanelAdmin.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\LinkElement.cshtml">
+    <None Include="ControlPanel\Views\Admin\LinkElement.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>LinkElement.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\LinkListPart.cshtml">
+    <None Include="ControlPanel\Views\Admin\LinkListPart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>LinkListPart.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\CountUserQueryElement.cshtml">
+    <None Include="ControlPanel\Views\Admin\CountUserQueryElement.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>CountUserQueryElement.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\CountSearchControlPart.cshtml">
+    <None Include="ControlPanel\Views\Admin\CountSearchControlPart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>CountSearchControlPart.cs</LastGenOutput>
     </None>
-    <None Include="ControlPanel\Views\PanelPart.cshtml">
+    <None Include="ControlPanel\Views\Admin\PanelPart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PanelPart.cs</LastGenOutput>
     </None>
@@ -881,6 +1233,26 @@
     <Content Include="Scheduler\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSMessage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSMessage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSTemplate.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSTemplate1.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSUpdatePackage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSUpdatePackage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSSendPackage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSSendPackage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\MultipleSMS.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>MultipleSMS.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

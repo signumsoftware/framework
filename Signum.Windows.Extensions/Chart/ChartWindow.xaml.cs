@@ -20,6 +20,8 @@ using Signum.Windows.DynamicQuery;
 using Signum.Utilities.DataStructures;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 
 namespace Signum.Windows.Chart
 {
@@ -36,8 +38,17 @@ namespace Signum.Windows.Chart
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+        public static readonly DependencyProperty OrderOptionsProperty =
+         DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(ChartWindow), new UIPropertyMetadata(null));
+        public ObservableCollection<OrderOption> OrderOptions
+        {
+            get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
+            set { SetValue(OrderOptionsProperty, value); }
+        }
+
         public ResultTable resultTable;
         public QueryDescription Description;
+        public QuerySettings Settings { get; private set; }
         public Type EntityType;
 
         ChartRendererBase chartRenderer; 
@@ -46,7 +57,6 @@ namespace Signum.Windows.Chart
         {
             get { return (ChartRequest)DataContext; }
         }
-       
 
         public ChartWindow()
         {
@@ -64,16 +74,38 @@ namespace Signum.Windows.Chart
         void ChartBuilder_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.OldValue != null)
-                ((ChartRequest)e.NewValue).ChartRequestChanged -= ReDrawChart;
+                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged -= Request_ChartRequestChanged;
 
             if (e.NewValue != null)
-                ((ChartRequest)e.NewValue).ChartRequestChanged += ReDrawChart;
+                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged += Request_ChartRequestChanged;
+
+            qtbFilters.UpdateTokenList();
         }
 
         void ChartWindow_Loaded(object sender, RoutedEventArgs e)
         {
             filterBuilder.Filters = FilterOptions = new FreezableCollection<FilterOption>();
+            OrderOptions = new ObservableCollection<OrderOption>();
 
+            UpdateFiltersOrdersUserInterface();
+
+            ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
+            Request.Chart.ChartRequestChanged += Request_ChartRequestChanged;
+
+            chartBuilder.Description = Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+            Settings = Navigator.GetQuerySettings(Request.QueryName);
+            var entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
+            EntityType = Reflector.ExtractLite(entityColumn.Type);
+
+            qtbFilters.Token = null;
+            qtbFilters.SubTokensEvent += new Func<QueryToken, List<QueryToken>>(qtbFilters_SubTokensEvent);
+
+            SetTitle(); 
+        }
+
+        internal void UpdateFiltersOrdersUserInterface()
+        {
+            FilterOptions.Clear();
             if (Request.Filters != null)
                 FilterOptions.AddRange(Request.Filters.Select(f => new FilterOption
                 {
@@ -82,14 +114,24 @@ namespace Signum.Windows.Chart
                     Value = f.Value
                 }));
 
-            Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
-            var entityColumn = Description.Columns.SingleOrDefault(a => a.IsEntity);
-            EntityType = Reflector.ExtractLite(entityColumn.Type);
+            OrderOptions.Clear();
+            if (Request.Orders != null)
+                OrderOptions.AddRange(Request.Orders.Select(o => new OrderOption
+                {
+                    Token = o.Token,
+                    OrderType = o.OrderType,
+                }));
+        }
 
-            qtbFilters.Token = null;
-            qtbFilters.SubTokensEvent += new Func<QueryToken, QueryToken[]>(qtbFilters_SubTokensEvent);
+        void Request_ChartRequestChanged()
+        {
+            UpdateMultiplyMessage();
+            ReDrawChart(); 
+        }
 
-            SetTitle(); 
+        void Filters_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateMultiplyMessage();
         }
 
         void SetTitle()
@@ -106,16 +148,27 @@ namespace Signum.Windows.Chart
             tbQueryName.Text = niceQueryName;
         }
 
-        QueryToken[] qtbFilters_SubTokensEvent(QueryToken arg)
+        public void UpdateMultiplyMessage()
         {
-            return QueryUtils.SubTokens(arg, Description.Columns);
+            string message = CollectionElementToken.MultipliedMessage(Request.Multiplications, EntityType);
+
+            tbMultiplications.Text = message;
+            brMultiplications.Visibility = message.HasText() ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        List<QueryToken> qtbFilters_SubTokensEvent(QueryToken token)
+        {
+            var cr = (ChartRequest)DataContext;
+            if (cr == null || Description == null)
+                return new List<QueryToken>();
+
+            return cr.Chart.SubTokensFilters(token, Description.Columns);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
         {
             filterBuilder.AddFilter(qtbFilters.Token);
         }
-
 
         private void Border_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -129,33 +182,33 @@ namespace Signum.Windows.Chart
 
         public void GenerateChart()
         { 
-            UpdateFilters();
+            UpdateFiltersAndOrdersRequests();
+
             var request = Request;
-
-
 
             if (HasErrors())
                 return;
 
             execute.IsEnabled = false;
-            Async.Do(this.FindCurrentWindow(),
+            Async.Do(
                 () => resultTable = Server.Return((IChartServer cs) => cs.ExecuteChart(request)),
                 () =>
                 {
-                    request.NeedNewQuery = false;
+                    request.Chart.NeedNewQuery = false;
                     ReDrawChart();
                 },
                 () => execute.IsEnabled = true);
         }
 
-        private void UpdateFilters()
+        private void UpdateFiltersAndOrdersRequests()
         {
             Request.Filters = filterBuilder.Filters.Select(f => f.ToFilter()).ToList();
+            Request.Orders = OrderOptions.Select(o => o.ToOrder()).ToList();
         }
 
         private void ReDrawChart()
         {
-            if (!Request.NeedNewQuery)
+            if (!Request.Chart.NeedNewQuery)
             {
                 if (resultTable != null)
                     SetResults();
@@ -166,7 +219,7 @@ namespace Signum.Windows.Chart
         {
             GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(Request));
 
-            string errors = Request.IdentifiableIntegrityCheck();
+            string errors = Request.FullIntegrityCheck();
 
             if (string.IsNullOrEmpty(errors))
                 return false;
@@ -180,22 +233,18 @@ namespace Signum.Windows.Chart
 
         private void SetResults()
         {
-            gvResults.Columns.Clear();
-            foreach (var t in resultTable.Columns.ZipStrict(Request.ChartTokens()))
-            {
-                AddListViewColumn(t.Item1, t.Item2);
-            }
+            FillGridView();
 
-            if (Request.GroupResults)
+            if (Request.Chart.GroupResults)
             {
                 //so the values don't get affected till next SetResults
                 var filters = Request.Filters.Select(f => new FilterOption { Path = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
-                var charTokens = Request.ChartTokens().Select(t => new { t.Token, t.Aggregate }).ToArray();
+                var keyColunns = Request.ChartTokens()
+                    .Zip(resultTable.Columns, (t, c) => new { t.Token, Column = c })
+                    .Where(a => !(a.Token is AggregateToken)).ToArray();
 
                 getFilters =
-                    rr => filters.Concat(charTokens.Zip(resultTable.Columns)
-                    .Where(t => t.Item1.Aggregate == null)
-                    .SelectMany(t => GetTokenFilters(t.Item1.Token, rr[t.Item2]))).ToList();
+                    rr => keyColunns.SelectMany(t => GetTokenFilters(t.Token, rr[t.Column])).ToList();
             }
             else getFilters = null;
 
@@ -203,7 +252,7 @@ namespace Signum.Windows.Chart
             if (resultTable.Rows.Length > 0)
             {
                 lvResult.SelectedIndex = 0;
-                lvResult.ScrollIntoView(resultTable.Rows.First());
+                lvResult.ScrollIntoView(resultTable.Rows.FirstEx());
             }
 
             lvResult.Background = Brushes.White;
@@ -217,9 +266,9 @@ namespace Signum.Windows.Chart
             }
             catch (ChartNullException ex)
             {
-                ChartRequest cr = (ChartRequest)DataContext;
+                ChartRequest cr = Request;
 
-                ChartTokenDN ct = cr.GetToken(ex.ChartTokenName);
+                ChartTokenDN ct = cr.Chart.GetToken(ex.ChartTokenName);
 
                 string message = "There are null values in {0} ({1}). \r\n Filter values?".Formato(ct.Token.ToString(), ct.PropertyLabel);
 
@@ -239,7 +288,7 @@ namespace Signum.Windows.Chart
         {
             if (queryToken is IntervalQueryToken)
             {
-                var filters = (IEnumerable<FilterOption>)miGetIntervalFilters.GetInvoker(queryToken.Type.GetGenericArguments())(queryToken.Parent, p);
+                var filters = miGetIntervalFilters.GetInvoker(queryToken.Type.GetGenericArguments())(queryToken.Parent, p);
 
                 return filters.ToArray();
             }
@@ -247,7 +296,8 @@ namespace Signum.Windows.Chart
                 return new[] { new FilterOption(queryToken.FullKey(), p) };
         }
 
-        static GenericInvoker miGetIntervalFilters = GenericInvoker.Create(() => GetIntervalFilters<int>(null, new NullableInterval<int>()));
+        static GenericInvoker<Func<QueryToken, object, IEnumerable<FilterOption>>> miGetIntervalFilters = new GenericInvoker<Func<QueryToken, object, IEnumerable<FilterOption>>>(
+            (qt, obj) => GetIntervalFilters<int>(qt, (NullableInterval<int>)obj));
         static IEnumerable<FilterOption> GetIntervalFilters<T>(QueryToken queryToken, NullableInterval<T> interval)
             where T: struct, IComparable<T>, IEquatable<T>
         {
@@ -258,13 +308,6 @@ namespace Signum.Windows.Chart
                 yield return new FilterOption { Path = queryToken.FullKey(), Value = interval.Max.Value, Operation = FilterOperation.LessThan };
         }
 
-        class ColumnInfo
-        {
-            public ChartTokenDN ChartToken;
-            public ResultColumn Column;
-            public ColumnOrderInfo OrderInfo; 
-        }
-
         void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
         {
             GridViewColumnHeader header = (GridViewColumnHeader)sender;
@@ -273,29 +316,42 @@ namespace Signum.Windows.Chart
             if (ci == null)
                 return;
 
-            var columnInfos = gvResults.Columns.Select(c => (ColumnInfo)((GridViewColumnHeader)c.Header).Tag).Where(c => c.OrderInfo != null).ToList();
+            string canOrder = QueryUtils.CanOrder(ci.Column.Token);
+            if (canOrder.HasText())
+            {
+                MessageBox.Show(canOrder);
+                return;
+            }
 
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (columnInfos.Count == 1 && columnInfos[0] == ci))
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (OrderOptions.Count == 1 && OrderOptions[0].ColumnOrderInfo.TryCC(coi => coi.Header) == header))
             {
 
             }
             else
             {
-                foreach (var col in columnInfos)
+                foreach (var oo in OrderOptions)
                 {
-                    col.ChartToken.OrderPriority = null;
-                    col.ChartToken.OrderType = null;
+                    if (oo.ColumnOrderInfo != null)
+                        oo.ColumnOrderInfo.CleanAdorner();
                 }
+
+                OrderOptions.Clear();
             }
 
-            if (ci.OrderInfo != null)
+            OrderOption order = OrderOptions.SingleOrDefaultEx(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
+            if (order != null)
             {
-                ci.ChartToken.OrderType = ci.ChartToken.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending; ;
+                order.ColumnOrderInfo.FlipAdorner();
+                order.OrderType = order.ColumnOrderInfo.OrderType;
             }
             else
             {
-                ci.ChartToken.OrderType = OrderType.Ascending;
-                ci.ChartToken.OrderPriority = 1; 
+                OrderOptions.Add(new OrderOption()
+                {
+                    Token = ci.Column.Token,
+                    OrderType = OrderType.Ascending,
+                    ColumnOrderInfo = new ColumnOrderInfo(header, OrderType.Ascending, OrderOptions.Count)
+                });
             }
 
             GenerateChart();
@@ -308,38 +364,40 @@ namespace Signum.Windows.Chart
             lvResult.Background = Brushes.WhiteSmoke;
         }
 
-        GridViewColumn AddListViewColumn(ResultColumn c, ChartTokenDN ct)
+        private void FillGridView()
         {
-            ChartTokenDN token = new ChartTokenDN();
-            
-            var columnInfo = new ColumnInfo
+            gvResults.Columns.Clear();
+            foreach (var rc in resultTable.Columns)
             {
-                Column = c,
-                ChartToken = ct,
-            };
+                gvResults.Columns.Add(new GridViewColumn
+                {
+                    Header = new GridViewColumnHeader
+                    {
+                        Content = rc.Column.DisplayName,
+                        Tag = new ColumnInfo(rc.Column)
+                    },
+                    CellTemplate = CreateDataTemplate(rc),
+                });
+            }
 
-            var header = new GridViewColumnHeader
+            for (int i = 0; i < OrderOptions.Count; i++)
             {
-                Content = c.Column.DisplayName,
-                Tag = columnInfo
-            };
+                OrderOption oo = OrderOptions[i];
+                QueryToken token = (QueryToken)oo.Token;
 
-            if (ct.OrderPriority.HasValue)
-                columnInfo.OrderInfo = new ColumnOrderInfo(header, ct.OrderType.Value, ct.OrderPriority.Value); 
+                GridViewColumnHeader header = gvResults.Columns
+                    .Select(c => (GridViewColumnHeader)c.Header)
+                    .FirstOrDefault(c => ((ColumnInfo)c.Tag).Column.Name == token.FullKey());
 
-            GridViewColumn column = new GridViewColumn
-            {
-                Header = header,
-                CellTemplate = CreateDataTemplate(c),
-            };
-            gvResults.Columns.Add(column);
-            return column;
+                if (header != null)
+                    oo.ColumnOrderInfo = new ColumnOrderInfo(header, oo.OrderType, i);
+            }
         }
 
         DataTemplate CreateDataTemplate(ResultColumn c)
         {
             Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
-            DataTemplate dt = QuerySettings.GetFormatter(c.Column)(b);
+            DataTemplate dt = Settings.GetFormatter(c.Column)(b);
             return dt;
         }
 
@@ -350,6 +408,13 @@ namespace Signum.Windows.Chart
             if (row == null)
                 return;
 
+            ShowRow(row);
+
+            e.Handled = true;
+        }
+
+        public void ShowRow(ResultRow row)
+        {
             if (row.Table.HasEntities)
             {
                 IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(row.Entity, EntityType);
@@ -363,10 +428,8 @@ namespace Signum.Windows.Chart
                 {
                     FilterOptions = getFilters(row),
                     SearchOnLoad = true,
-                }); 
+                });
             }
-
-            e.Handled = true;
         }
     }
 

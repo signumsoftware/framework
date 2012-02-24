@@ -22,27 +22,41 @@ namespace Signum.Web.Profiler
 {
     public class ProfilerController : Controller
     {
-        [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Heavy()
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             ViewData[ViewDataKeys.Title] = "Root entries";
-            ViewBag.Slowest = false;
-            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), Signum.Utilities.HeavyProfiler.Entries); 
+
+            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), HeavyProfiler.Entries);
         }
 
-        [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult HeavySlowest(int? top)
+        public ActionResult Statistics(SqlProfileResumeOrder order)
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
-            var list = Signum.Utilities.HeavyProfiler.AllEntries().Where(a => a.Role == "SQL").OrderByDescending(a => a.Elapsed).Take(top ?? 50).ToList();
+            var list = HeavyProfiler.SqlStatistics().ToList().OrderByDescending(GetOrder(order)); ;
 
+            ViewBag.Order = order;
             ViewData[ViewDataKeys.Title] = "Slowest SQLs";
-            ViewBag.Slowest = true;
 
-            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), list);
+            if (Request.IsAjaxRequest())
+                return PartialView(ProfilerClient.ViewPrefix.Formato("StatisticsTable"), list);
+            else
+                return View(ProfilerClient.ViewPrefix.Formato("Statistics"), list);
+        }
+
+        private Func<SqlProfileResume, long> GetOrder(SqlProfileResumeOrder order)
+        {
+            switch (order)
+            {
+                case SqlProfileResumeOrder.Count: return o => o.Count;
+                case SqlProfileResumeOrder.Sum: return o => o.Sum.Ticks;
+                case SqlProfileResumeOrder.Avg: return o => o.Avg.Ticks;
+                case SqlProfileResumeOrder.Min: return o => o.Min.Ticks;
+                case SqlProfileResumeOrder.Max: return o => o.Max.Ticks;
+            }
+            throw new InvalidOperationException();
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -57,36 +71,35 @@ namespace Signum.Web.Profiler
             return View(ProfilerClient.ViewPrefix.Formato("HeavyDetails"), entry);
         }
 
-        [AcceptVerbs(HttpVerbs.Get)]
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Enable()
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Enabled = true;
-            return RedirectToAction("Heavy");
+            return null;
         }
 
-        [AcceptVerbs(HttpVerbs.Get)]
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Disable()
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Enabled = false;
-            return RedirectToAction("Heavy");
+            return null;
         }
 
-        [AcceptVerbs(HttpVerbs.Get)]
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Clean()
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Clean();
-            return RedirectToAction("Heavy");
+            return null;
         }
 
-
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult Times(int? clear)
+        public ActionResult Times()
         {
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
@@ -103,7 +116,7 @@ namespace Signum.Web.Profiler
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult TimeTable(int? clear)
+        public ActionResult TimeTable()
         {
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
@@ -118,5 +131,14 @@ namespace Signum.Web.Profiler
             Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
             return RedirectToAction("Times");
         }
+    }
+
+    public enum SqlProfileResumeOrder
+    {
+        Count,
+        Sum,
+        Avg,
+        Min,
+        Max
     }
 }

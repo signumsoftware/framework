@@ -9,6 +9,7 @@ using Signum.Test;
 using Signum.Web.Operations;
 using Signum.Test.Extensions;
 using System.Web.Mvc;
+using Signum.Entities.Processes;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -31,15 +32,25 @@ namespace Signum.Web.Extensions.Sample
                     new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("PersonalAward") },
                     new EmbeddedEntitySettings<SongDN>() { PartialViewName = e => ViewPrefix.Formato("Song")},
 
-                    new EntitySettings<NoteDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Note") },
-
+                    new EntitySettings<NoteWithDateDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Note") },
 
                     new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => ViewPrefix.Formato("AlbumFromBandModel")},
                 });
 
-                ButtonBarEntityHelper.RegisterEntityButtons<AlbumDN>((ctx, album, partialViewName, prefix) =>
-                { 
-                    if (album.IsNew)
+                QuickLinkWidgetHelper.RegisterEntityLinks<LabelDN>((entity, partialViewName, prefix) =>
+                {
+                    if (entity.IsNew)
+                        return null;
+
+                    return new QuickLink[]
+                    {
+                        new QuickLinkFind(typeof(AlbumDN), "Label", entity, true)
+                    };
+                });
+
+                ButtonBarEntityHelper.RegisterEntityButtons<AlbumDN>((ctx, entity) =>
+                {
+                    if (entity.IsNew)
                         return null;
 
                     return new ToolBarButton[]
@@ -47,13 +58,13 @@ namespace Signum.Web.Extensions.Sample
                         new ToolBarButton
                         {
                             DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
-                            Id = TypeContextUtilities.Compose(prefix, "CloneWithData"),
+                            Id = TypeContextUtilities.Compose(ctx.Prefix, "CloneWithData"),
                             Text = "Clone with data",
                             OnClick = new JsOperationConstructorFrom(new JsOperationOptions
                             { 
                                 ControllerUrl = RouteHelper.New().Action("CloneWithData", "Music"),
-                                Prefix = prefix
-                            }).OperationAjax(Js.NewPrefix(prefix), JsOpSuccess.OpenPopupNoDefaultOk).ToJS()
+                                Prefix = ctx.Prefix
+                            }).ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk).ToJS()
                         }
                     };
                 });
@@ -62,23 +73,43 @@ namespace Signum.Web.Extensions.Sample
                 {
                     { AlbumOperation.Clone, new EntityOperationSettings 
                     { 
-                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options()).DefaultSubmit(),
                         OnContextualClick = ctx => Js.Confirm("Do you wish to clone album {0}".Formato(ctx.Entity.ToStr),
-                            new JsOperationConstructorFrom(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultContextualDispatcher)),
+                            new JsOperationConstructorFrom(ctx.Options()).ajax(ctx.Prefix, JsOpSuccess.DefaultContextualDispatcher)),
                         IsVisible = ctx => true,
                     }},
                     { AlbumOperation.CreateFromBand, new EntityOperationSettings 
                     { 
-                        OnClick = ctx => JsValidator.EntityIsValid(ctx.Prefix, 
-                            new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
-                            .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
+                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
+                            .validateAndAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+
                         OnContextualClick = ctx => Js.Confirm("Do you wish to create an album for band {0}".Formato(ctx.Entity.ToStr),
-                            new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music")).OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
+                            new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music")).ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
                     }},
                     { AlbumOperation.CreateGreatestHitsAlbum, new QueryOperationSettings
                     {
-                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("CreateGreatestHitsAlbum", "Music")).DefaultSubmit()
+                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("CreateGreatestHitsAlbum", "Music")).submitSelected()
                     }},
+                });
+            }
+        }
+
+        public static void StartDemoPackage()
+        {
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                Constructor.AddConstructor(() => new DemoPackageDN
+                {
+                    Name = "Demo Package",
+                    RequestedLines = 100,
+                    DelayMilliseconds = 100,
+                    ErrorRate = 0.3,
+                    MainError = false,
+                });
+
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<DemoPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("DemoPackage"), },
+                    new EntitySettings<DemoPackageLineDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("DemoPackageLine"), },
                 });
             }
         }

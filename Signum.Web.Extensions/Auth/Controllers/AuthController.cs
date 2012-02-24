@@ -19,7 +19,6 @@ using Signum.Entities;
 using Signum.Engine.Mailing;
 using System.Collections.Generic;
 using Signum.Engine.Operations;
-using Signum.Entities.Extensions.Authorization;
 using Signum.Web.Operations;
 #endregion
 
@@ -42,12 +41,11 @@ namespace Signum.Web.Auth
             return RouteHelper.New().Action("Index", "Home");
         };
 
+        public static event Action OnUserLoggingOut;
         public static event Func<Controller, string> OnUserLogoutRedirect = c =>
         {
             return RouteHelper.New().Action("Index", "Home");
         };
-
-        public const string SessionUserKey = "user";
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveNewUser(string prefix)
@@ -75,9 +73,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveUser(string prefix)
         {
-            var context = (Request.Form.AllKeys.Any(k => k.EndsWith(UserMapping.NewPasswordKey))) ?
-                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal() :
-                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
+            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
 
             if (context.GlobalErrors.Any())
             { 
@@ -85,7 +81,7 @@ namespace Signum.Web.Auth
                 return JsonAction.ModelState(ModelState);
             }
 
-            context.Value.Execute(UserOperation.SaveNew);
+            context.Value.Execute(UserOperation.Save);
             return JsonAction.Redirect(Navigator.ViewRoute(context.Value));
         }
 
@@ -100,15 +96,16 @@ namespace Signum.Web.Auth
             var model = new SetPasswordModel { User = entity.ToLite() };
 
             ViewData[ViewDataKeys.WriteSFInfo] = true; 
-            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix,
-                new JsOperationExecutor(new JsOperationOptions
+            ViewData[ViewDataKeys.OnSave] = new JsOperationExecutor(new JsOperationOptions
                 {
                     ControllerUrl = RouteHelper.New().Action("SetPasswordOnOk", "Auth"),
                     Prefix = prefix,
-                }).OperationAjax(prefix, JsOpSuccess.DefaultDispatcher)).ToJS();
+                }).validateAndAjax().ToJS();
 
             ViewData[ViewDataKeys.Title] = Resources.EnterTheNewPassword;
-            return Navigator.PopupView(this, model, prefix);
+
+            TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
+            return this.PopupOpen(new ViewSaveOptions(tc));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -120,11 +117,7 @@ namespace Signum.Web.Auth
 
             return JsonAction.Redirect(Navigator.ViewRoute(typeof(UserDN), g.Id));
         }
-
-
-
-
-
+                
         #region "Change password"
         public ActionResult ChangePassword()
         {
@@ -139,7 +132,6 @@ namespace Signum.Web.Auth
         [HttpPost]
         public ActionResult ChangePassword(FormCollection form)
         {
-
             UserDN user = null;
 
             if (UserDN.Current == null)
@@ -175,27 +167,25 @@ namespace Signum.Web.Auth
 
             else
             {
-            var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
-            if (context.GlobalErrors.Any())
-            {
-                ViewData["Title"] = Resources.ChangePassword;
-                ModelState.FromContext(context);
-                RestoreCleanCurrentUser();
-                return View(AuthClient.ChangePasswordView);
-            }
+                var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
+                if (context.GlobalErrors.Any())
+                {
+                    ViewData["Title"] = Resources.ChangePassword;
+                    ModelState.FromContext(context);
+                    RefreshSessionUserChanges();
+                    return View(AuthClient.ChangePasswordView);
+                }
 
                 string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
-            if (errorPasswordValidation.HasText())
-            {
-                ModelState.AddModelError("password", errorPasswordValidation);
-                RestoreCleanCurrentUser();
-                return View(AuthClient.ChangePasswordView);
-            }
+                if (errorPasswordValidation.HasText())
+                {
+                    ModelState.AddModelError("password", errorPasswordValidation);
+                    RefreshSessionUserChanges();
+                    return View(AuthClient.ChangePasswordView);
+                }
 
                 user = context.Value;
             }
-
-
 
             AuthLogic.ChangePassword(user.UserName,Security.EncodePassword( form[UserMapping.OldPasswordKey]), Security.EncodePassword(form[UserMapping.NewPasswordKey]));
             Login(user.UserName, form[UserMapping.NewPasswordKey], false, null);
@@ -205,11 +195,9 @@ namespace Signum.Web.Auth
 
         }
 
-        private void RestoreCleanCurrentUser()
+        private void RefreshSessionUserChanges()
         {
-            //Restore clean UserDN from database
-            Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).Single();
-            Session[AuthController.SessionUserKey] = Thread.CurrentPrincipal;
+            UserDN.Current = UserDN.Current.ToLite().Retrieve(); 
         }
 
         public ActionResult ChangePasswordSuccess()
@@ -230,50 +218,37 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordView);
         }
 
-     
+
 
         [HttpPost]
         public ActionResult ResetPassword(string email)
         {
-            try
+
+            if (string.IsNullOrEmpty(email))
             {
-                if (string.IsNullOrEmpty(email))
-                    return ResetPasswordError("email", Resources.EmailMustHaveAValue);
-
-                using (AuthLogic.Disable())
-                {
-                    //Check the email belongs to a user
-                    UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefault(Resources.EmailNotExistsDatabase);
-
-                    if (user == null)
-                        throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
-
-                    //since this is an url sent by email, it should contain the domain name
-                    AuthLogic.ResetPasswordRequest(user, rpr => 
-                        Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port ) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
-                }
-
-                ViewData["email"] = email;
-                return RedirectToAction("ResetPasswordSend");
+                ModelState.AddModelError("email", Resources.EmailMustHaveAValue);
+                return View(AuthClient.ResetPasswordView);
             }
-            catch (Exception ex)
+
+            using (AuthLogic.Disable())
             {
-                return ResetPasswordError("_FORM", ex.Message);
+                //Check the email belongs to a user
+                UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx(() => Resources.EmailNotExistsDatabase);
+
+                if (user == null)
+                    throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
+
+                //since this is an url sent by email, it should contain the domain name
+                ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, rpr =>
+                    Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
             }
+
+            ViewData["email"] = email;
+            return RedirectToAction("ResetPasswordSend");
         }
 
-        ViewResult ResetPasswordError(string key, string error)
-        {
-            ModelState.AddModelError("_FORM", error);
-            return View(AuthClient.ResetPasswordView);
-        }
-
-        ViewResult ResetPasswordSetNewError(int idResetPasswordRequest, string key, string error)
-        {
-            ModelState.AddModelError("_FORM", error);
-            ViewData["rpr"] = idResetPasswordRequest;
-            return View(AuthClient.ResetPasswordSetNewView);
-        }
+      
+      
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPasswordSend()
@@ -291,7 +266,7 @@ namespace Signum.Web.Auth
             {
                 rpr = Database.Query<ResetPasswordRequestDN>()
                     .Where(r => r.User.Email == email && r.Code == code)
-                    .SingleOrDefault(Resources.TheConfirmationCodeThatYouHaveJustSentIsInvalid);
+                    .SingleOrDefaultEx(()=>Resources.TheConfirmationCodeThatYouHaveJustSentIsInvalid);
             }
             TempData["ResetPasswordRequest"] = rpr;
 
@@ -312,46 +287,47 @@ namespace Signum.Web.Auth
         }
 
         [HttpPost]
-        public ActionResult ResetPasswordSetNew(string code, Lite<ResetPasswordRequestDN> rpr)
+        public ActionResult ResetPasswordSetNew(Lite<ResetPasswordRequestDN> rpr)
         {
             ResetPasswordRequestDN request = null;
-            try
+            UserDN user = null;
+            using (AuthLogic.Disable())
             {
-                UserDN user = null;
-                using (AuthLogic.Disable())
-                {
-                    request = rpr.Retrieve();
-                    user = Database.Query<UserDN>()
-                        .Where(u => u.Email == request.User.Email)
-                        .Single();
-                }
-
-                var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
-
-                if (context.GlobalErrors.Any())
-                {
-                    ViewData["Title"] = Resources.ChangePassword;
-                    ModelState.FromContext(context);
-                    return ResetPasswordSetNewError(request.Id, "", "");
-                }
-
-                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
-                if (errorPasswordValidation.HasText())
-                    return ResetPasswordSetNewError(request.Id, "NewPassword", errorPasswordValidation);
-
-                using (AuthLogic.Disable())
-                {
-                    Database.Save(context.Value);
-                    //remove pending requests
-                    Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == code).UnsafeDelete();
-                }
-
-                return RedirectToAction("ResetPasswordSuccess");
+                request = rpr.Retrieve();
+                user = Database.Query<UserDN>()
+                    .Where(u => u.Email == request.User.Email)
+                    .SingleEx();
             }
-            catch (Exception ex)
+
+            var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
+
+            if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
+                !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
             {
-                return ResetPasswordSetNewError(request.Id, ViewDataKeys.GlobalErrors, ex.Message);
+                ViewData["Title"] = Resources.ChangePassword;
+                ModelState.FromContext(context);
+                return ResetPasswordSetNewError(request.Id, "");
             }
+
+            string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+            if (errorPasswordValidation.HasText())
+                return ResetPasswordSetNewError(request.Id, errorPasswordValidation);
+
+            using (AuthLogic.Disable())
+            {
+                context.Value.Execute(UserOperation.Save);
+                //remove pending requests
+                Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == request.Code).UnsafeDelete();
+            }
+
+            return RedirectToAction("ResetPasswordSuccess");
+        }
+
+        ViewResult ResetPasswordSetNewError(int idResetPasswordRequest, string error)
+        {
+            ModelState.AddModelError("_FORM", error);
+            ViewData["rpr"] = idResetPasswordRequest;
+            return View(AuthClient.ResetPasswordSetNewView);
         }
 
         public ActionResult ResetPasswordSuccess()
@@ -359,8 +335,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordSuccessView);
         }
         #endregion
-
-  
+          
         #region Login
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -378,22 +353,22 @@ namespace Signum.Web.Auth
         }
 
         [HttpPost]
-        public ActionResult Login(string username, string password, bool rememberMe, string referrer)
+        public ActionResult Login(string username, string password, bool? rememberMe, string referrer)
         {
             // Basic parameter validation
             if (!username.HasText())
                 return LoginErrorAjaxOrForm("username", Resources.UserNameMustHaveAValue);
-            
+
             if (string.IsNullOrEmpty(password))
                 return LoginErrorAjaxOrForm("password", Resources.PasswordMustHaveAValue);
-            
+
             // Attempt to login
             UserDN user = null;
             try
             {
                 user = AuthLogic.Login(username, Security.EncodePassword(password));
             }
-            catch (ExpiredPasswordApplicationException)
+            catch (PasswordExpiredException)
             {
                 TempData["message"] = Resources.ExpiredPasswordMessage;
                 TempData["username"] = username;
@@ -407,16 +382,6 @@ namespace Signum.Web.Auth
             {
                 return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
             }
-            catch (Exception ex)
-            {
-
-                throw new Exception(Resources.ExpectedUserLogged, ex);
-            }
-
-
-            //if (user == null) //if it's an ajax request the error will match the password field
-            //    return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
-
 
             if (user == null)
                 throw new Exception(Resources.ExpectedUserLogged);
@@ -426,13 +391,13 @@ namespace Signum.Web.Auth
             {
                 var result = OnUserPreLogin(this, user);
                 if (result != null)
-                    return result; 
+                    return result;
             }
 
-            Thread.CurrentPrincipal = user;
+            UserDN.Current = user;
 
             //guardamos una cookie persistente si se ha seleccionado
-            if (rememberMe)
+            if (rememberMe.HasValue && rememberMe.Value)
             {
                 string ticketText = UserTicketLogic.NewTicket(
                        System.Web.HttpContext.Current.Request.UserHostAddress);
@@ -445,12 +410,12 @@ namespace Signum.Web.Auth
                 System.Web.HttpContext.Current.Response.Cookies.Add(cookie);
             }
 
-            AddUserSession(user.UserName, user);
+            AddUserSession(user);
 
-    		TempData["Message"] = AuthLogic.OnPasswordNearExpiredLogic();
+            TempData["Message"] = AuthLogic.OnLoginMessage();
 
-    
-                return LoginRedirectAjaxOrForm(OnUserLoggedDefaultRedirect(this));
+
+            return LoginRedirectAjaxOrForm(OnUserLoggedDefaultRedirect(this));
 
         }
 
@@ -505,14 +470,12 @@ namespace Signum.Web.Auth
                         }
                     }
 
-                    Thread.CurrentPrincipal = user;
-
                     System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(AuthClient.CookieName, ticketText)
                     {
                         Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
                     });
 
-                    AddUserSession(user.UserName, user);
+                    AddUserSession(user);
                     return true;
                 }
                 catch
@@ -530,131 +493,23 @@ namespace Signum.Web.Auth
         }
         #endregion
 
-        #region Register User (Commented)
 
-        //[HttpPost]
-        //public ContentResult RegisterUserValidate()
-        //{
-        //    UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
 
-        //    ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
-
-        //    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-        //    return Navigator.ModelState(ModelState);
-        //}
-
-        //public ActionResult RegisterUserPost()
-        //{
-        //    UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-        //    ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
-        //    if (changesLog.Errors != null && changesLog.Errors.Count > 0)
-        //    {
-        //        this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-        //        return Navigator.ModelState(ModelState);
-        //    }
-
-        //    u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.SaveNew);
-
-        //    if (Navigator.ExtractIsReactive(Request.Form))
-        //    {
-        //        string tabID = Navigator.ExtractTabID(Request.Form);
-        //        Session[tabID] = u;
-        //    }
-
-        //    return Navigator.View(this, u);
-        //}
-
-        //ChangesLog RegisterUserApplyChanges(NameValueCollection form, ref UserDN u)
-        //{
-        //    List<string> fullIntegrityErrors;
-        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
-        //    if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-        //    {
-        //        fullIntegrityErrors = fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList();
-        //        if (fullIntegrityErrors.Count > 0)
-        //            changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors);
-        //    }
-        //    if (u != null && u.UserName.HasText())
-        //    {
-        //        string username = u.UserName;
-        //        if (Database.Query<UserDN>().Any(us => us.UserName == username))
-        //            changesLog.Errors.Add(ViewDataKeys.GlobalErrors, new List<string> { Resources.UserNameAlreadyExists });
-        //    }
-        //    return changesLog;
-        //}
-
-        //Dictionary<string, List<string>> UserOperationApplyChanges(NameValueCollection form, ref UserDN u)
-        //{
-        //    List<string> fullIntegrityErrors;
-        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
-        //    if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-        //        changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
-
-        //    return changesLog.Errors;
-        //}
-
-        //public ActionResult UserExecOperation(string sfRuntimeType, int? sfId, string operationFullKey, bool isLite, string prefix, string sfOnOk, string onCancel)
-        //{
-        //    Type type = Navigator.ResolveType(sfRuntimeType);
-
-        //    UserDN entity = null;
-        //    if (isLite)
-        //    {
-        //        if (sfId.HasValue)
-        //        {
-        //            Lite lite = Lite.Create(type, sfId.Value);
-        //            entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
-        //        }
-        //        else
-        //            throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(operationFullKey));
-        //    }
-        //    else
-        //    {
-        //        //if (sfId.HasValue)
-        //        //    entity = Database.Retrieve<UserDN>(sfId.Value);
-        //        //else
-        //        //    entity = (UserDN)Navigator.CreateInstance(type);
-
-        //        entity = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-        //        Dictionary<string, List<string>> errors = UserOperationApplyChanges(Request.Form, ref entity);
-
-        //        if (errors != null && errors.Count > 0)
-        //        {
-        //            this.ModelState.FromDictionary(errors, Request.Form);
-        //            return Navigator.ModelState(ModelState);
-        //        }
-
-        //        entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
-
-        //        if (Navigator.ExtractIsReactive(Request.Form))
-        //        {
-        //            string tabID = Navigator.ExtractTabID(Request.Form);
-        //            Session[tabID] = entity;
-        //        }
-        //    }
-
-        //    if (prefix.HasText())
-        //        return Navigator.PopupView(this, entity, prefix);
-        //    else //NormalWindow
-        //        return Navigator.View(this, entity);
-        //} 
-        #endregion
+        public static Action<UserDN> OnUpdatedSessionUser;
 
         public static void UpdateSessionUser()
         {
             var newUser = UserDN.Current.ToLite().Retrieve();
 
-            Thread.CurrentPrincipal = newUser;
+            UserDN.Current = newUser; 
 
-            if (System.Web.HttpContext.Current != null)
-                System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
+            if (OnUpdatedSessionUser != null)
+                OnUpdatedSessionUser(newUser); 
         }
 
-        public static void AddUserSession(string userName, UserDN user)
+        public static void AddUserSession(UserDN user)
         {
-            System.Web.HttpContext.Current.Session[SessionUserKey] = user;
+            UserDN.Current = user;
 
             if (OnUserLogged != null)
                 OnUserLogged();
@@ -669,14 +524,18 @@ namespace Signum.Web.Auth
 
         public static void LogoutDo()
         {
-            FormsAuthentication.SignOut();
-            //Session.RemoveAll();
-            //Session.Remove(SessionUserKey);
-            var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
-            if (authCookie != null && authCookie.Value.HasText())
-                System.Web.HttpContext.Current.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+            var httpContext = System.Web.HttpContext.Current;
 
-            System.Web.HttpContext.Current.Session.Abandon();
+            if (OnUserLoggingOut != null)
+                OnUserLoggingOut();
+
+            FormsAuthentication.SignOut();
+
+            var authCookie = httpContext.Request.Cookies[AuthClient.CookieName];
+            if (authCookie != null && authCookie.Value.HasText())
+                httpContext.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+
+            httpContext.Session.Abandon();
         }
     }
 }

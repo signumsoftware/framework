@@ -7,6 +7,7 @@ using System.Reflection;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Authorization;
 using Signum.Entities.Profiler;
+using Signum.Utilities;
 
 namespace Signum.Engine.Profiler
 {
@@ -22,6 +23,13 @@ namespace Signum.Engine.Profiler
                 if (heavyProfiler)
                     PermissionAuthLogic.RegisterPermissions(ProfilerPermissions.ViewHeavyProfiler); 
             }
+        }
+
+        public static void ProfilerEntries(List<HeavyProfilerEntry> entries)
+        {
+            int index = HeavyProfiler.Entries.Count;
+            entries.ForEach(e => e.Index += index);
+            HeavyProfiler.Entries.AddRange(entries);
         }
     }
 }

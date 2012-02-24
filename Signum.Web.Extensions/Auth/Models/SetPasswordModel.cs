@@ -19,7 +19,6 @@ using Signum.Entities;
 using Signum.Engine.Mailing;
 using System.Collections.Generic;
 using Signum.Engine.Operations;
-using Signum.Entities.Extensions.Authorization;
 using Signum.Web.Operations;
 using System.ComponentModel;
 #endregion
@@ -45,22 +44,5 @@ namespace Signum.Web.Auth
             get { return password; }
             set { Set(ref password, value, () => Password); }
         }
-
-        string repeatPassword;
-        [NotNullValidator]
-        public string RepeatPassword
-        {
-            get { return repeatPassword; }
-            set { Set(ref repeatPassword, value, () => RepeatPassword); }
-        }
-
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
-        {
-            if (pi.Is(() => RepeatPassword) && RepeatPassword != Password)
-                return Resources.PasswordsAreDifferent;
-
-            return null;
-        }    
-    
     }
 }

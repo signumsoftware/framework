@@ -188,9 +188,16 @@ namespace Signum.Web.Selenium
         public static void ListLineViewElement(this ISelenium selenium, string prefix, int itemIndexBase0, bool opensEntity)
         {
             ListLineSelectElement(selenium, prefix, itemIndexBase0, false);
-            selenium.DoubleClick(ListLineOptionId(prefix, itemIndexBase0));
             if (opensEntity)
+            {
+                selenium.Click(ListLineOptionId(prefix, itemIndexBase0));
+                selenium.Click(LineViewSelector(prefix));
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(SeleniumExtensions.PopupSelector(prefix + itemIndexBase0 + "_"))));
+            }
+            else
+            {
+                selenium.DoubleClick(ListLineOptionId(prefix, itemIndexBase0));
+            }
         }
 
         public static string LineFindSelector(string prefix)

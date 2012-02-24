@@ -123,17 +123,8 @@
   <data name="Reports" xml:space="preserve">
     <value>Reports</value>
   </data>
-  <data name="Days" xml:space="preserve">
-    <value>Days</value>
-  </data>
-  <data name="Excel2003XmlSpreadsheet" xml:space="preserve">
-    <value>Excel XML 2003 Spreadsheet (*.xml)|*.xml</value>
-  </data>
   <data name="Excel2007Spreadsheet" xml:space="preserve">
     <value>Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx</value>
-  </data>
-  <data name="Excel97_2003Spreadsheet" xml:space="preserve">
-    <value>Microsoft Office Excel 97-2003 Spreadsheet (*.xls)|*.xls</value>
   </data>
   <data name="ExcelReport" xml:space="preserve">
     <value>Excel Report</value>
@@ -141,14 +132,8 @@
   <data name="Field" xml:space="preserve">
     <value>Field</value>
   </data>
-  <data name="File" xml:space="preserve">
-    <value>File</value>
-  </data>
   <data name="FindLocationFoExcelReport" xml:space="preserve">
     <value>Find location for Excel Report</value>
-  </data>
-  <data name="Months" xml:space="preserve">
-    <value>Months</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
@@ -156,23 +141,14 @@
   <data name="Open" xml:space="preserve">
     <value>Open</value>
   </data>
-  <data name="QueryName" xml:space="preserve">
-    <value>Query Name</value>
-  </data>
   <data name="Reload" xml:space="preserve">
     <value>Reload</value>
-  </data>
-  <data name="Removed" xml:space="preserve">
-    <value>Removed</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
   <data name="View" xml:space="preserve">
     <value>View</value>
-  </data>
-  <data name="Years" xml:space="preserve">
-    <value>Years</value>
   </data>
   <data name="ConstructorSelector" xml:space="preserve">
     <value>Constructor Selector</value>
@@ -213,15 +189,6 @@
   <data name="AreYouSureToRemove0" xml:space="preserve">
     <value>Are you sure to remove '{0}'?</value>
   </data>
-  <data name="Operation0IsDisabled1" xml:space="preserve">
-    <value>Operation {0} is disabled: {1}</value>
-  </data>
-  <data name="NoRows" xml:space="preserve">
-    <value>No hay filas</value>
-  </data>
-  <data name="ChartFor" xml:space="preserve">
-    <value>Chart for</value>
-  </data>
   <data name="MyCharts" xml:space="preserve">
     <value>My Charts</value>
   </data>
@@ -234,10 +201,31 @@
   <data name="Remove" xml:space="preserve">
     <value>Remove</value>
   </data>
-  <data name="CharactersLeft" xml:space="preserve">
-    <value>Characters left:</value>
+  <data name="RemainingCharacters" xml:space="preserve">
+    <value>Remaining characters</value>
   </data>
   <data name="SendData" xml:space="preserve">
     <value>Send Data</value>
+  </data>
+  <data name="Login_New" xml:space="preserve">
+    <value>New:</value>
+  </data>
+  <data name="Login_Password" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="Login_Repeat" xml:space="preserve">
+    <value>Repeat:</value>
+  </data>
+  <data name="Login_UserName" xml:space="preserve">
+    <value>Username:</value>
+  </data>
+  <data name="Insert" xml:space="preserve">
+    <value>Insert</value>
+  </data>
+  <data name="RemoveNonValidCharacters" xml:space="preserve">
+    <value>Remove non valid characters</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
   </data>
 </root>

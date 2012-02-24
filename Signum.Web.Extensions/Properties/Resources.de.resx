@@ -354,11 +354,11 @@
   <data name="RememberMe" xml:space="preserve">
     <value>Mich daran erinnern</value>
   </data>
-  <data name="RememberPassword" xml:space="preserve">
-    <value>An Kennwort erinnern</value>
+  <data name="ExpiredPasswordMessage" xml:space="preserve">
+    <value>Ihr Passwort ist abgelaufen. Sie sollten es ändern</value>
   </data>
-  <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Geben Sie Ihren Benutzernamen und Ihre E-Mail-Adresse ein, um eine E-Mail mit dem Passwort zu erhalten</value>
+  <data name="ExpectedUserLogged" xml:space="preserve">
+    <value>Es wurde erwartet, dass sich ein Benutzer anmeldet</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Passwort zurücksetzen</value>
@@ -381,8 +381,8 @@
   <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
     <value>Der Bestätigungs-Code, den Sie gerade gesendet haben, ist ungültig</value>
   </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>Das Passwort muss zwichen 7 und 15 Zeichen haben, diese können entweder eine Zahl von 0 bis 9 oder ein Buchstabe sein</value>
+  <data name="EnterTheNewPassword" xml:space="preserve">
+    <value>Geben Sie das neue Passwort ein</value>
   </data>
   <data name="ThereAreATotalOf0Errors" xml:space="preserve">
     <value>Es gibt insgesamt {0} Fehler</value>
@@ -455,5 +455,11 @@
   </data>
   <data name="Buscador" xml:space="preserve">
     <value>Suchmaschine</value>
+  </data>
+  <data name="PasswordsAreDifferent" xml:space="preserve">
+    <value>Die Passwörter sind unterschiedlich</value>
+  </data>
+  <data name="_0Rules" xml:space="preserve">
+    <value>{0} rules</value>
   </data>
 </root>

@@ -25,20 +25,6 @@ a {
 }
 
 /* general tweaks */
-a:focus,a:active {
-    -moz-outline-style:none;
-    outline:none;
-}
-
-a:hover {
-    color:#d54e21;
-    cursor:pointer;
-}
-
-::-moz-focus-inner {
-    border: 0;
-}
-
 textarea, select {/* IE will show a border around input radio */
     border:1px solid #ccc;
     color:#333;

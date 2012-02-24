@@ -48,12 +48,12 @@ namespace Signum.Engine.Authorization
 
         static bool OperationLogic_AllowOperation(Enum operationKey)
         {
-            return cache.GetAllowed(operationKey);
+            return GetOperationAllowed(operationKey);
         }
 
         public static List<OperationInfo> Filter(List<OperationInfo> operationInfos)
         {
-            return operationInfos.Where(ai => cache.GetAllowed(ai.Key)).ToList(); 
+            return operationInfos.Where(ai => GetOperationAllowed(ai.Key)).ToList(); 
         }
 
         public static OperationRulePack GetOperationRules(Lite<RoleDN> roleLite, TypeDN typeDN)
@@ -79,7 +79,13 @@ namespace Signum.Engine.Authorization
 
         public static bool GetOperationAllowed(Enum operationKey)
         {
-            return cache.GetAllowed(operationKey);
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+                return true;
+
+            if (GetTemporallyAllowed(operationKey))
+                return true;
+
+            return cache.GetAllowed(RoleDN.Current.ToLite(), operationKey);
         }
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
@@ -90,6 +96,24 @@ namespace Signum.Engine.Authorization
         public static DefaultDictionary<Enum, bool> OperationRules()
         {
             return cache.GetDefaultDictionary();
+        }
+
+        static readonly Variable<ImmutableStack<Enum>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Enum>>("authTempOperationsAllowed");
+
+        public static IDisposable AllowTemporally(Enum operationKey)
+        {
+            tempAllowed.Value = (tempAllowed.Value ?? ImmutableStack<Enum>.Empty).Push(operationKey);
+
+            return new Disposable(() => tempAllowed.Value = tempAllowed.Value.Pop());
+        }
+
+        internal static bool GetTemporallyAllowed(Enum operationKey)
+        {
+            var ta = tempAllowed.Value;
+            if (ta == null || ta.IsEmpty)
+                return false;
+
+            return ta.Contains(operationKey);
         }
     }
 }

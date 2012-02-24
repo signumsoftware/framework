@@ -1,4 +1,4 @@
-@using System.Configuration
+﻿@using System.Configuration
 
 <style type="text/css">
     .task
@@ -25,19 +25,19 @@
     
     .task .max
     {
-        background: #b22222 url(../images/alert-overlay.png) repeat-x;
+        background: #b22222;
     }
     .task .med
     {
-        background: #ff7722 url(../images/alert-overlay.png) repeat-x;
+        background: #ff7722;
     }
     .task .min
     {
-        background: #ffd700 url(../images/alert-overlay.png) repeat-x;
+        background: #ffd700;
     }
     .task .last
     {
-        background: #b27aff url(../images/alert-overlay.png) repeat-x;
+        background: #b27aff repeat-x;
     }
     .leftBorder
     {
@@ -77,7 +77,7 @@
        long maxValue = maxWitdh;
        if (TimeTracker.IdentifiedElapseds.Count > 0)
        {
-           maxValue = TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.MaxTime).First().Value.MaxTime;
+           maxValue = TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.MaxTime).FirstEx().Value.MaxTime;
        }
 
        double ratio = 1;

@@ -361,11 +361,11 @@ La password è {0}</value>
   <data name="RememberMe" xml:space="preserve">
     <value>Ricordati di me</value>
   </data>
-  <data name="RememberPassword" xml:space="preserve">
-    <value>Ricorda la password</value>
+  <data name="ExpiredPasswordMessage" xml:space="preserve">
+    <value>La password è scaduta. È necessario cambiarla</value>
   </data>
-  <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Inserisci il tuo nome utente e l'indirizzo email per ricevere un messaggio di posta elettronica con la password</value>
+  <data name="ExpectedUserLogged" xml:space="preserve">
+    <value>Era previsto un utente connesso</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Reimpostare la password</value>
@@ -388,8 +388,8 @@ La password è {0}</value>
   <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
     <value>Il codice di conferma fornito non è valido</value>
   </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>La password deve essere compresa tra 7 e 15 caratteri e ognuno di essi può essere un numero da 0 a 9 o una lettera</value>
+  <data name="EnterTheNewPassword" xml:space="preserve">
+    <value>Immettere la nuova password</value>
   </data>
   <data name="ThereAreATotalOf0Errors" xml:space="preserve">
     <value>C'è un totale di {0} errori</value>
@@ -456,5 +456,8 @@ La password è {0}</value>
   </data>
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
     <value>Hai richiesto di creare un account. Per confermare clicca sul seguente link:</value>
+  </data>
+  <data name="PasswordsAreDifferent" xml:space="preserve">
+    <value>Le password sono diverse</value>
   </data>
 </root>

@@ -12,7 +12,7 @@ namespace Signum.Test.Extensions
     public interface IServerSample : 
         IBaseServer, IDynamicQueryServer, ILoginServer, IOperationServer, IQueryServer, IChartServer, IUserQueryServer,
         IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer,
-        IEntityGroupAuthServer, IExcelReportServer
+        IExcelReportServer
     {
     }
 }

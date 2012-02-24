@@ -6,7 +6,6 @@ using System.ServiceModel;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using System.Reflection;
-using System.Threading;
 using Signum.Entities.Authorization;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
@@ -17,25 +16,34 @@ using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Utilities;
 using Signum.Engine.Basics;
-using Signum.Engine.Extensions.Chart;
 using Signum.Entities.Chart;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reports;
 using Signum.Engine.Reports;
+using Signum.Engine.SMS;
+using Signum.Entities.UserQueries;
+using Signum.Engine.UserQueries;
+using Signum.Entities.SMS;
+using Signum.Engine.Chart;
+using Signum.Engine.Exceptions;
+using System.IO;
+using System.Xml;
+using Signum.Engine.Profiler;
 
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, IChartServer, IExcelReportServer, IUserQueryServer,
-        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, IEntityGroupAuthServer
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, 
+        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, 
+        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
+        IProfilerServer
     {
-        protected UserDN currentUser;
-
         protected override T Return<T>(MethodBase mi, string description, Func<T> function)
         {
             try
             {
-                using (AuthLogic.User(currentUser))
+                using (ScopeSessionFactory.OverrideSession(session))
+                using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
                 {
                     FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
 
@@ -44,7 +52,17 @@ namespace Signum.Services
             }
             catch (Exception e)
             {
+                e.LogException(el =>
+                {
+                    el.ControllerName = GetType().Name;
+                    el.ActionName = mi.Name;
+                    el.QueryString = description;
+                });
                 throw new FaultException(e.Message);
+            }
+            finally
+            {
+                Statics.CleanThreadContextAndAssert();
             }
         }
 
@@ -53,22 +71,26 @@ namespace Signum.Services
         {
             try
             {
-                currentUser = AuthLogic.Login(username, passwordHash);
+                using (ScopeSessionFactory.OverrideSession(session))
+                {
+                    UserDN.Current = AuthLogic.Login(username, passwordHash);
+                }
             }
             catch (Exception e)
             {
                 throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
-
             }
         }
 
 
         public virtual void ChagePassword(string username, string passwordHash, string newPasswordHash)
         {
-
             try
             {
-                AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+                using (ScopeSessionFactory.OverrideSession(session))
+                {
+                    AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+                }
             }
             catch (Exception e)
             {
@@ -82,7 +104,10 @@ namespace Signum.Services
         {
             try
             {
-                currentUser = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
+                using (ScopeSessionFactory.OverrideSession(session))
+                {
+                    UserDN.Current = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
+                }
             }
             catch (Exception e)
             {
@@ -92,22 +117,23 @@ namespace Signum.Services
 
         public void Logout()
         {
-            this.currentUser = null;
+            using (ScopeSessionFactory.OverrideSession(session))
+            {
+                UserDN.Current = null;
+            }
         }
 
         public UserDN GetCurrentUser()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => currentUser);
+              () => UserDN.Current);
         }
 
 
         public string PasswordNearExpired()
         {
-
             return Return(MethodInfo.GetCurrentMethod(),
-             () => AuthLogic.OnPasswordNearExpiredLogic());
-            
+             () => AuthLogic.OnLoginMessage());
         }
 
         #endregion
@@ -115,7 +141,7 @@ namespace Signum.Services
         #region IOperationServer Members
         public List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetEntityOperationInfos {0}".Formato(entity.GetType()),
+            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
                 () => OperationLogic.ServiceGetEntityOperationInfos(entity));
         }
 
@@ -133,43 +159,43 @@ namespace Signum.Services
 
         public IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperation {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
         public IIdentifiable ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperationLite {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
         }
 
         public IIdentifiable Delete(Lite lite, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "Delete {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceDelete(lite, operationKey, args));
         }
 
         public IIdentifiable Construct(Type type, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "Construct {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstruct(type, operationKey, args));
         }
 
         public IIdentifiable ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ConstructFrom {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
         public IIdentifiable ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ConstructFromLite {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
         }
 
         public IIdentifiable ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ConstructFromMany {0}".Formato(operationKey),
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
         #endregion
@@ -218,10 +244,31 @@ namespace Signum.Services
               () => TypeAuthLogic.SetTypeRules(rules));
         }
 
-        public DefaultDictionary<Type, TypeAllowed> AuthorizedTypes()
+        public DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => TypeAuthLogic.AuthorizedTypes());
+        }
+
+        public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => TypeAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
+        }
+
+        public byte[] DownloadAuthRules()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+              () =>
+              {
+                  using (MemoryStream ms = new MemoryStream())
+                  using (XmlWriter wr = new XmlTextWriter(ms, Encoding.UTF8))
+                  {
+                      AuthLogic.ExportRules().WriteTo(wr);
+
+                      return ms.ToArray();
+                  }
+              });
         }
 
         #endregion
@@ -306,33 +353,6 @@ namespace Signum.Services
         }
         #endregion
 
-        #region IEntityGroupAuthServer Members
-
-        public EntityGroupRulePack GetEntityGroupAllowedRules(Lite<RoleDN> role)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => EntityGroupAuthLogic.GetEntityGroupRules(role));
-        }
-
-        public void SetEntityGroupAllowedRules(EntityGroupRulePack rules)
-        {
-            Execute(MethodInfo.GetCurrentMethod(),
-               () => EntityGroupAuthLogic.SetEntityGroupRules(rules));
-        }
-
-        public Dictionary<Type, MinMax<TypeAllowedBasic>> GetEntityGroupTypesAllowed()
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-           () => EntityGroupAuthLogic.GetEntityGroupTypesAllowed(true));
-        }
-
-        public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => EntityGroupAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
-        }
-        #endregion
-
         #region IChartServer
         [SuggestUserInterface]
         public ResultTable ExecuteChart(ChartRequest request)
@@ -398,5 +418,33 @@ namespace Signum.Services
         }
         #endregion
 
+        #region SMS Members
+        public string GetPhoneNumber(IdentifiableEntity ie)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.GetPhoneNumber(ie));
+        }
+
+        public List<string> GetLiteralsFromDataObjectProvider(TypeDN type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType()));
+        }    
+    
+        public List<Lite> GetAssociatedTypesForTemplates()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList());
+        }
+
+        #endregion
+
+        #region Profiler
+        public void PushProfilerEntries(List<HeavyProfilerEntry> entries)
+        {
+            Execute(MethodInfo.GetCurrentMethod(), () =>
+                ProfilerLogic.ProfilerEntries(entries)); 
+        }
+        #endregion
     }
 }

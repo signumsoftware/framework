@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Operations;
 using Signum.Utilities;
+using Signum.Entities.Exceptions;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Processes
 {
@@ -17,7 +19,7 @@ namespace Signum.Entities.Processes
         {
             get { return name; }
             set { SetToStr(ref name, value, () => Name); }
-        }
+        }        
 
         OperationDN operation;
         public OperationDN Operation
@@ -38,6 +40,14 @@ namespace Signum.Entities.Processes
         {
             get { return numErrors; }
             set { SetToStr(ref numErrors, value, () => NumErrors); }
+        }
+
+
+        Lite<UserDN> user;
+        public Lite<UserDN> User
+        {
+            get { return user; }
+            set { Set(ref user, value, () => User); }
         }
 
         public override string ToString()
@@ -79,10 +89,8 @@ namespace Signum.Entities.Processes
             set { Set(ref finishTime, value, () => FinishTime); }
         }
 
-
-        [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        public string Exception
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }

@@ -1,4 +1,4 @@
-@using Signum.Entities.Reflection
+﻿@using Signum.Entities.Reflection
 @using Signum.Engine
 @using Signum.Engine.Help
 @using Signum.Web.Help
@@ -15,7 +15,7 @@
    ViewBag.Title = eh.Type.NiceName();
 }
 <form action="@HelpLogic.EntityUrl(eh.Type)/Save" id="form-save">
-<div class="grid_16" id="entityName">
+<div id="entityName">
     <span class='shortcut'>[e:@eh.Type.Name]</span>
     <h1 title="@eh.Type.Namespace">@eh.Type.NiceName()</h1>
     @Html.TextArea("description", eh.Description, 5, 80, new { @class = "editable" })
@@ -23,9 +23,7 @@
         @Html.WikiParse(eh.Description, HelpClient.DefaultWikiSettings)
     </span>
 </div>
-<div class="clear">
-</div>
-<div id="entityContent" class="grid_12">
+<div id="entityContent" class="help_left">
     @if (eh.Properties != null && eh.Properties.Count > 0)
     {
         <div id="properties">
@@ -120,7 +118,7 @@
         </div>
     }
 </div>
-<div class="grid_4">
+<div class="help_right">
     <div class="sidebar">
         <h3>
             Temas relacionados</h3>
@@ -140,6 +138,6 @@
         </ul>
     </div>
 </div>
-<div class="clear">
+<div class="clearall">
 </div>
 </form>

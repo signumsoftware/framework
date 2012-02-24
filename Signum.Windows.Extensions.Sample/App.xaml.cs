@@ -20,6 +20,7 @@ using Signum.Test;
 using Signum.Windows.Extensions.Sample.Controls;
 using Signum.Entities.DynamicQuery;
 using Signum.Windows.Chart;
+using Signum.Windows.UserQueries;
 
 namespace Signum.Windows.Extensions.Sample
 {
@@ -41,7 +42,7 @@ namespace Signum.Windows.Extensions.Sample
         }
 
 
-        void UnhandledAsyncException(Exception e, Window win)
+        void UnhandledAsyncException(Exception e)
         {
             Program.HandleException("Error en llamada asíncrona", e);
         }
@@ -81,7 +82,14 @@ namespace Signum.Windows.Extensions.Sample
                 }
             });
 
-            AuthClient.Start(true, true, true, true, true, true, true, false);
+            AuthClient.Start(
+                types: true,
+                property: true, 
+                queries: true, 
+                permissions: true, 
+                operations: true, 
+                facadeMethods: true, 
+                defaultPasswordExpiresLogic: false);
 
             //ProcessClient.Start();
             //SchedulerClient.Start();
@@ -90,13 +98,13 @@ namespace Signum.Windows.Extensions.Sample
             ReportClient.Start(false, false);
 
             Links.RegisterGlobalLinks((r, c) => new[]{
-                new QuickLinkExplore(new ExploreOptions(typeof(LogOperationDN) )
-                                    {
-                                        FilterOptions = { new FilterOption("Target", r) },
-                                        OrderOptions = { new OrderOption("Start") },
-                                        ColumnOptionsMode = ColumnOptionsMode.Remove,
-                                        ColumnOptions = { new ColumnOption("Target") }
-                                    })
+                new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN) )
+                {
+                    FilterOptions = { new FilterOption("Target", r) },
+                    OrderOptions = { new OrderOption("Start") },
+                    ColumnOptionsMode = ColumnOptionsMode.Remove,
+                    ColumnOptions = { new ColumnOption("Target") }
+                })
             });
 
             UserQueryClient.Start();
@@ -116,7 +124,7 @@ namespace Signum.Windows.Extensions.Sample
 
                 new EntitySettings<CountryDN>(EntityType.Admin) { View = e => new Country() },
 
-                new EntitySettings<Signum.Test.NoteDN>(EntityType.Default) { View = e => new Note() },
+                new EntitySettings<NoteWithDateDN>(EntityType.Default) { View = e => new NoteWithDate() },
             });
 
             Navigator.Initialize();

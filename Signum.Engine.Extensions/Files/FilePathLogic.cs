@@ -13,6 +13,7 @@ using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using System.Diagnostics;
 using System.Web;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Files
 {
@@ -30,7 +31,7 @@ namespace Signum.Engine.Files
                 EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
-                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete +=new PreUnsafeDeleteHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
+                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete +=new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
 
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
                                                  select new
@@ -64,19 +65,36 @@ namespace Signum.Engine.Files
 
                 FilePathDN.UrlPathEncode = HttpUtility.UrlPathEncode;
 
-                sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository }); 
+                sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
+
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
+        }
+
+        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
+            fp => new WebImage { FullWebPath = fp.FullWebPath }; 
+        public static WebImage WebImage(this FilePathDN fp)
+        {
+            return WebImageExpression.Evaluate(fp);
+        }
+
+        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
+           fp => new WebDownload { FullWebPath = fp.FullWebPath };
+        public static WebDownload WebDownload(this FilePathDN fp)
+        {
+            return WebDownloadExpression.Evaluate(fp);
         }
 
         static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
         {
             var list = query.Select(a => a.FullPhysicalPath).ToList();
 
-            Transaction.RealCommit += () =>
+            Transaction.PostRealCommit += () =>
             {
                 foreach (var fullPath in list)
                 {
-                    if (unsafeMode)
+                    if (unsafeMode.Value)
                         Debug.WriteLine(fullPath);
                     else
                         File.Delete(fullPath);
@@ -87,13 +105,13 @@ namespace Signum.Engine.Files
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
 
-        [ThreadStatic]
-        static bool unsafeMode = false;
+        static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
         public static IDisposable UnsafeMode()
         {
-            unsafeMode = true;
-            return new Disposable(() => unsafeMode = false);
+            if (unsafeMode.Value) return null;
+            unsafeMode.Value = true;
+            return new Disposable(() => unsafeMode.Value = false);
         }
 
         public static FilePathDN UnsafeLoad(FileRepositoryDN repository, FileTypeDN fileType, string fullPath)
@@ -111,9 +129,9 @@ namespace Signum.Engine.Files
             };
         }
 
-        static void FilePath_PreSaving(FilePathDN fp, bool isRoot, ref bool graphModified)
+        static void FilePath_PreSaving(FilePathDN fp, ref bool graphModified)
         {
-            if (fp.IsNew && !unsafeMode)
+            if (fp.IsNew && !unsafeMode.Value)
             {
                 using (new EntityCache(true))
                 {
@@ -156,6 +174,7 @@ namespace Signum.Engine.Files
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
+                fp.BinaryFile = null; 
             }
             catch (IOException ex)
             {
@@ -180,7 +199,7 @@ namespace Signum.Engine.Files
 
         public static byte[] GetByteArray(FilePathDN fp)
         {
-            return File.ReadAllBytes(fp.FullPhysicalPath);
+            return fp.BinaryFile ?? File.ReadAllBytes(fp.FullPhysicalPath);
         }
     }
 
@@ -202,7 +221,7 @@ namespace Signum.Engine.Files
         {
             RenameAlgorithm = DefaultRenameAlgorithm;
             GetRepository = DefaultGetRepository;
-            CalculateSufix = DefaultCalculateSufix;
+            CalculateSufix = SimpleSufix;
         }
 
         public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
@@ -212,7 +231,12 @@ namespace Signum.Engine.Files
         public static readonly Func<FilePathDN, FileRepositoryDN> DefaultGetRepository = (FilePathDN fp) =>
             Database.Query<FileRepositoryDN>().FirstOrDefault(r => r.Active && r.FileTypes.Contains(fp.FileType));
 
-        public static readonly Func<FilePathDN, string> DefaultCalculateSufix = (FilePathDN fp) =>
-            Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM-dd"), fp.FileName);
+        public static readonly Func<FilePathDN, string> SimpleSufix = (FilePathDN fp) => fp.FileName;
+
+        public static readonly Func<FilePathDN, string> YearlySufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), fp.FileName);
+        public static readonly Func<FilePathDN, string> MonthlySufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), fp.FileName));
+
+        public static readonly Func<FilePathDN, string> YearlyGuidSufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Guid.NewGuid().ToString() + Path.GetExtension(fp.FileName));
+        public static readonly Func<FilePathDN, string> MonthlyGuidSufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName)));
     }
 }

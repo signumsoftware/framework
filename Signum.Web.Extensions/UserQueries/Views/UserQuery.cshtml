@@ -1,37 +1,47 @@
 ﻿@using Signum.Engine
-@using Signum.Entities.Reports
+@using Signum.Entities.UserQueries
 @using Signum.Entities.Basics
+@using Signum.Engine.Basics
 
+<style type="text/css">
+.sf-user-query-edit .sf-repeater-element
+{
+    padding: 2px 10px;
+}
+.sf-user-query-edit .sf-repeater-element legend
+{
+    float: left;
+    margin-right: 10px;
+}
+</style>
+    
+<div class="sf-user-query-edit">
 @using (var e = Html.TypeContext<UserQueryDN>())
 {
+    object queryName = QueryLogic.ToQueryName(e.Value.Query.Key);
+    ViewData[ViewDataKeys.QueryName] = queryName; //To be use inside Repeaters
+    
     @Html.EntityLine(e, f => f.Related, el => el.Create = false)
-using (var query = e.SubContext(f => f.Query))
-{
-    @Html.HiddenRuntimeInfo(query)
-    @Html.Span("Query", "Query", "sf-label-line")
-    if (ViewData[ViewDataKeys.QueryName] != null)
+    
+    using (var query = e.SubContext(f => f.Query))
     {
-    @Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "sf-value-line", null)
-    }
-    else 
-    { 
-        @Html.Span("spanQuery", query.Value.DisplayName, "sf-value-line")
-    }
+        @Html.HiddenRuntimeInfo(query)
         
-    <div class="clearall">
-    </div>
-        
-    @Html.Hidden(query.Compose("Key"), query.Value.Key)
-    @Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)
-}
+        @Html.Hidden(query.Compose("Key"), query.Value.Key)
+        @Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)
+
+        @Html.Field("Query", Navigator.IsFindable(queryName) ?
+            new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.DisplayName.EncodeHtml()).ToHtml() :
+            Html.Span("spanQuery", query.Value.DisplayName, "sf-value-line"))
+
+        <div class="clearall"></div>
+    }
+    
     @Html.ValueLine(e, f => f.DisplayName)
-    <br />
-    @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true;})
-    <br />
+    @Html.ValueLine(e, f => f.ElementsPerPage)
     @Html.ValueLine(e, f => f.ColumnsMode)
-    @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true;})
-    <br />
+    @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; })
+    @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
     @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
-    <br />
-    @Html.ValueLine(e, f => f.MaxItems)
 } 
+</div>

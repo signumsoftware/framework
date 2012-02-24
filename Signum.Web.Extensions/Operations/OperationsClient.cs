@@ -12,6 +12,7 @@ using System.Web;
 using Signum.Entities.Basics;
 using Signum.Web.Extensions.Properties;
 using Signum.Entities.Reflection;
+using Signum.Engine.Maps;
 #endregion
 
 namespace Signum.Web.Operations
@@ -39,13 +40,28 @@ namespace Signum.Web.Operations
             if (contextualMenuInSearchWindow)
                 OperationsContextualItemsHelper.Start();
         }
+
+        public static class Audit
+        {
+            public static List<string> SowSaveAndOperations()
+            {
+                return (from t in Schema.Current.Tables.Values
+                        where !t.Type.IsEmbeddedEntity()
+                        let es = Navigator.Manager.EntitySettings.TryGetC(t.Type)
+                        where es != null && es.OnShowSave() && OperationLogic.GetAllOperationInfos(t.Type)
+                                                                .Any(a => a.OperationType == OperationType.ConstructorFrom ||
+                                                                        a.OperationType == OperationType.Delete ||
+                                                                        a.OperationType == OperationType.Execute)
+                        select "Type {0} has registered operations but ShowSave = true".Formato(t.Type.Name)).ToList();
+            }
+        }
     }
 
     public class OperationManager
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
 
-        internal ToolBarButton[] ButtonBar_GetButtonBarElement(ControllerContext controllerContext, ModifiableEntity entity, string partialViewName, string prefix)
+        internal ToolBarButton[] ButtonBar_GetButtonBarElement(ToolBarButtonContext ctx, ModifiableEntity entity)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -57,21 +73,22 @@ namespace Signum.Web.Operations
             var contexts =
                     from oi in list
                     let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
-                    let ctx = new EntityOperationContext
+                    let octx = new EntityOperationContext
                     {
                          Entity = ident,
                          OperationSettings = os,
                          OperationInfo = oi,
-                         PartialViewName = partialViewName,
-                         Prefix = prefix
+                         PartialViewName = ctx.PartialViewName,
+                         Prefix = ctx.Prefix
                     }
-                    where os == null || os.IsVisible == null || os.IsVisible(ctx)
-                    select ctx;
+                    where (ctx.Buttons == ViewButtons.Save || os.TryCS(sett => sett.IsVisibleOnOkPopup) == true) &&
+                          (os == null || os.IsVisible == null || os.IsVisible(octx))
+                    select octx;
 
             List<ToolBarButton> buttons = contexts
                 .Where(oi => oi.OperationInfo.OperationType != OperationType.ConstructorFrom || 
                             (oi.OperationInfo.OperationType == OperationType.ConstructorFrom && oi.OperationSettings != null && !oi.OperationSettings.GroupInMenu))
-                .Select(ctx => OperationButtonFactory.Create(ctx))
+                .Select(octx => OperationButtonFactory.Create(octx))
                 .ToList();
 
             var constructFroms = contexts.Where(oi => oi.OperationInfo.OperationType == OperationType.ConstructorFrom && 
@@ -85,7 +102,7 @@ namespace Signum.Web.Operations
                     AltText = createText,
                     Text = createText,
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
-                    Items = constructFroms.Select(ctx => OperationButtonFactory.Create(ctx)).ToList()
+                    Items = constructFroms.Select(octx => OperationButtonFactory.Create(octx)).ToList()
                 });
             }
 
@@ -139,7 +156,7 @@ namespace Signum.Web.Operations
             if (!type.IsIIdentifiable())
                 return null;
 
-            OperationInfo constructor = OperationLogic.ServiceGetConstructorOperationInfos(type).SingleOrDefault();
+            OperationInfo constructor = OperationLogic.ServiceGetConstructorOperationInfos(type).SingleOrDefaultEx();
 
             if (constructor == null)
                 return null;

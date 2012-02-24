@@ -61,6 +61,7 @@ namespace Signum.Web.Auth
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default));
+
                 Navigator.EntitySettings<UserDN>().ShowSave = false;
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
@@ -68,10 +69,16 @@ namespace Signum.Web.Auth
 
                 if (passwordExpiration)
                 {
-                    Navigator.AddSetting(new EntitySettings<PasswordValidIntervalDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
+                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
                 }
 
-                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>() { PartialViewName = _ => ViewPrefix.Formato("SetPassword") });
+                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>()
+                {
+                    PartialViewName = _ => ViewPrefix.Formato("SetPassword"),
+                    MappingDefault = new EntityMapping<SetPasswordModel>(false)
+                    .SetProperty(a => a.Password, ctx => UserMapping.GetNewPassword(ctx, UserMapping.NewPasswordKey, UserMapping.NewPasswordBisKey))
+                    .CreateProperty(a => a.User)
+                });
 
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
@@ -132,18 +139,28 @@ namespace Signum.Web.Auth
                     }
                 };
 
-
                 OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
                     { UserOperation.SetPassword, new EntityOperationSettings 
                     { 
                         OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("SetPassword","Auth"))
-                            .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                        IsContextualVisible = _ => false
+                    }},
+
+                    { UserOperation.SaveNew, new EntityOperationSettings 
+                    { 
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveNewUser","Auth"))
+                            .validateAndAjax()
+                    }},
+
+                    { UserOperation.Save, new EntityOperationSettings 
+                    { 
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveUser","Auth"))
+                            .validateAndAjax(),
                         IsContextualVisible = _ => false
                     }},
                 });
-
-
             }
         }
 
@@ -176,18 +193,23 @@ namespace Signum.Web.Auth
 
         }
 
-        static GenericInvoker miAttachEvents = GenericInvoker.Create(() => AttachEvents<Entity>(null));
+        static GenericInvoker<Action<EntitySettings>> miAttachEvents = new GenericInvoker<Action<EntitySettings>>(es => AttachEvents<TypeDN>((EntitySettings<TypeDN>)es));
         static void AttachEvents<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
-            settings.IsCreable += admin => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() == TypeAllowedBasic.Create;
-            settings.IsReadOnly += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() <= TypeAllowedBasic.Read;
-            settings.IsNavigable += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() >= TypeAllowedBasic.Read;
-            settings.IsViewable += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() >= TypeAllowedBasic.Read;
+            settings.IsCreable += admin => TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() == TypeAllowedBasic.Create;
+
+            settings.IsReadOnly += (entity, admin) => entity == null || entity.IsNew ?
+                TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() < TypeAllowedBasic.Modify : 
+                !entity.IsAllowedFor(TypeAllowedBasic.Modify);
+
+            settings.IsViewable += (entity, admin) => entity == null || entity.IsNew ? 
+                TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() >= TypeAllowedBasic.Read: 
+                entity.IsAllowedFor(TypeAllowedBasic.Read);
         }
 
         static void TaskAuthorizeProperties(BaseLine bl)
         {
-            if (bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 switch (PropertyAuthLogic.GetPropertyAllowed(bl.PropertyRoute))
                 {
@@ -203,13 +225,13 @@ namespace Signum.Web.Auth
             }
         }
 
-        static void AuthClient_Saving(UserDN ident, bool isRoot)
+        static void AuthClient_Saving(UserDN ident)
         {
-            Transaction.RealCommit += () =>
-            {
-                if (ident.Is(UserDN.Current))
-                    AuthController.UpdateSessionUser();
-            };
+            if (ident.Modified == true && ident.Is(UserDN.Current))
+                Transaction.PostRealCommit += () =>
+                {
+                     AuthController.UpdateSessionUser();
+                };
         }
     }
 }

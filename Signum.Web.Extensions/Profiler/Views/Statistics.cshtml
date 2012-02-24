@@ -1,0 +1,27 @@
+﻿@using Signum.Utilities.ExpressionTrees
+@using Signum.Web.Profiler
+@model IOrderedEnumerable<SqlProfileResume>
+@{           
+    SqlProfileResumeOrder order = ViewBag.Order;
+}
+<h2>@ViewData[ViewDataKeys.Title]</h2>
+<div>
+  @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
+  @Html.ActionLink("Root Entries", "Heavy", new {@class = "sf-button" })
+</div>
+
+@Html.Partial(ProfilerClient.ViewPrefix.Formato("StatisticsTable"))
+@Html.ScriptsJs("~/Profiler/Scripts/SF_Profiler.js")
+<script language="javascript">
+    $(function () {
+        SF.Profiler.init(function () {
+            $.ajax({
+                url: "@Url.Action((ProfilerController p) => p.Statistics(order))",
+                success: function(data){
+                    $("table.sf-stats-table").replaceWith(data); 
+                }
+             }); 
+        });
+        SF.Profiler.initStats();
+    });
+</script>

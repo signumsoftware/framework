@@ -37,14 +37,17 @@ namespace Signum.Web.Extensions.Sample
             AlbumFromBandModel model = new AlbumFromBandModel(band.ToLite());
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix, new JsOperationExecutor(
-                new JsOperationOptions { Prefix = prefix, ControllerUrl = RouteHelper.New().Action("CreateAlbumFromBandOnOk", "Music") })
-                .OperationAjax(prefix, JsOpSuccess.DefaultDispatcher)).ToJS();
-            
-            return Navigator.PopupView(this, model, prefix);
+            ViewData[ViewDataKeys.OnSave] = new JsOperationExecutor(new JsOperationOptions 
+                { 
+                    Prefix = prefix,
+                    ControllerUrl = RouteHelper.New().Action("CreateAlbumFromBandOnSave", "Music") 
+                }).validateAndAjax().ToJS();
+
+            TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
+            return this.PopupOpen(new ViewSaveOptions(tc));
         }
 
-        public JsonResult CreateAlbumFromBandOnOk(string prefix)
+        public JsonResult CreateAlbumFromBandOnSave(string prefix)
         {
             MappingContext<AlbumFromBandModel> context = Navigator.ExtractEntity<AlbumFromBandModel>(this, prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
 
@@ -81,7 +84,9 @@ namespace Signum.Web.Extensions.Sample
             ViewData[ViewDataKeys.Title] = "Introduzca los datos de las disponibilidades a crear";
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return this.PopupView(new ValueLineBoxModel(this.ExtractEntity<AlbumDN>(), ValueLineBoxType.String, "Name", "Write new album's name"), prefix);
+
+            TypeContext tc = TypeContextUtilities.UntypedNew(new ValueLineBoxModel(this.ExtractEntity<AlbumDN>(), ValueLineBoxType.String, "Name", "Write new album's name"), prefix);
+            return this.PopupOpen(new ViewOkOptions(tc));
         }
 
         public ActionResult Clone(string prefix)
