@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProvider
 {
@@ -94,8 +95,11 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void TimeFunctionFunction()
+        public void TimeSpanFunction()
         {
+            if (!Schema.Current.Settings.TypeValues.ContainsKey(typeof(TimeSpan)))
+                return;
+
             var durations = Database.MListQuery((AlbumDN a) => a.Songs).Select(mle => mle.Element.Duration).Where(d => d != null);
 
             Debug.WriteLine(durations.Select(d => d.Value.Hours.InSql()).ToString(", "));

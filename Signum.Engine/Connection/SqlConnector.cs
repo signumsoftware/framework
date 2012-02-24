@@ -282,6 +282,11 @@ namespace Signum.Engine
             SqlConnectorScripts.RemoveAllScript().ExecuteLeaves();
             SqlConnectorScripts.ShrinkDatabase(DatabaseName());
         }
+
+        public override bool AllowsMultipleQueries
+        {
+            get { return true; }
+        }
     }
 
     public class SqlParameterBuilder : ParameterBuilder

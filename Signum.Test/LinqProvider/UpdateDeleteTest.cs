@@ -378,7 +378,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             {
                 int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeUpdate(b => new MListElement<AlbumDN, SongDN>
                 {
-                    Element = { Duration = TimeSpan.FromSeconds(3) }
+                    Element = { Seconds = 3 }
                 });
 
                 var list = Database.MListQuery((AlbumDN a) => a.Songs);

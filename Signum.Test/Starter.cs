@@ -37,14 +37,22 @@ namespace Signum.Test
 
         public static void Start(string connectionString)
         {
-            SchemaBuilder sb = new SchemaBuilder(DBMS.SqlCompact);
+            DBMS dbms = DBMS.SqlCompact;
+
+            SchemaBuilder sb = new SchemaBuilder(dbms);
             DynamicQueryManager dqm = new DynamicQueryManager();
-            Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema, dqm);
-                
-                //new SqlConnector(connectionString, sb.Schema, dqm);
+            if (dbms == DBMS.SqlCompact)
+                Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema, dqm);
+            else
+                Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);
+
+            if (dbms == DBMS.SqlCompact || dbms == DBMS.SqlServer2005)
+            {
+                sb.Settings.OverrideAttributes<AlbumDN>(a => a.Songs[0].Duration, new Signum.Entities.IgnoreAttribute());
+                sb.Settings.OverrideAttributes<AlbumDN>(a => a.BonusTrack.Duration, new Signum.Entities.IgnoreAttribute());
+            }
 
             StartMusic(sb, dqm);
-
         }
 
         public static void StartMusic(SchemaBuilder sb, DynamicQueryManager dqm)

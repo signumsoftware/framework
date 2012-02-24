@@ -32,13 +32,7 @@ namespace Signum.Engine.Maps
         {
             DBMS = dbms;
             if (dbms == Maps.DBMS.SqlServer2008)
-            {
                 TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
-            }
-            else
-            {
-                TypeValues.Add(typeof(TimeSpan), SqlDbType.BigInt);
-            }
         }
 
         public DBMS DBMS { get; private set; }

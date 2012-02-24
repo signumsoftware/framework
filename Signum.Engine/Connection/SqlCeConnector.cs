@@ -81,6 +81,8 @@ namespace Signum.Engine
             return cmd;
         }
 
+        string selecctInsertedId = "SELECT CONVERT(Int,@@Identity) AS [newID]";
+        string selectRowCount = "SELECT @@rowcount";
 
         protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand)
         {
@@ -90,8 +92,33 @@ namespace Signum.Engine
             {
                 try
                 {
-                    object result = cmd.ExecuteScalar();
-                    return result;
+                    if (cmd.CommandText.EndsWith(selecctInsertedId))
+                    {
+                        cmd.CommandText = cmd.CommandText.RemoveRight(selecctInsertedId.Length);
+
+                        cmd.ExecuteNonQuery();
+
+                        cmd.CommandText = selecctInsertedId;
+
+                        object result = cmd.ExecuteScalar();
+                        return result;
+                    }
+                    else if (cmd.CommandText.EndsWith(selectRowCount))
+                    {
+                        cmd.CommandText = cmd.CommandText.RemoveRight(selectRowCount.Length);
+
+                        cmd.ExecuteNonQuery();
+
+                        cmd.CommandText = selectRowCount;
+
+                        object result = cmd.ExecuteScalar();
+                        return result;
+                    }
+                    else
+                    {
+                        object result = cmd.ExecuteScalar();
+                        return result;
+                    }
                 }
                 catch (SqlCeException ex)
                 {
@@ -283,6 +310,11 @@ namespace Signum.Engine
 
             SqlCeEngine en = new SqlCeEngine(connectionString);
             en.CreateDatabase();
+        }
+
+        public override bool AllowsMultipleQueries
+        {
+            get { return false; }
         }
     }
 

@@ -591,16 +591,28 @@ namespace Signum.Engine.Maps
                     if (!newEntity)
                         new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(ident) }).ExecuteNonQuery();
 
-                    foreach (var list in collection.Split_1_2_4_8_16())
+                    if (!Connector.Current.AllowsMultipleQueries)
                     {
-                        switch (list.Count)
+                        List<T> uniList = new List<T>() { default(T) };
+                        foreach (var item in collection)
                         {
-                            case 1: Insert1(list, ident, forbidden); break;
-                            case 2: Insert2(list, ident, forbidden); break;
-                            case 4: Insert4(list, ident, forbidden); break;
-                            case 8: Insert8(list, ident, forbidden); break;
-                            case 16: Insert16(list, ident, forbidden); break;
-                            default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count)); 
+                            uniList[0] = item;
+                            Insert1(uniList, ident, forbidden);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var list in collection.Split_1_2_4_8_16())
+                        {
+                            switch (list.Count)
+                            {
+                                case 1: Insert1(list, ident, forbidden); break;
+                                case 2: Insert2(list, ident, forbidden); break;
+                                case 4: Insert4(list, ident, forbidden); break;
+                                case 8: Insert8(list, ident, forbidden); break;
+                                case 16: Insert16(list, ident, forbidden); break;
+                                default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count));
+                            }
                         }
                     }
                 }
@@ -688,7 +700,7 @@ namespace Signum.Engine.Maps
     internal static class SaveUtils
     {
         public static IEnumerable<List<T>> Split_1_2_4_8_16<T>(this IList<T> list)
-        {
+        { 
             List<T> result = new List<T>(16);
             int i = 0;
             for (; i <= list.Count - 16; i += 16)

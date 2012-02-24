@@ -116,6 +116,8 @@ namespace Signum.Engine
         public abstract ParameterBuilder ParameterBuilder { get; protected set; }
 
         public abstract void CleanDatabase();
+
+        public abstract bool AllowsMultipleQueries { get; }
     }
 
     public abstract class ParameterBuilder

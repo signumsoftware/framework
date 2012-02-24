@@ -368,7 +368,18 @@ namespace Signum.Test
         public TimeSpan? Duration
         {
             get { return duration; }
-            set { Set(ref duration, value, () => Duration); }
+            set
+            {
+                if (Set(ref duration, value, () => Duration))
+                    seconds = duration == null ? null : (int?)duration.Value.TotalSeconds;
+            }
+        }
+
+        int? seconds;
+        public int? Seconds
+        {
+            get { return seconds; }
+            set { Set(ref seconds, value, () => Seconds); }
         }
 
         public override string ToString()
