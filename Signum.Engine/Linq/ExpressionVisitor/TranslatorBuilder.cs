@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
-using System.Data.SqlClient;
 using Signum.Utilities;
 using System.Diagnostics;
 using Signum.Utilities.DataStructures;
@@ -15,6 +14,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Collections;
 using Signum.Engine.Maps;
+using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {  
@@ -42,7 +42,7 @@ namespace Signum.Engine.Linq
 
             Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope);
 
-            Expression<Func<SqlParameter[]>> createParams;
+            Expression<Func<DbParameter[]>> createParams;
             string sql = QueryFormatter.Format(proj.Source, out createParams);
 
             var result = new TranslateResult<T>
@@ -89,9 +89,9 @@ namespace Signum.Engine.Linq
 
             Expression<Func<IProjectionRow, KeyValuePair<K, V>>> lambda = ProjectionBuilder.Build<KeyValuePair<K, V>>(proj.Projector, scope);
 
-            Expression<Func<SqlParameter[]>> createParamsExpression;
+            Expression<Func<DbParameter[]>> createParamsExpression;
             string sql = QueryFormatter.Format(proj.Source, out createParamsExpression);
-            Func<SqlParameter[]> createParams = createParamsExpression.Compile();
+            Func<DbParameter[]> createParams = createParamsExpression.Compile();
 
             if (childProj.IsLazyMList)
                 return new LazyChildProjection<K, V>
@@ -119,7 +119,7 @@ namespace Signum.Engine.Linq
 
         public static CommandResult BuildCommandResult(CommandExpression command)
         {
-            Expression<Func<SqlParameter[]>> createParams;
+            Expression<Func<DbParameter[]>> createParams;
             string sql = QueryFormatter.Format(command, out createParams);
 
             return new CommandResult

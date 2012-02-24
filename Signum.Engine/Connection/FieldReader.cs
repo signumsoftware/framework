@@ -10,12 +10,13 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using System.Data.SqlTypes;
+using System.Data.Common;
 
 namespace Signum.Engine
 {
     public class FieldReader
     {
-        SqlDataReader reader;
+        DbDataReader reader;
         TypeCode[] typeCodes;
 
         private const TypeCode tcGuid = (TypeCode)20;
@@ -42,7 +43,7 @@ namespace Signum.Engine
             return tc;
         }
 
-        public FieldReader(SqlDataReader reader)
+        public FieldReader(DbDataReader reader)
         {
             this.reader = reader;
 
@@ -452,7 +453,7 @@ namespace Signum.Engine
             switch (typeCodes[ordinal])
             {
                 case tcDateTimeOffset:
-                    return reader.GetDateTimeOffset(ordinal);
+                    return ((SqlDataReader)reader).GetDateTimeOffset(ordinal);
                 default:
                     return ReflectionTools.ChangeType<DateTimeOffset>(reader.GetValue(ordinal));
             }
@@ -475,7 +476,7 @@ namespace Signum.Engine
             switch (typeCodes[ordinal])
             {
                 case tcTimeSpan:
-                    return reader.GetTimeSpan(ordinal);
+                    return ((SqlDataReader)reader).GetTimeSpan(ordinal);
                 default:
                     return ReflectionTools.ChangeType<TimeSpan>(reader.GetValue(ordinal));
             }

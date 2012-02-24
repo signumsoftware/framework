@@ -378,7 +378,7 @@ namespace Signum.Engine.Maps
 
         public static Schema Current
         {
-            get { return ConnectionScope.Current.Schema; }
+            get { return Connector.Current.Schema; }
         }
 
         public Table Table<T>() where T : IdentifiableEntity

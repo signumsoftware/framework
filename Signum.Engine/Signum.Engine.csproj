@@ -66,6 +66,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft SQL Server Compact Edition\v3.5\Private\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -83,10 +87,11 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Administrator.cs" />
-    <Compile Include="Connection\Connection.cs" />
-    <Compile Include="Connection\ConnectionScope.cs" />
+    <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Executor.cs" />
     <Compile Include="Connection\FieldReader.cs" />
+    <Compile Include="Connection\SqlCeConnector.cs" />
+    <Compile Include="Connection\SqlConnector.cs" />
     <Compile Include="Connection\Transaction.cs" />
     <Compile Include="Connection\UserConnections.cs" />
     <Compile Include="DynamicQuery\AutoDynamicQuery.cs" />
@@ -140,7 +145,6 @@
     <Compile Include="Engine\Saver.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Engine\SqlParameterBuilder.cs" />
     <Compile Include="Engine\SqlPreCommand.cs" />
     <Compile Include="Linq\ViewAttributes.cs" />
     <Compile Include="Engine\SchemaComparer.cs" />

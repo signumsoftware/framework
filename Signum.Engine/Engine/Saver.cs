@@ -32,7 +32,7 @@ namespace Signum.Engine
         {
             DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph);
 
-            Schema schema = ConnectionScope.Current.Schema;
+            Schema schema = Schema.Current;
             modifiables = GraphExplorer.ModifyGraph(modifiables, (Modifiable m, ref bool graphModified) =>
                 {
                     IdentifiableEntity ident = m as IdentifiableEntity;

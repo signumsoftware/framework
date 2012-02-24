@@ -14,6 +14,7 @@ using Signum.Engine.Properties;
 using System.Data;
 using Signum.Engine.Maps;
 using Signum.Entities.DynamicQuery;
+using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
@@ -44,7 +45,7 @@ namespace Signum.Engine.Linq
             return "@p" + (parameter++);
         }
 
-        MethodInfo miUnsafeCreateParameter = ReflectionTools.GetMethodInfo(() => SqlParameterBuilder.UnsafeCreateParameter(null, SqlDbType.BigInt, false, null));
+        MethodInfo miUnsafeCreateParameter = ReflectionTools.GetMethodInfo((ParameterBuilder s) => s.UnsafeCreateParameter(null, SqlDbType.BigInt, false, null));
 
         ParameterInfo CreateParameter(Expression value)
         {
@@ -61,9 +62,11 @@ namespace Signum.Engine.Linq
                 Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :
                 (Expression)Expression.Convert(value, typeof(object));
 
+            var pb = Connector.Current.ParameterBuilder;
+
             return new ParameterInfo
             {
-                Expression = Expression.Call(null, miUnsafeCreateParameter,
+                Expression = Expression.Call(Expression.Constant(pb), miUnsafeCreateParameter,
                    Expression.Constant(name),
                    Expression.Constant(sqlDbType),
                    Expression.Constant(nullable),
@@ -78,13 +81,13 @@ namespace Signum.Engine.Linq
         private QueryFormatter() { }
 
 
-        static internal string Format(Expression expression, out Expression<Func<SqlParameter[]>> getParameters)
+        static internal string Format(Expression expression, out Expression<Func<DbParameter[]>> getParameters)
         {
             QueryFormatter qf = new QueryFormatter();
             qf.Visit(expression);
 
-            getParameters = Expression.Lambda<Func<SqlParameter[]>>(
-                Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.Values.Select(pi=>pi.Expression).ToArray()));
+            getParameters = Expression.Lambda<Func<DbParameter[]>>(
+                Expression.NewArrayInit(typeof(DbParameter), qf.parameterExpressions.Values.Select(pi => pi.Expression).ToArray()));
 
             return qf.sb.ToString();
         }

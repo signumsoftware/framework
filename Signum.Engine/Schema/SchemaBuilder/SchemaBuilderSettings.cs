@@ -10,7 +10,6 @@ using System.Linq.Expressions;
 using Signum.Engine.Properties;
 using System.Data;
 using Signum.Entities.Reflection;
-using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine.Maps
 {

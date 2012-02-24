@@ -10,6 +10,7 @@ using Signum.Engine.Properties;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
+using System.Data.SqlServerCe;
 
 namespace Signum.Engine.Exceptions
 {
@@ -23,7 +24,7 @@ namespace Signum.Engine.Exceptions
 
         static Regex indexRegex = new Regex(@"\'IX_(?<table>[^_]+)(_(?<field>[^_]+))+.*\'"); 
 
-        public UniqueKeyException(SqlException inner) : base(null, inner) 
+        public UniqueKeyException(Exception inner) : base(null, inner) 
         {
             Match m = indexRegex.Match(inner.Message);
             if (m.Success)
@@ -67,7 +68,7 @@ namespace Signum.Engine.Exceptions
 
         protected ForeignKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
        
-        public ForeignKeyException(SqlException inner) : base(null, inner) 
+        public ForeignKeyException(Exception inner) : base(null, inner) 
         {
             Match m = indexRegex.Match(inner.Message);
             

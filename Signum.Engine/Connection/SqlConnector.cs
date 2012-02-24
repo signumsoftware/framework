@@ -1,101 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Data.SqlClient;
+using System.Data.Common;
 using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
-using System.Linq;
-using System.IO;
-using System.Data.SqlClient;
-using Signum.Utilities.ExpressionTrees;
-using System.Text.RegularExpressions;
-using Signum.Engine.Exceptions;
 using Signum.Engine.DynamicQuery;
+using Signum.Engine.Exceptions;
 using System.Data.SqlTypes;
+using System.Reflection;
+using Signum.Utilities.Reflection;
+using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine
 {
-
-    public abstract class BaseConnection
-    {
-        public BaseConnection(Schema schema, DynamicQueryManager dqm)
-        {
-            this.Schema = schema;
-            this.DynamicQueryManager = dqm;
-        }
-
-        public Schema Schema { get; private set; }
-        public DynamicQueryManager DynamicQueryManager { get; private set; }
-
-        static readonly Variable<TextWriter> logger = Statics.ThreadVariable<TextWriter>("connectionlogger");
-        public static TextWriter CurrentLogger
-        {
-            get { return logger.Value; }
-            set { logger.Value = value; }
-        }
-
-        protected static void Log(SqlPreCommandSimple pcs)
-        {
-            var log = logger.Value;
-            if (log != null)
-            {
-                log.WriteLine(pcs.Sql);
-                if (pcs.Parameters != null)
-                    log.WriteLine(pcs.Parameters
-                        .ToString(p => "{0} {1}: {2}".Formato(
-                            p.ParameterName,
-                            p.SqlDbType,
-                            p.Value.TryCC(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
-                log.WriteLine();
-            }
-        }
-
-        protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand);
-        protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand);
-        protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
-        protected internal abstract void ExecuteDataReader(SqlPreCommandSimple command, Action<FieldReader> forEach);
-        protected internal abstract SqlDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
-        protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
-
-        public abstract string DatabaseName();
-
-        public abstract string DataSourceName();
-
-        public virtual int MaxNameLength { get { return 128; } }
-    }
-
-
-    public class Connection : BaseConnection
+    public class SqlConnector : Connector
     {
         int? commandTimeout = null;
-        IsolationLevel isolationLevel = IsolationLevel.Unspecified;
         string connectionString;
 
-        public Connection(string connectionString, Schema schema, DynamicQueryManager dqm)
+        public SqlConnector(string connectionString, Schema schema, DynamicQueryManager dqm)
             : base(schema, dqm)
         {
             this.connectionString = connectionString;
-        }
-
-        public IsolationLevel IsolationLevel
-        {
-            get { return isolationLevel; }
-            set { isolationLevel = value; }
+            this.ParameterBuilder = new SqlParameterBuilder();
         }
 
         public int? CommandTimeout
         {
             get { return commandTimeout; }
-
             set { commandTimeout = value; }
-        }
-
-        static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout"); 
-        public static IDisposable CommandTimeoutScope(int? timeout)
-        {
-            var old = scopeTimeout.Value;
-            scopeTimeout.Value = timeout;
-            return new Disposable(() => scopeTimeout.Value = timeout); 
         }
 
         public string ConnectionString
@@ -109,7 +46,7 @@ namespace Signum.Engine
             if (Transaction.HasTransaction)
                 return null;
 
-            Connection current = ((Connection)ConnectionScope.Current);
+            SqlConnector current = ((SqlConnector)Connector.Current);
             SqlConnection result = new SqlConnection(current.ConnectionString);
             result.Open();
             return result;
@@ -119,7 +56,7 @@ namespace Signum.Engine
         {
             SqlCommand cmd = new SqlCommand();
 
-            int? timeout = scopeTimeout.Value ?? CommandTimeout;
+            int? timeout = Connector.ScopeTimeout ?? CommandTimeout;
             if (timeout.HasValue)
                 cmd.CommandTimeout = timeout.Value;
 
@@ -127,8 +64,8 @@ namespace Signum.Engine
                 cmd.Connection = overridenConnection;
             else
             {
-                cmd.Connection = Transaction.CurrentConnection;
-                cmd.Transaction = Transaction.CurrentTransaccion;
+                cmd.Connection = (SqlConnection)Transaction.CurrentConnection;
+                cmd.Transaction = (SqlTransaction)Transaction.CurrentTransaccion;
             }
 
             cmd.CommandText = preCommand.Sql;
@@ -224,11 +161,11 @@ namespace Signum.Engine
                         throw;
                     throw nex;
                 }
-               
+
             }
         }
 
-        protected internal override SqlDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand)
+        protected internal override DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand)
         {
             try
             {
@@ -310,6 +247,104 @@ namespace Signum.Engine
         public override string DataSourceName()
         {
             return new SqlConnection(connectionString).DataSource;
+        }
+
+        public override void SaveTransactionPoint(DbTransaction transaction, string savePointName)
+        {
+            ((SqlTransaction)transaction).Save(savePointName);
+        }
+
+        public override void RollbackTransactionPoint(DbTransaction transaction, string savePointName)
+        {
+            ((SqlTransaction)transaction).Rollback(savePointName);
+        }
+
+        public override SqlDbType GetSqlDbType(DbParameter p)
+        {
+            return ((SqlParameter)p).SqlDbType;
+        }
+
+        public override DbParameter CloneParameter(DbParameter p)
+        {
+            SqlParameter sp = (SqlParameter)p;
+            return new SqlParameter(sp.ParameterName, sp.Value) { IsNullable = sp.IsNullable, SqlDbType = sp.SqlDbType };
+        }
+
+        public override DbConnection CreateConnection()
+        {
+            return new SqlConnection(ConnectionString);
+        }
+
+        public override ParameterBuilder ParameterBuilder { get; protected set; }
+    }
+
+    public class SqlParameterBuilder : ParameterBuilder
+    {
+        public override string GetParameterName(string name)
+        {
+            return "@" + name;
+        }
+
+        public override DbParameter CreateReferenceParameter(string name, bool nullable, int? id)
+        {
+            return CreateParameter(name, SqlBuilder.PrimaryKeyType, nullable, id);
+        }
+
+        public override DbParameter CreateParameter(string name, object value, Type type)
+        {
+            return CreateParameter(name,
+             Schema.Current.Settings.DefaultSqlType(type.UnNullify()),
+             type == null || type.IsByRef || type.IsNullable(),
+             value);
+        }
+
+        public override DbParameter CreateParameter(string name, SqlDbType type, bool nullable, object value)
+        {
+            if (IsDate(type))
+                AssertDateTime((DateTime?)value);
+
+            return new SqlParameter(GetParameterName(name), type)
+            {
+                IsNullable = nullable,
+                Value = value == null ? DBNull.Value : value,
+                SourceColumn = name,
+            };
+        }
+
+        public override MemberInitExpression ParameterFactory(Expression name, SqlDbType type, bool nullable, Expression value)
+        {
+            NewExpression newParam = Expression.New(typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(SqlDbType) }), name, Expression.Constant(type));
+            
+            Expression valueExpr = Expression.Convert(IsDate(type) ? Expression.Call(miAsserDateTime, value.Nullify()) : value, typeof(object));
+
+            if (nullable)
+                return Expression.MemberInit(newParam, new MemberBinding[]
+                {
+                    Expression.Bind(typeof(SqlParameter).GetProperty("IsNullable"), Expression.Constant(true)),
+                    Expression.Bind(typeof(SqlParameter).GetProperty("Value"), 
+                        Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)), 
+                            Expression.Constant(DBNull.Value, typeof(object)),
+                            valueExpr))
+                });
+            else
+                return Expression.MemberInit(newParam, new MemberBinding[]
+                {  
+                    Expression.Bind(typeof(SqlParameter).GetProperty("Value"), valueExpr)
+                });
+        }
+
+
+
+        public override DbParameter UnsafeCreateParameter(string name, SqlDbType type, bool nullable, object value)
+        {
+            if (IsDate(type))
+                AssertDateTime((DateTime?)value);
+
+            return new SqlParameter(name, type)
+            {
+                IsNullable = nullable,
+                Value = value == null ? DBNull.Value : value,
+            };
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using Signum.Entities;
 using Signum.Engine;
@@ -17,6 +16,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Threading;
 using System.Text;
 using Signum.Utilities.DataStructures;
+using System.Data.Common;
 
 namespace Signum.Engine.Maps
 {
@@ -50,16 +50,16 @@ namespace Signum.Engine.Maps
         class InsertCache
         {
             public Func<string, bool, string> SqlInsertPattern;
-            public Func<IdentifiableEntity, Forbidden, string, List<SqlParameter>> InsertParameters;
+            public Func<IdentifiableEntity, Forbidden, string, List<DbParameter>> InsertParameters;
             public Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> Insert;
             public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert2;
             public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert4;
             public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert8;
             public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert16;
 
-            public List<SqlParameter> InsertParametersMany(List<IdentifiableEntity> entities, DirectedGraph<IdentifiableEntity> graph)
+            public List<DbParameter> InsertParametersMany(List<IdentifiableEntity> entities, DirectedGraph<IdentifiableEntity> graph)
             {
-                List<SqlParameter> result = new List<SqlParameter>();
+                List<DbParameter> result = new List<DbParameter>();
                 int i = 0;
                 foreach (var item in entities)
                     result.AddRange(InsertParameters(item, new Forbidden(graph, item), (i++).ToString()));
@@ -94,7 +94,7 @@ namespace Signum.Engine.Maps
                 trios.ToString(p => p.ParameterName + post, ", "));
 
 
-            var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<SqlParameter>>>(
+            var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
                 CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramPostfix);
 
             result.InsertParameters = expr.Compile();
@@ -228,7 +228,7 @@ namespace Signum.Engine.Maps
         class UpdateCache
         {
             public Func<string, bool, string> SqlUpdatePattern;
-            public Func<IdentifiableEntity, long, Forbidden, string, List<SqlParameter>> UpdateParameters;
+            public Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>> UpdateParameters;
             public Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> Update;
             public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update2;
             public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update4;
@@ -257,10 +257,12 @@ namespace Signum.Engine.Maps
                 item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
             }
 
-            string idParamName = SqlParameterBuilder.GetParameterName("id");
+            var pb = Connector.Current.ParameterBuilder;
+
+            string idParamName = pb.GetParameterName("id");
 
 
-            string oldTicksParamName = SqlParameterBuilder.GetParameterName("old_ticks");
+            string oldTicksParamName = pb.GetParameterName("old_ticks");
 
             result.SqlUpdatePattern = (post, output) =>
             {
@@ -280,12 +282,12 @@ namespace Signum.Engine.Maps
 
             List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
 
-            parameters.Add(SqlParameterBuilder.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, false, Expression.Field(paramIdent, fiId)));
+            parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, false, Expression.Field(paramIdent, fiId)));
 
             if (typeof(Entity).IsAssignableFrom(this.Type))
-                parameters.Add(SqlParameterBuilder.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, false, paramOldTicks));
+                parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, false, paramOldTicks));
 
-            var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<SqlParameter>>>(
+            var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>>>(
                 CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramPostfix);
 
             result.UpdateParameters = expr.Compile();
@@ -348,7 +350,7 @@ namespace Signum.Engine.Maps
             {
                 return (idents, graph) =>
                 {
-                    List<SqlParameter> parameters = new List<SqlParameter>();
+                    List<DbParameter> parameters = new List<DbParameter>();
                     for (int i = 0; i < num; i++)
 			        {    
                         Entity entity = (Entity)idents[i];
@@ -374,7 +376,7 @@ namespace Signum.Engine.Maps
             {
                 return (idents, graph) =>
                 {
-                    List<SqlParameter> parameters = new List<SqlParameter>();
+                    List<DbParameter> parameters = new List<DbParameter>();
                     for (int i = 0; i < num; i++)
 			        {   
                         var ident = idents[i];
@@ -516,14 +518,15 @@ namespace Signum.Engine.Maps
         {
             public Trio(IColumn column, Expression value, Expression postfix)
             {
+                var pc = Connector.Current.ParameterBuilder;
                 this.SourceColumn = column.Name;
-                this.ParameterName = SqlParameterBuilder.GetParameterName(column.Name);
-                this.ParameterBuilder = SqlParameterBuilder.ParameterFactory(Concat(this.ParameterName, postfix), column.SqlDbType, column.Nullable, value);
+                this.ParameterName = pc.GetParameterName(column.Name);
+                this.ParameterBuilder = pc.ParameterFactory(Concat(this.ParameterName, postfix), column.SqlDbType, column.Nullable, value);
             }
 
             public string SourceColumn;
             public string ParameterName;
-            public MemberInitExpression ParameterBuilder; //Expression<SqlParameter>
+            public MemberInitExpression ParameterBuilder; //Expression<DbParameter>
 
             public override string ToString()
             {
@@ -538,7 +541,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        static ConstructorInfo ciNewList = ReflectionTools.GetConstuctorInfo(() => new List<SqlParameter>(1));
+        static ConstructorInfo ciNewList = ReflectionTools.GetConstuctorInfo(() => new List<DbParameter>(1));
 
         public static Expression CreateBlock(IEnumerable<Expression> parameters, IEnumerable<Expression> assigments)
         {
@@ -561,8 +564,8 @@ namespace Signum.Engine.Maps
         {
             public string sqlDelete;
             public Func<string, string> sqlInsert;
-            public Func<IdentifiableEntity, T, Forbidden, string, List<SqlParameter>> InsertParameters;
-            public Func<IdentifiableEntity, SqlParameter> DeleteParameter;
+            public Func<IdentifiableEntity, T, Forbidden, string, List<DbParameter>> InsertParameters;
+            public Func<IdentifiableEntity, DbParameter> DeleteParameter;
 
             public Action<List<T>, IdentifiableEntity, Forbidden> Insert1;
             public Action<List<T>, IdentifiableEntity, Forbidden> Insert2;
@@ -575,7 +578,7 @@ namespace Signum.Engine.Maps
                 if (collection == null)
                 {
                     if (!newEntity)
-                        new SqlPreCommandSimple(sqlDelete, new List<SqlParameter> { DeleteParameter(ident)}).ExecuteNonQuery();
+                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(ident) }).ExecuteNonQuery();
                 }
                 else
                 {
@@ -586,7 +589,7 @@ namespace Signum.Engine.Maps
                         collection.Modified = null;
 
                     if (!newEntity)
-                        new SqlPreCommandSimple(sqlDelete, new List<SqlParameter> { DeleteParameter(ident) }).ExecuteNonQuery();
+                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(ident) }).ExecuteNonQuery();
 
                     foreach (var list in collection.Split_1_2_4_8_16())
                     {
@@ -624,7 +627,7 @@ namespace Signum.Engine.Maps
                 else
                 {
                     return SqlPreCommand.Combine(Spacing.Simple,
-                        new SqlPreCommandSimple(sqlDelete, new List<SqlParameter> { DeleteParameter(parent) }),
+                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(parent) }),
                         list.Select(e => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple)); 
                 }
             }
@@ -635,7 +638,7 @@ namespace Signum.Engine.Maps
             InsertCache<T> result = new InsertCache<T>();
 
             result.sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name.SqlScape(), BackReference.Name);
-            result.DeleteParameter = ident => SqlParameterBuilder.CreateReferenceParameter(BackReference.Name, false, ident.Id);
+            result.DeleteParameter = ident => Connector.Current.ParameterBuilder.CreateReferenceParameter(BackReference.Name, false, ident.Id);
 
             var trios = new List<Table.Trio>();
             var assigments = new List<Expression>();
@@ -652,7 +655,7 @@ namespace Signum.Engine.Maps
                 trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
                 trios.ToString(p => p.ParameterName + post, ", "));
 
-            var expr = Expression.Lambda<Func<IdentifiableEntity, T, Forbidden, string, List<SqlParameter>>>(
+            var expr = Expression.Lambda<Func<IdentifiableEntity, T, Forbidden, string, List<DbParameter>>>(
                 Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramItem, paramForbidden, paramPostfix);
 
             result.InsertParameters = expr.Compile();
@@ -672,7 +675,7 @@ namespace Signum.Engine.Maps
 
             return (list, ident, forbidden) =>
             {
-                List<SqlParameter> parameters = new List<SqlParameter>();
+                List<DbParameter> parameters = new List<DbParameter>();
                 for (int i = 0; i < num; i++)
                 {
                     parameters.AddRange(result.InsertParameters(ident, list[i], forbidden, i.ToString()));
