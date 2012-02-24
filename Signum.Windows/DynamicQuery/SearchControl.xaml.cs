@@ -255,11 +255,11 @@ namespace Signum.Windows
                 SimpleFilterBuilder = null;
             }
         }
-     
+
 
         public Type EntityType
         {
-            get { return Reflector.ExtractLite(entityColumn.Type); }
+            get { return entityColumn == null ? null : Reflector.ExtractLite(entityColumn.Type); }
         }
 
         public Implementations Implementations
