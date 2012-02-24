@@ -112,7 +112,7 @@ namespace Signum.Engine.Maps
         {
             if (Identity)
             {
-                string sqlSingle = result.SqlInsertPattern("", false) + ";SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]";
+                string sqlSingle = result.SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
 
                 return (ident, graph) =>
                 {
@@ -483,7 +483,7 @@ namespace Signum.Engine.Maps
             if (collections == null)
                 return insert;
 
-            SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = SCOPE_IDENTITY()"); 
+            SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = @@Identity"); 
 
             return SqlPreCommand.Combine(Spacing.Simple, insert, setParent, collections); 
         }

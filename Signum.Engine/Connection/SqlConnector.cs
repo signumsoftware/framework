@@ -276,6 +276,12 @@ namespace Signum.Engine
         }
 
         public override ParameterBuilder ParameterBuilder { get; protected set; }
+
+        public override void CleanDatabase()
+        {
+            SqlConnectorScripts.RemoveAllScript().ExecuteLeaves();
+            SqlConnectorScripts.ShrinkDatabase(DatabaseName());
+        }
     }
 
     public class SqlParameterBuilder : ParameterBuilder
@@ -345,6 +351,109 @@ namespace Signum.Engine
                 IsNullable = nullable,
                 Value = value == null ? DBNull.Value : value,
             };
+        }
+    }
+
+    public static class SqlConnectorScripts
+    {
+        public static readonly SqlPreCommandSimple RemoveAllConstraintsScript = new SqlPreCommandSimple(
+@"declare @schema nvarchar(128), @tbl nvarchar(128), @constraint nvarchar(128) 
+DECLARE @sql nvarchar(255) 
+
+declare cur cursor fast_forward for 
+select distinct cu.constraint_schema, cu.table_name, cu.constraint_name 
+from information_schema.table_constraints tc 
+join information_schema.referential_constraints rc on rc.unique_constraint_name = tc.constraint_name 
+join information_schema.constraint_column_usage cu on cu.constraint_name = rc.constraint_name 
+open cur 
+    fetch next from cur into @schema, @tbl, @constraint 
+    while @@fetch_status <> -1 
+    begin 
+        select @sql = 'ALTER TABLE ' + @schema + '.' + @tbl + ' DROP CONSTRAINT ' + @constraint 
+        exec sp_executesql @sql 
+        fetch next from cur into @schema, @tbl, @constraint 
+    end 
+close cur 
+deallocate cur");
+
+        public static readonly SqlPreCommandSimple RemoveAllTablesScript = new SqlPreCommandSimple(
+@"declare @schema nvarchar(128), @tbl nvarchar(128)
+DECLARE @sql nvarchar(255)
+ 
+declare cur cursor fast_forward for 
+select distinct table_schema, table_name
+from information_schema.tables where table_type = 'BASE TABLE'
+open cur 
+    fetch next from cur into @schema, @tbl
+    while @@fetch_status <> -1 
+    begin 
+        select @sql = 'DROP TABLE ' + @schema + '.' + @tbl + ';'
+        exec sp_executesql @sql 
+        fetch next from cur into @schema, @tbl
+    end 
+close cur 
+deallocate cur");
+
+        public static readonly SqlPreCommandSimple RemoveAllViewsScript = new SqlPreCommandSimple(
+@"declare @schema nvarchar(128), @view nvarchar(128)
+DECLARE @sql nvarchar(255) 
+
+declare cur cursor fast_forward for 
+select distinct table_schema, table_name
+from information_schema.tables where table_type = 'VIEW'
+open cur 
+    fetch next from cur into @schema, @view
+    while @@fetch_status <> -1 
+    begin 
+        select @sql = 'DROP VIEW ' + @schema + '.' + @view + ';'
+        exec sp_executesql @sql 
+        fetch next from cur into @schema, @view
+    end 
+close cur 
+deallocate cur");
+
+        public static readonly SqlPreCommandSimple RemoveAllProceduresScript = new SqlPreCommandSimple(
+@"declare @schema nvarchar(128), @proc nvarchar(128), @type nvarchar(128)
+DECLARE @sql nvarchar(255) 
+
+declare cur cursor fast_forward for 
+select routine_schema, routine_name, routine_type
+from information_schema.routines
+open cur 
+    fetch next from cur into @schema, @proc, @type
+    while @@fetch_status <> -1 
+    begin 
+        select @sql = 'DROP '+ @type +' ' + @schema + '.' + @proc + ';'
+        exec sp_executesql @sql 
+        fetch next from cur into @schema, @proc, @type
+    end 
+close cur 
+deallocate cur");
+
+        public static SqlPreCommand RemoveAllScript()
+        {
+            return SqlPreCommand.Combine(Spacing.Double, RemoveAllProceduresScript, RemoveAllViewsScript, RemoveAllConstraintsScript, RemoveAllTablesScript);
+        }
+
+        internal static SqlPreCommand ShrinkDatabase(string schemaName)
+        {
+            return
+                new[]{
+                    Schema.Current.Settings.DBMS == DBMS.SqlServer2005 ?  
+                        new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)):
+                        new []
+                        {
+                            new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".Formato(schemaName)),
+                            new[]{
+                                new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
+                                new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
+                                new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
+                            }.Combine(Spacing.Simple).ToSimple(),
+                            new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".Formato(schemaName)),                  
+                        }.Combine(Spacing.Simple),
+                    new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
+                }.Combine(Spacing.Simple);
+
         }
     }
 }

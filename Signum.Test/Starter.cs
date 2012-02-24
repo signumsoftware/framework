@@ -37,9 +37,11 @@ namespace Signum.Test
 
         public static void Start(string connectionString)
         {
-            SchemaBuilder sb = new SchemaBuilder(DBMS.SqlServer2008);
+            SchemaBuilder sb = new SchemaBuilder(DBMS.SqlCompact);
             DynamicQueryManager dqm = new DynamicQueryManager();
-            Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);
+            Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema, dqm);
+                
+                //new SqlConnector(connectionString, sb.Schema, dqm);
 
             StartMusic(sb, dqm);
 

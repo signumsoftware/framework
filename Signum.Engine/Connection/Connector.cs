@@ -114,6 +114,8 @@ namespace Signum.Engine
         public IsolationLevel IsolationLevel { get; set; }
 
         public abstract ParameterBuilder ParameterBuilder { get; protected set; }
+
+        public abstract void CleanDatabase();
     }
 
     public abstract class ParameterBuilder

@@ -106,6 +106,8 @@ namespace Signum.Engine
 
         public static string CreateField(string name, SqlDbType type, int? size, int? scale, bool nullable, bool primaryKey, bool identity)
         {
+            Schema.Current.Settings.FixType(ref type, ref size, ref scale);
+
             return "{0} {1}{2} {3}{4}{5}".Formato(
                 name.SqlScape(),
                 type.ToString().ToUpper(CultureInfo.InvariantCulture),
@@ -244,27 +246,6 @@ namespace Signum.Engine
         {
             return new SqlPreCommandSimple("SET IDENTITY_INSERT {0} {1}".Formato(
                 table.SqlScape(), value ? "ON" : "OFF"));
-        }
-
-        internal static SqlPreCommand ShrinkDatabase(string schemaName)
-        {
-            return  
-                new[]{
-                    Schema.Current.Settings.DBMS == DBMS.SqlServer2005 ?  
-                        new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)):
-                        new []
-                        {
-                            new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".Formato(schemaName)),
-                            new[]{
-                                new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
-                                new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
-                                new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
-                            }.Combine(Spacing.Simple).ToSimple(),
-                            new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".Formato(schemaName)),                  
-                        }.Combine(Spacing.Simple),
-                    new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
-                }.Combine(Spacing.Simple); 
-            
         }
 
         internal static SqlPreCommandSimple SetSnapshotIsolation(string schemaName, bool value)

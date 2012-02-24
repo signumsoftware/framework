@@ -12,10 +12,11 @@ using System.Data.Common;
 using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using System.IO;
 
 namespace Signum.Engine
 {
-    class SqlCeConnector : Connector
+    public class SqlCeConnector : Connector
     {
         string connectionString;
 
@@ -32,15 +33,6 @@ namespace Signum.Engine
             get { return commandTimeout; }
             set { commandTimeout = value; }
         }
-
-        static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout");
-        public static IDisposable CommandTimeoutScope(int? timeout)
-        {
-            var old = scopeTimeout.Value;
-            scopeTimeout.Value = timeout;
-            return new Disposable(() => scopeTimeout.Value = timeout);
-        }
-
         public string ConnectionString
         {
             get { return connectionString; }
@@ -52,7 +44,7 @@ namespace Signum.Engine
             if (Transaction.HasTransaction)
                 return null;
 
-            SqlConnector current = ((SqlConnector)Connector.Current);
+            SqlCeConnector current = ((SqlCeConnector)Connector.Current);
             SqlCeConnection result = new SqlCeConnection(current.ConnectionString);
             result.Open();
             return result;
@@ -62,7 +54,7 @@ namespace Signum.Engine
         {
             SqlCeCommand cmd = new SqlCeCommand();
 
-            int? timeout = scopeTimeout.Value ?? CommandTimeout;
+            int? timeout = Connector.ScopeTimeout ?? CommandTimeout;
             if (timeout.HasValue)
                 cmd.CommandTimeout = timeout.Value;
 
@@ -88,6 +80,7 @@ namespace Signum.Engine
 
             return cmd;
         }
+
 
         protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand)
         {
@@ -281,6 +274,16 @@ namespace Signum.Engine
         }
 
         public override ParameterBuilder ParameterBuilder { get; protected set; }
+
+        public override void CleanDatabase()
+        {
+            string fileName = new SqlCeConnection(connectionString).DataSource;
+            if (File.Exists(fileName))
+                File.Delete(fileName);
+
+            SqlCeEngine en = new SqlCeEngine(connectionString);
+            en.CreateDatabase();
+        }
     }
 
     public class SqlCeParameterBuilder : ParameterBuilder

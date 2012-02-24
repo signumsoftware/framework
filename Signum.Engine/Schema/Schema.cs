@@ -361,8 +361,6 @@ namespace Signum.Engine.Maps
         {
             this.Settings = settings;
 
-            Generating += Administrator.RemoveAllScript;
-            Generating += Administrator.ShrinkDataBase;
             Generating += Administrator.CreateTablesScript;
             Generating += Administrator.InsertEnumValuesScript;
             Generating += TypeLogic.Schema_Generating;

@@ -16,7 +16,8 @@ namespace Signum.Engine.Maps
     public enum DBMS
     {
         SqlServer2005,
-        SqlServer2008
+        SqlServer2008,
+        SqlCompact
     }
 
     public class SchemaSettings
@@ -24,6 +25,7 @@ namespace Signum.Engine.Maps
 
         public SchemaSettings()
         { 
+
         }
 
         public SchemaSettings(DBMS dbms)
@@ -32,6 +34,10 @@ namespace Signum.Engine.Maps
             if (dbms == Maps.DBMS.SqlServer2008)
             {
                 TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+            }
+            else
+            {
+                TypeValues.Add(typeof(TimeSpan), SqlDbType.BigInt);
             }
         }
 
@@ -238,6 +244,15 @@ namespace Signum.Engine.Maps
                 desambiguatedNames = new Dictionary<Type, string>();
 
             desambiguatedNames[type] = cleanName;
+        }
+
+        internal void FixType(ref SqlDbType type, ref int? size, ref int? scale)
+        {
+            if (DBMS == Maps.DBMS.SqlCompact && (type == SqlDbType.NVarChar || type == SqlDbType.VarChar) && size > 4000)
+            {
+                type = SqlDbType.NText;
+                size = null;
+            }
         }
     }
 
