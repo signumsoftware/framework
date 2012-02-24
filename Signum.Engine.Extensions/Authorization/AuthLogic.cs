@@ -370,7 +370,7 @@ namespace Signum.Engine.Authorization
 
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
-                new SqlPreCommandSimple("use {0}".Formato(ConnectionScope.Current.DatabaseName())),
+                new SqlPreCommandSimple("use {0}".Formato(Connector.Current.DatabaseName())),
                 dbOnlyWarnings,
                 declareParent,
                 result,

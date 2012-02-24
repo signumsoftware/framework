@@ -15,6 +15,7 @@ using System.Threading;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using System.Reflection;
+using System.Data.Common;
 
 namespace Signum.Entities.Authorization
 {
@@ -83,11 +84,11 @@ namespace Signum.Entities.Authorization
             var t = Schema.Current.Table<RuleTypeDN>();
             var rec = (FieldReference)t.Fields["resource"].Field;
             var cond = (FieldMList)t.Fields["conditions"].Field;
-            var param = SqlParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
 
             var conditions = new SqlPreCommandSimple("DELETE cond FROM {0} cond INNER JOIN {1} r ON cond.{2} = r.{3} WHERE r.{4} = {5}".Formato(
-                cond.RelationalTable.Name.SqlScape(), t.Name.SqlScape(), cond.RelationalTable.BackReference.Name.SqlScape(), "Id", rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<SqlParameter> { param });
-            var rule = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name.SqlScape(), rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<SqlParameter> { param });
+                cond.RelationalTable.Name.SqlScape(), t.Name.SqlScape(), cond.RelationalTable.BackReference.Name.SqlScape(), "Id", rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<DbParameter> { param });
+            var rule = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name.SqlScape(), rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<DbParameter> { param });
 
             return SqlPreCommand.Combine(Spacing.Simple, conditions, rule); 
         }    
