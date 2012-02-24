@@ -185,6 +185,8 @@ namespace Signum.Windows
                 return ValueLineType.Enum;
             else if (type == typeof(ColorDN))
                 return ValueLineType.Color;
+            else if (type == typeof(TimeSpan))
+                return ValueLineType.TimeSpan;
             else
             {
                 switch (Type.GetTypeCode(type))
@@ -223,6 +225,7 @@ namespace Signum.Windows
             {ValueLineType.String, TextBox.TextProperty},
             {ValueLineType.DateTime, DateTimePicker.SelectedDateProperty},
             {ValueLineType.Color, ColorPicker.SelectedColorProperty},
+            {ValueLineType.TimeSpan, TimePicker.TimePartProperty},
         };
 
         public Dictionary<ValueLineType, DependencyProperty> readOnlyProperties = new Dictionary<ValueLineType, DependencyProperty>()
@@ -232,7 +235,8 @@ namespace Signum.Windows
             {ValueLineType.Number, NumericTextBox.IsReadOnlyProperty},
             {ValueLineType.String, TextBox.IsReadOnlyProperty},
             {ValueLineType.DateTime, DateTimePicker.IsReadOnlyProperty},
-            {ValueLineType.Color, ColorPicker.IsReadOnlyProperty}
+            {ValueLineType.Color, ColorPicker.IsReadOnlyProperty},
+            {ValueLineType.TimeSpan, TimePicker.IsReadOnlyProperty},
         };
 
         public Dictionary<ValueLineType, Func<ValueLine, Control>> constructor = new Dictionary<ValueLineType, Func<ValueLine, Control>>()
@@ -285,6 +289,18 @@ namespace Signum.Windows
                         new DateTimeConverter(vl.Format); 
                 }
                 return dt;
+            }},
+            {ValueLineType.TimeSpan, vl => 
+            {
+                var tp = new TimePicker(); 
+                if(vl.Format != null) 
+                {
+                    tp.TimeSpanConverter = 
+                        vl.Format == TimeSpanConverter.Minutes.Format?  TimeSpanConverter.Minutes:
+                        vl.Format == TimeSpanConverter.Seconds.Format?  TimeSpanConverter.Seconds:
+                        new TimeSpanConverter(vl.Format); 
+                }
+                return tp;
             }},
             {ValueLineType.Color, vl => new ColorPicker()}
         };
@@ -346,6 +362,7 @@ namespace Signum.Windows
         Number,
         String,
         DateTime,
-        Color
+        Color,
+        TimeSpan
     };
 }
