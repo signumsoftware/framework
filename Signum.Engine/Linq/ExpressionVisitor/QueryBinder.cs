@@ -799,7 +799,7 @@ namespace Signum.Engine.Linq
 
                 Expression binded = ExpressionCleaner.BindMethodExpression(simple, true);
 
-                Expression cleanedSimple = DbQueryProvider.Clean(binded, true);
+                Expression cleanedSimple = DbQueryProvider.Clean(binded, true, null);
                 map.AddRange(replacements);
                 Expression result = Visit(cleanedSimple);
                 map.RemoveRange(replacements.Keys);
@@ -875,7 +875,7 @@ namespace Signum.Engine.Linq
 
                 Expression binded = ExpressionCleaner.BindMemberExpression(simple, true);
 
-                Expression cleanedSimple = DbQueryProvider.Clean(binded, true);
+                Expression cleanedSimple = DbQueryProvider.Clean(binded, true, null);
                 map.Add(parameter, source);
                 Expression result = Visit(cleanedSimple);
                 map.Remove(parameter);
@@ -1419,7 +1419,7 @@ namespace Signum.Engine.Linq
             {
                 MemberAssignment ma = (MemberAssignment)m;
                 Expression colExpression = Visit(Expression.MakeMemberAccess(obj, ma.Member));
-                Expression cleaned = DbQueryProvider.Clean(ma.Expression, true);
+                Expression cleaned = DbQueryProvider.Clean(ma.Expression, true, null);
                 Expression expression = Visit(cleaned);
                 return Assign(colExpression, expression);
             }

@@ -37,7 +37,7 @@ namespace Signum.Test
 
         public static void Start(string connectionString)
         {
-            DBMS dbms = DBMS.SqlCompact;
+            DBMS dbms = DBMS.SqlServer2005;
 
             SchemaBuilder sb = new SchemaBuilder(dbms);
             DynamicQueryManager dqm = new DynamicQueryManager();
