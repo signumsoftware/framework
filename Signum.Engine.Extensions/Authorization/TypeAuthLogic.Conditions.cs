@@ -391,7 +391,7 @@ namespace Signum.Engine.Authorization
                     return Expression.And(Expression.Not(exp), acum);
             });
 
-            return DbQueryProvider.Clean(expression, false);
+            return DbQueryProvider.Clean(expression, false, null);
         }
 
 
