@@ -222,9 +222,11 @@ namespace Signum.Utilities
             if (tracer == null)
                 return;
 
+            bool hasStackTrace = current.Value.StackTrace != null;
+
             tracer.Dispose();
 
-            tracer.saveCurrent = CreateNewEntry(role, aditionalData, tracer.saveCurrent.StackTrace != null); 
+            tracer.saveCurrent = CreateNewEntry(role, aditionalData, hasStackTrace); 
         }
 
         public static void CleanCurrent() //To fix possible non-dispossed ones
