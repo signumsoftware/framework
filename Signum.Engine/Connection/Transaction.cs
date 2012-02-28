@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Data.SqlClient;
 using System.Data;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
@@ -9,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Engine.Properties;
 using Signum.Entities;
+using System.Data.Common;
 
 namespace Signum.Engine
 {
@@ -34,7 +34,7 @@ namespace Signum.Engine
             UnexpectedBehaviourCallback("TRANSACTION ROLLBACKED!", new StackTrace(2, true));
         }
 
-        static readonly Variable<Dictionary<BaseConnection, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<BaseConnection, ICoreTransaction>>("transactions");
+        static readonly Variable<Dictionary<Connector, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<Connector, ICoreTransaction>>("transactions");
 
         bool commited;
         ICoreTransaction coreTransaction; 
@@ -44,8 +44,8 @@ namespace Signum.Engine
             event Action PostRealCommit;
             void CallPostRealCommit();
             event Action PreRealCommit;
-            SqlConnection Connection { get; }
-            SqlTransaction Transaction { get; }
+            DbConnection Connection { get; }
+            DbTransaction Transaction { get; }
             DateTime Time { get; }
             bool RolledBack { get; }
             bool Started { get; }
@@ -81,8 +81,8 @@ namespace Signum.Engine
                 remove { parent.PreRealCommit -= value; }
             }
 
-            public SqlConnection Connection{ get { return parent.Connection; } }
-            public SqlTransaction Transaction{ get { return parent.Transaction; } }
+            public DbConnection Connection{ get { return parent.Connection; } }
+            public DbTransaction Transaction{ get { return parent.Transaction; } }
             public DateTime Time{ get { return parent.Time;} }
             public bool RolledBack { get{ return parent.RolledBack;} }
             public bool Started { get { return parent.Started; } }
@@ -113,8 +113,8 @@ namespace Signum.Engine
         {
             ICoreTransaction parent; 
 
-            public SqlConnection Connection { get; private set; }
-            public SqlTransaction Transaction { get; private set; }
+            public DbConnection Connection { get; private set; }
+            public DbTransaction Transaction { get; private set; }
             public DateTime Time { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
@@ -134,11 +134,10 @@ namespace Signum.Engine
             {
                 if (!Started)
                 {
-                    Connection con = (Connection)ConnectionScope.Current;
-                    Connection = new SqlConnection(con.ConnectionString);
+                    Connection = Connector.Current.CreateConnection();
                     
                     Connection.Open();
-                    Transaction = Connection.BeginTransaction(IsolationLevel ?? con.IsolationLevel);
+                    Transaction = Connection.BeginTransaction(IsolationLevel ?? Connector.Current.IsolationLevel);
                     Started = true;
                 }
             }
@@ -229,8 +228,8 @@ namespace Signum.Engine
             }
 
         
-            public SqlConnection Connection { get { return parent.Connection; } }
-            public SqlTransaction Transaction { get { return parent.Transaction; } }
+            public DbConnection Connection { get { return parent.Connection; } }
+            public DbTransaction Transaction { get { return parent.Transaction; } }
             public DateTime Time { get { return parent.Time; } }
 
             public void Start()
@@ -238,7 +237,7 @@ namespace Signum.Engine
                 if (!Started)
                 {
                     parent.Start();
-                    Transaction.Save(savePointName);
+                    Connector.Current.SaveTransactionPoint(Transaction, savePointName);
                     Started = true;
                 }
             }
@@ -247,7 +246,7 @@ namespace Signum.Engine
             {
                 if (Started && !RolledBack)
                 {
-                    Transaction.Rollback(savePointName);
+                    Connector.Current.RollbackTransactionPoint(Transaction, savePointName);
                     NotifyRollback();
                     RolledBack = true;
                 }
@@ -288,8 +287,8 @@ namespace Signum.Engine
         {
             ICoreTransaction parent;
 
-            public SqlConnection Connection { get; private set; }
-            public SqlTransaction Transaction { get{return null;}}
+            public DbConnection Connection { get; private set; }
+            public DbTransaction Transaction { get{return null;}}
             public DateTime Time { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
@@ -306,8 +305,7 @@ namespace Signum.Engine
             {
                 if (!Started)
                 {
-                    Connection con = (Connection)ConnectionScope.Current;
-                    Connection = new SqlConnection(con.ConnectionString);
+                    Connection = Connector.Current.CreateConnection();
 
                     Connection.Open();
                     //Transaction = Connection.BeginTransaction(IsolationLevel ?? con.IsolationLevel);
@@ -406,9 +404,9 @@ namespace Signum.Engine
         Transaction(Func<ICoreTransaction, ICoreTransaction> factory)
         {
             if (currents.Value == null)
-                currents.Value = new Dictionary<BaseConnection, ICoreTransaction>();
+                currents.Value = new Dictionary<Connector, ICoreTransaction>();
 
-            BaseConnection bc = ConnectionScope.Current;
+            Connector bc = Connector.Current;
 
             if (bc == null)
                 throw new InvalidOperationException("ConnectionScope.Current not established. Use ConnectionScope.Default to set it.");
@@ -454,7 +452,7 @@ namespace Signum.Engine
     
         static ICoreTransaction GetCurrent()
         {
-            return currents.Value.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
+            return currents.Value.GetOrThrow(Connector.Current, "No Transaction created yet");
         }
 
         public static event Action PostRealCommit
@@ -476,10 +474,10 @@ namespace Signum.Engine
 
         public static bool HasTransaction
         {
-            get { return currents.Value != null && currents.Value.ContainsKey(ConnectionScope.Current); }
+            get { return currents.Value != null && currents.Value.ContainsKey(Connector.Current); }
         }
 
-        public static SqlConnection CurrentConnection
+        public static DbConnection CurrentConnection
         {
             get
             {
@@ -489,7 +487,7 @@ namespace Signum.Engine
             }
         }
 
-        public static SqlTransaction CurrentTransaccion
+        public static DbTransaction CurrentTransaccion
         {
             get
             {
@@ -533,9 +531,9 @@ namespace Signum.Engine
             ICoreTransaction parent = coreTransaction.Finish();
 
             if (parent == null)
-                currents.Value.Remove(ConnectionScope.Current);
+                currents.Value.Remove(Connector.Current);
             else
-                currents.Value[ConnectionScope.Current] = parent;
+                currents.Value[Connector.Current] = parent;
 
             if (commited)
                 coreTransaction.CallPostRealCommit();

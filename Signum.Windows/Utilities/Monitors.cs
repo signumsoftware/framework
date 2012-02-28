@@ -169,12 +169,15 @@ namespace Signum.Windows
 
             var info = Monitors.GetMonitorFromWindow(win, NotFoundOptions.DefaultToNearest);
 
-            if (win.MaxWidth != info.WorkingArea.Width || win.MaxHeight != info.WorkingArea.Height)
+            if (win.MaxWidth != info.WorkingArea.Width || win.MaxHeight != info.WorkingArea.Height )
             {
+                if(win.MaxWidth != double.PositiveInfinity && win.MaxHeight != double.PositiveInfinity)
+                     SetJustChangedMonitor(win, DateTime.Now);
+
                 win.MaxWidth = info.WorkingArea.Width;
                 win.MaxHeight = info.WorkingArea.Height;
 
-                SetJustChangedMonitor(win, DateTime.Now);
+               
             }
         }
 

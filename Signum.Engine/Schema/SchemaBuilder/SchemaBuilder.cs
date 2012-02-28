@@ -25,9 +25,14 @@ namespace Signum.Engine.Maps
             get { return schema.Settings; }
         }
 
-        public SchemaBuilder()
+        public SchemaBuilder() : this(DBMS.SqlServer2005)
         {
-            schema = new Schema(new SchemaSettings());
+
+        }
+
+        public SchemaBuilder(DBMS dbms)
+        {
+            schema = new Schema(new SchemaSettings(dbms));
             Include<TypeDN>();
         }
 

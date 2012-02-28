@@ -38,6 +38,16 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+
+        public static readonly DependencyProperty SimpleFilterBuilderProperty =
+          DependencyProperty.Register("SimpleFilterBuilder", typeof(ISimpleFilterBuilder), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public ISimpleFilterBuilder SimpleFilterBuilder
+        {
+            get { return (ISimpleFilterBuilder)GetValue(SimpleFilterBuilderProperty); }
+            set { SetValue(SimpleFilterBuilderProperty, value); }
+        }
+
+
         public static readonly DependencyProperty OrderOptionsProperty =
              DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
         public ObservableCollection<OrderOption> OrderOptions

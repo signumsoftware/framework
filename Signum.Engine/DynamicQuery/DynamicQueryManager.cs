@@ -23,7 +23,7 @@ namespace Signum.Engine.DynamicQuery
     {
         public static DynamicQueryManager Current
         {
-            get { return ConnectionScope.Current.DynamicQueryManager; }
+            get { return Connector.Current.DynamicQueryManager; }
 
         }
 

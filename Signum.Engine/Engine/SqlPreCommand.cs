@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading;
 using System.Diagnostics;
+using System.Data.Common;
 
 namespace Signum.Engine
 {
@@ -27,7 +28,7 @@ namespace Signum.Engine
 
         protected internal abstract void GenerateScript(StringBuilder sb);
 
-        protected internal abstract void GenerateParameters(List<SqlParameter> list);
+        protected internal abstract void GenerateParameters(List<DbParameter> list);
 
         protected internal abstract int NumParameters { get; }
 
@@ -105,14 +106,14 @@ namespace Signum.Engine
     public class SqlPreCommandSimple : SqlPreCommand
     {
         public string Sql { get; private set; }
-        public List<SqlParameter> Parameters { get; private set; }
+        public List<DbParameter> Parameters { get; private set; }
 
         public SqlPreCommandSimple(string sql)
         {
             this.Sql = sql;
         }
 
-        public SqlPreCommandSimple(string sql, List<SqlParameter> parameters)
+        public SqlPreCommandSimple(string sql, List<DbParameter> parameters)
         {
             this.Sql = sql;
             this.Parameters = parameters;
@@ -128,7 +129,7 @@ namespace Signum.Engine
             sb.Append(Sql);
         }
 
-        protected internal override void GenerateParameters(List<SqlParameter> list)
+        protected internal override void GenerateParameters(List<DbParameter> list)
         {
             if (Parameters != null)
                 list.AddRange(Parameters);
@@ -179,7 +180,7 @@ namespace Signum.Engine
         public override SqlPreCommand Clone()
         {
             return new SqlPreCommandSimple(Sql, Parameters == null ? null : Parameters
-                .Select(p => new SqlParameter(p.ParameterName, p.Value) { IsNullable = p.IsNullable, SqlDbType = p.SqlDbType })
+                .Select(p => Connector.Current.CloneParameter(p))
                 .ToList());
         }
 
@@ -228,7 +229,7 @@ namespace Signum.Engine
             if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
         }
 
-        protected internal override void GenerateParameters(List<SqlParameter> list)
+        protected internal override void GenerateParameters(List<DbParameter> list)
         {
             foreach (SqlPreCommand com in Commands)
                 com.GenerateParameters(list);
@@ -239,7 +240,7 @@ namespace Signum.Engine
             StringBuilder sb = new StringBuilder();
             GenerateScript(sb);
 
-            List<SqlParameter> parameters = new List<SqlParameter>();
+            List<DbParameter> parameters = new List<DbParameter>();
             GenerateParameters(parameters);
 
             return new SqlPreCommandSimple(sb.ToString(), parameters);

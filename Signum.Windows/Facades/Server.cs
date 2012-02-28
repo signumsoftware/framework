@@ -55,7 +55,13 @@ namespace Signum.Windows
         {
             get
             {
-                return (current is ICommunicationObject) && ((ICommunicationObject)current).State != CommunicationState.Faulted;
+                if (current == null)
+                    return false;
+
+                if(!(current is ICommunicationObject))
+                    return true;
+
+                return ((ICommunicationObject)current).State != CommunicationState.Faulted;
             }
         }
        

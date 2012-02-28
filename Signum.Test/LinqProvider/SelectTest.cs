@@ -31,7 +31,7 @@ namespace Signum.Test.LinqProvider
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLogger = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }      
      
         [TestMethod]
@@ -517,8 +517,8 @@ namespace Signum.Test.LinqProvider
         {
             var durations = (from a in Database.Query<AlbumDN>()
                              from s in a.Songs
-                             where s.Duration.HasValue
-                             select s.Duration.Value).ToArray();
+                             where s.Seconds.HasValue
+                             select s.Seconds.Value).ToArray();
         }
 
         [TestMethod]
@@ -526,8 +526,8 @@ namespace Signum.Test.LinqProvider
         {
             var durations = (from a in Database.Query<AlbumDN>()
                              from s in a.Songs
-                             where s.Duration.HasValue
-                             select s.Duration == null).ToArray();
+                             where s.Seconds.HasValue
+                             select s.Seconds == null).ToArray();
         }
 
         [TestMethod]

@@ -22,7 +22,7 @@ namespace Signum.Test
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLogger = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }
 
         [TestMethod]

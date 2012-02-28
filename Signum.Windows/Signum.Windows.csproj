@@ -95,6 +95,10 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Page Include="Controls\TimePicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DynamicQuery\ElementsInPageLabel.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -113,6 +117,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Controls\TimePicker.xaml.cs">
+      <DependentUpon>TimePicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\TimeSpanConverter.cs" />
     <Compile Include="DynamicQuery\DynamicQueryBachRequest.cs" />
     <Compile Include="DynamicQuery\ElementsInPageLabel.xaml.cs">
       <DependentUpon>ElementsInPageLabel.xaml</DependentUpon>

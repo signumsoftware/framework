@@ -30,7 +30,7 @@ namespace Signum.Windows
     public partial class SearchControl
     {
         public static readonly DependencyProperty QueryNameProperty =
-            DependencyProperty.Register("QueryName", typeof(object), typeof(SearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("QueryName", typeof(object), typeof(SearchControl), new UIPropertyMetadata((o,s)=>((SearchControl)o).QueryNameChanged(s)));
         public object QueryName
         {
             get { return (object)GetValue(QueryNameProperty); }
@@ -52,6 +52,16 @@ namespace Signum.Windows
             get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
             set { SetValue(FilterOptionsProperty, value); }
         }
+
+
+        public static readonly DependencyProperty SimpleFilterBuilderProperty =
+          DependencyProperty.Register("SimpleFilterBuilder", typeof(ISimpleFilterBuilder), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).SimpleFilterBuilderChanged(e)));
+        public ISimpleFilterBuilder SimpleFilterBuilder
+        {
+            get { return (ISimpleFilterBuilder)GetValue(SimpleFilterBuilderProperty); }
+            set { SetValue(SimpleFilterBuilderProperty, value); }
+        }
+
 
         public static readonly DependencyProperty ColumnOptionsModeProperty =
             DependencyProperty.Register("ColumnOptionsMode", typeof(ColumnOptionsMode), typeof(SearchControl), new UIPropertyMetadata(ColumnOptionsMode.Add));
@@ -102,7 +112,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ShowFiltersProperty =
-            DependencyProperty.Register("ShowFilters", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+            DependencyProperty.Register("ShowFilters", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false, (s, e) => ((SearchControl)s).ShowFiltersChanged(e)));
         public bool ShowFilters
         {
             get { return (bool)GetValue(ShowFiltersProperty); }
@@ -189,6 +199,14 @@ namespace Signum.Windows
             set { SetValue(CreateProperty, value); }
         }
 
+        public static readonly DependencyProperty RemoveProperty =
+            DependencyProperty.Register("Remove", typeof(bool), typeof(SearchControl), new FrameworkPropertyMetadata(false, (d, e) => ((SearchControl)d).UpdateVisibility()));
+        public bool Remove
+        {
+            get { return (bool)GetValue(RemoveProperty); }
+            set { SetValue(RemoveProperty, value); }
+        }
+
         public static readonly DependencyProperty ViewOnCreateProperty =
           DependencyProperty.Register("ViewOnCreate", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
         public bool ViewOnCreate
@@ -212,7 +230,7 @@ namespace Signum.Windows
             get { return (string)GetValue(FilterRouteProperty); }
             set { SetValue(FilterRouteProperty, value); }
         }
-
+        
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
         {
             if(IsLoaded)
@@ -220,9 +238,28 @@ namespace Signum.Windows
         }
 
 
+        private void SimpleFilterBuilderChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue != null)
+            {
+                ShowFilters = false;
+            }
+        }
+
+        private void ShowFiltersChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == true && SimpleFilterBuilder != null)
+            {
+                RefreshSimpleFilters();
+
+                SimpleFilterBuilder = null;
+            }
+        }
+
+
         public Type EntityType
         {
-            get { return Reflector.ExtractLite(entityColumn.Type); }
+            get { return entityColumn == null ? null : Reflector.ExtractLite(entityColumn.Type); }
         }
 
         public Implementations Implementations
@@ -246,6 +283,7 @@ namespace Signum.Windows
 
         public event Func<IdentifiableEntity> Creating;
         public event Action<IdentifiableEntity> Viewing;
+        public event Action<List<Lite>> Removing;
         public event Action DoubleClick;
 
         public SearchControl()
@@ -261,6 +299,31 @@ namespace Signum.Windows
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(100);
             timer.Tick += new EventHandler(timer_Tick);
+        }
+
+        private void QueryNameChanged(DependencyPropertyChangedEventArgs s)
+        {
+            if (DesignerProperties.GetIsInDesignMode(this) || s.NewValue == null)
+            {
+                return;
+            }
+
+            Settings = Navigator.GetQuerySettings(s.NewValue);
+
+
+            Description = Navigator.Manager.GetQueryDescription(s.NewValue);
+
+            if (Settings.SimpleFilterBuilder != null)
+            {
+                SimpleFilterBuilder = Settings.SimpleFilterBuilder(Description);
+            }
+
+            tokenBuilder.Token = null;
+            tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
+
+            entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
+            if (entityColumn == null)
+                throw new InvalidOperationException("Entity Column not found");
         }
 
         ColumnDescription entityColumn;
@@ -294,6 +357,7 @@ namespace Signum.Windows
                 return;
             }
 
+          
             if (FilterColumn.HasText())
             {
                 FilterOptions.Add(new FilterOption
@@ -308,16 +372,6 @@ namespace Signum.Windows
                     SearchOnLoad = true;
             }
 
-            Settings = Navigator.GetQuerySettings(QueryName);
-
-            Description = Navigator.Manager.GetQueryDescription(QueryName);
-
-            tokenBuilder.Token = null;
-            tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
-
-            entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
-            if (entityColumn == null)
-                throw new InvalidOperationException("Entity Column not found");
 
             if (this.NotSet(ViewProperty) && View && entityColumn.Implementations == null)
                 View = Navigator.IsViewable(EntityType, IsAdmin);
@@ -341,23 +395,23 @@ namespace Signum.Windows
 
             CompleteOrderColumns();
 
-
             if (IsVisible)
             {
-                LoadCustomMenuItems();
+                FillMenuItems();
 
                 if (SearchOnLoad)
                     Search();
             }
             else
-            {
                 IsVisibleChanged += SearchControl_IsVisibleChanged;
-            }
+
+            UpdateVisibility();
         }
+
 
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            UpdateMultiplyMessage();                       
+            UpdateMultiplyMessage(false);                       
         }
 
         List<QueryToken> tokenBuilder_SubTokensEvent(QueryToken arg)
@@ -417,15 +471,15 @@ namespace Signum.Windows
             if (((bool)e.NewValue) == true)
             {
                 IsVisibleChanged -= SearchControl_IsVisibleChanged;
-                
-                LoadCustomMenuItems();
+
+                FillMenuItems();
 
                 if (SearchOnLoad)
                     Search();
             }
         }
 
-        private void LoadCustomMenuItems()
+        private void FillMenuItems()
         {
             if (GetCustomMenuItems != null)
             {
@@ -440,7 +494,8 @@ namespace Signum.Windows
 
         void UpdateViewSelection()
         {
-            btView.Visibility = lvResult.SelectedItem != null && View ? Visibility.Visible : Visibility.Collapsed;
+            btView.Visibility = View && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
+            btRemove.Visibility = Remove && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
 
             SelectedItem = ((ResultRow)lvResult.SelectedItem).TryCC(r => r.Entity);
             if (MultiSelection)
@@ -509,7 +564,7 @@ namespace Signum.Windows
 
             btFind.IsEnabled = false;
 
-            var request = UpdateMultiplyMessage();
+            var request = UpdateMultiplyMessage(true);
 
             DynamicQueryBachRequest.Enqueue(request,          
                 obj =>
@@ -524,9 +579,9 @@ namespace Signum.Windows
                 () => { btFind.IsEnabled = true; });
         }
 
-        public QueryRequest UpdateMultiplyMessage()
+        public QueryRequest UpdateMultiplyMessage(bool updateSimpleFilters)
         {
-            var result = GetQueryRequest();
+            var result = GetQueryRequest(updateSimpleFilters);
 
             string message = CollectionElementToken.MultipliedMessage(result.Multiplications, EntityType);
 
@@ -536,8 +591,11 @@ namespace Signum.Windows
             return result;
         }
 
-        public QueryRequest GetQueryRequest()
+        public QueryRequest GetQueryRequest(bool updateSimpleFilters)
         {
+            if (updateSimpleFilters)
+                RefreshSimpleFilters();
+
             var request = new QueryRequest
             {
                 QueryName = QueryName,
@@ -549,6 +607,18 @@ namespace Signum.Windows
             };
 
             return request;
+        }
+
+        private void RefreshSimpleFilters()
+        {
+            if (SimpleFilterBuilder != null)
+            {
+                FilterOptions.Clear();
+                var newFilters = SimpleFilterBuilder.GenerateFilterOptions();
+
+                Navigator.Manager.SetFilterTokens(QueryName, newFilters);
+                FilterOptions.AddRange(newFilters);
+            }
         }
 
         private void SetResults()
@@ -691,6 +761,19 @@ namespace Signum.Windows
                 this.Viewing(entity);
         }
 
+        void btRemove_Click(object sender, RoutedEventArgs e)
+        {
+            if (lvResult.SelectedItems.Count == 0)
+                return;
+
+            var lites = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToList();
+
+            if (this.Removing == null)
+                throw new InvalidOperationException("Remove event not set");
+
+            this.Removing(lites);
+        }
+
         void lvResult_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateViewSelection();
@@ -790,7 +873,7 @@ namespace Signum.Windows
 
             AddColumn(token);
 
-            UpdateMultiplyMessage(); 
+            UpdateMultiplyMessage(true); 
         }
 
         private void AddColumn(QueryToken token)
@@ -849,7 +932,7 @@ namespace Signum.Windows
 
             gvResults.Columns.Remove(gvch.Column);
 
-            UpdateMultiplyMessage(); 
+            UpdateMultiplyMessage(true); 
         }
 
         private void filter_Click(object sender, RoutedEventArgs e)
@@ -871,6 +954,9 @@ namespace Signum.Windows
             ColumnOptionsMode = columnOptionsMode; 
             GenerateListViewColumns();
 
+            if (SimpleFilterBuilder != null)
+                SimpleFilterBuilder = null;
+
             FilterOptions.Clear();
             FilterOptions.AddRange(filters);
             Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
@@ -881,15 +967,13 @@ namespace Signum.Windows
             CompleteOrderColumns();
 
 
-            UpdateMultiplyMessage(); 
+            UpdateMultiplyMessage(true); 
         }
 
         private void btFilters_Unchecked(object sender, RoutedEventArgs e)
         {
             rowFilters.Height = new GridLength(); //Auto
         }
-
-
     }
 
     public delegate SearchControlMenuItem MenuItemForQueryName(object queryName, Type entityType);
@@ -953,5 +1037,10 @@ namespace Signum.Windows
 
     }
 
-   
+    
+
+    public interface ISimpleFilterBuilder
+    {
+        List<FilterOption> GenerateFilterOptions();
+    }
 }

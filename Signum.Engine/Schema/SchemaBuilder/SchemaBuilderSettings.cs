@@ -13,8 +13,30 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Maps
 {
+    public enum DBMS
+    {
+        SqlServer2005,
+        SqlServer2008,
+        SqlCompact
+    }
+
     public class SchemaSettings
     {
+
+        public SchemaSettings()
+        { 
+
+        }
+
+        public SchemaSettings(DBMS dbms)
+        {
+            DBMS = dbms;
+            if (dbms == Maps.DBMS.SqlServer2008)
+                TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+        }
+
+        public DBMS DBMS { get; private set; }
+
         public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
 
         public Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
@@ -36,7 +58,7 @@ namespace Signum.Engine.Maps
 
             {typeof(Byte[]), SqlDbType.VarBinary},
 
-            {typeof(Guid), SqlDbType.UniqueIdentifier}
+            {typeof(Guid), SqlDbType.UniqueIdentifier},
         };
 
         internal Dictionary<Type, string> desambiguatedNames;
@@ -216,6 +238,15 @@ namespace Signum.Engine.Maps
                 desambiguatedNames = new Dictionary<Type, string>();
 
             desambiguatedNames[type] = cleanName;
+        }
+
+        internal void FixType(ref SqlDbType type, ref int? size, ref int? scale)
+        {
+            if (DBMS == Maps.DBMS.SqlCompact && (type == SqlDbType.NVarChar || type == SqlDbType.VarChar) && size > 4000)
+            {
+                type = SqlDbType.NText;
+                size = null;
+            }
         }
     }
 

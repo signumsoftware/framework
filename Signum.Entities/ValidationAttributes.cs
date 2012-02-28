@@ -493,9 +493,9 @@ namespace Signum.Entities
         { }
 
     }
+
     public class DateTimePrecissionValidatorAttribute : ValidatorAttribute
     {
-
         public DateTimePrecision Precision { get; private set; }
 
         public DateTimePrecissionValidatorAttribute(DateTimePrecision precision)
@@ -527,6 +527,55 @@ namespace Signum.Entities
                     case DateTimePrecision.Minutes: return "g";
                     case DateTimePrecision.Seconds: return "G";
                     case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern + ".fff";
+                    default: return "";
+                }
+            }
+        }
+
+        public override string HelpMessage
+        {
+            get
+            {
+                return Resources.HaveAPrecisionOf + " " + Precision.NiceToString().ToLower();
+            }
+        }
+    }
+
+    public class TimeSpanPrecissionValidatorAttribute : ValidatorAttribute
+    {
+        public DateTimePrecision Precision { get; private set; }
+
+        public TimeSpanPrecissionValidatorAttribute(DateTimePrecision precision)
+        {
+            this.Precision = precision;
+        }
+
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            var prec = ((TimeSpan)value).GetPrecision();
+            if (prec > Precision)
+                return "{{0}} has a precission of {0} instead of {1}".Formato(prec, Precision);
+
+            if(((TimeSpan)value).Days != 0)
+                return "{{0}} has days".Formato(prec, Precision);
+
+            return null;
+        }
+
+        public string FormatString
+        {
+            get
+            {
+                var dtfi = CultureInfo.CurrentCulture.DateTimeFormat;
+                switch (Precision)
+                {
+                    case DateTimePrecision.Hours: return "HH";
+                    case DateTimePrecision.Minutes: return dtfi.ShortTimePattern;
+                    case DateTimePrecision.Seconds: return "c";
+                    case DateTimePrecision.Milliseconds: return dtfi.LongTimePattern + ".fff";
                     default: return "";
                 }
             }

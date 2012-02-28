@@ -11,8 +11,6 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Entities
 {
-    
-
     public static class Validator
     {
         static Dictionary<Type, Dictionary<string, PropertyPack>> validators = new Dictionary<Type, Dictionary<string, PropertyPack>>();

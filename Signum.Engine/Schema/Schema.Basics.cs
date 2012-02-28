@@ -125,36 +125,52 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        internal void InsertMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> graph)
+        internal void InsertMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
         {
             var ic = inserter.Value;
 
-            foreach (var ls in list.Split_1_2_4_8_16())
+            if (!Connector.Current.AllowsMultipleQueries)
             {
-                switch (ls.Count)
+                foreach (var item in list)
+                    ic.Insert(item, backEdges);
+            }
+            else
+            {
+                foreach (var ls in list.Split_1_2_4_8_16())
                 {
-                    case 1: ic.Insert(ls[0], graph); break;
-                    case 2: ic.Insert2(ls, graph); break;
-                    case 4: ic.Insert4(ls, graph); break;
-                    case 8: ic.Insert8(ls, graph); break;
-                    case 16: ic.Insert16(ls, graph); break;
+                    switch (ls.Count)
+                    {
+                        case 1: ic.Insert(ls[0], backEdges); break;
+                        case 2: ic.Insert2(ls, backEdges); break;
+                        case 4: ic.Insert4(ls, backEdges); break;
+                        case 8: ic.Insert8(ls, backEdges); break;
+                        case 16: ic.Insert16(ls, backEdges); break;
+                    }
                 }
             }
         }
 
-        internal void UpdateMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> graph)
+        internal void UpdateMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
         {
             var uc = updater.Value;
 
-            foreach (var ls in list.Split_1_2_4_8_16())
+            if (!Connector.Current.AllowsMultipleQueries)
             {
-                switch (ls.Count)
+                foreach (var item in list)
+                    uc.Update(item, backEdges);
+            }
+            else
+            {
+                foreach (var ls in list.Split_1_2_4_8_16())
                 {
-                    case 1: uc.Update(ls[0], graph); break;
-                    case 2: uc.Update2(ls, graph); break;
-                    case 4: uc.Update4(ls, graph); break;
-                    case 8: uc.Update8(ls, graph); break;
-                    case 16: uc.Update16(ls, graph); break;
+                    switch (ls.Count)
+                    {
+                        case 1: uc.Update(ls[0], backEdges); break;
+                        case 2: uc.Update2(ls, backEdges); break;
+                        case 4: uc.Update4(ls, backEdges); break;
+                        case 8: uc.Update8(ls, backEdges); break;
+                        case 16: uc.Update16(ls, backEdges); break;
+                    }
                 }
             }
         }

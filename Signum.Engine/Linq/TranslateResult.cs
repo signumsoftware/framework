@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
-using System.Data.SqlClient;
 using System.Data;
 using Signum.Utilities;
 using System.Collections;
 using Signum.Engine.DynamicQuery;
 using System.Data.SqlTypes;
 using Signum.Entities;
+using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
@@ -40,15 +40,15 @@ namespace Signum.Engine.Linq
         public ProjectionToken Name { get; set; }
 
         public string CommandText { get; set; }
-        internal Expression<Func<SqlParameter[]>> GetParametersExpression;
-        internal Func<SqlParameter[]> GetParameters;
+        internal Expression<Func<DbParameter[]>> GetParametersExpression;
+        internal Func<DbParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
 
         public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
         {
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
             using (HeavyProfiler.Log("SQL", command.Sql))
-            using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
+            using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
 
@@ -88,8 +88,8 @@ namespace Signum.Engine.Linq
         public ProjectionToken Name { get; set; }
 
         public string CommandText { get; set; }
-        internal Expression<Func<SqlParameter[]>> GetParametersExpression;
-        internal Func<SqlParameter[]> GetParameters;
+        internal Expression<Func<DbParameter[]>> GetParametersExpression;
+        internal Func<DbParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
 
         public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
@@ -101,7 +101,7 @@ namespace Signum.Engine.Linq
 
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
             using (HeavyProfiler.Log("SQL", command.Sql))
-            using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
+            using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
 
@@ -150,8 +150,8 @@ namespace Signum.Engine.Linq
         Dictionary<ProjectionToken, IEnumerable> lookups;
 
         public string CommandText { get; set; }
-        internal Expression<Func<SqlParameter[]>> GetParametersExpression;
-        internal Func<SqlParameter[]> GetParameters;
+        internal Expression<Func<DbParameter[]>> GetParametersExpression;
+        internal Func<DbParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, T>> ProjectorExpression;
 
         public object Execute()
@@ -171,7 +171,7 @@ namespace Signum.Engine.Linq
                     SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
 
                     using (HeavyProfiler.Log("SQL", command.Sql))
-                    using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
+                    using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
                     {
                         ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever);
 
@@ -246,8 +246,8 @@ namespace Signum.Engine.Linq
     class CommandResult
     {
         public string CommandText { get; set; }
-        internal Expression<Func<SqlParameter[]>> GetParametersExpression;
-        internal Func<SqlParameter[]> GetParameters;
+        internal Expression<Func<DbParameter[]>> GetParametersExpression;
+        internal Func<DbParameter[]> GetParameters;
 
         public int Execute()
         {

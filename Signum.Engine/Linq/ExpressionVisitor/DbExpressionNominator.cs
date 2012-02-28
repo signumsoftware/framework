@@ -799,6 +799,12 @@ namespace Signum.Engine.Linq
                 case "DateTime.Millisecond": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.Expression);
                 case "DateTime.Date": return TrySqlDate(m.Expression);
                 case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
+
+                case "TimeSpan.Hours": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.hour), m.Expression);
+                case "TimeSpan.Minutes": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.minute), m.Expression);
+                case "TimeSpan.Seconds": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression);
+                case "TimeSpan.Milliseconds": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.Expression);
+               
                 case "TimeSpan.TotalDays": return TrySqlDifference(SqlEnums.day, m.Type, m.Expression);
                 case "TimeSpan.TotalHours": return TrySqlDifference(SqlEnums.hour, m.Type, m.Expression);
                 case "TimeSpan.TotalMilliseconds": return TrySqlDifference(SqlEnums.millisecond, m.Type, m.Expression);

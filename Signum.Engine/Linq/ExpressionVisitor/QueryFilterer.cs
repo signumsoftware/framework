@@ -44,7 +44,7 @@ namespace Signum.Engine.Linq
                     /// <summary>
                     /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
                     /// </summary>
-                    return DbQueryProvider.Clean(query.Expression, filter);
+                    return DbQueryProvider.Clean(query.Expression, filter, null);
                 }
             }
 

@@ -37,12 +37,22 @@ namespace Signum.Test
 
         public static void Start(string connectionString)
         {
-            SchemaBuilder sb = new SchemaBuilder();
+            DBMS dbms = DBMS.SqlServer2005;
+
+            SchemaBuilder sb = new SchemaBuilder(dbms);
             DynamicQueryManager dqm = new DynamicQueryManager();
-            ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
+            if (dbms == DBMS.SqlCompact)
+                Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema, dqm);
+            else
+                Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);
+
+            if (dbms == DBMS.SqlCompact || dbms == DBMS.SqlServer2005)
+            {
+                sb.Settings.OverrideAttributes<AlbumDN>(a => a.Songs[0].Duration, new Signum.Entities.IgnoreAttribute());
+                sb.Settings.OverrideAttributes<AlbumDN>(a => a.BonusTrack.Duration, new Signum.Entities.IgnoreAttribute());
+            }
 
             StartMusic(sb, dqm);
-
         }
 
         public static void StartMusic(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -251,9 +261,9 @@ namespace Signum.Test
                 Author = smashingPumpkins,
                 Songs = 
                 { 
-                    new SongDN { Name = "Zero", Duration = 123 }, 
+                    new SongDN { Name = "Zero", Duration = TimeSpan.FromSeconds(123) }, 
                     new SongDN { Name = "1976" }, 
-                    new SongDN { Name = "Tonight, Tonight", Duration = 376 } 
+                    new SongDN { Name = "Tonight, Tonight", Duration = TimeSpan.FromSeconds(376) } 
                 },
                 BonusTrack = new SongDN { Name = "Jellybelly" },
                 Label = virgin
@@ -280,7 +290,7 @@ namespace Signum.Test
                 Name = "American Gothic", 
                 Year = 2008,
                 Author = smashingPumpkins,
-                Songs = { new SongDN { Name = "The Rose March", Duration = 276 } },
+                Songs = { new SongDN { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
                 Label = wea,
             }.Save();
 

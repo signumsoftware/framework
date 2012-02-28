@@ -76,13 +76,17 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" x:Name="rowFilters"/>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" MinHeight="100"/>
             <RowDefinition Height="32"  />
         </Grid.RowDefinitions>
-        <Grid Background="#FFC9E4FF" >
+        <ContentControl Content="{Binding Path=SimpleFilterBuilder, ElementName=me}" Focusable="False"
+                        x:Name="simpleFilterBuilderContentControl" 
+                        HorizontalContentAlignment="Stretch"/>
+        <Grid Background="#FFC9E4FF" Grid.Row="1">
             <Grid.Visibility>
                 <MultiBinding Converter="{x:Static m:Converters.AndToVisibility}">
                     <Binding Path="ShowHeader" ElementName="me"/>
@@ -101,17 +105,8 @@
             </StackPanel>
             <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
         </Grid>
-        <GridSplitter HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Grid.Row="0" Height="3" Background="#FFC9E4FF">
-            <GridSplitter.Visibility>
-                <MultiBinding Converter="{x:Static m:Converters.AndToVisibility}">
-                    <Binding Path="ShowHeader" ElementName="me"/>
-                    <Binding Path="ShowFilters" ElementName="me"/>
-                </MultiBinding>
-            </GridSplitter.Visibility>
-
-        </GridSplitter>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="30" Background="Transparent"
-                    Visibility="{Binding ShowHeader, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Grid.Row="1">
+                    Visibility="{Binding ShowHeader, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Grid.Row="2">
             <StackPanel.Resources>
                 <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">
                     <Setter Property="Width" Value="24"/>
@@ -136,13 +131,14 @@
             </Button>
             <Button x:Name="btCreate" Content="{DynamicResource Create}" Click="btCreate_Click" ToolTip="{m:Loc CreateNew}" Style="{StaticResource big}"/>
             <Button x:Name="btView" Content="{DynamicResource View}" Click="btView_Click" ToolTip="{m:Loc ViewSelected}" Style="{StaticResource big}"/>
+            <Button x:Name="btRemove" Content="{DynamicResource Remove}" Click="btRemove_Click" ToolTip="{m:Loc Remove}" Style="{StaticResource big}"/>
             <Menu IsMainMenu="False" x:Name="menu" VerticalAlignment="Center" Background="Transparent"/>
         </StackPanel>
-        <Border x:Name="brMultiplications" BorderBrush="#fbdd73" Background="#fff59d" BorderThickness="1" CornerRadius="2" Margin="1" Padding="2" HorizontalAlignment="Stretch" Visibility="Collapsed" Grid.Row="2">
+        <Border x:Name="brMultiplications" BorderBrush="#fbdd73" Background="#fff59d" BorderThickness="1" CornerRadius="2" Margin="1" Padding="2" HorizontalAlignment="Stretch" Visibility="Collapsed" Grid.Row="3">
             <TextBlock x:Name="tbMultiplications"/>
         </Border>
         <ListView x:Name="lvResult"
-                Grid.Row="3" 
+                Grid.Row="4" 
                 MinHeight="100"
                   IsSynchronizedWithCurrentItem="True" 
                   Background="WhiteSmoke"
@@ -168,7 +164,7 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <Grid Grid.Row="4" Background="#FFC9E4FF"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
+        <Grid Grid.Row="5" Background="#FFC9E4FF"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
             <DockPanel Height="24"   Margin="3,3,15,3" >
                 <m:ElementsInPageLabel x:Name="elementsInPageLabel" VerticalAlignment="Center"  MinWidth="150" Visibility="Hidden"  DockPanel.Dock="Left" />
                 <m:PageSizeSelector x:Name="pageSizeSelector" VerticalAlignment="Center" PageSize="{Binding ElementsPerPage, ElementName=me}" DockPanel.Dock="Left"/>

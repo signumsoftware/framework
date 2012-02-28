@@ -10,8 +10,8 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
-using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
+using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
@@ -32,7 +32,7 @@ namespace Signum.Engine.Linq
 
         public IProjectionRow Parent { get; private set; }
 
-        SqlDataReader dataReader;
+        DbDataReader dataReader;
 
         T current;
         Func<IProjectionRow, T> projector; 
@@ -40,7 +40,7 @@ namespace Signum.Engine.Linq
 
         Dictionary<ProjectionToken, IEnumerable> lookups;
 
-        internal ProjectionRowEnumerator(SqlDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
+        internal ProjectionRowEnumerator(DbDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
         {
             this.dataReader = dataReader;
             this.Reader = new FieldReader(dataReader);
