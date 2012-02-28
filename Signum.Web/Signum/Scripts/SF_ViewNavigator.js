@@ -120,7 +120,7 @@ SF.registerModule("ViewNavigator", function () {
             SF.triggerNewContent($("#" + this.tempDivId()));
 
             var self = this;
-            $("#" + this.tempDivId()).popup({
+            $("#" + this.tempDivId()).data("viewOptions", this.viewOptions).popup({
                 onOk: function () { self.onViewOk() },
                 onCancel: function () { self.onViewCancel() }
             });
@@ -135,7 +135,7 @@ SF.registerModule("ViewNavigator", function () {
             SF.triggerNewContent($("#" + this.viewOptions.containerDiv));
 
             var self = this;
-            $("#" + this.viewOptions.containerDiv).popup({
+            $("#" + this.viewOptions.containerDiv).data("viewOptions", this.viewOptions).popup({
                 onSave: function () { self.onCreateSave() },
                 onCancel: function () { self.onCreateCancel() }
             });
@@ -152,7 +152,7 @@ SF.registerModule("ViewNavigator", function () {
             SF.triggerNewContent($("#" + tempDivId));
 
             var self = this;
-            $("#" + tempDivId).popup({
+            $("#" + tempDivId).data("viewOptions", this.viewOptions).popup({
                 onOk: function () { self.onCreateOk() },
                 onCancel: function () { self.onCreateCancel() }
             });
@@ -172,7 +172,7 @@ SF.registerModule("ViewNavigator", function () {
             SF.triggerNewContent($("#" + tempDivId));
 
             var self = this;
-            $("#" + tempDivId).popup({
+            $("#" + tempDivId).data("viewOptions", this.viewOptions).popup({
                 onSave: function () { self.onCreateSave(saveUrl) },
                 onCancel: function () { self.onCreateCancel() }
             });
