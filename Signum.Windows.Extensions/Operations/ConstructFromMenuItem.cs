@@ -17,17 +17,20 @@ using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Windows.Extensions.Properties;
 using Signum.Windows;
+using System.Windows.Data;
 
 namespace Signum.Windows.Operations
 {
     public class ConstructFromMenuItem : SearchControlMenuItem
     {
+        static readonly IValueConverter ListToVisibility = ConverterFactory.New((Array a) => a == null || a.Length == 0 ? Visibility.Collapsed : Visibility.Visible); 
+
         internal List<OperationInfo> OperationInfos; 
 
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            Header = "Construir";
+            Header = Signum.Windows.Extensions.Properties.Resources.Create + "...";
             Icon = ExtensionsImageLoader.GetImageSortName("factory.png").ToSmallImage();
         }
 
@@ -47,6 +50,8 @@ namespace Signum.Windows.Operations
                 };
                 Items.Add(mi);
             }
+
+            this.Bind(VisibilityProperty, SearchControl, "SelectedItems", ListToVisibility);
         }
 
         private void MenuItem_Clicked(object sender, RoutedEventArgs e)

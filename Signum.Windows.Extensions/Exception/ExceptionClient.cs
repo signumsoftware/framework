@@ -10,7 +10,7 @@ namespace Signum.Windows.Logging
 {
     public static class ExceptionClient
     {
-        public static void Start(bool exceptions, bool deployment)
+        public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {

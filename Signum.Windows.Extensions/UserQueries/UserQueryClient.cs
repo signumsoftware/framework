@@ -39,7 +39,7 @@ namespace Signum.Windows.UserQueries
         {
             QueryDescription description = Navigator.Manager.GetQueryDescription(searchControl.QueryName);
 
-            return searchControl.GetQueryRequest().ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName));
+            return searchControl.GetQueryRequest(true).ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName));
         }
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)

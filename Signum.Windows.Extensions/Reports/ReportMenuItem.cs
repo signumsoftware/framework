@@ -86,7 +86,7 @@ namespace Signum.Windows.Reports
 
                 if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
                 {
-                    byte[] result = Server.Return((IExcelReportServer r) => r.ExecuteExcelReport(reportLite, SearchControl.GetQueryRequest()));
+                    byte[] result = Server.Return((IExcelReportServer r) => r.ExecuteExcelReport(reportLite, SearchControl.GetQueryRequest(true)));
 
                     File.WriteAllBytes(sfd.FileName, result);
 

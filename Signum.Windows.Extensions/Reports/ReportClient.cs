@@ -21,7 +21,7 @@ namespace Signum.Windows.Reports
                     if (toExcel)
                         SearchControl.GetCustomMenuItems += (qn, type) => qn as Type == typeof(ExcelReportDN) ? null : new ReportMenuItem() { PlainExcelMenuItem = new PlainExcelMenuItem() };
                     else
-                        SearchControl.GetCustomMenuItems += (qn, type) => new PlainExcelMenuItem();
+                        SearchControl.GetCustomMenuItems += (qn, type) => new ReportMenuItem();
 
                     QueryClient.Start();
 
