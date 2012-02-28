@@ -46,7 +46,6 @@ namespace Signum.Engine
             event Action PreRealCommit;
             DbConnection Connection { get; }
             DbTransaction Transaction { get; }
-            DateTime Time { get; }
             bool RolledBack { get; }
             bool Started { get; }
             void Rollback();
@@ -83,7 +82,6 @@ namespace Signum.Engine
 
             public DbConnection Connection{ get { return parent.Connection; } }
             public DbTransaction Transaction{ get { return parent.Transaction; } }
-            public DateTime Time{ get { return parent.Time;} }
             public bool RolledBack { get{ return parent.RolledBack;} }
             public bool Started { get { return parent.Started; } }
 
@@ -115,7 +113,6 @@ namespace Signum.Engine
 
             public DbConnection Connection { get; private set; }
             public DbTransaction Transaction { get; private set; }
-            public DateTime Time { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
             public event Action PostRealCommit;
@@ -126,7 +123,6 @@ namespace Signum.Engine
             public RealTransaction(ICoreTransaction parent, IsolationLevel? isolationLevel)
             {
                 IsolationLevel = isolationLevel;
-                Time = TimeZoneManager.Now;
                 this.parent = parent;
             }
 
@@ -230,8 +226,7 @@ namespace Signum.Engine
         
             public DbConnection Connection { get { return parent.Connection; } }
             public DbTransaction Transaction { get { return parent.Transaction; } }
-            public DateTime Time { get { return parent.Time; } }
-
+            
             public void Start()
             {
                 if (!Started)
@@ -289,7 +284,6 @@ namespace Signum.Engine
 
             public DbConnection Connection { get; private set; }
             public DbTransaction Transaction { get{return null;}}
-            public DateTime Time { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
             public event Action PostRealCommit;
@@ -297,7 +291,6 @@ namespace Signum.Engine
 
             public NoneTransaction(ICoreTransaction parent)
             {
-                Time = TimeZoneManager.Now;
                 this.parent = parent;
             }
 
@@ -494,16 +487,6 @@ namespace Signum.Engine
                 ICoreTransaction tran = GetCurrent();
                 tran.Start();
                 return tran.Transaction;
-            }
-        }
-
-
-        public static DateTime StartTime
-        {
-            get
-            {
-                ICoreTransaction tran = GetCurrent();
-                return tran.Time;
             }
         }
 

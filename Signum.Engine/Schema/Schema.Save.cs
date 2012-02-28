@@ -120,7 +120,7 @@ namespace Signum.Engine.Maps
 
                     Entity entity = ident as Entity;
                     if (entity != null)
-                        entity.Ticks = Transaction.StartTime.Ticks;
+                        entity.Ticks = TimeZoneManager.Now.Ticks;
 
                     var forbidden = new Forbidden(graph, ident);
 
@@ -140,7 +140,7 @@ namespace Signum.Engine.Maps
 
                     Entity entity = ident as Entity;
                     if (entity != null)
-                        entity.Ticks = Transaction.StartTime.Ticks;
+                        entity.Ticks = TimeZoneManager.Now.Ticks;
 
                     var forbidden = new Forbidden(graph, ident);
 
@@ -171,7 +171,7 @@ namespace Signum.Engine.Maps
 
                         Entity entity = ident as Entity;
                         if (entity != null)
-                            entity.Ticks = Transaction.StartTime.Ticks;
+                            entity.Ticks = TimeZoneManager.Now.Ticks;
                     }
 
                     DataTable table = new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteDataTable();
@@ -197,7 +197,7 @@ namespace Signum.Engine.Maps
                         AssertHasId(ident);
                         Entity entity = ident as Entity;
                         if (entity != null)
-                            entity.Ticks = Transaction.StartTime.Ticks;
+                            entity.Ticks = TimeZoneManager.Now.Ticks;
                     }
 
                     new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteNonQuery();
@@ -313,7 +313,7 @@ namespace Signum.Engine.Maps
                     Entity entity = (Entity)ident;
 
                     long oldTicks = entity.Ticks;
-                    entity.Ticks = Transaction.StartTime.Ticks;
+                    entity.Ticks = TimeZoneManager.Now.Ticks;
 
                     var forbidden = new Forbidden(graph, ident);
 
@@ -356,7 +356,7 @@ namespace Signum.Engine.Maps
                         Entity entity = (Entity)idents[i];
 
                         long oldTicks = entity.Ticks;
-                        entity.Ticks = Transaction.StartTime.Ticks;
+                        entity.Ticks = TimeZoneManager.Now.Ticks;
 
                         parameters.AddRange(result.UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString()));
 			        }
