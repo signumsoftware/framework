@@ -492,7 +492,7 @@ namespace Signum.Windows
                 Lite lite = FindUnique(new FindUniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
-                    UniqueType = UniqueType.SingleOrMany,
+                    UniqueType = UniqueType.Only,
                 });
 
                 if (lite != null)
