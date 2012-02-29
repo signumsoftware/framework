@@ -58,7 +58,7 @@ namespace Signum.Test.Extensions
         {
             if (!started)
             {
-                SchemaBuilder sb = new SchemaBuilder();
+                SchemaBuilder sb = new SchemaBuilder(DBMS.SqlServer2008);
                 DynamicQueryManager dqm = new DynamicQueryManager();
                 Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);
 
@@ -89,7 +89,6 @@ namespace Signum.Test.Extensions
                 ReportsLogic.Start(sb, dqm, true);
 
                 Signum.Test.Starter.StartMusic(sb, dqm);
-
                 
                 CacheLogic.CacheTable<LabelDN>(sb);
 
