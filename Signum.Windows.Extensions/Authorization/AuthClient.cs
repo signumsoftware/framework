@@ -14,6 +14,7 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
+using Signum.Windows.Operations;
 
 namespace Signum.Windows.Authorization
 {
@@ -42,9 +43,19 @@ namespace Signum.Windows.Authorization
 
                 UpdateCache();
 
-                Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Admin) { View = e => new User() });
+                Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Admin) { View = e => new User(), ShowSave = false, });
                 Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default) { View = e => new Role() });
                 Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Admin) { View = e => new PasswordExpiresInterval() });
+
+                OperationClient.AddSetting(new EntityOperationSettings<UserDN>(UserOperation.SaveNew)
+                {
+                    IsVisible = e=>e.Entity.IsNew,
+                });
+
+                OperationClient.AddSetting(new EntityOperationSettings<UserDN>(UserOperation.Save)
+                {
+                    IsVisible = e => !e.Entity.IsNew,
+                }); 
             }
         }
     }

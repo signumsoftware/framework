@@ -90,14 +90,14 @@ namespace Signum.Engine.Chart
             Database.Delete(lite);
         }
 
-        public static void RegisterUserEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(UserDN));
 
             TypeConditionLogic.Register<UserChartDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current));
         }
 
-        public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(RoleDN));
 

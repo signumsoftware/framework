@@ -45,8 +45,8 @@ namespace Signum.Engine.Deployment
                 CreationDate = TimeZoneManager.Now,
                 Version = Schema.Current.MainAssembly.TryCC(a => a.GetName().Version.ToString()),
                 Description = description,
-                DataSourceName = ConnectionScope.Current.DataSourceName(),
-                DatabaseName = ConnectionScope.Current.DatabaseName(),
+                DataSourceName = Connector.Current.DataSourceName(),
+                DatabaseName = Connector.Current.DatabaseName(),
                 MachineName = Environment.MachineName,
             }.Save();
         }

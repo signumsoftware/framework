@@ -536,7 +536,7 @@ namespace Signum.Engine.Cache
             GetController<T>().Invalidation += action;
         }
 
-        public static void SchemaGraph(Func<Type, bool> cacheHint)
+        public static XDocument SchemaGraph(Func<Type, bool> cacheHint)
         {
             var dgml = Schema.Current.ToDirectedGraph().ToDGML(t =>
                 new[]
@@ -546,8 +546,9 @@ namespace Signum.Engine.Cache
             }, lite => lite ? new[]
             {
                 new XAttribute("StrokeDashArray",  "2 3")
-            } : new XAttribute[0]);  
+            } : new XAttribute[0]);
 
+            return dgml;
         }
 
         static Color GetColor(Type type, Func<Type, bool> cacheHint)

@@ -445,13 +445,17 @@ SF.registerModule("Operations", function () {
             SF.triggerNewContent($elem);
         }
         else { //PopupWindow
+            var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
+            var tempDivId = oldViewNav.tempDivId();
+            var oldViewOptions = $("#" + tempDivId).data("viewOptions");
+
             SF.closePopup(prefix);
-            var viewNav = new SF.ViewNavigator({
-                prefix: prefix
-                //containerDiv: parentDiv /*SF.compose(prefix, "externalPopupDiv")*/
-            });
-            viewNav.viewOptions.containerDiv = viewNav.tempDivId();
-            viewNav.viewSave(operationResult);
+
+            new SF.ViewNavigator({ 
+                prefix: prefix,
+                onCancelled: oldViewOptions.onCancelled, 
+                containerDiv: tempDivId 
+            }).viewSave(operationResult);
         }
         SF.Notify.info(lang.signum.executed, 2000);
     };

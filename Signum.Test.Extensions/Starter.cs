@@ -58,9 +58,9 @@ namespace Signum.Test.Extensions
         {
             if (!started)
             {
-                SchemaBuilder sb = new SchemaBuilder();
+                SchemaBuilder sb = new SchemaBuilder(DBMS.SqlServer2008);
                 DynamicQueryManager dqm = new DynamicQueryManager();
-                ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
+                Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);
 
                 sb.Settings.OverrideAttributes((UserDN u) => u.Related, new ImplementedByAttribute());
                 sb.Settings.OverrideAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
@@ -77,19 +77,18 @@ namespace Signum.Test.Extensions
 
                 QueryLogic.Start(sb);
                 UserQueryLogic.Start(sb, dqm);
-                UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-                UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+                UserQueryLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
+                UserQueryLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
                 ControlPanelLogic.Start(sb, dqm);
-                ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-                ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+                ControlPanelLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
+                ControlPanelLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
                 ChartLogic.Start(sb, dqm);
-                ChartLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-                ChartLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+                ChartLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
+                ChartLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
 
                 ReportsLogic.Start(sb, dqm, true);
 
                 Signum.Test.Starter.StartMusic(sb, dqm);
-
                 
                 CacheLogic.CacheTable<LabelDN>(sb);
 

@@ -70,7 +70,7 @@ namespace Signum.Engine.ControlPanel
             return panels.Where(p => hs.Contains(p.Role)).OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel);
         }
 
-        public static void RegisterUserEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(UserDN));
 
@@ -84,7 +84,7 @@ namespace Signum.Engine.ControlPanel
                  llp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(llp)));
         }
 
-        public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
 
