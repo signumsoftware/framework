@@ -468,7 +468,7 @@ namespace Signum.Engine.Operations
 
         public static Type[] FindTypes(Enum operation)
         {
-            return TypeLogic.DnToType.Values.Where(t => operations.TryGetValue(t).ContainsKey(operation)).ToArray();
+            return TypeLogic.DnToType.Values.Where(t => operations.TryGetValue(t).TryGetC(operation) != null).ToArray();
         }
 
         internal static IEnumerable<Graph<E, S>.IGraphOperation> GraphOperations<E, S>()
