@@ -39,7 +39,7 @@ namespace Signum.Windows.Reports
             if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
             {
 
-                var request = SearchControl.GetQueryRequest();
+                var request = SearchControl.GetQueryRequest(true);
 
                 byte[] file = Server.Return((IExcelReportServer s) => s.ExecutePlainExcel(request));
 

@@ -26,6 +26,7 @@ using Signum.Engine.Scheduler;
 using System.Linq.Expressions;
 using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
+using System.IO;
 
 namespace Signum.Engine.Processes
 {
@@ -590,6 +591,9 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
+                    if (Transaction.AvoidIndependentTransactions)
+                        throw; 
+
                     Execution.State = ProcessState.Error;
                     Execution.ExceptionDate = TimeZoneManager.Now;
                     Execution.Exception = e.LogException(el => el.ActionName = Execution.Process.ToString()).ToLite();

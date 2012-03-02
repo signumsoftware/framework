@@ -95,8 +95,8 @@ namespace Signum.Engine.Mailing
 
                 if (overrideEmail != EmailLogic.DoNotSend)
                 {
-                Parallel.ForEach(group, s =>
-                {
+                    Parallel.ForEach(group, s =>
+                    {
                         try
                         {
                             var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
@@ -107,7 +107,7 @@ namespace Signum.Engine.Mailing
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>
                             {
                                 var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].TryToString(); 
+                                return s.Row[index].TryToString();
                             });
                             message.Subject = NewsletterLogic.TokenRegex.Replace(newsletter.Subject, m =>
                             {
@@ -122,7 +122,7 @@ namespace Signum.Engine.Mailing
                             s.Error = ex;
                         }
                     });
-                    }
+                }
 
 
                     if (numErrors != 0)

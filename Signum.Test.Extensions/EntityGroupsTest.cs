@@ -33,7 +33,7 @@ namespace Signum.Test.Extensions
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLogger = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }
 
         const int JapLab = 2;

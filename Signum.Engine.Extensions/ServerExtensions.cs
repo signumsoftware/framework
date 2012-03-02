@@ -85,18 +85,10 @@ namespace Signum.Services
 
         public virtual void ChagePassword(string username, string passwordHash, string newPasswordHash)
         {
-            try
+            Execute(MethodInfo.GetCurrentMethod(), () =>
             {
-                using (ScopeSessionFactory.OverrideSession(session))
-                {
-                    AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
-
-            }
+                AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+            });
         }
 
 
@@ -115,7 +107,7 @@ namespace Signum.Services
             }
         }
 
-        public void Logout()
+        public virtual void Logout()
         {
             using (ScopeSessionFactory.OverrideSession(session))
             {
@@ -262,10 +254,12 @@ namespace Signum.Services
               () =>
               {
                   using (MemoryStream ms = new MemoryStream())
-                  using (XmlWriter wr = new XmlTextWriter(ms, Encoding.UTF8))
                   {
-                      AuthLogic.ExportRules().WriteTo(wr);
+                      using (XmlWriter wr = new XmlTextWriter(ms, Encoding.UTF8) { Formatting = Formatting.Indented })
+                      {
 
+                          AuthLogic.ExportRules().WriteTo(wr);
+                      }
                       return ms.ToArray();
                   }
               });

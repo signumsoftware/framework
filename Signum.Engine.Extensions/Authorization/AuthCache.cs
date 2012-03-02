@@ -12,6 +12,7 @@ using System.Xml.Linq;
 using System.IO;
 using System.Data.SqlClient;
 using System.Threading;
+using System.Data.Common;
 
 namespace Signum.Entities.Authorization
 {
@@ -73,9 +74,9 @@ namespace Signum.Entities.Authorization
             var t = Schema.Current.Table<RT>();
             var f = (FieldReference)t.Fields["resource"].Field;
 
-            var param = SqlParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
 
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<SqlParameter> { param });
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
         }
 
 

@@ -64,8 +64,6 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_Initializing;
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
-                AuthLogic.StartUserGraph(sb);
-
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
                                        select new
                                        {
@@ -97,13 +95,7 @@ namespace Signum.Engine.Authorization
                                            e.PasswordSetDate,
                                            Related = e.Related.ToLite(),
                                        }).ToDynamic();
-            }
-        }
 
-        private static void StartUserGraph(SchemaBuilder sb)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
                 UserGraph.Register();
                 new BasicExecute<UserDN>(UserOperation.SetPassword)
                 {
@@ -378,7 +370,7 @@ namespace Signum.Engine.Authorization
 
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
-                new SqlPreCommandSimple("use {0}".Formato(ConnectionScope.Current.DatabaseName())),
+                new SqlPreCommandSimple("use {0}".Formato(Connector.Current.DatabaseName())),
                 dbOnlyWarnings,
                 declareParent,
                 result,
