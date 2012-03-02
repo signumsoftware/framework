@@ -254,10 +254,12 @@ namespace Signum.Services
               () =>
               {
                   using (MemoryStream ms = new MemoryStream())
-                  using (XmlWriter wr = new XmlTextWriter(ms, Encoding.UTF8))
                   {
-                      AuthLogic.ExportRules().WriteTo(wr);
+                      using (XmlWriter wr = new XmlTextWriter(ms, Encoding.UTF8) { Formatting = Formatting.Indented })
+                      {
 
+                          AuthLogic.ExportRules().WriteTo(wr);
+                      }
                       return ms.ToArray();
                   }
               });
