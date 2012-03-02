@@ -368,6 +368,11 @@ namespace Signum.Engine
             }
         }
 
+        public static bool AvoidIndependentTransactions
+        {
+            get { return avoidIndependentTransactions.Value; }
+        }
+
         static readonly Variable<bool> avoidIndependentTransactions = Statics.ThreadVariable<bool>("avoidIndependentTransactions");
 
         class TestTransaction : RealTransaction 
