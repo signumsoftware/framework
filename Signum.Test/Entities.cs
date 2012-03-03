@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test
 {
@@ -270,6 +271,14 @@ namespace Signum.Test
         {
             get { return owner; }
             set { Set(ref owner, value, () => Owner); }
+        }
+
+        [UniqueIndex]
+        SqlHierarchyId node;
+        public SqlHierarchyId Node
+        {
+            get { return node; }
+            set { Set(ref node, value, () => Node); }
         }
 
         public override string ToString()

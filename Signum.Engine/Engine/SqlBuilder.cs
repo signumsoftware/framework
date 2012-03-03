@@ -11,6 +11,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Engine.Properties;
 using Signum.Engine.Maps;
 using System.Globalization;
+using Microsoft.SqlServer.Types;
 
 
 namespace Signum.Engine
@@ -91,26 +92,26 @@ namespace Signum.Engine
 
         public static string CreateField(IColumn c)
         {
-            return SqlBuilder.CreateField(c.Name, c.SqlDbType, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.Identity);
+            return CreateField(c.Name, c.SqlDbType, c.UdtTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.Identity);
         }
 
         public static string CreatePrimaryKeyField(bool identity)
         {
-            return CreateField(PrimaryKeyName, PrimaryKeyType, null, null, false, true, identity);
+            return CreateField(PrimaryKeyName, PrimaryKeyType, null, null, null, false, true, identity);
         }
 
         public static string CreateReferenceField(string name, bool nullable)
         {
-            return CreateField(name, PrimaryKeyType, null, null, nullable, false, false);
+            return CreateField(name, PrimaryKeyType, null, null, null, nullable, false, false);
         }
 
-        public static string CreateField(string name, SqlDbType type, int? size, int? scale, bool nullable, bool primaryKey, bool identity)
+        public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity)
         {
             Schema.Current.Settings.FixType(ref type, ref size, ref scale);
 
             return "{0} {1}{2} {3}{4}{5}".Formato(
                 name.SqlScape(),
-                type.ToString().ToUpper(CultureInfo.InvariantCulture),
+                type == SqlDbType.Udt ? udtTypeName : type.ToString().ToUpper(),
                 GetSizeScale(size, scale),
                 identity ? "IDENTITY " : "",
                 nullable ? "NULL" : "NOT NULL",

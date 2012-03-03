@@ -155,7 +155,12 @@ namespace Signum.Utilities.ExpressionTrees
              StringBuilder sb = new StringBuilder();
              using (StringWriter w = new StringWriter(sb))
              {
-                 provider.GenerateCodeFromExpression(GetRightExpressionForValue(valor, type, importedNamespaces), w, options);
+                 var expr = GetRightExpressionForValue(valor, type, importedNamespaces);
+                 if(expr != null)
+                     provider.GenerateCodeFromExpression(expr, w, options);
+
+                 w.Write(valor.ToString());
+
                  return w.ToString();
              }
         }

@@ -17,21 +17,6 @@ namespace Signum.Engine
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public sealed class SqlMethodAttribute : Attribute
-    {
-        public string Name { get; private set; }
-        
-        public SqlMethodAttribute()
-        {
-        }
-
-        public SqlMethodAttribute(string name)
-        {
-            this.Name = name;
-        }
-    }
-
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
     public sealed class SqlViewColumnAttribute : Attribute
     {

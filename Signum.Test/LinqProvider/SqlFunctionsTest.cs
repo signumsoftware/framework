@@ -12,6 +12,7 @@ using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test.LinqProvider
 {
@@ -85,6 +86,11 @@ namespace Signum.Test.LinqProvider
         public void DateFunctions()
         {
             Dump((NoteWithDateDN n) => n.CreationTime.Date);
+
+            if (Schema.Current.Settings.IsDbType(typeof(TimeSpan)))
+            {
+                Dump((NoteWithDateDN n) => n.CreationTime.TimeOfDay);
+            }
         }
 
         [TestMethod]
@@ -97,7 +103,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void TimeSpanFunction()
         {
-            if (!Schema.Current.Settings.TypeValues.ContainsKey(typeof(TimeSpan)))
+            if (!Schema.Current.Settings.IsDbType(typeof(TimeSpan)))
                 return;
 
             var durations = Database.MListQuery((AlbumDN a) => a.Songs).Select(mle => mle.Element.Duration).Where(d => d != null);
@@ -117,6 +123,25 @@ namespace Signum.Test.LinqProvider
                              from d in Database.MListQuery((AlbumDN a) => a.Songs)
                              where d.Element.Duration != null
                              select (n.CreationTime - d.Element.Duration.Value).InSql()).ToString(", "));
+        }
+
+
+        [TestMethod]
+        public void SqlHierarchyIdFunction()
+        {
+            if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+                return;
+
+            var nodes = Database.Query<LabelDN>().Select(a => a.Node);
+ 
+            Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => n.GetAncestor(1).InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => (int)(short)n.GetLevel().InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => n.ToString().InSql()).ToString(", "));
+
+
+            Debug.WriteLine(nodes.Where(n => (bool)(n.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null) != SqlHierarchyId.Null)).ToString(", "));
+            Debug.WriteLine(nodes.Where(n => (bool)(n.GetReparentedValue(n.GetAncestor(0), SqlHierarchyId.GetRoot()) != SqlHierarchyId.Null)).ToString(", "));
         }
 
         [TestMethod]

@@ -259,10 +259,9 @@ namespace Signum.Engine.Maps
 
             var pb = Connector.Current.ParameterBuilder;
 
-            string idParamName = pb.GetParameterName("id");
+            string idParamName = ParameterBuilder.GetParameterName("id");
 
-
-            string oldTicksParamName = pb.GetParameterName("old_ticks");
+            string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
 
             result.SqlUpdatePattern = (post, output) =>
             {
@@ -282,10 +281,10 @@ namespace Signum.Engine.Maps
 
             List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
 
-            parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, false, Expression.Field(paramIdent, fiId)));
+            parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, fiId)));
 
             if (typeof(Entity).IsAssignableFrom(this.Type))
-                parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, false, paramOldTicks));
+                parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, null, false, paramOldTicks));
 
             var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>>>(
                 CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramPostfix);
@@ -518,10 +517,9 @@ namespace Signum.Engine.Maps
         {
             public Trio(IColumn column, Expression value, Expression postfix)
             {
-                var pc = Connector.Current.ParameterBuilder;
                 this.SourceColumn = column.Name;
-                this.ParameterName = pc.GetParameterName(column.Name);
-                this.ParameterBuilder = pc.ParameterFactory(Concat(this.ParameterName, postfix), column.SqlDbType, column.Nullable, value);
+                this.ParameterName = Engine.ParameterBuilder.GetParameterName(column.Name);
+                this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(Concat(this.ParameterName, postfix), column.SqlDbType, column.UdtTypeName, column.Nullable, value);
             }
 
             public string SourceColumn;
@@ -650,7 +648,7 @@ namespace Signum.Engine.Maps
             InsertCache<T> result = new InsertCache<T>();
 
             result.sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name.SqlScape(), BackReference.Name);
-            result.DeleteParameter = ident => Connector.Current.ParameterBuilder.CreateReferenceParameter(BackReference.Name, false, ident.Id);
+            result.DeleteParameter = ident => Connector.Current.ParameterBuilder.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), false, ident.Id);
 
             var trios = new List<Table.Trio>();
             var assigments = new List<Expression>();

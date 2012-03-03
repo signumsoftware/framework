@@ -131,6 +131,8 @@ namespace Signum.Entities
         {
             get { return scale.HasValue; }
         }
+
+        public string UdtTypeName { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Field)]

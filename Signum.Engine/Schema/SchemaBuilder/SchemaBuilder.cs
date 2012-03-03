@@ -303,15 +303,16 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldValue(PropertyRoute route, NameSequence name, bool forceNull)
         {
-            SqlDbType sqlDbType = Settings.GetSqlDbType(route).Value;
+            SqlDbTypePair pair = Settings.GetSqlDbType(route);
 
             return new FieldValue(route.Type)
             {
                 Name = name.ToString(),
-                SqlDbType = sqlDbType,
+                SqlDbType = pair.SqlDbType,
+                UdtTypeName = pair.UdtTypeName,
                 Nullable = Settings.IsNullable(route, forceNull),
-                Size = Settings.GetSqlSize(route, sqlDbType),
-                Scale = Settings.GetSqlScale(route, sqlDbType),
+                Size = Settings.GetSqlSize(route, pair.SqlDbType),
+                Scale = Settings.GetSqlScale(route, pair.SqlDbType),
                 IndexType = Settings.GetIndexType(route)
             };
         }

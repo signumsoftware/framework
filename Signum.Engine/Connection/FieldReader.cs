@@ -11,6 +11,8 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using System.Data.SqlTypes;
 using System.Data.Common;
+using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine
 {
@@ -515,6 +517,18 @@ namespace Signum.Engine
             return GetGuid(ordinal);
         }
 
+        static MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<IBinarySerialize>(0)).GetGenericMethodDefinition(); 
+
+        public T GetUdt<T>(int ordinal) where T : IBinarySerialize
+        {
+            LastOrdinal = ordinal;
+            if (reader.IsDBNull(ordinal))
+            {
+                return (T)(object)null;
+            }
+            return (T)reader.GetValue(ordinal);
+        }
+
         static Dictionary<Type, MethodInfo> methods =
             typeof(FieldReader).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .Where(m => m.Name != "GetExpression" && m.Name != "IsNull")
@@ -523,9 +537,15 @@ namespace Signum.Engine
 
         public static Expression GetExpression(Expression reader, int ordinal, Type type)
         {
-            MethodInfo mi = methods.GetOrThrow(type, "Type {0} not supported");
+            MethodInfo mi = methods.TryGetC(type);
 
-            return Expression.Call(reader, mi, Expression.Constant(ordinal));
+            if (mi != null)
+                return Expression.Call(reader, mi, Expression.Constant(ordinal));
+
+            if (typeof(IBinarySerialize).IsAssignableFrom(type))
+                return Expression.Call(reader, miGetUdt.MakeGenericMethod(type), Expression.Constant(ordinal));
+
+            throw new InvalidOperationException("Type {0} not supported".Formato(type));
         }
 
         static MethodInfo miIsNull = ReflectionTools.GetMethodInfo((FieldReader r) => r.IsNull(0)); 
@@ -542,7 +562,6 @@ namespace Signum.Engine
                 Ordinal = LastOrdinal,
                 ColumnName = reader.GetName(LastOrdinal),
                 ColumnType = reader.GetFieldType(LastOrdinal),
-                
             };
         }
     }

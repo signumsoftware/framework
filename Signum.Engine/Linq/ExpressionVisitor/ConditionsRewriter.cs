@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Engine.Properties;
 using System.Collections.ObjectModel;
 using Signum.Utilities.ExpressionTrees;
+using System.Data.SqlTypes;
 
 namespace Signum.Engine.Linq
 {
@@ -81,7 +82,7 @@ namespace Signum.Engine.Linq
 
         static bool IsBooleanExpression(Expression expr)
         {
-            return expr.Type.UnNullify() == typeof(bool);
+            return expr.Type.UnNullify() == typeof(bool) || expr.Type.UnNullify() == typeof(SqlBoolean);
         }
 
         static bool IsSqlCondition(Expression expression)
@@ -145,7 +146,6 @@ namespace Signum.Engine.Linq
                     return Expression.Not(operand);
                 }
             }
-
             return base.VisitUnary(u);
         }
 
@@ -197,9 +197,10 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
+            Expression obj = MakeSqlValue(Visit(sqlFunction.Object));
             ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => MakeSqlValue(Visit(a)));
-            if (args != sqlFunction.Arguments)
-                return new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args);
+            if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
+                return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args);
             return sqlFunction;
         }
 

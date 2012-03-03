@@ -10,6 +10,8 @@ using System.Linq.Expressions;
 using Signum.Engine.Properties;
 using System.Data;
 using Signum.Entities.Reflection;
+using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Maps
 {
@@ -22,7 +24,6 @@ namespace Signum.Engine.Maps
 
     public class SchemaSettings
     {
-
         public SchemaSettings()
         { 
 
@@ -32,12 +33,23 @@ namespace Signum.Engine.Maps
         {
             DBMS = dbms;
             if (dbms == Maps.DBMS.SqlServer2008)
+            {
                 TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+
+                UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
+                UdtSqlName.Add(typeof(SqlGeography), "Geography");
+                UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
+            }
         }
 
         public DBMS DBMS { get; private set; }
 
         public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
+
+        public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
+        {
+
+        };
 
         public Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
         {
@@ -74,6 +86,8 @@ namespace Signum.Engine.Maps
             {SqlDbType.NChar, 1}, 
             {SqlDbType.Decimal, 18}, 
         };
+
+
 
         Dictionary<SqlDbType, int> defaultScale = new Dictionary<SqlDbType, int>()
         {
@@ -197,14 +211,14 @@ namespace Signum.Engine.Maps
             return null;
         }
 
-        internal SqlDbType? GetSqlDbType(PropertyRoute route)
+        internal SqlDbTypePair GetSqlDbType(PropertyRoute route)
         {
             SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
 
             if (att != null && att.HasSqlDbType)
-                return att.SqlDbType;
+                return new SqlDbTypePair(att.SqlDbType, att.UdtTypeName);
 
-            return TypeValues.TryGetS(route.Type.UnNullify());
+            return GetSqlDbTypePair(route.Type.UnNullify());
         }
 
         internal int? GetSqlSize(PropertyRoute route, SqlDbType sqlDbType)
@@ -247,6 +261,48 @@ namespace Signum.Engine.Maps
                 type = SqlDbType.NText;
                 size = null;
             }
+        }
+
+        public SqlDbTypePair GetSqlDbTypePair(Type type)
+        {
+            SqlDbType result;
+            if (TypeValues.TryGetValue(type, out result))
+                return new SqlDbTypePair(result, null);
+
+            string udtTypeName = GetUdtName(type);
+            if (udtTypeName != null)
+                return new SqlDbTypePair(SqlDbType.Udt, udtTypeName);
+
+            return null;
+        }
+
+        public string GetUdtName(Type udtType)
+        {
+            var att = udtType.SingleAttribute<SqlUserDefinedTypeAttribute>();
+
+            if (att == null)
+                return null;
+
+            return UdtSqlName[udtType];
+        }
+
+        public bool IsDbType(Type type)
+        {
+            return type.IsEnum || GetSqlDbTypePair(type) != null;
+        }
+    }
+
+    public class SqlDbTypePair
+    {
+        public SqlDbType SqlDbType { get; private set; }
+        public string UdtTypeName { get; private set; }
+
+        public SqlDbTypePair() { }
+
+        public SqlDbTypePair(SqlDbType type, string udtTypeName)
+        {
+            this.SqlDbType = type;
+            this.UdtTypeName = udtTypeName;
         }
     }
 
