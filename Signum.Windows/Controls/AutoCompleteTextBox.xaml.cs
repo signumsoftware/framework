@@ -264,6 +264,12 @@ namespace Signum.Windows
                 ReleaseMouseCapture();
                 Close(CloseReason.ClickOut);
             }
+            else if (pop.IsMouseOver)
+            {
+                ReleaseMouseCapture();
+                Commit(CloseReason.ClickList);
+            }
+
         }
 
         //private void me_GotMouseCapture(object sender, MouseEventArgs e)
