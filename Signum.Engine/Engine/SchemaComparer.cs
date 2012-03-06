@@ -267,12 +267,12 @@ namespace Signum.Engine
 
         public bool Equals(IColumn other)
         {
-            var result = 
-                   SqlDbType == other.SqlDbType 
-                && UdtTypeName == other.UdtTypeName 
+            var result =
+                   SqlDbType == other.SqlDbType
+                && StringComparer.InvariantCultureIgnoreCase.Equals(UdtTypeName, other.UdtTypeName)
                 && Nullable == other.Nullable
                 && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / 2 || other.Size.Value == int.MaxValue && Length == -1)
-                && (other.Scale == null || other.Scale.Value == Scale) 
+                && (other.Scale == null || other.Scale.Value == Scale)
                 && Identity == other.Identity
                 && PrimaryKey == other.PrimaryKey;
 
