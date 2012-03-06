@@ -230,6 +230,7 @@ namespace Signum.Engine.DynamicQuery
                 this.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                 this.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 this.Implementations = ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes);
+                this.PropertyRoute = cm.PropertyRoutes.FirstOrDefault();
             }
 
             IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
@@ -245,10 +246,12 @@ namespace Signum.Engine.DynamicQuery
         public string Unit;
         public Implementations Implementations;
         public Func<bool> IsAllowed;
+        public PropertyRoute PropertyRoute;
+       
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
-            return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed()) { DisplayName = NiceName() }; 
+            return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
         }
     }
 }
