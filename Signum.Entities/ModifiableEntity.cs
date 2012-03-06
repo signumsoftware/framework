@@ -438,6 +438,8 @@ namespace Signum.Entities
 
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
             var type = target.GetType();
+            list.Add(new Member("Type", type, typeof(Type)));
+
             foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t=> t!= typeof(ModifiableEntity) && t!= typeof(Modifiable)).Reverse())
             {
                 foreach (var fi in t.GetFields(flags).OrderBy(f => f.MetadataToken))
