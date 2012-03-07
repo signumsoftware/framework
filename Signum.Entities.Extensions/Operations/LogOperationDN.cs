@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
 using Signum.Entities.Exceptions;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Operations
 {
@@ -48,6 +49,14 @@ namespace Signum.Entities.Operations
         {
             get { return end; }
             set { Set(ref end, value, () => End); }
+        }
+
+
+        static Expression<Func<OperationLogDN, double?>> DurationExpression =
+            log => (double?)(log.End - log.Start).Value.TotalMilliseconds;
+        public double? Duration
+        {
+            get { return end == null ? null : DurationExpression.Evaluate(this); }
         }
 
         Lite<ExceptionDN> exception;
