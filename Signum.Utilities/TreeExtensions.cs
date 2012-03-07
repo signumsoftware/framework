@@ -105,9 +105,10 @@ namespace Signum.Utilities
             Children = new List<Node<T>>();
         }
 
-        //public override string ToString()
-        //{
-        //   // StringWriter 
-        //}
+
+        public override string ToString()
+        {
+            return "{0} Children: {1}".Formato(Children.Count, Value);
+        }
     }
 }
