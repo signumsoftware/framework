@@ -152,7 +152,7 @@ SF.Chart.Builder = (function () {
                 originalAddFilter.call(this, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
             }
             else {
-                originalNewSubtokensCombo.call(this);
+                originalAddFilter.call(this);
             }
         }
     };
