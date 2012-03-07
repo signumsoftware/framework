@@ -123,6 +123,9 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
+                    if (Transaction.AvoidIndependentTransactions)
+                        throw; 
+
                     var exLog = e.LogException();
 
                     using (Transaction tr = Transaction.ForceNew())

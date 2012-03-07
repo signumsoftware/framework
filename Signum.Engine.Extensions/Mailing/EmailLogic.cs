@@ -267,6 +267,9 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception e)
             {
+                if (Transaction.AvoidIndependentTransactions)
+                    throw; 
+
                 var exLog = e.LogException().ToLite();
 
                 using (Transaction tr = Transaction.ForceNew())
@@ -338,6 +341,9 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception ex)
             {
+                if (Transaction.AvoidIndependentTransactions)
+                    throw; 
+
                 var exLog = ex.LogException().ToLite();
 
                 using (var tr = Transaction.ForceNew())

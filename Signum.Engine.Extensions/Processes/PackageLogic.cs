@@ -121,7 +121,6 @@ namespace Signum.Engine.Processes
                     using (Transaction tr = Transaction.ForceNew())
                     {
                         ExecuteLine(pl, package);
-
                         pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();
                         tr.Commit();
@@ -129,6 +128,9 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
+                    if (Transaction.AvoidIndependentTransactions)
+                        throw; 
+
                     var exLog = e.LogException();
 
                     using (Transaction tr = Transaction.ForceNew())

@@ -94,6 +94,9 @@ namespace Signum.Engine.Operations
             {  
                 OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
 
+                if (Transaction.AvoidIndependentTransactions)
+                    throw; 
+
                 var exLog = ex.LogException();
 
                 using (Transaction tr2 = Transaction.ForceNew())

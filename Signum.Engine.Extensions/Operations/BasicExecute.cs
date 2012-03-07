@@ -100,6 +100,9 @@ namespace Signum.Engine.Operations
 
                 if (!entity.IsNew)
                 {
+                    if (Transaction.AvoidIndependentTransactions)
+                        throw; 
+
                     var exLog = ex.LogException();
 
                     using (Transaction tr2 = Transaction.ForceNew())
