@@ -12,6 +12,7 @@ using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using System.Data.Common;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine
 {
@@ -158,8 +159,14 @@ namespace Signum.Engine
             if (value is DateTime)
                 return "convert(datetime, '{0:s}', 126)".Formato(value);
 
+            if (value is TimeSpan)
+                return "convert(time, '{0:g}')".Formato(value);
+
             if (value is bool)
                 return (((bool)value) ? 1 : 0).ToString();
+
+            if (value is SqlHierarchyId)
+                return "CAST('{0}' AS hierarchyid)".Formato(value);
 
             return value.ToString();
         }
