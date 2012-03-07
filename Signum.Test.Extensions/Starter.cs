@@ -59,7 +59,7 @@ namespace Signum.Test.Extensions
             {
                 SchemaBuilder sb = new SchemaBuilder();
                 DynamicQueryManager dqm = new DynamicQueryManager();
-                ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
+                ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm) { DBMS = DBMS.SqlServer2008 };
 
                 sb.Settings.OverrideAttributes((UserDN u) => u.Related, new ImplementedByAttribute());
                 sb.Settings.OverrideAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
