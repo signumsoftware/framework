@@ -74,7 +74,7 @@ namespace Signum.Engine
 
             ee.Saving += e =>
             {
-                if (!e.IsNew)
+                if (!e.IsNew && e.Modified == true)
                     action();
             };
             ee.PreUnsafeUpdate += q => action();
@@ -85,7 +85,11 @@ namespace Signum.Engine
         {
             var ee = s.EntityEvents<T>();
 
-            ee.Saving += e => action();
+            ee.Saving += e =>
+            {
+                if (e.Modified == true)
+                    action();
+            };
             ee.PreUnsafeUpdate += q => action();
             ee.PreUnsafeDelete += q => action();
         }
