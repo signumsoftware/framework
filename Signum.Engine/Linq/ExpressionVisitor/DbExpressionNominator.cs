@@ -250,7 +250,7 @@ namespace Signum.Engine.Linq
                 return null;
 
             Expression left = Visit(be.Left);
-            if (!Has(lef.RemoveNullify()t))
+            if (!Has(left.RemoveNullify()))
                 return null;
 
             Expression right = Visit(be.Right);
