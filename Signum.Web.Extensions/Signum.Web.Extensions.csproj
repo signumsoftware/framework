@@ -719,19 +719,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />
-    <Compile Include="ViewsChecker\ViewError.cs" />
-    <Compile Include="ViewsChecker\Controllers\ViewsCheckerController.cs" />
-    <Compile Include="ViewsChecker\Views\ViewsChecker.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ViewsChecker.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewsChecker\Views\_ViewStart.cs">
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
@@ -1071,11 +1058,6 @@
     <Content Include="UserQueries\Views\Web.config" />
     <Content Include="Reports\Views\Web.config" />
     <Content Include="Scheduler\Views\Web.config" />
-    <Content Include="ViewsChecker\Views\Web.config" />
-    <Content Include="ViewsChecker\Views\_ViewStart.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>_ViewStart.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="AuthAdmin\Views\Web.config" />
@@ -1282,10 +1264,6 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
-    <None Include="ViewsChecker\Views\ViewsChecker.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ViewsChecker.cs</LastGenOutput>
-    </None>
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
     <EmbeddedResource Include="Properties\Resources.de.resx">
       <SubType>Designer</SubType>
