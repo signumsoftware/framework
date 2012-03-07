@@ -242,17 +242,19 @@ namespace Signum.Engine.Linq
             if (innerProjection)
                 return null;
 
+            expression = expression.RemoveUnNullify();
+
             BinaryExpression be = expression as BinaryExpression;
 
             if (be == null || be.NodeType != ExpressionType.Subtract)
                 return null;
 
             Expression left = Visit(be.Left);
-            if (!Has(left))
+            if (!Has(lef.RemoveNullify()t))
                 return null;
 
             Expression right = Visit(be.Right);
-            if (!Has(right))
+            if (!Has(right.RemoveNullify()))
                 return null;
 
             SqlFunctionExpression result = new SqlFunctionExpression(type, null, SqlFunction.DATEDIFF.ToString(), new Expression[]{
