@@ -29,7 +29,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult Permissions(Lite<RoleDN> role)
         {
-            return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role.FillToStr()));
+            return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role.FillToString()));
         }
 
         [HttpPost]
@@ -47,7 +47,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult FacadeMethods(Lite<RoleDN> role)
         {
-            return Navigator.View(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToStr()));
+            return Navigator.View(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToString()));
         }
 
         [HttpPost]
@@ -64,7 +64,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult Types(Lite<RoleDN> role)
         {
-            return Navigator.View(this, TypeAuthLogic.GetTypeRules(role.FillToStr()));
+            return Navigator.View(this, TypeAuthLogic.GetTypeRules(role.FillToString()));
         }
 
         [HttpPost]
@@ -83,7 +83,7 @@ namespace Signum.Web.AuthAdmin
         public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            TypeContext tc = TypeContextUtilities.UntypedNew(PropertyAuthLogic.GetPropertyRules(role.FillToStr(), type.Retrieve()), prefix);
+            TypeContext tc = TypeContextUtilities.UntypedNew(PropertyAuthLogic.GetPropertyRules(role.FillToString(), type.Retrieve()), prefix);
             return this.PopupOpen(new ViewSaveOptions(tc));
         }
 
@@ -104,7 +104,7 @@ namespace Signum.Web.AuthAdmin
         public ActionResult Queries(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            TypeContext tc = TypeContextUtilities.UntypedNew(QueryAuthLogic.GetQueryRules(role.FillToStr(), type.Retrieve()), prefix);
+            TypeContext tc = TypeContextUtilities.UntypedNew(QueryAuthLogic.GetQueryRules(role.FillToString(), type.Retrieve()), prefix);
             return this.PopupOpen(new ViewSaveOptions(tc));
         }
 
@@ -126,7 +126,7 @@ namespace Signum.Web.AuthAdmin
         public ActionResult Operations(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            TypeContext tc = TypeContextUtilities.UntypedNew(OperationAuthLogic.GetOperationRules(role.FillToStr(), type.Retrieve()), prefix);
+            TypeContext tc = TypeContextUtilities.UntypedNew(OperationAuthLogic.GetOperationRules(role.FillToString(), type.Retrieve()), prefix);
             return this.PopupOpen(new ViewSaveOptions(tc));
         }
 

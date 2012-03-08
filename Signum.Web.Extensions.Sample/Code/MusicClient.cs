@@ -23,7 +23,7 @@ namespace Signum.Web.Extensions.Sample
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<AlbumDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix.Formato("Album") },
+                    new EntitySettings<AlbumDN>(EntityType.DefaultNotSaving) { PartialViewName = e => ViewPrefix.Formato("Album") },
                     new EntitySettings<AmericanMusicAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("AmericanMusicAward") },
                     new EntitySettings<ArtistDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Artist") },
                     new EntitySettings<BandDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Band") },
@@ -73,7 +73,7 @@ namespace Signum.Web.Extensions.Sample
                 {
                     { AlbumOperation.Clone, new EntityOperationSettings 
                     { 
-                        OnContextualClick = ctx => Js.Confirm("Do you wish to clone album {0}".Formato(ctx.Entity.ToStr),
+                        OnContextualClick = ctx => Js.Confirm("Do you wish to clone album {0}".Formato(ctx.Entity.ToString()),
                             new JsOperationConstructorFrom(ctx.Options()).ajax(ctx.Prefix, JsOpSuccess.DefaultContextualDispatcher)),
                         IsVisible = ctx => true,
                     }},
@@ -82,7 +82,7 @@ namespace Signum.Web.Extensions.Sample
                         OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
                             .validateAndAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
 
-                        OnContextualClick = ctx => Js.Confirm("Do you wish to create an album for band {0}".Formato(ctx.Entity.ToStr),
+                        OnContextualClick = ctx => Js.Confirm("Do you wish to create an album for band {0}".Formato(ctx.Entity.ToString()),
                             new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music")).ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
                     }},
                     { AlbumOperation.CreateGreatestHitsAlbum, new QueryOperationSettings

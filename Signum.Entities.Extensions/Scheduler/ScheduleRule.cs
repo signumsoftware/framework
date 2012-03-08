@@ -77,7 +77,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return  Resources.Each0MinutesFrom1.Formato(eachMinute.ToString(), startingOn.ToUserInterface().ToShortDateString());
+            return Resources.Each0MinutesFrom1.Formato(eachMinute.ToString(), startingOn.ToUserInterface().ToShortDateString());
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Security.Authentication;
 using Signum.Entities.Extensions.Properties;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
 {
@@ -27,9 +28,10 @@ namespace Signum.Entities.Authorization
             set { Set(ref roles, value, () => Roles); }
         }
 
+        static readonly Expression<Func<RoleDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
 
         public static RoleDN Current

@@ -6,6 +6,7 @@ using Signum.Utilities;
 using System.ServiceModel;
 using Signum.Services;
 using Signum.Entities.Basics;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
@@ -30,13 +31,12 @@ namespace Signum.Entities.Basics
             set { SetToStr(ref key, value, () => Key); }
         }
 
+        static readonly Expression<Func<QueryDN, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
-            return displayName;
+            return ToStringExpression.Evaluate(this);
         }
     }
-
-   
 }
 
 

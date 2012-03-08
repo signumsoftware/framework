@@ -200,7 +200,7 @@ namespace Signum.Engine.Authorization
 
         public static IEnumerable<Lite<RoleDN>> RolesInOrder()
         {
-            return roles.Value.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.ToStr));
+            return roles.Value.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.ToString()));
         }
 
         internal static DirectedGraph<Lite<RoleDN>> RolesGraph()
@@ -328,14 +328,14 @@ namespace Signum.Engine.Authorization
                 new XElement("Auth",
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
-                            new XAttribute("Name", r.ToStr),
+                            new XAttribute("Name", r.ToString()),
                             new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
                      ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
         {
-            var rolesDic = roles.Value.ToDictionary(a => a.ToStr);
+            var rolesDic = roles.Value.ToDictionary(a => a.ToString());
             var rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
 
             var xmlOnly = rolesXml.Keys.Except(rolesDic.Keys).ToList();
@@ -349,7 +349,7 @@ namespace Signum.Engine.Authorization
                 EnumerableExtensions.JoinStrict(
                     roles.Value.RelatedTo(r),
                     kvp.Value.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
-                    sr => sr.ToStr,
+                    sr => sr.ToString(),
                     s => s,
                     (sr, s) => 0,
                     "Checking SubRoles of {0}".Formato(r));

@@ -149,8 +149,8 @@ namespace Signum.Web.Reports
                     {
                         items.Add(new ToolBarButton
                         {
-                            AltText = report.ToStr,
-                            Text = report.ToStr,
+                            AltText = report.ToString(),
+                            Text = report.ToString(),
                             OnClick = Js.SubmitOnly(RouteHelper.New().Action("ExcelReport", "Report"), "$.extend({{excelReport:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato(report.Id, prefix)).ToJS(),
                             DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });

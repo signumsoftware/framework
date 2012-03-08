@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
+using System.Linq.Expressions;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Basics
 {
@@ -28,9 +30,10 @@ namespace Signum.Entities.Basics
             internal set { Set(ref key, value, () => Key); }
         }
 
+        static readonly Expression<Func<EnumDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
 
         public static string UniqueKey(Enum a)

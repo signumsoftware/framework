@@ -393,7 +393,7 @@ namespace Signum.Web.Chart
                     return new
                     {
                         key = l.TryCC(li => li.Key()),
-                        toStr = l.TryCC(li => li.ToStr)
+                        toStr = l.TryCC(li => li.ToString())
                     };
                 };
             }

@@ -123,14 +123,14 @@ namespace Signum.Web.Operations
         public static JsInstruction ConfirmOperation(ContextualOperationContext ctx, JsFunction onSuccess)
         {
             return Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entity.ToStr, ctx.Entity.GetType().NiceName(), ctx.Entity.Id),
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entity.ToString(), ctx.Entity.GetType().NiceName(), ctx.Entity.Id),
                 onSuccess);
         }
 
         public static JsInstruction ConfirmOperation(ContextualOperationContext ctx, JsInstruction onSuccess)
         {
             return Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entity.ToStr, ctx.Entity.GetType().NiceName(), ctx.Entity.Id), 
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entity.ToString(), ctx.Entity.GetType().NiceName(), ctx.Entity.Id), 
                 onSuccess);
         }
     }

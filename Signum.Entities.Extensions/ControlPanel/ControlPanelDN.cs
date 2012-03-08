@@ -93,9 +93,10 @@ namespace Signum.Entities.ControlPanel
             return base.PropertyValidation(pi);
         }
 
+        static readonly Expression<Func<ControlPanelDN, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
-            return DisplayName;
+            return ToStringExpression.Evaluate(this);
         }
     }
 }

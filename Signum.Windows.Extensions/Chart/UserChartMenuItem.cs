@@ -103,7 +103,7 @@ namespace Signum.Windows.Chart
                     MenuItem mi = new MenuItem()
                     {
                         IsCheckable = true,
-                        Header = uc.ToStr,
+                        Header = uc.ToString(),
                         Tag = uc,
                     };
                     Items.Add(mi);

@@ -8,6 +8,7 @@ using Signum.Entities.UserQueries;
 using Signum.Entities.Chart;
 using System.Reflection;
 using Signum.Entities.Extensions.Properties;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -73,9 +74,10 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref userQuery, value, () => UserQuery); }
         }
 
+        static readonly Expression<Func<UserQueryPartDN, string>> ToStringExpression = e => e.userQuery.ToString();
         public override string ToString()
         {
-            return userQuery.TryCC(uq => uq.DisplayName);
+            return userQuery == null ? null : ToStringExpression.Evaluate(this);
         }
     }
 
@@ -90,9 +92,10 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref userChart, value, () => UserChart); }
         }
 
+        static readonly Expression<Func<UserChartPartDN, string>> ToStringExpression = e => e.userChart.ToString();
         public override string ToString()
         {
-            return userChart.TryCC(uq => uq.DisplayName);
+            return userChart == null ? null : ToStringExpression.Evaluate(this);
         }
     }
 

@@ -131,9 +131,10 @@ namespace Signum.Entities.Authorization
             return base.PropertyValidation(pi);
         }
 
+        static readonly Expression<Func<UserDN, string>> ToStringExpression = e => e.userName;
         public override string ToString()
         {
-            return userName;
+            return ToStringExpression.Evaluate(this);
         }
 
         public static string UserSessionKey = "user";

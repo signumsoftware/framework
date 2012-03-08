@@ -7,6 +7,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Extensions.Properties;
 using Signum.Utilities;
 using Signum.Entities.Files;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Reports
 {
@@ -46,9 +47,10 @@ namespace Signum.Entities.Reports
             set { SetToStr(ref deleted, value, () => Deleted); }
         }
 
+        static readonly Expression<Func<ExcelReportDN, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
-            return displayName + (deleted ? Resources.Deleted : "");
+            return ToStringExpression.Evaluate(this);
         }
     }
 }

@@ -8,6 +8,7 @@ using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Exceptions;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Mailing
 {
@@ -87,9 +88,10 @@ namespace Signum.Entities.Mailing
             set { Set(ref displayFrom, value, () => DiplayFrom); }
         }
 
+        static readonly Expression<Func<NewsletterDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
 
         public static Lite<SMTPConfigurationDN> DefaultSMTPConfig;

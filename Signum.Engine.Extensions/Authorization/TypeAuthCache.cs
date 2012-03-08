@@ -407,7 +407,7 @@ namespace Signum.Entities.Authorization
                 (from r in AuthLogic.RolesInOrder()
                  let max = defaultRules.TryGet(r, Max.BaseAllowed).Equals(Max.BaseAllowed)
                  select new XElement("Role",
-                     new XAttribute("Name", r.ToStr),
+                     new XAttribute("Name", r.ToString()),
                      max ? null : new XAttribute("Default", "Min"),
                      specificRules.TryGetC(r).TryCC(dic =>
                          from kvp in dic
@@ -503,12 +503,12 @@ namespace Signum.Entities.Authorization
 
         internal static string Comment(Lite<RoleDN> role, TypeDN resource, TypeAllowed allowed)
         {
-            return "{0} {1} for {2} ({3})".Formato(typeof(TypeDN).NiceName(), resource.ToStr, role, allowed);
+            return "{0} {1} for {2} ({3})".Formato(typeof(TypeDN).NiceName(), resource.ToString(), role, allowed);
         }
 
         internal static string Comment(Lite<RoleDN> role, TypeDN resource, TypeAllowed from, TypeAllowed to)
         {
-            return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(TypeDN).NiceName(), resource.ToStr, role, from, to);
+            return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(TypeDN).NiceName(), resource.ToString(), role, from, to);
         }
 
         private SqlPreCommand SetDefault(Table table, RuleTypeDN def, bool max, Lite<RoleDN> role)

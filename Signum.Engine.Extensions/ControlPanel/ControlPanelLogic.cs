@@ -38,7 +38,7 @@ namespace Signum.Engine.ControlPanel
                                                select new
                                                {
                                                    Entity = cp.ToLite(),
-                                                   cp.ToStr,
+                                                   ToStr = cp.ToString(),
                                                    Links = cp.Links.Count
                                                }).ToDynamic();
 
@@ -46,7 +46,7 @@ namespace Signum.Engine.ControlPanel
                                                select new
                                                {
                                                    Entity = cp.ToLite(),
-                                                   cp.ToStr,
+                                                   ToStr = cp.ToString(),
                                                    Links = cp.UserQueries.Count
                                                }).ToDynamic(); 
             }

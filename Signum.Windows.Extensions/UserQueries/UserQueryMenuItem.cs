@@ -80,7 +80,7 @@ namespace Signum.Windows.UserQueries
                     MenuItem mi = new MenuItem()
                     {
                         IsCheckable = true,
-                        Header = report.ToStr,
+                        Header = report.ToString(),
                         Tag = report,
                     };
                     Items.Add(mi);
