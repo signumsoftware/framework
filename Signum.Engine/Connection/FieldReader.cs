@@ -13,6 +13,7 @@ using System.Data.SqlTypes;
 using System.Data.Common;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine
 {
@@ -542,8 +543,13 @@ namespace Signum.Engine
             if (mi != null)
                 return Expression.Call(reader, mi, Expression.Constant(ordinal));
 
-            if (typeof(IBinarySerialize).IsAssignableFrom(type))
-                return Expression.Call(reader, miGetUdt.MakeGenericMethod(type), Expression.Constant(ordinal));
+            if (typeof(IBinarySerialize).IsAssignableFrom(type.UnNullify()))
+            {
+                if (type.IsNullable())
+                    return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal)).Nullify();
+                else
+                    return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
+            }
 
             throw new InvalidOperationException("Type {0} not supported".Formato(type));
         }
