@@ -52,7 +52,11 @@ namespace Signum.Web.Extensions.Sample.Test
             //add filter of lite
             selenium.FilterSelectToken(0, "label=Label", true);
             selenium.AddFilter(0);
-            selenium.LineFindAndSelectElements("value_1_", false, new int[] { 1 });
+            selenium.LineFind("value_1_");
+            selenium.Sort(3, true, "value_1_");
+            selenium.Search("value_1_");
+            selenium.SelectRowRadioButton(1, "value_1_");
+            selenium.PopupOk("value_1_");
 
             //add user column
             selenium.ExpandTokens(1);

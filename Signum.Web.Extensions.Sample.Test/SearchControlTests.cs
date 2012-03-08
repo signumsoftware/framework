@@ -55,7 +55,7 @@ namespace Signum.Web.Extensions.Sample.Test
             //Filter of a Lite from the combo
             selenium.FilterSelectToken(0, "label=Label", true);
             selenium.AddFilter(1);
-            selenium.LineFindAndSelectElements("value_1_", false, new int[]{0});
+            OpenFinderAndSelectFirstOrderedById(selenium, "value_1_");
             selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(LinesTestExtensions.LineFindSelector("value_1_"))));
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(2));
@@ -103,7 +103,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.QuickFilterFromHeader(4, 0); //Label
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
-            selenium.LineFindAndSelectElements("value_0_", false, new int[] { 0 });
+            OpenFinderAndSelectFirstOrderedById(selenium, "value_0_");
             selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(LinesTestExtensions.LineFindSelector("value_0_"))));
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(2));
@@ -155,7 +155,7 @@ namespace Signum.Web.Extensions.Sample.Test
             //Filter of a Lite from the combo
             selenium.FilterSelectToken(0, "label=Artist", true, prefix);
             selenium.AddFilter(2, prefix);
-            selenium.LineFindAndSelectElements(prefix + "value_2_", false, new int[] { 0 });
+            OpenFinderAndSelectFirstOrderedById(selenium, prefix + "value_2_");
             selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(LinesTestExtensions.LineFindSelector(prefix + "value_2_"))));
             selenium.Search(prefix);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(1, prefix));
@@ -193,6 +193,15 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.SetElementsPerPageToFinder("", prefix); 
             selenium.Search(prefix);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(8, prefix));
+        }
+
+        private void OpenFinderAndSelectFirstOrderedById(ISelenium selenium, string prefix)
+        {
+            selenium.LineFind(prefix);
+            selenium.Sort(3, true, prefix);
+            selenium.Search(prefix);
+            selenium.SelectRowRadioButton(0, prefix);
+            selenium.PopupOk(prefix);
         }
 
         [TestMethod]

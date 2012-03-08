@@ -118,7 +118,7 @@
     <Content Include="Scripts\d3\d3.geom.min.js" />
     <Content Include="Scripts\d3\d3.layout.min.js" />
     <Content Include="Scripts\d3\d3.min.js" />
-    <Content Include="Scripts\jquery-1.6.2.min.js" />
+    <Content Include="Scripts\jquery-1.7.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.8.14.min.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
