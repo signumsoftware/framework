@@ -116,17 +116,19 @@ namespace Signum.Web
             switch (entityType)
             {
                 case EntityType.Default:
-                    ShowSave = true;
+                case EntityType.DefaultNotSaving:
+                    ShowSave = entityType == EntityType.Default;
                     MappingAdmin = MappingDefault = new EntityMapping<T>(true).GetValue;
                     break;
                 case EntityType.Admin:
-                    ShowSave = true;
+                case EntityType.AdminNotSaving:
+                    ShowSave =  entityType == EntityType.Admin;;
                     IsCreable = ctx => ctx == EntitySettingsContext.Admin;
                     IsViewable = (_, ctx) => ctx == EntitySettingsContext.Admin;
                     MappingAdmin = new EntityMapping<T>(true).GetValue;
                     MappingDefault = new EntityMapping<T>(false).GetValue;
                     break;
-                case EntityType.NotSaving:
+            
                     ShowSave = false;
                     MappingAdmin = MappingDefault = new EntityMapping<T>(true).GetValue;
                     break;
@@ -264,7 +266,8 @@ namespace Signum.Web
     {
         Admin,
         Default,
-        NotSaving,
+        AdminNotSaving,
+        DefaultNotSaving,
         ServerOnly,
         Content,
     }
