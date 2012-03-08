@@ -185,7 +185,7 @@ namespace Signum.Web
                         if (lite.UntypedEntityOrNull != null)
                             return Lite.Create(liteType, lite.UntypedEntityOrNull);
                         else
-                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToStr);
+                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToString());
                     }
                 }
 

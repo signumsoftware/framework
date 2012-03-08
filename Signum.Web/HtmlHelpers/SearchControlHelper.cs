@@ -284,8 +284,8 @@ namespace Signum.Web
             if (filterOption.Token.Type.IsLite())
             {
                 Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type);
-                if (lite != null && string.IsNullOrEmpty(lite.ToStr))
-                    Database.FillToStr(lite);
+                if (lite != null && string.IsNullOrEmpty(lite.ToString()))
+                    Database.FillToString(lite);
 
                 Type cleanType = Reflector.ExtractLite(filterOption.Token.Type);
                 if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))

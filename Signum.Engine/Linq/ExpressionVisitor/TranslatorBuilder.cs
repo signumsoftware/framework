@@ -191,7 +191,6 @@ namespace Signum.Engine.Linq
             static PropertyInfo piRetriever = ReflectionTools.GetPropertyInfo((IProjectionRow r) => r.Retriever);
             static MemberExpression retriever = Expression.Property(row, piRetriever); 
            
-            public PropertyInfo piToStrLite = ReflectionTools.GetPropertyInfo((Lite l) =>l.ToStr);
             static FieldInfo fiId = ReflectionTools.GetFieldInfo((IdentifiableEntity i) => i.id);
 
             static MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<TypeDN>(null, null)).GetGenericMethodDefinition();

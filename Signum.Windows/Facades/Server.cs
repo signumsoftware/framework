@@ -248,7 +248,7 @@ namespace Signum.Windows
                         if (lite.UntypedEntityOrNull != null)
                             return Lite.Create(liteType, lite.UntypedEntityOrNull);
                         else
-                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToStr); 
+                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToString()); 
                     }
                 }
 
@@ -315,14 +315,14 @@ namespace Signum.Windows
 
         public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-           lite.ToStr = Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id));
+            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id)));
 
            return lite;
         }
 
         public static Lite FillToStr(Lite lite)
         {
-            lite.ToStr = Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id));
+            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id)));
 
             return lite;
         }

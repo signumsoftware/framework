@@ -109,8 +109,9 @@ namespace Signum.Entities
             return true;
         }
 
+        static readonly Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
         [HiddenProperty]
-        public string ToStringMethod
+        public string ToStringProperty
         {
             get
             {

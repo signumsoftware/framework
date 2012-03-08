@@ -41,14 +41,14 @@
                 {
                     @Html.CheckBox(
                         Model.Compose("rowSelection", row.Index.ToString()),
-                        new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr });
+                          new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString() });
 
                 }
                 else
                 {
                     @Html.RadioButton(
                              Model.Compose("rowSelection"),
-                        entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr);
+                        entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString());
                 }
             </td>
         }

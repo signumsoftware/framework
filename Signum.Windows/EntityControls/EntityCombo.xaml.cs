@@ -149,7 +149,7 @@ namespace Signum.Windows
             }
 
             if (SortElements)
-                data = data.OrderBy(a => a.ToStr).ToList();
+                data = data.OrderBy(a => a.ToString()).ToList();
 
             try
             {

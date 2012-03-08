@@ -88,7 +88,7 @@ namespace Signum.Entities.DynamicQuery
                     //    .Concat(asPropesties).Concat(EntityProperties(cleanType)).ToArray();
                 }
 
-                return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
+                return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
                     .Concat(EntityProperties(cleanType).Concat(OnEntityExtension(cleanType, this)).OrderBy(a => a.ToString())).ToList();
             }
 

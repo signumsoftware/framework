@@ -552,7 +552,7 @@ namespace Signum.Engine.Linq
                         new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
 
                 return new LiteReferenceExpression(liteType,
-                    reference, id, Expression.Constant(lite.ToStr), Expression.Constant(lite.RuntimeType));
+                    reference, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.RuntimeType));
             }
 
             return null;

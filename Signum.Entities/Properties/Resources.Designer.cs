@@ -547,6 +547,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Text.
+        /// </summary>
+        public static string IdentifiableEntity_ToStr {
+            get {
+                return ResourceManager.GetString("IdentifiableEntity_ToStr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Id not valid.
         /// </summary>
         public static string IdNotValid {

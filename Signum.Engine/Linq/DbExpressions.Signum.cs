@@ -22,6 +22,7 @@ namespace Signum.Engine.Linq
     {
         public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo((IdentifiableEntity ei) =>ei.id);
         public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((IdentifiableEntity ie) =>ie.toStr);
+        public static readonly MethodInfo ToStringMethod = ReflectionTools.GetMethodInfo((object o) => o.ToString());
 
         public readonly Table Table;
         public readonly Expression ExternalId;
@@ -49,21 +50,21 @@ namespace Signum.Engine.Linq
             this.ExternalId = externalId;
         }
 
-        public Expression GetOrCreateFieldBinding(FieldInfo fi, BinderTools tools)
+        public Expression GetOrCreateFieldBinding(FieldInfo fi, QueryBinder binder)
         {
             FieldBinding binding = Bindings.SingleOrDefaultEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
             if (binding != null)
                 return binding.Binding;
 
-            AssertTable(tools);
+            AssertTable(binder);
 
-            Expression ex = Table.CreateBinding(Token, TableAlias, fi, tools);
+            Expression ex = Table.CreateBinding(Token, TableAlias, fi, binder);
 
             if (ex is MListExpression)
             {
                 MListExpression mle = (MListExpression)ex;
 
-                mle.BackID = GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
+                mle.BackID = GetOrCreateFieldBinding(FieldInitExpression.IdField, binder);
             }
 
             Bindings.Add(new FieldBinding(fi, ex));
@@ -93,31 +94,31 @@ namespace Signum.Engine.Linq
                 constructor;
         }
 
-        public void Complete(BinderTools tools)
+        public void Complete(QueryBinder binder)
         {
-            AssertTable(tools);
+            AssertTable(binder);
 
             foreach (EntityField field in Table.Fields.Values.Where(f =>
                 !ReflectionTools.Equals(f.FieldInfo, IdField)))
             {
-                Expression exp = GetOrCreateFieldBinding(field.FieldInfo, tools);
+                Expression exp = GetOrCreateFieldBinding(field.FieldInfo, binder);
 
                 if (exp is MListExpression)
                 {
-                    Expression proj = tools.MListProjection((MListExpression)exp);
+                    Expression proj = binder.MListProjection((MListExpression)exp);
                     ReplaceBinding(field.FieldInfo, proj); 
                 }  
             }
         }
 
-        void AssertTable(BinderTools tools)
+        void AssertTable(QueryBinder binder)
         {
             if (TableAlias == null)
             {
-                TableAlias = tools.NextTableAlias(Table.Name);
+                TableAlias = binder.NextTableAlias(Table.Name);
                 if (!Table.IsView)
-                    GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
-                tools.AddRequest(Token, new TableCondition
+                    GetOrCreateFieldBinding(FieldInitExpression.IdField, binder);
+                binder.AddRequest(Token, new TableCondition
                 {
                     FieldInit = this,
                     Table = new TableExpression(TableAlias, Table.Name)

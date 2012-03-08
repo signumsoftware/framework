@@ -221,7 +221,7 @@ namespace Signum.Engine
                         var toStr = dic.TryGetC(item.Key.Id) ?? ("[" + Resources.EntityWithType0AndId1NotFound.Formato(item.Key.Type.NiceName(), item.Key.Id) + "]");
                         foreach (var lite in item.Value)
                         {
-                            lite.ToStr = toStr;
+                            lite.SetToString(toStr);
                         }
                     }
 
@@ -253,7 +253,7 @@ namespace Signum.Engine
         static readonly GenericInvoker<Func<List<int>, Dictionary<int, string>>> giGetStrings = new GenericInvoker<Func<List<int>, Dictionary<int, string>>>(ids => GetStrings<IdentifiableEntity>(ids));
         static Dictionary<int, string> GetStrings<T>(List<int> ids) where T : IdentifiableEntity
         {
-            return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToStr)).ToDictionary();
+            return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToDictionary();
         }
     }
 

@@ -96,7 +96,7 @@ namespace Signum.Web
                                 .Class("sf-entity-list-option")
                                 .SetInnerText(
                                     (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
-                                    (itemTC.Value as Lite).TryCC(i => i.ToStr) ??
+                                    (itemTC.Value as Lite).TryCC(i => i.ToString()) ??
                                     (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? "")
                                 .ToHtml(TagRenderMode.Normal));
             

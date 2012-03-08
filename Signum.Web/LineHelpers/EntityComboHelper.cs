@@ -140,7 +140,7 @@ namespace Signum.Web
 
         public static SelectListItem ToSelectListItem(this Lite lite, bool selected)
         {
-            return new SelectListItem { Text = lite.ToStr, Value = lite.Id.ToString(), Selected = selected };
+            return new SelectListItem { Text = lite.ToString(), Value = lite.Id.ToString(), Selected = selected };
         }
 
         public static MvcHtmlString ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite<T> selectedElement) where T : class, IIdentifiable

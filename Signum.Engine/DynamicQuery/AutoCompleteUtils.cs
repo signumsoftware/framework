@@ -44,7 +44,7 @@ namespace Signum.Engine.DynamicQuery
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToStr).Cast<Lite>().ToList();
+            return Database.Query<RT>().Where(a => a.ToString().StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToString()).Cast<Lite>().ToList();
         }
 
         static GenericInvoker<Func<string, int, List<Lite>>> miLiteContaining = new GenericInvoker<Func<string, int, List<Lite>>>((ss, c) => LiteContaining<TypeDN, TypeDN>(ss, c));
@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToStr.Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToStr).Cast<Lite>().ToList();
+            return Database.Query<RT>().Where(a => a.ToString().Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToString()).Cast<Lite>().ToList();
         }
 
         public static List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)

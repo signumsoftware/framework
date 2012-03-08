@@ -137,9 +137,9 @@ WriteLiteral("            <td>\r\n");
                     
                Write(Html.CheckBox(
                         Model.Compose("rowSelection", row.Index.ToString()),
-                        new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr }));
+                          new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString() }));
 
-                                                                                                                                                            ;
+                                                                                                                                                                   ;
 
                 }
                 else
@@ -147,9 +147,9 @@ WriteLiteral("            <td>\r\n");
                     
                Write(Html.RadioButton(
                              Model.Compose("rowSelection"),
-                        entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr));
+                        entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString()));
 
-                                                                                                                                            ;
+                                                                                                                                                 ;
                 }
 
 WriteLiteral("            </td>\r\n");
