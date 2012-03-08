@@ -41,7 +41,7 @@ namespace Signum.Web.Reports
                 {
                     string viewPrefix = "~/Reports/Views/{0}.cshtml";
                     Navigator.AddSettings(new List<EntitySettings>{
-                        new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
+                        new EntitySettings<ExcelReportDN>(EntityType.AdminNotSaving) 
                         { 
                             PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
                             MappingAdmin = new ExcelReportMapping()

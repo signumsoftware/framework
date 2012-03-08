@@ -52,8 +52,9 @@ namespace Signum.Web.UserQueries
                     return QueryUtils.Parse(tokenStr, qd);
                 };
 
-                Navigator.AddSettings(new List<EntitySettings>{
-                    new EntitySettings<UserQueryDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<UserQueryDN>(EntityType.AdminNotSaving) { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
                     
                     new EmbeddedEntitySettings<QueryFilterDN>()
                     { 
