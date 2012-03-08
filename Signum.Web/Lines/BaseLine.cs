@@ -40,7 +40,7 @@ namespace Signum.Web
             set { visible = value; }
         }
 
-        public bool hideIfNull = false;
+        bool hideIfNull = false;
         public bool HideIfNull
         {
             get { return hideIfNull; }
