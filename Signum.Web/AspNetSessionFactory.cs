@@ -5,11 +5,23 @@ using System.Web;
 using Signum.Utilities;
 using System.Security.Principal;
 using System.Threading;
+using System.Web.SessionState;
 
 namespace Signum.Web
 {
     public class AspNetSessionFactory : ISessionFactory
     {
+        static readonly ThreadLocalVariable<HttpSessionState> overrideAspNetSessionVariable = new ThreadLocalVariable<HttpSessionState>("overrideASPNetSession");
+
+        public static IDisposable OverrideAspNetSession(HttpSessionState globalAsaxSession)
+        {
+            if (overrideAspNetSessionVariable.Value != null)
+                throw new InvalidOperationException("overrideASPNetSession is already set");
+
+            overrideAspNetSessionVariable.Value = globalAsaxSession;
+            return new Disposable(() => overrideAspNetSessionVariable.Value = null);
+        }
+
         public SessionVariable<T> CreateVariable<T>(string name)
         {
             return new AspNetSessionVariable<T>(name);
@@ -27,7 +39,7 @@ namespace Signum.Web
             {
                 get
                 {
-                    var session = HttpContext.Current.Session;
+                    var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current.Session;
 
                     object result = session[Name];
 
@@ -39,7 +51,7 @@ namespace Signum.Web
 
                     return GetDefaulValue();
                 }
-                set { HttpContext.Current.Session[Name] = value; }
+                set { (overrideAspNetSessionVariable.Value ?? HttpContext.Current.Session)[Name] = value; }
             }
         }
     }
