@@ -21,12 +21,6 @@ namespace Signum.Engine
         public readonly static SqlDbType PrimaryKeyType = SqlDbType.Int;
         public readonly static string PrimaryKeyName = "Id";
 
-        public readonly static SqlDbType TicksType = SqlDbType.BigInt;
-        public readonly static string TicksName = "Ticks";
-
-        public readonly static SqlDbType ToStrType = SqlDbType.NVarChar;
-        public readonly static string ToStrName = "ToStr";
-
         #region Create Tables
         public static SqlPreCommand CreateTable(string table, List<string> campos)
         {

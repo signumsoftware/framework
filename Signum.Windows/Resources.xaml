@@ -279,7 +279,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="{x:Type dn:Lite}"  DataType="{x:Type dn:Lite}">
-        <TextBlock Text="{Binding ToStr}" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding}" VerticalAlignment="Center" />
     </DataTemplate>
 
     <Style x:Key="LinkButtonStyle" TargetType="{x:Type Button}">
