@@ -48,7 +48,7 @@ namespace Signum.Windows.Reports
                 {
                     MenuItem mi = new MenuItem()
                     {
-                        Header = report.ToStr,
+                        Header = report.ToString(),
                         Icon = ExtensionsImageLoader.GetImageSortName("excelDoc.png").ToSmallImage(),
                         Tag = report,
                     };
@@ -79,7 +79,7 @@ namespace Signum.Windows.Reports
                     AddExtension = true,
                     DefaultExt = ".xlsx",
                     Filter = Prop.Resources.Excel2007Spreadsheet,
-                    FileName = reportLite.ToStr + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx",
+                    FileName = reportLite.ToString() + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx",
                     OverwritePrompt = true,
                     Title = Prop.Resources.FindLocationFoExcelReport
                 };

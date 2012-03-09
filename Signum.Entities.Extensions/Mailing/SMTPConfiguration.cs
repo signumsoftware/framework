@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities;
+using System.Linq.Expressions;
+using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
@@ -72,10 +74,10 @@ namespace Signum.Entities.Mailing
             set { Set(ref clientCertificationFiles, value, () => ClientCertificationFiles); }
         }
 
-
+        static readonly Expression<Func<SMTPConfigurationDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
@@ -105,9 +107,10 @@ namespace Signum.Entities.Mailing
             set { Set(ref certFileType, value, () => CertFileType); }
         }
 
+        static readonly Expression<Func<ClientCertificationFileDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 

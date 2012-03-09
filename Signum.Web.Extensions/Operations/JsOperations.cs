@@ -67,7 +67,7 @@ namespace Signum.Web.Operations
         public JsInstruction ContextualExecute(IdentifiableEntity entity, string operationName)
         {
             return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(operationName, entity.ToStr, entity.GetType().NiceName(), entity.Id),
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(operationName, entity.ToString(), entity.GetType().NiceName(), entity.Id),
                 "{0}.contextualExecute()".Formato(this.ToJS())).ToJS());
         }
     }
@@ -93,7 +93,7 @@ namespace Signum.Web.Operations
         public JsInstruction ContextualConstruct(IdentifiableEntity entity, string operationName)
         {
             return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(operationName, entity.ToStr, entity.GetType().NiceName(), entity.Id),
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(operationName, entity.ToString(), entity.GetType().NiceName(), entity.Id),
                 "{0}.contextualConstruct()".Formato(this.ToJS())).ToJS());
         }
     }
@@ -133,14 +133,14 @@ namespace Signum.Web.Operations
         public JsInstruction confirmAndAjax(IdentifiableEntity entity)
         {
             return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToStr, entity.GetType().NiceName(), entity.Id),
+                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToString(), entity.GetType().NiceName(), entity.Id),
                 "{0}.ajax()".Formato(this.ToJS())).ToJS());
         }
 
         public JsInstruction ContextualDelete(IdentifiableEntity entity)
         {
             return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToStr, entity.GetType().NiceName(), entity.Id),
+                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToString(), entity.GetType().NiceName(), entity.Id),
                 "{0}.contextualDelete()".Formato(this.ToJS())).ToJS());
         }
     }

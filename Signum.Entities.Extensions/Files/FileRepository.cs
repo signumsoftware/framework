@@ -75,9 +75,10 @@ namespace Signum.Entities.Files
             set { Set(ref fileTypes, value, () => FileTypes); }
         }
 
+        static readonly Expression<Func<FileRepositoryDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 }

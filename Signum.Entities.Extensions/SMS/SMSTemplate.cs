@@ -135,9 +135,10 @@ namespace Signum.Entities.SMS
             return base.PropertyValidation(pi);
         }
 
+        static readonly Expression<Func<SMSTemplateDN, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
-            return Name;
+            return ToStringExpression.Evaluate(this);
         }
 
         public SMSMessageDN CreateStaticSMSMessage()

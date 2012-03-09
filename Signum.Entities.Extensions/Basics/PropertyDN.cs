@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Reflection;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
@@ -36,9 +37,10 @@ namespace Signum.Entities.Basics
             set { Set(ref type, value, () => Type); }
         }
 
+        static readonly Expression<Func<PropertyDN, string>> ToStringExpression = e => e.path;
         public override string ToString()
         {
-            return path;
+            return ToStringExpression.Evaluate(this);
         }
     }
 }

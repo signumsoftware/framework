@@ -33,8 +33,8 @@ namespace Signum.Web.SMS
                 Navigator.RegisterArea(typeof(SMSClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMSMessageDN>(EntityType.NotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSMessage")},
-                    new EntitySettings<SMSTemplateDN>(EntityType.NotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
+                    new EntitySettings<SMSMessageDN>(EntityType.AdminNotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSMessage")},
+                    new EntitySettings<SMSTemplateDN>(EntityType.AdminNotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
                     new EntitySettings<SMSSendPackageDN>(EntityType.ServerOnly){ PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
                     new EntitySettings<SMSUpdatePackageDN>(EntityType.ServerOnly){ PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
 

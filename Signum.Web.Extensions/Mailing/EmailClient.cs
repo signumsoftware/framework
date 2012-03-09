@@ -47,7 +47,7 @@ namespace Signum.Web.Mailing
                 if (newsletter)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<NewsletterDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
+                    new EntitySettings<NewsletterDN>(EntityType.AdminNotSaving) { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
                     new EntitySettings<NewsletterDeliveryDN>(EntityType.ServerOnly) { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                 });
             }

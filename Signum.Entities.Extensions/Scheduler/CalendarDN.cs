@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
 using System.Reflection;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Scheduler
 {
@@ -55,10 +56,10 @@ namespace Signum.Entities.Scheduler
             return base.PropertyValidation(pi);
         }
 
-
+        static readonly Expression<Func<CalendarDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using System.Linq.Expressions;
+using Signum.Utilities;
 
 namespace Signum.Entities.SMS
 {
@@ -133,9 +135,10 @@ namespace Signum.Entities.SMS
             set { Set(ref updatePackage, value, () => UpdatePackage); }
         }
 
+        static readonly Expression<Func<SMSMessageDN, string>> ToStringExpression = e => "SMS " + e.MessageID;
         public override string ToString()
         {
-            return "SMS " + MessageID;
+            return ToStringExpression.Evaluate(this);
         }
     }
 }

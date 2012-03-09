@@ -108,7 +108,7 @@ namespace Signum.Engine.Processes
                               {
                                   Entity = pe.ToLite(),
                                   pe.Id,
-                                  Resume = pe.ToStr,
+                                  Resume = pe.ToString(),
                                   Process = pe.Process.ToLite(),
                                   State = pe.State,
                                   pe.CreationDate,

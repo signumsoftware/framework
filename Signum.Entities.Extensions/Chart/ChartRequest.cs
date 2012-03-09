@@ -460,11 +460,13 @@ namespace Signum.Entities.Chart
             set { Set(ref orders, value, () => Orders); }
         }
 
+
+        static readonly Expression<Func<UserChartDN, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
-            return displayName;
+            return ToStringExpression.Evaluate(this);
         }
-
+      
         internal void ParseData(QueryDescription description)
         {
             if (Filters != null)

@@ -9,6 +9,7 @@ using Signum.Utilities.Reflection;
 using System.Globalization;
 using System.Reflection;
 using Signum.Entities.Reports;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.UserQueries
 {
@@ -103,9 +104,10 @@ namespace Signum.Entities.UserQueries
                     Orders[i].Index = i;
         }
 
+        static readonly Expression<Func<UserQueryDN, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
-            return displayName;
+            return ToStringExpression.Evaluate(this);
         }
 
         internal void ParseData(QueryDescription description)

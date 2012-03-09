@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
+using System.Linq.Expressions;
+using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
@@ -26,9 +28,10 @@ namespace Signum.Entities.Mailing
             set { Set(ref friendlyName, value, () => FriendlyName); }
         }
 
+        static readonly Expression<Func<EmailTemplateDN, string>> ToStringExpression = e => e.friendlyName;
         public override string ToString()
         {
-            return friendlyName;
+            return ToStringExpression.Evaluate(this);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Signum.Web.Reports
                 {
                     string viewPrefix = "~/Reports/Views/{0}.cshtml";
                     Navigator.AddSettings(new List<EntitySettings>{
-                        new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
+                        new EntitySettings<ExcelReportDN>(EntityType.AdminNotSaving) 
                         { 
                             PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
                             MappingAdmin = new ExcelReportMapping()
@@ -149,8 +149,8 @@ namespace Signum.Web.Reports
                     {
                         items.Add(new ToolBarButton
                         {
-                            AltText = report.ToStr,
-                            Text = report.ToStr,
+                            AltText = report.ToString(),
+                            Text = report.ToString(),
                             OnClick = Js.SubmitOnly(RouteHelper.New().Action("ExcelReport", "Report"), "$.extend({{excelReport:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato(report.Id, prefix)).ToJS(),
                             DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });
