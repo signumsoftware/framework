@@ -33,6 +33,7 @@
         </Grid>
         <m:ValueLine m:Common.Route="RemoveNoSMSCharacters" m:Common.MinLabelWidth="150"/>
         <m:ValueLine m:Common.Route="MessageLengthExceeded" m:Common.MinLabelWidth="150" />
+        <m:ValueLine m:Common.Route="EditableMessage" />
         <m:ValueLine m:Common.Route="Certified" />
         <m:ValueLine m:Common.Route="From" />
         <m:ValueLine m:Common.Route="StartDate" />

@@ -24,10 +24,14 @@ namespace Signum.Windows.SMS
     {
         public static IValueConverter StateToVisibility = ConverterFactory.New((SMSMessageState s) => s == SMSMessageState.Created ? Visibility.Visible : Visibility.Collapsed);
         public static IValueConverter NotStateToVisibility = ConverterFactory.New((SMSMessageState s) => s != SMSMessageState.Created ? Visibility.Visible : Visibility.Collapsed);
+        public static IValueConverter ReadOnlyMessageConverter = ConverterFactory.New((SMSMessageDN m) =>
+            !m.EditableMessage ? true
+            : m.State != SMSMessageState.Created);
 
         public SMSMessage()
         {
             InitializeComponent();
+            DataContextChanged += new DependencyPropertyChangedEventHandler(SMSMessage_DataContextChanged);
             text = textMessage.Child<TextBox>();
             text.TextWrapping = TextWrapping.WrapWithOverflow;
             text.TextChanged += new TextChangedEventHandler(SMSMessage_TextChanged);
@@ -41,7 +45,25 @@ namespace Signum.Windows.SMS
                 new GradientStop(Color.FromRgb(255, 204, 204), 1)
             }, new Point(0.5, 1), new Point(0.5, 0));
             normalBackGround = text.Background;
+            SetReadOnly();
             VisualCharactersToEnd();
+        }
+
+        void SMSMessage_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            SetReadOnly();
+        }
+
+        private void SetReadOnly()
+        {
+            if (MessageDC != null)
+            {
+                var ro = !MessageDC.EditableMessage ? true
+                                  : MessageDC.State != SMSMessageState.Created;
+                text.IsReadOnly = ro;
+                Common.SetIsReadOnly(vlCertified, ro);
+                Common.SetIsReadOnly(txtFrom, ro);
+            }
         }
 
         private void SMSMessage_TextChanged(object sender, TextChangedEventArgs e)

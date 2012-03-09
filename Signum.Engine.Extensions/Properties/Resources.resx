@@ -277,4 +277,7 @@
   <data name="StatusCanNotBeUpdatedForNonSentMessages" xml:space="preserve">
     <value>Status can not be updated for non sent messages</value>
   </data>
+  <data name="TheTextForTheSMSMessageExceedsTheLengthLimit" xml:space="preserve">
+    <value>The text for the SMS message exceeds the length limit</value>
+  </data>
 </root>

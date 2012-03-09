@@ -43,6 +43,13 @@ namespace Signum.Entities.SMS
             set { Set(ref certified, value, () => Certified); }
         }
 
+        bool editableMessage = AllowEditMessages;
+        public bool EditableMessage
+        {
+            get { return editableMessage; }
+            set { Set(ref editableMessage, value, () => EditableMessage); }
+        }
+
         TypeDN associatedType;
         public TypeDN AssociatedType
         {
@@ -145,11 +152,14 @@ namespace Signum.Entities.SMS
                 Template = this.ToLite(),
                 Message = this.message,
                 From = this.from,
+                EditableMessage = this.editableMessage,
                 State = SMSMessageState.Created,
                 DestinationNumber = destinationNumber,
                 Certified = this.Certified
             };            
         }
+
+        public static bool AllowEditMessages = true;
     }
 
     public enum MessageLengthExceeded

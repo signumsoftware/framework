@@ -25,7 +25,7 @@
             vl.ValueLineType = ValueLineType.TextArea;
             vl.ValueHtmlProps["cols"] = "30";
             vl.ValueHtmlProps["rows"] = "6";
-            vl.ReadOnly = (e.Value.State != SMSMessageState.Created);
+            vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
         })
     if(e.Value.State == SMSMessageState.Created) {
         <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
