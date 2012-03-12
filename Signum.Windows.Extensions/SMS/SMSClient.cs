@@ -49,11 +49,9 @@ namespace Signum.Windows.SMS
                 SearchOnLoad = true,
             });
 
-            if (template == null)
-                return null;
-
-            Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate, 
-                template.ToLite<SMSTemplateDN>().Retrieve()));
+            if (template != null)
+                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate,
+                    template.ToLite<SMSTemplateDN>().Retrieve()));
 
             return null;
         }
