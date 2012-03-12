@@ -184,6 +184,7 @@ namespace Signum.Engine.SMS
                     numbers.Select(n => new SMSMessageDN
                     {
                         Message = template.ComposeMessage(n.Data),
+                        EditableMessage = template.EditableMessage,
                         From = template.From,
                         DestinationNumber = n.Phone,
                         SendPackage = packLite,
@@ -214,6 +215,7 @@ namespace Signum.Engine.SMS
                     return new SMSMessageDN
                     {
                         Message = template.ComposeMessage(func.Evaluate(provider)),
+                        EditableMessage = template.EditableMessage,
                         From = template.From,
                         DestinationNumber = GetPhoneNumber(provider),
                         State = SMSMessageState.Created,
@@ -286,7 +288,7 @@ namespace Signum.Engine.SMS
                 switch (onExceeded)
                 {
                     case MessageLengthExceeded.NotAllowed:
-                        throw new ApplicationException("The text for the SMS message exceeds the limit");
+                        throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.TheTextForTheSMSMessageExceedsTheLengthLimit);
                     case MessageLengthExceeded.Allowed:
                         break;
                     case MessageLengthExceeded.TextPruning:

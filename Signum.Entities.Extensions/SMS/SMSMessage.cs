@@ -66,6 +66,13 @@ namespace Signum.Entities.SMS
             set { Set(ref message, value, () => Message); }
         }
 
+        bool editableMessage;
+        public bool EditableMessage
+        {
+            get { return editableMessage; }
+            set { Set(ref editableMessage, value, () => EditableMessage); }
+        }
+
         string from = DefaultFrom;
         [StringLengthValidator(AllowNulls = false)]
         public string From
