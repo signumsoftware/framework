@@ -145,9 +145,6 @@ namespace Signum.Utilities.DataStructures
                     Expression.LessThanOrEqual(Expression.Property(instance, "Min"), arguments[0]),
                     Expression.LessThan(arguments[0], Expression.Property(instance, "Max")));
             else
-                // (!min.HasValue || min.Value <= value &&
-                //  !max.HasValue || value < max.Value)
-
                 return Expression.And(
                     Expression.Or(Expression.Not(Expression.Property(Expression.Property(instance, "Min"), "HasValue")), Expression.LessThanOrEqual(Expression.Property(Expression.Property(instance, "Min"), "Value"), arguments[0])),
                     Expression.Or(Expression.Not(Expression.Property(Expression.Property(instance, "Max"), "HasValue")), Expression.LessThan(arguments[0], Expression.Property(Expression.Property(instance, "Max"), "Value"))));  
