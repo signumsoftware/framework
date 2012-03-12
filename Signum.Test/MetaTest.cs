@@ -41,7 +41,7 @@ namespace Signum.Test
         [TestMethod]
         public void AnonymousType()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => new { a.Target, a.Text, a.ToStr.Length, Sum = a.ToStr + a.ToStr }));
+            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => new { a.Target, a.Text, a.ToString().Length, Sum = a.ToString() + a.ToString() }));
             Assert.IsInstanceOfType(dic["Target"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Text"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
@@ -57,7 +57,7 @@ namespace Signum.Test
         [TestMethod]
         public void NamedType()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => new Bla { ToStr = a.ToStr, Length = a.ToStr.Length }));
+            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => new Bla { ToStr = a.ToString(), Length = a.ToString().Length }));
             Assert.IsInstanceOfType(dic["ToStr"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
         }

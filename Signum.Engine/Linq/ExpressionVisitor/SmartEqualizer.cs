@@ -67,8 +67,8 @@ namespace Signum.Engine.Linq
 
         private static Expression ConditionalEquals(Expression exp1, Expression exp2)
         {
-            if (Schema.Current.Settings.TypeValues.ContainsKey(exp1.Type) ||
-                Schema.Current.Settings.TypeValues.ContainsKey(exp2.Type))
+            if (Schema.Current.Settings.IsDbType(exp1.Type)||
+                Schema.Current.Settings.IsDbType(exp2.Type))
                 return null;
 
             if (exp1.NodeType == ExpressionType.Conditional)
@@ -90,8 +90,8 @@ namespace Signum.Engine.Linq
 
         private static Expression CoalesceEquals(Expression exp1, Expression exp2)
         {
-            if ((Schema.Current.Settings.TypeValues.ContainsKey(exp1.Type) ||
-              Schema.Current.Settings.TypeValues.ContainsKey(exp2.Type)))
+            if (Schema.Current.Settings.IsDbType(exp1.Type)||
+                Schema.Current.Settings.IsDbType(exp2.Type))
                 return null;
 
             if (exp1.NodeType == ExpressionType.Coalesce)
@@ -552,7 +552,7 @@ namespace Signum.Engine.Linq
                         new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
 
                 return new LiteReferenceExpression(liteType,
-                    reference, id, Expression.Constant(lite.ToStr), Expression.Constant(lite.RuntimeType));
+                    reference, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.RuntimeType));
             }
 
             return null;

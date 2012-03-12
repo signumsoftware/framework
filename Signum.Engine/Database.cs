@@ -207,17 +207,17 @@ namespace Signum.Engine
             return result;
         }
 
-        public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
+        public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            return (Lite<T>)FillToStr((Lite)lite);
+            return (Lite<T>)FillToString((Lite)lite);
         }
 
-        public static Lite FillToStr(Lite lite)
+        public static Lite FillToString(Lite lite)
         {
             if (lite == null)
                 return null;
 
-            lite.ToStr = GetToStr(lite.RuntimeType, lite.Id);
+            lite.SetToString(GetToStr(lite.RuntimeType, lite.Id));
 
             return lite;
         }
@@ -235,7 +235,7 @@ namespace Signum.Engine
             if (cc != null)
                 return cc.RetriveLite(id).ToString();
 
-            return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToStr).FirstEx();
+            return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
         }
 
         #endregion

@@ -592,19 +592,24 @@ namespace Signum.Engine.Linq
 
     internal class SqlFunctionExpression : DbExpression
     {
+        public readonly Expression Object; 
         public readonly string SqlFunction;
         public readonly ReadOnlyCollection<Expression> Arguments;
 
-        public SqlFunctionExpression(Type type, string sqlFunction, IEnumerable<Expression> arguments)
+        public SqlFunctionExpression(Type type, Expression obj, string sqlFunction, IEnumerable<Expression> arguments)
             :base(DbExpressionType.SqlFunction, type )
         {
             this.SqlFunction = sqlFunction;
+            this.Object = obj;
             this.Arguments = arguments.ToReadOnly(); 
         }
 
         public override string ToString()
         {
-            return "{0}({1})".Formato(SqlFunction, Arguments.ToString(a => a.NiceToString(), ","));
+            string result = "{0}({1})".Formato(SqlFunction, Arguments.ToString(a => a.NiceToString(), ","));
+            if (Object == null)
+                return result;
+            return Object.ToString() + "." + result;
         }
     }
 

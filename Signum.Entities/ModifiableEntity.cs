@@ -109,8 +109,9 @@ namespace Signum.Entities
             return true;
         }
 
+        static readonly Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
         [HiddenProperty]
-        public string ToStringMethod
+        public string ToStringProperty
         {
             get
             {
@@ -438,6 +439,8 @@ namespace Signum.Entities
 
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
             var type = target.GetType();
+            list.Add(new Member("Type", type, typeof(Type)));
+
             foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t=> t!= typeof(ModifiableEntity) && t!= typeof(Modifiable)).Reverse())
             {
                 foreach (var fi in t.GetFields(flags).OrderBy(f => f.MetadataToken))

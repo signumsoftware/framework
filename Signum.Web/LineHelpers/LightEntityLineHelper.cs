@@ -20,18 +20,18 @@ namespace Signum.Web
         {
             if (lite == null)
                 return MvcHtmlString.Empty;
-            
-            if (string.IsNullOrEmpty(lite.ToStr))
-                Database.FillToStr(lite);
+
+            if (string.IsNullOrEmpty(lite.ToString()))
+                Database.FillToString(lite);
 
             string key = lite.Key();
             MvcHtmlString result = Navigator.IsViewable(lite.RuntimeType, admin ? EntitySettingsContext.Admin : EntitySettingsContext.Default) ?
                 helper.Href("",
-                    lite.ToStr,
+                    lite.ToString(),
                     Navigator.ViewRoute(lite),
                     HttpUtility.HtmlEncode(Resources.View),
                     "", null) :
-                lite.ToStr.EncodeHtml();
+                lite.ToString().EncodeHtml();
             
             return result.Concat(helper.HiddenAnonymous(key, new { @class = "sf-data" }));
         }

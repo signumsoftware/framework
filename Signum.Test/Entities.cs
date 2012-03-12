@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test
 {
@@ -37,7 +38,7 @@ namespace Signum.Test
 
         public override string ToString()
         {
-            return text;
+            return "{0} -> {1}".Formato(creationTime, text);
         }
     }
 
@@ -122,9 +123,10 @@ namespace Signum.Test
             return LonelyExpression.Evaluate(this);
         }
 
+        static Expression<Func<ArtistDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
@@ -191,9 +193,10 @@ namespace Signum.Test
             return LonelyExpression.Evaluate(this);
         }
 
+        static Expression<Func<BandDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
@@ -272,9 +275,18 @@ namespace Signum.Test
             set { Set(ref owner, value, () => Owner); }
         }
 
+        [UniqueIndex]
+        SqlHierarchyId node;
+        public SqlHierarchyId Node
+        {
+            get { return node; }
+            set { Set(ref node, value, () => Node); }
+        }
+
+        static Expression<Func<LabelDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
@@ -346,9 +358,10 @@ namespace Signum.Test
             set { Set(ref label, value, () => Label); }
         }
 
+        static Expression<Func<AlbumDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
@@ -382,9 +395,10 @@ namespace Signum.Test
             set { Set(ref seconds, value, () => Seconds); }
         }
 
+        static Expression<Func<SongDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 

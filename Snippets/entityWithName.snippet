@@ -49,9 +49,11 @@
         
         $end$
 
+
+        static Expression<Func<$entityName$DN, string>> ToStringExpression = e => e.$name$;
         public override string ToString()
         {
-            return $name$;
+            return ToStringExpression.Evaluate(this);
         }
     }]]>
 			</Code>

@@ -108,6 +108,19 @@ namespace Signum.Engine.Maps
             return result;
         }
 
+        public IColumn ToStrColumn
+        {
+            get
+            {
+                EntityField entity;
+                
+                if(Fields.TryGetValue("toStr", out entity))
+                    return (IColumn)entity.Field;
+
+                return null;
+            }
+        }
+
         private Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> GetInsert(InsertCache result)
         {
             if (Identity)
@@ -121,6 +134,8 @@ namespace Signum.Engine.Maps
                     Entity entity = ident as Entity;
                     if (entity != null)
                         entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                    SetToStrField(ident);
 
                     var forbidden = new Forbidden(graph, ident);
 
@@ -142,6 +157,8 @@ namespace Signum.Engine.Maps
                     if (entity != null)
                         entity.Ticks = TimeZoneManager.Now.Ticks;
 
+                    SetToStrField(ident);
+
                     var forbidden = new Forbidden(graph, ident);
 
                     new SqlPreCommandSimple(sqlSingle, result.InsertParameters(ident, forbidden, "")).ExecuteNonQuery();
@@ -149,6 +166,17 @@ namespace Signum.Engine.Maps
                     ident.IsNew = false;
                     FinishInsert(ident, forbidden);
                 };
+            }
+        }
+
+        private void SetToStrField(IdentifiableEntity entity)
+        {
+            var toStrColumn = ToStrColumn;
+            if (toStrColumn != null)
+            {
+                entity.toStr = entity.ToString();
+                if (entity.toStr.HasText() && toStrColumn.Size.HasValue && entity.toStr.Length > toStrColumn.Size)
+                    entity.toStr = entity.toStr.Substring(0, toStrColumn.Size.Value);
             }
         }
 
@@ -172,6 +200,8 @@ namespace Signum.Engine.Maps
                         Entity entity = ident as Entity;
                         if (entity != null)
                             entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                        SetToStrField(ident);
                     }
 
                     DataTable table = new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteDataTable();
@@ -198,6 +228,8 @@ namespace Signum.Engine.Maps
                         Entity entity = ident as Entity;
                         if (entity != null)
                             entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                        SetToStrField(ident);
                     }
 
                     new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteNonQuery();
@@ -259,10 +291,9 @@ namespace Signum.Engine.Maps
 
             var pb = Connector.Current.ParameterBuilder;
 
-            string idParamName = pb.GetParameterName("id");
+            string idParamName = ParameterBuilder.GetParameterName("id");
 
-
-            string oldTicksParamName = pb.GetParameterName("old_ticks");
+            string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
 
             result.SqlUpdatePattern = (post, output) =>
             {
@@ -282,10 +313,10 @@ namespace Signum.Engine.Maps
 
             List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
 
-            parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, false, Expression.Field(paramIdent, fiId)));
+            parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, fiId)));
 
             if (typeof(Entity).IsAssignableFrom(this.Type))
-                parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, false, paramOldTicks));
+                parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, null, false, paramOldTicks));
 
             var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>>>(
                 CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramPostfix);
@@ -315,6 +346,8 @@ namespace Signum.Engine.Maps
                     long oldTicks = entity.Ticks;
                     entity.Ticks = TimeZoneManager.Now.Ticks;
 
+                    SetToStrField(ident);
+
                     var forbidden = new Forbidden(graph, ident);
 
                     int num = (int)new SqlPreCommandSimple(sqlUpdate, result.UpdateParameters(ident, oldTicks, forbidden, "")).ExecuteNonQuery();
@@ -328,6 +361,8 @@ namespace Signum.Engine.Maps
             {
                 return (ident, graph) =>
                 {
+                    SetToStrField(ident);
+
                     var forbidden = new Forbidden(graph, ident);
 
                     int num = (int)new SqlPreCommandSimple(sqlUpdate, result.UpdateParameters(ident, -1, forbidden, "")).ExecuteNonQuery();
@@ -493,7 +528,7 @@ namespace Signum.Engine.Maps
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
         {   
             if(comment == null)
-                comment = ident.ToStr;
+                comment = ident.ToString();
 
             bool dirty = false;
             ident.PreSaving(ref dirty);
@@ -518,10 +553,9 @@ namespace Signum.Engine.Maps
         {
             public Trio(IColumn column, Expression value, Expression postfix)
             {
-                var pc = Connector.Current.ParameterBuilder;
                 this.SourceColumn = column.Name;
-                this.ParameterName = pc.GetParameterName(column.Name);
-                this.ParameterBuilder = pc.ParameterFactory(Concat(this.ParameterName, postfix), column.SqlDbType, column.Nullable, value);
+                this.ParameterName = Engine.ParameterBuilder.GetParameterName(column.Name);
+                this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(Concat(this.ParameterName, postfix), column.SqlDbType, column.UdtTypeName, column.Nullable, value);
             }
 
             public string SourceColumn;
@@ -650,7 +684,7 @@ namespace Signum.Engine.Maps
             InsertCache<T> result = new InsertCache<T>();
 
             result.sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name.SqlScape(), BackReference.Name);
-            result.DeleteParameter = ident => Connector.Current.ParameterBuilder.CreateReferenceParameter(BackReference.Name, false, ident.Id);
+            result.DeleteParameter = ident => Connector.Current.ParameterBuilder.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), false, ident.Id);
 
             var trios = new List<Table.Trio>();
             var assigments = new List<Expression>();

@@ -35,14 +35,9 @@ namespace Signum.Entities
             return (T)Enum.ToObject(typeof(T), Id);
         }
 
-        protected internal override void PreSaving(ref bool graphModified)
-        {
-            ToStr = ToString();
-        }
-
         public override string ToString()
         {
-            return ((Enum)(object)ToEnum()).NiceToString() ?? toStr; 
+            return ((Enum)(object)ToEnum()).NiceToString(); 
         }
 
         public bool Equals(EnumProxy<T> other)

@@ -62,7 +62,7 @@ namespace Signum.Windows
             {
                 Lite lite = f.RealValue as Lite;
 
-               if (lite != null && string.IsNullOrEmpty(lite.ToStr))
+                if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                     Server.FillToStr(lite);
 
                 Type cleanType = Reflector.ExtractLite(type);

@@ -118,7 +118,6 @@
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasReplacer.cs" />
-    <Compile Include="Linq\ExpressionVisitor\BinderTools.cs" />
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
     <Compile Include="Linq\ExpressionVisitor\ConditionsRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\ChildProjectionFlattener.cs" />

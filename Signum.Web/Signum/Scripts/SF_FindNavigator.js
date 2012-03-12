@@ -60,20 +60,25 @@ SF.registerModule("FindNavigator", function () {
                 return true;
             };
 
-            $(this.pf("tblResults") + " th:not(.th-col-entity):not(.th-col-selection)")
-            .live('click', function (e) {
+            var $tblResults = $(this.pf("tblResults"));
+            $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
+                if (e.target != this) {
+                    return;
+                }
                 self.newSortOrder($(e.target), e.shiftKey);
                 self.search();
                 return false;
-            })
-            .live('contextmenu', function (e) {
+            });
+
+            $tblResults.on("contextmenu", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
                 if (!closeMyOpenedCtxMenu(e.target)) {
                     return false;
                 }
                 self.headerContextMenu(e);
                 return false;
-            })
-            .live('mousedown', function (e) {
+            });
+
+            $tblResults.on("mousedown", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
                 this.onselectstart = function () { return false };
                 return false;
             });
@@ -320,7 +325,7 @@ SF.registerModule("FindNavigator", function () {
             requestData["elems"] = $(this.pf(this.elems)).val();
             requestData["page"] = $(this.pf(this.page)).val();
             requestData["allowMultiple"] = $(this.pf(this.allowMultiple)).val();
-            
+
             var canView = $(this.pf(this.view)).val();
             requestData["view"] = (SF.isEmpty(canView) ? true : canView);
 
@@ -684,7 +689,7 @@ SF.registerModule("FindNavigator", function () {
             var $btnAddColumn = $(this.pf("btnAddColumn"));
 
             this.clearChildSubtokenCombos($selectedCombo, index);
-            
+
             var self = this;
             var $selectedOption = $selectedCombo.children("option:selected");
             if ($selectedOption.val() == "") {

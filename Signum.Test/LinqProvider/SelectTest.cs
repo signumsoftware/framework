@@ -67,8 +67,8 @@ namespace Signum.Test.LinqProvider
                         let label = a.Label
                         select new
                         {
-                            Artist = label.Country.ToStr,
-                            Author = a.Label.ToStr
+                            Artist = label.Country.Name,
+                            Author = a.Label.Name
                         }).ToList();
 
             Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
@@ -219,7 +219,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = (from a in Database.Query<AlbumDN>()
                         let band = (BandDN)a.Author
-                        select new { Artist = band.LastAward.ToStr, Author = a.Author.ToStr }).ToList();
+                        select new { Artist = band.ToString(), Author = a.Author.ToString() }).ToList();
 
             Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
         }
@@ -229,7 +229,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumDN>()
                 .Select(a => a.Author.ToLite())
-                .Where(a => a.ToStr.StartsWith("Michael")).ToList();
+                .Where(a => a.ToString().StartsWith("Michael")).ToList();
         }
 
         [TestMethod]
@@ -644,6 +644,18 @@ namespace Signum.Test.LinqProvider
         {
             var lists = (from mle in Database.MListQuery((AlbumDN a) => a.Songs)
                          select mle).ToList();
+        }
+
+        [TestMethod]
+        public void SelectToStrField()
+        {
+            var list = Database.Query<NoteWithDateDN>().Select(a => a.ToStringProperty).ToList();
+        }
+
+        [TestMethod]
+        public void SelectFakedToString()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.ToStringProperty).ToList();
         }
     }
 

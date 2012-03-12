@@ -15,12 +15,12 @@ namespace Signum.Engine.Linq
 {
     internal class EntityCompleter : DbExpressionVisitor
     {
-        BinderTools tools;
+        QueryBinder binder;
         ImmutableStack<Type> previousTypes = ImmutableStack<Type>.Empty; 
 
-        public static Expression Complete(Expression source, BinderTools tools)
+        public static Expression Complete(Expression source, QueryBinder binder)
         {
-            EntityCompleter pc = new EntityCompleter(){ tools = tools};
+            EntityCompleter pc = new EntityCompleter() { binder = binder };
             return pc.Visit(source);
         }
 
@@ -43,7 +43,7 @@ namespace Signum.Engine.Linq
                 fie.TableAlias = null;
             }
             else
-                fie.Complete(tools);
+                fie.Complete(binder);
 
             previousTypes = previousTypes.Push(fie.Type);
 
@@ -92,7 +92,7 @@ namespace Signum.Engine.Linq
 
             var result = new ProjectionExpression(proj.Source, projector, proj.UniqueFunction, proj.Token, proj.Type);
 
-            var expanded = tools.ApplyExpansions(result);
+            var expanded = binder.ApplyExpansions(result);
 
             return expanded;
         }

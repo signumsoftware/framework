@@ -124,6 +124,8 @@ namespace Signum.Engine
 
         public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription()
         {
+            var udttypes = Schema.Current.Settings.UdtSqlName.Values.ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+
             var database = (from t in Database.View<SysTables>()
                             join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
                             where !Database.View<SysExtendedProperties>().Any(a => a.major_id == t.object_id && a.name == "microsoft_database_tools_support")
@@ -137,7 +139,8 @@ namespace Signum.Engine
                                           select new DiffColumn
                                           {
                                               Name = c.name,
-                                              DbType = ToSqlDbType(type.name),
+                                              SqlDbType = udttypes.Contains(type.name) ? SqlDbType.Udt: ToSqlDbType(type.name),
+                                              UdtTypeName = udttypes.Contains(type.name) ? type.name: null,
                                               Nullable = c.is_nullable,
                                               Length = c.max_length,
                                               Precission = c.precision,
@@ -249,7 +252,8 @@ namespace Signum.Engine
     public class DiffColumn : IEquatable<IColumn>
     {
         public string Name;
-        public SqlDbType DbType;
+        public SqlDbType SqlDbType;
+        public string UdtTypeName; 
         public bool Nullable;
         public int Length; 
         public int Precission;
@@ -263,11 +267,12 @@ namespace Signum.Engine
 
         public bool Equals(IColumn other)
         {
-            var result = 
-                   DbType == other.SqlDbType
+            var result =
+                   SqlDbType == other.SqlDbType
+                && StringComparer.InvariantCultureIgnoreCase.Equals(UdtTypeName, other.UdtTypeName)
                 && Nullable == other.Nullable
                 && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / 2 || other.Size.Value == int.MaxValue && Length == -1)
-                && (other.Scale == null || other.Scale.Value == Scale) 
+                && (other.Scale == null || other.Scale.Value == Scale)
                 && Identity == other.Identity
                 && PrimaryKey == other.PrimaryKey;
 

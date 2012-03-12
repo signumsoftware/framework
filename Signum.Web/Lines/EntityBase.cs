@@ -161,8 +161,8 @@ namespace Signum.Web
         {
             get 
             {
-                return (UntypedValue as IIdentifiable).TryCC(i => i.ToStr) ??
-                       (UntypedValue as Lite).TryCC(l => l.ToStr);
+                return (UntypedValue as IIdentifiable).TryCC(i => i.ToString()) ??
+                       (UntypedValue as Lite).TryCC(l => l.ToString());
             }
         }
 

@@ -53,10 +53,10 @@ namespace Signum.Engine.Linq
                 using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
                 {
                     Expression cleaned = Clean(expression, true, log);
-                    BinderTools tools = new BinderTools();
+                    var binder = new QueryBinder();
                     log.Switch("Bind");
-                    ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(cleaned, tools);
-                    ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools, log);
+                    ProjectionExpression binded = (ProjectionExpression)binder.BindQuery(cleaned);
+                    ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, binder, log);
                     log.Switch("ChPrjFlatt");
                     ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
                     log.Switch("TB");
@@ -76,12 +76,12 @@ namespace Signum.Engine.Linq
             return filtered;
         }
 
-        internal static Expression Optimize(Expression binded, BinderTools tools, HeavyProfiler.Tracer log)
+        internal static Expression Optimize(Expression binded, QueryBinder binder, HeavyProfiler.Tracer log)
         {
             log.Switch("AggRew");
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             log.Switch("EnCom");
-            Expression completed = EntityCompleter.Complete(rewrited, tools);
+            Expression completed = EntityCompleter.Complete(rewrited, binder);
             log.Switch("OrBtRw");
             Expression orderRewrited = OrderByRewriter.Rewrite(completed);
             log.Switch("QuRb");
@@ -109,10 +109,10 @@ namespace Signum.Engine.Linq
                 {
                     Expression cleaned = Clean(query.Expression, true, log);
                     
-                    BinderTools tools = new BinderTools();
                     log.Switch("Bind");
-                    CommandExpression delete = new QueryBinder(tools).BindDelete(cleaned);
-                    CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools, log);
+                    var binder = new QueryBinder();
+                    CommandExpression delete = binder.BindDelete(cleaned);
+                    CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, binder, log);
                     cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
                 }
                 return cr.Execute();
@@ -128,10 +128,10 @@ namespace Signum.Engine.Linq
                 using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
                 {
                     Expression cleaned = Clean(query.Expression, true, log);
-                    BinderTools tools = new BinderTools();
+                    var binder = new QueryBinder();
                     log.Switch("Bind");
-                    CommandExpression update = new QueryBinder(tools).BindUpdate(cleaned, set);
-                    CommandExpression updateOptimized = (CommandExpression)Optimize(update, tools, log);
+                    CommandExpression update = binder.BindUpdate(cleaned, set);
+                    CommandExpression updateOptimized = (CommandExpression)Optimize(update, binder, log);
                     log.Switch("TR");
                     cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
                 }

@@ -20,6 +20,7 @@ using System.Collections.Specialized;
 using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Web;
+using Microsoft.SqlServer.Types;
 #endregion
 
 namespace Signum.Web
@@ -45,6 +46,7 @@ namespace Signum.Web
             MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.Input).FromUserInterface());
             MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
             MappingRepository<TimeSpan>.Mapping = GetValue(ctx => TimeSpan.Parse(ctx.Input));
+            MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));

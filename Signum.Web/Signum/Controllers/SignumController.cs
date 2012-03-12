@@ -218,7 +218,7 @@ namespace Signum.Web.Controllers
             var result = lites.Select(o => new
             {
                 id = o.Id,
-                text = o.ToStr,
+                text = o.ToString(),
                 type = Navigator.ResolveWebTypeName(o.RuntimeType)
             }).ToList();
 

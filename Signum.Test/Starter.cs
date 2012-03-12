@@ -13,6 +13,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test
 {
@@ -223,6 +224,16 @@ namespace Signum.Test
         }
 
         public const string Japan = "Japan";
+
+        public static SqlHierarchyId FirstChild(this SqlHierarchyId parent)
+        {
+            return parent.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null);
+        }
+
+        public static SqlHierarchyId NextSibling(this SqlHierarchyId sibling)
+        {
+            return sibling.GetAncestor(1).GetDescendant(sibling, SqlHierarchyId.Null);
+        }
         
         public static void Load()
         {
@@ -243,7 +254,7 @@ namespace Signum.Test
 
             new NoteWithDateDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }.Save();
 
-            LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa };
+            LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() };
 
             new AlbumDN
             {
@@ -273,7 +284,7 @@ namespace Signum.Test
 
             new NoteWithDateDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }.Save();
 
-            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite() };
+            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() };
 
             new AlbumDN
             {
@@ -306,7 +317,7 @@ namespace Signum.Test
 
             new NoteWithDateDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }.Save();
 
-            LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa };
+            LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling()  };
 
             new AlbumDN
             {
@@ -318,7 +329,7 @@ namespace Signum.Test
                 Label = universal,
             }.Save();
 
-            LabelDN sony = new LabelDN { Name = "Sony", Country = japan };
+            LabelDN sony = new LabelDN { Name = "Sony", Country = japan, Node = universal.Node.NextSibling() };
 
             new AlbumDN
             {
@@ -331,7 +342,7 @@ namespace Signum.Test
                 Label = sony
             }.Save();
 
-            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa, Owner = sony.ToLite() };
+            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa, Owner = sony.ToLite(), Node = sony.Node.FirstChild() };
 
             new AlbumDN
             {
@@ -384,7 +395,7 @@ namespace Signum.Test
                 LastAward = ga,
             };
 
-            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite() }; 
+            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), Node = universal.Node.FirstChild() }; 
 
             new AlbumDN
             {
@@ -394,10 +405,10 @@ namespace Signum.Test
                 Songs = "Scefn-g-englar"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 BonusTrack = new SongDN { Name = "Intro" },
-                Label = fatCat
+                Label = fatCat,
             }.Save();
 
-            LabelDN emi = new LabelDN { Name = "EMI", Country = usa }; 
+            LabelDN emi = new LabelDN { Name = "EMI", Country = usa, Node = sony.Node.NextSibling() }; 
 
             new AlbumDN
             {

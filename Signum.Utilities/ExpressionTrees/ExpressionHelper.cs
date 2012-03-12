@@ -94,6 +94,27 @@ namespace Signum.Utilities.ExpressionTrees
             return expression;
         }
 
+
+        [DebuggerStepThrough]
+        public static Expression RemoveNullify(this Expression expression)
+        {
+            if (expression.NodeType == ExpressionType.Convert && expression.Type == ((UnaryExpression)expression).Operand.Type.Nullify())
+                return ((UnaryExpression)expression).Operand;
+            return expression;
+        }
+
+        [DebuggerStepThrough]
+        public static Expression RemoveUnNullify(this Expression expression)
+        {
+            if (expression.NodeType == ExpressionType.Convert && expression.Type == ((UnaryExpression)expression).Operand.Type.UnNullify())
+                return ((UnaryExpression)expression).Operand;
+
+            if (expression.NodeType == ExpressionType.MemberAccess && ((MemberExpression)expression).Member.Name == "Value" && expression.Type == ((MemberExpression)expression).Expression.Type.UnNullify())
+                return ((MemberExpression)expression).Expression;
+
+            return expression;
+        }
+
         [DebuggerStepThrough]
         public static Expression GetArgument(this MethodCallExpression mce, string parameterName)
         {

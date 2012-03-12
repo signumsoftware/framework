@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine
 {
@@ -122,12 +123,25 @@ namespace Signum.Engine
 
     public abstract class ParameterBuilder
     {
-        public abstract DbParameter CreateParameter(string name, SqlDbType type, bool nullable, object value);
-        public abstract DbParameter CreateParameter(string name, object value, Type type);
-        public abstract DbParameter CreateReferenceParameter(string name, bool nullable, int? id);
-        public abstract string GetParameterName(string name);
-        public abstract MemberInitExpression ParameterFactory(Expression name, SqlDbType type, bool nullable, Expression value);
-        public abstract DbParameter UnsafeCreateParameter(string name, SqlDbType type, bool nullable, object value);
+        public static string GetParameterName(string name)
+        {
+            return "@" + name;
+        }
+
+        public DbParameter CreateReferenceParameter(string parameterName, bool nullable, int? id)
+        {
+            return CreateParameter(parameterName, SqlBuilder.PrimaryKeyType, null, nullable, id);
+        }
+
+        public DbParameter CreateParameter(string parameterName, object value, Type type)
+        {
+            var pair = Schema.Current.Settings.GetSqlDbTypePair(type.UnNullify());
+
+            return CreateParameter(parameterName, pair.SqlDbType, pair.UdtTypeName, type == null || type.IsByRef || type.IsNullable(), value);
+        }
+
+        public abstract DbParameter CreateParameter(string parameterName, SqlDbType type, string udtTypeName, bool nullable, object value);
+        public abstract MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType type, string udtTypeName, bool nullable, Expression value);
 
         protected static bool IsDate(SqlDbType type)
         {

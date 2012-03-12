@@ -16,27 +16,19 @@ namespace Signum.Entities.DynamicQuery
     public class EntityPropertyToken : QueryToken
     {
         public PropertyInfo PropertyInfo { get; private set; }
-        public bool IsSpecial { get; private set; }
-
+       
         public static QueryToken IdProperty(QueryToken parent)
         {
             return new EntityPropertyToken(parent, ReflectionTools.GetPropertyInfo((IdentifiableEntity e) => e.Id));
         }
 
-        public static QueryToken ToStrProperty(QueryToken parent)
-        {
-            return new EntityPropertyToken(parent, ReflectionTools.GetPropertyInfo((IdentifiableEntity e) => e.ToStr));
-        }
-
-        internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, bool isSpecial = false)
+        internal EntityPropertyToken(QueryToken parent, PropertyInfo pi)
             : base(parent)
         {
             if (pi == null)
                 throw new ArgumentNullException("pi");
 
             this.PropertyInfo = pi;
-
-            this.IsSpecial = isSpecial;
         }
 
         public override Type Type
@@ -46,9 +38,6 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            if (IsSpecial)
-                return "[{0}]".Formato(PropertyInfo.NiceName());
-
             return PropertyInfo.NiceName();
         }
 
@@ -62,7 +51,7 @@ namespace Signum.Entities.DynamicQuery
             var baseExpression = Parent.BuildExpression(context);
 
             if (PropertyInfo.Is((IdentifiableEntity ident) => ident.Id) ||
-                PropertyInfo.Is((IdentifiableEntity ident) => ident.ToStr))
+                PropertyInfo.Is((IdentifiableEntity ident) => ident.ToStringProperty))
             {
                 baseExpression = ExtractEntity(baseExpression, true);
 

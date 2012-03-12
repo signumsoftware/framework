@@ -14,6 +14,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using System.Linq.Expressions;
 using System.Runtime.Remoting.Contexts;
+using Signum.Engine.Linq;
 
 namespace Signum.Engine.Maps
 {
@@ -189,6 +190,8 @@ namespace Signum.Engine.Maps
         }
 
         #region Field Generator
+        
+
         protected Dictionary<string, EntityField> GenerateFields(PropertyRoute root, Contexts contexto, Table table, NameSequence preName, bool forceNull)
         {
             Dictionary<string, EntityField> result = new Dictionary<string, EntityField>();
@@ -203,16 +206,31 @@ namespace Signum.Engine.Maps
                     if (!SilentMode() && Reflector.TryFindPropertyInfo(fi) == null)
                         Debug.WriteLine("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
 
-                    Field campo = GenerateField(route, contexto, table, preName, forceNull);
+                    Field field = GenerateField(route, contexto, table, preName, forceNull);
 
                     if (result.ContainsKey(fi.Name))
                         throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fi.Name, type.TypeName()));
 
-                    result.Add(fi.Name, new EntityField(type, fi) { Field = campo });
+                    result.Add(fi.Name, new EntityField(type, fi) { Field = field });
                 }
             }
+
+            if (type.IsIdentifiableEntity() && !ExpressionCleaner.HasExpansions(type, FieldInitExpression.ToStringMethod))
+            {
+                PropertyRoute route = root.Add(fiToStr);
+
+                Field field = GenerateField(route, contexto, table, preName, forceNull);
+
+                if (result.ContainsKey(fiToStr.Name))
+                    throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fiToStr.Name, type.TypeName()));
+
+                result.Add(fiToStr.Name, new EntityField(type, fiToStr) { Field = field });
+            }
+
             return result;
         }
+
+        static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((IdentifiableEntity o) => o.toStr);
 
         protected virtual bool SilentMode()
         {
@@ -303,15 +321,16 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldValue(PropertyRoute route, NameSequence name, bool forceNull)
         {
-            SqlDbType sqlDbType = Settings.GetSqlDbType(route).Value;
+            SqlDbTypePair pair = Settings.GetSqlDbType(route);
 
             return new FieldValue(route.Type)
             {
                 Name = name.ToString(),
-                SqlDbType = sqlDbType,
+                SqlDbType = pair.SqlDbType,
+                UdtTypeName = pair.UdtTypeName,
                 Nullable = Settings.IsNullable(route, forceNull),
-                Size = Settings.GetSqlSize(route, sqlDbType),
-                Scale = Settings.GetSqlScale(route, sqlDbType),
+                Size = Settings.GetSqlSize(route, pair.SqlDbType),
+                Scale = Settings.GetSqlScale(route, pair.SqlDbType),
                 IndexType = Settings.GetIndexType(route)
             };
         }

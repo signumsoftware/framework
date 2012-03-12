@@ -320,71 +320,46 @@ namespace Signum.Engine
 
     public class SqlCeParameterBuilder : ParameterBuilder
     {
-        public override string GetParameterName(string name)
+        public override DbParameter CreateParameter(string parameterName, SqlDbType sqlType, string udtTypeName, bool nullable, object value)
         {
-            return "@" + name;
-        }
-
-        public override DbParameter CreateReferenceParameter(string name, bool nullable, int? id)
-        {
-            return CreateParameter(name, SqlBuilder.PrimaryKeyType, nullable, id);
-        }
-
-        public override DbParameter CreateParameter(string name, object value, Type type)
-        {
-            return CreateParameter(name,
-             Schema.Current.Settings.DefaultSqlType(type.UnNullify()),
-             type == null || type.IsByRef || type.IsNullable(),
-             value);
-        }
-
-        public override DbParameter CreateParameter(string name, SqlDbType type, bool nullable, object value)
-        {
-            if (IsDate(type))
+            if (IsDate(sqlType))
                 AssertDateTime((DateTime?)value);
 
-            return new SqlCeParameter(GetParameterName(name), type)
+            var result = new SqlCeParameter(parameterName, value == null ? DBNull.Value : value)
             {
-                IsNullable = nullable,
-                Value = value == null ? DBNull.Value : value,
-                SourceColumn = name,
+                IsNullable = nullable
             };
+
+            result.SqlDbType = sqlType;
+
+            if (sqlType == SqlDbType.Udt)
+                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".Formato(udtTypeName));
+
+            return result;
         }
 
-        public override MemberInitExpression ParameterFactory(Expression name, SqlDbType type, bool nullable, Expression value)
+        public override MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType sqlType, string udtTypeName, bool nullable, Expression value)
         {
-            NewExpression newParam = Expression.New(typeof(SqlCeParameter).GetConstructor(new[] { typeof(string), typeof(SqlDbType) }), name, Expression.Constant(type));
-            
-            Expression valueExpr = Expression.Convert(IsDate(type) ? Expression.Call(miAsserDateTime, value.Nullify()) : value, typeof(object));
+            Expression valueExpr = Expression.Convert(IsDate(sqlType) ? Expression.Call(miAsserDateTime, value.Nullify()) : value, typeof(object));
 
             if (nullable)
-                return Expression.MemberInit(newParam, new MemberBinding[]
-                {
-                    Expression.Bind(typeof(SqlCeParameter).GetProperty("IsNullable"), Expression.Constant(true)),
-                    Expression.Bind(typeof(SqlCeParameter).GetProperty("Value"), 
-                        Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)), 
+                valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),
                             Expression.Constant(DBNull.Value, typeof(object)),
-                            valueExpr))
-                });
-            else
-                return Expression.MemberInit(newParam, new MemberBinding[]
-                {  
-                    Expression.Bind(typeof(SqlCeParameter).GetProperty("Value"), valueExpr)
-                });
-        }
+                            valueExpr);
+
+            NewExpression newExpr = Expression.New(typeof(SqlCeParameter).GetConstructor(new[] { typeof(string), typeof(object) }), parameterName, valueExpr);
 
 
-
-        public override DbParameter UnsafeCreateParameter(string name, SqlDbType type, bool nullable, object value)
-        {
-            if (IsDate(type))
-                AssertDateTime((DateTime?)value);
-
-            return new SqlCeParameter(name, type)
+            List<MemberBinding> mb = new List<MemberBinding>()
             {
-                IsNullable = nullable,
-                Value = value == null ? DBNull.Value : value,
+                Expression.Bind(typeof(SqlCeParameter).GetProperty("IsNullable"), Expression.Constant(nullable)),
+                Expression.Bind(typeof(SqlCeParameter).GetProperty("SqlDbType"), Expression.Constant(sqlType)),
             };
+
+            if (sqlType == SqlDbType.Udt)
+                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".Formato(udtTypeName));
+
+            return Expression.MemberInit(newExpr, mb);
         }
     }
 }

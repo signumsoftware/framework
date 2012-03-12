@@ -496,9 +496,10 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
+            Expression obj = Visit(sqlFunction.Object);
             ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
-            if(args != sqlFunction.Arguments)
-                return new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args); 
+            if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
+                return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); 
             return sqlFunction;
         }
 

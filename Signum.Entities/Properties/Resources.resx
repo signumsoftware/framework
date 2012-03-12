@@ -351,4 +351,7 @@
   <data name="FilterOperation_NotStartsWith" xml:space="preserve">
     <value>not starts with</value>
   </data>
+  <data name="IdentifiableEntity_ToStr" xml:space="preserve">
+    <value>Text</value>
+  </data>
 </root>

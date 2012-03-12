@@ -22,24 +22,24 @@ namespace Signum.Engine.Maps
 
     public partial class Table
     {
-        internal Expression CreateBinding(ProjectionToken token, Alias tableAlias, FieldInfo fi, BinderTools tools)
+        internal Expression CreateBinding(ProjectionToken token, Alias tableAlias, FieldInfo fi, QueryBinder binder)
         {
             EntityField field = Fields.TryGetC(fi.Name);
             if (field == null)
                 throw new InvalidOperationException("The field {0} is not included".Formato(fi.Name));
 
-            Expression result = field.Field.GetExpression(token, tableAlias, tools);
+            Expression result = field.Field.GetExpression(token, tableAlias, binder);
 
             return result;
         }
 
-        internal Expression GetProjectorExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal Expression GetProjectorExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             if (!IsView)
             {
                 Schema.Current.AssertAllowed(Type);
 
-                Expression id = this.CreateBinding(token, tableAlias, FieldInitExpression.IdField, tools);
+                Expression id = this.CreateBinding(token, tableAlias, FieldInitExpression.IdField, binder);
                 return new FieldInitExpression(this.Type, tableAlias, id, token)
                 {
                     Bindings = { new FieldBinding(FieldInitExpression.IdField, id) }
@@ -49,7 +49,7 @@ namespace Signum.Engine.Maps
             {
                 var bindings = (from kvp in this.Fields
                                 let fi = kvp.Value.FieldInfo
-                                select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, tools))).ToReadOnly();
+                                select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, binder))).ToReadOnly();
 
                 return new EmbeddedFieldInitExpression(this.Type, null, bindings, null);
             }
@@ -68,12 +68,12 @@ namespace Signum.Engine.Maps
             return new ColumnExpression(BackReference.ReferenceType(), tableAlias, BackReference.Name);
         }
 
-        internal Expression FieldExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal Expression FieldExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
-            return Field.GetExpression(token, tableAlias, tools);
+            return Field.GetExpression(token, tableAlias, binder);
         }
 
-        internal Expression GetProjectorExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal Expression GetProjectorExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             Schema.Current.AssertAllowed(this.BackReference.ReferenceTable.Type);
 
@@ -81,8 +81,8 @@ namespace Signum.Engine.Maps
 
             return new MListElementExpression(
                  RowIdExpression(tableAlias) ,
-                (FieldInitExpression)this.BackReference.GetExpression(token, tableAlias, tools),
-                this.Field.GetExpression(token, tableAlias, tools), this);
+                (FieldInitExpression)this.BackReference.GetExpression(token, tableAlias, binder),
+                this.Field.GetExpression(token, tableAlias, binder), this);
         }
     }
 
@@ -98,12 +98,12 @@ namespace Signum.Engine.Maps
 
     public abstract partial class Field
     {
-        internal abstract Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools);
+        internal abstract Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder);
     }
 
     public partial class FieldPrimaryKey
     {
-        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             return new ColumnExpression(typeof(int), tableAlias, this.Name);
         }
@@ -111,7 +111,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldValue
     {
-        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             return new ColumnExpression(this.FieldType, tableAlias, this.Name);
         }
@@ -119,7 +119,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldReference
     {
-        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             Type cleanType = IsLite ? Reflector.ExtractLite(FieldType) : FieldType;
 
@@ -127,7 +127,7 @@ namespace Signum.Engine.Maps
                 new ColumnExpression(this.ReferenceType(), tableAlias, Name), token);
 
             if(this.IsLite)
-                return tools.MakeLite(this.FieldType, result, null);
+                return binder.MakeLite(this.FieldType, result, null);
             else 
                 return result; 
         }
@@ -135,7 +135,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEnum
     {
-        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             return Expression.Convert(new ColumnExpression(this.ReferenceType(), tableAlias, Name), FieldType);
         }
@@ -143,7 +143,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMList
     {
-        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             return new MListExpression(FieldType, null, RelationalTable); // keep back id empty for some seconds 
         }
@@ -151,11 +151,11 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
-        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, tools))).ToReadOnly();
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, binder))).ToReadOnly();
 
             ColumnExpression hasValue = HasValue == null ? null : new ColumnExpression(typeof(bool), tableAlias, HasValue.Name);
             return new EmbeddedFieldInitExpression(this.FieldType, hasValue, bindings, this); 
@@ -174,7 +174,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedBy
     {
-        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             var implementations = (from kvp in ImplementationColumns
                                    select new ImplementationColumnExpression(kvp.Key,
@@ -185,7 +185,7 @@ namespace Signum.Engine.Maps
             var result = new ImplementedByExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType, implementations);
 
             if (this.IsLite)
-                return tools.MakeLite(this.FieldType, result, null);
+                return binder.MakeLite(this.FieldType, result, null);
             else
                 return result; 
         }
@@ -193,14 +193,14 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
             Expression result = new ImplementedByAllExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType,
                 new ColumnExpression(Column.ReferenceType(), tableAlias, Column.Name),
                 new TypeImplementedByAllExpression(new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name)), token);
 
             if (this.IsLite)
-                return tools.MakeLite(this.FieldType, result, null);
+                return binder.MakeLite(this.FieldType, result, null);
             else
                 return result;
         }
