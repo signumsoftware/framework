@@ -10,11 +10,44 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class ColorDN : EmbeddedEntity
     {
+        public ColorDN()
+        {
+        }
+
+        public ColorDN(byte a, byte r, byte g, byte b)
+        {
+            argb = a << 0x18 | r << 0x10 | g << 0x8 | b;
+        }
+
         int argb;
         public int Argb
         {
             get { return argb; }
             set { SetToStr(ref argb, value, () => Argb); }
+        }
+
+        [HiddenProperty]
+        public byte A
+        {
+            get { return (byte)((argb >> 0x18) & 0xff); }
+        }
+
+        [HiddenProperty]
+        public byte R
+        {
+            get { return (byte)((argb >> 0x10) & 0xff); }
+        }
+
+        [HiddenProperty]
+        public byte G
+        {
+            get { return (byte)((argb >> 0x8) & 0xff); }
+        }
+
+        [HiddenProperty]
+        public byte B
+        {
+            get { return (byte)(argb & 0xff); }
         }
 
         public Color ToColor()
