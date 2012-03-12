@@ -219,13 +219,19 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            DateTime? date = ((DateTime?)line.UntypedValue).TrySS(d => d.ToUserInterface());
+            TimeSpan? time = null;
+            
+            DateTime? dateValue = line.UntypedValue as DateTime?;
+            if (dateValue != null)
+                time = dateValue.TrySS(d => d.ToUserInterface()).TrySS(d => d.TimeOfDay);
+            else
+                time = line.UntypedValue as TimeSpan?;
 
-            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Hour, "Hour", date == null ? "" : date.Value.Hour.ToString("00")); 
+            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Hour, "Hour", time == null ? "" : time.Value.ToString("HH")); 
 
             sb.Add(helper.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
 
-            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Minute, "Minute", date == null ? "" : date.Value.Minute.ToString("00")); 
+            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Minute, "Minute", time == null ? "" : time.Value.ToString("mm")); 
 
             return sb.ToHtml();
         }
