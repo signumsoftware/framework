@@ -118,11 +118,9 @@ namespace Signum.Windows
         public static readonly IValueConverter TokenOperations = ConverterFactory.New(
             (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));
 
-        static readonly ColorConverter cc = new ColorConverter();
         public static readonly IValueConverter ColorConverter = ConverterFactory.New(
-            (ColorDN c) => c == null ? null : (Color?)(System.Windows.Media.ColorConverter.ConvertFromString(c.Hex)),
-            (Color? c) => c == null ? null : new ColorDN { Hex = cc.ConvertToString(c) });
-
+            (ColorDN c) => c == null ? null : (Color?)Color.FromArgb(c.A, c.R, c.G, c.B),
+            (Color? c) => c == null ? null : new ColorDN(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
 
         public static readonly IMultiValueConverter And = ConverterFactory.New(
             (bool a, bool b) => a && b);
