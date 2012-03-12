@@ -2,22 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Linq.Expressions;
+using System.Drawing;
 
 namespace Signum.Entities.Basics
 {
     [Serializable]
     public class ColorDN : EmbeddedEntity
     {
-        string hex;
-        public string Hex
+        int argb;
+        public int Argb
         {
-            get { return hex; }
-            set { SetToStr(ref hex, value, () => Hex); }
+            get { return argb; }
+            set { SetToStr(ref argb, value, () => Argb); }
+        }
+
+        public Color ToColor()
+        {
+            return Color.FromArgb(argb); 
         }
 
         public override string ToString()
         {
-            return hex;
+            return ToColor().ToString();
         }
     }
 }
