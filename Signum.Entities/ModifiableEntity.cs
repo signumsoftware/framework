@@ -237,7 +237,7 @@ namespace Signum.Entities
 
         public void NotifyToString()
         {
-            NotifyPrivate("ToStringMethod");
+            NotifyPrivate("ToStringProperty");
         }
 
         void NotifyPrivate(string propertyName)
