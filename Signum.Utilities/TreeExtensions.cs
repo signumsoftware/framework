@@ -83,9 +83,43 @@ namespace Signum.Utilities
             }
         }
 
-        public static List<Node<S>> SelectTree<T, S>(List<Node<T>> roots, Func<T, S> selector)
+        public static List<Node<S>> SelectTree<T, S>(List<Node<T>> nodes, Func<T, S> selector)
         {
-            return roots.Select(n => new Node<S>(selector(n.Value)) { Children = SelectTree(n.Children, selector) }).ToList();
+            return nodes.Select(n => new Node<S>(selector(n.Value), SelectTree(n.Children, selector))).ToList();
+        }
+
+        public static List<Node<S>> SelectSimplifyTreeC<T, S>(List<Node<T>> nodes, Func<T, S> selector) where S : class
+        {
+            List<Node<S>> result = new List<Node<S>>();
+
+            foreach (var item in nodes)
+            {
+                var newValue = selector(item.Value);
+
+                if (newValue != null)
+                    result.Add(new Node<S>(newValue, SelectSimplifyTreeC(item.Children, selector)));
+                else
+                    result.AddRange(SelectSimplifyTreeC(item.Children, selector));
+            }
+
+            return result;
+        }
+
+        public static List<Node<S>> SelectSimplifyTreeS<T, S>(List<Node<T>> nodes, Func<T, S?> selector) where S : struct
+        {
+            List<Node<S>> result = new List<Node<S>>();
+
+            foreach (var item in nodes)
+            {
+                var newValue = selector(item.Value);
+
+                if (newValue != null)
+                    result.Add(new Node<S>(newValue.Value, SelectSimplifyTreeS(item.Children, selector)));
+                else
+                    result.AddRange(SelectSimplifyTreeS(item.Children, selector));
+            }
+
+            return result;
         }
     }
 
@@ -93,6 +127,12 @@ namespace Signum.Utilities
     {
         public T Value { get; set; }
         public List<Node<T>> Children { get; set; }
+
+        public Node(T value, List<Node<T>> children)
+        {
+            Value = value;
+            Children = children?? new List<Node<T>>();
+        }
 
         public Node(T value)
         {

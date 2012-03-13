@@ -166,8 +166,8 @@ namespace Signum.Engine.Linq
                 m.Method.Name == "Truncate"))
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 
-            if (m.Method.Name == "ToString" && typeof(IIdentifiable).IsAssignableFrom(m.Object.Type))
-                return Visit(Expression.Property(m.Object, "ToStringProperty"));
+            if (m.Method.Name == "ToString" && m.Object != null && typeof(IIdentifiable).IsAssignableFrom(m.Object.Type))
+                return Visit(Expression.Property(m.Object, piToStringProperty));
 
             if (m.Object != null)
             {
@@ -181,6 +181,9 @@ namespace Signum.Engine.Linq
                 return MakeDirtyMeta(m.Type, list.ToArray());
             }
         }
+
+        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((IIdentifiable ii) => ii.ToStringProperty);
+
 
         private Expression MapAndVisit(LambdaExpression lambda, params MetaProjectorExpression[] projs)
         {
