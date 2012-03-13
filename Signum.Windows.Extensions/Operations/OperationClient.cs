@@ -155,7 +155,7 @@ namespace Signum.Windows.Operations
                 return null;
 
             
-            if(operationInfo.OperationType == OperationType.ConstructorFrom)
+            if(operationInfo.OperationType == OperationType.ConstructorFrom && (os == null  || !os.AvoidMoveToSearchControl))
             {
                 var controls = entityControl.Children<SearchControl>()
                     .Where(sc => operationInfo.Key.Equals(OperationClient.GetConstructFromOperationKey(sc)) ||

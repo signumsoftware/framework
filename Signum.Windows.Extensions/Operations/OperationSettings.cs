@@ -34,6 +34,8 @@ namespace Signum.Windows.Operations
         public EntityOperationSettings(Enum key): base(key)
         {
         }
+
+        public bool AvoidMoveToSearchControl { get; set; }
     }
 
     public class EntityOperationEventArgs<T> : EventArgs
