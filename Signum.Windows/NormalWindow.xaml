@@ -12,7 +12,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     
-    Title="{Binding ToStringMethod}">
+    Title="{Binding ToStringProperty}">
     <DockPanel>
         <m:ButtonBar x:Name="buttonBar" DockPanel.Dock="Top" OkClick="Ok_Click" SaveClick="Save_Click" ReloadClick="Reload_Click" ReloadVisible="true" MainControl="{Binding Path=MainControl, ElementName=Window}"/>
         <m:WidgetPanel x:Name="widgetPanel" DockPanel.Dock="Left" MainControl="{Binding Path=MainControl, ElementName=Window}" ExpandedCollapsed="widgetPanel_ExpandedCollapsed" />

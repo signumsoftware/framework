@@ -274,7 +274,7 @@
             ToolTip="{Binding Error, Converter = {x:Static m:Converters.CollapseStringEmpty}}"
             BorderThickness="{Binding Error, Converter = {x:Static m:Converters.ErrorToInt}}"
             BorderBrush="Red" >
-            <TextBlock Text="{Binding ToStringMethod}" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding ToStringProperty}" VerticalAlignment="Center" />
         </Border>
     </DataTemplate>
 
