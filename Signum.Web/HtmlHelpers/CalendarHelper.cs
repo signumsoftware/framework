@@ -227,7 +227,7 @@ namespace Signum.Web
             else
                 time = line.UntypedValue as TimeSpan?;
 
-            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Hour, "Hour", time == null ? "" : time.Value.ToString("HH")); 
+            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Hour, "Hour", time == null ? "" : time.Value.ToString("hh")); 
 
             sb.Add(helper.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
 

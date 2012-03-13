@@ -114,7 +114,34 @@ namespace Signum.Web
             return ctx.None();
         }
 
-         
+        public static TimeSpan TimeSpanHourMinute(MappingContext<TimeSpan> ctx)
+        {
+            if (ctx.Parent.Empty())
+                return ctx.None();
+
+            int hours;
+            int mins;
+            if (ctx.Parse("Hour", out hours) & ctx.Parse("Minute", out mins))
+                return new TimeSpan(hours, mins, 0);
+
+            return ctx.None();
+        }
+
+        public static TimeSpan? TimeSpanHourMinute(MappingContext<TimeSpan?> ctx)
+        {
+            if (ctx.Parent.Empty())
+                return ctx.None();
+
+            int hours;
+            int mins;
+            if (ctx.Parse("Hour", out hours) & ctx.Parse("Minute", out mins))
+                return new TimeSpan(hours, mins, 0);
+                
+            if (ctx.IsEmpty("Hour") && ctx.IsEmpty("Minute"))
+                return null;
+
+            return ctx.None();
+        }
 
         public static void RegisterValue<T>(Mapping<T> mapping)
         {
