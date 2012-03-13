@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToString().Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToString()).Cast<Lite>().ToList();
+            return Database.Query<RT>().Where(a => a.ToString().Contains(subString) && !a.ToString().StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToString()).Cast<Lite>().ToList();
         }
 
         public static List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
