@@ -329,6 +329,23 @@ namespace Signum.Engine.Linq
             return Add(result);
         }
 
+
+        private Expression TryAddSubstractDateTime(Expression date, Expression time, bool add)
+        {
+            Expression exprDate = Visit(date);
+            Expression exprTime = Visit(time);
+            if (innerProjection || !Has(exprDate) || !Has(exprTime))
+                return null;
+
+            var cast = new SqlCastExpression(typeof(DateTime), exprDate, SqlDbType.DateTime); //Just in case is a Date
+
+            var result = add ? Expression.Add(cast, exprTime) :
+                Expression.Subtract(cast, exprTime);
+
+            return Add(result); 
+        }
+        
+
         private Expression TrySqlTrim(Expression expression)
         {
             Expression expr = Visit(expression);
@@ -408,6 +425,9 @@ namespace Signum.Engine.Linq
                 Expression result = b;
                 if (candidates.Contains(left) && candidates.Contains(right) && IsFullNominateOrAggresive)
                 {
+                    if ((b.NodeType == ExpressionType.Add || b.NodeType == ExpressionType.Subtract) && b.Left.Type.UnNullify() == typeof(DateTime) && b.Right.Type.UnNullify() == typeof(TimeSpan))
+                        result = TryAddSubstractDateTime(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? result;
+
                     if (b.NodeType == ExpressionType.Add)
                     {
                         result = ConvertToSqlAddition(b);
@@ -877,6 +897,7 @@ namespace Signum.Engine.Linq
                         if (Has(charIndex))
                             return Add(result);
                         return result;
+
                     }
                 case "string.ToLower": return TrySqlFunction(null, SqlFunction.LOWER, m.Type, m.Object);
                 case "string.ToUpper": return TrySqlFunction(null, SqlFunction.UPPER, m.Type, m.Object);
@@ -895,6 +916,15 @@ namespace Signum.Engine.Linq
                 case "StringExtensions.Reverse": return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
                 case "StringExtensions.Like": return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
 
+                case "DateTime.Add":
+                case "DateTime.Substract":
+                    {
+                        var val = m.GetArgument("value");
+                        if (val.Type.UnNullify() != typeof(TimeSpan))
+                            return null;
+
+                        return TryAddSubstractDateTime(m.Object, val, m.Method.Name == "Add");
+                    }
                 case "DateTime.AddDays": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.day), m.GetArgument("value"), m.Object);
                 case "DateTime.AddHours": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.hour), m.GetArgument("value"), m.Object);
                 case "DateTime.AddMilliseconds": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.GetArgument("value"), m.Object);
