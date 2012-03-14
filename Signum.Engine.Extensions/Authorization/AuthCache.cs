@@ -242,25 +242,28 @@ namespace Signum.Entities.Authorization
 
         internal void SetRules(BaseRulePack<AR> rules, Expression<Func<R, bool>> filterResources)
         {
-            if (rules.DefaultRule != GetDefaultRule(rules.Role))
+            using (AuthLogic.Disable())
             {
-                ((IManualAuth<K, A>)this).SetDefaultRule(rules.Role, rules.DefaultRule);
-                Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null).UnsafeDelete();  
-                return;
-            }
-
-            var current = Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
-            var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
-
-            Synchronizer.Synchronize(current, should,
-                (p, pr) => pr.Delete(),
-                (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(),
-                (p, pr, ar) =>
+                if (rules.DefaultRule != GetDefaultRule(rules.Role))
                 {
-                    pr.Allowed = ar.Allowed;
-                    if (pr.SelfModified)
-                        pr.Save();
-                });
+                    ((IManualAuth<K, A>)this).SetDefaultRule(rules.Role, rules.DefaultRule);
+                    Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null).UnsafeDelete();
+                    return;
+                }
+
+                var current = Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
+                var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
+
+                Synchronizer.Synchronize(current, should,
+                    (p, pr) => pr.Delete(),
+                    (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(),
+                    (p, pr, ar) =>
+                    {
+                        pr.Allowed = ar.Allowed;
+                        if (pr.SelfModified)
+                            pr.Save();
+                    });
+            }
         }
 
         public DefaultRule GetDefaultRule(Lite<RoleDN> role)

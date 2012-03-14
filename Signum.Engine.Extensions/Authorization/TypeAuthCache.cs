@@ -262,35 +262,38 @@ namespace Signum.Entities.Authorization
 
         internal void SetRules(BaseRulePack<TypeAllowedRule> rules)
         {
-            if (rules.DefaultRule != GetDefaultRule(rules.Role))
+            using (AuthLogic.Disable())
             {
-                ((IManualAuth<Type, TypeAllowed>)this).SetDefaultRule(rules.Role, rules.DefaultRule);
-                Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).UnsafeDelete();
-                return;
-            }
-
-            var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
-            var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
-
-            Synchronizer.Synchronize(current, should,
-                (type, pr) => pr.Delete(),
-                (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
-                (type, pr, ar) =>
+                if (rules.DefaultRule != GetDefaultRule(rules.Role))
                 {
-                    pr.Allowed = ar.Allowed.Fallback;
+                    ((IManualAuth<Type, TypeAllowed>)this).SetDefaultRule(rules.Role, rules.DefaultRule);
+                    Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).UnsafeDelete();
+                    return;
+                }
 
-                    var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionDN
+                var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
+                var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
+
+                Synchronizer.Synchronize(current, should,
+                    (type, pr) => pr.Delete(),
+                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
+                    (type, pr, ar) =>
                     {
-                        Allowed = a.Allowed,
-                        Condition = EnumLogic<TypeConditionNameDN>.ToEntity(a.ConditionName),
-                    }).ToMList();
+                        pr.Allowed = ar.Allowed.Fallback;
 
-                    if (!pr.Conditions.SequenceEqual(shouldConditions))
-                        pr.Conditions = shouldConditions;
+                        var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionDN
+                        {
+                            Allowed = a.Allowed,
+                            Condition = EnumLogic<TypeConditionNameDN>.ToEntity(a.ConditionName),
+                        }).ToMList();
 
-                    if (pr.SelfModified)
-                        pr.Save();
-                });
+                        if (!pr.Conditions.SequenceEqual(shouldConditions))
+                            pr.Conditions = shouldConditions;
+
+                        if (pr.SelfModified)
+                            pr.Save();
+                    });
+            }
         }
 
         public DefaultRule GetDefaultRule(Lite<RoleDN> role)
