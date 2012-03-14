@@ -8,6 +8,7 @@ using Signum.Utilities;
 using Signum.Engine.Authorization;
 using System.Reflection;
 using Signum.Engine.Extensions.Properties;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Basics
 {
@@ -92,7 +93,15 @@ namespace Signum.Engine.Basics
 
         public static T ToEntity(Enum key)
         {
+            AssertInitialized();
+
             return toEntity.GetOrThrow(key);
+        }
+
+        private static void AssertInitialized()
+        {
+            if (Keys == null)
+                throw new InvalidOperationException("{0} is not initialized. Consider calling Schema.InitializeUntil(InitLevel.Level0SyncEntities)".Formato(typeof(EnumLogic<T>).TypeName()));
         }
 
         public static T ToEntity(string keyName)
@@ -102,6 +111,8 @@ namespace Signum.Engine.Basics
 
         public static T TryToEntity(Enum key)
         {
+            AssertInitialized();
+
             return toEntity.TryGetC(key);
         }
 
@@ -122,16 +133,22 @@ namespace Signum.Engine.Basics
 
         public static Enum ToEnum(string keyName)
         {
+            AssertInitialized();
+
             return toEnum.GetOrThrow(keyName);
         }
 
         public static Enum TryToEnum(string keyName)
         {
+            AssertInitialized();
+
             return toEnum.TryGetC(keyName);
         }
 
         internal static IEnumerable<T> AllEntities()
         {
+            AssertInitialized();
+
             return toEntity.Values; 
         }
     }
