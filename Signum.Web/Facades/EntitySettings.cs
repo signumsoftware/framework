@@ -122,15 +122,11 @@ namespace Signum.Web
                     break;
                 case EntityType.Admin:
                 case EntityType.AdminNotSaving:
-                    ShowSave =  entityType == EntityType.Admin;;
+                    ShowSave =  entityType == EntityType.Admin;
                     IsCreable = ctx => ctx == EntitySettingsContext.Admin;
                     IsViewable = (_, ctx) => ctx == EntitySettingsContext.Admin;
                     MappingAdmin = new EntityMapping<T>(true).GetValue;
                     MappingDefault = new EntityMapping<T>(false).GetValue;
-                    break;
-            
-                    ShowSave = false;
-                    MappingAdmin = MappingDefault = new EntityMapping<T>(true).GetValue;
                     break;
                 case EntityType.ServerOnly:
                     IsReadOnly = (_, ctx) => true;
