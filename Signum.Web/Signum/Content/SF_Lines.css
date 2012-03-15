@@ -11,6 +11,7 @@
 .sf-label-detail-line, .sf-label-repeater-line
 {
     display: inline-block;
+    margin-right: 1px; /*IE8 fix for inline-block*/
 }
 
 .sf-unit-line {
