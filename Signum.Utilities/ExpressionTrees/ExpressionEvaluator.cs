@@ -6,6 +6,7 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 
 namespace Signum.Utilities.ExpressionTrees
 {
@@ -154,19 +155,19 @@ namespace Signum.Utilities.ExpressionTrees
             }
         }
 
-        static Dictionary<Type, Dictionary<MethodKey, Func<object>>> cachedStaticMethods = new Dictionary<Type, Dictionary<MethodKey, Func<object>>>();
+        static ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object>> cachedStaticMethods = new ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object>>();
         private static Func<object> GetStaticMethodCaller(MethodInfo mi)
         {
-            return cachedStaticMethods.GetOrCreate(mi.DeclaringType).GetOrCreate(new MethodKey(mi), () =>
+            return cachedStaticMethods.GetOrAdd(Tuple.Create(mi.DeclaringType, new MethodKey(mi)), (Tuple<Type, MethodKey> _) =>
             {
                 return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Call(mi), typeof(object))).Compile();
             });
         }
 
-        static Dictionary<Type, Dictionary<MethodKey, Func<object, object>>> cachedExtensionMethods = new Dictionary<Type, Dictionary<MethodKey, Func<object, object>>>();
+        static ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object, object>> cachedExtensionMethods = new ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object, object>>();
         private static Func<object, object> GetExtensionMethodCaller(MethodInfo mi)
         {
-            return cachedExtensionMethods.GetOrCreate(mi.DeclaringType).GetOrCreate(new MethodKey(mi), () =>
+            return cachedExtensionMethods.GetOrAdd(Tuple.Create(mi.DeclaringType, new MethodKey(mi)), (Tuple<Type, MethodKey> _) =>
             {
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 return Expression.Lambda<Func<object, object>>(Expression.Convert(Expression.Call(mi, Expression.Convert(p, mi.GetParameters()[0].ParameterType)), typeof(object)), p).Compile();
@@ -174,29 +175,29 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
 
-        static Dictionary<Type, Dictionary<MethodKey, Func<object, object>>> cachedInstanceMethods = new Dictionary<Type, Dictionary<MethodKey, Func<object, object>>>();
+        static ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object, object>> cachedInstanceMethods = new ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object, object>>();
         private static Func<object, object> GetInstanceMethodCaller(MethodInfo mi)
         {
-            return cachedInstanceMethods.GetOrCreate(mi.DeclaringType).GetOrCreate(new MethodKey(mi), () =>
+            return cachedInstanceMethods.GetOrAdd(Tuple.Create(mi.DeclaringType, new MethodKey(mi)), (Tuple<Type, MethodKey> _) =>
             {
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 return Expression.Lambda<Func<object, object>>(Expression.Convert(Expression.Call(Expression.Convert(p, mi.DeclaringType), mi), typeof(object)), p).Compile();
             });
         }
 
-        static Dictionary<Type, Dictionary<string, Func<object>>> cachedStaticGetters = new Dictionary<Type, Dictionary<string, Func<object>>>();
+        static ConcurrentDictionary<Tuple<Type, string>, Func<object>> cachedStaticGetters = new ConcurrentDictionary<Tuple<Type, string>, Func<object>>();
         private static Func<object> GetStaticGetter(MemberInfo mi)
         {
-            return cachedStaticGetters.GetOrCreate(mi.DeclaringType).GetOrCreate(mi.Name, () =>
+            return cachedStaticGetters.GetOrAdd(Tuple.Create(mi.DeclaringType, mi.Name), (Tuple<Type, string> _) =>
             {
                 return Expression.Lambda<Func<object>>(Expression.Convert(Expression.MakeMemberAccess(null, mi), typeof(object))).Compile();
             });
         }
 
-        static Dictionary<Type, Dictionary<string, Func<object, object>>> cachedInstanceGetters = new Dictionary<Type, Dictionary<string, Func<object, object>>>();
+        static ConcurrentDictionary<Tuple<Type, string>, Func<object, object>> cachedInstanceGetters = new ConcurrentDictionary<Tuple<Type, string>, Func<object, object>>();
         private static Func<object, object> GetInstanceGetter(MemberInfo mi)
         {
-            return cachedInstanceGetters.GetOrCreate(mi.DeclaringType).GetOrCreate(mi.Name, () =>
+            return cachedInstanceGetters.GetOrAdd(Tuple.Create(mi.DeclaringType, mi.Name), (Tuple<Type, string> _) =>
             {
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 return Expression.Lambda<Func<object, object>>(Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, mi.DeclaringType), mi), typeof(object)), p).Compile();
