@@ -36,6 +36,8 @@ namespace Signum.Web
             BuildProvider.RegisterBuildProvider(".cshtml", typeof(CompiledRazorBuildProvider));
 
             ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
+            ModelBinders.Binders.Add(typeof(DateTime), new CurrentCultureDateModelBinder());
+            ModelBinders.Binders.Add(typeof(DateTime?), new CurrentCultureDateModelBinder());
             ModelBinders.Binders.Add(typeof(FindOptions), new FindOptionsModelBinder());
             ModelBinders.Binders.Add(typeof(QueryRequest), new QueryRequestModelBinder());
         }
