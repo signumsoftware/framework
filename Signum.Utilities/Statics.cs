@@ -56,7 +56,7 @@ namespace Signum.Utilities
             return variable;
         }
 
-        static ISessionFactory sessionFactory = new SingletonSessionFactory();
+        static ISessionFactory sessionFactory = new ScopeSessionFactory(new SingletonSessionFactory());
         public static ISessionFactory SessionFactory
         {
             get
