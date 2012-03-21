@@ -7,7 +7,8 @@
 /*--------------
 --dropdowns-----
 --------------*/
-.sf-dropdown.sf-query-button .sf-menu-button {
+.sf-dropdown.sf-query-button .sf-menu-button, .sf-dropdown.sf-entity-button .sf-menu-button 
+{
     position:absolute;
 }
 .sf-dropdown .sf-menu-button {
@@ -22,6 +23,10 @@
 	-moz-border-shadow: 0 2px 8px #ddd;
 	-webkit-border-shadow: 0 2px 8px #ddd;
 	border-shadow: 0 2px 8px #ddd;	
+}
+.sf-dropdown.sf-query-button .sf-menu-button, .sf-dropdown.sf-entity-button .sf-menu-button 
+{
+    position: fixed;    
 }
 .sf-dropdown.sf-open .sf-menu-button:hover
 {

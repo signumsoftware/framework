@@ -558,7 +558,7 @@ namespace Signum.Utilities
             return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadChopRight(lengths[i]), " ")).ToString("\r\n");
         }
 
-        public static void WriteFormatedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string title, bool longHeaders)
+        public static void WriteFormattedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string title, bool longHeaders)
         {
             textWriter.WriteLine();
             if (title.HasText())
@@ -569,7 +569,15 @@ namespace Signum.Utilities
 
         public static void ToConsoleTable<T>(this IEnumerable<T> collection, string title = null, bool longHeader = false)
         {
-            collection.WriteFormatedStringTable(Console.Out, title, longHeader);
+            collection.WriteFormattedStringTable(Console.Out, title, longHeader);
+        }
+
+        public static string ToFormattedTable<T>(this IEnumerable<T> collection, string title = null, bool longHeader = false)
+        {
+            StringBuilder sb = new StringBuilder();
+            using (StringWriter sw = new StringWriter(sb))
+                collection.WriteFormattedStringTable(sw, title, longHeader);
+            return sb.ToString();
         }
 
         public static string ToWikiTable<T>(this IEnumerable<T> collection)

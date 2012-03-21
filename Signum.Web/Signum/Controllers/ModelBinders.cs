@@ -9,6 +9,7 @@ using Signum.Utilities;
 using System.Text.RegularExpressions;
 using Signum.Engine;
 using Signum.Web.Properties;
+using System.Globalization;
 
 namespace Signum.Web.Controllers
 {
@@ -40,21 +41,18 @@ namespace Signum.Web.Controllers
         }
     }
 
-    public class DateModelBinder : DefaultModelBinder
+    public class CurrentCultureDateModelBinder : DefaultModelBinder
     {
         public override object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
         {
             string value = controllerContext.HttpContext.Request[bindingContext.ModelName];
-            Match m = Regex.Match(value, @"^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})$");
-
-            if (m == null) return base.BindModel(controllerContext, bindingContext);
-
-            return new DateTime(
-                int.Parse(m.Groups["year"].Value),
-                int.Parse(m.Groups["month"].Value),
-                int.Parse(m.Groups["day"].Value),
-                0,0,0,                    
-                TimeZoneManager.Mode == TimeZoneMode.Local ? DateTimeKind.Local : DateTimeKind.Utc);
+            
+            DateTime dt = new DateTime();
+            bool success = DateTime.TryParse(value, CultureInfo.CurrentUICulture, DateTimeStyles.None, out dt);
+            if (success)
+                return dt;
+            else
+                return base.BindModel(controllerContext, bindingContext);
         }
     }   
 }

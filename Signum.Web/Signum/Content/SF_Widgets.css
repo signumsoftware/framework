@@ -9,10 +9,6 @@
     border-left: solid 1px #AAA;
     padding: 1px 2px; /*Change SF.Widgets .sf-item onmouseover accordingly*/     
 }
-.sf-dropdown.sf-query-button .sf-menu-button 
-{
-    position: fixed;    
-}
 .sf-widget-content
 {
     margin-left: 0 !important;
