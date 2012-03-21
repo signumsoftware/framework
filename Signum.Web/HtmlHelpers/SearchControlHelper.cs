@@ -19,16 +19,18 @@ using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web
 {
-    public class CountSearchControlOptions
+    public class CountSearchControl
     {
-        public CountSearchControlOptions()
-        {
-            Navigate = true;
-            PopupView = false;
-        }
-
         public bool Navigate { get; set; }
-        public bool PopupView { get; set; }
+        public string PopupViewPrefix { get; set; }
+        public WriteQueryName WriteQueryName { get; set; }
+    }
+
+    public enum WriteQueryName
+    {
+        No,
+        Span,
+        Field
     }
 
     public static class SearchControlHelper
@@ -49,56 +51,68 @@ namespace Signum.Web
             return helper.Partial(Navigator.Manager.SearchControlView, viewData);
         }
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions)
+        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions, Action<CountSearchControl> settingsModifier)
         {
-            return CountSearchControl(helper, findOptions, null);
-        }
+            var options = new CountSearchControl();
+            if (settingsModifier != null)
+                settingsModifier(options);
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix)
-        {
-            return CountSearchControl(helper, findOptions, prefix, null);
-        }
-
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix, CountSearchControlOptions options)
-        {
-            if (options == null)
-                options = new CountSearchControlOptions();
+            findOptions.SearchOnLoad = true;
 
             int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
             {
                 FilterOptions = findOptions.FilterOptions
             });
 
-            findOptions.SearchOnLoad = true;
-
             JsFindOptions foptions = new JsFindOptions
             {
-                Prefix = prefix,
+                Prefix = options.PopupViewPrefix,
                 FindOptions = findOptions
             };
 
-            string result = options.Navigate ?
-                "<a class=\"count-search sf-value-line\" href='{0}'>{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
-                "<span class=\"count-search sf-value-line\">{0}</span>".Formato(count);
+            HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            if (options.PopupView)
+            if (options.WriteQueryName == WriteQueryName.Span)
+                sb.Add(new HtmlTag("span")
+                    .Class("count-search")
+                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
+                    .SetInnerText(QueryUtils.GetNiceName(findOptions.QueryName)));
+
+            if (options.Navigate)
+            {
+                sb.Add(new HtmlTag("a")
+                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
+                    .Attr("href", foptions.FindOptions.ToString())
+                    .SetInnerText(count.ToString()));
+            }
+            else
+            {
+                sb.Add(new HtmlTag("span")
+                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
+                    .SetInnerText(options.WriteQueryName == WriteQueryName.Span ? " (" + count.ToString() + ")" : count.ToString()));
+            }
+
+            if (options.PopupViewPrefix != null)
             {
                 var htmlAttr = new Dictionary<string, object>
-                {
-                    { "onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()) },
-                    { "data-icon", "ui-icon-circle-arrow-e" },
-                    { "data-text", false}
-                };
+                    {
+                        { "onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()) },
+                        { "data-icon", "ui-icon-circle-arrow-e" },
+                        { "data-text", false}
+                    };
 
-                result += helper.Href(prefix + "csbtnView",
+                sb.Add(helper.Href(options.PopupViewPrefix + "csbtnView",
                       Resources.LineButton_View,
                       "",
                       Resources.LineButton_View,
                       "sf-line-button sf-view",
-                      htmlAttr);
+                      htmlAttr));
             }
 
-            return MvcHtmlString.Create(result);
+            if (options.WriteQueryName == WriteQueryName.Field)
+                return helper.Field(QueryUtils.GetNiceName(findOptions.QueryName), sb.ToHtml());
+
+            return sb.ToHtml();
         }
 
         public static MvcHtmlString NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, Context context, int index)

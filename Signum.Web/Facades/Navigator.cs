@@ -365,9 +365,15 @@ namespace Signum.Web
         {
             return Manager.IsCreable(type, ctx);
         }
+
         public static bool IsFindable(object queryName)
         {
             return Manager.IsFindable(queryName);
+        }
+
+        public static bool IsFindable(this FindOptions options)
+        {
+            return Manager.IsFindable(options.QueryName);
         }
 
         public static string OnPartialViewName(ModifiableEntity entity)

@@ -243,3 +243,13 @@
 {
 	background-color:#999;	
 }
+
+span.count-with-results
+{
+    font-weight:bold;
+}
+
+span.count-no-results
+{
+    font-weight:normal;
+}
