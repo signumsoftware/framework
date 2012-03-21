@@ -85,9 +85,7 @@ WriteLiteral("\r\n\r\n");
 
 
 Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
-                "~/scripts/d3/d3.min.js",
-                "~/scripts/d3/d3.geom.min.js",
-                "~/scripts/d3/d3.layout.min.js"));
+                "~/scripts/d3.v2.min.js"));
 
 WriteLiteral("\r\n\r\n");
 

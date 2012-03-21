@@ -200,9 +200,7 @@ Write(Html.ScriptCss("~/Profiler/Content/SF_Profiler.css"));
 WriteLiteral("\r\n");
 
 
-Write(Html.ScriptsJs("~/scripts/d3/d3.min.js",
-                "~/scripts/d3/d3.geom.min.js",
-                "~/scripts/d3/d3.layout.min.js",
+Write(Html.ScriptsJs("~/scripts/d3.v2.min.js",
                 "~/Profiler/Scripts/SF_Profiler.js"));
 
 WriteLiteral("\r\n");
