@@ -28,21 +28,14 @@ namespace Signum.Web.UserQueries
             return helper.SearchControl(userQuery, findOptions, context);
         }
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, FindOptions findOptions, string prefix)
+        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, FindOptions findOptions, Action<CountSearchControl> settinsModifier)
         {
             if (findOptions == null)
                 throw new ArgumentNullException("findOptions");
 
-            findOptions.ApplyUserQuery(userQuery); 
+            findOptions.ApplyUserQuery(userQuery);
 
-            return helper.CountSearchControl(findOptions, prefix);
-        }
-
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, string prefix)
-        {
-            FindOptions findOptions = userQuery.ToFindOptions();
-
-            return helper.CountSearchControl(userQuery, findOptions, prefix);
+            return helper.CountSearchControl(findOptions, settinsModifier);
         }
     }
 }

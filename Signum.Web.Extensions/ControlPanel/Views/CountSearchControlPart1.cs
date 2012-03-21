@@ -86,7 +86,7 @@ WriteLiteral("\r\n<div class=\"sf-cp-count-uq-list\">\r\n");
         };
 
         
-   Write(Html.Field(uq.Label.HasText() ? uq.Label : uq.UserQuery.DisplayName, Html.CountSearchControl(uq.UserQuery, fo, "r{0}c{1}".Formato(Model.Row, Model.Column))));
+   Write(Html.Field(uq.Label.HasText() ? uq.Label : uq.UserQuery.DisplayName, Html.CountSearchControl(uq.UserQuery, fo, csc=>csc.Navigate = true)));
 
                                                                                                                                                                      
 
