@@ -1489,9 +1489,12 @@ namespace Signum.Engine.Linq
             {
                 EmbeddedFieldInitExpression efie = (EmbeddedFieldInitExpression)colExpression;
 
-                ConstantExpression ce = (ConstantExpression)expression;
-
-                EmbeddedFieldInitExpression efie2 = efie.FieldEmbedded.GetConstantExpression(ce.Value, this);
+                EmbeddedFieldInitExpression efie2;
+                if(expression is ConstantExpression)
+                    efie2 = efie.FieldEmbedded.FromConstantExpression((ConstantExpression)expression, this);
+                else if(expression is MemberInitExpression)
+                    efie2 = efie.FieldEmbedded.FromMemberInitiExpression(((MemberInitExpression)expression), this);
+                else throw new InvalidOperationException("Impossible to assign to {0} the expression {1}".Formato(colExpression.NiceToString(), expression.NiceToString()));
 
                 var bindings = efie.Bindings.SelectMany(b => Assign(b.Binding,
                     efie2.Bindings.SingleEx(b2 => ReflectionTools.FieldEquals(b.FieldInfo, b2.FieldInfo)).Binding));
