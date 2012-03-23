@@ -119,6 +119,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Signum\Controllers\JsonConverters.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />

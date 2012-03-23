@@ -95,7 +95,7 @@ namespace Signum.Web
             HtmlStringBuilder label = new HtmlStringBuilder();
             
             var toggler = new HtmlTag("a")
-                .Class("sf-widget-toggler sf-notes-toggler")
+                .Class("sf-widget-toggler sf-notes-toggler").Class(count > 0 ? "sf-widget-toggler-active" : null)
                 .Attr("title", Resources.Notes);
             
             using (label.Surround(toggler))

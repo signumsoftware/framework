@@ -28,6 +28,11 @@
     display: inline-block;
     vertical-align: top;
 }
+a.sf-widget-toggler-active
+{
+    color:#000;
+} 
+
 .sf-alerts-count-separator
 {
     vertical-align: top;    
@@ -40,6 +45,11 @@
 {
     color: Red;    
 }
+.sf-alert-attended, .sf-alert-future
+{
+    color: Black;    
+}
+
 .ui-state-highlight a
 {
     color: auto !important;    
