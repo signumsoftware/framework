@@ -29,7 +29,7 @@ namespace Signum.Utilities
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpander1))]
+        [MethodExpander(typeof(IsInIntervalExpander))]
         public static bool IsInInterval(this DateTime date, DateTime minDate, DateTime maxDate)
         {
             return minDate <= date && date < maxDate;
@@ -38,7 +38,7 @@ namespace Signum.Utilities
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpander2))]
+        [MethodExpander(typeof(IsInIntervalExpanderNull))]
         public static bool IsInInterval(this DateTime date, DateTime minDate, DateTime? maxDate)
         {
             return minDate <= date && (maxDate == null || date < maxDate);
@@ -47,7 +47,7 @@ namespace Signum.Utilities
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpander3))]
+        [MethodExpander(typeof(IsInIntervalExpanderNullNull))]
         public static bool IsInInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
         {
             return (minDate == null || minDate <= date) &&
@@ -66,7 +66,7 @@ namespace Signum.Utilities
         /// <summary>
         /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
         /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpander1))]
+        [MethodExpander(typeof(IsInIntervalExpander))]
         public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime maxDate)
         {
             AssertDateOnly(date);
@@ -78,7 +78,7 @@ namespace Signum.Utilities
         /// <summary>
         /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
         /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpander2))]
+        [MethodExpander(typeof(IsInIntervalExpanderNull))]
         public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime? maxDate)
         {
             AssertDateOnly(date);
@@ -91,7 +91,7 @@ namespace Signum.Utilities
         /// <summary>
         /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
         /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpander3))]
+        [MethodExpander(typeof(IsInIntervalExpanderNullNull))]
         public static bool IsInDateInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
         {
             AssertDateOnly(date);
@@ -101,7 +101,7 @@ namespace Signum.Utilities
                    (maxDate == null || date < maxDate);
         }
 
-        class IsInIntervalExpander1 : IMethodExpander
+        class IsInIntervalExpander : IMethodExpander
         {
             static readonly Expression<Func<DateTime, DateTime, DateTime, bool>> func = (date, minDate, maxDate) => minDate <= date && date < maxDate;
 
@@ -111,7 +111,7 @@ namespace Signum.Utilities
             }
         }
 
-        class IsInIntervalExpander2 : IMethodExpander
+        class IsInIntervalExpanderNull : IMethodExpander
         {
             Expression<Func<DateTime, DateTime, DateTime?, bool>> func = (date, minDate, maxDate) => minDate <= date && (maxDate == null || date < maxDate);
 
@@ -121,7 +121,7 @@ namespace Signum.Utilities
             }
         }
 
-        class IsInIntervalExpander3 : IMethodExpander
+        class IsInIntervalExpanderNullNull : IMethodExpander
         {
             Expression<Func<DateTime, DateTime?, DateTime?, bool>> func = (date, minDate, maxDate) =>
                 (minDate == null || minDate <= date) &&
