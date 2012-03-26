@@ -657,12 +657,12 @@ namespace Signum.Engine.Linq
         {
             if (proj.IsOneCell)
             {
-                var column = proj.Source.Columns.SingleEx();
+                var column = proj.Select.Columns.SingleEx();
 
-                var select = (SelectExpression)base.Visit(proj.Source);
+                var select = (SelectExpression)base.Visit(proj.Select);
                 var scalar = new ScalarExpression(column.Expression.Type, select);
 
-                var reference = column.GetReference(proj.Source.Alias);
+                var reference = column.GetReference(proj.Select.Alias);
                 
                 if (replacements == null)
                     replacements = new Dictionary<ColumnExpression, ScalarExpression>(); 

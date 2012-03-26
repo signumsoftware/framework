@@ -447,7 +447,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, top,  columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top,  columns, from, where, orderBy, groupBy);
 
             return select;
         }
@@ -471,11 +471,11 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression VisitProjection(ProjectionExpression proj)
         {
-            SelectExpression source = (SelectExpression)this.Visit(proj.Source);
+            SelectExpression source = (SelectExpression)this.Visit(proj.Select);
             Expression projector = this.Visit(proj.Projector);
             ProjectionToken token = VisitProjectionToken(proj.Token);
 
-            if (source != proj.Source || projector != proj.Projector || token != proj.Token)
+            if (source != proj.Select || projector != proj.Projector || token != proj.Token)
             {
                 return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
             }

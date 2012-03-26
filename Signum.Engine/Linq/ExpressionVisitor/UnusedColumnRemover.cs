@@ -41,7 +41,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(
                 c =>
                 {
-                    if (select.Distinct ? IsConstant(c.Expression) : !columnsUsed.Contains(c.Name))
+                    if (select.IsDistinct ? IsConstant(c.Expression) : !columnsUsed.Contains(c.Name))
                         return null;
 
                     var ex = Visit(c.Expression);
@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
 
             if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupbys != select.GroupBy)
             {
-                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, select.Top, columns, from, where, orderbys, groupbys);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, select.Top, columns, from, where, orderbys, groupbys);
             }
 
             return select;
@@ -86,8 +86,8 @@ namespace Signum.Engine.Linq
         {
             // visit mapping in reverse order
             Expression projector = this.Visit(projection.Projector);
-            SelectExpression source = (SelectExpression)this.Visit(projection.Source);
-            if (projector != projection.Projector || source != projection.Source)
+            SelectExpression source = (SelectExpression)this.Visit(projection.Select);
+            if (projector != projection.Projector || source != projection.Select)
             {
                 return new ProjectionExpression(source, projector, projection.UniqueFunction, projection.Token, projection.Type);
             }

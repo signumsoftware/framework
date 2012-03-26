@@ -52,7 +52,7 @@ namespace Signum.Engine.Linq
 
         static internal ProjectedColumns ProjectColumns(ProjectionExpression projector, Alias newAlias)
         {
-            return ProjectColumns(projector.Projector, newAlias, projector.Source.KnownAliases, new[] { projector.Token });
+            return ProjectColumns(projector.Projector, newAlias, projector.Select.KnownAliases, new[] { projector.Token });
         }
 
         static internal ProjectedColumns ProjectColumnsGroupBy(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
