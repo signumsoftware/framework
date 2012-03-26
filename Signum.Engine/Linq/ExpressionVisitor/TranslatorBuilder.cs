@@ -36,14 +36,14 @@ namespace Signum.Engine.Linq
 
             Scope scope = new Scope
             {
-                Alias = proj.Source.Alias,
-                Positions = proj.Source.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i),
+                Alias = proj.Select.Alias,
+                Positions = proj.Select.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i),
             };
 
             Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope);
 
             Expression<Func<DbParameter[]>> createParams;
-            string sql = QueryFormatter.Format(proj.Source, out createParams);
+            string sql = QueryFormatter.Format(proj.Select, out createParams);
 
             var result = new TranslateResult<T>
             {
@@ -83,14 +83,14 @@ namespace Signum.Engine.Linq
 
             Scope scope = new Scope
             {
-                Alias = proj.Source.Alias,
-                Positions = proj.Source.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i),
+                Alias = proj.Select.Alias,
+                Positions = proj.Select.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i),
             };
 
             Expression<Func<IProjectionRow, KeyValuePair<K, V>>> lambda = ProjectionBuilder.Build<KeyValuePair<K, V>>(proj.Projector, scope);
 
             Expression<Func<DbParameter[]>> createParamsExpression;
-            string sql = QueryFormatter.Format(proj.Source, out createParamsExpression);
+            string sql = QueryFormatter.Format(proj.Select, out createParamsExpression);
             Func<DbParameter[]> createParams = createParamsExpression.Compile();
 
             if (childProj.IsLazyMList)

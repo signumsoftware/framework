@@ -28,6 +28,7 @@
     display: inline-block;
     vertical-align: top;
 }
+
 a.sf-widget-toggler-active
 {
     color:#000;
@@ -41,11 +42,11 @@ a.sf-widget-toggler-active
 {
     margin-left: 2px;
 }
-.sf-alert-warned
+.sf-alert-warned.sf-alert-active
 {
     color: Red;    
 }
-.sf-alert-attended, .sf-alert-future
+.sf-alert-attended.sf-alert-active, .sf-alert-future.sf-alert-active
 {
     color: Black;    
 }

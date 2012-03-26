@@ -414,7 +414,7 @@ namespace Signum.Engine.Linq
             }
 
             sb.Append("SELECT ");
-            if (select.Distinct)
+            if (select.IsDistinct)
                 sb.Append("DISTINCT ");
 
             if (select.Top != null)

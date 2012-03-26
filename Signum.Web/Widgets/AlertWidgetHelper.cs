@@ -44,9 +44,9 @@ namespace Signum.Web
 
             var alertList = new[]
             {
-                new { Count = CountAlerts(identifiable, AttendedAlertsQuery), Query = AttendedAlertsQuery, ActiveClass = "sf-alert-attended", Title = Properties.Resources.Alerts_Attended },
-                new { Count = CountAlerts(identifiable, WarnedAlertsQuery), Query = WarnedAlertsQuery, ActiveClass = "sf-alert-warned", Title = Properties.Resources.Alerts_NotAttended },
-                new { Count = CountAlerts(identifiable, FutureAlertsQuery), Query = FutureAlertsQuery, ActiveClass = "sf-alert-future", Title = Properties.Resources.Alerts_Future },
+                new { Count = CountAlerts(identifiable, AttendedAlertsQuery), Query = AttendedAlertsQuery, AlertClass = "sf-alert-attended", Title = Properties.Resources.Alerts_Attended },
+                new { Count = CountAlerts(identifiable, WarnedAlertsQuery), Query = WarnedAlertsQuery, AlertClass = "sf-alert-warned", Title = Properties.Resources.Alerts_NotAttended },
+                new { Count = CountAlerts(identifiable, FutureAlertsQuery), Query = FutureAlertsQuery, AlertClass = "sf-alert-future", Title = Properties.Resources.Alerts_Future },
             };
 
             JsViewOptions voptions = new JsViewOptions
@@ -69,8 +69,8 @@ namespace Signum.Web
                             .Class("sf-alert-view")
                             .Attr("onclick", new JsFindNavigator(GetJsFindOptions(identifiable, a.Query, prefix)).openFinder().ToJS())
                             .InnerHtml(
-                            new HtmlTag("span").Class("sf-alert-count-label").Class(a.Count > 0 ? a.ActiveClass : null).InnerHtml((a.Title + ": ").EncodeHtml()),
-                            new HtmlTag("span").Class(a.Count > 0 ? a.ActiveClass : null).SetInnerText(a.Count.ToString()))
+                            new HtmlTag("span").Class("sf-alert-count-label").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).InnerHtml((a.Title + ": ").EncodeHtml()),
+                            new HtmlTag("span").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).SetInnerText(a.Count.ToString()))
                             .ToHtml());
                     }
                 }
@@ -105,7 +105,8 @@ namespace Signum.Web
                     
                     label.Add(new HtmlTag("span")
                         .Class("sf-widget-count")
-                        .Class(a.Count > 0 ? a.ActiveClass : null)
+                        .Class(a.AlertClass)
+                        .Class(a.Count > 0 ? "sf-alert-active" : null)
                         .SetInnerText(a.Count.ToString())
                         .Attr("title", a.Title)
                         .ToHtml());

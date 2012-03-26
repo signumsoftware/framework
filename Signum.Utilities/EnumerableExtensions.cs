@@ -1025,17 +1025,17 @@ namespace Signum.Utilities
             var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
             var shouldDictionary = shouldCollection.ToDictionary(shouldKeySelector);
 
-            var currentOnly = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
-            var shouldOnly = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
+            var extra = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
+            var lacking = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
 
-            if (currentOnly.Count != 0)
-                if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+            if (extra.Count != 0)
+                if (lacking.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, extra.ToString(", "), lacking.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, currentOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, extra.ToString(", ")));
             else
-                if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, shouldOnly.ToString(", ")));
+                if (lacking.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, lacking.ToString(", ")));
 
             return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
