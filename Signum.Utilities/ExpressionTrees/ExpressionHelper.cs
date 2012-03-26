@@ -118,7 +118,10 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static Expression GetArgument(this MethodCallExpression mce, string parameterName)
         {
-            int index = Array.FindIndex(mce.Method.GetParameters(), p => p.Name == parameterName);
+            int index = FindParameter(mce.Method.GetParameters(), parameterName);
+
+            if (index == -1)
+                throw new ArgumentException("parameterName '{0}' not found".Formato(parameterName));
 
             return mce.Arguments[index];
         }
@@ -126,10 +129,23 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static Expression TryGetArgument(this MethodCallExpression mce, string parameterName)
         {
-            int index = Array.FindIndex(mce.Method.GetParameters(), p => p.Name == parameterName);
+            int index = FindParameter(mce.Method.GetParameters(), parameterName);
 
             return index == -1 ? null : mce.Arguments[index];
         }
+
+        [DebuggerStepThrough]
+        private static int FindParameter(ParameterInfo[] parameters, string parameterName)
+        {
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].Name == parameterName)
+                    return i;
+            }
+
+            return -1;
+        }
+      
 
         [DebuggerStepThrough]
         public static LambdaExpression StripQuotes(this Expression e)
