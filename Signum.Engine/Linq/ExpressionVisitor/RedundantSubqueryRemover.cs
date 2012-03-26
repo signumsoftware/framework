@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.Collections.ObjectModel;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
@@ -193,16 +194,7 @@ namespace Signum.Engine.Linq
                 return select;
             }
 
-            private static SelectExpression GetLeftMostSelect(Expression source)
-            {
-                SelectExpression select = source as SelectExpression;
-                if (select != null) return select;
-                JoinExpression join = source as JoinExpression;
-                if (join != null) return GetLeftMostSelect(join.Left);
-                return null;
-            }
-
-            private static bool IsColumnProjection(SelectExpression select)
+            static bool IsColumnProjection(SelectExpression select)
             {
                 for (int i = 0, n = select.Columns.Count; i < n; i++)
                 {
@@ -214,7 +206,7 @@ namespace Signum.Engine.Linq
                 return true;
             }
 
-            private static bool CanMergeWithFrom(SelectExpression select, bool isTopLevel)
+            static bool CanMergeWithFrom(SelectExpression select, bool isTopLevel)
             {
                 SelectExpression fromSelect = GetLeftMostSelect(select.From);
                 if (fromSelect == null)
@@ -236,24 +228,45 @@ namespace Signum.Engine.Linq
                 if (select.IsReverse || fromSelect.IsReverse)
                     return false;
 
-                bool selHasAggregates = AggregateChecker.HasAggregates(select);
-
                 // cannot move forward order-by if outer has group-by
-                if (frmHasOrderBy && (selHasGroupBy || selHasAggregates || select.IsDistinct))
+                if (frmHasOrderBy && (selHasGroupBy || select.IsDistinct || AggregateChecker.HasAggregates(select)))
                     return false;
                 // cannot move forward group-by if outer has where clause
                 if (frmHasGroupBy /*&& (select.Where != null)*/) // need to assert projection is the same in order to move group-by forward
                     return false;
+
                 // cannot move forward a take if outer has take or skip or distinct
-                if (fromSelect.Top != null && (select.Top != null || /*select.Skip != null ||*/ select.IsDistinct || selHasAggregates || selHasGroupBy))
+                if (fromSelect.Top != null && (select.Top != null || /*select.Skip != null ||*/ select.IsDistinct || selHasGroupBy || HasApplyJoin(select.From) ))
                     return false;
                 // cannot move forward a skip if outer has skip or distinct
                 //if (fromSelect.Skip != null && (select.Skip != null || select.Distinct || selHasAggregates || selHasGroupBy))
                 //    return false;
                 // cannot move forward a distinct if outer has take, skip, groupby or a different projection
-                if (fromSelect.IsDistinct && (select.Top != null || /*select.Skip != null ||*/ !IsNameMapProjection(select) || selHasGroupBy || selHasAggregates || (selHasOrderBy && !isTopLevel)))
+                if (fromSelect.IsDistinct && (select.Top != null || /*select.Skip != null ||*/ !IsNameMapProjection(select) || selHasGroupBy || (selHasOrderBy && !isTopLevel) || AggregateChecker.HasAggregates(select)))
                     return false;
                 return true;
+            }
+
+            static SelectExpression GetLeftMostSelect(Expression source)
+            {
+                SelectExpression select = source as SelectExpression;
+                if (select != null)
+                    return select;
+                JoinExpression join = source as JoinExpression;
+
+                if (join != null)
+                    return GetLeftMostSelect(join.Left);
+                return null;
+            }
+
+            static bool HasApplyJoin(SourceExpression source)
+            {
+                var join = source as JoinExpression;
+
+                if (join == null)
+                    return false;
+
+                return join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply || HasApplyJoin(join.Left) || HasApplyJoin(join.Right);
             }
         }
 
