@@ -247,7 +247,7 @@ namespace Signum.Entities.DynamicQuery
             if (token == null)
                 return "No column selected"; 
 
-            if (token.Type != typeof(string) && token.Type.ElementType() != null)
+            if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
                 return "You can not add collections as columns";
 
             if (token.HasAllOrAny())
