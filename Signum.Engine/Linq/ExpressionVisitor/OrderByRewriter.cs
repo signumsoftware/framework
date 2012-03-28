@@ -27,7 +27,7 @@ namespace Signum.Engine.Linq
             var oldOuterMostSelect = outerMostSelect;
 
             gatheredOrderings = Enumerable.Empty<OrderExpression>();
-            outerMostSelect = proj.Source;
+            outerMostSelect = proj.Select;
 
             var result = base.VisitProjection(proj);
 
@@ -45,7 +45,7 @@ namespace Signum.Engine.Linq
             if (select.GroupBy != null && select.GroupBy.Any())
                 gatheredOrderings = Enumerable.Empty<OrderExpression>();
 
-            if (select.Reverse)
+            if (select.IsReverse)
                 gatheredOrderings = gatheredOrderings.Select(o => 
                     new OrderExpression(o.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending, o.Expression));  
 
@@ -60,10 +60,10 @@ namespace Signum.Engine.Linq
                 gatheredOrderings = Enumerable.Empty<OrderExpression>();
             }
 
-            if (AreEqual(select.OrderBy, orderings) && !select.Reverse)
+            if (AreEqual(select.OrderBy, orderings) && !select.IsReverse)
                 return select;
 
-            return new SelectExpression(select.Alias, select.Distinct, false, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy);
+            return new SelectExpression(select.Alias, select.IsDistinct, false, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy);
         }
 
         static bool AreEqual(IEnumerable<OrderExpression> col1, IEnumerable<OrderExpression> col2)

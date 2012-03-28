@@ -96,5 +96,14 @@ namespace Signum.Test.LinqProvider
             if (problematic.Any())
                 throw new AssertFailedException("Some non-retrived elements: {0}".Formato(problematic.ToString(", ")));  
         }
+
+
+        [TestMethod]
+        public void RetrieveWithMListCount()
+        {
+            var artist = Database.Query<ArtistDN>().OrderBy(a => a.Name).First();
+
+            Assert.AreEqual(artist.ToLite().Retrieve().Friends.Count, artist.Friends.Count);
+        }
     }
 }

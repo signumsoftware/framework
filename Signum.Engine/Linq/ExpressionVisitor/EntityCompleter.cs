@@ -90,7 +90,7 @@ namespace Signum.Engine.Linq
         {
             Expression projector = this.Visit(proj.Projector);
 
-            var result = new ProjectionExpression(proj.Source, projector, proj.UniqueFunction, proj.Token, proj.Type);
+            var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Token, proj.Type);
 
             var expanded = binder.ApplyExpansions(result);
 

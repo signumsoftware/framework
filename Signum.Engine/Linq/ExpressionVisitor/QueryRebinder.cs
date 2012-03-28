@@ -34,12 +34,12 @@ namespace Signum.Engine.Linq
         {
             this.Visit(proj.Projector);
 
-            SelectExpression source = (SelectExpression)this.Visit(proj.Source);
+            SelectExpression source = (SelectExpression)this.Visit(proj.Select);
             Expression projector = this.Visit(proj.Projector);
 
             ProjectionToken token = VisitProjectionToken(proj.Token);
 
-            if (source != proj.Source || projector != proj.Projector || token != proj.Token)
+            if (source != proj.Select || projector != proj.Projector || token != proj.Token)
             {
                 return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
             }
@@ -133,7 +133,7 @@ namespace Signum.Engine.Linq
             CurrentScope.SetRange(askedColumns);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy);
 
             return select;
         }

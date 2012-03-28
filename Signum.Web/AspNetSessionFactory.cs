@@ -12,7 +12,7 @@ namespace Signum.Web
     public class AspNetSessionFactory : ISessionFactory
     {
         static readonly ThreadLocalVariable<HttpSessionState> overrideAspNetSessionVariable = new ThreadLocalVariable<HttpSessionState>("overrideASPNetSession");
-
+        //Usefull for Session_End  http://stackoverflow.com/questions/464456/httpcontext-current-session-vs-global-asax-this-session
         public static IDisposable OverrideAspNetSession(HttpSessionState globalAsaxSession)
         {
             if (overrideAspNetSessionVariable.Value != null)
@@ -40,6 +40,9 @@ namespace Signum.Web
                 get
                 {
                     var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current.Session;
+
+                    if (session == null)
+                        return default(T);
 
                     object result = session[Name];
 

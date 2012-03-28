@@ -19,10 +19,21 @@ namespace Signum.Entities
             set { OverrideTimeZoneVariable.Value = value; }
         }
 
+        public static readonly SessionVariable<DateTime?> OverrideNowVariable = Statics.SessionVariable<DateTime?>("now");
+        public static DateTime? OverrideNow
+        {
+            get { return OverrideNowVariable.Value; }
+            set { OverrideNowVariable.Value = value; }
+        }
+  
+
         public static DateTime Now
         {
             get
             {
+                if (OverrideNow.HasValue)
+                    return OverrideNow.Value;
+
                 if (Mode == TimeZoneMode.Local)
                     return DateTime.Now;
                 else

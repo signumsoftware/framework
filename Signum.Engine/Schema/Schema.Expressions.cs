@@ -161,14 +161,28 @@ namespace Signum.Engine.Maps
             return new EmbeddedFieldInitExpression(this.FieldType, hasValue, bindings, this); 
         }
 
-        internal EmbeddedFieldInitExpression GetConstantExpression(object contant, QueryBinder tools)
+        internal EmbeddedFieldInitExpression FromConstantExpression(ConstantExpression contant, QueryBinder tools)
         {
+            var value = contant.Value;
+
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi,
-                                tools.VisitConstant(kvp.Value.Getter(contant), kvp.Value.FieldInfo.FieldType))).ToReadOnly();
+                                tools.VisitConstant(kvp.Value.Getter(value), kvp.Value.FieldInfo.FieldType))).ToReadOnly();
 
             return new EmbeddedFieldInitExpression(this.FieldType, Expression.Constant(true), bindings, this); 
+        }
+
+        internal EmbeddedFieldInitExpression FromMemberInitiExpression(MemberInitExpression mie, QueryBinder tools)
+        {
+            var dic = mie.Bindings.OfType<MemberAssignment>().ToDictionary(a=>(a.Member as FieldInfo ?? Reflector.FindFieldInfo(mie.Type,  (PropertyInfo)a.Member)).Name, a=>a.Expression);
+
+            var bindings = (from kvp in EmbeddedFields
+                            let fi = kvp.Value.FieldInfo
+                            select new FieldBinding(fi,
+                                dic.TryGetC(fi.Name) ?? tools.VisitConstant(Expression.Constant(null, fi.FieldType), fi.FieldType))).ToReadOnly();
+
+            return new EmbeddedFieldInitExpression(this.FieldType, Expression.Constant(true), bindings, this);
         }
     }
 

@@ -97,7 +97,7 @@ namespace Signum.Entities.DynamicQuery
                 return EntityProperties(type).OrderBy(a => a.ToString()).ToList();
             }
 
-            if(type != typeof(string) && type.ElementType() != null)
+            if(type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null)
             {
                 return CollectionProperties(this);
             }

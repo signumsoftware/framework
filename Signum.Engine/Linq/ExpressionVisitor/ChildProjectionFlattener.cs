@@ -44,12 +44,12 @@ namespace Signum.Engine.Linq
         {
             if (currentSource == null)
             {
-                currentSource = WithoutOrder(proj.Source);
+                currentSource = WithoutOrder(proj.Select);
 
                 Expression projector = this.Visit(proj.Projector);
 
                 if (projector != proj.Projector)
-                    proj = new ProjectionExpression(proj.Source, projector, proj.UniqueFunction, proj.Token, proj.Type);
+                    proj = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Token, proj.Type);
 
                 currentSource = null;
                 return proj;
@@ -67,7 +67,7 @@ namespace Signum.Engine.Linq
                     ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
                     Type projType = proj.UniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(kvpType) : kvpType;
                     return new ChildProjectionExpression(new ProjectionExpression(
-                            proj.Source, Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, projType),
+                            proj.Select, Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, projType),
                         Expression.Constant(0), inEntity, proj.Type);
 
                 }
@@ -101,10 +101,10 @@ namespace Signum.Engine.Linq
 
                     ColumnGenerator generatorSM = new ColumnGenerator();
                     List<ColumnDeclaration> columnsSMExternal = externalColumns.Select(ce => generatorSM.MapColumn(ce)).ToList();
-                    List<ColumnDeclaration> columnsSMInternal = proj.Source.Columns.Select(cd => generatorSM.MapColumn(cd.GetReference(proj.Source.Alias))).ToList();
+                    List<ColumnDeclaration> columnsSMInternal = proj.Select.Columns.Select(cd => generatorSM.MapColumn(cd.GetReference(proj.Select.Alias))).ToList();
 
                     List<OrderExpression> innerOrders;
-                    SelectExpression @internal = ExtractOrders(proj.Source, out innerOrders);
+                    SelectExpression @internal = ExtractOrders(proj.Select, out innerOrders);
 
                     Alias aliasSM = Alias.GetUniqueAlias(@internal.Alias.Name + "SM");
                     SelectExpression selectMany = new SelectExpression(aliasSM, false, false, null, columnsSMExternal.Concat(columnsSMInternal),
@@ -142,7 +142,7 @@ namespace Signum.Engine.Linq
             if (sel.Top != null || (sel.OrderBy == null || sel.OrderBy.Count == 0))
                 return sel;
 
-            return new SelectExpression(sel.Alias, sel.Distinct, sel.Reverse, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy);
+            return new SelectExpression(sel.Alias, sel.IsDistinct, sel.IsReverse, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy);
         }
 
         private SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression> innerOrders)
@@ -159,7 +159,7 @@ namespace Signum.Engine.Linq
 
                 innerOrders = newColumns.Select(kvp => new OrderExpression(kvp.Key.OrderType, kvp.Value.GetReference(sel.Alias))).ToList();
 
-                return new SelectExpression(sel.Alias, sel.Distinct, sel.Reverse, sel.Top, sel.Columns.Concat(newColumns.Values), sel.From, sel.Where, null, sel.GroupBy);
+                return new SelectExpression(sel.Alias, sel.IsDistinct, sel.IsReverse, sel.Top, sel.Columns.Concat(newColumns.Values), sel.From, sel.Where, null, sel.GroupBy);
             }
         }
 
@@ -221,7 +221,7 @@ namespace Signum.Engine.Linq
 
                 var result = inner.Select(ce=>select.Columns.FirstOrDefault(cd=>cd.Expression.Equals(ce)).TryCC(cd=>cd.GetReference(select.Alias))).ToList();
 
-                if (!select.Distinct)
+                if (!select.IsDistinct)
                     return result;
 
                 var result2 = select.Columns.Select(cd => cd.GetReference(select.Alias)).ToList();

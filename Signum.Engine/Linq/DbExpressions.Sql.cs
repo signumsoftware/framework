@@ -361,8 +361,8 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<OrderExpression> OrderBy;
         public readonly ReadOnlyCollection<Expression> GroupBy;
         public readonly Expression Top;
-        public readonly bool Distinct;
-        public readonly bool Reverse;
+        public readonly bool IsDistinct;
+        public readonly bool IsReverse;
 
         readonly Alias[] knownAliases;
         public override Alias[] KnownAliases
@@ -373,8 +373,8 @@ namespace Signum.Engine.Linq
         internal SelectExpression(Alias alias, bool distinct, bool reverse, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
             : base(DbExpressionType.Select, alias)
         {
-            this.Distinct = distinct;
-            this.Reverse = reverse;
+            this.IsDistinct = distinct;
+            this.IsReverse = reverse;
             this.Top = top;
             this.Columns = columns.ToReadOnly();
             this.From = from;
@@ -398,7 +398,7 @@ namespace Signum.Engine.Linq
                 else if (Columns.Any(cd => AggregateFinder.HasAggregates(cd.Expression)))
                     roles |= SelectRoles.Aggregate;
 
- 				if (Reverse)
+ 				if (IsReverse)
                     roles |= SelectRoles.Reverse;
 
                 if (OrderBy != null && OrderBy.Count > 0)
@@ -407,7 +407,7 @@ namespace Signum.Engine.Linq
                 if (!Columns.All(cd => cd.Expression is ColumnExpression))
                     roles |= SelectRoles.Select;
 
-                if(Distinct)
+                if(IsDistinct)
                     roles |= SelectRoles.Distinct;
                 
                 if (Top != null)
@@ -420,7 +420,7 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}AS {7}".Formato(
-                Distinct ? "DISTINCT " : "",
+                IsDistinct ? "DISTINCT " : "",
                 Top.TryCC(t => "TOP {0} ".Formato(t.NiceToString())),
                 Columns.TryCC(c => c.ToString(", ")),
                 From.TryCC(f=>f.ToString().Map(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
@@ -949,7 +949,7 @@ namespace Signum.Engine.Linq
     /// </summary> 
     internal class ProjectionExpression : DbExpression
     {
-        public readonly SelectExpression Source;
+        public readonly SelectExpression Select;
         public readonly Expression Projector;
         public readonly UniqueFunction?  UniqueFunction;
         public readonly ProjectionToken Token; 
@@ -970,7 +970,7 @@ namespace Signum.Engine.Linq
             if (!shouldImplement.IsAssignableFrom(resultType))
                 throw new InvalidOperationException("ProjectionType is {0} but should implement {1}".Formato(resultType.TypeName(), shouldImplement.TypeName()));  
 
-            this.Source = source;
+            this.Select = source;
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
             this.Token = token;
@@ -978,12 +978,12 @@ namespace Signum.Engine.Linq
     
         internal bool IsOneCell
         {
-            get { return this.UniqueFunction.HasValue && Source.Columns.Count == 1; }
+            get { return this.UniqueFunction.HasValue && Select.Columns.Count == 1; }
         }
 
         public override string ToString()
         {
-            return "(SOURCE\r\n{0}\r\nPROJECTION\r\n{1})".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
+            return "(SOURCE\r\n{0}\r\nPROJECTION\r\n{1})".Formato(Select.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
         }
     }
 
