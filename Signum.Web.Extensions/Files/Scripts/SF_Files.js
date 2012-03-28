@@ -14,6 +14,21 @@ SF.registerModule("Files", function () {
         SF.log("FLine");
         SF.EBaseLine.call(this, _flineOptions);
 
+        this.init = function () {
+            $("#" + SF.compose(this.options.prefix, "DivNew") + " .sf-file-drop")[0].addEventListener("drop", function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                // fetch FileList object  
+                var files = e.target.files || e.dataTransfer.files;
+                // process all File objects  
+                for (var i = 0, f; f = files[i]; i++) {
+                    window.alert(f.name);
+                }
+
+            }, false);
+        };
+
         this.download = function () {
             SF.log("FLine download");
             var id = this.runtimeInfo().id();
@@ -64,8 +79,26 @@ SF.registerModule("Files", function () {
         this.updateButtonsDisplay = function (hasEntity) { };
     };
 
-    /**
-    * @constructor
-    */
     SF.FLine.prototype = new SF.EBaseLine();
+
+    SF.FRep = function (_frepOptions) {
+        SF.log("FRep");
+        SF.ERep.call(this, _frepOptions);
+
+        this.typedCreate = function (_viewOptions) {
+            SF.log("FRep create");
+            if (!this.canAddItems()) {
+                return;
+            }
+
+            var viewOptions = this.viewOptionsForCreating(_viewOptions);
+            var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+            //Template pre-loaded: It will be created with "_0" itemprefix => replace it with the current one
+            template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+            this.onItemCreated(template, viewOptions);
+            $(".sf-repeater-element > #" + SF.compose(viewOptions.prefix, SF.Keys.runtimeInfo)).remove();
+        };
+    };
+
+    SF.FRep.prototype = new SF.ERep();
 });

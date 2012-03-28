@@ -22,23 +22,39 @@ namespace Signum.Web.Files
     {
         private static MvcHtmlString InternalFileRepeater(this HtmlHelper helper, FileRepeater fileRepeater)
         {
-            if (!fileRepeater.Visible)
+            if (!fileRepeater.Visible || (fileRepeater.HideIfNull && fileRepeater.UntypedValue == null))
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
-
-            sb.AddLine(helper.HiddenStaticInfo(fileRepeater));
-            sb.AddLine(helper.Hidden(fileRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
-
-            sb.AddLine(ListBaseHelper.CreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));
-            using (sb.Surround(new HtmlTag("div").IdName(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+            using (sb.Surround(new HtmlTag("fieldset").Class("sf-repeater-field sf-file-repeater-field")))
             {
-                if (fileRepeater.UntypedValue != null)
+                using (sb.Surround(new HtmlTag("legend")))
                 {
-                    foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<FilePathDN>>)fileRepeater.Parent))
-                        sb.Add(InternalRepeaterElement(helper, itemTC, fileRepeater));
+                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
+                    sb.AddLine(ListBaseHelper.CreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));
+                }
+
+                sb.AddLine(helper.HiddenStaticInfo(fileRepeater));
+                sb.AddLine(helper.Hidden(fileRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
+
+                sb.AddLine(new HtmlTag("script")
+                    .Attr("type", "text/javascript")
+                    .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
+                    .ToHtml());
+
+                //Write FileLine template
+                TypeElementContext<FilePathDN> templateTC = new TypeElementContext<FilePathDN>(null, (TypeContext)fileRepeater.Parent, 0);
+                using (FileLine fl = new FileLine(typeof(FilePathDN), templateTC.Value, templateTC, "", templateTC.PropertyRoute) { Remove = false, AsyncUpload = fileRepeater.AsyncUpload, FileType = fileRepeater.FileType })
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(fileRepeater, helper.InternalFileLine(fl)));
+                
+                using (sb.Surround(new HtmlTag("div").IdName(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                {
+                    if (fileRepeater.UntypedValue != null)
+                    {
+                        foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<FilePathDN>>)fileRepeater.Parent))
+                            sb.Add(InternalRepeaterElement(helper, itemTC, fileRepeater));
+                    }
                 }
             }
 
