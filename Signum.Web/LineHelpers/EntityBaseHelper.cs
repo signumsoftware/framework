@@ -189,7 +189,7 @@ namespace Signum.Web
                   htmlAttr);
         }
 
-        internal static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template)
+        public static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template)
         {
             return MvcHtmlString.Create("<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
                                 entityBase.Compose(EntityBaseKeys.Template),
