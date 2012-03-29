@@ -75,14 +75,14 @@ namespace Signum.Engine.Maps
         internal Dictionary<string, Type> NameToType
         {
             get { return nameToType; }
-            set { nameToType = value; }
+            //set { nameToType = value; }
         }
 
         Dictionary<Type, string> typeToName = new Dictionary<Type, string>();
         internal Dictionary<Type, string> TypeToName
         {
             get { return typeToName; }
-            set { typeToName = value; }
+            //set { typeToName = value; }
         }
 
         internal Type GetType(int id)
