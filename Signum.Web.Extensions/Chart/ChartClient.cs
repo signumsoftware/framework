@@ -84,6 +84,25 @@ namespace Signum.Web.Chart
                                     .SetProperty(a=>a.Token, qtMapping)
                             })
                     },
+
+                    new EmbeddedEntitySettings<ChartPaletteModel>() 
+                    { 
+                        ShowSave = false,
+                        PartialViewName = _ => ViewPrefix.Formato("ChartPalette"),
+                        MappingDefault = new EntityMapping<ChartPaletteModel>(true)
+                            .SetProperty(a => a.Colors, new MListDictionaryMapping<ChartColorDN, Lite<IdentifiableEntity>>(cc=>cc.Related, "Related",
+                                new EntityMapping<ChartColorDN>(false)
+                                    .SetProperty(m => m.Color, ctx=>
+                                    {
+                                        var input = ctx.Inputs["Rgb"];
+                                        int rgb;
+                                        if(input.HasText() && int.TryParse(input, System.Globalization.NumberStyles.HexNumber, null, out rgb))
+                                            return ColorDN.FromARGB(255, rgb);
+
+                                        return null;
+                                    })
+                                    .CreateProperty(c => c.Related)))
+                    }
                 });
 
                 ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
@@ -112,6 +131,26 @@ namespace Signum.Web.Chart
                     }
 
                     return buttons.ToArray();
+                });
+
+                ButtonBarEntityHelper.RegisterEntityButtons<ChartPaletteModel>((ctx, entity) =>
+                {
+                    var typeName = Navigator.ResolveWebTypeName(entity.Type.ToType());
+                    return new []
+                    {
+                        new ToolBarButton
+                        {
+                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorSave"),
+                            Text = "Save palette",
+                            OnClick = "SF.ChartColors.savePalette('{0}')".Formato(RouteHelper.New().Action((ChartController pc) => pc.SavePalette(typeName)))
+                        },
+                        new ToolBarButton
+                        {
+                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorCreate"),
+                            Text = "New palette",
+                            Href = RouteHelper.New().Action<ChartController>(cc => cc.CreateNewPalette(typeName))
+                        }
+                    };
                 });
             }
         }

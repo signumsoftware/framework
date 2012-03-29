@@ -38,12 +38,25 @@
             <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
         </td>
     </tr>
+    
+    
     <tr class="sf-chart-token-config" style="display:none">
         <td></td>
         <td colspan="2">
             @using (Html.FieldInline()) 
             { 
                 @Html.ValueLine(tc, ct => ct.DisplayName)
+       @*         if (tc.Value.IsColor &&  Navigator.IsViewable(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                {
+                    var imp = tc.Value.Token.Implementations(); 
+                    
+                    if(imp == null){
+                        
+                    }
+                    
+                    @Html.ActionLink((ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(tc.Value.Token.Type)), );
+                }*@
+                
             }
         </td>
     </tr>

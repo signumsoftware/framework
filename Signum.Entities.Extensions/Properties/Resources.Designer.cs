@@ -79,6 +79,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Colors for {0}.
+        /// </summary>
+        public static string ColorsFor0 {
+            get {
+                return ResourceManager.GetString("ColorsFor0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Part {0} is in column {1} but panel has only {2} columns.
         /// </summary>
         public static string ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns {

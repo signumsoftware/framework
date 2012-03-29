@@ -179,6 +179,11 @@ namespace Signum.Entities.Chart
             return GroupResults && ChartUtils.ShouldAggregate(chartResultType, GetTokenName(token));
         }
 
+        internal bool token_IsColor(ChartTokenDN token)
+        {
+            return ChartUtils.IsColorToken(chartResultType, GetTokenName(token));
+        }
+
         internal string token_PropertyLabel(ChartTokenDN token)
         {
             var chartLavel = ChartUtils.PropertyLabel(chartType, GetTokenName(token));
@@ -327,6 +332,8 @@ namespace Signum.Entities.Chart
             if (Value2 != null)
                 yield return Value2;
         }
+
+      
     }
 
     [Serializable]

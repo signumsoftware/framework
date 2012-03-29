@@ -130,3 +130,15 @@
 {
     width: 100%;
 }
+
+.sf-chart-color-table
+{
+    width: 0%;
+}
+
+.sf-chart-color-box
+{
+    width:16px;
+    height:16px;
+    border: 2px solid #AAA;
+}

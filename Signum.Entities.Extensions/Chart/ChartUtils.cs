@@ -268,6 +268,23 @@ namespace Signum.Entities.Chart
             return false;
         }
 
+        public static bool IsColorToken(ChartResultType crt, ChartTokenName name)
+        {
+            switch (crt)
+            {
+                case ChartResultType.TypeValue:
+                    return name == ChartTokenName.Dimension1;
+                case ChartResultType.TypeTypeValue:
+                    return name == ChartTokenName.Dimension2;
+
+                case ChartResultType.Points:
+                case ChartResultType.Bubbles:
+                    return name == ChartTokenName.Value1;
+            }
+
+            return false;
+        }
+
         public static bool CanGroupBy(ChartResultType crt, ChartTokenName name)
         {
             switch (crt)

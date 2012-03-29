@@ -19,6 +19,7 @@ using System.Web.Script.Serialization;
 using Signum.Engine.Reports;
 using Signum.Web.Controllers;
 using Signum.Engine.Chart;
+using Signum.Entities.Basics;
 
 namespace Signum.Web.Chart
 {
@@ -288,5 +289,46 @@ namespace Signum.Web.Chart
             return Redirect(Navigator.FindRoute(queryName));
         }
         #endregion
+
+        #region chart color
+
+        public ActionResult Colors(string typeName)
+        {
+            Type type = Navigator.ResolveType(typeName);
+
+            var model = ChartColorLogic.GetPalette(type);
+
+            return Navigator.View(this, model);
+        }
+
+        public ActionResult SavePalette(string typeName)
+        {
+            Type type = Navigator.ResolveType(typeName);
+
+            var ctx =  ChartColorLogic.GetPalette(type).ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
+
+            if (ctx.GlobalErrors.Any())
+            {
+                this.ModelState.FromContext(ctx);
+                return JsonAction.ModelState(ModelState);
+            }
+
+            var palette = ctx.Value;
+
+            ChartColorLogic.SavePalette(palette);
+
+            return Redirect(Url.Action<ChartController>(cc => cc.Colors(typeName)));
+        }
+
+        public ActionResult CreateNewPalette(string typeName)
+        {
+            Type type = Navigator.ResolveType(typeName);
+
+            ChartColorLogic.CreateNewPalette(type);
+
+            return Redirect(Url.Action<ChartController>(cc => cc.Colors(typeName)));
+        }
+
+        #endregion 
     }
 }

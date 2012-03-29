@@ -16,13 +16,13 @@ namespace Signum.Engine.Chart
 {
     public static class ChartColorLogic
     {
-        static readonly Lazy<Dictionary<Type, Dictionary<int, Color>>> Colors = GlobalLazy.Create(() =>
+        public static readonly Lazy<Dictionary<Type, Dictionary<int, Color>>> Colors = GlobalLazy.Create(() =>
               Database.Query<ChartColorDN>()
               .Select(cc => new { cc.Related.RuntimeType, cc.Related.Id, cc.Color.Argb })
               .AgGroupToDictionary(a => a.RuntimeType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))))
         .InvalidateWith(typeof(ChartColorDN));
 
-        static readonly int Limit = 360; 
+        public static readonly int Limit = 360; 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -40,20 +40,17 @@ namespace Signum.Engine.Chart
             }
         }
 
-        public static void SetFullPalette(Type type)
+        public static void CreateNewPalette(Type type)
         {
-            int count = giCount.GetInvoker(type)();
-
-            if (count > Limit)
-                throw new ApplicationException("Too many {0} ({1}), maximum is {2}".Formato(type.NicePluralName(), count, Limit));
+            AssertFewEntities(type);
 
             var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = l.ToLite<IdentifiableEntity>() }).ToDictionary(a => a.Related);
 
             dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.RuntimeType == type).ToDictionary(a=>a.Related));
 
-            double[] bright = dic.Count < 18 ? new double[]{.60}:
-                            dic.Count < 72 ? new double[]{.80, .40}:
-                            new double[]{.90, .50, .30};
+            double[] bright = dic.Count < 18 ? new double[]{.80}:
+                            dic.Count < 72 ? new double[]{.90, .50}:
+                            new double[]{1, .60, .30};
 
             var hues = (dic.Count / bright.Length);
 
@@ -72,11 +69,56 @@ namespace Signum.Engine.Chart
             values.SaveList();
         }
 
+        public static void AssertFewEntities(Type type)
+        {
+            int count = giCount.GetInvoker(type)();
+
+            if (count > Limit)
+                throw new ApplicationException("Too many {0} ({1}), maximum is {2}".Formato(type.NicePluralName(), count, Limit));
+        }
+
+        public static void SavePalette(ChartPaletteModel model)
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Type type = model.Type.ToType();
+
+                giDeleteColors.GetInvoker(type)();
+
+                model.Colors.Where(a => a.Color != null).SaveList();
+                tr.Commit();
+            }
+        }
 
         static readonly GenericInvoker<Func<int>> giCount = new GenericInvoker<Func<int>>(() => Count<IdentifiableEntity>());
         static int Count<T>() where T : IdentifiableEntity
         {
-            return Database.Query<T>().Count(); 
+            return Database.Query<T>().Count();
+        }
+
+        static readonly GenericInvoker<Func<int>> giDeleteColors = new GenericInvoker<Func<int>>(() => DeleteColors<IdentifiableEntity>());
+        static int DeleteColors<T>() where T : IdentifiableEntity
+        {
+            return (from t in Database.Query<T>() // To filter by type conditions
+                    join cc in Database.Query<ChartColorDN>() on t.ToLite<IdentifiableEntity>() equals cc.Related
+                    select cc).UnsafeDelete();
+        }
+
+        public static ChartPaletteModel GetPalette(Type type)
+        {
+            AssertFewEntities(type);
+
+            var dic = ChartColorLogic.Colors.Value.TryGetC(type);
+
+            return new ChartPaletteModel
+            {
+                Type = type.ToTypeDN(),
+                Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorDN
+                {
+                    Related = l.ToLite<IdentifiableEntity>(),
+                    Color = dic.TryGetS(l.Id).TrySC(c => new ColorDN { Argb = c.ToArgb() })
+                }).ToMList()
+            };
         }
     }
 }

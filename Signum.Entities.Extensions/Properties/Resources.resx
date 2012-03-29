@@ -306,4 +306,7 @@
   <data name="WebImage" xml:space="preserve">
     <value>Image</value>
   </data>
+  <data name="ColorsFor0" xml:space="preserve">
+    <value>Colors for {0}</value>
+  </data>
 </root>

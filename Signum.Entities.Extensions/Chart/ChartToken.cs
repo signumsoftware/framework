@@ -11,6 +11,7 @@ using System.ComponentModel;
 using Signum.Entities.Reports;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Reflection;
 
 namespace Signum.Entities.Chart
 {
@@ -63,6 +64,9 @@ namespace Signum.Entities.Chart
 
         [AvoidLocalization]
         public bool Grouping { get { return parentChart.GroupResults; } }
+
+        [AvoidLocalization]
+        public bool IsColor { get { return parentChart.token_IsColor(this) && (token.Type.IsEnum || token.Type.IsLite()); } }
 
         [AvoidLocalization]
         public bool ShouldAggregate { get { return parentChart.token_ShouldAggregate(this); } }
