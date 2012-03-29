@@ -39,7 +39,7 @@ namespace Signum.Web
             {
                 get
                 {
-                    var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current.Session;
+                    var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current.TryCC(c => c.Session);
 
                     if (session == null)
                         return default(T);
