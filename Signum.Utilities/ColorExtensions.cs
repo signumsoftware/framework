@@ -24,6 +24,14 @@ namespace Signum.Utilities
             return ToHtmlColor(color.ToArgb());
         }
 
+        public static string TryToHtml(this Color? color)
+        {
+            if (color == null)
+                return null;
+
+            return ToHtmlColor(color.Value.ToArgb());
+        }
+
         public static string ToHtmlColor(int value)
         {
             return "#" + (value & 0xffffff).ToString("X6");
