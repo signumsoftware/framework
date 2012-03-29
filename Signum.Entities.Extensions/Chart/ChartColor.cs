@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.Chart
 {
@@ -22,7 +23,7 @@ namespace Signum.Entities.Chart
 
         [NotNullable]
         ColorDN color;
-        [NotNullValidator]
+        //[NotNullValidator]
         public ColorDN Color
         {
             get { return color; }
@@ -36,6 +37,30 @@ namespace Signum.Entities.Chart
 
 
             return "{0} {1} -> {2}".Formato(related.GetType().NiceName(), related.Id, color);
+        }
+    }
+
+    [Serializable]
+    public class ChartPaletteModel : ModelEntity
+    {
+        TypeDN type;
+        [NotNullValidator]
+        public TypeDN Type
+        {
+            get { return type; }
+            set { Set(ref type, value, () => Type); }
+        }
+
+        MList<ChartColorDN> colors = new MList<ChartColorDN>();
+        public MList<ChartColorDN> Colors
+        {
+            get { return colors; }
+            set { Set(ref colors, value, () => Colors); }
+        }
+
+        public override string ToString()
+        {
+            return Resources.ColorsFor0.Formato(type.FriendlyName);
         }
     }
 }

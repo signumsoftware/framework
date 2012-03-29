@@ -1,0 +1,93 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+@using Signum.Utilities
+@using Signum.Engine
+@Html.ScriptCss("~/Chart/Content/SF_Chart.css")
+
+@using (var cpt = Html.TypeContext<ChartPaletteModel>())
+{
+    @Html.HiddenRuntimeInfo(cpt, cp => cp.Type)
+    <table class="sf-search-results sf-chart-color-table">
+        <thead>
+            <tr>
+                <th class="ui-state-default">
+                    Color
+                </th>
+                <th class="ui-state-default">
+                    Hex
+                </th>
+                <th class="ui-state-default">
+                    Id
+                </th>
+                <th class="ui-state-default">
+                    Text
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (TypeContext<ChartColorDN> clc in cpt.TypeElementContext(cp => cp.Colors))
+            {  
+                <tr>
+                    <td>
+                        <div class="sf-chart-color-box">
+                        </div>
+                    </td>
+                    <td>
+                        #@Html.TextBox(clc.Compose("Color_Rgb"), clc.Value.Color.TryCC(c => c.ToColor().ToHtml().Substring(1)), new { maxlength = 6, size = 6, @class = "sf-chart-color-input" })
+                        @Html.HiddenRuntimeInfo(clc, cl => cl.Related)
+                    </td>
+                    <td>
+                        @clc.Value.Related.Id
+                    </td>
+                    <td>
+                        @clc.Value.Related.ToString()
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script type="text/javascript">
+    var SF = SF || {};
+
+    SF.ChartColors = (function () {
+        var updateColor = function (input) {
+            var $input = $(input);
+            $input.closest("tr").find("div.sf-chart-color-box").css("background-color", "#" + ($input.val() || "FFFFFF"));
+        }
+
+        $(function () {
+            $("input.sf-chart-color-input")
+                .each(function (i, input) { updateColor(input); })
+                .change(function () { updateColor(this); });
+
+            $("#sfChartSavePalette").on("click", function (e) {
+                e.preventDefault();
+
+            });
+        });
+
+        var savePalette = function (url) {
+            $.ajax({
+                url: url,
+                data: $("#divMainControl :input").serialize(),
+                success: function (result) {
+                    if (typeof result.ModelState != "undefined") {
+                        new SF.Validator().showErrors(result.ModelState);
+                    }
+                }
+            });
+        };
+
+        return {
+            savePalette: savePalette
+        };
+    })();
+</script>

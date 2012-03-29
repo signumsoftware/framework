@@ -267,6 +267,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartControl.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Chart\Views\ChartPalette1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartPalette.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\Views\ChartResults.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -291,6 +296,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>UserChartFilter.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="ControllerFilters\GZipFilter.cs" />
     <Compile Include="ControlPanel\Views\Admin\PanelParts1.cs">
@@ -981,6 +991,15 @@
       <LastGenOutput>DeploymentLog.cs</LastGenOutput>
     </Content>
     <Content Include="Deployment\Views\Web.config" />
+    <Content Include="Chart\Views\ChartPalette.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartPalette1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\Web.config" />
+    <Content Include="Chart\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>

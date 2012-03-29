@@ -20,6 +20,13 @@ namespace ASP
     using System.Web.Security;
     using System.Web.UI;
     using System.Web.WebPages;
+    using System.Web.Mvc;
+    using System.Web.Mvc.Ajax;
+    using System.Web.Mvc.Html;
+    using System.Web.Routing;
+    using Signum.Utilities;
+    using Signum.Entities;
+    using Signum.Web;
     using System.Collections;
     using System.Collections.Specialized;
     using System.ComponentModel.DataAnnotations;
@@ -34,13 +41,6 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using System.Web.Mvc;
-    using System.Web.Mvc.Ajax;
-    using System.Web.Mvc.Html;
-    using System.Web.Routing;
-    using Signum.Utilities;
-    using Signum.Entities;
-    using Signum.Web;
     using Signum.Web.Extensions.Properties;
     using Signum.Entities.DynamicQuery;
     using Signum.Engine.DynamicQuery;
@@ -132,6 +132,8 @@ WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-co
 WriteLiteral("</a>\r\n        </td>\r\n    </tr>\r\n");
 
 
+    
+    
 
 WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display:none\">\r\n        <td></td>\r\n " +
 "       <td colspan=\"2\">\r\n");
@@ -143,6 +145,10 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display:none\">\r\
            Write(Html.ValueLine(tc, ct => ct.DisplayName));
 
                                                          
+       
+
+                   
+                
             }
 
 WriteLiteral("        </td>\r\n    </tr>\r\n");
