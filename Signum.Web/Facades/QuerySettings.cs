@@ -75,6 +75,10 @@ namespace Signum.Web
                 {
                     return o != null ? ((DateTime)o).ToUserInterface().TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }),
+                new FormatterRule(c=>c.Type.UnNullify() == typeof(TimeSpan), c => (h,o) => 
+                {
+                    return o != null ? ((TimeSpan)o).TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
+                }),
                 new FormatterRule(c=> Reflector.IsNumber(c.Type), c => (h,o) => 
                 {
                     if (o != null)

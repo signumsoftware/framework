@@ -180,10 +180,10 @@ namespace Signum.Windows
             if (View == null)
                 throw new InvalidOperationException("View not defined in EntitySettings");
 
-            if (typeContext == null)
+            if (typeContext == null && !(entity is IRootEntity))
                 throw new ArgumentException("An EmbeddedEntity neeed TypeContext");
 
-            return View((T)entity, typeContext);
+            return View((T)entity, typeContext ?? PropertyRoute.Root(entity.GetType()));
         }
 
         public void OverrideView(Func<EmbeddedEntity, PropertyRoute, Control, Control> overrideView)
