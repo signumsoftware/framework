@@ -33,9 +33,12 @@ namespace Signum.Web.Files
             using (fileLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 sb.AddLine(helper.HiddenEntityInfo(fileLine));
+
+                sb.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/SF_Files.css") }).ToHtmlSelf());
+
                 sb.AddLine(new HtmlTag("script")
                     .Attr("type", "text/javascript")
-                    .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Scripts/SF_Files.js") + "'); SF.Loader.loadCss('" + RouteHelper.New().Content("~/Files/Content/SF_Files.css") + "'); });"))
+                    .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
                     .ToHtml());
 
                 if (fileLine.PropertyRoute.Type == typeof(FilePathDN))
@@ -94,7 +97,7 @@ namespace Signum.Web.Files
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivNew")).Attr("style", "display:" + (hasEntity ? "none" : "block")).Class("sf-file-line-new")))
+                using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivNew")).Attr("style", "display:" + (hasEntity ? "none" : "block")).Class("sf-file-line-new").Attr("data-drop-url", RouteHelper.New().Action<FileController>(fc => fc.UploadDropped()))))
                 {
                     var label = EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID);
 
@@ -103,8 +106,7 @@ namespace Signum.Web.Files
 
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
-                        sb.AddLine(helper.Field("Fichero", 
-                            MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID))));
+                        sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID)));
                         sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
                         sb.AddLine(MvcHtmlString.Create("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID)));
                         
@@ -114,10 +116,7 @@ namespace Signum.Web.Files
                 }
 
                 if (fileLine.ShowValidationMessage)
-                {
-                    sb.Add(MvcHtmlString.Create("&nbsp;"));
                     sb.AddLine(helper.ValidationMessage(fileLine.ControlID));
-                }
             }
 
             return sb.ToHtml();

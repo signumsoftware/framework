@@ -51,11 +51,18 @@ namespace Signum.Web.Files
                                 var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
 
                                 HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+                                if (hpf != null)
+                                {
+                                    fp.FileName = Path.GetFileName(hpf.FileName);
+                                    fp.BinaryFile = hpf.InputStream.ReadAllBytes();
 
-                                fp.FileName = Path.GetFileName(hpf.FileName);
-                                fp.BinaryFile = hpf.InputStream.ReadAllBytes();
-
-                                return fp;
+                                    return fp;
+                                }
+                                else
+                                { 
+                                    FilePathDN filePathInSession = (FilePathDN)ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
+                                    return filePathInSession;
+                                }
                             }
                         }
 

@@ -14,19 +14,63 @@ SF.registerModule("Files", function () {
         SF.log("FLine");
         SF.EBaseLine.call(this, _flineOptions);
 
-        this.init = function () {
-            $("#" + SF.compose(this.options.prefix, "DivNew") + " .sf-file-drop")[0].addEventListener("drop", function (e) {
-                e.stopPropagation();
-                e.preventDefault();
+        this.initDragDrop = function ($divNew) {
+            if (window.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
+                var self = this;
+                var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("or drag a file here")
+                .on("dragover", function (e) { self.fileDropHover(e, true); })
+                .on("dragleave", function (e) { self.fileDropHover(e, false); })
+                .appendTo($divNew);
+                $fileDrop[0].addEventListener("drop", function (e) { self.fileDropped(e); }, false);
+            }
+        };
 
-                // fetch FileList object  
-                var files = e.target.files || e.dataTransfer.files;
-                // process all File objects  
-                for (var i = 0, f; f = files[i]; i++) {
-                    window.alert(f.name);
-                }
+        this.fileDropHover = function (e, toggle) {
+            e.stopPropagation();
+            e.preventDefault();
+            $(e.target).toggleClass("sf-file-drop-over", toggle);
+        };
 
-            }, false);
+        this.fileDropped = function (e) {
+            var files = e.target.files || e.dataTransfer.files;
+            e.stopPropagation();
+            e.preventDefault();
+            
+            if (files.length == 0) {
+                this.fileDropHover(e, false);
+                return;
+            }
+
+            for (var i = 0, f; f = files[i]; i++) {
+                $(this.pf('loading')).show();
+                this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
+
+                var fileName = f.name;
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", $(this.pf("DivNew")).attr("data-drop-url"), true);
+                xhr.setRequestHeader("X-FileName", fileName);
+                xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, new SF.RuntimeInfo().find().val());
+                xhr.setRequestHeader("X-Prefix", this.options.prefix);
+                xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().find().val());
+                xhr.setRequestHeader("X-FileType", $(this.pf("FileType")).val());
+                xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
+
+                var self = this;
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            SF.log(xhr.responseText);
+                            $(self.pf("DivNew iframe")).html(xhr.responseText);
+                        }
+                        else {
+                            SF.log("Error", xhr.statusText);
+                        }
+                    }
+                };
+
+                xhr.send(f);
+            }
         };
 
         this.download = function () {
@@ -81,6 +125,15 @@ SF.registerModule("Files", function () {
 
     SF.FLine.prototype = new SF.EBaseLine();
 
+    $(".sf-file-line-new").each(function () {
+        var $this = $(this);
+        if ($this.find("sf-file-drop").length == 0) {
+            var id = $this.attr("id");
+            var prefix = id.substring(0, id.indexOf("DivNew"));
+            new SF.FLine({ prefix: prefix }).initDragDrop($this);
+        }
+    });
+
     SF.FRep = function (_frepOptions) {
         SF.log("FRep");
         SF.ERep.call(this, _frepOptions);
@@ -97,6 +150,7 @@ SF.registerModule("Files", function () {
             template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
             this.onItemCreated(template, viewOptions);
             $(".sf-repeater-element > #" + SF.compose(viewOptions.prefix, SF.Keys.runtimeInfo)).remove();
+            new SF.FLine({ prefix: viewOptions.prefix }).initDragDrop($("#" + SF.compose(viewOptions.prefix, "DivNew")));
         };
     };
 

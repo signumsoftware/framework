@@ -6,11 +6,19 @@
 .sf-file-repeater-element
 {
     padding: 0;
-    margin-bottom: 0;    
+    margin-bottom: 0;
 }
-.sf-file-repeater-element legend, .sf-file-repeater-element .sf-field
+.sf-file-repeater-element legend, .sf-file-repeater-element .sf-field, .sf-file-repeater-element .sf-line-entity
 {
     float: left;
+}
+.sf-file-repeater-element .sf-line-entity
+{
+    margin-top: 5px\0/; /*I8 fix*/
+}
+.sf-file-repeater-element legend
+{
+    margin-right: 5px;    
 }
 .sf-file-drop
 {

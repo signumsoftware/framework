@@ -38,6 +38,8 @@ namespace Signum.Web.Files
                 sb.AddLine(helper.HiddenStaticInfo(fileRepeater));
                 sb.AddLine(helper.Hidden(fileRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
 
+                sb.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/SF_Files.css") }).ToHtmlSelf());
+
                 sb.AddLine(new HtmlTag("script")
                     .Attr("type", "text/javascript")
                     .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
@@ -45,7 +47,7 @@ namespace Signum.Web.Files
 
                 //Write FileLine template
                 TypeElementContext<FilePathDN> templateTC = new TypeElementContext<FilePathDN>(null, (TypeContext)fileRepeater.Parent, 0);
-                using (FileLine fl = new FileLine(typeof(FilePathDN), templateTC.Value, templateTC, "", templateTC.PropertyRoute) { Remove = false, AsyncUpload = fileRepeater.AsyncUpload, FileType = fileRepeater.FileType })
+                using (FileLine fl = new FileLine(typeof(FilePathDN), templateTC.Value, templateTC, "", templateTC.PropertyRoute) { Remove = false, AsyncUpload = fileRepeater.AsyncUpload, FileType = fileRepeater.FileType, OnlyValue = true })
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(fileRepeater, helper.InternalFileLine(fl)));
                 
                 using (sb.Surround(new HtmlTag("div").IdName(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
@@ -81,11 +83,11 @@ namespace Signum.Web.Files
                 sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
                 //Render FileLine for the current item
-                using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityBaseKeys.Entity))))
+                using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityBaseKeys.Entity)).Class("sf-line-entity")))
                 {
                     TypeContext<FilePathDN> tc = (TypeContext<FilePathDN>)TypeContextUtilities.CleanTypeContext(itemTC);
 
-                    using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.PropertyRoute) { Remove = false })
+                    using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.PropertyRoute) { Remove = false, OnlyValue = true })
                         sb.AddLine(helper.InternalFileLine(fl));
                 }
             }
