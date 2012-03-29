@@ -382,7 +382,7 @@ namespace Signum.Engine.Linq
                     var left = Visit(newB.Left);
                     var right = Visit(newB.Right);
 
-                    newB = Expression.Equal(left, right);
+                    newB = Expression.MakeBinary(b.NodeType, left, right);
                     if (Has(left) && Has(right))
                         candidates.Add(newB);
 
