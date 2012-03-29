@@ -21,6 +21,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.Chart;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web.Chart
 {
@@ -325,99 +326,115 @@ namespace Signum.Web.Chart
         public static object DataJson(ChartRequest request, ResultTable resultTable)
         {
             var chart = request.Chart;
-
-            var d1Converter = chart.Dimension1.Converter();
-            var d2Converter = chart.Dimension2.Converter();
-            var v1Converter = chart.Value1.Converter();
-            var v2Converter = chart.Value2.Converter();
+            
 
             switch (chart.ChartResultType)
-            { 
+            {
                 case ChartResultType.TypeValue:
-                    return new
                     {
-                        labels = new 
+                        var d1Converter = chart.Dimension1.Converter(true);
+                        var v1Converter = chart.Value1.Converter(false);
+                        return new
                         {
-                            dimension1 = chart.Dimension1.GetTitle(),
-                            value1 = chart.Value1.GetTitle() 
-                        },
-                        serie = chart.GroupResults ? 
-                            resultTable.Rows.Select(r => new Dictionary<string, object>
+                            labels = new
+                            {
+                                dimension1 = chart.Dimension1.GetTitle(),
+                                value1 = chart.Value1.GetTitle()
+                            },
+                            serie = chart.GroupResults ?
+                                resultTable.Rows.Select(r => new Dictionary<string, object>
                             { 
                                 { "dimension1", d1Converter(r[0]) }, 
                                 { "value1", v1Converter(r[1]) }
                             }).ToList() :
-                            resultTable.Rows.Select(r => new Dictionary<string, object>
+                                resultTable.Rows.Select(r => new Dictionary<string, object>
                             { 
                                 { "dimension1", d1Converter(r[0]) }, 
                                 { "value1", v1Converter(r[1]) },
                                 { "entity", r.Entity.Key() }
                             }).ToList()
-                    };
+                        };
+                    }
                 case ChartResultType.TypeTypeValue:
-
-                    object NullValue = "- None -"; 
-                    List<object> dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
-                    Dictionary<object, Dictionary<object, object>> dic1dic0 = resultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue, r => r[2]));
-
-                    return new
                     {
-                        labels = new
-                        {
-                            dimension1 = chart.Dimension1.GetTitle(),
-                            dimension2 = chart.Dimension2.GetTitle(),
-                            value1 = chart.Value1.GetTitle()
-                        },
-                        dimension1 = dimension1Values.Select(d1Converter).ToList(),
-                        series = dic1dic0.Select(kvp =>new
-                        {
-                            dimension2 = d2Converter(kvp.Key == NullValue ? null: kvp.Key),
-                            values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1 ?? NullValue)).ToList(),
-                        }).ToList()
-                    };
+                        var d1Converter = chart.Dimension1.Converter(false);
+                        var d2Converter = chart.Dimension2.Converter(true);
+                        var v1Converter = chart.Value1.Converter(false);
 
+                        object NullValue = "- None -";
+                        List<object> dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
+                        Dictionary<object, Dictionary<object, object>> dic1dic0 = resultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue, r => r[2]));
+
+                        return new
+                        {
+                            labels = new
+                            {
+                                dimension1 = chart.Dimension1.GetTitle(),
+                                dimension2 = chart.Dimension2.GetTitle(),
+                                value1 = chart.Value1.GetTitle()
+                            },
+                            dimension1 = dimension1Values.Select(d1Converter).ToList(),
+                            series = dic1dic0.Select(kvp => new
+                            {
+                                dimension2 = d2Converter(kvp.Key == NullValue ? null : kvp.Key),
+                                values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1 ?? NullValue)).ToList(),
+                            }).ToList()
+                        };
+                    }
                 case ChartResultType.Points:
-                    return new
                     {
-                        labels = new
+                        var d1Converter = chart.Dimension1.Converter(false);
+                        var d2Converter = chart.Dimension2.Converter(false);
+                        var v1Converter = chart.Value1.Converter(true);
+
+                        return new
                         {
-                            value1 = chart.Value1.GetTitle(),
-                            dimension1 = chart.Dimension1.GetTitle(),
-                            dimension2 = chart.Dimension2.GetTitle(),
-                        },
-                        points = resultTable.Rows.Select(r => new 
-                        {
-                            value1 = v1Converter(r[2]),
-                            dimension1 = d1Converter(r[0]),
-                            dimension2 = d2Converter(r[1]) 
-                        }).ToList()
-                    };
+                            labels = new
+                            {
+                                value1 = chart.Value1.GetTitle(),
+                                dimension1 = chart.Dimension1.GetTitle(),
+                                dimension2 = chart.Dimension2.GetTitle(),
+                            },
+                            points = resultTable.Rows.Select(r => new
+                            {
+                                value1 = v1Converter(r[2]),
+                                dimension1 = d1Converter(r[0]),
+                                dimension2 = d2Converter(r[1])
+                            }).ToList()
+                        };
+                    }
 
                 case ChartResultType.Bubbles:
-
-                    return new
                     {
-                        labels = new
+                        var d1Converter = chart.Dimension1.Converter(false);
+                        var d2Converter = chart.Dimension2.Converter(false);
+                        var v1Converter = chart.Value1.Converter(true);
+                        var v2Converter = chart.Value2.Converter(false);
+
+                        return new
                         {
-                            value1 = chart.Value1.GetTitle(),
-                            dimension1 = chart.Dimension1.GetTitle(),
-                            dimension2 = chart.Dimension2.GetTitle(),
-                            value2 = chart.Value2.GetTitle()
-                        },
-                        points = resultTable.Rows.Select(r => new
-                        {
-                            value1 = v1Converter(r[2]),
-                            dimension1 = d1Converter(r[0]),
-                            dimension2 = d2Converter(r[1]),
-                            value2 = v2Converter(r[3])
-                        }).ToList()
-                    };
+                            labels = new
+                            {
+                                value1 = chart.Value1.GetTitle(),
+                                dimension1 = chart.Dimension1.GetTitle(),
+                                dimension2 = chart.Dimension2.GetTitle(),
+                                value2 = chart.Value2.GetTitle()
+                            },
+                            points = resultTable.Rows.Select(r => new
+                            {
+                                value1 = v1Converter(r[2]),
+                                dimension1 = d1Converter(r[0]),
+                                dimension2 = d2Converter(r[1]),
+                                value2 = v2Converter(r[3])
+                            }).ToList()
+                        };
+                    }
                 default:
                     throw new NotImplementedException("");
             }
         }
 
-        private static Func<object,object> Converter(this ChartTokenDN ct)
+        private static Func<object,object> Converter(this ChartTokenDN ct, bool color)
         {
             if (ct == null)
                 return null;
@@ -426,27 +443,53 @@ namespace Signum.Web.Chart
 
             if (typeof(Lite).IsAssignableFrom(type))
             {
-                return p =>
-                {
-                    Lite l = (Lite)p;
-                    return new
+                if(color)
+                    return p =>
                     {
-                        key = l.TryCC(li => li.Key()),
-                        toStr = l.TryCC(li => li.ToString())
+                        Lite l = (Lite)p;
+                        return new
+                        {
+                            key = l.TryCC(li => li.Key()),
+                            toStr = l.TryCC(li => li.ToString()),
+                            color = ChartColorLogic.Colors.Value.TryGetC(l.RuntimeType).TryGetS(l.Id).TryToHtml(),
+                        };
                     };
-                };
+                else
+                    return p =>
+                    {
+                        Lite l = (Lite)p;
+                        return new
+                        {
+                            key = l.TryCC(li => li.Key()),
+                            toStr = l.TryCC(li => li.ToString())
+                        };
+                    };
             }
             else if (type.IsEnum)
             {
-                return p =>
-                {
-                    Enum e = (Enum)p;
-                    return new
+                var dic = ChartColorLogic.Colors.Value.TryGetC(Reflector.GenerateEnumProxy(type));
+
+                if (color)
+                    return p =>
                     {
-                        key = e.TryToString(),
-                        toStr = e.TryCC(en => en.NiceToString())
+                        Enum e = (Enum)p;
+                        return new
+                        {
+                            key = e.TryToString(),
+                            toStr = e.TryCC(en => en.NiceToString()),
+                            color = dic.TryGetS(Convert.ToInt32(e)).TryToHtml(),
+                        };
                     };
-                };
+                else
+                    return p =>
+                    {
+                        Enum e = (Enum)p;
+                        return new
+                        {
+                            key = e.TryToString(),
+                            toStr = e.TryCC(en => en.NiceToString())
+                        };
+                    };
             }
             else if (typeof(DateTime) == type)
             {

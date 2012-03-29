@@ -47,11 +47,33 @@ namespace ASP
     using Signum.Entities.Reflection;
     using Signum.Entities.Chart;
     using Signum.Web.Chart;
+    using Signum.Engine.Authorization;
+    using Signum.Entities.Authorization;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartToken.cshtml")]
     public class _Page_Chart_Views_ChartToken_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
+
+
+public System.Web.WebPages.HelperResult ColorLink(Type type)
+    {
+return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
+
+
+     
+        var identType = type.IsEnum? Reflector.GenerateEnumProxy(type) : type;
+        
+        
+WriteTo(@__razor_helper_writer, Html.Field(Signum.Entities.Extensions.Properties.Resources.ColorsFor0.Formato(type.NiceName()),
+                 Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
+                 (ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)))));
+
+                                                                                             
+    
+});
+
+    }
 
 
         public _Page_Chart_Views_ChartToken_cshtml()
@@ -75,7 +97,7 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
+
 
 
  using (var tc = Html.TypeContext<ChartTokenDN>())
@@ -97,11 +119,11 @@ WriteLiteral("\">\r\n        <td>");
 
        Write(tc.Value.PropertyLabel);
 
-WriteLiteral("</td>\r\n        <td>\r\n");
+WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
 
 
              if (tc.Value.GroupByVisible)
-            { 
+            {
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
                 bool groupResults = chart.GroupResults;
                 if (groupResults)
@@ -135,20 +157,59 @@ WriteLiteral("</a>\r\n        </td>\r\n    </tr>\r\n");
     
     
 
-WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display:none\">\r\n        <td></td>\r\n " +
-"       <td colspan=\"2\">\r\n");
+     
+    
+
+WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r\n        <td>\r\n     " +
+"   </td>\r\n        <td colspan=\"2\">\r\n");
 
 
-             using (Html.FieldInline()) 
+             using (Html.FieldInline())
             { 
                 
            Write(Html.ValueLine(tc, ct => ct.DisplayName));
 
                                                          
-       
+                if (tc.Value.Token != null && tc.Value.IsColor && TypeAuthLogic.GetAllowed(typeof(ChartColorDN)).Min().GetUI() >= TypeAllowedBasic.Modify)
+                {
+                    var imp = tc.Value.Token.Implementations();
 
-                   
+                    if (imp == null)
+                    {
+                        var type = tc.Value.Token.Type.CleanType();
+
+                        if (type.IsEnum || type.IsIdentifiableEntity())
+                        {
+                            
+                       Write(ColorLink(type));
+
+                                            ;
+                        }
+                    }
+                    else if (!imp.IsByAll)
+                    {
+                        var ib = ((ImplementedByAttribute)imp);
+
+                        for (int i = 0; i < ib.ImplementedTypes.Length; i++)
+                        {
+                            if (i != 0)
+                            {
+
+WriteLiteral("                ");
+
+WriteLiteral(" | ");
+
+WriteLiteral("\r\n");
+
+
+                            }
                 
+           Write(ColorLink(ib.ImplementedTypes[0]));
+
+                                                  ;
+                        }
+                    }
+                }
             }
 
 WriteLiteral("        </td>\r\n    </tr>\r\n");

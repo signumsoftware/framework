@@ -471,4 +471,10 @@
   <data name="RemoveNonValidCharacters" xml:space="preserve">
     <value>Remove non valid characters</value>
   </data>
+  <data name="CreatePalette" xml:space="preserve">
+    <value>Create palette</value>
+  </data>
+  <data name="ViewPalette" xml:space="preserve">
+    <value>View palette</value>
+  </data>
 </root>

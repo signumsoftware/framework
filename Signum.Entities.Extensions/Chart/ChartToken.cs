@@ -66,7 +66,7 @@ namespace Signum.Entities.Chart
         public bool Grouping { get { return parentChart.GroupResults; } }
 
         [AvoidLocalization]
-        public bool IsColor { get { return parentChart.token_IsColor(this) && (token.Type.IsEnum || token.Type.IsLite()); } }
+        public bool IsColor { get { return parentChart.token_IsColor(this); } }
 
         [AvoidLocalization]
         public bool ShouldAggregate { get { return parentChart.token_ShouldAggregate(this); } }

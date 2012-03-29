@@ -392,7 +392,7 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('width', function (v) { return x(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('height', y.rangeBand)" + this.brt +
             ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
-            ".attr('fill', function (v) { return color(JSON.stringify(v)); })" + this.brt +
+            ".attr('fill', function (v) { return v.dimension1.color || color(JSON.stringify(v)); })" + this.brt +
             ".attr('stroke', '#fff')" + this.brt +
             ".attr('data-d1', function(v) { return myChart.getTokenKey(v.dimension1); })" + this.brt +
             ".attr('data-entity', function(v) { return v.entity || ''; })" + this.brt +
@@ -406,7 +406,7 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".enterData(data.serie, 'text', 'y-axis-tick-label sf-chart-strong')" + this.brt +
             ".attr('x', function(v) { var posx = x(myChart.getTokenKey(v.value1)); return posx >= xHalf ? 0 : posx; })" + this.brt +
             ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
-            ".attr('fill', function(v) { return x(myChart.getTokenKey(v.value1)) >= xHalf ? '#fff' : color(JSON.stringify(v)); })" + this.brt +
+            ".attr('fill', function(v) { return x(myChart.getTokenKey(v.value1)) >= xHalf ? '#fff' : v.dimension1.color || color(JSON.stringify(v)); })" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
             "}" + this.br + this.br;
     }
@@ -497,7 +497,7 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('height', function (v) { return y(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('width', x.rangeBand)" + this.brt +
             ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('fill', function (v) { return color(JSON.stringify(v)); })" + this.brt +
+            ".attr('fill', function (v) { return v.dimension1.color || color(JSON.stringify(v)); })" + this.brt +
             ".attr('stroke', '#fff')" + this.brt +
             ".attr('data-d1', function(v) { return myChart.getTokenKey(v.dimension1); })" + this.brt +
             ".attr('data-entity', function(v) { return v.entity || ''; })" + this.brt +
@@ -512,7 +512,7 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('x', function (v) { var posy = y(myChart.getTokenKey(v.value1)); return posy >= yHalf ? posy - labelMargin : posy + labelMargin; })" + this.brt +
             ".attr('y', function (v) { return x(JSON.stringify(v)) })" + this.brt +
             ".attr('text-anchor', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? 'end' : 'start'; })" + this.brt +
-	        ".attr('fill', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? '#fff' : color(JSON.stringify(v)); })" + this.brt +
+	        ".attr('fill', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? '#fff' : v.dimension1.color || color(JSON.stringify(v)); })" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
             "}" + this.br + +this.br;
     }
@@ -753,7 +753,7 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".enterData(data.series, 'rect', 'color-rect')" + this.brt +
             ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
             ".attr('width', legendRectWidth).attr('height', fontSize)" + this.brt +
-            ".attr('fill', function(s) { return color(JSON.stringify(s.dimension2)); });" + this.br +
+            ".attr('fill', function(s) { return v.dimension2.color ||color(JSON.stringify(s.dimension2)); });" + this.br +
             this.br +
             "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')" + this.brt +
             ".enterData(data.series, 'text', 'color-text')" + this.brt +
@@ -772,7 +772,7 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
         return "//paint graph - line" + this.br +
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".append('svg:path').attr('class', 'shape')" + this.brt +
-            ".attr('stroke', function(s) { return color(JSON.stringify(s.dimension2)); })" + this.brt +
+            ".attr('stroke', function(s) { return s.dimension2.color || color(JSON.stringify(s.dimension2)); })" + this.brt +
             ".attr('fill', 'none')" + this.brt +
             ".attr('stroke-width', 3)" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
@@ -795,7 +795,7 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "//paint graph - points" + this.br +
             "chart.enterData(data.series, 'g', 'point-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'circle', 'point')" + this.brt +
-            ".attr('fill', function(pair) { return color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('fill', function(pair) { return pair.dimension2.color || color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('fill-opacity', function(pair) { SF.isEmpty(pair.value) ? 0 : 100; })" + this.brt +
             ".attr('r', function(pair) { return SF.isEmpty(pair.value) ? 0 : 5; })" + this.brt +
             ".attr('cx', function(pair, i) { return x(JSON.stringify(data.dimension1[i])); })" + this.brt +
@@ -823,7 +823,7 @@ SF.Chart.MultiColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
-            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : pair.dimension2.color || color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('x', function(pair, i) { return xSubscale(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', xSubscale.rangeBand())" + this.brt +
@@ -882,7 +882,7 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
-            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : pair.dimension2.color || color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform', function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', x.rangeBand())" + this.brt +
             ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
@@ -927,7 +927,7 @@ SF.Chart.TotalColumns.prototype = $.extend({}, new SF.Chart.StackedColumns(), {
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
-            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : pair.dimension2.color || color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', x.rangeBand())" + this.brt +
             ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y((100 * myChart.getTokenKey(pair.value)) / countArray[i]); })" + this.brt +
@@ -1080,7 +1080,7 @@ SF.Chart.MultiBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding) + ')')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
-            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : pair.dimension2.color || color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('y', function(pair, i) { return ySubscale(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(JSON.stringify(data.dimension1[i])) + ')'; })" + this.brt +
             ".attr('height', ySubscale.rangeBand())" + this.brt +
@@ -1111,7 +1111,7 @@ SF.Chart.StackedBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeVal
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding) + ')')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
-            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : pair.dimension2.color || color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(JSON.stringify(data.dimension1[i])) + ')'; })" + this.brt +
             ".attr('height', y.rangeBand())" + this.brt +
             ".attr('width', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : x(myChart.getTokenLabel(pair.value)); })" + this.brt +
@@ -1156,7 +1156,7 @@ SF.Chart.TotalBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding) + ')')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
-            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : pair.dimension2.color || color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(JSON.stringify(data.dimension1[i])) + ')'; })" + this.brt +
             ".attr('height', y.rangeBand())" + this.brt +
             ".attr('width', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : x((100 * pair.value) / countArray[i]); })" + this.brt +
@@ -1197,8 +1197,8 @@ SF.Chart.StackedAreas.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "var countArray = myChart.createEmptyCountArray(data.dimension1.length);" + this.br +
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".append('svg:path').attr('class', 'shape')" + this.brt +
-            ".attr('stroke', function(s) { return color(JSON.stringify(s.dimension2)); })" + this.brt +
-            ".attr('fill', function(s) { return color(JSON.stringify(s.dimension2)); })" + this.brt +
+            ".attr('stroke', function(s) { return s.dimension2.color || color(JSON.stringify(s.dimension2)); })" + this.brt +
+            ".attr('fill', function(s) { return s.dimension2.color || color(JSON.stringify(s.dimension2)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('d', function(s) { return myChart.getPathPoints($.merge(" + this.brt + "\t" +
             "$.map(countArray, function(v, i) { return { x: x(JSON.stringify(data.dimension1[i])), y: y(countArray[i]) }; }).reverse(), " + this.brt + "\t" +
@@ -1228,8 +1228,8 @@ SF.Chart.TotalAreas.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "var emptyCountArray = myChart.createEmptyCountArray(data.dimension1.length);" + this.br +
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".append('svg:path').attr('class', 'shape')" + this.brt +
-            ".attr('stroke', function(s) { return color(JSON.stringify(s.dimension2)); })" + this.brt +
-            ".attr('fill', function(s) { return color(JSON.stringify(s.dimension2)); })" + this.brt +
+            ".attr('stroke', function(s) { return s.dimension2.color || color(JSON.stringify(s.dimension2)); })" + this.brt +
+            ".attr('fill', function(s) { return s.dimension2.color || color(JSON.stringify(s.dimension2)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('d', function(s) { return myChart.getPathPoints($.merge(" + this.brt + "\t" +
             "$.map(countArray, function(v, i) { return { x: x(JSON.stringify(data.dimension1[i])), y: y((100 * emptyCountArray[i]) / countArray[i]) }; }).reverse(), " + this.brt + "\t" +
@@ -1331,8 +1331,8 @@ SF.Chart.Points.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         return "//paint graph" + this.br +
             "chart.enterData(data.points, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".append('svg:circle').attr('class', 'shape')" + this.brt +
-            ".attr('stroke', function(p) { return color(JSON.stringify(p)); })" + this.brt +
-            ".attr('fill', function(p) { return color(JSON.stringify(p)); })" + this.brt +
+            ".attr('stroke', function(p) { return p.value1.color || color(JSON.stringify(p)); })" + this.brt +
+            ".attr('fill', function(p) { return p.value1.color || color(JSON.stringify(p)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('r', 5)" + this.brt +
             ".attr('cx', function(p) { return x(myChart.getTokenKey(p.dimension1)); })" + this.brt +
@@ -1366,8 +1366,8 @@ SF.Chart.Bubbles.prototype = $.extend({}, new SF.Chart.Points(), {
             "var sizeScale = myChart.getSizeScale(data, (width - yAxisLeftPosition) * (height - xAxisTopPosition));" + this.br +
             "chart.enterData(data.points, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".append('svg:circle').attr('class', 'shape')" + this.brt +
-            ".attr('stroke', function(p) { return color(JSON.stringify(p)); })" + this.brt +
-            ".attr('fill', function(p) { return color(JSON.stringify(p)); })" + this.brt +
+            ".attr('stroke', function(p) { return p.value1.color || color(JSON.stringify(p)); })" + this.brt +
+            ".attr('fill', function(p) { return p.value1.color || color(JSON.stringify(p)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('r', function(p) { return Math.sqrt(sizeScale(myChart.getTokenKey(p.value2))/Math.PI); })" + this.brt +
             ".attr('cx', function(p) { return x(myChart.getTokenKey(p.dimension1)); })" + this.brt +
@@ -1417,7 +1417,7 @@ SF.Chart.Pie.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('x', function(slice) { var m = (slice.endAngle + slice.startAngle) / 2; return Math.sin(m) * r * legendRadius; })" + this.brt +
             ".attr('y', function(slice) { var m = (slice.endAngle + slice.startAngle) / 2; return -Math.cos(m) * r * legendRadius; })" + this.brt +
             ".attr('text-anchor', function(slice) { var m = (slice.endAngle + slice.startAngle) / 2; var cuadr = Math.floor(m * 4 / Math.PI); return (cuadr == 1 || cuadr == 2) ? 'start' : (cuadr == 5 || cuadr == 6) ? 'end' : 'middle'; })" + this.brt +
-            ".attr('fill', function(slice) { return color(JSON.stringify(slice.data)); })" + this.brt +
+            ".attr('fill', function(slice) { return slice.data.dimension1.color || color(JSON.stringify(slice.data)); })" + this.brt +
             ".text(function(slice){ return ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? myChart.getTokenLabel(slice.data.dimension1) : ''; });" + this.br +
             this.br;
     },
@@ -1430,7 +1430,7 @@ SF.Chart.Pie.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".enterData(pie, 'g', 'slice')" + this.brt +
             ".append('svg:path').attr('class', 'shape')" + this.brt +
             ".attr('d', arc)" + this.brt +
-            ".attr('fill', function(slice) { return color(JSON.stringify(slice.data)); })" + this.brt +
+            ".attr('fill', function(slice) { return slice.data.dimension1.color || color(JSON.stringify(slice.data)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('data-d1', function(slice) { return myChart.getTokenKey(slice.data.dimension1); })" + this.brt +
             ".attr('data-entity', function(slice) { return slice.data.entity || ''; })" + this.brt +
