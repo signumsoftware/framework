@@ -14,9 +14,19 @@ namespace Signum.Entities.Basics
         {
         }
 
-        public ColorDN(byte a, byte r, byte g, byte b)
+        public static ColorDN FromARGB(byte a, byte r, byte g, byte b)
         {
-            argb = a << 0x18 | r << 0x10 | g << 0x8 | b;
+            return new ColorDN { Argb = a << 0x18 | r << 0x10 | g << 0x8 | b };
+        }
+
+        public static ColorDN FromARGB(byte a, int rgb)
+        {
+            return new ColorDN { Argb = a << 0x18 | rgb };
+        }
+
+        public static ColorDN FromARGB(int argb)
+        {
+            return new ColorDN { Argb = argb };
         }
 
         int argb;

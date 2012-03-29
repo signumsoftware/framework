@@ -178,7 +178,7 @@ namespace Signum.Engine.Linq
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy) return TypeIbIbEquals((TypeImplementedByExpression)exp1, (TypeImplementedByExpression)exp2);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll) return TypeIbIbaEquals((TypeImplementedByExpression)exp1, (TypeImplementedByAllExpression)exp2);
             }
-            else if (exp1.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
+            else if (exp1.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
             {
                 if (exp2.NodeType == ExpressionType.Constant) return TypeConstantIbaEquals((ConstantExpression)exp2, (TypeImplementedByAllExpression)exp1);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeFieldInit) return TypeFieIbaEquals((TypeFieldInitExpression)exp2, (TypeImplementedByAllExpression)exp1);
