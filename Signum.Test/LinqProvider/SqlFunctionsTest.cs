@@ -148,6 +148,7 @@ namespace Signum.Test.LinqProvider
         public void MathFunctions()
         {
             Dump((AlbumDN a) => Math.Sign(a.Year));
+            Dump((AlbumDN a) => -Math.Sign(a.Year) * a.Year);
             Dump((AlbumDN a) => Math.Abs(a.Year));
             Dump((AlbumDN a) => Math.Sin(a.Year));
             Dump((AlbumDN a) => Math.Asin(Math.Sin(a.Year)));
