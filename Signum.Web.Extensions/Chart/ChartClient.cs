@@ -451,7 +451,7 @@ namespace Signum.Web.Chart
                         {
                             key = l.TryCC(li => li.Key()),
                             toStr = l.TryCC(li => li.ToString()),
-                            color = ChartColorLogic.Colors.Value.TryGetC(l.RuntimeType).TryGetS(l.Id).TryToHtml(),
+                            color = l == null ? "#555" : ChartColorLogic.ColorFor(l).TryToHtml(),
                         };
                     };
                 else
@@ -477,7 +477,7 @@ namespace Signum.Web.Chart
                         {
                             key = e.TryToString(),
                             toStr = e.TryCC(en => en.NiceToString()),
-                            color = dic.TryGetS(Convert.ToInt32(e)).TryToHtml(),
+                            color = e == null ? "#555" : dic.TryGetS(Convert.ToInt32(e)).TryToHtml(),
                         };
                     };
                 else
@@ -493,7 +493,6 @@ namespace Signum.Web.Chart
             }
             else if (typeof(DateTime) == type)
             {
-
                 return p =>
                 {
                     DateTime? e = (DateTime?)p;

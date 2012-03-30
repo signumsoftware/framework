@@ -120,5 +120,10 @@ namespace Signum.Engine.Chart
                 }).ToMList()
             };
         }
+
+        public static Color? ColorFor(Lite lite)
+        {
+            return Colors.Value.TryGetC(lite.RuntimeType).TryGetS(lite.Id);
+        }
     }
 }

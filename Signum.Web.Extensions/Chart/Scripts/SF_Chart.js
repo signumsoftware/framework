@@ -1416,7 +1416,7 @@ SF.Chart.Pie.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".append('svg:text').attr('class', 'color-legend sf-chart-strong')" + this.brt +
             ".attr('x', function(slice) { var m = (slice.endAngle + slice.startAngle) / 2; return Math.sin(m) * r * legendRadius; })" + this.brt +
             ".attr('y', function(slice) { var m = (slice.endAngle + slice.startAngle) / 2; return -Math.cos(m) * r * legendRadius; })" + this.brt +
-            ".attr('text-anchor', function(slice) { var m = (slice.endAngle + slice.startAngle) / 2; var cuadr = Math.floor(m * 4 / Math.PI); return (cuadr == 1 || cuadr == 2) ? 'start' : (cuadr == 5 || cuadr == 6) ? 'end' : 'middle'; })" + this.brt +
+            ".attr('text-anchor', function(slice) { var m = (slice.endAngle + slice.startAngle) / 2; var cuadr = Math.floor(12 * m / (2 * Math.PI)); return (1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'; })" + this.brt +
             ".attr('fill', function(slice) { return slice.data.dimension1.color || color(JSON.stringify(slice.data)); })" + this.brt +
             ".text(function(slice){ return ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? myChart.getTokenLabel(slice.data.dimension1) : ''; });" + this.br +
             this.br;
