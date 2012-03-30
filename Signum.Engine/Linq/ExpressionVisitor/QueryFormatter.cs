@@ -153,6 +153,7 @@ namespace Signum.Engine.Linq
             return u;
         }
 
+
         bool IsNull(Expression exp)
         {
             return exp.NodeType == ExpressionType.Constant && ((ConstantExpression)exp).Value == null; 
@@ -677,8 +678,6 @@ namespace Signum.Engine.Linq
             return src; 
         }
 
-        
-
         protected override Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
             for (int i = 0, n = cea.Commands.Count; i < n; i++)
@@ -695,6 +694,139 @@ namespace Signum.Engine.Linq
             return cea;
         }
 
+        protected override Expression VisitSubquery(SubqueryExpression subquery)
+        {
+            return base.VisitSubquery(subquery);
+        }
+
+
+
+        protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
+        {
+            throw InvalidSqlExpression(aggregate);
+        }
+
+        protected override Expression VisitChildProjection(ChildProjectionExpression child)
+        {
+            throw InvalidSqlExpression(child);
+        }
+
+        protected override Expression VisitConditional(ConditionalExpression c)
+        {
+            throw InvalidSqlExpression(c);
+        }
+
+        protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
+        {
+            throw InvalidSqlExpression(efie);
+        }
+
+        protected override Expression VisitImplementedBy(ImplementedByExpression reference)
+        {
+            throw InvalidSqlExpression(reference);
+        }
+
+        protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
+        {
+            throw InvalidSqlExpression(reference);
+        }
+
+        protected override Expression VisitFieldInit(FieldInitExpression fie)
+        {
+            throw InvalidSqlExpression(fie);
+        }
+
+        protected override Expression VisitLambda(LambdaExpression lambda)
+        {
+            throw InvalidSqlExpression(lambda);
+        }
+
+        protected override Expression VisitListInit(ListInitExpression init)
+        {
+            throw InvalidSqlExpression(init);
+        }
+
+        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        {
+            throw InvalidSqlExpression(lite);
+        }
+
+        protected override Expression VisitInvocation(InvocationExpression iv)
+        {
+            throw InvalidSqlExpression(iv);
+        }
+
+        protected override Expression VisitMemberAccess(MemberExpression m)
+        {
+            throw InvalidSqlExpression(m);
+        }
+
+        protected override Expression VisitMemberInit(MemberInitExpression init)
+        {
+            throw InvalidSqlExpression(init);
+        }
+
+        protected override Expression VisitMethodCall(MethodCallExpression m)
+        {
+            throw InvalidSqlExpression(m);
+        }
+
+        protected override Expression VisitMList(MListExpression ml)
+        {
+            throw InvalidSqlExpression(ml);
+        }
+
+        protected override Expression VisitMListElement(MListElementExpression mle)
+        {
+            throw InvalidSqlExpression(mle);
+        }
+
+        protected override NewExpression VisitNew(NewExpression nex)
+        {
+            throw InvalidSqlExpression(nex);
+        }
+
+      
+
+        protected override Expression VisitNewArray(NewArrayExpression na)
+        {
+            throw InvalidSqlExpression(na);
+        }
+
+        protected override Expression VisitParameter(ParameterExpression p)
+        {
+            throw InvalidSqlExpression(p);
+        }
+
+        protected override Expression VisitTypeFieldInit(TypeFieldInitExpression typeFie)
+        {
+            throw InvalidSqlExpression(typeFie);
+        }
+
+        protected override Expression VisitProjection(ProjectionExpression proj)
+        {
+            throw InvalidSqlExpression(proj);
+        }
+
+        protected override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
+        {
+            throw InvalidSqlExpression(typeIb);
+        }
+
+        protected override Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
+        {
+            throw InvalidSqlExpression(typeIba);
+        }
+
+        protected override Expression VisitTypeIs(TypeBinaryExpression b)
+        {
+            throw InvalidSqlExpression(b);
+        }
+
+        private InvalidOperationException InvalidSqlExpression(Expression expression)
+        {
+            return new InvalidOperationException("Unexepected expression on sql {0}".Formato(expression.NiceToString()));
+        }
         
     }
 }
