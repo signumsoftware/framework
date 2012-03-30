@@ -272,7 +272,9 @@ namespace Signum.Web
 
         public static MvcHtmlString Json(this HtmlHelper html, object value)
         {
-            return new MvcHtmlString(new JavaScriptSerializer().Serialize(value));
+            var serializer = new JavaScriptSerializer();
+            serializer.RegisterConverters(new List<JavaScriptConverter>(new JavaScriptConverter[] { new LiteJavaScriptConverter() }));
+            return new MvcHtmlString(serializer.Serialize(value));
         }
 
         public static HelperResult If(this WebPageBase webPage, bool condition, Func<HelperResult> html)
