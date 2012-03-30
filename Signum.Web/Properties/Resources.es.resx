@@ -132,8 +132,8 @@
   <data name="Alerts" xml:space="preserve">
     <value>Alertas</value>
   </data>
-  <data name="Checked" xml:space="preserve">
-    <value>Comprobadas</value>
+  <data name="Alerts_Future" xml:space="preserve">
+    <value>Futuras</value>
   </data>
   <data name="CreateAlert" xml:space="preserve">
     <value>Crear alerta</value>
@@ -141,8 +141,8 @@
   <data name="CreateNote" xml:space="preserve">
     <value>Crear nota</value>
   </data>
-  <data name="Future" xml:space="preserve">
-    <value>Futuras</value>
+  <data name="Alerts_Attended" xml:space="preserve">
+    <value>Atendidas</value>
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notas</value>
@@ -150,8 +150,8 @@
   <data name="ViewNotes" xml:space="preserve">
     <value>Ver notas</value>
   </data>
-  <data name="Warned" xml:space="preserve">
-    <value>Alertadas</value>
+  <data name="AlertCreated" xml:space="preserve">
+    <value>Alerta creada</value>
   </data>
   <data name="View" xml:space="preserve">
     <value>Ver</value>
@@ -177,14 +177,8 @@
   <data name="Type0NotAllowed" xml:space="preserve">
     <value>El tipo {0} no está permitido</value>
   </data>
-  <data name="Average" xml:space="preserve">
-    <value>Medio</value>
-  </data>
   <data name="Signum_enterTheNewColumnName" xml:space="preserve">
     <value>Escriba el nuevo nombre de columna</value>
-  </data>
-  <data name="ExecutedXTimes" xml:space="preserve">
-    <value>Ejecutado x veces</value>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Campo</value>
@@ -194,12 +188,6 @@
   </data>
   <data name="Signum_addFilter" xml:space="preserve">
     <value>Agregar filtro</value>
-  </data>
-  <data name="Maximum" xml:space="preserve">
-    <value>Máximo</value>
-  </data>
-  <data name="Minimum" xml:space="preserve">
-    <value>Mínimo</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Nombre</value>
@@ -213,14 +201,14 @@
   <data name="Search" xml:space="preserve">
     <value>Buscar</value>
   </data>
-  <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
-    <value>Mostrar</value>
+  <data name="SearchControl_Pagination_Results" xml:space="preserve">
+    <value>resultados</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Valor</value>
   </data>
-  <data name="SearchControl_ShowNRows_Rows" xml:space="preserve">
-    <value>filas</value>
+  <data name="SearchControl_Pagination_Of" xml:space="preserve">
+    <value>de</value>
   </data>
   <data name="CalendarClose" xml:space="preserve">
     <value>Cerrar</value>
@@ -234,14 +222,11 @@
   <data name="CalendarToday" xml:space="preserve">
     <value>Hoy</value>
   </data>
-  <data name="SearchControl_RowsFound" xml:space="preserve">
-    <value>filas encontradas</value>
+  <data name="SearchControl_Pagination_All" xml:space="preserve">
+    <value>Todos</value>
   </data>
   <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
     <value>Eliminar filtro</value>
-  </data>
-  <data name="Excel" xml:space="preserve">
-    <value>Excel</value>
   </data>
   <data name="NoResults" xml:space="preserve">
     <value>No hay resultados</value>
@@ -326,5 +311,29 @@
   </data>
   <data name="Signum_showFilters" xml:space="preserve">
     <value>Mostrar filtros</value>
+  </data>
+  <data name="Alerts_NotAttended" xml:space="preserve">
+    <value>Sin atender</value>
+  </data>
+  <data name="ChooseAType" xml:space="preserve">
+    <value>Elija un tipo</value>
+  </data>
+  <data name="InvalidFormat" xml:space="preserve">
+    <value>Formato no válido</value>
+  </data>
+  <data name="NoteCreated" xml:space="preserve">
+    <value>Nota creada</value>
+  </data>
+  <data name="Quicklinks" xml:space="preserve">
+    <value>Vínculos rápidos</value>
+  </data>
+  <data name="Signum_selectToken" xml:space="preserve">
+    <value>Seleccione un símbolo (token)</value>
+  </data>
+  <data name="Query0IsNotAllowed" xml:space="preserve">
+    <value>No se permite la consulta {0}</value>
+  </data>
+  <data name="SearchControl_Pagination_Rows" xml:space="preserve">
+    <value>Filas</value>
   </data>
 </root>

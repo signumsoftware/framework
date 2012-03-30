@@ -11,17 +11,14 @@ namespace Signum.Web
 {
     public delegate ContextualItem GetContextualItemDelegate(ControllerContext controllerContext, Lite lite, object queryName, string prefix);
 
-    public abstract class ContextualItem : ToolBarMenu
+    public class ContextualItem : ToolBarMenu
     {
-        /// <summary>
-        /// Text that will be shown as a header
-        /// </summary>
-        public string Label { get; set; }
-
-        /// <summary>
-        /// The different widgets
-        /// </summary>
         public string Content { get; set; }
+
+        public override string ToString()
+        {
+            return Content;
+        }
     }
 
     public static class ContextualItemsHelper

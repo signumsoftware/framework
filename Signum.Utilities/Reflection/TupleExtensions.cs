@@ -91,7 +91,7 @@ namespace Signum.Utilities.Reflection
                 throw new InvalidOperationException("fieldExpressions is empty"); 
 
             Type type = TupleChainType(fieldExpressions.Select(e => e.Type));
-            ConstructorInfo ci = type.GetConstructors().Single();
+            ConstructorInfo ci = type.GetConstructors().SingleEx();
 
             if (count >= 8)
                 return Expression.New(ci, fieldExpressions.Take(7).And(TupleChainConstructor(fieldExpressions.Skip(7))));
@@ -105,12 +105,6 @@ namespace Signum.Utilities.Reflection
                 return TupleChainProperty(Expression.Property(expression, TupleProperty(expression.Type, 7)), index - 7);
 
             return Expression.Property(expression, TupleProperty(expression.Type, index));
-        }
-
-        public static LambdaExpression TupleChainPropertyLambda(Type tupleType, int index)
-        {
-            ParameterExpression p = Expression.Parameter(typeof(object), "p");
-            return Expression.Lambda(TupleChainProperty(Expression.Convert(p, tupleType), index), p);
         }
     }
 }

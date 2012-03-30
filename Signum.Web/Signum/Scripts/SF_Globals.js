@@ -8,10 +8,9 @@ SF.registerModule("Globals", function () {
     SF.Keys = {
         separator: "_",
         tabId: "sfTabId",
-        reactive: "sfReactive",
         antiForgeryToken: "__RequestVerificationToken",
 
-        entityTypeName: "sfEntityTypeName",
+        entityTypeNames: "sfEntityTypeNames",
 
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
@@ -92,7 +91,6 @@ SF.registerModule("Globals", function () {
         var _runtimeType = 0;
         var _id = 1;
         var _isNew = 2;
-        var _ticks = 3;
         var $elem; 			//cache for the element
 
         var find = function () {
@@ -127,9 +125,6 @@ SF.registerModule("Globals", function () {
         var isNew = function () {
             return getSet(_isNew);
         };
-        var ticks = function (val) {
-            return getSet(_ticks, val);
-        };
         var setEntity = function (runtimeType, id) {
             getSet(_runtimeType, runtimeType);
             if (SF.isEmpty(id)) {
@@ -146,7 +141,7 @@ SF.registerModule("Globals", function () {
             getSet(_id, '');
             getSet(_isNew, 'o');
         };
-        var createValue = function (runtimeType, id, isNew, ticks) {
+        var createValue = function (runtimeType, id, isNew) {
             var array = [];
             array[_runtimeType] = runtimeType;
             array[_id] = id;
@@ -156,7 +151,6 @@ SF.registerModule("Globals", function () {
             else {
                 array[_isNew] = isNew;
             }
-            array[_ticks] = ticks;
             return toValue(array);
         };
 
@@ -164,7 +158,6 @@ SF.registerModule("Globals", function () {
             runtimeType: runtimeType,
             id: id,
             isNew: isNew,
-            ticks: ticks,
             setEntity: setEntity,
             removeEntity: removeEntity,
             createValue: createValue,
@@ -268,8 +261,8 @@ SF.registerModule("Globals", function () {
         return path;
     };
 
-    SF.submit = function (urlController, requestExtraJsonData) {
-        var $form = $("form");
+    SF.submit = function (urlController, requestExtraJsonData, $form) {
+        $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData)) {
                 requestExtraJsonData = requestExtraJsonData();
@@ -281,7 +274,7 @@ SF.registerModule("Globals", function () {
             }
         }
 
-        $form.attr("action", urlController).submit();
+        $form.attr("action", urlController)[0].submit();
         return false;
     };
 
@@ -308,8 +301,8 @@ SF.registerModule("Globals", function () {
         var currentForm = $("form");
         currentForm.after($form);
 
-        $form.submit()
-            .remove();
+        $form[0].submit();
+        $form.remove();
 
         return false;
     }

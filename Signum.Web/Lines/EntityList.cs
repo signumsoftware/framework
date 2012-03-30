@@ -28,10 +28,10 @@ namespace Signum.Web
             return "new SF.EList(" + this.OptionsJS() + ")";
         }
 
-        protected override JsViewOptions DefaultJsViewOptions()
+        public override JsViewOptions DefaultJsViewOptions()
         {
             var voptions = base.DefaultJsViewOptions();
-            voptions.ValidationControllerUrl = RouteHelper.New().SignumAction("ValidatePartial");
+            voptions.ValidationOptions = new JsValidatorOptions { ControllerUrl = RouteHelper.New().SignumAction("ValidatePartial") };
             return voptions;
         }
 
@@ -42,7 +42,12 @@ namespace Signum.Web
 
         public static JsInstruction JsView(EntityList elist, JsViewOptions viewOptions)
         {
-            if (viewOptions.ControllerUrl == null)
+            if (elist.ViewMode == ViewMode.Navigate)
+            {
+                viewOptions.Navigate = true;
+                viewOptions.ControllerUrl = Navigator.ViewRoute(elist.ElementType.CleanType(), null);
+            }
+            else if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
 
             return new JsInstruction(() => "{0}.view({1})".Formato(
@@ -58,7 +63,12 @@ namespace Signum.Web
 
         private static JsInstruction JsCreate(EntityList elist, JsViewOptions viewOptions)
         {
-            if (viewOptions.ControllerUrl == null)
+            if (elist.ViewMode == ViewMode.Navigate)
+            {
+                viewOptions.Navigate = true;
+                viewOptions.ControllerUrl = Navigator.ViewRoute(elist.ElementType.CleanType(), null);
+            }
+            else if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
 
             string createParams = ",".Combine(

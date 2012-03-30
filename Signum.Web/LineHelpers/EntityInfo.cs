@@ -28,8 +28,7 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), 
-                new RuntimeInfo(tc) { Ticks = GetTicks(helper, tc) }.ToString());
+            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), tc.RuntimeInfo().ToString());
         }
 
         public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, EntityBase tc)
@@ -41,16 +40,8 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
-            TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
+            TypeContext<S> typeContext = Common.WalkExpression(parent, property);
             return helper.HiddenRuntimeInfo(typeContext);
-        }
-       
-        public static long? GetTicks(HtmlHelper helper, TypeContext tc)
-        {
-            if (tc.ShowTicks && !tc.ReadOnly &&
-                (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || (tc as BaseLine).TryCS(bl => bl.ReloadOnChange) == true))
-                return helper.GetChangeTicks(tc.ControlID) ?? 0;
-            return null;
         }
     }
 
@@ -115,39 +106,44 @@ namespace Signum.Web
         public Type RuntimeType { get; set; }
         public int? IdOrNull { get; set; }
         public bool IsNew { get; set; }
-        public long? Ticks { get; set; }
 
         public RuntimeInfo() { }
 
-        public RuntimeInfo(TypeContext tc)
+        public RuntimeInfo(Lite lite)
         {
-            if (tc.UntypedValue == null)
+            if (lite == null)
             {
                 RuntimeType = null;
                 return;
             }
-            
-            Type type = tc.UntypedValue.GetType();
-            if (type.IsLite())
+
+            RuntimeType = lite.RuntimeType;
+            IdOrNull = lite.IdOrNull;
+            IsNew = lite.IdOrNull == null;
+        }
+
+        public RuntimeInfo(EmbeddedEntity entity)
+        {
+            if (entity == null)
             {
-                Lite liteValue = tc.UntypedValue as Lite;
-                RuntimeType = liteValue.RuntimeType;
-                IdOrNull = liteValue.IdOrNull;
-                IsNew = liteValue.IdOrNull == null;
+                RuntimeType = null;
+                return;
             }
-            else if (type.IsEmbeddedEntity())
+
+            RuntimeType = entity.GetType();
+        }
+
+        public RuntimeInfo(IdentifiableEntity entity)
+        {
+            if (entity == null)
             {
-                RuntimeType = type;
+                RuntimeType = null;
+                return;
             }
-            else if (typeof(IdentifiableEntity).IsAssignableFrom(type))
-            {
-                RuntimeType = type;
-                IIdentifiable identifiable = tc.UntypedValue as IIdentifiable;
-                IdOrNull = identifiable.IdOrNull;
-                IsNew = identifiable.IdOrNull == null;
-            }
-            else
-                throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(type));
+
+            RuntimeType = entity.GetType();
+            IdOrNull = entity.IdOrNull;
+            IsNew = entity.IsNew;
         }
 
         public override string ToString()
@@ -158,18 +154,17 @@ namespace Signum.Web
             if (RuntimeType != null && RuntimeType.IsLite())
                 throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
 
-            return "{0};{1};{2};{3}".Formato(
+            return "{0};{1};{2}".Formato(
                 (RuntimeType == null) ? "" : Navigator.ResolveWebTypeName(RuntimeType),
                 IdOrNull.TryToString(),
-                IsNew ? "n" : "o",
-                Ticks.TryToString()
+                IsNew ? "n" : "o"
                 );
         }
 
         public static RuntimeInfo FromFormValue(string formValue)
         {
             string[] parts = formValue.Split(new[] { ";" }, StringSplitOptions.None);
-            if (parts.Length != 4)
+            if (parts.Length != 3)
                 throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
 
             string runtimeTypeString = parts[0];
@@ -178,8 +173,7 @@ namespace Signum.Web
             {
                 RuntimeType = string.IsNullOrEmpty(runtimeTypeString) ? null : Navigator.ResolveType(runtimeTypeString),
                 IdOrNull = (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
-                IsNew = parts[2]=="n" ? true : false,
-                Ticks = (parts[3].HasText()) ? long.Parse(parts[3]) : (long?)null
+                IsNew = parts[2]=="n" ? true : false
             };
         }
     }

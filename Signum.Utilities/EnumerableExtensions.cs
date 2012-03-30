@@ -16,74 +16,68 @@ using System.Data;
 using System.Text.RegularExpressions;
 using Signum.Utilities.Properties;
 using System.Collections;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
-    public static class EnumerableExtensions
+
+    public static class EnumerableUniqueExtensions
     {
-        public static bool Empty<T>(this IEnumerable<T> collection)
+        class UniqueExExpander : IMethodExpander
         {
-            foreach (var item in collection)
-                return false;
+            static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where<int>(null, a => false));
+            static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, a => false));
 
-            return true;
-        }
-
-        public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
-        {
-            return collection.Where(a => a != null);
-        }
-
-        public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> collection) where T : struct
-        {
-            return collection.Where(a => a.HasValue).Select(a => a.Value);
-        }
-
-        public static IEnumerable<T> And<T>(this IEnumerable<T> collection, T newItem)
-        {
-            foreach (var item in collection)
-                yield return item;
-            yield return newItem;
-        }
-
-        public static IEnumerable<T> PreAnd<T>(this IEnumerable<T> collection, T newItem)
-        {
-            yield return newItem;
-            foreach (var item in collection)
-                yield return item;
-        }
-
-        public static int IndexOf<T>(this IEnumerable<T> collection, T item)
-        {
-            int i = 0;
-            foreach (var val in collection)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
-                if (EqualityComparer<T>.Default.Equals(item, val))
-                    return i;
-                i++;
+                bool query = mi.GetParameters()[0].ParameterType.IsInstantiationOf(typeof(IQueryable<>));
+
+                var whereMi = (query ? miWhereE : miWhereQ).MakeGenericMethod(mi.GetGenericArguments());
+
+                var whereExpr = Expression.Call(mi, arguments[0]);
+
+                var uniqueMi = mi.DeclaringType.GetMethods().SingleEx(m => m.Name == mi.Name && m.IsGenericMethod && m.GetParameters().Length < mi.GetParameters().Length);
+
+                return Expression.Call(uniqueMi.MakeGenericMethod(mi.GetGenericArguments()), whereExpr);
             }
-            return -1;
         }
 
-        public static int IndexOf<T>(this IEnumerable<T> collection, Func<T, bool> condition)
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
 
-            int i = 0;
-            foreach (var val in collection)
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            T result = default(T);
+            bool found = false;
+            foreach (T item in collection)
             {
-                if (condition(val))
-                    return i;
-                i++;
+                if (predicate(item))
+                {
+                    if (found)
+                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+
+                    result = item;
+                    found = true;
+                }
             }
-            return -1;
+
+            if (found)
+                return result;
+
+            throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
         }
 
-        public static T Single<T>(this IEnumerable<T> collection, string errorMessage)
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
-            return collection.Single<T>(errorMessage, errorMessage);
+            return query.Where(predicate).SingleEx();
         }
 
-        public static T Single<T>(this IEnumerable<T> collection, string errorZero, string errorMoreThanOne)
+        public static T SingleEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -91,7 +85,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero);
+                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
 
                 T current = enumerator.Current;
 
@@ -99,10 +93,66 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException(errorMoreThanOne);
+            throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
-        public static T SingleOrDefault<T>(this IEnumerable<T> collection, string errorMessage)
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> error)
+        {
+            return collection.SingleEx(error, error);
+        }
+
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException(errorZero());
+
+                T current = enumerator.Current;
+
+                if (!enumerator.MoveNext())
+                    return current;
+            }
+
+            throw new InvalidOperationException(errorMoreThanOne());
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            T result = default(T);
+            bool found = false;
+            foreach (T item in collection)
+            {
+                if (predicate(item))
+                {
+                    if (found)
+                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+
+                    result = item;
+                    found = true;
+                }
+            }
+
+            return result;
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrDefaultEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).SingleOrDefaultEx();
+        }
+
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -118,10 +168,10 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException(errorMessage);
+            throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
-        public static T First<T>(this IEnumerable<T> collection, string errorMessage)
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMorethanOne)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -129,13 +179,56 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorMessage);
+                    return default(T);
+
+                T current = enumerator.Current;
+
+                if (!enumerator.MoveNext())
+                    return current;
+            }
+
+            throw new InvalidOperationException(errorMorethanOne());
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T FirstEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            foreach (T item in collection)
+            {
+                if (predicate(item))
+                    return item;
+            }
+
+            throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T FirstEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).FirstEx();
+        }
+
+        public static T FirstEx<T>(this IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
 
                 return enumerator.Current;
             }
         }
 
-        public static T SingleOrMany<T>(this IEnumerable<T> collection, string errorZero)
+        public static T FirstEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -143,7 +236,52 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero);
+                    throw new InvalidOperationException(errorZero());
+
+                return enumerator.Current;
+            }
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            return collection.Where(predicate).FirstEx();
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrManyEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).FirstEx();
+        }
+
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+
+                T current = enumerator.Current;
+
+                if (enumerator.MoveNext())
+                    return default(T);
+
+                return current;
+            }
+        }
+
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException(errorZero());
 
                 T current = enumerator.Current;
 
@@ -193,6 +331,82 @@ namespace Signum.Utilities
                 return current;
             }
         }
+    }
+
+
+    public static class EnumerableExtensions
+    {
+        public static bool IsEmpty<T>(this IEnumerable<T> collection)
+        {
+            foreach (var item in collection)
+                return false;
+
+            return true;
+        }
+
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
+        {
+            return collection == null || collection.IsEmpty();
+        }
+
+        public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
+        {
+            foreach (var item in collection)
+            {
+                if (item != null)
+                    yield return item;
+            }
+        }
+
+        public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> collection) where T : struct
+        {
+            foreach (var item in collection)
+            {
+                if (item.HasValue)
+                    yield return item.Value;
+            }
+        }
+
+        public static IEnumerable<T> And<T>(this IEnumerable<T> collection, T newItem)
+        {
+            foreach (var item in collection)
+                yield return item;
+            yield return newItem;
+        }
+
+        public static IEnumerable<T> PreAnd<T>(this IEnumerable<T> collection, T newItem)
+        {
+            yield return newItem;
+            foreach (var item in collection)
+                yield return item;
+        }
+
+        public static int IndexOf<T>(this IEnumerable<T> collection, T item)
+        {
+            int i = 0;
+            foreach (var val in collection)
+            {
+                if (EqualityComparer<T>.Default.Equals(item, val))
+                    return i;
+                i++;
+            }
+            return -1;
+        }
+
+        public static int IndexOf<T>(this IEnumerable<T> collection, Func<T, bool> condition)
+        {
+
+            int i = 0;
+            foreach (var val in collection)
+            {
+                if (condition(val))
+                    return i;
+                i++;
+            }
+            return -1;
+        }
+
+
 
         public static string ToString<T>(this IEnumerable<T> collection, string separator)
         {
@@ -229,7 +443,7 @@ namespace Signum.Utilities
 
         public static string CommaOr<T>(this IEnumerable<T> collection)
         {
-            return CommaString(collection.Select(a=>a.ToString()).ToArray(), Resources.Or);
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), Resources.Or);
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string> toString)
@@ -248,7 +462,7 @@ namespace Signum.Utilities
         }
 
         static string CommaString(this string[] values, string lastSeparator)
-        {            
+        {
             if (values.Length == 0)
                 return "";
 
@@ -344,17 +558,26 @@ namespace Signum.Utilities
             return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadChopRight(lengths[i]), " ")).ToString("\r\n");
         }
 
-        public static void WriteFormatedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string title)
+        public static void WriteFormattedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string title, bool longHeaders)
         {
             textWriter.WriteLine();
-            textWriter.WriteLine(title ?? "Tabla");
-            textWriter.WriteLine(collection.ToStringTable().FormatTable(false));
+            if (title.HasText())
+                textWriter.WriteLine(title);
+            textWriter.WriteLine(collection.ToStringTable().FormatTable(longHeaders));
             textWriter.WriteLine();
         }
 
-        public static void ToConsoleTable<T>(this IEnumerable<T> collection, string title)
+        public static void ToConsoleTable<T>(this IEnumerable<T> collection, string title = null, bool longHeader = false)
         {
-            collection.WriteFormatedStringTable(Console.Out, title);
+            collection.WriteFormattedStringTable(Console.Out, title, longHeader);
+        }
+
+        public static string ToFormattedTable<T>(this IEnumerable<T> collection, string title = null, bool longHeader = false)
+        {
+            StringBuilder sb = new StringBuilder();
+            using (StringWriter sw = new StringWriter(sb))
+                collection.WriteFormattedStringTable(sw, title, longHeader);
+            return sb.ToString();
         }
 
         public static string ToWikiTable<T>(this IEnumerable<T> collection)
@@ -462,7 +685,7 @@ namespace Signum.Utilities
         }
 
         public static Interval<V> MinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-            where V:struct, IComparable<V>, IEquatable<V>
+            where V : struct, IComparable<V>, IEquatable<V>
         {
             bool has = false;
             V min = default(V), max = default(V);
@@ -561,7 +784,7 @@ namespace Signum.Utilities
 
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
         {
-            return GroupWhen(collection, isGroupKey, false); 
+            return GroupWhen(collection, isGroupKey, false);
         }
 
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup)
@@ -574,7 +797,7 @@ namespace Signum.Utilities
                 {
                     group = new Grouping<T, T>(item);
                     if (includeKeyInGroup)
-                        group.Add(item); 
+                        group.Add(item);
                     result.Add(group);
                 }
                 else
@@ -585,6 +808,33 @@ namespace Signum.Utilities
             }
 
             return result;
+        }
+
+        public static IEnumerable<IGrouping<K, T>> GroupWhenChange<T, K>(this IEnumerable<T> collection, Func<T, K> getGroupKey)
+        {
+            Grouping<K, T> current = null;
+
+            foreach (var item in collection)
+            {
+                if (current == null)
+                {
+                    current = new Grouping<K, T>(getGroupKey(item));
+                    current.Add(item);
+                }
+                else if (current.Key.Equals(getGroupKey(item)))
+                {
+                    current.Add(item);
+                }
+                else
+                {
+                    yield return current;
+                    current = new Grouping<K, T>(getGroupKey(item));
+                    current.Add(item);
+                }
+            }
+
+            if (current != null)
+                yield return current;
         }
 
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)
@@ -711,6 +961,11 @@ namespace Signum.Utilities
             return new HashSet<T>(source);
         }
 
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source, IEqualityComparer<T> comparer)
+        {
+            return new HashSet<T>(source, comparer);
+        }
+
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> collection)
         {
             return collection == null ? null :
@@ -759,30 +1014,53 @@ namespace Signum.Utilities
         }
         #endregion
 
-        public static IEnumerable<R> JoinStrict<K, O, N, R>(
-           IEnumerable<O> oldCollection,
-           IEnumerable<N> newCollection,
-           Func<O, K> oldKeySelector,
-           Func<N, K> newKeySelector,
-           Func<O, N, R> resultSelector, string action)
+        public static IEnumerable<R> JoinStrict<K, C, S, R>(
+           IEnumerable<C> currentCollection,
+           IEnumerable<S> shouldCollection,
+           Func<C, K> currentKeySelector,
+           Func<S, K> shouldKeySelector,
+           Func<C, S, R> resultSelector, string action)
         {
 
-            var oldDictionary = oldCollection.ToDictionary(oldKeySelector);
-            var newDictionary = newCollection.ToDictionary(newKeySelector);
+            var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
+            var shouldDictionary = shouldCollection.ToDictionary(shouldKeySelector);
 
-            var oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
-            var newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
+            var extra = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
+            var lacking = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
 
-            if (oldOnly.Count != 0)
-                if (newOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, oldOnly.ToString(", "), newOnly.ToString(", ")));
+            if (extra.Count != 0)
+                if (lacking.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, extra.ToString(", "), lacking.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, oldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, extra.ToString(", ")));
             else
-                if (newOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, newOnly.ToString(", ")));
+                if (lacking.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, lacking.ToString(", ")));
 
-            return oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key]));
+            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
+        }
+
+
+        public static JoinStrictResult<C, S, R> JoinStrict<K, C, S, R>(
+            IEnumerable<C> currentCollection,
+            IEnumerable<S> shouldCollection,
+            Func<C, K> currentKeySelector,
+            Func<S, K> shouldKeySelector,
+            Func<C, S, R> resultSelector)
+        {
+            var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
+            var newDictionary = shouldCollection.ToDictionary(shouldKeySelector);
+
+            HashSet<K> commonKeys = currentDictionary.Keys.ToHashSet();
+            commonKeys.IntersectWith(newDictionary.Keys);
+
+            return new JoinStrictResult<C, S, R>
+            {
+                Extra = currentDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+                Lacking = newDictionary.Where(e => !currentDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+
+                Result = commonKeys.Select(k => resultSelector(currentDictionary[k], newDictionary[k])).ToList()
+            };
         }
 
         public static IEnumerable<Iteration<T>> Iterate<T>(this IEnumerable<T> collection)
@@ -807,6 +1085,14 @@ namespace Signum.Utilities
         }
     }
 
+
+    public class JoinStrictResult<O, N, R>
+    {
+        public List<O> Extra;
+        public List<N> Lacking;
+        public List<R> Result;
+    }
+
     public enum BiSelectOptions
     {
         None,
@@ -820,7 +1106,7 @@ namespace Signum.Utilities
     {
         readonly T value;
         readonly bool isFirst;
-        readonly bool isLast; 
+        readonly bool isLast;
         readonly int position;
 
         internal Iteration(T value, bool isFirst, bool isLast, int position)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
@@ -77,21 +77,31 @@ namespace Signum.Entities.Reflection
 
         public static string Integrity(DirectedGraph<Modifiable> graph)
         {
-            var problems = (from m in graph.OfType<IdentifiableEntity>()
-                            group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
-                            where g.Count() > 1 && g.Count(m => m.SelfModified) > 0
-                            select g).ToList();
+            if (graph.OfType<IdentifiableEntity>().Any())
+            {
+                var problems = (from m in graph.OfType<IdentifiableEntity>()
+                                group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
+                                where g.Count() > 1 && g.Count(m => m.SelfModified) > 0
+                                select g).ToList();
 
-            if (problems.Count > 0)
-                return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".Formato(
-                    p.Count(),
-                    p.Key,
-                    p.ToString(m => "  {0}{1}".Formato(m.SelfModified ? "[SelfModified] " : "", m), "\r\n")), "\r\n\r\n");
+                if (problems.Count > 0)
+                    return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".Formato(
+                        p.Count(),
+                        p.Key,
+                        p.ToString(m => "  {0}{1}".Formato(m.SelfModified ? "[SelfModified] " : "", m), "\r\n")), "\r\n\r\n");
 
-            return (from ident in graph.OfType<IdentifiableEntity>()
-                    let error = ident.IdentifiableIntegrityCheck()
-                    where error.HasText()
-                    select new { ident, error }).ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+                return (from ident in graph.OfType<IdentifiableEntity>()
+                        let error = ident.IdentifiableIntegrityCheck()
+                        where error.HasText()
+                        select new { ident, error }).ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+            }
+            else
+            {
+                return (from me in graph.OfType<ModifiableEntity>()
+                        select me.IntegrityCheck() into error
+                        where error.HasText()
+                        select error).ToString("\r\n"); 
+            }
         }
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
@@ -182,12 +192,7 @@ namespace Signum.Entities.Reflection
             return result;
         }
 
-        public static XDocument SuperDGML(ModifiableEntity graph)
-        {
-            return FromRoot(graph).SuperDGML(); 
-        }
-
-        public static XDocument SuperDGML(this DirectedGraph<Modifiable> graph)
+        public static XDocument EntityDGML(this DirectedGraph<Modifiable> graph)
         {
             return graph.ToDGML(n =>
                 n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n): 
@@ -198,7 +203,7 @@ namespace Signum.Entities.Reflection
                 {
                     new XAttribute("Label", n.ToString() ?? "[null]"),
                     new XAttribute("TypeName", n.GetType().TypeName()), 
-                    new XAttribute("Background", ColorGenerator.ColorFor(n.GetType().FullName.GetHashCode()))
+                    new XAttribute("Background", ColorExtensions.ToHtmlColor(n.GetType().FullName.GetHashCode()))
                 });
         }
 
@@ -208,14 +213,21 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (ie.ToString() ?? "[null]")  + Modified(ie)),
                new XAttribute("TypeName", ie.GetType().TypeName()), 
-               new XAttribute("Background", ColorGenerator.ColorFor(ie.GetType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(ie.GetType().FullName.GetHashCode())),
                new XAttribute("Description", ie.IdOrNull.TryToString() ?? "New")
             };
         }
 
         private static string Modified(Modifiable ie)
         {
-            return " [{0}/{1}]".Formato(ie.Modified, ie.SelfModified);
+            string str = ",".Combine(ie.SelfModified ? "SelfModified" : null,
+                                               ie.Modified == true ? "Modified" :
+                                               ie.Modified == false ? "Not-Modified" : null);
+
+            if (str.HasText())
+                return "({0})".Formato(str);
+
+            return null;
         }
 
         private static XAttribute[] GetAttributes(Lite lite)
@@ -224,9 +236,9 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified(lite)),
                new XAttribute("TypeName", lite.GetType().TypeName()), 
-               new XAttribute("Stroke", ColorGenerator.ColorFor(Reflector.ExtractLite(lite.GetType()).FullName.GetHashCode())),
+               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(Reflector.ExtractLite(lite.GetType()).FullName.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
-               new XAttribute("Background", ColorGenerator.ColorFor(lite.RuntimeType.FullName.GetHashCode()).Replace("#", "#44")),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.RuntimeType.FullName.GetHashCode()).Replace("#", "#44")),
                new XAttribute("Description", " ".Combine((lite.RuntimeType == Reflector.ExtractLite(lite.GetType())? "":  lite.RuntimeType.TypeName() ),   lite.IdOrNull.TryToString() ?? "New"))
             };
         }
@@ -238,7 +250,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (ee.ToString() ?? "[null]")+  Modified(ee)),
                new XAttribute("TypeName", ee.GetType().TypeName()), 
                new XAttribute("NodeRadius", 0),
-               new XAttribute("Background", ColorGenerator.ColorFor(ee.GetType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName.GetHashCode())),
             };
         }
 
@@ -246,10 +258,10 @@ namespace Signum.Entities.Reflection
         {
             return new[]
             {
-               new XAttribute("Label", list.ToString() ?? "[null]"),
+               new XAttribute("Label", (list.ToString() ?? "[null]") +  Modified((Modifiable)list)),
                new XAttribute("TypeName", list.GetType().TypeName()), 
                new XAttribute("NodeRadius", 2),
-               new XAttribute("Background", ColorGenerator.ColorFor(list.GetType().ElementType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType().FullName.GetHashCode())),
             };
         }
     }

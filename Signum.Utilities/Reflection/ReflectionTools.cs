@@ -296,11 +296,6 @@ namespace Signum.Utilities.Reflection
             return (Action<object, object>)exp.Compile();
         }
 
-        public static Func<T> CreateConstructor<T>(Type type)
-        {
-            return Expression.Lambda<Func<T>>(Expression.Convert(Expression.New(type), typeof(T))).Compile();
-        }
-
         public static bool IsNumber(Type type)
         {
             switch (Type.GetTypeCode(type.UnNullify()))
@@ -364,6 +359,8 @@ namespace Signum.Utilities.Reflection
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
                 return (T)Enum.Parse(utype, (string)value);
+            else if (utype == typeof(Guid))
+                return (T)(object)Guid.Parse(value); 
             else
                 return (T)Convert.ChangeType(value, utype);
         }
@@ -376,9 +373,11 @@ namespace Signum.Utilities.Reflection
             if (value == null || value == "")
                 return (object)null;
 
-            Type utype = type.UnNullify(); 
+            Type utype = type.UnNullify();
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
+            else if (utype == typeof(Guid))
+                return Guid.Parse(value); 
             else
                 return Convert.ChangeType(value, utype);
         }
@@ -394,6 +393,8 @@ namespace Signum.Utilities.Reflection
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
                 return (T)Enum.Parse(utype, (string)value);
+            else if (utype == typeof(Guid))
+                return (T)(object)Guid.Parse(value); 
             else
                 return (T)Convert.ChangeType(value, utype, culture);
         }
@@ -409,6 +410,8 @@ namespace Signum.Utilities.Reflection
             Type utype = type.UnNullify();
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
+            else if (utype == typeof(Guid))
+                return Guid.Parse(value); 
             else
                 return Convert.ChangeType(value, utype, culture);
         }
@@ -598,6 +601,16 @@ namespace Signum.Utilities.Reflection
                 }
                 else return false; 
             }
+            else if (utype == typeof(Guid))
+            {
+                Guid _result;
+                if (Guid.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
             else if (utype == typeof(object))
             {
                 result = value;
@@ -606,7 +619,7 @@ namespace Signum.Utilities.Reflection
             else
             {
                 TypeConverter converter = TypeDescriptor.GetConverter(utype);
-                if(converter.CanConvertFrom(typeof(string)))
+                if (converter.CanConvertFrom(typeof(string)))
                 {
                     try
                     {
@@ -640,6 +653,9 @@ namespace Signum.Utilities.Reflection
                     else
                         return (T)Enum.ToObject(utype, value);
                 }
+
+                else if (utype == typeof(Guid) && value is string)
+                    return (T)(object)Guid.Parse((string)value);
 
                 else
                     return (T)Convert.ChangeType(value, utype);

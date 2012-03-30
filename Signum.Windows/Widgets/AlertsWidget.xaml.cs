@@ -93,45 +93,38 @@ namespace Signum.Windows.Widgets
                 return;
             }
 
-            bool anyNote = false; 
-            anyNote |= CountAlerts(FutureAlertsQuery, entity, Properties.Resources.FutureAlerts, btnFutureAlerts);
-            anyNote |= CountAlerts(CheckedAlertsQuery, entity, Properties.Resources.CheckedAlerts, btnCheckedAlerts);
-            anyNote |= CountAlerts(WarnedAlertsQuery, entity, Properties.Resources.WarnedAlerts, btnWarnedAlerts);
-
-            if (anyNote)
-            {
-                tbAlerts.FontWeight = FontWeights.Bold;
-
-                if (ForceShow != null)
-                    ForceShow();
-            }
-            else
-            {
-                tbAlerts.FontWeight = FontWeights.Normal;
-            }
+            tbAlerts.FontWeight = FontWeights.Normal;
+            CountAlerts(FutureAlertsQuery, entity, Properties.Resources.FutureAlerts, btnFutureAlerts);
+            CountAlerts(CheckedAlertsQuery, entity, Properties.Resources.CheckedAlerts, btnCheckedAlerts);
+            CountAlerts(WarnedAlertsQuery, entity, Properties.Resources.WarnedAlerts, btnWarnedAlerts);
         }
 
-        bool CountAlerts(object queryName, IdentifiableEntity entity, string resource, Button button)
+        void CountAlerts(object queryName, IdentifiableEntity entity, string resource, Button button)
         {
-            int count = Navigator.QueryCount(new CountOptions(queryName)
+            Navigator.QueryCountBatch(new CountOptions(queryName)
             {
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption( AlertsQueryColumn , DataContext)
                 }
-            }); 
+            },
+            count =>
+            {
+                if (count == 0)
+                {
+                    button.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    button.Visibility = Visibility.Visible;
+                    button.Content = "{0} ({1})".Formato(resource, count);
 
-            if (count == 0)
-            {
-                button.Visibility = Visibility.Collapsed;
-                return false;
-            }
-            else
-            {
-                button.Visibility = Visibility.Visible;
-                button.Content = "{0} ({1})".Formato(resource, count);
-                return true;
-            }
+                    tbAlerts.FontWeight = FontWeights.Bold;
+
+                    if (ForceShow != null)
+                        ForceShow();
+                }
+            }, () => { }); 
         }
 
         private void btnAlerts_Click(object sender, RoutedEventArgs e)

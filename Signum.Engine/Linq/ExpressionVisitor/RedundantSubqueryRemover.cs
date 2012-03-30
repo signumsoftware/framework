@@ -1,115 +1,309 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
+using System.Linq.Expressions;
+using System.Collections.ObjectModel;
 using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
-    internal class RedundantSubqueryRemover : DbExpressionVisitor
+    class RedundantSubqueryRemover : DbExpressionVisitor
     {
-
-        private RedundantSubqueryRemover() { }
-
-        static internal Expression Remove(Expression expression)
+        private RedundantSubqueryRemover()
         {
-            return new RedundantSubqueryRemover().Visit(expression);
         }
 
-        protected override Expression VisitSelect(SelectExpression original)
+        public static Expression Remove(Expression expression)
         {
-            var select = (SelectExpression)base.VisitSelect(original);
+            expression = new RedundantSubqueryRemover().Visit(expression);
+            expression = SubqueryMerger.Merge(expression);
+            return expression;
+        }
 
+        protected override Expression VisitSelect(SelectExpression select)
+        {
+            select = (SelectExpression)base.VisitSelect(select);
+
+            // first remove all purely redundant subqueries
+            List<SelectExpression> redundant = RedundantSubqueryGatherer.Gather(select.From);
+            if (redundant != null)
+            {
+                select = (SelectExpression)SubqueryRemover.Remove(select, redundant);
+            }
+
+            return select;
+        }
+
+        protected override Expression VisitProjection(ProjectionExpression proj)
+        {
+            proj = (ProjectionExpression)base.VisitProjection(proj);
+            if (proj.Select.From is SelectExpression)
+            {
+                List<SelectExpression> redundant = RedundantSubqueryGatherer.Gather(proj.Select);
+                if (redundant != null)
+                {
+                    proj = (ProjectionExpression)SubqueryRemover.Remove(proj, redundant);
+                }
+            }
+            return proj;
+        }
+
+        internal static bool IsSimpleProjection(SelectExpression select)
+        {
+            foreach (ColumnDeclaration decl in select.Columns)
+            {
+                ColumnExpression col = decl.Expression as ColumnExpression;
+                if (col == null || decl.Name != col.Name)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        internal static bool IsNameMapProjection(SelectExpression select)
+        {
+            if (select.From is TableExpression) return false;
             SelectExpression fromSelect = select.From as SelectExpression;
-            if (fromSelect != null)
+            if (fromSelect == null || select.Columns.Count != fromSelect.Columns.Count)
+                return false;
+            ReadOnlyCollection<ColumnDeclaration> fromColumns = fromSelect.Columns;
+            // test that all columns in 'select' are refering to columns in the same position
+            // in from.
+            for (int i = 0, n = select.Columns.Count; i < n; i++)
             {
-                SelectRoles selectRole = select.SelectRoles;
-                SelectRoles minSelect = (SelectRoles)EnumExtensions.MinFlag((int)selectRole); 
+                ColumnExpression col = select.Columns[i].Expression as ColumnExpression;
+                if (col == null || !(col.Name == fromColumns[i].Name))
+                    return false;
+            }
+            return true;
+        }
 
-                SelectRoles fromSelectRole = fromSelect.SelectRoles;
-                SelectRoles maxSelect = (SelectRoles)EnumExtensions.MaxFlag((int)fromSelectRole);
+        internal static bool IsInitialProjection(SelectExpression select)
+        {
+            return select.From is TableExpression;
+        }
 
-                if (selectRole == 0 || minSelect > maxSelect || minSelect == maxSelect && minSelect == SelectRoles.Where)
+        class RedundantSubqueryGatherer : DbExpressionVisitor
+        {
+            List<SelectExpression> redundant;
+
+            private RedundantSubqueryGatherer()
+            {
+            }
+
+            internal static List<SelectExpression> Gather(Expression source)
+            {
+                RedundantSubqueryGatherer gatherer = new RedundantSubqueryGatherer();
+                gatherer.Visit(source);
+                return gatherer.redundant;
+            }
+
+            private static bool IsRedudantSubquery(SelectExpression select)
+            {
+                return (IsSimpleProjection(select) || IsNameMapProjection(select))
+                    && !select.IsDistinct
+                    && !select.IsReverse
+                    && select.Top == null
+                    //&& select.Skip == null
+                    && select.Where == null
+                    && (select.OrderBy == null || select.OrderBy.Count == 0)
+                    && (select.GroupBy == null || select.GroupBy.Count == 0);
+            }
+
+            protected override Expression VisitSelect(SelectExpression select)
+            {
+                if (IsRedudantSubquery(select))
                 {
-                    SelectExpression newSelect = (SelectExpression)SubqueryRemover.Remove(select, new[] { fromSelect });
-
-                    var distinct = (selectRole & SelectRoles.Distinct) != 0 ? newSelect.Distinct : fromSelect.Distinct;
-                    var top = (selectRole & SelectRoles.Top) != 0 ? newSelect.Top : fromSelect.Top;
-                    var where = minSelect == maxSelect && minSelect == SelectRoles.Where ? Expression.And(newSelect.Where, fromSelect.Where) :
-                                (selectRole & SelectRoles.Where) != 0 ? newSelect.Where : fromSelect.Where;
-                    var groupBy = (selectRole & SelectRoles.GroupBy) != 0 ? newSelect.GroupBy : fromSelect.GroupBy;
-                    var orderBy = (selectRole & SelectRoles.OrderBy) != 0 ? newSelect.OrderBy : fromSelect.OrderBy;
-
-                    return new SelectExpression(newSelect.Alias, distinct, top, newSelect.Columns, newSelect.From, where, orderBy, groupBy);
+                    if (this.redundant == null)
+                    {
+                        this.redundant = new List<SelectExpression>();
+                    }
+                    this.redundant.Add(select);
                 }
+                return select;
             }
 
-            JoinExpression join = select.From as JoinExpression;
-            if (join != null)
+            protected override Expression VisitSubquery(SubqueryExpression subquery)
             {
-                List<SelectExpression> toRemove = new List<SelectExpression>();
-                
-                GatherRedundantSelects(join.Left, toRemove);
-                GatherRedundantSelects(join.Right, toRemove);
+                // don't gather inside scalar & exists
+                return subquery;
+            }
+        }
 
-                if (toRemove.Count > 0)
+        class SubqueryMerger : DbExpressionVisitor
+        {
+            private SubqueryMerger()
+            {
+            }
+
+            internal static Expression Merge(Expression expression)
+            {
+                return new SubqueryMerger().Visit(expression);
+            }
+
+            bool isTopLevel = true;
+
+            protected override Expression VisitSelect(SelectExpression select)
+            {
+                bool wasTopLevel = isTopLevel;
+                isTopLevel = false;
+
+                select = (SelectExpression)base.VisitSelect(select);
+
+                // next attempt to merge subqueries that would have been removed by the above
+                // logic except for the existence of a where clause
+                while (CanMergeWithFrom(select, wasTopLevel))
                 {
-                    SelectExpression newSelect = (SelectExpression)SubqueryRemover.Remove(select, toRemove);
-                    return newSelect;
+                    SelectExpression fromSelect = GetLeftMostSelect(select.From);
+
+                    // remove the redundant subquery
+                    select = (SelectExpression)SubqueryRemover.Remove(select, new[] { fromSelect });
+
+                    // merge where expressions 
+                    Expression where = select.Where;
+                    if (fromSelect.Where != null)
+                    {
+                        if (where != null)
+                        {
+                            where = Expression.And(fromSelect.Where, where);
+                        }
+                        else
+                        {
+                            where = fromSelect.Where;
+                        }
+                    }
+                    var orderBy = select.OrderBy != null && select.OrderBy.Count > 0 ? select.OrderBy : fromSelect.OrderBy;
+                    var groupBy = select.GroupBy != null && select.GroupBy.Count > 0 ? select.GroupBy : fromSelect.GroupBy;
+                    //Expression skip = select.Skip != null ? select.Skip : fromSelect.Skip;
+                    Expression top = select.Top != null ? select.Top : fromSelect.Top;
+                    bool isDistinct = select.IsDistinct | fromSelect.IsDistinct;
+
+                    if (where != select.Where
+                        || orderBy != select.OrderBy
+                        || groupBy != select.GroupBy
+                        || isDistinct != select.IsDistinct
+                        //|| skip != select.Skip
+                        || top != select.Top)
+                    {
+                        select = new SelectExpression(select.Alias, isDistinct, select.IsReverse, top, select.Columns, select.From, where, orderBy, groupBy);
+                    }
                 }
+
+                return select;
             }
 
-            return select; 
-        }
-
-        private static void GatherRedundantSelects(SourceExpression source, List<SelectExpression> toRemove)
-        {
-            SelectExpression select = source as SelectExpression;
-            if (select != null && select.SelectRoles == 0)
-                toRemove.Add(select); 
-
-            JoinExpression join = source as JoinExpression;
-            if(join != null)
+            static bool IsColumnProjection(SelectExpression select)
             {
-                GatherRedundantSelects(join.Left, toRemove);
-                GatherRedundantSelects(join.Right, toRemove);
+                for (int i = 0, n = select.Columns.Count; i < n; i++)
+                {
+                    var cd = select.Columns[i];
+                    if (cd.Expression.NodeType != (ExpressionType)DbExpressionType.Column &&
+                        cd.Expression.NodeType != ExpressionType.Constant)
+                        return false;
+                }
+                return true;
             }
-        }
 
-        protected override Expression VisitDelete(DeleteExpression original)
-        {
-            var delete = (DeleteExpression)base.VisitDelete(original);
-
-            SelectExpression select = delete.Source as SelectExpression;
-            if (select != null && select.SelectRoles == 0)
+            static bool CanMergeWithFrom(SelectExpression select, bool isTopLevel)
             {
-                var result =  (DeleteExpression)SubqueryRemover.Remove(delete, new[] { select });
-                TableExpression table = result.Source as TableExpression;
-                if (table != null && table.Name == result.Table.Name)
-                    return new DeleteExpression(result.Table, result.Source, null); //remove where cos SQL is Orks language
+                SelectExpression fromSelect = GetLeftMostSelect(select.From);
+                if (fromSelect == null)
+                    return false;
+                if (!IsColumnProjection(fromSelect))
+                    return false;
+                bool selHasOrderBy = select.OrderBy != null && select.OrderBy.Count > 0;
+                bool selHasGroupBy = select.GroupBy != null && select.GroupBy.Count > 0;
+               
+                bool frmHasOrderBy = fromSelect.OrderBy != null && fromSelect.OrderBy.Count > 0;
+                bool frmHasGroupBy = fromSelect.GroupBy != null && fromSelect.GroupBy.Count > 0;
+                // both cannot have orderby
+                if (selHasOrderBy && frmHasOrderBy)
+                    return false;
+                // both cannot have groupby
+                if (selHasGroupBy && frmHasGroupBy)
+                    return false;
+                // this are distinct operations 
+                if (select.IsReverse || fromSelect.IsReverse)
+                    return false;
+
+                // cannot move forward order-by if outer has group-by
+                if (frmHasOrderBy && (selHasGroupBy || select.IsDistinct || AggregateChecker.HasAggregates(select)))
+                    return false;
+                // cannot move forward group-by if outer has where clause
+                if (frmHasGroupBy /*&& (select.Where != null)*/) // need to assert projection is the same in order to move group-by forward
+                    return false;
+
+                // cannot move forward a take if outer has take or skip or distinct
+                if (fromSelect.Top != null && (select.Top != null || /*select.Skip != null ||*/ select.IsDistinct || selHasGroupBy || HasApplyJoin(select.From) ))
+                    return false;
+                // cannot move forward a skip if outer has skip or distinct
+                //if (fromSelect.Skip != null && (select.Skip != null || select.Distinct || selHasAggregates || selHasGroupBy))
+                //    return false;
+                // cannot move forward a distinct if outer has take, skip, groupby or a different projection
+                if (fromSelect.IsDistinct && (select.Top != null || /*select.Skip != null ||*/ !IsNameMapProjection(select) || selHasGroupBy || (selHasOrderBy && !isTopLevel) || AggregateChecker.HasAggregates(select)))
+                    return false;
+                return true;
             }
 
-            return delete;
-        }
-
-        protected override Expression VisitUpdate(UpdateExpression original)
-        {
-            var update = (UpdateExpression)base.VisitUpdate(original);
-
-            SelectExpression select = update.Source as SelectExpression;
-            if (select != null && select.SelectRoles == 0)
+            static SelectExpression GetLeftMostSelect(Expression source)
             {
-                var result = (UpdateExpression)SubqueryRemover.Remove(update, new[] { select });
-                TableExpression table = result.Source as TableExpression;
-                if (table != null && table.Name == result.Table.Name)
-                    return new UpdateExpression(result.Table, result.Source, null, result.Assigments); //remove where cos SQL is Orks language
+                SelectExpression select = source as SelectExpression;
+                if (select != null)
+                    return select;
+                JoinExpression join = source as JoinExpression;
+
+                if (join != null)
+                    return GetLeftMostSelect(join.Left);
+                return null;
             }
 
-            return update;
+            static bool HasApplyJoin(SourceExpression source)
+            {
+                var join = source as JoinExpression;
+
+                if (join == null)
+                    return false;
+
+                return join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply || HasApplyJoin(join.Left) || HasApplyJoin(join.Right);
+            }
         }
-    }   
+
+        class AggregateChecker : DbExpressionVisitor
+        {
+            bool hasAggregate = false;
+            private AggregateChecker()
+            {
+            }
+
+            internal static bool HasAggregates(SelectExpression expression)
+            {
+                AggregateChecker checker = new AggregateChecker();
+                checker.Visit(expression);
+                return checker.hasAggregate;
+            }
+
+            protected override Expression VisitAggregate(AggregateExpression aggregate)
+            {
+                this.hasAggregate = true;
+                return aggregate;
+            }
+
+            protected override Expression VisitSelect(SelectExpression select)
+            {
+                // only consider aggregates in these locations
+                this.Visit(select.Where);
+                this.VisitOrderBy(select.OrderBy);
+                this.VisitColumnDeclarations(select.Columns);
+                return select;
+            }
+
+            protected override Expression VisitSubquery(SubqueryExpression subquery)
+            {
+                // don't count aggregates in subqueries
+                return subquery;
+            }
+        }
+    }
 }

@@ -24,7 +24,7 @@ namespace Signum.Test.LinqProvider
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLog = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }
 
         [TestMethod]

@@ -42,6 +42,9 @@ SF.registerModule("Popup", function () {
                     if (options.onOk)
                         $this.find(".sf-ok-button").click(options.onOk);
 
+                    if (options.onSave)
+                        $this.find(".sf-save").click(options.onSave);
+
                     $this.dialog(o);
                 }
             });
@@ -51,11 +54,13 @@ SF.registerModule("Popup", function () {
     SF.Popup = {};
 
     SF.Popup.serialize = function (prefix) {
-        return $('#' + SF.compose(prefix, "panelPopup") + " :input").serialize();
+        var id = SF.compose(prefix, "panelPopup");
+        return $("#" + id + " :input").serialize();
     };
 
     SF.Popup.serializeJson = function (prefix) {
-        var arr = $('#' + SF.compose(prefix, "panelPopup") + " :input").serializeArray();
+        var id = SF.compose(prefix, "panelPopup");
+        var arr = $("#" + id + " :input").serializeArray();
         var data = {};
         for (var index = 0; index < arr.length; index++) {
             if (data[arr[index].name] != null) {

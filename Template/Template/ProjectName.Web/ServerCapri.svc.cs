@@ -12,6 +12,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Basics;
 using Signum.Services;
+using Signum.Utilities;
 using $custommessage$.Services;
 
 namespace $custommessage$.Web
@@ -23,7 +24,11 @@ namespace $custommessage$.Web
             try
             {
                 //Do Security, Tracing and Logging here
-                return function();
+                using (ScopeSessionFactory.OverrideSession(session))
+                using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
+                {
+                    return function();
+                }
             }
             catch (Exception e)
             {

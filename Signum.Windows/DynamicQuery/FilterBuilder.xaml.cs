@@ -39,6 +39,7 @@ namespace Signum.Windows
                 FilterOption fo = ((FilterOption)((QueryTokenRenderer)fe).DataContext);
                 return new FilterOption { Token = fo.Token, Operation = fo.Operation, RealValue = fo.RealValue };
             }, DragDropEffects.Copy);
+
             this.InitializeComponent();
         }
 
@@ -47,12 +48,23 @@ namespace Signum.Windows
             Grid g = (Grid)sender;
             Common.SetCurrentWindow(g, this.FindCurrentWindow());
             FilterOption f = (FilterOption)g.DataContext;
-            Implementations implementations = f.Token.Implementations();
+           
             Common.SetIsReadOnly(g, f.Frozen);
 
+            g.Children.Add(GetValueControl(f)); 
+        }
+
+        public static Control GetValueControl(FilterOption f)
+        {
+            Implementations implementations = f.Token.Implementations();
             Type type = f.Token.Type;
             if (type.IsLite())
             {
+                Lite lite = f.RealValue as Lite;
+
+                if (lite != null && string.IsNullOrEmpty(lite.ToString()))
+                    Server.FillToStr(lite);
+
                 Type cleanType = Reflector.ExtractLite(type);
 
                 if (Reflector.IsLowPopulation(cleanType) && !(implementations is ImplementedByAllAttribute))
@@ -60,9 +72,10 @@ namespace Signum.Windows
                     EntityCombo ec = new EntityCombo
                     {
                         Type = type,
-                        Style = (Style)FindResource("toolTip"),
+                        //Style = (Style)FindResource("toolTip"),
                         Implementations = implementations
                     };
+
                     ec.SetBinding(EntityCombo.EntityProperty, new Binding
                     {
                         Path = new PropertyPath(FilterOption.RealValueProperty),
@@ -70,7 +83,8 @@ namespace Signum.Windows
                         ValidatesOnDataErrors = true,
                         ValidatesOnExceptions = true,
                     });
-                    g.Children.Add(ec);
+
+                    return ec;
                 }
                 else
                 {
@@ -81,6 +95,7 @@ namespace Signum.Windows
                         HideAutoCompleteOnLostFocus = false,
                         Implementations = implementations
                     };
+
                     el.SetBinding(EntityLine.EntityProperty, new Binding
                     {
                         Path = new PropertyPath(FilterOption.RealValueProperty),
@@ -88,7 +103,8 @@ namespace Signum.Windows
                         ValidatesOnDataErrors = true,
                         ValidatesOnExceptions = true
                     });
-                    g.Children.Add(el);
+
+                    return el;
                 }
             }
             else if (type.IsEmbeddedEntity())
@@ -102,6 +118,7 @@ namespace Signum.Windows
                     HideAutoCompleteOnLostFocus = false,
                     Implementations = implementations
                 };
+
                 el.SetBinding(EntityLine.EntityProperty, new Binding
                 {
                     Path = new PropertyPath(FilterOption.RealValueProperty),
@@ -109,7 +126,8 @@ namespace Signum.Windows
                     ValidatesOnDataErrors = true,
                     ValidatesOnExceptions = true
                 });
-                g.Children.Add(el);
+
+                return el;
             }
             else
             {
@@ -127,7 +145,6 @@ namespace Signum.Windows
                     vl.ItemSource = EnumProxy.GetValues(type.UnNullify()).PreAndNull(type.IsNullable());
                 }
 
-
                 vl.SetBinding(ValueLine.ValueProperty, new Binding
                 {
                     Path = new PropertyPath("RealValue"), //odd
@@ -136,31 +153,16 @@ namespace Signum.Windows
                     ValidatesOnExceptions = true,
                     Converter = Reflector.IsNumber(type) ? Converters.Identity : null,
                 });
-                g.Children.Add(vl);
+
+                return vl;
             }
         }
 
         private void btRemove_Click(object sender, RoutedEventArgs e)
         {
-            RemoveFilters();
+            Filters.Remove((FilterOption)((Button)sender).DataContext);
         }
 
-        private void RemoveFilters()
-        {
-            var toRemove = lvFilters.SelectedItems.Cast<FilterOption>().ToList();
-            foreach (var f in toRemove)
-            {
-                Filters.Remove(f);
-            }
-        }
-
-        private void lvFilters_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == Key.Delete)
-            {
-                RemoveFilters();
-            }
-        }
 
         private void lvFilters_DragOver(object sender, DragEventArgs e)
         {
@@ -174,23 +176,15 @@ namespace Signum.Windows
                 FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
 
                 Filters.Add(filter);
-
-                RefreshFirstColumn();
             }
         }
 
-        public void RefreshFirstColumn()
-        {
-            firstColumn.Width = 0;
-            firstColumn.Width = double.NaN;
-        }
 
         public void AddFilter(QueryToken queryToken)
         {
-
             if (queryToken == null)
             {
-                MessageBox.Show(Properties.Resources.NoFilterSelected);
+                MessageBox.Show(Properties.Resources.NoColumnSelected);
                 return;
             }
 
@@ -200,12 +194,10 @@ namespace Signum.Windows
             {
                 Token = queryToken,
                 Value = queryToken.Type.IsValueType && !queryToken.Type.IsNullable() ? Activator.CreateInstance(queryToken.Type) : null,
-                Operation = QueryUtils.GetFilterOperations(ft).First()
+                Operation = QueryUtils.GetFilterOperations(ft).FirstEx()
             };
 
             Filters.Add(f);
-
-            RefreshFirstColumn();
         }
     }
 }

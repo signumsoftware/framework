@@ -31,6 +31,8 @@ namespace Signum.Windows
 
     public abstract class FindOptionsBase 
     {
+        public static int DefaultElementsPerPage = 200; 
+
         public object QueryName { get; set; }
 
         List<FilterOption> filterOptions = new List<FilterOption>();
@@ -59,6 +61,13 @@ namespace Signum.Windows
         {
             get { return columnOptions; }
             set { this.columnOptions = value; }
+        }
+
+        int? elementsPerPage = DefaultElementsPerPage;
+        public int? ElementsPerPage
+        {
+            get { return elementsPerPage; }
+            set { this.elementsPerPage = value; }
         }
 
         public FindOptionsBase()
@@ -276,7 +285,7 @@ namespace Signum.Windows
         public QueryToken Token { get; set; }
         public OrderType OrderType { get; set; }
         
-        internal ColumnOrderInfo ColumnOrderInfo; 
+        public ColumnOrderInfo ColumnOrderInfo; 
 
         public Order ToOrder()
         {
@@ -304,5 +313,11 @@ namespace Signum.Windows
         //For temporaly XAML only
         public string Path { get; set; }
         public string DisplayName { get; set; }
+
+        internal Column CreateColumn(QueryDescription description)
+        {
+            QueryToken token = QueryUtils.Parse(Path, t => QueryUtils.SubTokens(t, description.Columns));
+            return new Column(token, DisplayName.DefaultText(token.NiceName()));
+        }
     }
 }

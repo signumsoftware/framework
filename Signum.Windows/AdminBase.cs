@@ -136,7 +136,7 @@ namespace Signum.Windows
             Button button = GetSaveButton();
 
             button.IsEnabled = false;
-            Async.Do(this,
+            Async.Do(
                () => value = SaveEntities(value),
                () => { SetEntities(value); UpdateInterface(); },
                () => button.IsEnabled = true);

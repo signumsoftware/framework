@@ -68,8 +68,14 @@ namespace Signum.Windows
         public static readonly IValueConverter NotBoolToVisibility =
             ConverterFactory.New((bool b) => b ? Visibility.Collapsed : Visibility.Visible);
 
+        public static readonly IValueConverter ZeroToVisibility =
+            ConverterFactory.New((int count) => count == 0 ? Visibility.Visible : Visibility.Collapsed);
+
+        public static readonly IValueConverter NotZeroToVisibility =
+            ConverterFactory.New((int count) => count == 0 ? Visibility.Collapsed : Visibility.Visible);
+
         public static readonly IValueConverter NullToVisibility =
-            ConverterFactory.New((object o) => o != null ? Visibility.Visible : Visibility.Collapsed);
+          ConverterFactory.New((object o) => o != null ? Visibility.Visible : Visibility.Collapsed);
 
         public static readonly IValueConverter NotNullToVisibility =
            ConverterFactory.New((object o) => o != null ? Visibility.Collapsed : Visibility.Visible);
@@ -112,11 +118,9 @@ namespace Signum.Windows
         public static readonly IValueConverter TokenOperations = ConverterFactory.New(
             (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));
 
-        static readonly ColorConverter cc = new ColorConverter();
         public static readonly IValueConverter ColorConverter = ConverterFactory.New(
-            (ColorDN c) => c == null ? null : (Color?)(System.Windows.Media.ColorConverter.ConvertFromString(c.Hex)),
-            (Color? c) => c == null ? null : new ColorDN { Hex = cc.ConvertToString(c) });
-
+            (ColorDN c) => c == null ? null : (Color?)Color.FromArgb(c.A, c.R, c.G, c.B),
+            (Color? c) => c == null ? null : new ColorDN(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
 
         public static readonly IMultiValueConverter And = ConverterFactory.New(
             (bool a, bool b) => a && b);

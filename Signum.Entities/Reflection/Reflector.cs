@@ -82,13 +82,13 @@ namespace Signum.Entities.Reflection
         public static bool IsEmbeddedEntity(this Type t)
         {
             return typeof(EmbeddedEntity).IsAssignableFrom(t);
-        }    
+        }
 
         public static FieldInfo[] InstanceFieldsInOrder(Type type)
         {
             var result = type.For(t => t != typeof(object), t => t.BaseType)
                 .Reverse()
-                .SelectMany(t => t.GetFields(flags | BindingFlags.DeclaredOnly).OrderBy(f=>f.MetadataToken)).ToArray();
+                .SelectMany(t => t.GetFields(flags | BindingFlags.DeclaredOnly).OrderBy(f => f.MetadataToken)).ToArray();
 
             return result;
         }
@@ -97,7 +97,7 @@ namespace Signum.Entities.Reflection
         {
             return type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                        .Where(p => !p.HasAttribute<HiddenPropertyAttribute>())
-                       .OrderBy(f => f.MetadataToken).ToArray(); 
+                       .OrderBy(f => f.MetadataToken).ToArray();
         }
 
         public static PropertyInfo[] PublicInstancePropertiesInOrder(Type type)
@@ -111,12 +111,12 @@ namespace Signum.Entities.Reflection
             return result;
         }
 
-        internal static Type GenerateEnumProxy(Type enumType)
+        public static Type GenerateEnumProxy(Type enumType)
         {
-            return typeof(EnumProxy<>).MakeGenericType(enumType); 
+            return typeof(EnumProxy<>).MakeGenericType(enumType);
         }
 
-        internal static Type ExtractEnumProxy(Type enumProxyType)
+        public static Type ExtractEnumProxy(Type enumProxyType)
         {
             if (enumProxyType.IsGenericType && enumProxyType.GetGenericTypeDefinition() == typeof(EnumProxy<>))
                 return enumProxyType.GetGenericArguments()[0];
@@ -143,9 +143,9 @@ namespace Signum.Entities.Reflection
         public static Type CleanType(this Type t)
         {
             return ExtractLite(t) ?? t;
-        }    
+        }
 
-        public static MemberInfo[] GetMemberList<T>(Expression<Func<T, object>> lambdaToField)
+        public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField)
         {
             Expression e = lambdaToField.Body;
 
@@ -155,7 +155,7 @@ namespace Signum.Entities.Reflection
 
             MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a)).NotNull().Reverse().ToArray();
 
-            return result;          
+            return result;
         }
 
         static Expression NextExpression(Expression e)
@@ -167,16 +167,18 @@ namespace Signum.Entities.Reflection
                     {
                         MethodCallExpression mce = (MethodCallExpression)e;
 
-                        if (mce.Method.DeclaringType == typeof(MListExtensions) && mce.Method.Name == "Element")
-                            return mce.Arguments.Single();
+                        var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.FirstEx() : mce.Object;
 
-                        return ((MethodCallExpression)e).Arguments.Single("Only one argument allowed");
+                        if (parent != null && parent.Type.ElementType() == e.Type)
+                            return parent;
 
+                        break;
                     }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Operand;
                 case ExpressionType.Parameter: return null;
-                default: throw new InvalidCastException("Not supported {0}".Formato(e.NodeType));
             }
+
+            throw new InvalidCastException("Not supported {0}".Formato(e.NodeType));
         }
 
         static readonly string[] collectionMethods = new[] { "Element" };
@@ -186,55 +188,66 @@ namespace Signum.Entities.Reflection
             switch (e.NodeType)
             {
                 case ExpressionType.MemberAccess:
-                    {
-                        MemberExpression me = (MemberExpression)e;  
-                        if(me.Member.DeclaringType.IsLite() && me.Member.Name.StartsWith("Entity"))
-                            return null;
-                        
-                        return me.Member;
-                    }
+                {
+                    MemberExpression me = (MemberExpression)e;
+                    if (me.Member.DeclaringType.IsLite() && me.Member.Name.StartsWith("Entity"))
+                        throw new InvalidOperationException("Members of Lite not supported"); 
+
+                    return me.Member;
+                }
                 case ExpressionType.Call:
-                    {
-                        MethodCallExpression mce = (MethodCallExpression)e;
+                {
+                    MethodCallExpression mce = (MethodCallExpression)e;
 
-                        if (mce.Method.DeclaringType == typeof(MListExtensions) && mce.Method.Name == "Element")
-                            return mce.Arguments.Single().Type.GetProperty("Item");
+                    var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.FirstEx() : mce.Object; 
 
-                        return mce.Method;
-                    }
+                    if(parent != null && parent.Type.ElementType() == e.Type)
+                        return parent.Type.GetProperty("Item");
+
+                    return mce.Method;
+                }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Type;
                 case ExpressionType.Parameter: return null;
-                default: throw new InvalidCastException("Not supported {0}".Formato(e.NodeType)); 
+                default: throw new InvalidCastException("Not supported {0}".Formato(e.NodeType));
             }
         }
 
-        internal static FieldInfo FindFieldInfo(Type type, MemberInfo value, bool throws)
+        internal static FieldInfo FindFieldInfo(Type type, PropertyInfo value)
         {
-            return value as FieldInfo ?? Reflector.FindFieldInfo(type, (PropertyInfo)value, throws);
-        }
+            var fi = TryFindFieldInfo(type, value);
 
-        public static FieldInfo FindFieldInfo(Type type, PropertyInfo pi, bool throws)
-        {
-            FieldInfo fi=null;
-            for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
-            {
-                fi = (tempType.GetField(pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
-                tempType.GetField("m" + pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
-                tempType.GetField("_" + pi, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic));
-            }
-
-            if (throws && fi == null)
-                throw new NullReferenceException("Field for property '{0}' not found".Formato(pi.Name));
+            if (fi == null)
+                throw new InvalidOperationException("No FieldInfo for '{0}' found on '{1}'".Formato(value.Name, type.Name));
 
             return fi;
         }
 
-        public static PropertyInfo FindPropertyInfo(MemberInfo mi)
+        static readonly BindingFlags privateFlags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic;
+        public static FieldInfo TryFindFieldInfo(Type type, PropertyInfo pi)
         {
-            return mi as PropertyInfo ?? FindPropertyInfo((FieldInfo)mi); 
+            FieldInfo fi = null;
+            for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
+            {
+
+                fi = (tempType.GetField(pi.Name, privateFlags) ??
+                      tempType.GetField("m" + pi.Name, privateFlags) ??
+                      tempType.GetField("_" + pi, privateFlags));
+            }
+
+            return fi;
         }
 
         public static PropertyInfo FindPropertyInfo(FieldInfo fi)
+        {
+            var pi = TryFindPropertyInfo(fi);
+
+            if (pi == null)
+                throw new InvalidOperationException("No PropertyInfo for '{0}' found".Formato(fi.Name));
+
+            return pi;
+        }
+
+        public static PropertyInfo TryFindPropertyInfo(FieldInfo fi)
         {
             return (fi.DeclaringType.GetProperty(CleanFieldName(fi.Name), BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public));
         }
@@ -258,11 +271,11 @@ namespace Signum.Entities.Reflection
             if (spa != null)
                 return spa.AvailableForQueries;
 
-            FieldInfo fi = FindFieldInfo(type, pi, false);
+            FieldInfo fi = TryFindFieldInfo(type, pi);
             if (fi != null && !fi.HasAttribute<IgnoreAttribute>())
                 return true;
 
-            if (ExpressionCleaner.HasExpansions(type, pi) != null)
+            if (ExpressionCleaner.HasExpansions(type, pi))
                 return true;
 
             return false;
@@ -275,12 +288,10 @@ namespace Signum.Entities.Reflection
 
             LowPopulationAttribute lpa = type.SingleAttribute<LowPopulationAttribute>();
             if (lpa != null)
-                return lpa.Low;
+                return true;
 
-            return !typeof(Entity).IsAssignableFrom(type) && !type.IsInterface;
+            return false;
         }
-
-    
 
         public static Func<IFormattable, string> GetPropertyFormatter(string format, string unitName)
         {
@@ -302,25 +313,25 @@ namespace Signum.Entities.Reflection
 
         public static string FormatString(PropertyRoute route)
         {
-            if (route.PropertyRouteType != PropertyRouteType.Property)
+            if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 throw new InvalidOperationException("PropertyRoute of type Property expected");
 
             FormatAttribute format = route.PropertyInfo.SingleAttribute<FormatAttribute>();
-            if(format != null)
+            if (format != null)
                 return format.Format;
 
             var pp = Validator.GetOrCreatePropertyPack(route);
             if (pp != null)
             {
-                DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
+                DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
                 if (datetimePrecission != null)
                     return datetimePrecission.FormatString;
 
-                DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefault();
+                DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                 if (decimals != null)
                     return "N" + decimals.DecimalPlaces;
 
-                StringCaseValidatorAttribute stringCase = pp.Validators.OfType<StringCaseValidatorAttribute>().SingleOrDefault();
+                StringCaseValidatorAttribute stringCase = pp.Validators.OfType<StringCaseValidatorAttribute>().SingleOrDefaultEx();
                 if (stringCase != null)
                     return stringCase.TextCase == Case.Lowercase ? "L" : "U";
             }
@@ -346,11 +357,11 @@ namespace Signum.Entities.Reflection
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
-                    return "D"; 
+                    return "D";
                 case TypeCode.Decimal:
                 case TypeCode.Double:
                 case TypeCode.Single:
-                    return "N2"; 
+                    return "N2";
             }
             return null;
         }

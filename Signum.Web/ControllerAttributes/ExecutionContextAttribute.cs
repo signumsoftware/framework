@@ -19,36 +19,43 @@ namespace Signum.Web
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
     public sealed class ExecutionContextAttribute : ActionFilterAttribute
     {
-        public static Func<ActionExecutingContext, ExecutionContext>  SetExecutionContext = a=> ExecutionContext.UserInterface;
-
-     
-        public ExecutionContextAttribute()
-        {
-        }
+        public static Func<ControllerContext, ExecutionContext> SetExecutionContext = a => ExecutionContext.UserInterface;
 
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            if(SetExecutionContext != null)
-            {
-                ExecutionContext context = SetExecutionContext(filterContext);
+            Set(filterContext);
+        }
 
-                filterContext.RequestContext.HttpContext.Items[typeof(ExecutionContext)] = ExecutionContext.Scope(context);
-            }
+        public override void OnActionExecuted(ActionExecutedContext filterContext)
+        {
+            Release(filterContext);
+        }
+
+        public override void OnResultExecuting(ResultExecutingContext filterContext)
+        {
+            Set(filterContext);
         }
 
         public override void OnResultExecuted(ResultExecutedContext filterContext)
         {
-            if (SetExecutionContext != null)
-            {
-                var oldContext = ExecutionContext.Current;
-                IDisposable scope = (IDisposable)filterContext.RequestContext.HttpContext.Items[typeof(ExecutionContext)];
-                if (scope != null)
-                {
-                    scope.Dispose();
-                    filterContext.RequestContext.HttpContext.Items.Remove(typeof(ExecutionContext));
-                }
-            }
+            Release(filterContext);
         }
 
+        private static void Set(ControllerContext filterContext)
+        {
+            ExecutionContext context = SetExecutionContext(filterContext);
+
+            filterContext.Controller.ViewData.Add("ExecutionContext", ExecutionContext.Scope(context));
+        }
+
+        private static void Release(ControllerContext filterContext)
+        {
+            IDisposable scope = (IDisposable)filterContext.Controller.ViewData["ExecutionContext"];
+            if (scope != null)
+            {
+                scope.Dispose();
+                filterContext.Controller.ViewData.Remove("ExecutionContext");
+            }
+        }
     }
 }

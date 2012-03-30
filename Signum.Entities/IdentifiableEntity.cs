@@ -21,7 +21,8 @@ namespace Signum.Entities
     public abstract class IdentifiableEntity : ModifiableEntity, IIdentifiable
     {
         internal int? id = null; //primary key
-        protected internal string toStr; //no value for new entities
+        [Ignore]
+        protected internal string toStr; //for queries and lites on entities with non-expression ToString 
 
         [HiddenProperty, Description("Id")]
         public int Id
@@ -40,14 +41,6 @@ namespace Signum.Entities
         public int? IdOrNull
         {
             get { return id; }
-        }
-
-        [HiddenProperty]
-        public string ToStr
-        {
-            get { return toStr; }
-            //protected set { Set(ref toStr, value, () => ToStr); }
-               protected set { toStr= value; }// TODO: olmo revisar
         }
 
         [Ignore]
@@ -71,13 +64,6 @@ namespace Signum.Entities
             }
 
             return base.Set<T>(ref field, value, property);
-        }
-
-        protected internal override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
-
-            ToStr = ToString();
         }
 
         public override string ToString()
@@ -119,12 +105,12 @@ namespace Signum.Entities
 
     }
 
-    public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, ICloneable, IRootEntity
+    public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, IRootEntity
     {
         int Id { get; }
         int? IdOrNull { get; }
-        string ToStr { get; }
         bool IsNew { get; }
+        string ToStringProperty { get; }
     }
 
     public interface IRootEntity

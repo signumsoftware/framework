@@ -13,22 +13,15 @@ using System.Windows;
 
 namespace Signum.Windows.DynamicQuery
 {
-    internal class ColumnInfo
+    public class ColumnInfo
     {        
         public ColumnInfo(Column column)
         {
             Column = column;
         }
 
-        public ColumnInfo(ColumnOption co, QueryDescription description)
-        {
-            QueryToken token = QueryUtils.Parse(co.Path, description);
-            Column = new Column(token, co.DisplayName.DefaultText(token.NiceName()));
-        }
-
         public Column Column;
         public ResultColumn ResultColumn;
-        public GridViewColumn GridViewColumn;
     }
 
     public class ColumnOrderInfo
@@ -37,7 +30,7 @@ namespace Signum.Windows.DynamicQuery
         SortAdorner adorner;
         public GridViewColumnHeader Header { get; set; }
 
-        public void Clean()
+        public void CleanAdorner()
         {
             var layer = AdornerLayer.GetAdornerLayer(Header);
 
@@ -45,7 +38,7 @@ namespace Signum.Windows.DynamicQuery
                 layer.Remove(adorner);
         }
 
-        public void Flip()
+        public void FlipAdorner()
         {
             adorner.OrderType = adorner.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
             AdornerLayer.GetAdornerLayer(Header).Update();

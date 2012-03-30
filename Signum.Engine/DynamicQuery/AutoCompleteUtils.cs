@@ -35,47 +35,45 @@ namespace Signum.Engine.DynamicQuery
         {
             return (from mi in new[] { miLiteStarting, miLiteContaining }
                     from type in types
-                    from lite in (List<Lite>)mi.GetInvoker(liteType, type)(subString, count)
+                    from lite in mi.GetInvoker(liteType, type)(subString, count)
                     select lite).Take(count).ToList();
         }
 
-        static GenericInvoker miLiteStarting = GenericInvoker.Create(() => LiteStarting<TypeDN, TypeDN>(null, 1));
+        static GenericInvoker<Func<string, int, List<Lite>>> miLiteStarting = new GenericInvoker<Func<string, int, List<Lite>>>((ss, c) => LiteStarting<TypeDN, TypeDN>(ss, c));
         static List<Lite> LiteStarting<LT, RT>(string subString, int count)
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToStr).Cast<Lite>().ToList();
+            return Database.Query<RT>().Where(a => a.ToString().StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToString()).Cast<Lite>().ToList();
         }
 
-        static GenericInvoker miLiteContaining = GenericInvoker.Create(() => LiteContaining<TypeDN, TypeDN>(null, 1));
+        static GenericInvoker<Func<string, int, List<Lite>>> miLiteContaining = new GenericInvoker<Func<string, int, List<Lite>>>((ss, c) => LiteContaining<TypeDN, TypeDN>(ss, c));
         static List<Lite> LiteContaining<LT, RT>(string subString, int count)
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToStr.Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToStr).Cast<Lite>().ToList();
+            return Database.Query<RT>().Where(a => a.ToString().Contains(subString) && !a.ToString().StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToString()).Cast<Lite>().ToList();
         }
 
-        public static List<Lite> RetriveAllLite(Type liteType, Implementations implementations)
+        public static List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
             if (implementations == null)
             {
-                return (List<Lite>)miAllLite.GetInvoker(liteType, liteType)();
+                return Database.RetrieveAllLite(liteType);
             }
 
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for RetrieAllLite");
 
-            return (from type in ((ImplementedByAttribute)implementations).ImplementedTypes
-                    from l in (List<Lite>)miAllLite.GetInvoker(liteType, type)()
-                    select l).ToList();
+            return ((ImplementedByAttribute)implementations).ImplementedTypes.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
         }
 
-        static GenericInvoker miAllLite = GenericInvoker.Create(() => AllLite<TypeDN, TypeDN>());
-        static List<Lite> AllLite<LT, RT>()
-            where LT : class, IIdentifiable
-            where RT : IdentifiableEntity, LT
+        static GenericInvoker<Func<List<Lite>>> miAllLite = new GenericInvoker<Func<List<Lite>>>(() => AllLite<TypeDN, TypeDN>());
+        static List<Lite> AllLite<ST, RT>()
+            where ST : class, IIdentifiable
+            where RT : IdentifiableEntity, ST
         {
-            return Database.Query<RT>().Select(a => a.ToLite<LT>()).AsEnumerable().Cast<Lite>().ToList();
+            return Database.Query<RT>().Select(a => a.ToLite<ST>()).AsEnumerable().Cast<Lite>().ToList();
         }
     }
 }

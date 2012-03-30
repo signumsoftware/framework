@@ -135,9 +135,6 @@
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
     <value>Concurrency error on the databe, Table = {0}, Id = {1}</value>
   </data>
-  <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
-    <value>Cannot Insert duplicated values on field {0} of table {1}</value>
-  </data>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
     <value>'{0}' has been renamed in {1}?</value>
   </data>
@@ -149,8 +146,5 @@
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Unautorized access to {0} because {1}</value>
-  </data>
-  <data name="NotAuthorizedToRetrieve01" xml:space="preserve">
-    <value>Not authorized to retrieve {0} {1}</value>
   </data>
 </root>

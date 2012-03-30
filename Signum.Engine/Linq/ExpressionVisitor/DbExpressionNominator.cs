@@ -14,6 +14,8 @@ using System.Collections.ObjectModel;
 using Signum.Engine.Maps;
 using System.Data;
 using Signum.Entities.Reflection;
+using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Linq
 {
@@ -23,7 +25,7 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class DbExpressionNominator : DbExpressionVisitor
     {
-        string[] existingAliases;
+        Alias[] existingAliases;
 
         // existingAliases is null when used in QueryBinder, not ColumnProjector
         // this allows to make function changes in where clausules but keeping the full expression (not compressing it in one column
@@ -31,37 +33,45 @@ namespace Signum.Engine.Linq
 
         bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
 
+        bool IsFullNominateOrAggresive { get { return IsFullNominate || isAggresive; } }
+
         bool isAggresive = false;
 
         bool innerProjection = false; 
 
         HashSet<Expression> candidates = new HashSet<Expression>();
 
+        T Add<T>(T expression) where T : Expression
+        {
+            this.candidates.Add(expression);
+            return expression;
+        }
+
+        bool Has(Expression expression)
+        {
+            return this.candidates.Contains(expression);
+        }
+
         private DbExpressionNominator() { }
 
-        static internal HashSet<Expression> Nominate(Expression expression, string[] existingAliases, out Expression newExpression)
+        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression)
         {
             DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
 
-        static internal HashSet<Expression> NominateGroupBy(Expression expression, string[] existingAliases, out Expression newExpression)
+        static internal HashSet<Expression> NominateGroupBy(Expression expression, Alias[] existingAliases, out Expression newExpression)
         {
             DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isAggresive = true };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
         
-        static internal Expression FullNominate(Expression expression, bool isCondition)
+        static internal Expression FullNominate(Expression expression)
         {
             DbExpressionNominator n = new DbExpressionNominator { existingAliases = null };
             Expression result = n.Visit(expression);
-         
-            if (isCondition)
-                result = ConditionsRewriter.MakeSqlCondition(result);
-            else
-                result = ConditionsRewriter.MakeSqlValue(result); 
 
             return result;
         }
@@ -69,7 +79,7 @@ namespace Signum.Engine.Linq
         protected override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
-            if(IsFullNominate && result != null && !candidates.Contains(result) && !IsExcluded(exp.NodeType))
+            if (IsFullNominate && result != null && !Has(result) && !IsExcluded(exp.NodeType))
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.NiceToString());
 
             return result;
@@ -93,12 +103,18 @@ namespace Signum.Engine.Linq
             return false; 
         }
 
+        Dictionary<ColumnExpression, ScalarExpression> replacements; 
+
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (((IsFullNominate || isAggresive) && !innerProjection) ||
+            ScalarExpression scalar;
+            if (replacements != null && replacements.TryGetValue(column, out scalar))
+                return Visit(scalar);
+
+            if ((IsFullNominateOrAggresive && !innerProjection) ||
                 existingAliases.Contains(column.Alias))
-                candidates.Add(column);
-            
+                return Add(column);
+
             return column;
         }
 
@@ -116,8 +132,8 @@ namespace Signum.Engine.Linq
                         nex = Expression.New(nex.Constructor, args);
                 }
 
-                if (args.All(a => candidates.Contains(a)))
-                    candidates.Add(nex);
+                if (args.All(a => Has(a)))
+                    return Add(nex);
 
                 return nex;
             }
@@ -127,35 +143,41 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (!innerProjection && (IsFullNominate || isAggresive) && (IsSimpleType(c.Type) || c.Type == typeof(object) && c.IsNull()))
-                candidates.Add(c);
+            if (!innerProjection && IsFullNominateOrAggresive && ( Schema.Current.Settings.IsDbType(c.Type.UnNullify()) || c.Type == typeof(object) && c.IsNull()))
+            {
+                return Add(c);
+            }
             return c;
         }
 
-        private bool IsSimpleType(Type type)
-        {
-            type = type.UnNullify();
 
-            return type.IsEnum || Schema.Current.Settings.TypeValues.ContainsKey(type);
-        }
 
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             //We can not assume allways true because neasted projections
+            Expression obj = Visit(sqlFunction.Object);
             ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
-            if (args != sqlFunction.Arguments)
-                sqlFunction = new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args); ;
+            if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
+                sqlFunction = new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); ;
 
-            if (args.All(a => candidates.Contains(a)))
-                candidates.Add(sqlFunction);
+            if (args.All(Has) && (obj == null || Has(obj)))
+                return Add(sqlFunction);
 
             return sqlFunction;
+        }
+
+        protected override Expression VisitSqlCast(SqlCastExpression castExpr)
+        {
+            var expression = Visit(castExpr.Expression);
+            if (expression != castExpr.Expression)
+                castExpr = new SqlCastExpression(castExpr.Type, expression, castExpr.SqlDbType);
+            return Add(castExpr);
         }
 
         protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
         {
             if (!innerProjection)
-                candidates.Add(sqlConstant);
+                return Add(sqlConstant);
             return sqlConstant;
         }
 
@@ -167,8 +189,8 @@ namespace Signum.Engine.Linq
             if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
                 cex = new CaseExpression(newWhens, newDefault);
 
-            if (newWhens.All(w => candidates.Contains(w.Condition) && candidates.Contains(w.Value)) && candidates.Contains(newDefault))
-                candidates.Add(cex);
+            if (newWhens.All(w => Has(w.Condition) && Has(w.Value)) && (newDefault == null || Has(newDefault)))
+                return Add(cex);
 
             return cex;
         }
@@ -176,24 +198,31 @@ namespace Signum.Engine.Linq
         protected Expression TrySqlToString(Type type, Expression expression)
         {
             var newExp = Visit(expression);
-            if (candidates.Contains(newExp) && IsFullNominate)
+            if (Has(newExp) && IsFullNominateOrAggresive)
             {
                 var cast = new SqlCastExpression(type, newExp);
-                candidates.Add(cast);
-                return cast;
+                return Add(cast);
             }
             return null;
         }
 
-        protected Expression TrySqlFunction(SqlFunction sqlFunction, Type type, params Expression[] expression)
+        protected Expression TrySqlFunction(Expression obj, SqlFunction sqlFunction, Type type, params Expression[] expression)
         {
-            return TrySqlFunction(sqlFunction.ToString(), type, expression); 
+            return TrySqlFunction(obj, sqlFunction.ToString(), type, expression); 
         }
 
-        protected Expression TrySqlFunction(string sqlFunction, Type type, params Expression[] expression)
+        protected Expression TrySqlFunction(Expression obj, string sqlFunction, Type type, params Expression[] expression)
         {
             if (innerProjection)
                 return null;
+
+            Expression newObj = null;
+            if (obj != null)
+            {
+                newObj = Visit(obj);
+                if (!Has(newObj))
+                    return null;
+            }
 
             expression = expression.NotNull().ToArray();
             Expression[] newExpressions = new Expression[expression.Length];
@@ -201,13 +230,11 @@ namespace Signum.Engine.Linq
             for (int i = 0; i < expression.Length; i++)
             {
                 newExpressions[i] = Visit(expression[i]);
-                if (!candidates.Contains(newExpressions[i]))
+                if (!Has(newExpressions[i]))
                     return null;
             }
 
-            var result = new SqlFunctionExpression(type, sqlFunction.ToString(), newExpressions);
-            candidates.Add(result);
-            return result;
+            return Add(new SqlFunctionExpression(type, newObj, sqlFunction.ToString(), newExpressions));
         }
 
         private SqlFunctionExpression TrySqlDifference(SqlEnums sqlEnums, Type type, Expression expression)
@@ -215,104 +242,131 @@ namespace Signum.Engine.Linq
             if (innerProjection)
                 return null;
 
+            expression = expression.RemoveUnNullify();
+
             BinaryExpression be = expression as BinaryExpression;
 
             if (be == null || be.NodeType != ExpressionType.Subtract)
                 return null;
 
             Expression left = Visit(be.Left);
-            if (!candidates.Contains(left))
+            if (!Has(left.RemoveNullify()))
                 return null;
 
             Expression right = Visit(be.Right);
-            if (!candidates.Contains(right))
+            if (!Has(right.RemoveNullify()))
                 return null;
 
-            SqlFunctionExpression result = new SqlFunctionExpression(type, SqlFunction.DATEDIFF.ToString(), new Expression[]{
+            SqlFunctionExpression result = new SqlFunctionExpression(type, null, SqlFunction.DATEDIFF.ToString(), new Expression[]{
                 new SqlEnumExpression(sqlEnums), right, left});
 
-            candidates.Add(result);
-
-            return result;
+            return Add(result);
         }
 
         private Expression TrySqlDate(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (innerProjection || !candidates.Contains(expr))
+            if (innerProjection || !Has(expr))
                 return null;
 
-            Expression result =
-                  new SqlCastExpression(typeof(DateTime),
-                    new SqlFunctionExpression(typeof(double), SqlFunction.FLOOR.ToString(),
-                        new[] { new SqlCastExpression(typeof(double), expr) }
-                    ));
+            if (Schema.Current.Settings.DBMS == DBMS.SqlServer2008)
+                return Add(new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.CONVERT.ToString(), new[]
+                {
+                    new SqlConstantExpression(SqlDbType.Date),
+                    expr,
+                    new SqlConstantExpression(101)
+                }));
 
-            candidates.Add(result);
-            return result; 
+            return Add(new SqlCastExpression(typeof(DateTime),
+                   new SqlFunctionExpression(typeof(double), null, SqlFunction.FLOOR.ToString(),
+                       new[] { new SqlCastExpression(typeof(double), expr) }
+                   )));
+        }
+
+        private Expression TrySqlTime(Expression expression)
+        {
+            Expression expr = Visit(expression);
+            if (innerProjection || !Has(expr))
+                return null;
+
+            if (Schema.Current.Settings.DBMS == DBMS.SqlServer2008)
+                return Add(new SqlFunctionExpression(typeof(TimeSpan), null, SqlFunction.CONVERT.ToString(), new[]
+                {
+                    new SqlConstantExpression(SqlDbType.Time),
+                    expr,
+                }));
+
+            throw new InvalidOperationException("{0} not supported on SQL Server 2005");
         }
 
         private Expression TrySqlDayOftheWeek(Expression expression)
         {
-            if (!IsFullNominate)
+            if (!IsFullNominateOrAggresive)
                 return null;
 
             Expression expr = Visit(expression);
-            if (innerProjection || !candidates.Contains(expr))
+            if (innerProjection || !Has(expr))
                 return null;
 
-            Expression result = Expression.Convert(Expression.Add(
-                    TrySqlFunction(SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
+            Expression result = Expression.Convert(Expression.Subtract(
+                    TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
                     Expression.Constant(1)), typeof(DayOfWeek));
 
-            candidates.Add(result);
-
-            return result;
+            return Add(result);
         }
 
         private Expression TrySqlMonthStart(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (innerProjection || !candidates.Contains(expr))
+            if (innerProjection || !Has(expr))
                 return null;
 
             Expression result =
-                TrySqlFunction(SqlFunction.DATEADD, expression.Type, new SqlEnumExpression(SqlEnums.month),
-                      TrySqlFunction(SqlFunction.DATEDIFF, typeof(int), new SqlEnumExpression(SqlEnums.month), new SqlConstantExpression(0), expression),
+                TrySqlFunction(null, SqlFunction.DATEADD, expression.Type, new SqlEnumExpression(SqlEnums.month),
+                      TrySqlFunction(null, SqlFunction.DATEDIFF, typeof(int), new SqlEnumExpression(SqlEnums.month), new SqlConstantExpression(0), expression),
                     new SqlConstantExpression(0));
 
-            candidates.Add(result);
-            return result;
+            return Add(result);
         }
+
+
+        private Expression TryAddSubstractDateTime(Expression date, Expression time, bool add)
+        {
+            Expression exprDate = Visit(date);
+            Expression exprTime = Visit(time);
+            if (innerProjection || !Has(exprDate) || !Has(exprTime))
+                return null;
+
+            var cast = new SqlCastExpression(typeof(DateTime), exprDate, SqlDbType.DateTime); //Just in case is a Date
+
+            var result = add ? Expression.Add(cast, exprTime) :
+                Expression.Subtract(cast, exprTime);
+
+            return Add(result); 
+        }
+        
 
         private Expression TrySqlTrim(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (innerProjection || !candidates.Contains(expr))
+            if (innerProjection || !Has(expr))
                 return null;
 
             Expression result =
-                TrySqlFunction(SqlFunction.LTRIM, expression.Type,
-                      TrySqlFunction(SqlFunction.RTRIM, expression.Type, expression));
+                TrySqlFunction(null, SqlFunction.LTRIM, expression.Type,
+                      TrySqlFunction(null, SqlFunction.RTRIM, expression.Type, expression));
 
-            candidates.Add(result);
-            return result;
-        }
-
-        Expression Convert(Expression exp, Type type)
-        {
-            return new SqlFunctionExpression(type, SqlFunction.CONVERT.ToString(), new[]{exp, 
-                new SqlConstantExpression(Schema.Current.Settings.DefaultSqlType(type).ToString(), typeof(string))});
+            return Add(result);
         }
 
         private Expression DateAdd(SqlEnums part, Expression dateExpression, Expression intExpression)
         {
-            return new SqlFunctionExpression(typeof(DateTime), SqlFunction.DATEADD.ToString(), new Expression[] { new SqlEnumExpression(part), dateExpression, intExpression });
+            return new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.DATEADD.ToString(), new Expression[] { new SqlEnumExpression(part), dateExpression, intExpression });
         }
 
         private Expression MinusDatePart(SqlEnums part, Expression dateExpression)
         {
-            return Expression.Negate(new SqlFunctionExpression(typeof(int), SqlFunction.DATEPART.ToString(), new Expression[] { new SqlEnumExpression(part), dateExpression }));
+            return Expression.Negate(new SqlFunctionExpression(typeof(int), null, SqlFunction.DATEPART.ToString(), new Expression[] { new SqlEnumExpression(part), dateExpression }));
         }
 
 
@@ -322,46 +376,41 @@ namespace Signum.Engine.Linq
             {
                 var expression = SmartEqualizer.PolymorphicEqual(b.Left, b.Right);
 
-                if (expression.NodeType == ExpressionType.Equal)
+                if (expression.NodeType == ExpressionType.Equal) //simple comparison
                 {
                     BinaryExpression newB = expression as BinaryExpression;
                     var left = Visit(newB.Left);
                     var right = Visit(newB.Right);
 
                     newB = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-                    
-                    if (candidates.Contains(left) && candidates.Contains(right))
+                    if (Has(left) && Has(right))
+                        candidates.Add(newB);
+
+                    if (Has(newB) && IsFullNominateOrAggresive)
                     {
-                        Expression result = ConvertToSql(newB);
-                        candidates.Add(result);
-
-                        return result;
-                    }
-
-                    return newB;
-                }
-                else
-                {
-                    var result = Visit(expression);
-
-                    if (b.NodeType == ExpressionType.NotEqual)
-                    {
-                        bool nominated = candidates.Contains(result);
-                        result = Expression.Not(result);
-                        if (nominated)
-                            candidates.Add(result);
-                        return result;
+                        Expression result = ConvertToSqlComparison(newB);
+                        return Add(result);
                     }
                     else
                     {
-                        return Visit(expression);
+                        return ConvertAvoidNominate(newB);
                     }
+                }
+                else //tuples, entities, etc...
+                {
+                    Expression result = Visit(expression);
+                    if (b.NodeType == ExpressionType.Equal)
+                        return result;
+
+                    var not = SimpleNot(result) ?? Expression.Not(result);
+
+                    if (Has(result))
+                        return Add(not);
+                    return not;
                 }
             }
             else
             {
-
-
                 Expression left = this.Visit(b.Left);
                 Expression right = this.Visit(b.Right);
                 Expression conversion = this.Visit(b.Conversion);
@@ -373,29 +422,85 @@ namespace Signum.Engine.Linq
                         b = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
                 }
 
-                if (candidates.Contains(left) && candidates.Contains(right))
+                Expression result = b;
+                if (candidates.Contains(left) && candidates.Contains(right) && IsFullNominateOrAggresive)
                 {
-                    if (b.NodeType == ExpressionType.Add && IsFullNominate && (left.Type == typeof(string)) != (right.Type == typeof(string)))
+                    if ((b.NodeType == ExpressionType.Add || b.NodeType == ExpressionType.Subtract) && b.Left.Type.UnNullify() == typeof(DateTime) && b.Right.Type.UnNullify() == typeof(TimeSpan))
+                        result = TryAddSubstractDateTime(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? result;
+
+                    if (b.NodeType == ExpressionType.Add)
                     {
-                        b = Expression.Add(
-                            left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
-                            right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
+                        result = ConvertToSqlAddition(b);
+                    }
+                    else if (b.NodeType == ExpressionType.Coalesce)
+                    {
+                        result = ConvertToSqlCoallesce(b);
                     }
 
-                    candidates.Add(b);
+                    return Add(result);
                 }
-                return b;
+
+                return result;
             }
         }
 
-        private Expression ConvertToSql(BinaryExpression b)
+        public Expression SimpleNot(Expression e)
+        {
+            if (e.NodeType == ExpressionType.Not)
+                return ((UnaryExpression)e).Operand;
+
+            if (e.NodeType == (ExpressionType)DbExpressionType.IsNull)
+                return new IsNotNullExpression(((IsNullExpression)e).Expression);
+
+            if (e.NodeType == (ExpressionType)DbExpressionType.IsNotNull)
+                return new IsNullExpression(((IsNotNullExpression)e).Expression);
+
+            return null;
+        }
+
+        private Expression ConvertToSqlCoallesce(BinaryExpression b)
+        {
+            Expression left = b.Left;
+            Expression right = b.Right;
+
+            List<Expression> expressions = new List<Expression>();
+            SqlFunctionExpression fLeft = left as SqlFunctionExpression;
+            if (fLeft != null && fLeft.SqlFunction == SqlFunction.COALESCE.ToString())
+                expressions.AddRange(fLeft.Arguments);
+            else
+                expressions.Add(left);
+
+            SqlFunctionExpression fRight = right as SqlFunctionExpression;
+            if (fRight != null && fRight.SqlFunction == SqlFunction.COALESCE.ToString())
+                expressions.AddRange(fRight.Arguments);
+            else
+                expressions.Add(right);
+
+            return Add(new SqlFunctionExpression(b.Type, null, SqlFunction.COALESCE.ToString(), expressions));
+        }
+
+        private BinaryExpression ConvertToSqlAddition(BinaryExpression b)
+        {
+            Expression left = b.Left;
+            Expression right = b.Right;
+
+            if ((left.Type == typeof(string)) != (right.Type == typeof(string)))
+            {
+                b = Expression.Add(
+                    left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
+                    right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
+            }
+            return b;
+        }
+
+        private Expression ConvertToSqlComparison(BinaryExpression b)
         {
             if (b.NodeType == ExpressionType.Equal)
             {
                 if (b.Left.IsNull())
                 {
                     if (b.Right.IsNull())
-                        return SqlConstantExpression.True;
+                        return Expression.Constant(true);
                     else
                         return new IsNullExpression(b.Right);
                 }
@@ -412,7 +517,7 @@ namespace Signum.Engine.Linq
                 if (b.Left.IsNull())
                 {
                     if (b.Right.IsNull())
-                        return SqlConstantExpression.False;
+                        return Expression.Constant(false);
                     else
                         return new IsNotNullExpression(b.Right);
                 }
@@ -425,6 +530,45 @@ namespace Signum.Engine.Linq
                 }
             }
             throw new InvalidOperationException(); 
+        }
+
+        private Expression ConvertAvoidNominate(BinaryExpression b)
+        {
+            if (b.NodeType == ExpressionType.Equal)
+            {
+                if (b.Left.IsNull())
+                {
+                    if (b.Right.IsNull())
+                        return Expression.Constant(true);
+                    else
+                        return Expression.Equal(Expression.Constant(null, b.Left.Type), b.Right);
+                }
+                else
+                {
+                    if (b.Right.IsNull())
+                        return Expression.Equal(b.Left, Expression.Constant(null, b.Right.Type));
+
+                    return b;
+                }
+            }
+            else if (b.NodeType == ExpressionType.NotEqual)
+            {
+                if (b.Left.IsNull())
+                {
+                    if (b.Right.IsNull())
+                        return Expression.Constant(false);
+                    else
+                        return Expression.NotEqual(Expression.Constant(null, b.Left.Type), b.Right);
+                }
+                else
+                {
+                    if (b.Right.IsNull())
+                        return Expression.NotEqual(b.Left, Expression.Constant(null, b.Right.Type));
+
+                    return b;
+                }
+            }
+            throw new InvalidOperationException();
         }
 
         static MethodInfo miSimpleConcat = ReflectionTools.GetMethodInfo(() => string.Concat("a", "b"));
@@ -441,21 +585,22 @@ namespace Signum.Engine.Linq
                 result = Expression.Condition(test, ifTrue, ifFalse);
             }
 
-            if (candidates.Contains(test) && candidates.Contains(ifTrue) && candidates.Contains(ifFalse))
+            if (Has(test) && Has(ifTrue) && Has(ifFalse))
             {
-                Expression newTest = ConditionsRewriter.MakeSqlCondition(test); 
-                Expression newTrue = ConditionsRewriter.MakeSqlValue(ifTrue);
-
                 if (ifFalse.NodeType == (ExpressionType)DbExpressionType.Case)
                 {
-                    var oldC  = (CaseExpression)ifFalse;
+                    var oldC = (CaseExpression)ifFalse;
                     candidates.Remove(ifFalse); // just to save some memory
-                    result = new CaseExpression(oldC.Whens.PreAnd(new When(newTest, newTrue)), oldC.DefaultValue);
+                    result = new CaseExpression(oldC.Whens.PreAnd(new When(test, ifTrue)), oldC.DefaultValue);
                 }
                 else
-                    result = new CaseExpression(new[] { new When(newTest, newTrue) }, ConditionsRewriter.MakeSqlValue(ifFalse));
+                {
+                    Expression @default = ifFalse.IsNull() ? null : ifFalse;
 
-                candidates.Add(result);
+                    result = new CaseExpression(new[] { new When(test, ifTrue) }, @default);
+                }
+
+                return Add(result);
             }
             return result;
         }
@@ -472,24 +617,70 @@ namespace Signum.Engine.Linq
 
             Expression operand = this.Visit(u.Operand);
 
-            UnaryExpression result = operand == u.Operand ? u : Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
+            Expression result = operand == u.Operand ? u : Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
 
-            if (candidates.Contains(operand) &&
-                (u.NodeType == ExpressionType.Not ||
-                 u.NodeType == ExpressionType.Negate ||
-                 u.NodeType == ExpressionType.Convert && (/*u.Operand.Type.UnNullify() == u.Type.UnNullify() ||*/ IsFullNominate))) //Expand nullability
-                candidates.Add(result);
+            if (Has(operand))
+            {
+                if (u.NodeType == ExpressionType.Not)
+                    return Add(SimpleNot(operand) ?? result);
+                
+                if(u.NodeType == ExpressionType.Negate)
+                    return Add(result);
+
+                if (u.NodeType == ExpressionType.Convert)
+                {
+                    var untu = u.Type.UnNullify(); 
+                    var optu = u.Operand.Type.UnNullify();
+
+                    if ((optu == typeof(bool) || optu == typeof(int) || optu == typeof(long)) &&
+                        (untu == typeof(double) || untu == typeof(float) || untu == typeof(decimal)))
+                        return Add(new SqlCastExpression(u.Type, u.Operand));
+
+                    if (optu == typeof(bool) &&
+                       (untu == typeof(int) || untu == typeof(long)))
+                        return Add(new SqlCastExpression(u.Type, u.Operand));
+
+                    if (IsFullNominate || isAggresive && u.Operand.Type.UnNullify() == u.Type.UnNullify())
+                        return Add(result);
+
+                    if ("Sql" + u.Type.UnNullify().Name == u.Operand.Type.UnNullify().Name)
+                        return Add(result);
+                }
+            }
 
             return result;
         }
 
+        
+
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
-            bool oldInnerProjection = this.innerProjection;
-            innerProjection = true;
-            var result = base.VisitProjection(proj);
-            innerProjection = oldInnerProjection;
-            return result;
+            if (proj.IsOneCell)
+            {
+                var column = proj.Select.Columns.SingleEx();
+
+                var select = (SelectExpression)base.Visit(proj.Select);
+                var scalar = new ScalarExpression(column.Expression.Type, select);
+
+                var reference = column.GetReference(proj.Select.Alias);
+                
+                if (replacements == null)
+                    replacements = new Dictionary<ColumnExpression, ScalarExpression>(); 
+
+                replacements.Add(reference, scalar);
+                var result = Visit(proj.Projector);
+                replacements.Remove(reference);
+
+                return result;
+            }
+            else
+            {
+                bool oldInnerProjection = this.innerProjection;
+                innerProjection = true;
+                var result = base.VisitProjection(proj);
+                innerProjection = oldInnerProjection;
+                return result;
+            }
         }
 
         protected override Expression VisitIn(InExpression inExp)
@@ -501,8 +692,8 @@ namespace Signum.Engine.Linq
                 result = select == null ? InExpression.FromValues(exp, inExp.Values) :
                                          new InExpression(exp, select);
 
-            if (!innerProjection && candidates.Contains(exp))
-                candidates.Add(result);
+            if (!innerProjection && Has(exp))
+                return Add(result);
 
             return result;
         }
@@ -514,7 +705,7 @@ namespace Signum.Engine.Linq
                 exists = new ExistsExpression(select);
 
             if(!innerProjection)
-                candidates.Add(exists);
+                return Add(exists);
 
             return exists;
         }
@@ -526,7 +717,7 @@ namespace Signum.Engine.Linq
                 scalar = new ScalarExpression(scalar.Type, select);
 
             if (!innerProjection)
-                candidates.Add(scalar);
+                return Add(scalar);
 
             return scalar;
         }
@@ -538,7 +729,7 @@ namespace Signum.Engine.Linq
                 aggregate = new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
 
             if (!innerProjection)
-                candidates.Add(aggregate);
+                return Add(aggregate);
 
             return aggregate;
         }
@@ -549,8 +740,8 @@ namespace Signum.Engine.Linq
             if (subquery != aggregate.AggregateAsSubquery)
                 aggregate = new AggregateSubqueryExpression(aggregate.GroupByAlias, aggregate.AggregateInGroupSelect, subquery);
 
-            if (!innerProjection) 
-                candidates.Add(aggregate);
+            if (!innerProjection)
+                return Add(aggregate);
 
             return aggregate;
         }
@@ -561,8 +752,8 @@ namespace Signum.Engine.Linq
             if (exp != isNotNull.Expression)
                 isNotNull = new IsNotNullExpression(exp);
 
-            if (candidates.Contains(exp))
-                candidates.Add(isNotNull);
+            if (Has(exp))
+                return Add(isNotNull);
 
             return isNotNull;
         }
@@ -573,8 +764,8 @@ namespace Signum.Engine.Linq
             if (exp != isNull.Expression)
                 isNull = new IsNullExpression(exp);
 
-            if (candidates.Contains(exp))
-                candidates.Add(isNull);
+            if (Has(exp))
+                return Add(isNull);
 
             return isNull;
         }
@@ -583,7 +774,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             if (!innerProjection)
-                candidates.Add(sqlEnum);
+                return Add(sqlEnum);
             return sqlEnum;
         }
 
@@ -594,8 +785,8 @@ namespace Signum.Engine.Linq
             if (exp != like.Expression || pattern != like.Pattern)
                 like = new LikeExpression(exp, pattern);
 
-            if (candidates.Contains(exp) && candidates.Contains(pattern))
-                candidates.Add(like);
+            if (Has(exp) && Has(pattern))
+                return Add(like);
 
             return like;
         }
@@ -607,12 +798,11 @@ namespace Signum.Engine.Linq
              Expression newPattern = Visit(pattern); 
              Expression newExpression = Visit(expression);
 
-             LikeExpression result = new LikeExpression(newExpression,newPattern); 
+             LikeExpression result = new LikeExpression(newExpression,newPattern);
 
-             if(candidates.Contains(newPattern) && candidates.Contains(newExpression))
+             if (Has(newPattern) && Has(newExpression))
              {
-                 candidates.Add(result); 
-                 return result;
+                 return Add(result); 
              }
              return null;
         }
@@ -628,8 +818,8 @@ namespace Signum.Engine.Linq
                 else
                     nullable = new IsNotNullExpression(expression);
 
-                if (candidates.Contains(expression))
-                    candidates.Add(nullable);
+                if (Has(expression))
+                    return Add(nullable);
 
                 return nullable;
             }
@@ -645,18 +835,25 @@ namespace Signum.Engine.Linq
         {
             switch (m.Member.DeclaringType.TypeName() + "." + m.Member.Name)
             {
-                case "string.Length": return TrySqlFunction(SqlFunction.LEN, m.Type, m.Expression);
-                case "Math.PI": return TrySqlFunction(SqlFunction.PI, m.Type);
-                case "DateTime.Year": return TrySqlFunction(SqlFunction.YEAR, m.Type, m.Expression);
-                case "DateTime.Month": return TrySqlFunction(SqlFunction.MONTH, m.Type, m.Expression);
-                case "DateTime.Day": return TrySqlFunction(SqlFunction.DAY, m.Type, m.Expression);
-                case "DateTime.DayOfYear": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.dayofyear), m.Expression);
-                case "DateTime.Hour": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.hour), m.Expression);
-                case "DateTime.Minute": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.minute), m.Expression);
-                case "DateTime.Second": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression);
-                case "DateTime.Millisecond": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.Expression);
+                case "string.Length": return TrySqlFunction(null, SqlFunction.LEN, m.Type, m.Expression);
+                case "Math.PI": return TrySqlFunction(null, SqlFunction.PI, m.Type);
+                case "DateTime.Year": return TrySqlFunction(null, SqlFunction.YEAR, m.Type, m.Expression);
+                case "DateTime.Month": return TrySqlFunction(null, SqlFunction.MONTH, m.Type, m.Expression);
+                case "DateTime.Day": return TrySqlFunction(null, SqlFunction.DAY, m.Type, m.Expression);
+                case "DateTime.DayOfYear": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.dayofyear), m.Expression);
+                case "DateTime.Hour": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.hour), m.Expression);
+                case "DateTime.Minute": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.minute), m.Expression);
+                case "DateTime.Second": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression);
+                case "DateTime.Millisecond": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.Expression);
                 case "DateTime.Date": return TrySqlDate(m.Expression);
+                case "DateTime.TimeOfDay": return TrySqlTime(m.Expression);
                 case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
+
+                case "TimeSpan.Hours": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.hour), m.Expression);
+                case "TimeSpan.Minutes": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.minute), m.Expression);
+                case "TimeSpan.Seconds": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression);
+                case "TimeSpan.Milliseconds": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.Expression);
+               
                 case "TimeSpan.TotalDays": return TrySqlDifference(SqlEnums.day, m.Type, m.Expression);
                 case "TimeSpan.TotalHours": return TrySqlDifference(SqlEnums.hour, m.Type, m.Expression);
                 case "TimeSpan.TotalMilliseconds": return TrySqlDifference(SqlEnums.millisecond, m.Type, m.Expression);
@@ -670,14 +867,14 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            SqlMethodAttribute sma = m.Method.SingleAttribute<SqlMethodAttribute>();
-            if (sma != null)
-                using (ForceFullNominate())
-                    return TrySqlFunction(sma.Name ?? m.Method.Name, m.Type, m.Arguments.ToArray());
-
             Expression result = HardCodedMethods(m);
             if (result != null)
                 return result;
+
+            SqlMethodAttribute sma = m.Method.SingleAttribute<SqlMethodAttribute>();
+            if (sma != null)
+                using (ForceFullNominate())
+                    return TrySqlFunction(m.Object, sma.Name ?? m.Method.Name, m.Type, m.Arguments.ToArray());
 
             return base.VisitMethodCall(m);
         }
@@ -693,68 +890,79 @@ namespace Signum.Engine.Linq
                     {
                         Expression startIndex = m.TryGetArgument("startIndex").TryCC(e => Expression.Add(e, new SqlConstantExpression(1)));
 
-                        Expression charIndex = TrySqlFunction(SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, startIndex);
+                        Expression charIndex = TrySqlFunction(null, SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, startIndex);
                         if (charIndex == null)
                             return null;
                         Expression result = Expression.Subtract(charIndex, Expression.Constant(1));
-                        if (candidates.Contains(charIndex))
-                            candidates.Add(result);
+                        if (Has(charIndex))
+                            return Add(result);
                         return result;
+
                     }
-                case "string.ToLower": return TrySqlFunction(SqlFunction.LOWER, m.Type, m.Object);
-                case "string.ToUpper": return TrySqlFunction(SqlFunction.UPPER, m.Type, m.Object);
-                case "string.TrimStart": return TrySqlFunction(SqlFunction.LTRIM, m.Type, m.Object);
-                case "string.TrimEnd": return TrySqlFunction(SqlFunction.RTRIM, m.Type, m.Object);
+                case "string.ToLower": return TrySqlFunction(null, SqlFunction.LOWER, m.Type, m.Object);
+                case "string.ToUpper": return TrySqlFunction(null, SqlFunction.UPPER, m.Type, m.Object);
+                case "string.TrimStart": return TrySqlFunction(null, SqlFunction.LTRIM, m.Type, m.Object);
+                case "string.TrimEnd": return TrySqlFunction(null, SqlFunction.RTRIM, m.Type, m.Object);
                 case "string.Trim": return TrySqlTrim(m.Object);
-                case "string.Replace": return TrySqlFunction(SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
-                case "string.Substring": return TrySqlFunction(SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1)), m.TryGetArgument("length") ?? new SqlConstantExpression(int.MaxValue));
+                case "string.Replace": return TrySqlFunction(null, SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
+                case "string.Substring": return TrySqlFunction(null, SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1)), m.TryGetArgument("length") ?? new SqlConstantExpression(int.MaxValue));
                 case "string.Contains": return TryLike(m.Object, Expression.Add(Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c), Expression.Constant("%"), c));
                 case "string.StartsWith": return TryLike(m.Object, Expression.Add(m.GetArgument("value"), Expression.Constant("%"), c));
                 case "string.EndsWith": return TryLike(m.Object, Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c));
 
-                case "StringExtensions.Left": return TrySqlFunction(SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
-                case "StringExtensions.Right": return TrySqlFunction(SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
-                case "StringExtensions.Replicate": return TrySqlFunction(SqlFunction.REPLICATE, m.Type, m.GetArgument("str"), m.GetArgument("times"));
-                case "StringExtensions.Reverse": return TrySqlFunction(SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
+                case "StringExtensions.Left": return TrySqlFunction(null, SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
+                case "StringExtensions.Right": return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
+                case "StringExtensions.Replicate": return TrySqlFunction(null, SqlFunction.REPLICATE, m.Type, m.GetArgument("str"), m.GetArgument("times"));
+                case "StringExtensions.Reverse": return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
                 case "StringExtensions.Like": return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
 
-                case "DateTime.AddDays": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.day), m.GetArgument("value"), m.Object);
-                case "DateTime.AddHours": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.hour), m.GetArgument("value"), m.Object);
-                case "DateTime.AddMilliseconds": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.GetArgument("value"), m.Object);
-                case "DateTime.AddMinutes": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.minute), m.GetArgument("value"), m.Object);
-                case "DateTime.AddMonths": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("months"), m.Object);
-                case "DateTime.AddSeconds": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.second), m.GetArgument("value"), m.Object);
-                case "DateTime.AddYears": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("value"), m.Object);
+                case "DateTime.Add":
+                case "DateTime.Substract":
+                    {
+                        var val = m.GetArgument("value");
+                        if (val.Type.UnNullify() != typeof(TimeSpan))
+                            return null;
+
+                        return TryAddSubstractDateTime(m.Object, val, m.Method.Name == "Add");
+                    }
+                case "DateTime.AddDays": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.day), m.GetArgument("value"), m.Object);
+                case "DateTime.AddHours": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.hour), m.GetArgument("value"), m.Object);
+                case "DateTime.AddMilliseconds": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.GetArgument("value"), m.Object);
+                case "DateTime.AddMinutes": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.minute), m.GetArgument("value"), m.Object);
+                case "DateTime.AddMonths": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("months"), m.Object);
+                case "DateTime.AddSeconds": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.second), m.GetArgument("value"), m.Object);
+                case "DateTime.AddYears": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("value"), m.Object);
                 
                     //dateadd(month, datediff(month, 0, SomeDate),0);
                 case "DateTimeExtensions.MonthStart": return TrySqlMonthStart(m.GetArgument("dateTime"));
-                    
-                case "Math.Sign": return TrySqlFunction(SqlFunction.SIGN, m.Type, m.GetArgument("value"));
-                case "Math.Abs": return TrySqlFunction(SqlFunction.ABS, m.Type, m.GetArgument("value"));
-                case "Math.Sin": return TrySqlFunction(SqlFunction.SIN, m.Type, m.GetArgument("a"));
-                case "Math.Asin": return TrySqlFunction(SqlFunction.ASIN, m.Type, m.GetArgument("d"));
-                case "Math.Cos": return TrySqlFunction(SqlFunction.COS, m.Type, m.GetArgument("d"));
-                case "Math.Acos": return TrySqlFunction(SqlFunction.ACOS, m.Type, m.GetArgument("d"));
-                case "Math.Tan": return TrySqlFunction(SqlFunction.TAN, m.Type, m.GetArgument("a"));
-                case "Math.Atan": return TrySqlFunction(SqlFunction.ATAN, m.Type, m.GetArgument("d"));
-                case "Math.Atan2": return TrySqlFunction(SqlFunction.ATN2, m.Type, m.GetArgument("y"), m.GetArgument("x"));
-                case "Math.Pow": return TrySqlFunction(SqlFunction.POWER, m.Type, m.GetArgument("x"), m.GetArgument("y"));
-                case "Math.Sqrt": return TrySqlFunction(SqlFunction.SQRT, m.Type, m.GetArgument("d"));
-                case "Math.Exp": return TrySqlFunction(SqlFunction.EXP, m.Type, m.GetArgument("d"));
-                case "Math.Floor": return TrySqlFunction(SqlFunction.FLOOR, m.Type, m.GetArgument("d"));
-                case "Math.Log10": return TrySqlFunction(SqlFunction.LOG10, m.Type, m.GetArgument("d"));
-                case "Math.Log": return m.Arguments.Count != 1? null: TrySqlFunction(SqlFunction.LOG, m.Type, m.GetArgument("d"));
-                case "Math.Ceiling": return TrySqlFunction(SqlFunction.CEILING, m.Type, m.TryGetArgument("d") ?? m.GetArgument("a"));
-                case "Math.Round": return TrySqlFunction(SqlFunction.ROUND, m.Type,
+                case "DateTimeExtensions.YearsTo": return TrySqlFunction(null, SqlFunction.DATEDIFF, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("min"), m.GetArgument("max"));
+                case "DateTimeExtensions.MonthsTo": return TrySqlFunction(null, SqlFunction.DATEDIFF, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("min"), m.GetArgument("max"));
+
+                case "Math.Sign": return TrySqlFunction(null, SqlFunction.SIGN, m.Type, m.GetArgument("value"));
+                case "Math.Abs": return TrySqlFunction(null, SqlFunction.ABS, m.Type, m.GetArgument("value"));
+                case "Math.Sin": return TrySqlFunction(null, SqlFunction.SIN, m.Type, m.GetArgument("a"));
+                case "Math.Asin": return TrySqlFunction(null, SqlFunction.ASIN, m.Type, m.GetArgument("d"));
+                case "Math.Cos": return TrySqlFunction(null, SqlFunction.COS, m.Type, m.GetArgument("d"));
+                case "Math.Acos": return TrySqlFunction(null, SqlFunction.ACOS, m.Type, m.GetArgument("d"));
+                case "Math.Tan": return TrySqlFunction(null, SqlFunction.TAN, m.Type, m.GetArgument("a"));
+                case "Math.Atan": return TrySqlFunction(null, SqlFunction.ATAN, m.Type, m.GetArgument("d"));
+                case "Math.Atan2": return TrySqlFunction(null, SqlFunction.ATN2, m.Type, m.GetArgument("y"), m.GetArgument("x"));
+                case "Math.Pow": return TrySqlFunction(null, SqlFunction.POWER, m.Type, m.GetArgument("x"), m.GetArgument("y"));
+                case "Math.Sqrt": return TrySqlFunction(null, SqlFunction.SQRT, m.Type, m.GetArgument("d"));
+                case "Math.Exp": return TrySqlFunction(null, SqlFunction.EXP, m.Type, m.GetArgument("d"));
+                case "Math.Floor": return TrySqlFunction(null, SqlFunction.FLOOR, m.Type, m.GetArgument("d"));
+                case "Math.Log10": return TrySqlFunction(null, SqlFunction.LOG10, m.Type, m.GetArgument("d"));
+                case "Math.Log": return m.Arguments.Count != 1 ? null : TrySqlFunction(null, SqlFunction.LOG, m.Type, m.GetArgument("d"));
+                case "Math.Ceiling": return TrySqlFunction(null, SqlFunction.CEILING, m.Type, m.TryGetArgument("d") ?? m.GetArgument("a"));
+                case "Math.Round": return TrySqlFunction(null, SqlFunction.ROUND, m.Type,
                     m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
                     m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
-
+                case "Math.Truncate": return TrySqlFunction(null, SqlFunction.ROUND, m.Type, m.GetArgument("d"), new SqlConstantExpression(0), new SqlConstantExpression(1));
                 case "ExpressionNominatorExtensions.InSql":
                     using (ForceFullNominate())
                     {
                         return Visit(m.GetArgument("value"));
                     }
-
                 default: return null; 
             }
         }

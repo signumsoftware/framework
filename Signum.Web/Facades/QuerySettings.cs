@@ -23,8 +23,10 @@ namespace Signum.Web
         public object QueryName { get; private set; }
 
         public Func<string> Title { get; set; }
-        public int? Top { get; set; }
+        public int? ElementsPerPage { get; set; }
         public string WebQueryName { get; set; }
+
+        public bool? AllowMultiple { get; set; }
 
         public Func<object, bool> IsFindable;
 
@@ -44,6 +46,13 @@ namespace Signum.Web
         public static List<EntityFormatterRule> EntityFormatRules { get; set; }
 
         public static Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>> PropertyFormatters { get; set; }
+
+        Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> formatters;
+        public Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> Formatters
+        {
+            get { return formatters ?? (formatters = new Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>>()); }
+            set { formatters = value; }
+        }
 
         static QuerySettings()
         {
@@ -65,6 +74,10 @@ namespace Signum.Web
                 new FormatterRule(c=>c.Type.UnNullify() == typeof(DateTime), c => (h,o) => 
                 {
                     return o != null ? ((DateTime)o).ToUserInterface().TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
+                }),
+                new FormatterRule(c=>c.Type.UnNullify() == typeof(TimeSpan), c => (h,o) => 
+                {
+                    return o != null ? ((TimeSpan)o).TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }),
                 new FormatterRule(c=> Reflector.IsNumber(c.Type), c => (h,o) => 
                 {
@@ -91,7 +104,10 @@ namespace Signum.Web
             {
                 new EntityFormatterRule(l => true, (h,l) => 
                 {
-                    return h.Href(Navigator.ViewRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
+                    if (Navigator.IsViewable(l.RuntimeType, EntitySettingsContext.Admin))
+                        return h.Href(Navigator.ViewRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
+                    else
+                        return MvcHtmlString.Empty;
                 }),
             };
 
@@ -109,6 +125,10 @@ namespace Signum.Web
 
         public Func<HtmlHelper, object, MvcHtmlString> GetFormatter(Column column)
         {
+            Func<HtmlHelper, object, MvcHtmlString> cf;
+            if (formatters != null && formatters.TryGetValue(column.Name, out cf))
+                return cf; 
+
             PropertyRoute route = column.Token.GetPropertyRoute();
             if (route != null)
             {
@@ -121,10 +141,10 @@ namespace Signum.Web
         }
 
 
-        public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> property, Func<HtmlHelper, object, MvcHtmlString> formatter)
+        public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> propertyRoute, Func<HtmlHelper, object, MvcHtmlString> formatter)
          where T : IRootEntity
         {
-            PropertyFormatters.Add(PropertyRoute.Construct(property), formatter);
+            PropertyFormatters.Add(PropertyRoute.Construct(propertyRoute), formatter);
         }
     }
 

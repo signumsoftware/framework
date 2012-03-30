@@ -12,16 +12,9 @@
     <AssemblyName>Signum.Utilities</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -71,6 +64,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -80,7 +74,10 @@
   <ItemGroup>
     <Compile Include="AboutTools.cs" />
     <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="ColorExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
+    <Compile Include="Statics.cs" />
+    <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
     <Compile Include="DataStructures\ScopedDictionary.cs" />
     <Compile Include="DescriptionAttributes.cs" />
@@ -89,11 +86,13 @@
     <Compile Include="ExpressionTrees\Linq.cs" />
     <Compile Include="FileExtensions.cs" />
     <Compile Include="NaturalLanguageTools.cs" />
+    <Compile Include="Pagination.cs" />
+    <Compile Include="Polymorphic.cs" />
     <Compile Include="QueryableExtensions.cs" />
     <Compile Include="Reflection\GenericInvoker.cs" />
     <Compile Include="Reflection\TupleExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
-    <Compile Include="CSV.cs" />
+    <Compile Include="Csv.cs" />
     <Compile Include="DataStructures\Grouping.cs" />
     <Compile Include="DataStructures\ImmutableAVLTree.cs">
       <SubType>Code</SubType>
@@ -180,9 +179,6 @@
     <EmbeddedResource Include="Properties\Resources.de.resx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="SignumFramework.pfx" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -200,6 +196,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

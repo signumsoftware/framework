@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Data.SqlClient;
 using System.Data;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
@@ -9,13 +8,14 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Engine.Properties;
 using Signum.Entities;
+using System.Data.Common;
 
 namespace Signum.Engine
 {
     /// <summary>
     /// Allows easy nesting of transaction using 'using' statement
     /// Keeps an implicit stack of Transaction objects over the StackTrace of the current Thread
-    /// and an explicit ThreadStatic stack of RealTransaction objects.
+    /// and an explicit stack of RealTransaction objects on thread variable.
     /// Usually, just the first Transaccion creates a RealTransaction, but you can create more using 
     /// forceNew = true
     /// All Transaction can cancel but only the one that created the RealTransaction can Commit 
@@ -34,19 +34,18 @@ namespace Signum.Engine
             UnexpectedBehaviourCallback("TRANSACTION ROLLBACKED!", new StackTrace(2, true));
         }
 
-        [ThreadStatic]
-        static Dictionary<BaseConnection, ICoreTransaction> currents;
+        static readonly Variable<Dictionary<Connector, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<Connector, ICoreTransaction>>("transactions");
 
         bool commited;
         ICoreTransaction coreTransaction; 
 
         interface ICoreTransaction
         {
-            event Action RealCommit;
+            event Action PostRealCommit;
+            void CallPostRealCommit();
             event Action PreRealCommit;
-            SqlConnection Connection { get; }
-            SqlTransaction Transaction { get; }
-            DateTime Time { get; }
+            DbConnection Connection { get; }
+            DbTransaction Transaction { get; }
             bool RolledBack { get; }
             bool Started { get; }
             void Rollback();
@@ -63,13 +62,16 @@ namespace Signum.Engine
 
             public FakedTransaction(ICoreTransaction parent)
             {
+                if (parent != null && parent.RolledBack)
+                    throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+
                 this.parent = parent;
             }
 
-            public event Action RealCommit
+            public event Action PostRealCommit
             {
-                add { parent.RealCommit += value; }
-                remove { parent.RealCommit -= value; }
+                add { parent.PostRealCommit += value; }
+                remove { parent.PostRealCommit -= value; }
             }
 
             public event Action PreRealCommit
@@ -78,9 +80,8 @@ namespace Signum.Engine
                 remove { parent.PreRealCommit -= value; }
             }
 
-            public SqlConnection Connection{ get { return parent.Connection; } }
-            public SqlTransaction Transaction{ get { return parent.Transaction; } }
-            public DateTime Time{ get { return parent.Time;} }
+            public DbConnection Connection{ get { return parent.Connection; } }
+            public DbTransaction Transaction{ get { return parent.Transaction; } }
             public bool RolledBack { get{ return parent.RolledBack;} }
             public bool Started { get { return parent.Started; } }
 
@@ -99,18 +100,22 @@ namespace Signum.Engine
             {
                 get { return parent.UserData; }
             }
+
+            public void CallPostRealCommit()
+            {
+
+            }
         }
 
         class RealTransaction : ICoreTransaction
         {
             ICoreTransaction parent; 
 
-            public SqlConnection Connection { get; private set; }
-            public SqlTransaction Transaction { get; private set; }
-            public DateTime Time { get; private set; }
+            public DbConnection Connection { get; private set; }
+            public DbTransaction Transaction { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action RealCommit;
+            public event Action PostRealCommit;
             public event Action PreRealCommit;
 
             IsolationLevel? IsolationLevel;
@@ -118,7 +123,6 @@ namespace Signum.Engine
             public RealTransaction(ICoreTransaction parent, IsolationLevel? isolationLevel)
             {
                 IsolationLevel = isolationLevel;
-                Time = TimeZoneManager.Now;
                 this.parent = parent;
             }
 
@@ -126,26 +130,44 @@ namespace Signum.Engine
             {
                 if (!Started)
                 {
-                    Connection con = (Connection)ConnectionScope.Current;
-                    Connection = new SqlConnection(con.ConnectionString);
+                    Connection = Connector.Current.CreateConnection();
                     
                     Connection.Open();
-                    Transaction = Connection.BeginTransaction(IsolationLevel ?? con.IsolationLevel);
+                    Transaction = Connection.BeginTransaction(IsolationLevel ?? Connector.Current.IsolationLevel);
                     Started = true;
                 }
             }
 
-            public void Commit()
+            public virtual void Commit()
             {
                 if (Started)
                 {
-                    if (PreRealCommit != null)
-                        PreRealCommit(); 
+                    OnPreRealCommit();
 
                     Transaction.Commit();
+                }
+            }
 
-                    if (RealCommit != null)
-                        RealCommit();  
+            protected void OnPreRealCommit()
+            {
+                while (PreRealCommit != null)
+                {
+                    foreach (Action item in PreRealCommit.GetInvocationList())
+                    {
+                        item();
+                        PreRealCommit -= item;
+                    }
+                }
+            }
+
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
+                {
+                    foreach (Action item in PostRealCommit.GetInvocationList())
+                    {
+                        item();
+                    }
                 }
             }
 
@@ -159,7 +181,7 @@ namespace Signum.Engine
                 }
             }
 
-            public ICoreTransaction Finish()
+            public virtual ICoreTransaction Finish()
             {
                 if (Transaction != null)
                 {
@@ -189,35 +211,28 @@ namespace Signum.Engine
             string savePointName;
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
+            public event Action PostRealCommit;
+            public event Action PreRealCommit;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
+                if (parent != null && parent.RolledBack)
+                    throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+
                 this.parent = parent;
                 this.savePointName = savePointName;
             }
 
-            public event Action RealCommit
-            {
-                add { parent.RealCommit += value; }
-                remove { parent.RealCommit -= value; }
-            }
-
-            public event Action PreRealCommit
-            {
-                add { parent.PreRealCommit += value; }
-                remove { parent.PreRealCommit -= value; }
-            }
-
-            public SqlConnection Connection { get { return parent.Connection; } }
-            public SqlTransaction Transaction { get { return parent.Transaction; } }
-            public DateTime Time { get { return parent.Time; } }
-
+        
+            public DbConnection Connection { get { return parent.Connection; } }
+            public DbTransaction Transaction { get { return parent.Transaction; } }
+            
             public void Start()
             {
                 if (!Started)
                 {
                     parent.Start();
-                    Transaction.Save(savePointName);
+                    Connector.Current.SaveTransactionPoint(Transaction, savePointName);
                     Started = true;
                 }
             }
@@ -226,13 +241,34 @@ namespace Signum.Engine
             {
                 if (Started && !RolledBack)
                 {
-                    Transaction.Rollback(savePointName);
+                    Connector.Current.RollbackTransactionPoint(Transaction, savePointName);
                     NotifyRollback();
                     RolledBack = true;
                 }
             }
 
-            public void Commit() { }
+            public void Commit() 
+            {
+                while (PreRealCommit != null)
+                {
+                    foreach (Action item in PreRealCommit.GetInvocationList())
+                    {
+                        item();
+                        PreRealCommit -= item;
+                    }
+                }
+            }
+
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
+                {
+                    foreach (Action item in PostRealCommit.GetInvocationList())
+                    {
+                        item();
+                    }
+                }
+            }
 
             public ICoreTransaction Finish() { return parent; }
 
@@ -242,63 +278,185 @@ namespace Signum.Engine
             }
         }
 
-        public Transaction() : this(false, null) { }
-
-        public Transaction(bool forceNew) : this(forceNew, null) { }
-
-        const string connectionError = "ConnectionScope.Current not established. User ConnectionScope.Default to do it.";
-
-        public Transaction(bool forceNew, IsolationLevel? isolationLevel)
+        class NoneTransaction : ICoreTransaction
         {
-            if (currents == null)
-                currents = new Dictionary<BaseConnection, ICoreTransaction>();
+            ICoreTransaction parent;
 
-            BaseConnection bc = ConnectionScope.Current;
+            public DbConnection Connection { get; private set; }
+            public DbTransaction Transaction { get{return null;}}
+            public bool RolledBack { get; private set; }
+            public bool Started { get; private set; }
+            public event Action PostRealCommit;
+            public event Action PreRealCommit;
+
+            public NoneTransaction(ICoreTransaction parent)
+            {
+                this.parent = parent;
+            }
+
+            public void Start()
+            {
+                if (!Started)
+                {
+                    Connection = Connector.Current.CreateConnection();
+
+                    Connection.Open();
+                    //Transaction = Connection.BeginTransaction(IsolationLevel ?? con.IsolationLevel);
+                    Started = true;
+                }
+            }
+
+            public void Commit()
+            {
+                if (Started)
+                {
+                    while (PreRealCommit != null)
+                    {
+                        foreach (Action item in PreRealCommit.GetInvocationList())
+                        {
+                            item();
+                            PreRealCommit -= item;
+                        }
+                    }
+
+                    //Transaction.Commit();
+                }
+            }
+
+            public void CallPostRealCommit()
+            {
+                if (PostRealCommit != null)
+                {
+                    foreach (Action item in PostRealCommit.GetInvocationList())
+                    {
+                        item();
+                    }
+                }
+            }
+
+            public void Rollback()
+            {
+                if (Started && !RolledBack)
+                {
+                    //Transaction.Rollback();
+                    NotifyRollback();
+                    RolledBack = true;
+                }
+            }
+
+            public ICoreTransaction Finish()
+            {
+                //if (Transaction != null)
+                //{
+                //    Transaction.Dispose();
+                //    Transaction = null;
+                //}
+
+                if (Connection != null)
+                {
+                    Connection.Dispose();
+                    Connection = null;
+                }
+
+                return parent;
+            }
+
+            Dictionary<string, object> userData;
+            public Dictionary<string, object> UserData
+            {
+                get { return userData ?? (userData = new Dictionary<string, object>()); }
+            }
+        }
+
+        public static bool AvoidIndependentTransactions
+        {
+            get { return avoidIndependentTransactions.Value; }
+        }
+
+        static readonly Variable<bool> avoidIndependentTransactions = Statics.ThreadVariable<bool>("avoidIndependentTransactions");
+
+        class TestTransaction : RealTransaction 
+        {
+            public TestTransaction(ICoreTransaction parent, IsolationLevel? isolation)
+                : base(parent, isolation)
+            {
+                avoidIndependentTransactions.Value = true;
+            }
+
+    
+            public override ICoreTransaction Finish()
+            {
+                avoidIndependentTransactions.Value = false;
+
+                return base.Finish();
+            }
+        }
+
+        public Transaction()
+            : this(parent => parent == null ?
+                (ICoreTransaction)new RealTransaction(parent, null) :
+                (ICoreTransaction)new FakedTransaction(parent))
+        {
+        }
+
+        Transaction(Func<ICoreTransaction, ICoreTransaction> factory)
+        {
+            if (currents.Value == null)
+                currents.Value = new Dictionary<Connector, ICoreTransaction>();
+
+            Connector bc = Connector.Current;
 
             if (bc == null)
-                throw new InvalidOperationException(connectionError);
+                throw new InvalidOperationException("ConnectionScope.Current not established. Use ConnectionScope.Default to set it.");
 
-            ICoreTransaction parent = currents.TryGetC(bc);
-            if (parent == null || forceNew)
-            {
-                currents[bc] = coreTransaction = new RealTransaction(parent, isolationLevel);
-            }
-            else
-            {
-                AssertTransaction();
-                currents[bc] = coreTransaction = new FakedTransaction(parent);
-            }
+            ICoreTransaction parent = currents.Value.TryGetC(bc);
+
+            currents.Value[bc] = coreTransaction = factory(parent);
         }
 
-        public Transaction(string savePointName)
+        public static Transaction None()
         {
-            if (currents == null)
-                currents = new Dictionary<BaseConnection, ICoreTransaction>();
-
-            BaseConnection bc = ConnectionScope.Current;
-
-            if (bc == null)
-                throw new InvalidOperationException(connectionError);
-
-            ICoreTransaction parent = GetCurrent();
-            currents[bc] = coreTransaction = new NamedTransaction(parent, savePointName);
+            return new Transaction(parent => new NoneTransaction(parent));
         }
 
-        void AssertTransaction()
+        public static Transaction NamedSavePoint(string savePointName)
         {
-            if (GetCurrent().RolledBack)
-                throw new InvalidOperationException("The transation is RolledBack");
+            return new Transaction(parent => new NamedTransaction(parent, savePointName));
         }
 
+        public static Transaction ForceNew()
+        {
+            return new Transaction(parent => avoidIndependentTransactions.Value ? 
+                (ICoreTransaction)new FakedTransaction(parent) : 
+                (ICoreTransaction)new RealTransaction(parent, null));
+        }
+
+        public static Transaction ForceNew(IsolationLevel? isolationLevel)
+        {
+            return new Transaction(parent => avoidIndependentTransactions.Value ? 
+                (ICoreTransaction)new FakedTransaction(parent) : 
+                (ICoreTransaction)new RealTransaction(parent, isolationLevel));
+        }
+
+        public static Transaction Test()
+        {
+            return new Transaction(parent => new TestTransaction(parent, null));
+        }
+
+        public static Transaction Test(IsolationLevel? isolationLevel)
+        {
+            return new Transaction(parent => new TestTransaction(parent, isolationLevel));
+        }
+    
         static ICoreTransaction GetCurrent()
         {
-            return currents.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
+            return currents.Value.GetOrThrow(Connector.Current, "No Transaction created yet");
         }
 
-        public static event Action RealCommit
+        public static event Action PostRealCommit
         {
-            add { GetCurrent().RealCommit += value; }
-            remove { GetCurrent().RealCommit -= value; }
+            add { GetCurrent().PostRealCommit += value; }
+            remove { GetCurrent().PostRealCommit -= value; }
         }
 
         public static event Action PreRealCommit
@@ -314,10 +472,10 @@ namespace Signum.Engine
 
         public static bool HasTransaction
         {
-            get { return currents != null && currents.ContainsKey(ConnectionScope.Current); }
+            get { return currents.Value != null && currents.Value.ContainsKey(Connector.Current); }
         }
 
-        public static SqlConnection CurrentConnection
+        public static DbConnection CurrentConnection
         {
             get
             {
@@ -327,23 +485,13 @@ namespace Signum.Engine
             }
         }
 
-        public static SqlTransaction CurrentTransaccion
+        public static DbTransaction CurrentTransaccion
         {
             get
             {
                 ICoreTransaction tran = GetCurrent();
                 tran.Start();
                 return tran.Transaction;
-            }
-        }
-
-
-        public static DateTime StartTime
-        {
-            get
-            {
-                ICoreTransaction tran = GetCurrent();
-                return tran.Time;
             }
         }
 
@@ -355,7 +503,8 @@ namespace Signum.Engine
 
         public void Commit()
         {
-            AssertTransaction();
+            if (coreTransaction.RolledBack)
+                throw new InvalidOperationException("The transation is rolled back and can not be commited.");
 
             coreTransaction.Commit();
 
@@ -370,18 +519,12 @@ namespace Signum.Engine
             ICoreTransaction parent = coreTransaction.Finish();
 
             if (parent == null)
-                currents.Remove(ConnectionScope.Current);
+                currents.Value.Remove(Connector.Current);
             else
-                currents[ConnectionScope.Current] = parent;
-        }
+                currents.Value[Connector.Current] = parent;
 
-        public static void ForceClean()
-        {
-            if (currents != null && currents.Count != 0)
-            {
-                UnexpectedBehaviourCallback("DIRTY TRANSACTIONS FOUND!", new StackTrace(1));
-                currents.Clear();
-            }
+            if (commited)
+                coreTransaction.CallPostRealCommit();
         }
     }
 }

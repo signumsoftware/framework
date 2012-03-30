@@ -26,7 +26,7 @@ namespace Signum.Test.LinqProvider
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLog = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }      
      
         [TestMethod]
@@ -77,17 +77,17 @@ namespace Signum.Test.LinqProvider
         {
             var artists = Database.Query<ArtistDN>();
 
-            Assert2.Throws<InvalidOperationException>(() => artists.Single(a => a.Dead && !a.Dead));
-            Assert.IsNotNull(artists.Single(a => a.Dead)); //michael
-            Assert2.Throws<InvalidOperationException>(() => artists.Single(a => a.Sex == Sex.Male));
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleEx(a => a.Dead && !a.Dead));
+            Assert.IsNotNull(artists.SingleEx(a => a.Dead)); //michael
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleEx(a => a.Sex == Sex.Male));
 
-            Assert.IsNull(artists.SingleOrDefault(a => a.Dead && !a.Dead));
-            Assert.IsNotNull(artists.SingleOrDefault(a => a.Dead)); //michael
-            Assert2.Throws<InvalidOperationException>(() => artists.SingleOrDefault(a => a.Sex == Sex.Male));
+            Assert.IsNull(artists.SingleOrDefaultEx(a => a.Dead && !a.Dead));
+            Assert.IsNotNull(artists.SingleOrDefaultEx(a => a.Dead)); //michael
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleOrDefaultEx(a => a.Sex == Sex.Male));
 
-            Assert2.Throws<InvalidOperationException>(() => artists.First(a => a.Dead && !a.Dead));
-            Assert.IsNotNull(artists.First(a => a.Dead)); //michael
-            Assert.IsNotNull(artists.First(a => a.Sex == Sex.Male));
+            Assert2.Throws<InvalidOperationException>(() => artists.FirstEx(a => a.Dead && !a.Dead));
+            Assert.IsNotNull(artists.FirstEx(a => a.Dead)); //michael
+            Assert.IsNotNull(artists.FirstEx(a => a.Sex == Sex.Male));
 
             Assert.IsNull(artists.FirstOrDefault(a => a.Dead && !a.Dead));
             Assert.IsNotNull(artists.FirstOrDefault(a => a.Dead)); //michael
@@ -103,44 +103,49 @@ namespace Signum.Test.LinqProvider
         {
             var artists = Database.Query<ArtistDN>();
 
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).Single("X"), "X");
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).Single("X"), "X");
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleOrDefault("X"), "X");
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).First("X"),"X");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleEx(() => "Y"), "Y");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleEx(() => "X", ()=>"Y"), "Y");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleOrDefaultEx(() => "Y"), "Y");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).FirstEx(() => "X"), "X");
+
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleEx(a => a.Dead && !a.Dead),typeof(ArtistDN).Name);
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleEx(a => a.Sex == Sex.Male), typeof(ArtistDN).Name);
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleOrDefaultEx(a => a.Sex == Sex.Male), typeof(ArtistDN).Name);
+            Assert2.Throws<InvalidOperationException>(() => artists.FirstEx(a => a.Dead && !a.Dead), typeof(ArtistDN).Name);
 
 
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleOrMany("X"), "X");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleOrManyEx(() => "X"), "X");
         }
 
 
         [TestMethod]
         public void WhereEntityEquals()
         {
-            ArtistDN wretzky = Database.Query<ArtistDN>().Single(a => a.Sex == Sex.Female);
+            ArtistDN wretzky = Database.Query<ArtistDN>().SingleEx(a => a.Sex == Sex.Female);
 
             BandDN smashing = (from b in Database.Query<BandDN>()
                                from a in b.Members
                                where a == wretzky
-                               select b).Single(); 
+                               select b).SingleEx(); 
         }
 
 
         [TestMethod]
         public void WhereLiteEquals()
         {
-            ArtistDN wretzky = Database.Query<ArtistDN>().Single(a => a.Sex == Sex.Female);
+            ArtistDN wretzky = Database.Query<ArtistDN>().SingleEx(a => a.Sex == Sex.Female);
 
             BandDN smashing = (from b in Database.Query<BandDN>()
                                from a in b.Members
                                where a.ToLite() == wretzky.ToLite()
-                               select b).Single();
+                               select b).SingleEx();
         }
 
 
         [TestMethod]
         public void WhereEntityEqualsIB()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
             var albums = (from a in Database.Query<AlbumDN>()
                           where a.Author == michael
@@ -150,9 +155,9 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereEntityEqualsIBA()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
-            var albums = (from n in Database.Query<NoteDN>()
+            var albums = (from n in Database.Query<NoteWithDateDN>()
                           where n.Target == michael
                           select n.ToLite()).ToList();
         }
@@ -160,7 +165,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereLiteEqualsIB()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
             var albums = (from a in Database.Query<AlbumDN>()
                           where a.Author.ToLite() == michael.ToLite<IAuthorDN>()
@@ -170,9 +175,9 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereLiteEqualsIBA()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
-            var albums = (from n in Database.Query<NoteDN>()
+            var albums = (from n in Database.Query<NoteWithDateDN>()
                           where n.Target.ToLite() == michael.ToLite<IIdentifiable>()
                           select n.ToLite()).ToList();
         }
@@ -226,7 +231,7 @@ namespace Signum.Test.LinqProvider
             var females = Database.Query<ArtistDN>().Where(a=>a.Sex == Sex.Female);
             string f = females.ToString();
 
-            var female = Database.Query<ArtistDN>().Single(a=>females.Contains(a));
+            var female = Database.Query<ArtistDN>().SingleEx(a=>females.Contains(a));
         }
 
         [TestMethod]
@@ -268,7 +273,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereOutsideEquals()
         {
-            var pa = Database.Query<PersonalAwardDN>().First();
+            var pa = Database.Query<PersonalAwardDN>().FirstEx();
 
             var albums = Database.Query<BandDN>().Where(a => a.LastAward == pa).ToList();
         }

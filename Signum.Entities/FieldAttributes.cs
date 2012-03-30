@@ -12,7 +12,7 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Entities.Reflection;
-using System.ComponentModel;
+using System.ComponentModel;  
 using System.Collections;
 
 namespace Signum.Entities
@@ -30,7 +30,7 @@ namespace Signum.Entities
         public abstract bool ImplementedBy(Type type);
     }
 
-    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
+    [Serializable, AttributeUsage(AttributeTargets.Field)]
     public sealed class ImplementedByAttribute : Implementations
     {
         Type[] implementedTypes;
@@ -56,7 +56,7 @@ namespace Signum.Entities
         }
     }
 
-    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
+    [Serializable, AttributeUsage(AttributeTargets.Field)]
     public sealed class ImplementedByAllAttribute : Implementations
     {
         public ImplementedByAllAttribute()
@@ -131,6 +131,8 @@ namespace Signum.Entities
         {
             get { return scale.HasValue; }
         }
+
+        public string UdtTypeName { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Field)]
@@ -151,6 +153,11 @@ namespace Signum.Entities
 
     }
 
+    [AttributeUsage(AttributeTargets.Field)]
+    public class ForceForeignKey : Attribute
+    {
+
+    }
 
     //Used by NotifyCollectionChangedAttribute, NotifyChildPropertyAttribute, ValidateChildPropertyAttribute
     internal static class AttributeManager<T>

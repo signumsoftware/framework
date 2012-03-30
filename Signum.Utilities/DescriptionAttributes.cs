@@ -113,7 +113,7 @@ namespace Signum.Utilities
             Assembly assembly = (memberInfo.DeclaringType ?? (Type)memberInfo).Assembly;
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
-                string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add(memberInfo.Name, "_");
+                string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add("_", memberInfo.Name);
                 string result = assembly.GetDefaultResourceManager().GetString(key);
                 if (result != null)
                     return result;
@@ -179,7 +179,7 @@ namespace Signum.Utilities
         public static ResourceManager GetDefaultResourceManager(this Assembly assembly)
         {
             string[] resourceFiles = assembly.GetManifestResourceNames();
-            string name = resourceFiles.Single(a => a.Contains("Resources.resources"));
+            string name = resourceFiles.SingleEx(a => a.Contains("Resources.resources"));
             return new ResourceManager(name.Replace(".resources", ""), assembly);
         }
     }

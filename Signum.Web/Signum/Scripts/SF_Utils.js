@@ -94,50 +94,79 @@ SF.registerModule = (function () {
             loadCss: loadCss,
             loadJs: loadJs
 };
-    })();
+})();
 
-    SF.ajax = function (options) {
+(function (options) {
+    var pendingRequests = 0;
 
-        function checkRedirection(ajaxResult) {
-            if (SF.isEmpty(ajaxResult)) {
-                return null;
-            }
-            if (typeof ajaxResult !== "object") {
-                return null;
-            }
-            if (ajaxResult.result == null) {
-                return null;
-            }
-            if (ajaxResult.result == 'url') {
-                return ajaxResult.url;
-            }
+    $.ajaxSetup({
+        type: "POST",
+        sfCheckRedirection: true,
+        sfNotify: true
+    });
+
+    var checkRedirection = function (ajaxResult) {
+        if (SF.isEmpty(ajaxResult)) {
             return null;
-        };
-
-        var originalSuccess = options.success; 
-
-        options.success = function (result) {
-            if (typeof result === "string") {
-                result = result ? result.trim() : "";
-            }
-            var url = checkRedirection(result);
-            if (!SF.isEmpty(url)) window.location.href = url;
-            else {
-                if (originalSuccess != null) originalSuccess(result);
-            }
-        };
-
-        return $.ajax(options);
+        }
+        if (typeof ajaxResult !== "object") {
+            return null;
+        }
+        if (ajaxResult.result == null) {
+            return null;
+        }
+        if (ajaxResult.result == 'url') {
+            return ajaxResult.url;
+        }
+        return null;
     };
 
-$(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
-    //check request status
-    //request.abort() has status 0, so we don't show this "error", since we have
-    //explicitly aborted the request.
-    //this error is documented on http://bugs.jquery.com/ticket/7189
-    if (XMLHttpRequest.status === 0) return;
-    $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
-});
+    $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+        if (options.dataType == "script" && (typeof originalOptions.type == "undefined")) {
+            options.type = "GET";
+        }
+        if (options.sfNotify) {
+            pendingRequests++;
+            if (pendingRequests == 1) {
+                SF.Notify.info(lang.signum.loading);
+            }
+        }
+        if (options.sfCheckRedirection) {
+            var originalSuccess = options.success;
+
+            options.success = function (result) {
+                pendingRequests--;
+                if (pendingRequests <= 0) {
+                    pendingRequests = 0;
+                    SF.Notify.clear();
+                }
+                if (typeof result === "string") {
+                    result = result ? result.trim() : "";
+                }
+                var url = checkRedirection(result);
+                if (!SF.isEmpty(url)) {
+                    window.location.href = url;
+                }
+                else {
+                    if (originalSuccess != null) {
+                        originalSuccess(result);
+                    }
+                }
+            };
+        }
+    });
+
+    $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+        //check request status
+        //request.abort() has status 0, so we don't show this "error", since we have
+        //explicitly aborted the request.
+        //this error is documented on http://bugs.jquery.com/ticket/7189
+        if (XMLHttpRequest.status !== 0) {
+            $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
+            pendingRequests = 0;
+        }
+    });
+})();
 
 SF.stopPropagation = function (event) {
         if (event.stopPropagation) event.stopPropagation();
@@ -213,18 +242,17 @@ SF.Notify = (function () {
     };
 
     var info = function (s, t, cssClass) {
-        $messageArea = $("#sf-message-area"), css = (cssClass != undefined ? cssClass : "sf-info");
+        css = (cssClass != undefined ? cssClass : "sf-info");
+        $messageArea = $("#sfMessageArea");
         if ($messageArea.length == 0) {
-            //create the message container
-            $messageArea = $("<div id=\"sf-message-area\"><div class=\"sf-message-area-text-container\"><span></span></div></div>").hide().prependTo($("body"));
+            $messageArea = $("<div id=\"sfMessageArea\"><div id=\"sfMessageAreaTextContainer\"><span></span></div></div>").hide().prependTo($("body"));
         }
 
-        $messageArea.find("span").html(s); 
-        $messageArea.children().first().addClass(css); 
-            $messageArea.css({
-                marginLeft: -parseInt($messageArea.outerWidth() / 2),
-                top: 0
-            }).show();
+        $messageArea.find("span").html(s);
+        $messageArea.children().first().addClass(css);
+        $messageArea.css({
+            marginLeft: -parseInt($messageArea.outerWidth() / 2)
+        }).show();
 
         if (t != undefined) {
             timer = setTimeout(clear, t);
@@ -233,45 +261,49 @@ SF.Notify = (function () {
 
     var clear = function () {
         if ($messageArea) {
-                $messageArea.animate({
-                    top: -30
-                }, "slow").hide().children().first().removeClass(css);
-            clearTimeout(timer);
-        timer = null;
+            $messageArea.hide().children().first().removeClass(css);
+            if (timer != null) {
+                clearTimeout(timer);
+                timer = null;
+            }
         }
     }
 
-        return {
-            error: error,
-            info: info,
-            clear: clear
-        };
+    return {
+        error: error,
+        info: info,
+        clear: clear
+    };
 })();
 
 SF.InputValidator = {
     isNumber: function (e) {
         var c = e.keyCode;
-            return ((c >= 48 && c <= 57) || //0-9
-			(c >= 96 && c <= 105) ||  //NumPad 0-9
-			(c == 8) || //BackSpace
-			(c == 9) || //Tab
-			(c == 12) || //Clear
-			(c == 27) || //Escape
-			(c == 37) || //Left
-			(c == 39) || //Right
-			(c == 46) || //Delete
-			(c == 36) || //Home
-			(c == 35) || //End
-			(c == 109) || //NumPad -
-            (c == 189));
+            return ((c >= 48 && c <= 57) /*0-9*/ || 
+			(c >= 96 && c <= 105) /*NumPad 0-9*/ ||
+			(c == 8) /*BackSpace*/ ||
+			(c == 9) /*Tab*/ || 
+			(c == 12) /*Clear*/ || 
+			(c == 27) /*Escape*/ || 
+			(c == 37) /*Left*/ || 
+			(c == 39) /*Right*/ || 
+			(c == 46) /*Delete*/ || 
+			(c == 36) /*Home*/ || 
+			(c == 35) /*End*/ || 
+			(c == 109) /*NumPad -*/ ||
+            (c == 189) /*-*/ ||
+            (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
+            (e.ctrlKey && c == 67) /*Ctrl + v*/
+        );
     },
 
     isDecimal: function (e) {
         var c = e.keyCode;
         return (
-            this.isNumber(e) || (c == 110) || //NumPad Decimal
-            (c == 190) || //.
-			(c == 188) //,
+            this.isNumber(e) || 
+            (c == 110) /*NumPad Decimal*/ ||
+            (c == 190) /*.*/ ||
+			(c == 188) /*,*/
 		);
     }
 };
@@ -385,12 +417,14 @@ SF.NewContentProcessor = {
     defaultButtons: function ($newContent) {
         $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
             var $txt = $(val);
-            var data = $txt.data();
-            $txt.button({
-                text: (!("text" in data) || SF.isTrue(data.text)),
-                icons: { primary: data.icon, secondary: data["icon-secondary"] },
-                disabled: $txt.hasClass("sf-disabled")
-            });
+            if (!$txt.hasClass("ui-button")) {
+                var data = $txt.data();
+                $txt.button({
+                    text: (!("text" in data) || SF.isTrue(data.text)),
+                    icons: { primary: data.icon, secondary: data.iconSecondary },
+                    disabled: $txt.hasClass("sf-disabled")
+                });
+            }
         });
     },
 

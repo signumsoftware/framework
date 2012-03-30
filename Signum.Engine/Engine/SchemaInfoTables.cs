@@ -16,12 +16,20 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
+    [SqlViewName("sys.schemas")]
+    public class SysSchemas : IView
+    {
+        public int schema_id;
+        public string name;
+    }
+
 
     [SqlViewName("sys.tables")]
     public class SysTables : IView
     {
         public string name;
         public int object_id;
+        public int schema_id;
     }
 
     [SqlViewName("sys.views")]
@@ -58,15 +66,19 @@ namespace Signum.Engine.SchemaInfoTables
     {
         public int object_id;
         public string name;
-        public int parent_object_id; 
+        public int parent_object_id;
+        public int referenced_object_id; 
     }
 
     [SqlViewName("sys.foreign_key_columns")]
     public class SysForeignKeyColumns : IView
     {
         public int constraint_object_id;
+        public int constraint_column_id;
         public int parent_object_id;
         public int parent_column_id;
+        public int referenced_object_id;
+        public int referenced_column_id;
     }
 
     [SqlViewName("sys.indexes")]
@@ -91,6 +103,20 @@ namespace Signum.Engine.SchemaInfoTables
     public class SysExtendedProperties : IView
     {
         public int major_id;
+        public string name;
+    }
+
+    [SqlViewName("sys.sql_modules")]
+    public class SysSqlModules : IView
+    {
+        public int object_id;
+        public string definition; 
+    }
+
+    [SqlViewName("sys.procedures")]
+    public class SysProcedures : IView
+    {
+        public int object_id;
         public string name;
     }
 

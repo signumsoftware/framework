@@ -150,9 +150,6 @@
   <data name="_0IsNotAllowedOnState1" xml:space="preserve">
     <value>{0} is not allowed on state {1}</value>
   </data>
-  <data name="_0IsNotAValidIdentifier" xml:space="preserve">
-    <value>'{0}' is not a valid identifier</value>
-  </data>
   <data name="And" xml:space="preserve">
     <value> and </value>
   </data>
@@ -264,9 +261,6 @@
   <data name="InvalidFormat" xml:space="preserve">
     <value>Invalid Format</value>
   </data>
-  <data name="LockeableEntity_Locked" xml:space="preserve">
-    <value>Locked</value>
-  </data>
   <data name="Lowercase" xml:space="preserve">
     <value>lowercase</value>
   </data>
@@ -296,9 +290,6 @@
   </data>
   <data name="Second" xml:space="preserve">
     <value>Second</value>
-  </data>
-  <data name="State0NotRegisteredInStateValidator" xml:space="preserve">
-    <value>State {0} not registered in StateValidator</value>
   </data>
   <data name="Telephone" xml:space="preserve">
     <value>Telephone</value>
@@ -342,10 +333,25 @@
   <data name="_0IsNotSet" xml:space="preserve">
     <value>{0} is not set</value>
   </data>
-  <data name="IdentifiableEntity_ToStr" xml:space="preserve">
-    <value>Text</value>
-  </data>
   <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
     <value>Attempt to modify locked entity {0}</value>
+  </data>
+  <data name="TheNumberOf0IsBeingMultipliedBy1" xml:space="preserve">
+    <value>The number of {0} is being multiplied by {1}</value>
+  </data>
+  <data name="FilterOperation_NotContains" xml:space="preserve">
+    <value>not contains</value>
+  </data>
+  <data name="FilterOperation_NotEndsWith" xml:space="preserve">
+    <value>not ends with</value>
+  </data>
+  <data name="FilterOperation_NotLike" xml:space="preserve">
+    <value>not like</value>
+  </data>
+  <data name="FilterOperation_NotStartsWith" xml:space="preserve">
+    <value>not starts with</value>
+  </data>
+  <data name="IdentifiableEntity_ToStr" xml:space="preserve">
+    <value>Text</value>
   </data>
 </root>

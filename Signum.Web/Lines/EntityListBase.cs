@@ -17,6 +17,7 @@ namespace Signum.Web
     public static class EntityListBaseKeys
     {
         public const string Index = "sfIndex";
+        public const string ListPresent = "sfListPresent";
     }
 
     public abstract class EntityListBase : EntityBase
@@ -44,12 +45,12 @@ namespace Signum.Web
 
         public bool ShouldWriteOldIndex(TypeContext tc)
         {
-            if(WriteIndex == WriteIndex.Allways)
+            if(WriteIndex == WriteIndex.Always)
             return  true;
 
             if (WriteIndex == Web.WriteIndex.ForSavedEntities)
             {
-                IdentifiableEntity ie = tc.Parent.FollowC(a => a.Parent).OfType<TypeContext>().Select(a=>a.UntypedValue).OfType<IdentifiableEntity>().First("Parent entity not found");
+                IdentifiableEntity ie = tc.Parent.FollowC(a => a.Parent).OfType<TypeContext>().Select(a => a.UntypedValue).OfType<IdentifiableEntity>().FirstEx(() => "Parent entity not found");
                 return !ie.IsNew; 
             }
 
@@ -60,7 +61,7 @@ namespace Signum.Web
     public enum WriteIndex
     {
         ForSavedEntities,
-        Allways,
+        Always,
         Never
     }
 }

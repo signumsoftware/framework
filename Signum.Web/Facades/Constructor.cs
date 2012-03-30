@@ -39,6 +39,11 @@ namespace Signum.Web
         {
             return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle);
         }
+
+        public static void AddConstructor<T>(Func<T> constructor) where T:ModifiableEntity
+        {
+            ConstructorManager.Constructors.Add(typeof(T), constructor);
+        }
     }
 
     public class ConstructContext
@@ -119,7 +124,11 @@ namespace Signum.Web
             switch (preferredStyle)
             {
                 case VisualConstructStyle.PopupView:
-                    return Navigator.PopupView(controller, ident, prefix);
+                    TypeContext tc = TypeContextUtilities.UntypedNew(ident, prefix);
+                    return Navigator.PopupOpen(controller, new ViewOkOptions(tc));
+                case VisualConstructStyle.PopupCreate:
+                    TypeContext t = TypeContextUtilities.UntypedNew(ident, prefix);
+                    return Navigator.PopupOpen(controller, new ViewSaveOptions(t));
                 case VisualConstructStyle.PartialView:
                     return Navigator.PartialView(controller, ident, prefix);
                 case VisualConstructStyle.View:
@@ -145,7 +154,7 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, queryDescription)
+            var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns))
                 .Where(fo => fo.Operation == FilterOperation.EqualTo);
 
             var pairs = from pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -162,6 +171,7 @@ namespace Signum.Web
     public enum VisualConstructStyle
     {
         PopupView, 
+        PopupCreate,
         PartialView,
         View,
         Navigate

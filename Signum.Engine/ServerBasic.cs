@@ -17,20 +17,18 @@ namespace Signum.Services
 {
     public abstract class ServerBasic : IBaseServer, IDynamicQueryServer
     {
-        public static ExecutionContext GetDefaultExecutionContext(MethodBase mi, string desc)
-        {
-            return SuggestUserInterfaceAttribute.Suggests(mi) == true ? ExecutionContext.UserInterface : null;
-        }
+        protected Dictionary<string, object> session = new Dictionary<string, object>();
 
         protected T Return<T>(MethodBase mi, Func<T> function)
         {
-            return Return(mi, mi.Name, function);
+            return Return(mi, null, function);
         }
 
         protected virtual T Return<T>(MethodBase mi, string description, Func<T> function)
         {
             try
             {
+                using (ScopeSessionFactory.OverrideSession(session))
                 using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
                 {
                     return function();
@@ -40,11 +38,15 @@ namespace Signum.Services
             {
                 throw new FaultException(e.Message);
             }
+            finally
+            {
+                Statics.CleanThreadContextAndAssert();
+            }
         }
 
         protected void Execute(MethodBase mi, Action action)
         {
-            Return(mi, mi.Name, () => { action(); return true; });
+            Return(mi, null, () => { action(); return true; });
         }
 
         protected void Execute(MethodBase mi, string description, Action action)
@@ -52,46 +54,51 @@ namespace Signum.Services
             Return(mi, description, () => { action(); return true; });
         }
 
+        public static ExecutionContext GetDefaultExecutionContext(MethodBase mi, string desc)
+        {
+            return SuggestUserInterfaceAttribute.Suggests(mi) == true ? ExecutionContext.UserInterface : null;
+        }
+
         #region IBaseServer
         [SuggestUserInterface]
         public virtual IdentifiableEntity Retrieve(Type type, int id)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "Retrieve {0}".Formato(type.Name),
+            return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () =>Database.Retrieve(type, id));
         }
 
         [SuggestUserInterface]
         public virtual IdentifiableEntity Save(IdentifiableEntity entidad)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "Save {0}".Formato(entidad.GetType()),
+            return Return(MethodInfo.GetCurrentMethod(), entidad.GetType().Name,
                 () =>Database.Save(entidad));
         }
 
         [SuggestUserInterface]
         public virtual List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLite {0}".Formato(liteType),
-                () =>AutoCompleteUtils.RetriveAllLite(liteType, implementations));
+            return Return(MethodInfo.GetCurrentMethod(), liteType.Name,
+                () =>AutoCompleteUtils.RetrieveAllLite(liteType, implementations));
         }
 
         [SuggestUserInterface]
         public virtual List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "FindLiteLike {0}".Formato(liteType),
+            return Return(MethodInfo.GetCurrentMethod(), liteType.Name,
                 () =>AutoCompleteUtils.FindLiteLike(liteType, implementations, subString, count));
         }
 
         [SuggestUserInterface]
-        public virtual Implementations FindImplementations(PropertyRoute entityPath)
+        public Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () => Schema.Current.FindImplementations(entityPath));
+            return Return(MethodInfo.GetCurrentMethod(), root.Name,
+                () => Schema.Current.FindAllImplementations(root));
         }
 
         [SuggestUserInterface]
         public virtual List<IdentifiableEntity> RetrieveAll(Type type)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "RetrieveAll {0}".Formato(type),
+            return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () => Database.RetrieveAll(type));
         }
 
@@ -123,9 +130,16 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => TypeLogic.TypesAssignableFrom(type));
         }
+
+        [SuggestUserInterface]
+        public virtual string GetToStr(Type type, int id)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => Database.GetToStr(type, id));
+        }
         #endregion
 
-        #region IQueryServer
+        #region IDynamicQueryServer
         [SuggestUserInterface]
         public virtual QueryDescription GetQueryDescription(object queryName)
         {
@@ -136,21 +150,21 @@ namespace Signum.Services
         [SuggestUserInterface]
         public virtual ResultTable ExecuteQuery(QueryRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryResult {0}".Formato(request.QueryName),
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQuery(request));
         }
 
         [SuggestUserInterface]
         public virtual int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryCount {0}".Formato(request.QueryName),
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQueryCount(request));
         }
 
         [SuggestUserInterface]
         public virtual Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryEntity {0}".Formato(request.QueryName),
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteUniqueEntity(request));
         }
 
@@ -160,6 +174,26 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => DynamicQueryManager.Current.GetQueryNames());
         }
+
+        [SuggestUserInterface]
+        public virtual List<QueryToken> ExternalQueryToken(Type type, QueryToken parent)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+               () => DynamicQueryManager.Current.GetExtensions(type, parent).ToList());
+        }
+
+        [SuggestUserInterface]
+        public object[] BatchExecute(BaseQueryRequest[] requests)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => DynamicQueryManager.Current.BatchExecute(requests));
+        }
         #endregion
+
+
+
+
+
+       
     }
 }

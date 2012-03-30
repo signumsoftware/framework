@@ -63,8 +63,12 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\$custommessage$Client.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Code\$custommessage$Client.cs" >
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controllers\HomeController.cs" >
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -93,24 +97,18 @@
     <Content Include="Content\smoothness\images\ui-icons_454545_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_888888_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\smoothness\jquery-ui-1.8.9.custom.css" />
+    <Content Include="Content\smoothness\jquery-ui-1.8.14.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Server$custommessage$.svc" />
     <Content Include="Views\$custommessage$\MyEntity.cshtml" />
-    <Content Include="Views\Shared\Menu.cshtml" />
-    <Content Include="Web.config" />
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
-    <Content Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\Menu.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -118,8 +116,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\" />
-    <Content Include="Scripts\jquery-1.5.min.js" />
-    <Content Include="Scripts\jquery-ui-1.8.9.custom.min.js" />
+    <Content Include="Scripts\jquery-1.6.2.min.js" />
+    <Content Include="Scripts\jquery-ui-1.8.14.min.js" />
     <Content Include="Scripts\newcontent.js" />
   </ItemGroup>
   <ItemGroup>

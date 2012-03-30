@@ -48,7 +48,7 @@ namespace Signum.Engine
         {
             Schema current = Schema.Current; 
 
-            List<TypeDN> types = Administrator.UnsafeRetrieveAll<TypeDN>();
+            List<TypeDN> types = Database.RetrieveAll<TypeDN>();
 
             var dict = EnumerableExtensions.JoinStrict(
                 types, current.Tables.Keys, t => t.FullClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).FullName,
@@ -57,7 +57,7 @@ namespace Signum.Engine
                 ).ToDictionary(a => a.type, a => a.typeDN);
 
             current.TypeToId = dict.SelectDictionary(k => k, v => v.Id);
-            current.IdToTable = current.TypeToId.ToDictionary(p => p.Value, p => current.Table(p.Key));
+            current.IdToType = current.TypeToId.ToDictionary(p => p.Value, p => current.Table(p.Key).Type);
 
             current.TypeToDN = dict;
             current.DnToType = dict.Inverse();
@@ -65,7 +65,7 @@ namespace Signum.Engine
             current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
             current.NameToType = current.TypeToName.Inverse("CleanTypeNames");
         }
-
+        
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
         {
             return (from dn in Administrator.TryRetrieveAll<TypeDN>(replacements)
@@ -123,14 +123,27 @@ namespace Signum.Engine
             return Schema.Current.TypeToDN.Where(a => type.IsAssignableFrom(a.Key)).Select(a => a.Value.ToLite()).ToList();
         }
 
-        public static Lite ParseLite(Type staticType, string value)
+        public static Lite ParseLite(Type staticType, string liteKey)
         {
-            return Lite.ParseLite(staticType, value, TryGetType);
+            return Lite.ParseLite(staticType, liteKey, TryGetType);
         }
 
-        public static string TryParseLite(Type liteType, string liteKey, out Lite lite)
+        public static Lite<T> ParseLite<T>(string liteKey) where T : class, IIdentifiable
         {
-            return Lite.TryParseLite(liteType, liteKey, TryGetType, out lite);
+            return (Lite<T>)Lite.ParseLite(typeof(T), liteKey, TryGetType);
+        }
+
+        public static string TryParseLite(Type staticType, string liteKey, out Lite lite)
+        {
+            return Lite.TryParseLite(staticType, liteKey, TryGetType, out lite);
+        }
+
+        public static string TryParseLite<T>(Type staticType, string liteKey, out Lite<T> lite) where T : class, IIdentifiable
+        {
+            Lite untypedLite;
+            var result = Lite.TryParseLite(staticType, liteKey, TryGetType, out untypedLite);
+            lite = (Lite<T>)untypedLite;
+            return result;
         }
 
         public static Type GetType(string cleanName)

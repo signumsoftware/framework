@@ -119,11 +119,16 @@ namespace Signum.Web
                     {
                         if (Link != null)
                         {
-                            sb.AddLine(new HtmlTag("a")
+                            HtmlTag htA = new HtmlTag("a")
                                              .Attrs(new { onmouseover = "", title = Title, href = Link.ToString(), id = Id })
-                                             .Class(Class)
-                                             .SetInnerText(Text)
-                                             .ToHtml());
+                                             .Class(Class);
+
+                            if (!MvcHtmlString.IsNullOrEmpty(html))
+                                htA.InnerHtml(html);
+                            else
+                                htA.SetInnerText(Text);
+
+                            sb.AddLine(htA.ToHtml());
                         }
                         else
                         {

@@ -43,11 +43,10 @@ namespace Signum.Entities
             set { Set(ref friendlyName, value, () => FriendlyName); }
         }
 
-        
-
+        static Expression<Func<TypeDN, string>> ToStringExpression = e => e.friendlyName;
         public override string ToString()
         {
-            return friendlyName; 
+            return ToStringExpression.Evaluate(this);
         }
 
         public bool IsType(Type type)
@@ -57,8 +56,6 @@ namespace Signum.Entities
 
             return FullClassName == type.FullName;
         }
-
-
 
         public string Namespace
         {

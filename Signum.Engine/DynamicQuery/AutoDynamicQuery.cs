@@ -13,6 +13,7 @@ namespace Signum.Engine.DynamicQuery
     public class AutoDynamicQuery<T> : DynamicQuery<T>
     {
         public IQueryable<T> Query { get; private set; }
+        
         Dictionary<string, Meta> metas;
 
         public AutoDynamicQuery(IQueryable<T> query)
@@ -31,40 +32,37 @@ namespace Signum.Engine.DynamicQuery
         {
             request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
 
-            DQueryable<T> result = Query
+            DQueryable<T> query = Query
+                .ToDQueryable(GetColumnDescriptions())
+                .SelectMany(request.Multiplications)
                 .Where(request.Filters)
-                .SelectDynamic(request.Columns, request.Orders)
-                .OrderBy(request.Orders).TryTake(request.Limit);
+                .OrderBy(request.Orders)
+                .Select(request.Columns);
 
-            DEnumerable<T> array = result.ToArray();
+            var result = query.TryPaginate(request.ElementsPerPage, request.CurrentPage);
 
-            return array.ToResultTable(request.Columns);
+            return result.ToResultTable(request);
         }
 
         public override int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Query.Where(request.Filters).Count();
+            return Query.ToDQueryable(GetColumnDescriptions()).Where(request.Filters).Query.Count();
         }
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            var columns = new List<Column> { new _EntityColumn(EntityColumn().BuildColumnDescription()) };
-            DQueryable<T> orderQuery = Query.Where(request.Filters).SelectDynamic(columns, request.Orders).OrderBy(request.Orders);
+            var ex = new _EntityColumn(EntityColumn().BuildColumnDescription());
 
-            var entitySelect = GetEntitySelector(orderQuery.TupleType);
+            DQueryable<T> orderQuery = Query
+                .ToDQueryable(GetColumnDescriptions())
+                .Where(request.Filters)
+                .OrderBy(request.Orders)
+                .Select(new List<Column> { ex});
 
-            return (Lite)orderQuery.Query.Select(entitySelect).Unique(request.UniqueType);
+            var exp = Expression.Lambda<Func<object, Lite>>(Expression.Convert(ex.Token.BuildExpression(orderQuery.Context), typeof(Lite)), orderQuery.Context.Parameter);
+
+            return orderQuery.Query.Select(exp).Unique(request.UniqueType);
         }
-
-        private static Expression<Func<object, Lite>> GetEntitySelector(Type tupleType)
-        {
-            ParameterExpression p = Expression.Parameter(typeof(object), "p");
-            return Expression.Lambda<Func<object, Lite>>(
-                Expression.Convert(
-                    TupleReflection.TupleChainProperty(Expression.Convert(p, tupleType), 0),
-                typeof(Lite)), p);
-        }
-
         public override Expression Expression
         {
             get { return Query.Expression; }

@@ -17,18 +17,6 @@ namespace Signum.Web
     {
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
-        /// <summary>
-        /// HTML5 Input types
-        /// </summary>
-        public enum InputType
-        {
-            Text,
-            Number,
-            Email,
-            Url,
-            Hidden
-        }
-
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
             if (!valueLine.Visible || (valueLine.HideIfNull && valueLine.UntypedValue == null))
@@ -66,10 +54,6 @@ namespace Signum.Web
 
         private static void InternalValueLineValue(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
         {
-            long? ticks = EntityInfoHelper.GetTicks(helper, valueLine);
-            if (ticks != null)
-                sb.AddLine(helper.Hidden(valueLine.Compose(TypeContext.Ticks), ticks.Value));
-
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
             valueLine.ValueHtmlProps.AddCssClass("sf-value-line");
@@ -92,10 +76,15 @@ namespace Signum.Web
 
         public static MvcHtmlString EnumComboBox(this HtmlHelper helper, ValueLine valueLine)
         {
-            Enum value = (Enum)valueLine.UntypedValue;
+            Enum value = valueLine.UntypedValue as Enum;
 
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, value != null ? value.NiceToString() : "", "sf-value-line");
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, valueLine.UntypedValue.ToString()));
+                return result.Concat(helper.Span("", value != null ? value.NiceToString() : valueLine.UntypedValue.TryToString(), "sf-value-line"));
+            }
 
             StringBuilder sb = new StringBuilder();
             List<SelectListItem> items = valueLine.EnumComboItems;
@@ -103,8 +92,8 @@ namespace Signum.Web
             {
                 items = new List<SelectListItem>();
 
-                if (valueLine.Type.IsNullable() &&
-                   (!Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any() || valueLine.UntypedValue == null))
+                if (valueLine.UntypedValue == null ||
+                    valueLine.Type.IsNullable() && (valueLine.PropertyRoute == null || !Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()))
                 {
                     items.Add(new SelectListItem() { Text = "-", Value = "" });
                 }
@@ -122,16 +111,7 @@ namespace Signum.Web
             }
             else
                 if (value != null)
-                    items.Where(e => e.Value == value.ToString()).Single("Not value present in ValueLine", "More than one values present in ValueLine").Selected = true;
-
-
-            string setTicks = SetTicksFunction(helper, valueLine);
-            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
-
-            if (valueLine.ValueHtmlProps.ContainsKey("onchange"))
-                valueLine.ValueHtmlProps["onchange"] = setTicks + valueLine.ValueHtmlProps["onchange"] + reloadOnChangeFunction;
-            else
-                valueLine.ValueHtmlProps.Add("onchange", setTicks + reloadOnChangeFunction);
+                    items.Where(e => e.Value == value.ToString()).SingleEx(()=>"Not value present in ValueLine", ()=> "More than one values present in ValueLine").Selected = true;
 
             return helper.DropDownList(valueLine.ControlID, items, valueLine.ValueHtmlProps);
         }
@@ -147,24 +127,17 @@ namespace Signum.Web
                 value = value.Value.ToUserInterface();
 
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, value.TryToString(valueLine.Format), "sf-value-line");
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, value.TryToString(valueLine.Format)));
+                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line"));
+            }
 
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
 
-            if (valueLine.DatePickerOptions.ShowAge)
-                valueLine.ValueHtmlProps.AddCssClass("hasAge");
-
-            string setTicks = SetTicksFunction(helper, valueLine);
-            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
-
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText())
-            {
-                if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                    valueLine.ValueHtmlProps["onblur"] = setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
-                else
-                    valueLine.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
-            }
-
+            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");        
+            
             string jsDataFormat = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g");
 
             valueLine.ValueHtmlProps["size"] = jsDataFormat.Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"
@@ -178,33 +151,16 @@ namespace Signum.Web
                 valueLine.ValueHtmlProps.AddCssClass("sf-datepicker");
                 valueLine.ValueHtmlProps["data-format"] =  valueLine.DatePickerOptions.Format;
             }
+
+            if (!valueLine.ValueHtmlProps.ContainsKey("placeholder") && jsDataFormat.HasText())
+                valueLine.ValueHtmlProps["placeholder"] = jsDataFormat.ToLower();
+
             MvcHtmlString returnString = helper.TextBox(valueLine.ControlID, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps);
             
             if (!isDefaultDatepicker)
                 returnString = returnString.Concat(helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions));
 
-            if (valueLine.DatePickerOptions.ShowAge)
-                returnString = returnString.Concat(helper.Span(valueLine.ControlID + "Age", String.Empty, "age"));
-
             return returnString;
-        }
-
-        public static InputType GetInputType(ValueLine valueLine)
-        {
-            if (valueLine.PropertyRoute == null) return InputType.Text;
-            var pp = Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute);
-
-            if (pp == null) return InputType.Text;
-
-            if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
-                    .Validators.OfType<EMailValidatorAttribute>().SingleOrDefault() != null)
-                return InputType.Email;
-
-            if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
-                .Validators.OfType<URLValidatorAttribute>().SingleOrDefault() != null)
-                return InputType.Url;
-
-            return InputType.Text;
         }
 
         public static MvcHtmlString Hidden(this HtmlHelper helper, ValueLine valueLine)
@@ -215,55 +171,51 @@ namespace Signum.Web
             return HtmlHelperExtenders.InputType("hidden", valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
         }
 
-        public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine, InputType inputType)
+        public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            string value = (valueLine.UntypedValue as IFormattable).TryToString(valueLine.Format) ?? 
+            string value = (valueLine.UntypedValue as IFormattable).TryToString(valueLine.Format) ??
                            valueLine.UntypedValue.TryToString() ?? "";
 
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, value, "sf-value-line");
-
-            string setTicks = SetTicksFunction(helper, valueLine);
-            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, value));
+                return result.Concat(helper.Span("", value, "sf-value-line"));
+            }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
                 valueLine.ValueHtmlProps.Add("autocomplete", "off");
             else
                 valueLine.ValueHtmlProps.Remove("autocomplete");
 
-            if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
-            else
-                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");
 
-            valueLine.ValueHtmlProps["type"] = inputType.ToString().ToLower();
+            valueLine.ValueHtmlProps["type"] = "text";
 
             return helper.TextBox(valueLine.ControlID, value, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
-
-            valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");
-
-            return helper.TextboxInLine(valueLine, InputType.Text);
+            if (!valueLine.ReadOnly)
+                valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");    
+            
+            return helper.TextboxInLine(valueLine);
         }
 
         public static MvcHtmlString TextAreaInLine(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, (string)valueLine.UntypedValue, "sf-value-line");
-
-            string setTicks = SetTicksFunction(helper, valueLine);
-            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, (string)valueLine.UntypedValue));
+                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line"));
+            }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
-            if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
-            else
-                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+            valueLine.ValueHtmlProps["onblur"] = "this.innerHTML = this.value; " + valueLine.ValueHtmlProps.TryGetC("onblur");
 
             return helper.TextArea(valueLine.ControlID, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
         }
@@ -272,19 +224,6 @@ namespace Signum.Web
         {
             if (valueLine.ReadOnly)
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
-            else
-            {
-                string setTicks = SetTicksFunction(helper, valueLine);
-                string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
-
-                if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText())
-                {
-                    if (valueLine.ValueHtmlProps.ContainsKey("onclick"))
-                        valueLine.ValueHtmlProps["onclick"] = setTicks + valueLine.ValueHtmlProps["onclick"] + reloadOnChangeFunction;
-                    else
-                        valueLine.ValueHtmlProps.Add("onclick", setTicks + reloadOnChangeFunction);
-                }
-            }
 
             bool? value = (bool?)valueLine.UntypedValue;
             return HtmlHelperExtenders.CheckBox(helper, valueLine.ControlID, value.HasValue ? value.Value : false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
@@ -296,7 +235,12 @@ namespace Signum.Web
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
             if (valueLine.ReadOnly)
+            {
+                if (valueLine.WriteHiddenOnReadonly)
+                    sb.AddLine(helper.Hidden(valueLine.ControlID, value ?? false));
+                
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
+            }
 
             valueLine.ValueHtmlProps.Add("name", valueLine.ControlID);
 
@@ -327,7 +271,7 @@ namespace Signum.Web
 
         public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             ValueLine vl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
@@ -346,7 +290,7 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             ValueLine hl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
@@ -356,20 +300,6 @@ namespace Signum.Web
                 settingsModifier(hl);
 
             return Hidden(helper, hl);
-        }
-
-        private static string SetTicksFunction(HtmlHelper helper, ValueLine valueLine)
-        {
-            return (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ?
-                "$('#{0}').val(new Date().getTime()); ".Formato(valueLine.Compose(TypeContext.Ticks)) :
-                "";
-        }
-
-        private static string GetReloadFunction(HtmlHelper helper, ValueLine valueLine)
-        {
-            return (valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ?
-                valueLine.ReloadFunction ?? "SF.reloadEntity('{0}','{1}'); ".Formato(valueLine.ReloadControllerUrl, helper.WindowPrefix()) :
-                "";
         }
     }
 
@@ -416,7 +346,7 @@ namespace Signum.Web
 
         public Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>> Constructor = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>>()
         {
-            {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine, ValueLineHelper.GetInputType(valueLine))},
+            {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine)},
             {ValueLineType.TextArea, (helper, valueLine) => helper.TextAreaInLine(valueLine)},
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
             {ValueLineType.RadioButtons, (helper, valueLine) => helper.RadioButtons(valueLine)},

@@ -32,9 +32,7 @@ namespace Signum.Web
             sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
 
             sb.AddLine(helper.HiddenStaticInfo(listDetail));
-
-            sb.AddLine(helper.Hidden(listDetail.Compose(TypeContext.Ticks), 
-                EntityInfoHelper.GetTicks(helper, listDetail).TryToString() ?? ""));
+            sb.AddLine(helper.Hidden(listDetail.Compose(EntityListBaseKeys.ListPresent), ""));
 
             //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
             if (listDetail.ElementType.IsEmbeddedEntity())
@@ -57,12 +55,12 @@ namespace Signum.Web
 
                 sb.Add(sbSelect.ToHtml());
 
-                sb.AddLine(new HtmlStringBuilder()
+                using (sb.Surround(new HtmlTag("ul")))
                 {
-                    ListBaseHelper.CreateButton(helper, listDetail, null).Surround("td").Surround("tr"),
-                    ListBaseHelper.FindButton(helper, listDetail).Surround("td").Surround("tr"),
-                    ListBaseHelper.RemoveButton(helper, listDetail).Surround("td").Surround("tr")
-                }.ToHtml().Surround("table"));
+                    sb.AddLine(ListBaseHelper.CreateButton(helper, listDetail, null).Surround("li"));
+                    sb.AddLine(ListBaseHelper.FindButton(helper, listDetail).Surround("li"));
+                    sb.AddLine(ListBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
+                }
             }
 
             if (listDetail.DetailDiv == defaultDetailDiv)
@@ -88,7 +86,9 @@ namespace Signum.Web
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             //TODO: Anto - RequestLoadAll con ItemTC
-            if (typeof(T).IsEmbeddedEntity() || ((IdentifiableEntity)(object)itemTC.Value).IsNew || EntityBaseHelper.RequiresLoadAll(helper, listDetail))
+            if (typeof(T).IsEmbeddedEntity() || 
+                EntityBaseHelper.RequiresLoadAll(helper, listDetail) ||
+                (itemTC.Value.GetType().IsIIdentifiable() && (itemTC.Value as IIdentifiable).IsNew))
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInInvisibleDiv, listDetail));
             else if (itemTC.Value != null)
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
@@ -104,7 +104,7 @@ namespace Signum.Web
                     .Class("sf-entity-list-option")
                     .SetInnerText(
                         (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
-                        (itemTC.Value as Lite).TryCC(i => i.ToStr) ??
+                        (itemTC.Value as Lite).TryCC(i => i.ToString()) ??
                         (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? "");
 
             if (itemTC.Index == 0)

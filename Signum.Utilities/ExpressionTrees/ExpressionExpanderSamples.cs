@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace Signum.Utilities.ExpressionTrees
 	{
         static MethodInfo miContains = ReflectionTools.GetMethodInfo(() => "".Contains(""));
 
-        public Expression Expand(Expression instance, Expression[] parameters, Type[] typeArguments)
+        public Expression Expand(Expression instance, Expression[] parameters, MethodInfo mi)
         {
             return parameters.Select(p => (Expression)Expression.Call(instance, miContains, p))
                 .Aggregate((a, b) => Expression.Or(a, b));
@@ -52,7 +52,7 @@ namespace Signum.Utilities.ExpressionTrees
     {
         static MethodInfo miContains = ReflectionTools.GetMethodInfo(() => "".Contains(""));
 
-        public Expression Expand(Expression instance, Expression[] parameters, Type[] typeArguments)
+        public Expression Expand(Expression instance, Expression[] parameters, MethodInfo mi)
         {
             return parameters.Select(p => (Expression)Expression.Call(instance, miContains, p))
                 .Aggregate((a, b) => Expression.And(a, b));

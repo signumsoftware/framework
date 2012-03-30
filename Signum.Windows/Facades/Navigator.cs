@@ -118,6 +118,11 @@ namespace Signum.Windows
             return Manager.QueryCount(options);
         }
 
+        public static void QueryCountBatch(CountOptions options, Action<int> onResult, Action @finally)
+        {
+            Manager.QueryCountBatch(options, onResult, @finally);
+        }
+
         public static void NavigateUntyped(object entity)
         {
             Manager.Navigate(entity, new NavigateOptions());
@@ -193,12 +198,12 @@ namespace Signum.Windows
             Manager.Admin(adminOptions);
         }
 
-        internal static EntitySettings GetEntitySettings(Type type)
+        public static EntitySettings GetEntitySettings(Type type)
         {
             return Manager.GetEntitySettings(type);
         }
 
-        internal static QuerySettings GetQuerySettings(object queryName)
+        public static QuerySettings GetQuerySettings(object queryName)
         {
             return Manager.GetQuerySettings(queryName);
         }
@@ -322,6 +327,8 @@ namespace Signum.Windows
             {
                 //Looking for a better place to do this
                 PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
+                QueryToken.EntityExtensions = (type, parent) => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(type, parent));
+
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
                 CompleteQuerySettings();
@@ -485,7 +492,7 @@ namespace Signum.Windows
                 Lite lite = FindUnique(new FindUniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
-                    UniqueType = UniqueType.SingleOrMany,
+                    UniqueType = UniqueType.Only,
                 });
 
                 if (lite != null)
@@ -536,13 +543,28 @@ namespace Signum.Windows
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryCount(request));
         }
 
+        public void QueryCountBatch(CountOptions options, Action<int> onResult, Action @finally)
+        {
+            AssertFindable(options.QueryName);
+
+            SetFilterTokens(options.QueryName, options.FilterOptions);
+
+            var request = new QueryCountRequest
+            {
+                QueryName = options.QueryName,
+                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
+            };
+
+            DynamicQueryBachRequest.Enqueue(request, obj => onResult((int)obj), @finally);
+        }
+
         public void SetFilterTokens(object queryName, IEnumerable<FilterOption> filters)
         {
             QueryDescription description = GetQueryDescription(queryName);
 
             foreach (var f in filters)
             {
-                f.Token = QueryUtils.Parse(f.Path, description); 
+                f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
                 f.RefreshRealValue();
             }
         }
@@ -553,7 +575,7 @@ namespace Signum.Windows
 
             foreach (var o in orders)
             {
-                o.Token = QueryUtils.Parse(o.Path, description); 
+                o.Token = QueryUtils.Parse(o.Path, t => QueryUtils.SubTokens(t, description.Columns)); 
             }
         }
 
@@ -573,6 +595,7 @@ namespace Signum.Windows
                 OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions),
                 ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions),
                 ColumnOptionsMode = options.ColumnOptionsMode,
+                ElementsPerPage = options.ElementsPerPage,
                 ShowFilters = options.ShowFilters,
                 ShowFilterButton = options.ShowFilterButton,
                 ShowFooter = options.ShowFooter,
@@ -591,27 +614,40 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            ModifiableEntity entity = entityOrLite as ModifiableEntity;
-            if (entity == null)
-            {
-                Lite lite = (Lite)entityOrLite;
-                entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
-            }
+            Type type = entityOrLite is Lite? ((Lite)entityOrLite).RuntimeType :entityOrLite.GetType();
 
-            AssertViewable(entity, true);
-            EntitySettings es = EntitySettings[entity.GetType()];
-
-            if (entity is EmbeddedEntity)
-                throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
-
-            Control ctrl = options.View ?? es.CreateView(entity, null);
-
-            Window win = CreateNormalWindow((ModifiableEntity)entity, options, es, ctrl);
-
-            if (options.Closed != null)
-                win.Closed += options.Closed;
-
+            NormalWindow win = CreateNormalWindow();
+            win.SetTitleText(Resources.Loading0.Formato(type.NiceName()));
             win.Show();
+
+
+            try
+            {
+                ModifiableEntity entity = entityOrLite as ModifiableEntity;
+                if (entity == null)
+                {
+                    Lite lite = (Lite)entityOrLite;
+                    entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
+                }
+
+                AssertViewable(entity, true);
+                EntitySettings es = EntitySettings[entity.GetType()];
+
+                if (entity is EmbeddedEntity)
+                    throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
+
+                Control ctrl = options.View ?? es.CreateView(entity, null);
+
+                SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
+
+                if (options.Closed != null)
+                    win.Closed += options.Closed;
+            }
+            catch
+            {
+                win.Close();
+                throw;
+            }
         }
 
         public virtual object View(object entityOrLite, ViewOptions options)
@@ -632,7 +668,9 @@ namespace Signum.Windows
 
             Control ctrl = options.View ?? es.CreateView(entity, options.TypeContext);
 
-            NormalWindow win = CreateNormalWindow((ModifiableEntity)entity, options, es, ctrl);
+            NormalWindow win = CreateNormalWindow();
+                
+            SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
 
             if (options.AllowErrors != AllowErrors.Ask)
                 win.AllowErrors = options.AllowErrors; 
@@ -650,25 +688,24 @@ namespace Signum.Windows
 
         }
 
-        protected virtual NormalWindow CreateNormalWindow(ModifiableEntity entity, ViewOptionsBase options, EntitySettings es, Control ctrl)
+        protected virtual NormalWindow CreateNormalWindow()
+        {
+            return new NormalWindow();
+        }
+
+        protected virtual NormalWindow SetNormalWindowEntity(NormalWindow win, ModifiableEntity entity, ViewOptionsBase options, EntitySettings es, Control ctrl)
         {
             Type entityType = entity.GetType();
 
             ViewButtons buttons = options.GetViewButtons();
 
-            bool isReadOnly = options.ReadOnly ?? IsReadOnly(entity, options.Admin);
+            bool isReadOnly = options.ReadOnly ?? es.OnIsReadOnly(entity, options.Admin);
 
-            NormalWindow win = new NormalWindow()
-            {
-                MainControl = ctrl,
-                ButtonBar =
-                {
-                    ViewButtons = buttons,
-                    SaveVisible = buttons == ViewButtons.Save && ShowSave(entityType) && !isReadOnly,
-                    OkVisible = buttons == ViewButtons.Ok
-                },
-                DataContext = options.Clone ?((ICloneable)entity).Clone(): entity,
-            };
+            win.MainControl = ctrl;
+            win.ButtonBar.ViewButtons = buttons;
+            win.ButtonBar.SaveVisible = buttons == ViewButtons.Save && es.OnShowSave() && !isReadOnly;
+            win.ButtonBar.OkVisible = buttons == ViewButtons.Ok;
+            win.DataContext = options.Clone ? ((ICloneable)entity).Clone() : entity;
 
             if (isReadOnly)
                 Common.SetIsReadOnly(win, true);

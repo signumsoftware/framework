@@ -157,7 +157,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected override Expression Visit(Expression exp)
         {
-            if (Enum.IsDefined(typeof(ExpressionType), exp.NodeType))
+            if ( Enum.IsDefined(typeof(ExpressionType), exp.NodeType) && exp.NodeType <= ExpressionType.Assign)
                 return base.Visit(exp);
             else
                 builder.Append(exp.ToString());
@@ -621,6 +621,13 @@ namespace Signum.Utilities.ExpressionTrees
                     builder.Append(" as ");
                     builder.Append(u.Type.TypeName());
                     break;
+                case ExpressionType.Convert:
+                    builder.Append("((");
+                    builder.Append(u.Type.TypeName());
+                    builder.Append(")");
+                    Visit(u.Operand);
+                    builder.Append(")");
+                    break;
                 default:
                     builder.Append(u.NodeType);
                     builder.Append("(");
@@ -628,7 +635,6 @@ namespace Signum.Utilities.ExpressionTrees
                     builder.Append(")");
                     break;
             }
-
 
             return u;
         }

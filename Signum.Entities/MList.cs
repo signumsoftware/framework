@@ -16,7 +16,6 @@ namespace Signum.Entities
     [Serializable, DebuggerTypeProxy(typeof(MListDebugging<>)), DebuggerDisplay("Count = {Count}")]
     public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, INotifyPropertyChanged 
     {
-        int hashCode = -1;
         List<T> innerList = new List<T>();
 
         #region Events
@@ -66,27 +65,12 @@ namespace Signum.Entities
 
         #endregion
 
-        public override bool SelfModified
-        {
-            get
-            {
-                return hashCode != HashCodeSum();
-            }
-        }
+        public bool selfModified = true;
+        public override bool SelfModified { get { return selfModified; } }
 
         protected override void CleanSelfModified()
         {
-            hashCode = HashCodeSum();
-        }
-
-        int HashCodeSum()
-        {
-            long hash = 0;
-            foreach (var item in innerList)
-            {
-                hash += item.GetHashCode();
-            }
-            return hash.GetHashCode();
+            selfModified = false;
         }
 
         public MList()
@@ -116,6 +100,7 @@ namespace Signum.Entities
             {
                 T old = innerList[index];
                 innerList[index] = value;
+                selfModified = true;
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, old));
             }
         }
@@ -123,6 +108,7 @@ namespace Signum.Entities
         public void Add(T item)
         {
             innerList.Add(item);
+            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
         }
 
@@ -153,11 +139,11 @@ namespace Signum.Entities
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
-        public void Sort<S>(Func<T,S> element)
-            where S:IComparable<S>
+        public void Sort<S>(Func<T, S> element)
+            where S : IComparable<S>
         {
             innerList.Sort((a, b) => element(a).CompareTo(element(b)));
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public void SortDescending<S>(Func<T, S> element)
@@ -182,6 +168,7 @@ namespace Signum.Entities
         public void Clear()
         {
             innerList.Clear();
+            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
@@ -198,15 +185,19 @@ namespace Signum.Entities
         public void Insert(int index, T item)
         {
             innerList.Insert(index, item);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add,item, index));
+            selfModified = true;
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
         }
-     
+
         public bool Remove(T item)
         {
-            int index =  innerList.IndexOf(item);
-            if (index == -1) return false;
+            int index = innerList.IndexOf(item);
+            if (index == -1)
+                return false;
+         
             innerList.RemoveAt(index);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item , index));
+            selfModified = true;
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
             return true;
         }
 
@@ -222,6 +213,7 @@ namespace Signum.Entities
         {
             T item = innerList[index];
             innerList.RemoveAt(index);
+            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
         }
 
@@ -425,10 +417,5 @@ namespace Signum.Entities
             return new MList<T>(collection); 
         }
 
-        //For Expression Trees only
-        public static T Element<T>(this IEnumerable<T> collection)
-        {
-            return default(T);
-        }
     }
 }

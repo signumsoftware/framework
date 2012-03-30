@@ -143,15 +143,18 @@ namespace Signum.Windows
             buttonBar.SaveButton.IsEnabled = false;
             IdentifiableEntity ei = (IdentifiableEntity)base.DataContext;
             IdentifiableEntity nueva = null;
-            Async.Do(this,
+            Async.Do(
                 () => nueva = Server.Save(ei),
                 () => { base.DataContext = null; base.DataContext = nueva; },
                 () => buttonBar.SaveButton.IsEnabled = true);
         }
 
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
+
+            MoveFocus();
 
             if (buttonBar.ViewButtons== ViewButtons.Save && this.HasChanges())
             {
@@ -182,6 +185,17 @@ namespace Signum.Windows
             }
         }
 
+        private static void MoveFocus()
+        {
+            // Change keyboard focus.
+            UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
+
+            if (elementWithFocus != null)
+            {
+                elementWithFocus.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            }
+        }
+
         void RefreshEnabled()
         {
             buttonBar.ReloadButton.IsEnabled = (DataContext as IdentifiableEntity).TryCS(ei => !ei.IsNew) ?? false;
@@ -200,6 +214,11 @@ namespace Signum.Windows
         private void widgetPanel_ExpandedCollapsed(object sender, RoutedEventArgs e)
         {
             this.SizeToContent = SizeToContent.WidthAndHeight;
+        }
+
+        public void SetTitleText(string text)
+        {
+            this.entityTitle.SetTitleText(text);
         }
     }
 

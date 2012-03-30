@@ -1,76 +1,34 @@
-@using Signum.Entities.DynamicQuery
+﻿@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reflection
 @using Signum.Engine.DynamicQuery
 @using Signum.Web.Properties
+@model Context
+@{ 
+    List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+}
 
-@{ bool visible = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterMode == FilterMode.Visible;
-   Context context = (Context)Model;
-   FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
-   QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];}
-
-<div id="@context.Compose("fields-search")">
-    <div id="@context.Compose("fields-list")" class="sf-fields-list">
-        <div class="ui-widget sf-filters" @(visible ? "" : "style=display:none")>
-            <div id="@context.Compose("filters-body")" class="ui-widget-header ui-corner-top sf-filters-body">
-                @{ var columns = queryDescription.Columns
-                        .Select(c => new SelectListItem { Text = c.DisplayName, Value = c.Name, Selected = false })
-                        .ToList();
-                   columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });}
-                
-                @Html.TokensCombo(findOptions.QueryName, columns, context, 0, false)
-                
-                @Html.Href(
-                        context.Compose("btnAddFilter"), 
-                        Resources.FilterBuilder_AddFilter, 
-                        "",
-                        Resources.FilterBuilder_AddFilter,
-                        "sf-query-button sf-add-filter", 
-                        new Dictionary<string, object> 
-                        { 
-                            { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")) },
-                            { "data-icon", "ui-icon-arrowthick-1-s" }
-                        })
-
-                @if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
-                {
-                    @Html.Href(
-                        context.Compose("btnAddColumn"), 
-                        Resources.FilterBuilder_AddColumn, 
-                        "", 
-                        Resources.FilterBuilder_AddColumn, 
-                        "sf-query-button sf-add-column", 
-                        new Dictionary<string, object> 
-                        { 
-                            { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")) }, 
-                            { "data-icon", "ui-icon-arrowthick-1-e" }
-                        })
-                }
-            </div>
-            @{ List<FilterOption> filterOptions = findOptions.FilterOptions;}
-            <div class="ui-widget-content ui-corner-bottom sf-filters-list">
-                <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@Resources.NoFiltersSpecified</span>
-                <table id="@context.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
-                    <thead>
-                        <tr>
-                            <th>
-                            </th>
-                            <th class="sf-filter-field-header">@Resources.Field
-                            </th>
-                            <th>@Resources.Operation
-                            </th>
-                            <th>@Resources.Value
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (int i = 0; i < filterOptions.Count; i++)
-                        {
-                            FilterOption filter = filterOptions[i];
-                            @Html.NewFilter(findOptions.QueryName, filter, context, i)
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+<div class="ui-widget-content ui-corner-bottom sf-filters-list">
+    <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@Resources.NoFiltersSpecified</span>
+    <table id="@Model.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
+        <thead>
+            <tr>
+                <th>
+                </th>
+                <th class="sf-filter-field-header">@Resources.Field
+                </th>
+                <th>@Resources.Operation
+                </th>
+                <th>@Resources.Value
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < filterOptions.Count; i++)
+            {
+                FilterOption filter = filterOptions[i];
+                @Html.NewFilter(queryDescription.QueryName, filter, Model, i)
+            }
+        </tbody>
+    </table>
 </div>

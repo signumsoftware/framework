@@ -5,11 +5,11 @@
             containerLeft = $container.offset().left;
 
     $container.css({ "overflow-x": "hidden" });
-    var $track = $("<div class='track'></div>")
+    var $track = $("<div class='sf-search-track'></div>")
             .css({ width: w });
 
     var sliderWidth = Math.max(100, (2 * w - mw));
-    var $slider = $("<div class='slider' title='Arrastrar para hacer scroll'></div>")
+    var $slider = $("<div class='sf-search-slider' title='Arrastrar para hacer scroll'></div>")
             .css({ width: sliderWidth })
             .appendTo($track);
 
@@ -40,18 +40,18 @@
         };
     }
 
-    $container.find(".slider").bind("mousedown", function (e) {
+    $container.find(".sf-search-slider").bind("mousedown", function (e) {
         mouseDown = true;
         left = getMousePosition(e).x - containerLeft;
         prevLeft = $(this).position().left;
     });
 
-    $container.find(".track").bind("click", function (e) {
-        if ($(e.target).hasClass("slider")) return;
+    $container.find(".sf-search-track").bind("click", function (e) {
+        if ($(e.target).hasClass("sf-search-slider")) return;
 
         var $track = $(this),
             clicked = getMousePosition(e, window, document).x - containerLeft,
-            $slider = $track.find(".slider"),
+            $slider = $track.find(".sf-search-slider"),
             sliderPosLeft = $slider.position().left,
             sliderWidth = $slider.width();
 
@@ -67,7 +67,7 @@
         }
 
         $track.parent()
-            .find(".slider")
+            .find(".sf-search-slider")
             .css({ left: left });
 
         $container.children("table")
@@ -83,7 +83,7 @@
                     currentLeft = Math.min(currentLeft, w - (Math.max(100, 2 * w - mw)));
                     currentLeft = Math.max(0, currentLeft);
 
-                    $container.find(".slider").css({ left: currentLeft });
+                    $container.find(".sf-search-slider").css({ left: currentLeft });
                     $target.css({ marginLeft: -currentLeft * proportion });
                 }
             })
@@ -105,7 +105,7 @@
 
                     proportion = (mw - w) / (w - sliderWidth);
 
-                    $t.find(".slider").css({ width: sliderWidth });
+                    $t.find(".sf-search-slider").css({ width: sliderWidth });
                     $container.children("table").first().css({ marginLeft: 0 });
                 }
                 else {
@@ -115,7 +115,7 @@
         }
         setTimeout(function () { resize($c, $t); }, 1000);
     };
-    resize($container, $container.find(".track"));
+    resize($container, $container.find(".sf-search-track"));
 
     $(function () {
         $.extend($.fn.disableTextSelect = function () {
@@ -130,6 +130,6 @@
                 }
             });
         });
-        $container.find(".slider").disableTextSelect();
+        $container.find(".sf-search-slider").disableTextSelect();
     });
 }

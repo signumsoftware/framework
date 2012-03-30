@@ -61,6 +61,14 @@ namespace Signum.Engine.Linq
             });
         }
 
+        internal static Expression JustVisit(LambdaExpression expression, Type type)
+        {
+            var cleaned = MetaEvaluator.Clean(expression);
+
+            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, Expression.Constant(null, type)));
+
+            return new MetadataVisitor().Visit(replaced);
+        }
 
         static MetaExpression MakeCleanMeta(Type type, Expression expression)
         {
@@ -158,6 +166,9 @@ namespace Signum.Engine.Linq
                 m.Method.Name == "Truncate"))
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 
+            if (m.Method.Name == "ToString" && m.Object != null && typeof(IIdentifiable).IsAssignableFrom(m.Object.Type))
+                return Visit(Expression.Property(m.Object, piToStringProperty));
+
             if (m.Object != null)
             {
                 var a = this.Visit(m.Object);
@@ -170,6 +181,9 @@ namespace Signum.Engine.Linq
                 return MakeDirtyMeta(m.Type, list.ToArray());
             }
         }
+
+        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((IIdentifiable ii) => ii.ToStringProperty);
+
 
         private Expression MapAndVisit(LambdaExpression lambda, params MetaProjectorExpression[] projs)
         {
@@ -198,7 +212,7 @@ namespace Signum.Engine.Linq
                 MetaExpression meta = expression as MetaExpression;
                 if (meta != null && meta.Meta is CleanMeta)
                 {
-                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.Single("Metas doesn't work over polymorphic MLists").Add("Item");
+                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(()=>"Metas don't work over polymorphic MLists").Add("Item");
 
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
@@ -357,7 +371,7 @@ namespace Signum.Engine.Linq
                 case ExpressionType.MemberInit:
                     return ((MemberInitExpression)source).Bindings
                         .OfType<MemberAssignment>()
-                        .Single(a => ReflectionTools.MemeberEquals(a.Member, member)).Expression;
+                        .SingleEx(a => ReflectionTools.MemeberEquals(a.Member, member)).Expression;
                 case ExpressionType.New:
                     NewExpression nex = (NewExpression)source;
                     if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && member.Name == "Key")
@@ -368,7 +382,7 @@ namespace Signum.Engine.Linq
                     if (nex.Members != null)
                     {
                         PropertyInfo pi = (PropertyInfo)member;
-                        return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                        return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                     }
 
                     break;
@@ -376,7 +390,10 @@ namespace Signum.Engine.Linq
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
             {
-                var pi = Reflector.FindPropertyInfo(member); 
+                var pi = member as PropertyInfo ??  Reflector.TryFindPropertyInfo((FieldInfo)member);
+
+                if (pi == null)
+                    return new MetaExpression(memberType, null);
 
                 MetaExpression meta = (MetaExpression)source;
 

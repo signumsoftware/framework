@@ -118,8 +118,6 @@ namespace Signum.Windows
 
             base.OnLoad(sender, e);
 
-            combo.IsEnabled = !Common.GetIsReadOnly(this);
-
             if (LoadDataTrigger == LoadDataTrigger.OnLoad)
                 OnLoadData(sender, e);
             else
@@ -151,7 +149,7 @@ namespace Signum.Windows
             }
 
             if (SortElements)
-                data = data.OrderBy(a => a.ToStr).ToList();
+                data = data.OrderBy(a => a.ToString()).ToList();
 
             try
             {

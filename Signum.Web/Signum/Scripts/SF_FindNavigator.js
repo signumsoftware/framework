@@ -10,13 +10,13 @@ SF.registerModule("FindNavigator", function () {
             allowMultiple: null,
             create: true,
             view: true,
-            top: null,
+            elems: null,
             filters: null, //List of filter names "token1,operation1,value1;token2,operation2,value2"
             filterMode: null,
             orders: null, //A Json array like ["columnName1","-columnName2"] => will order by columnname1 asc, then by columnname2 desc
             columns: null, //List of column names "token1,displayName1;token2,displayName2"
             columnMode: null,
-            allowUserColumns: null,
+            allowChangeColumns: true,
             navigatorControllerUrl: null,
             searchControllerUrl: null,
             onOk: null,
@@ -29,17 +29,20 @@ SF.registerModule("FindNavigator", function () {
     SF.FindNavigator.prototype = {
 
         webQueryName: "sfWebQueryName",
-        top: "sfTop",
+        elems: "sfElems",
+        page: "sfPage",
         allowMultiple: "sfAllowMultiple",
+        allowChangeColumns: "sfAllowChangeColumns",
         view: "sfView",
         orders: "sfOrders",
+        filterMode: "sfFilterMode",
 
         pf: function (s) {
             return "#" + SF.compose(this.findOptions.prefix, s);
         },
 
         control: function () {
-            return $(this.pf("divSearchControl"));
+            return $(".sf-search-control[data-prefix='" + this.findOptions.prefix + "']");
         },
 
         tempDivId: function () {
@@ -57,25 +60,30 @@ SF.registerModule("FindNavigator", function () {
                 return true;
             };
 
-            $(this.pf("tblResults") + " th:not(.th-col-entity):not(.th-col-selection)")
-            .live('click', function (e) {
+            var $tblResults = $(this.pf("tblResults"));
+            $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
+                if (e.target != this) {
+                    return;
+                }
                 self.newSortOrder($(e.target), e.shiftKey);
                 self.search();
                 return false;
-            })
-            .live('contextmenu', function (e) {
+            });
+
+            $tblResults.on("contextmenu", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
                 if (!closeMyOpenedCtxMenu(e.target)) {
                     return false;
                 }
                 self.headerContextMenu(e);
                 return false;
-            })
-            .live('mousedown', function (e) {
+            });
+
+            $tblResults.on("mousedown", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
                 this.onselectstart = function () { return false };
                 return false;
             });
 
-            $(this.pf("tblResults td")).live('contextmenu', function (e) {
+            $(this.pf("tblResults td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)")).live('contextmenu', function (e) {
                 if (!closeMyOpenedCtxMenu(e.target)) {
                     return false;
                 }
@@ -143,6 +151,17 @@ SF.registerModule("FindNavigator", function () {
                 self.moveColumn($elem, e);
                 return false;
             });
+
+            $(this.pf("tblResults") + " .sf-pagination-button").live('click', function () {
+                SF.log("pagination button click");
+                $(self.pf(self.page)).val($(this).attr("data-page"));
+                self.search();
+            });
+
+            $(this.pf("sfElems")).live('change', function () {
+                SF.log("page size changed");
+                self.search();
+            });
         },
 
         createCtxMenu: function ($rightClickTarget) {
@@ -167,23 +186,26 @@ SF.registerModule("FindNavigator", function () {
 
         headerContextMenu: function (e) {
             SF.log("headerContextmenu");
-            
+
             var $th = $(e.target).closest("th");
             var $menu = this.createCtxMenu($th);
 
             var $itemContainer = $menu.find(".sf-search-ctxmenu");
-            $itemContainer.append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>")
-                .append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
-                .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
+            $itemContainer.append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>");
 
-            var thIndex = $th.index();
-            var extraCols = this.control().find(".th-col-entity,.th-col-selection");
+            if (SF.isTrue($(this.pf(this.allowChangeColumns)).val())) {
+                $itemContainer.append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
+                    .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
 
-            if (thIndex > extraCols.length) {
-                $itemContainer.append("<div class='sf-search-ctxitem move-column-left'>" + lang.signum.reorderColumn_MoveLeft + "</div>")
-            }
-            if (thIndex < $th.parent().children("th").length - 1) {
-                $itemContainer.append("<div class='sf-search-ctxitem move-column-right'>" + lang.signum.reorderColumn_MoveRight + "</div>");
+                var thIndex = $th.index();
+                var extraCols = this.control().find(".th-col-entity,.th-col-selection");
+
+                if (thIndex > extraCols.length) {
+                    $itemContainer.append("<div class='sf-search-ctxitem move-column-left'>" + lang.signum.reorderColumn_MoveLeft + "</div>")
+                }
+                if (thIndex < $th.parent().children("th").length - 1) {
+                    $itemContainer.append("<div class='sf-search-ctxitem move-column-right'>" + lang.signum.reorderColumn_MoveRight + "</div>");
+                }
             }
 
             $th.append($menu);
@@ -193,10 +215,10 @@ SF.registerModule("FindNavigator", function () {
 
         cellContextMenu: function (e) {
             SF.log("cellContextmenu");
-            
+
             var $td = $(e.target);
             var $menu = this.createCtxMenu($td);
-            
+
             $menu.find(".sf-search-ctxmenu")
                 .html("<div class='sf-search-ctxitem quickfilter'>" + lang.signum.addFilter + "</div>");
 
@@ -208,8 +230,7 @@ SF.registerModule("FindNavigator", function () {
         openFinder: function () {
             SF.log("FindNavigator openFinder");
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.findOptions.navigatorControllerUrl,
                 data: this.requestDataForOpenFinder(),
                 async: false,
@@ -273,40 +294,26 @@ SF.registerModule("FindNavigator", function () {
         },
 
         search: function () {
-            var $btnSearch = $(this.pf("qbSearch"));
-            $btnSearch.toggleClass("sf-loading").val(lang.signum.searching);
-
             var self = this;
-            SF.ajax({
-                type: "POST",
-                url: this.findOptions.searchControllerUrl,
+            $.ajax({
+                url: (SF.isEmpty(this.findOptions.searchControllerUrl) ? this.control().attr("data-search-url") : this.findOptions.searchControllerUrl),
                 data: this.requestDataForSearch(),
                 async: this.findOptions.async,
                 success: function (r) {
-                    var idBtnSearch = $btnSearch.attr('id');
+                    var idBtnSearch = $(self.pf("qbSearch")).attr('id');
                     if (SF.FindNavigator.asyncSearchFinished[idBtnSearch])
                         SF.FindNavigator.asyncSearchFinished[idBtnSearch] = false;
-                    $btnSearch.val(lang.signum.search).toggleClass("sf-loading");
+
                     var $control = self.control();
+                    var $tbody = $control.find(".sf-search-results-container tbody");
+
                     if (!SF.isEmpty(r)) {
-                        $control.find(".sf-search-results-container tbody").html(r);
+                        $tbody.html(r);
                         SF.triggerNewContent($control.find(".sf-search-results-container tbody"));
-                        var rowCount = $control.find(".sf-search-results-container tbody tr").length;
-                        $control.find(self.pf("rowsFoundCount")).html(rowCount);
-                        $control.find(".rows-found-count-maximum").removeClass("rows-found-count-maximum");
-                        if (rowCount == $(self.pf("sfTop")).val()) {
-                            $control.find(".rows-found-count").addClass("rows-found-count-maximum");
-                        }
                     }
                     else {
-                        var columns = $(self.pf("divResults th")).length;
-                        $control.find(".sf-search-results-container tbody").html("<tr><td colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
-                        $control.find(self.pf("rowsFoundCount")).html(0);
-                        $control.find(".rows-found-count-maximum").removeClass("rows-found-count-maximum");
+                        $tbody.html("");
                     }
-                },
-                error: function () {
-                    $btnSearch.val(lang.signum.search).toggleClass('loading');
                 }
             });
 
@@ -315,13 +322,15 @@ SF.registerModule("FindNavigator", function () {
         requestDataForSearch: function () {
             var requestData = new Object();
             requestData["webQueryName"] = $(this.pf(this.webQueryName)).val();
-            requestData["top"] = $(this.pf(this.top)).val();
+            requestData["elems"] = $(this.pf(this.elems)).val();
+            requestData["page"] = $(this.pf(this.page)).val();
             requestData["allowMultiple"] = $(this.pf(this.allowMultiple)).val();
 
             var canView = $(this.pf(this.view)).val();
             requestData["view"] = (SF.isEmpty(canView) ? true : canView);
 
             requestData["filters"] = this.serializeFilters();
+            requestData["filterMode"] = $(this.pf(this.filterMode)).val();
             requestData["orders"] = this.serializeOrders();
             requestData["columns"] = this.serializeColumns();
             requestData["columnMode"] = 'Replace';
@@ -333,8 +342,9 @@ SF.registerModule("FindNavigator", function () {
         requestDataForOpenFinder: function () {
             var requestData = {};
             requestData["webQueryName"] = this.findOptions.webQueryName;
-            requestData["top"] = this.findOptions.top;
+            requestData["elems"] = this.findOptions.elems;
             requestData["allowMultiple"] = this.findOptions.allowMultiple;
+
             if (this.findOptions.view == false)
                 requestData["view"] = this.findOptions.view;
             if (this.findOptions.searchOnLoad == true)
@@ -348,6 +358,9 @@ SF.registerModule("FindNavigator", function () {
 
             if (!this.findOptions.create)
                 requestData["create"] = this.findOptions.create;
+
+            if (!this.findOptions.allowChangeColumns)
+                requestData["allowChangeColumns"] = this.findOptions.allowChangeColumns;
 
             if (this.findOptions.filters != null)
                 requestData["filters"] = this.findOptions.filters;
@@ -424,7 +437,7 @@ SF.registerModule("FindNavigator", function () {
             var found = false;
             var currIndex;
             var oldOrder = "";
-            for (var currIndex = 0; currIndex < currOrderArray.length && !found; currIndex++) {
+            for (currIndex = 0; currIndex < currOrderArray.length && !found; currIndex++) {
                 found = currOrderArray[currIndex] == columnName;
                 if (found) {
                     oldOrder = "";
@@ -437,7 +450,7 @@ SF.registerModule("FindNavigator", function () {
                 }
             }
             var newOrder = found ? (oldOrder == "" ? "-" : "") : "";
-            var currOrder = $(this.pf(this.orders));
+            currOrder = $(this.pf(this.orders));
             if (!multiCol) {
                 this.control().find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
                 currOrder.val(newOrder + columnName + ";");
@@ -501,10 +514,10 @@ SF.registerModule("FindNavigator", function () {
                 this.findOptions.onCancelled();
         },
 
-        addColumn: function (getColumnNameUrl) {
+        addColumn: function () {
             SF.log("FindNavigator addColumn");
 
-            if (SF.isFalse(this.findOptions.allowUserColumns) || $(this.pf("tblFilters tbody")).length == 0)
+            if (SF.isFalse(this.findOptions.allowChangeColumns) || $(this.pf("tblFilters tbody")).length == 0)
                 throw "Adding columns is not allowed";
 
             var tokenName = this.constructTokenName();
@@ -517,9 +530,8 @@ SF.registerModule("FindNavigator", function () {
 
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
             var self = this;
-            SF.ajax({
-                type: "POST",
-                url: getColumnNameUrl,
+            $.ajax({
+                url: $(this.pf("btnAddColumn")).attr("data-url"),
                 data: { "webQueryName": webQueryName, "tokenName": tokenName },
                 async: false,
                 success: function (columnNiceName) {
@@ -570,7 +582,9 @@ SF.registerModule("FindNavigator", function () {
             else {
                 throw "No direction was given to FindNavigator moveColumn";
             }
-            $(this.pf("tblResults tbody")).html("");
+            var $tbody = $(this.pf("tblResults tbody"));
+            $tbody.find("tr:not('.sf-search-footer')").remove();
+            $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
         },
 
         removeColumn: function ($th) {
@@ -578,7 +592,9 @@ SF.registerModule("FindNavigator", function () {
 
             $th.remove();
 
-            $(this.pf("tblResults tbody")).html("");
+            var $tbody = $(this.pf("tblResults tbody"));
+            $tbody.find("tr:not('.sf-search-footer')").remove();
+            $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
         },
 
         toggleFilters: function (elem) {
@@ -596,7 +612,7 @@ SF.registerModule("FindNavigator", function () {
             return false;
         },
 
-        addFilter: function (addFilterUrl) {
+        addFilter: function (addFilterUrl, requestExtraJsonData) {
             SF.log("FindNavigator addFilter");
 
             var tableFilters = $(this.pf("tblFilters tbody"));
@@ -608,11 +624,20 @@ SF.registerModule("FindNavigator", function () {
 
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
+            var serializer = new SF.Serializer().add({
+                webQueryName: webQueryName,
+                tokenName: tokenName,
+                index: this.newFilterRowIndex(),
+                prefix: this.findOptions.prefix
+            });
+            if (!SF.isEmpty(requestExtraJsonData)) {
+                serializer.add(requestExtraJsonData);
+            }
+
             var self = this;
-            SF.ajax({
-                type: "POST",
-                url: addFilterUrl,
-                data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
+            $.ajax({
+                url: addFilterUrl || $(this.pf("btnAddFilter")).attr("data-url"),
+                data: serializer.serialize(),
                 async: false,
                 success: function (filterHtml) {
                     var $filterList = self.control().find(".sf-filters-list");
@@ -634,40 +659,89 @@ SF.registerModule("FindNavigator", function () {
             return parseInt(lastRowIndex) + 1;
         },
 
-        newSubTokensCombo: function (index, controllerUrl) {
-            SF.log("FindNavigator newSubTokensCombo");
-            var selectedColumn = $(this.pf("ddlTokens_" + index));
-            if (selectedColumn.length == 0) return;
-
-            //Clear child subtoken combos
+        clearChildSubtokenCombos: function ($selectedCombo, index) {
+            SF.log("FindNavigator clearChildSubtokenCombos");
             var self = this;
-            $("select,span")
-        .filter(function () {
-            return ($(this).attr("id").indexOf(SF.compose(self.findOptions.prefix, "ddlTokens_")) == 0)
-            || ($(this).attr("id").indexOf(SF.compose(self.findOptions.prefix, "lblddlTokens_")) == 0)
-        })
-        .filter(function () {
-            var currentId = $(this).attr("id");
-            var lastSeparatorIndex = currentId.lastIndexOf("_");
-            var currentIndex = currentId.substring(lastSeparatorIndex + 1, currentId.length);
-            return parseInt(currentIndex) > index;
-        })
-        .remove();
+            $selectedCombo.siblings("select,span")
+                .filter(function () {
+                    var elementId = $(this).attr("id");
+                    if (typeof elementId == "undefined") {
+                        return false;
+                    }
+                    if ((elementId.indexOf(SF.compose(self.findOptions.prefix, "ddlTokens_")) != 0)
+                        && (elementId.indexOf(SF.compose(self.findOptions.prefix, "lblddlTokens_")) != 0)) {
+                        return false;
+                    }
+                    var currentIndex = elementId.substring(elementId.lastIndexOf("_") + 1, elementId.length);
+                    return parseInt(currentIndex) > index;
+                })
+                .remove();
+        },
 
-            if (selectedColumn.children("option:selected").val() == "") return;
+        newSubTokensCombo: function (index, controllerUrl, requestExtraJsonData) {
+            SF.log("FindNavigator newSubTokensCombo");
+            var $selectedCombo = $(this.pf("ddlTokens_" + index));
+            if ($selectedCombo.length == 0) {
+                return;
+            }
+
+            var $btnAddFilter = $(this.pf("btnAddFilter"));
+            var $btnAddColumn = $(this.pf("btnAddColumn"));
+
+            this.clearChildSubtokenCombos($selectedCombo, index);
+
+            var self = this;
+            var $selectedOption = $selectedCombo.children("option:selected");
+            if ($selectedOption.val() == "") {
+                if (index == 0) {
+                    this.changeButtonState($btnAddFilter, lang.signum.selectToken);
+                    this.changeButtonState($btnAddColumn, lang.signum.selectToken);
+                }
+                else {
+                    var $prevSelectedOption = $(this.pf("ddlTokens_" + (parseInt(index, 10) - 1))).find("option:selected");
+                    this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilter(); });
+                    this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumn(); });
+                }
+                return;
+            }
+
+            this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () { self.addFilter(); });
+            this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () { self.addColumn(); });
 
             var tokenName = this.constructTokenName();
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
-            SF.ajax({
-                type: "POST",
+            var serializer = new SF.Serializer().add({
+                webQueryName: webQueryName,
+                tokenName: tokenName,
+                index: index,
+                prefix: this.findOptions.prefix
+            });
+            if (!SF.isEmpty(requestExtraJsonData)) {
+                serializer.add(requestExtraJsonData);
+            }
+
+            $.ajax({
                 url: controllerUrl,
-                data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
+                data: serializer.serialize(),
                 async: false,
                 success: function (newCombo) {
                     $(self.pf("ddlTokens_" + index)).after(newCombo);
                 }
             });
+        },
+
+        changeButtonState: function ($button, disablingMessage, enableCallback) {
+            var hiddenId = $button.attr("id") + "temp";
+            if (typeof disablingMessage != "undefined") {
+                $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
+                $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
+            }
+            else {
+                var self = this;
+                $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
+                $button.unbind('click').bind('click', enableCallback);
+            }
         },
 
         constructTokenName: function () {
@@ -701,8 +775,7 @@ SF.registerModule("FindNavigator", function () {
             };
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: quickFilterUrl,
                 data: params,
                 async: false,
@@ -760,9 +833,10 @@ SF.registerModule("FindNavigator", function () {
         },
 
         requestDataForSearchPopupCreate: function () {
-            var requestData = this.serializeFilters();
-            var requestData = $.extend(requestData, { webQueryName: ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName) });
-            return requestData;
+            return {
+                filters: this.serializeFilters(),
+                webQueryName: ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName)
+            };
         },
 
         viewOptionsForSearchCreate: function (_viewOptions) {
@@ -772,7 +846,6 @@ SF.registerModule("FindNavigator", function () {
             _viewOptions.prefix = SF.compose("New", _viewOptions.prefix);
             var self = this;
             return $.extend({
-                type: $(this.pf(SF.Keys.entityTypeName)).val(),
                 containerDiv: null,
                 onCancelled: null
             }, _viewOptions);
@@ -785,11 +858,33 @@ SF.registerModule("FindNavigator", function () {
             _viewOptions.prefix = SF.compose("New", _viewOptions.prefix);
             var self = this;
             return $.extend({
-                type: $(this.pf(SF.Keys.entityTypeName)).val(),
                 containerDiv: null,
                 requestExtraJsonData: this.requestDataForSearchPopupCreate(),
                 onCancelled: null
             }, _viewOptions);
+        },
+
+        getRuntimeType: function (typeChooserUrl, _onTypeFound) {
+            SF.log("FindNavigator getRuntimeType");
+            var typeStr = $(this.pf(SF.Keys.entityTypeNames)).val();
+            var types = typeStr.split(",");
+            if (types.length == 1)
+                return _onTypeFound(types[0]);
+
+            SF.openTypeChooser(this.findOptions.prefix, _onTypeFound, { controllerUrl: typeChooserUrl, types: typeStr });
+        },
+
+        typedCreate: function (viewOptions) {
+            SF.log("FindNavigator typedCreate");
+            if (SF.isEmpty(viewOptions.prefix)) {
+                var fullViewOptions = this.viewOptionsForSearchCreate(viewOptions);
+                new SF.ViewNavigator(fullViewOptions).navigate();
+            }
+            else {
+                var saveUrl = this.control().data("popup-save-url");
+                var fullViewOptions = this.viewOptionsForSearchPopupCreate(viewOptions);
+                new SF.ViewNavigator(fullViewOptions).createSave(saveUrl);
+            }
         },
 
         toggleSelectAll: function () {
@@ -800,17 +895,11 @@ SF.registerModule("FindNavigator", function () {
         }
     };
 
-    SF.FindNavigator.create = function (viewOptions) {
+    SF.FindNavigator.create = function (viewOptions, typeChooserUrl) {
         var findNavigator = new SF.FindNavigator({ prefix: viewOptions.prefix });
-        if (SF.isEmpty(viewOptions.prefix)) {
-            var viewOptions = findNavigator.viewOptionsForSearchCreate(viewOptions);
-            new SF.ViewNavigator(viewOptions).navigate();
-        }
-        else {
-            var saveUrl = this.control().data("popup-save-url");
-            var viewOptions = findNavigator.viewOptionsForSearchPopupCreate(viewOptions);
-            new SF.ViewNavigator(viewOptions).createSave(saveUrl);
-        }
+        var type = findNavigator.getRuntimeType(typeChooserUrl, function (type) {
+            findNavigator.typedCreate($.extend({ type: type }, viewOptions));
+        });
     }
 
     SF.FindNavigator.asyncSearchFinished = new Array();
@@ -828,10 +917,9 @@ SF.registerModule("FindNavigator", function () {
             makeSearch();
         }
         else {
-            var $tabContainer = $button.parents(".sf-tabs").first();
-            if ($tabContainer.length) {
-                $tabContainer.find("a").click(
-                function () {
+            var $tabContainer = $button.closest(".sf-tabs");
+            if ($tabContainer.length > 0) {
+                $tabContainer.bind("tabsshow", function () {
                     if ($("#" + SF.compose(prefix, "divResults")).is(':visible')) {
                         makeSearch();
                     }
@@ -840,5 +928,11 @@ SF.registerModule("FindNavigator", function () {
                 makeSearch();
             }
         }
-    }
+    };
+
+    $(".sf-subtokens-expander").live('click', function () {
+        var $this = $(this);
+        $this.next().show().focus().click();
+        $this.remove();
+    });
 });

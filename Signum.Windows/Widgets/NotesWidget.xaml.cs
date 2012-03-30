@@ -101,27 +101,28 @@ namespace Signum.Windows
                 return;
             }
 
-            int count = Navigator.QueryCount(new CountOptions(NotesQuery)
+            Navigator.QueryCountBatch(new CountOptions(NotesQuery)
             {
-                FilterOptions = { new FilterOption( NotesQueryColumn, DataContext) }
-            }); 
+                FilterOptions = { new FilterOption(NotesQueryColumn, DataContext) }
+            }, count =>
+            {
+                if (count == 0)
+                {
+                    tbNotes.FontWeight = FontWeights.Normal;
+                    btnExploreNotes.Visibility = Visibility.Collapsed;
 
-            if (count == 0)
-            {
-                tbNotes.FontWeight = FontWeights.Normal;
-                btnExploreNotes.Visibility = Visibility.Collapsed;
-              
-            }
-            else
-            {
-                tbNotes.FontWeight = FontWeights.Bold;
-                btnExploreNotes.FontWeight = FontWeights.Bold;
-                btnExploreNotes.Visibility = Visibility.Visible;
-                btnExploreNotes.Content = count + " " + (count > 1 ? Properties.Resources._notes : Properties.Resources._note);
-            }
+                }
+                else
+                {
+                    tbNotes.FontWeight = FontWeights.Bold;
+                    btnExploreNotes.FontWeight = FontWeights.Bold;
+                    btnExploreNotes.Visibility = Visibility.Visible;
+                    btnExploreNotes.Content = count + " " + (count > 1 ? Properties.Resources._notes : Properties.Resources._note);
+                }
 
-            if (count > 0 && ForceShow != null)
-                ForceShow();
+                if (count > 0 && ForceShow != null)
+                    ForceShow();
+            }, () => { });
         }
     }
 }

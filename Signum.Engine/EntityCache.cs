@@ -8,40 +8,41 @@ using Signum.Utilities.DataStructures;
 using Signum.Engine;
 using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
+using Signum.Engine.Maps;
+using System.Collections;
+using Signum.Engine.Linq;
+using Signum.Utilities.Reflection;
+using System.Linq.Expressions;
 
 namespace Signum.Engine
 {
     public class EntityCache: IDisposable
     {
-        class RealObjectCache : Dictionary<Type, Dictionary<int, IdentifiableEntity>>
+        internal class RealEntityCache : Dictionary<IdentityTuple, IdentifiableEntity>
         {
             public void Add(IdentifiableEntity ie)
             {
                 if (ie == null)
                     throw new ArgumentNullException("ie");
 
-                var dic = this.GetOrCreate(ie.GetType());
+                var tuple = new IdentityTuple(ie);
 
-                IdentifiableEntity ident = dic.TryGetC(ie.Id);
+                IdentifiableEntity ident = this.TryGetC(tuple);
 
-                if (ident == null)    
-                    dic.Add(ie.Id, ie);
+                if (ident == null)
+                    this.Add(tuple, ie);
                 else if (ident != ie)
                    throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".Formato(ie.GetType().Name, ie.id));
             }
 
             public bool Contains(Type type, int id)
             {
-                var dic = this.TryGetC(type);
-                if (dic == null)
-                    return false;
-
-                return dic.ContainsKey(id);
+                return this.ContainsKey(new IdentityTuple(type, id));
             }
 
             public IdentifiableEntity Get(Type type, int id)
             {
-                return this.TryGetC(type).TryGetC(id);
+                return this.TryGetC(new IdentityTuple(type, id));
             }
 
             public void AddFullGraph(IdentifiableEntity ie)
@@ -49,14 +50,40 @@ namespace Signum.Engine
                 DirectedGraph<Modifiable> modifiables = GraphExplorer.FromRoot(ie);
 
                 foreach (var ident in modifiables.OfType<IdentifiableEntity>().Where(ident => !ident.IsNew))
-                    if (Get(ident.GetType(), ident.Id) != ident)
-                        Add(ident);
+                    Add(ident);
+            }
+
+            IRetriever retriever;
+
+            internal IRetriever NewRetriever()
+            {
+                if (retriever == null)
+                    retriever = new RealRetriever(this);
+                else
+                    retriever = new ChildRetriever(retriever, this);
+
+                return retriever;
+            }
+
+            internal void ReleaseRetriever(IRetriever retriever)
+            {
+                if (this.retriever == null || this.retriever != retriever)
+                    throw new InvalidOperationException("Inconsistent state of the retriever");
+
+                this.retriever = retriever.Parent;
+            }
+
+            internal bool HasRetriever
+            {
+                get{return retriever != null; }
             }
         }
 
 
-        [ThreadStatic]
-        private static ImmutableStack<RealObjectCache> stack;
+        static readonly Variable<RealEntityCache> currentCache = Statics.ThreadVariable<RealEntityCache>("cache");
+
+
+        RealEntityCache oldCache;
 
         private bool facked = false;
 
@@ -64,31 +91,35 @@ namespace Signum.Engine
 
         public EntityCache(bool forceNew)
         {
-            if (stack == null)
-                stack = ImmutableStack<RealObjectCache>.Empty;
-
-            if (stack.IsEmpty || forceNew)
-                stack = stack.Push(new RealObjectCache());
+            if (currentCache.Value == null || forceNew)
+            {
+                oldCache = currentCache.Value;
+                currentCache.Value = new RealEntityCache();
+            }
             else
                 facked = true;
         }
 
-        static RealObjectCache Current
+        static RealEntityCache Current
         {
             get
             {
-                if (stack.IsEmpty)
+                var val = currentCache.Value;
+                if (val == null)
                     throw new InvalidOperationException("No EntityCache context has been created");
 
-                return stack.Peek(); 
+                return val;
             }
         }
 
+        public static bool Created { get { return currentCache.Value != null; } }
+
+        internal static bool HasRetriever { get { return currentCache.Value != null && currentCache.Value.HasRetriever; } }
 
         public void Dispose()
         {
             if (!facked)
-                stack = stack.Pop();
+                currentCache.Value = oldCache;
         }
 
         public static void AddMany<T>(params T[] objects)
@@ -135,5 +166,83 @@ namespace Signum.Engine
         {
             return Current.Get(type, id);
         }
+
+        internal static IRetriever NewRetriever()
+        {
+            return Current.NewRetriever();
+        }
+    
+        internal static void ReleaseRetriever(IRetriever retriever)
+        {
+            Current.ReleaseRetriever(retriever);
+        }
+
+        public static T Construct<T>(int id) where T : IdentifiableEntity
+        {
+            var result = Constructor<T>.Call();
+            result.id = id;
+            return result;
+        }
+
+        static class Constructor<T> where T : IdentifiableEntity
+        {
+            static Func<T> call;
+            public static Func<T> Call
+            {
+                get
+                {
+                    if (call == null)
+                        call = Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile();
+                    return call;
+                }
+            }
+        }
     }
+
+    [Serializable]
+    internal struct IdentityTuple : IEquatable<IdentityTuple>
+    {
+        public readonly Type Type;
+        public readonly int Id;
+
+        public IdentityTuple(Lite lite)
+        {
+            this.Type = lite.RuntimeType;
+            this.Id = lite.Id;
+        }
+
+        public IdentityTuple(IdentifiableEntity entiy)
+        {
+            this.Type = entiy.GetType();
+            this.Id = entiy.Id;
+        }
+
+        public IdentityTuple(Type type, int id)
+        {
+            this.Type = type;
+            this.Id = id;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Type.GetHashCode() ^ this.Id.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals((IdentityTuple)obj);
+        }
+
+        public override string ToString()
+        {
+            return "[{0},{1}]".Formato(this.Type.Name, this.Id);
+        }
+
+        public bool Equals(IdentityTuple other)
+        {
+            return Id == other.Id && this.Type == other.Type;
+        }
+    }
+
+
 }

@@ -51,12 +51,12 @@ namespace Signum.Utilities
 
         public static T SingleAttribute<T>(this ICustomAttributeProvider mi) where T : Attribute
         {
-            return mi.GetCustomAttributes(typeof(T), false).Cast<T>().SingleOrDefault();
+            return mi.GetCustomAttributes(typeof(T), false).Cast<T>().SingleOrDefaultEx();
         }
 
         public static T SingleAttributeInherit<T>(this ICustomAttributeProvider mi) where T : Attribute
         {
-            return mi.GetCustomAttributes(typeof(T), true).Cast<T>().SingleOrDefault();
+            return mi.GetCustomAttributes(typeof(T), true).Cast<T>().SingleOrDefaultEx();
         }
 
         public static bool IsInstantiationOf(this Type type, Type genericTypeDefinition)
@@ -103,13 +103,30 @@ namespace Signum.Utilities
                 return null;
 
             return ft.GetInterfaces().PreAnd(ft)
-                .SingleOrDefault(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .SingleOrDefaultEx(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .TryCC(ti => ti.GetGenericArguments()[0]);
         }
 
         public static bool IsExtensionMethod(this MethodInfo m)
         {
             return m.IsStatic && m.HasAttribute<ExtensionAttribute>();
+        }
+
+        public static PropertyInfo GetBaseDefinition(this PropertyInfo propertyInfo)
+        {
+            var method = propertyInfo.GetAccessors(true)[0];
+            if (method == null)
+                return null;
+
+            var baseMethod = method.GetBaseDefinition();
+
+            if (baseMethod == method)
+                return propertyInfo;
+
+            var arguments = propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray();
+
+            return baseMethod.DeclaringType.GetProperty(propertyInfo.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null, propertyInfo.PropertyType, arguments, null);
         }
     }
 }

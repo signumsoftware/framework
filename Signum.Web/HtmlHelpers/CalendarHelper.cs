@@ -8,6 +8,10 @@ using Signum.Web.Properties;
 using System.Globalization;
 using System.Web.Script.Serialization;
 using System.Web;
+using System.Linq.Expressions;
+using Signum.Web.Lines;
+using System.Web.Mvc.Html;
+using Signum.Entities;
 
 namespace Signum.Web
 {
@@ -17,8 +21,7 @@ namespace Signum.Web
         
         public bool IsDefault()
         {
-            return this.ShowAge == Default.ShowAge &&
-                   this.ChangeMonth == Default.ChangeMonth &&
+            return this.ChangeMonth == Default.ChangeMonth &&
                    this.ChangeYear == Default.ChangeYear &&
                    this.FirstDay == Default.FirstDay &&
                    this.YearRange == Default.YearRange &&
@@ -72,15 +75,6 @@ namespace Signum.Web
             return dateFormat;
         }
 
-        bool showAge = false;
-        /// <summary>
-        /// If true it will show age next no datetimepicker and will refresh if the value of datepicker changes
-        /// </summary>
-        public bool ShowAge
-        {
-            get { return showAge; }
-            set { showAge = value; }
-        }
         bool changeMonth = true;
         public bool ChangeMonth
         {
@@ -158,12 +152,9 @@ namespace Signum.Web
             set { constrainInput = value; }
         }
 
-        [ThreadStatic]
-        static string defaultculture;
         public static string DefaultCulture
         {
-            get { return defaultculture ?? CultureInfo.CurrentCulture.Name.Substring(0, 2); }
-            set { defaultculture = value; }
+            get { return CultureInfo.CurrentCulture.Name.Substring(0, 2); }
         }
 
         public override string ToString()
@@ -200,6 +191,78 @@ namespace Signum.Web
                 "</script>");
 
             return MvcHtmlString.Create(sb.ToString());
-        }     
+        }
+
+        public static MvcHtmlString HourMinute<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        {
+            return helper.HourMinute(tc, property, null);
+        }
+
+        public static MvcHtmlString HourMinute<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<HourMinuteLine> settingsModifier)
+        {
+            TypeContext<S> context = Common.WalkExpression(tc, property);
+
+            HourMinuteLine line = new HourMinuteLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+
+            Common.FireCommonTasks(line);
+
+            if (settingsModifier != null)
+                settingsModifier(line);
+
+            return HourMinuteInternal(helper, line);
+        }
+
+        private static MvcHtmlString HourMinuteInternal(HtmlHelper helper, HourMinuteLine line)
+        {
+            if (!line.Visible || (line.HideIfNull && line.UntypedValue == null))
+                return MvcHtmlString.Empty;
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+
+            TimeSpan? time = null;
+            
+            DateTime? dateValue = line.UntypedValue as DateTime?;
+            if (dateValue != null)
+                time = dateValue.TrySS(d => d.ToUserInterface()).TrySS(d => d.TimeOfDay);
+            else
+                time = line.UntypedValue as TimeSpan?;
+
+            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Hour, "Hour", time == null ? "" : time.Value.ToString("hh")); 
+
+            sb.Add(helper.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
+
+            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Minute, "Minute", time == null ? "" : time.Value.ToString("mm")); 
+
+            return sb.ToHtml();
+        }
+
+        private static void WriteField(HtmlStringBuilder sb, HtmlHelper helper, HourMinuteLine line, string label, string name, string value)
+        {
+            using (sb.Surround(new HtmlTag("div").Class("sf-field")))
+            {
+                if (line.LabelVisible)
+                    sb.Add(new HtmlTag("div").Class("sf-label-line").SetInnerText(label));
+
+                using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
+                {
+                    if (line.ReadOnly)
+                    {
+                        sb.Add(new HtmlTag("span").Class("sf-value-line").SetInnerText(value));
+
+                        if (line.WriteHiddenOnReadonly)
+                            sb.Add(helper.Hidden(line.Compose(name), value));
+                    }
+                    else
+                    {
+                        line.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + line.ValueHtmlProps.TryGetC("onblur");
+
+                        line.ValueHtmlProps["size"] = "2";
+                        line.ValueHtmlProps["class"] = "sf-value-line";
+
+                        sb.Add(helper.TextBox(line.Compose(name), value, line.ValueHtmlProps));
+                    }
+                }
+            }
+        }
     }
 }

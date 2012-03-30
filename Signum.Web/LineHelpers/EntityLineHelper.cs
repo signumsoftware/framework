@@ -67,10 +67,27 @@ namespace Signum.Web
                             entityLine.Compose(EntityBaseKeys.ToStr),
                             entityLine.ToStr,
                             htmlAttr));
+
+                        int? id = entityLine.IdOrNull;
+                        if (id != null && entityLine.View && Navigator.IsViewable(entityLine.CleanRuntimeType, EntitySettingsContext.Admin))
+                        {
+                            sb.AddLine(
+                                helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
+                                    entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
+                                    new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
+                        }
+                        else
+                        {
+                            sb.AddLine(
+                                helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink),
+                                    entityLine.UntypedValue.TryToString() ?? " ",
+                                    "sf-value-line",
+                                    new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
+                        }
                     }
                     else
                     {
-                        if (entityLine.UntypedValue == null)
+                        if (entityLine.UntypedValue == null && entityLine.Parent is TypeContext) /*Second condition filters embedded entities in filters to be rendered */
                         {
                             TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
                             sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityLine)));
@@ -80,23 +97,6 @@ namespace Signum.Web
                             sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine));
 
                         sb.AddLine(helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink), entityLine.UntypedValue.TryToString(), "sf-value-line"));
-                    }
-
-                    int? id = entityLine.IdOrNull;
-                    if (entityLine.Navigate && id != null)
-                    {
-                        sb.AddLine(
-                            helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
-                                new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
-                    }
-                    else if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
-                    {
-                        sb.AddLine(
-                            helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                entityLine.UntypedValue.TryToString() ?? " ",
-                                "sf-value-line",
-                                new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                     }
 
                     sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine));
@@ -130,6 +130,9 @@ namespace Signum.Web
             EntityLine el = new EntityLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
             EntityBaseHelper.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType());
+
+            if (el.Implementations.TryCS(i => i.IsByAll) == true)
+                el.Autocomplete = false;
 
             Common.FireCommonTasks(el);
 

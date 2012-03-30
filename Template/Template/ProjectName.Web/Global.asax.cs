@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using $custommessage$.Logic;
+using Signum.Utilities;
 using Signum.Engine;
 using $custommessage$.Web.Properties;
 using Signum.Engine.Maps;
@@ -50,6 +51,8 @@ namespace $custommessage$.Web
 
         protected void Application_Start()
         {
+            Statics.SessionFactory = new ScopeSessionFactory(new AspNetSessionFactory());
+            
             Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
             Schema.Current.Initialize();
@@ -69,7 +72,18 @@ namespace $custommessage$.Web
             ScriptHtmlHelper.Manager.MainAssembly = typeof($custommessage$Client).Assembly;
             SignumControllerFactory.MainAssembly = typeof($custommessage$Client).Assembly;
 
+            SignumControllerFactory.EveryController().AddFilters(ctx =>
+              ctx.FilterInfo.AuthorizationFilters.OfType<AuthenticationRequiredAttribute>().Any() ? null : new AuthenticationRequiredAttribute());
+
+            SignumControllerFactory.EveryController().AddFilters(new SignumExceptionHandlerAttribute());
+
+
             Navigator.Initialize();
+        }
+
+        protected void Application_Error(Object sender, EventArgs e)
+        {
+            SignumExceptionHandlerAttribute.HandlerApplication_Error(HttpContext.Current, true);
         }
     }
 }

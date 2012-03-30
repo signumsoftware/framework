@@ -2,9 +2,9 @@
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
 	<CodeSnippet Format="1.0.0">
 		<Header>
-			<Title>Transaccion</Title>
+			<Title>Transaction</Title>
 			<Shortcut>tran</Shortcut>
-			<Description>New Transacction</Description>
+			<Description>New Transaction</Description>
 			<Author>Signum Framework</Author>
 			<SnippetTypes>
 				<SnippetType>Expansion</SnippetType>
@@ -12,9 +12,16 @@
 			</SnippetTypes>
 		</Header>
 		<Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+          <Namespace>Signum.Utilities</Namespace>
+          <Namespace>Signum.Engine</Namespace>
+        </Import>
+      </Imports>
 			<Code Language="csharp"><![CDATA[using (Transaction tr = new Transaction())
 {
-	$selected$
+	$selected$$end$
     tr.Commit();
 }
 ]]>

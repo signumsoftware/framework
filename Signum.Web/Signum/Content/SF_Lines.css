@@ -8,6 +8,12 @@
     font-weight:bold;
 }
 
+.sf-label-detail-line, .sf-label-repeater-line
+{
+    display: inline-block;
+    margin-right: 1px; /*IE8 fix for inline-block*/
+}
+
 .sf-unit-line {
     float:left;
     margin-right:10px;
@@ -17,7 +23,7 @@
 
 .sf-field
 {
-	min-width:350px;	/* a ver */
+	min-width:350px;
 }
 
 .sf-field:after, .sf-field-list:after{
@@ -49,10 +55,14 @@
     padding:3px;
 }
 
+.sf-field-list ul
+{
+    float:left;    
+}
 
 .sf-value-container
 {
-	overflow:hidden;
+    overflow: hidden;
 }
 
 .sf-value-container .sf-value-line, .sf-value-container .sf-entity-list 
@@ -62,12 +72,10 @@
     display:block;
 }
 
-.sf-value-ext {float:right; margin-left:10px;}
-
 .sf-value-line, .sf-entity-list{float:left;}
 
 a.sf-value-line, span.sf-value-line{
-    padding:3px 0;
+    padding:5px 0;
 	overflow:hidden;
 	_overflow:visible;
 	zoom:1;
@@ -106,64 +114,16 @@ a.sf-value-line, span.sf-value-line{
     margin:6px 0;
 }
 
-.sf-field-list ul:after{
-    content: ".";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
+.sf-entity-line-detail .sf-field-inline .sf-field 
+{
+	clear:inherit;
 }
-
-.sf-entity-line-detail > div > .sf-field > .sf-label-line, .sf-entity-line-detail .sf-around .sf-label-line {
-    width:100px;
-   /* border-left:2px dotted #bbb;*/
-    margin-left:80px;
-}
-
-.sf-entity-line-detail tr {vertical-align:top;}
 
 .sf-field .sf-sf-value-first .sf-label-line
 {
 	width:inherit;
 	border:0;
 	margin:inherit;
-}
-
-
-.sf-repeater-element
-{
-	margin-left:160px;
-	padding: 5px;
-	display:block;
-	border-color:#dfdfdf #eee #fff #eee;
-	border-width:1px;
-	border-style:solid;
-	clear:both;
-}
-.sf-repeater-element:last-child
-{
-    border-bottom-color: #dfdfdf;
-}
-.sf-repeater a.sf-remove
-{
-	position:absolute;
-}
-.sf-repeater-element a
-{
-	text-decoration: underline;
-	font-weight:bold;
-	float:left;
-	margin-right:5px;
-}
-
-/*.sf-entity-line-detail .sf-field 
-{
-	clear:both;
-}*/
-
-.sf-entity-line-detail .sf-field-inline .sf-field 
-{
-	clear:inherit;
 }
 
 .sf-line-button 
@@ -182,6 +142,21 @@ a.sf-value-line, span.sf-value-line{
     line-height:1;
 }
 
+.sf-line-detail-field legend .sf-line-button, .sf-repeater-field legend .sf-line-button
+{
+    float: none;
+    display: inline-block;
+}
+
+fieldset.sf-repeater-field
+{
+    border-style: solid;
+}
+
+.sf-repeater-element legend .sf-line-button
+{
+    display: block !important;
+}
 
 /* errors */
 .sf-field-validation-error {

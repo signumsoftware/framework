@@ -62,7 +62,7 @@ namespace Signum.Web
 
         public static string Compose(string prefix, string nameToAppend)
         {
-            return prefix.Add(nameToAppend, TypeContext.Separator);
+            return prefix.Add(TypeContext.Separator, nameToAppend);
         }
 
         public static string Compose(string prefix, params string[] namesToAppend)

@@ -36,7 +36,6 @@ namespace Signum.Windows
         {
             if (mod == null)
                 return "";
-
             
             string niceName = mod.GetType().NiceName();
 
@@ -48,9 +47,13 @@ namespace Signum.Windows
             {
                 Gender gender = ident.GetType().GetGender();
                 return Properties.Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + niceName; 
-
             }
             return niceName + " " + ident.Id;
+        }
+
+        public void SetTitleText(string text)
+        {
+            textBox.Text = text;
         }
     }
 }

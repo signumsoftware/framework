@@ -43,13 +43,15 @@ namespace Signum.Web
         }
 
         public Implementations Implementations { get; set; }
+
+        public ViewMode ViewMode { get; set; } 
         
-        public bool View { get; set; }
+        public virtual bool View { get; set; }
         public bool Create { get; set; }
         public bool Find { get; set; }
         public bool Remove { get; set; }
         public bool ReadOnlyEntity { get; set; }
-        
+
         bool preserveViewData = false; 
         /// <summary>
         /// When rendering the line content, it will preserve the ViewData values except the Model
@@ -61,26 +63,6 @@ namespace Signum.Web
         }
 
         public string OnEntityChanged { get; set; }
-        
-        string onChangedTotal;
-        protected internal string OnChangedTotal
-        {
-            get 
-            {
-                if (onChangedTotal.HasText())
-                    return onChangedTotal;
-                
-                string doReload = (ReloadOnChange) ?
-                    (ReloadFunction ?? Js.ReloadEntity(ReloadControllerUrl, Parent.Parent.ControlID).ToJS()) :
-                    "";
-                string total = OnEntityChanged + doReload;
-                
-                if (total.HasText())
-                    onChangedTotal = "function(){" + total + "}";
-
-                return onChangedTotal;
-            }
-        }
 
         public string PartialViewName { get; set; }
 
@@ -96,16 +78,16 @@ namespace Signum.Web
             return new JsOptionsBuilder(false)
             {
                 {"prefix", ControlID.SingleQuote()},
-                {"onEntityChanged", OnChangedTotal}, 
+                {"onEntityChanged", "function(){ " + OnEntityChanged + " }"}, 
             };
         }
 
-        protected virtual JsViewOptions DefaultJsViewOptions()
+        public virtual JsViewOptions DefaultJsViewOptions()
         {
             return new JsViewOptions { PartialViewName = this.PartialViewName };
         }
 
-        protected JsFindOptions DefaultJsfindOptions()
+        public JsFindOptions DefaultJsfindOptions()
         {
             return new JsFindOptions();
         }
@@ -179,9 +161,20 @@ namespace Signum.Web
         {
             get 
             {
-                return (UntypedValue as IIdentifiable).TryCC(i => i.ToStr) ??
-                       (UntypedValue as Lite).TryCC(l => l.ToStr);
+                return (UntypedValue as IIdentifiable).TryCC(i => i.ToString()) ??
+                       (UntypedValue as Lite).TryCC(l => l.ToString());
             }
         }
+
+        protected internal virtual EntitySettingsContext EntitySettingsContext
+        {
+            get { return ViewMode == Web.ViewMode.Popup ? Web.EntitySettingsContext.Content : Web.EntitySettingsContext.Default; }
+        }
+    }
+
+    public enum ViewMode
+    {
+        Popup,
+        Navigate
     }
 }

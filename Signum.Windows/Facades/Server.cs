@@ -11,6 +11,7 @@ using System.Reflection;
 using System.ServiceModel;
 using System.Windows;
 using System.ServiceModel.Security;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Windows
 {
@@ -24,7 +25,11 @@ namespace Signum.Windows
 
         static Server()
         {
-            Connecting += () => ServerTypes = current.ServerTypes();
+            Connecting += () =>
+            {
+                ServerTypes = current.ServerTypes();
+                NameToType = ServerTypes.ToDictionary(a => a.Value.CleanName, a => a.Key);
+            };
         }
 
         public static void SetNewServerCallback(Func<IBaseServer> server)
@@ -50,7 +55,13 @@ namespace Signum.Windows
         {
             get
             {
-                return (current is ICommunicationObject) && ((ICommunicationObject)current).State != CommunicationState.Faulted;
+                if (current == null)
+                    return false;
+
+                if(!(current is ICommunicationObject))
+                    return true;
+
+                return ((ICommunicationObject)current).State != CommunicationState.Faulted;
             }
         }
        
@@ -66,7 +77,10 @@ namespace Signum.Windows
             
             try
             {
-                action(server);
+                using (HeavyProfiler.Log("WCFClient", "{0}".Formato(typeof(S).TypeName())))
+                {
+                    action(server);
+                }
             }
             catch (MessageSecurityException e)
             {
@@ -88,7 +102,10 @@ namespace Signum.Windows
 
             try
             {
-                return function(server);
+                using (HeavyProfiler.Log("WCFClient", "{0} --> {1}".Formato(typeof(S).TypeName(), typeof(R).TypeName())))
+                {
+                    return function(server);
+                }
             }
             catch (MessageSecurityException e)
             {
@@ -189,14 +206,19 @@ namespace Signum.Windows
             return Return((IBaseServer s)=>s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
         }
 
-        static Dictionary<PropertyRoute, Implementations> implementations = new Dictionary<PropertyRoute, Implementations>(); 
+        static Dictionary<Type, Dictionary<PropertyRoute, Implementations>> implementations = new Dictionary<Type, Dictionary<PropertyRoute, Implementations>>();
 
         public static Implementations FindImplementations(PropertyRoute propertyRoute)
         {
-            if (Server.ServerTypes.ContainsKey(propertyRoute.RootType))
-                return implementations.GetOrCreate(propertyRoute, () => Server.Return((IBaseServer s) => s.FindImplementations(propertyRoute)));
+            var dic = implementations.GetOrCreate(propertyRoute.RootType, () =>
+            {
+                if (!Server.ServerTypes.ContainsKey(propertyRoute.RootType))
+                    return null;
 
-            return null;
+                return Server.Return((IBaseServer s) => s.FindAllImplementations(propertyRoute.RootType));
+            });
+
+            return dic.TryGetC(propertyRoute);
         }
 
         public static object Convert(object obj, Type type)
@@ -226,7 +248,7 @@ namespace Signum.Windows
                         if (lite.UntypedEntityOrNull != null)
                             return Lite.Create(liteType, lite.UntypedEntityOrNull);
                         else
-                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToStr); 
+                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToString()); 
                     }
                 }
 
@@ -264,15 +286,16 @@ namespace Signum.Windows
         }
 
         public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
+        public static Dictionary<string, Type> NameToType { get; private set; }
 
-        public static Type TryGetType(string typeName)
+        public static Type TryGetType(string cleanName)
         {
-            return ServerTypes.Keys.Where(t => t.Name == typeName).SingleOrDefault();
+            return NameToType.TryGetC(cleanName);
         }
 
-        public static Type GetType(string typeName)
+        public static Type GetType(string cleanName)
         {
-            return ServerTypes.Keys.Where(t => t.Name == typeName).Single("Type {0} not found in the Server".Formato(typeName));
+            return NameToType.GetOrThrow(cleanName, "Type {0} not found in the Server");
         }
 
         public static string GetCleanName(Type type)
@@ -290,9 +313,18 @@ namespace Signum.Windows
             return Lite.TryParseLite(liteType, liteKey, TryGetType, out result);
         }
 
-        //public static void Execute(Action<global::Signum.Services.ILoginServer> action)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
+        {
+            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id)));
+
+           return lite;
+        }
+
+        public static Lite FillToStr(Lite lite)
+        {
+            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id)));
+
+            return lite;
+        }
     }
 }

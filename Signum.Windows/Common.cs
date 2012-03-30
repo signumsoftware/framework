@@ -25,15 +25,15 @@ namespace Signum.Windows
 {
     public static class Common
     {
-        public static readonly DependencyProperty LabelWidthProperty =
-           DependencyProperty.RegisterAttached("LabelWidth", typeof(double), typeof(Common), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.Inherits));
-        public static double GetLabelWidth(DependencyObject obj)
+        public static readonly DependencyProperty MinLabelWidthProperty =
+           DependencyProperty.RegisterAttached("MinLabelWidth", typeof(double), typeof(Common), new FrameworkPropertyMetadata(120.0, FrameworkPropertyMetadataOptions.Inherits));
+        public static double GetMinLabelWidth(DependencyObject obj)
         {
-            return (double)obj.GetValue(LabelWidthProperty);
+            return (double)obj.GetValue(MinLabelWidthProperty);
         }
-        public static void SetLabelWidth(DependencyObject obj, double value)
+        public static void SetMinLabelWidth(DependencyObject obj, double value)
         {
-            obj.SetValue(LabelWidthProperty, value);
+            obj.SetValue(MinLabelWidthProperty, value);
         }
 
 
@@ -75,7 +75,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty CollapseIfNullProperty =
-                   DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false, (d, e) => CollapseIfNullChanged((FrameworkElement)d)));
+                   DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
         public static bool GetCollapseIfNull(DependencyObject obj)
         {
             return (bool)obj.GetValue(CollapseIfNullProperty);
@@ -85,14 +85,6 @@ namespace Signum.Windows
         {
             obj.SetValue(CollapseIfNullProperty, value);
         }
-
-        static object CollapseIfNullChanged(FrameworkElement frameworkElement)
-        {
-            if (GetRoute(frameworkElement) != null)
-                throw new InvalidOperationException("CollapseIfNull has to be set before Route");
-            return null;
-        }
-
 
         public static readonly DependencyProperty RouteProperty =
          DependencyProperty.RegisterAttached("Route", typeof(string), typeof(Common), new FrameworkPropertyMetadata(null, new PropertyChangedCallback(RoutePropertyChanged)));
@@ -287,7 +279,7 @@ namespace Signum.Windows
 
         static void TaskColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
         {
-            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
             if (isReadOnly && column.NotSet(DataGridColumn.IsReadOnlyProperty))
             {
@@ -304,7 +296,7 @@ namespace Signum.Windows
 
             if (colBound.Binding == null)
             {
-                bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+                bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
                 colBound.Binding = new Binding(route)
                 {
                     Mode = isReadOnly ? BindingMode.OneWay : BindingMode.TwoWay,
@@ -351,13 +343,9 @@ namespace Signum.Windows
 
         public static void TaskSetValueProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
-            DependencyProperty valueProperty =
-                fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
-                fe is DataGrid ? DataGrid.ItemsSourceProperty :
-                FrameworkElement.DataContextProperty;
+            DependencyProperty valueProperty = ValueProperty(fe);
 
-
-            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
             if (!BindingOperations.IsDataBound(fe, valueProperty))
             {
@@ -370,6 +358,13 @@ namespace Signum.Windows
                 };
                 fe.SetBinding(valueProperty, b);
             }
+        }
+
+        private static DependencyProperty ValueProperty(FrameworkElement fe)
+        {
+            return fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
+                            fe is DataGrid ? DataGrid.ItemsSourceProperty :
+                            FrameworkElement.DataContextProperty;
         }
 
 
@@ -403,7 +398,7 @@ namespace Signum.Windows
         static void TaskSetUnitText(FrameworkElement fe, string route, PropertyRoute context)
         {
             ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 UnitAttribute ua = context.PropertyInfo.SingleAttribute<UnitAttribute>();
                 if (ua != null)
@@ -414,7 +409,7 @@ namespace Signum.Windows
         static void TaskSetFormatText(FrameworkElement fe, string route, PropertyRoute context)
         {
             ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.FormatProperty) && context.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.NotSet(ValueLine.FormatProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 string format = Reflector.FormatString(context);
                 if (format != null)
@@ -424,7 +419,7 @@ namespace Signum.Windows
 
         public static void TaskSetIsReadonly(FrameworkElement fe, string route, PropertyRoute context)
         {
-            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
             if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty) && (fe is ValueLine || fe is EntityLine || fe is EntityCombo || fe is TextArea))
             {
@@ -450,11 +445,18 @@ namespace Signum.Windows
         {
             if (GetCollapseIfNull(fe) && fe.NotSet(UIElement.VisibilityProperty))
             {
-                Binding b = fe is ValueLine ? new Binding(route) : new Binding();
+                var dp = ValueProperty(fe);
 
-                b.Mode = BindingMode.OneWay;
-                b.Converter = Converters.NullToVisibility;
+                if (dp == null)
+                    throw new InvalidOperationException("Unknown value property of {0}".Formato(fe.GetType().Name));
 
+                Binding b = new Binding()
+                {
+                    Path = new PropertyPath(dp.Name),
+                    Source = fe,
+                    Mode = BindingMode.OneWay,
+                    Converter = Converters.NullToVisibility,
+                };
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }
@@ -462,7 +464,7 @@ namespace Signum.Windows
         static void TaskSetNotNullItemsSource(FrameworkElement fe, string route, PropertyRoute context)
         {
             ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
                    Validator.GetOrCreatePropertyPack(context).Validators.OfType<NotNullableAttribute>().Any())
@@ -498,7 +500,7 @@ namespace Signum.Windows
         public static Window FindCurrentWindow(this FrameworkElement fe)
         {
             return fe.FollowC(a => (FrameworkElement)(a.Parent ?? a.TemplatedParent))
-                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().First("Parent window not found");
+                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().FirstEx(() => "Parent window not found");
         }
 
         public static IDisposable OverrideCursor(System.Windows.Input.Cursor cursor)

@@ -38,6 +38,16 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+
+        public static readonly DependencyProperty SimpleFilterBuilderProperty =
+          DependencyProperty.Register("SimpleFilterBuilder", typeof(ISimpleFilterBuilder), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public ISimpleFilterBuilder SimpleFilterBuilder
+        {
+            get { return (ISimpleFilterBuilder)GetValue(SimpleFilterBuilderProperty); }
+            set { SetValue(SimpleFilterBuilderProperty, value); }
+        }
+
+
         public static readonly DependencyProperty OrderOptionsProperty =
              DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
         public ObservableCollection<OrderOption> OrderOptions
@@ -62,12 +72,20 @@ namespace Signum.Windows
             set { SetValue(ColumnOptionsProperty, value); }
         }
 
-        public static readonly DependencyProperty AllowUserColumnsProperty =
-            DependencyProperty.Register("AllowUserColumns", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
-        public bool AllowUserColumns
+        public static readonly DependencyProperty ElementsPerPageProperty =
+          DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchWindow), new UIPropertyMetadata(200));
+        public int? ElementsPerPage
         {
-            get { return (bool)GetValue(AllowUserColumnsProperty); }
-            set { SetValue(AllowUserColumnsProperty, value); }
+            get { return (int?)GetValue(ElementsPerPageProperty); }
+            set { SetValue(ElementsPerPageProperty, value); }
+        }
+
+        public static readonly DependencyProperty AllowChangeColumnsProperty =
+            DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
+        public bool AllowChangeColumns
+        {
+            get { return (bool)GetValue(AllowChangeColumnsProperty); }
+            set { SetValue(AllowChangeColumnsProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedItemProperty =
@@ -139,6 +157,22 @@ namespace Signum.Windows
 
             ButtonsChanged();
             searchControl.Loaded += new RoutedEventHandler(searchControl_Loaded);
+            searchControl.ClearSize += new EventHandler(searchControl_ClearSize);
+            searchControl.FixSize += new EventHandler(searchControl_FixSize);
+        }
+
+        void searchControl_FixSize(object sender, EventArgs e)
+        {
+            this.Width = this.ActualWidth;
+            this.Height = this.ActualHeight;
+            this.SizeToContent = System.Windows.SizeToContent.Manual;
+        }
+
+        void searchControl_ClearSize(object sender, EventArgs e)
+        {
+            ClearValue(WidthProperty);
+            ClearValue(HeightProperty);
+            this.SizeToContent = System.Windows.SizeToContent.WidthAndHeight;
         }
 
         public SearchWindow()
@@ -165,11 +199,8 @@ namespace Signum.Windows
         void ButtonsChanged()
         {
             bool ok = Mode == SearchMode.Find;
-
-            btOk.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
-            btCancel.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
+            spOkCancel.Visibility =  ok ? Visibility.Visible : Visibility.Collapsed;
             
-            btClose.Visibility = !ok ? Visibility.Visible : Visibility.Collapsed;
             searchControl.IsAdmin = !ok;
 
             if (ok)
@@ -198,6 +229,11 @@ namespace Signum.Windows
             OkAndClose();
         }
 
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+        }
+
         private void OkAndClose()
         {
             if (MultiSelection)
@@ -206,16 +242,6 @@ namespace Signum.Windows
                 SelectedItem = searchControl.SelectedItem;
 
             DialogResult = true;
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
-
-        private void Close_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
         }
 
         void searchControl_DoubleClick()

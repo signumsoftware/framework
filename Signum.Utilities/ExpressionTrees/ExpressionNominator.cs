@@ -74,6 +74,5 @@ namespace Signum.Utilities.ExpressionTrees
         {
             return Expression.Call(null, miInSql.MakeGenericMethod(expression.Type), expression);
         }
-
     }
 }

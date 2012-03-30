@@ -14,16 +14,9 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -69,9 +62,17 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.Types.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll</HintPath>
     </Reference>
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
@@ -90,11 +91,16 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Administrator.cs" />
+    <Compile Include="Connection\Connector.cs" />
+    <Compile Include="Connection\Executor.cs" />
+    <Compile Include="Connection\FieldReader.cs" />
+    <Compile Include="Connection\SqlCeConnector.cs" />
+    <Compile Include="Connection\SqlConnector.cs" />
+    <Compile Include="Connection\Transaction.cs" />
     <Compile Include="Connection\UserConnections.cs" />
-    <Compile Include="Connection\CommandTimeout.cs" />
     <Compile Include="DynamicQuery\AutoDynamicQuery.cs" />
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
-    <Compile Include="DynamicQuery\StaticColumnFactory.cs" />
+    <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
     <Compile Include="Engine\SqlUtils.cs" />
     <Compile Include="Exceptions.cs" />
@@ -104,38 +110,36 @@
     <Compile Include="Engine\SchemaInfoTables.cs" />
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="ExecutionContext.cs" />
+    <Compile Include="GlobalLazy.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
-    <Compile Include="Linq\DbQueryUtils.cs" />
-    <Compile Include="Linq\ExpressionVisitor\AggregateOptimizer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbQueryUtils.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
-    <Compile Include="Linq\ExpressionVisitor\AliasGenerator.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
     <Compile Include="Linq\ExpressionVisitor\ConditionsRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\ChildProjectionFlattener.cs" />
-    <Compile Include="Linq\ExpressionVisitor\CountOrderByRemover.cs" />
+    <Compile Include="Linq\ExpressionVisitor\OrderByRewriter.cs" />
+    <Compile Include="Linq\ExpressionVisitor\GroupEntityCleaner.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AggregateFinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\RowNumberFiller.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryFilterer.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryRebinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\OverloadingSimplifier.cs" />
-    <Compile Include="Linq\ExpressionVisitor\ProjectionCleaner.cs" />
+    <Compile Include="Linq\ExpressionVisitor\EntityCompleter.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionVisitor.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionNominator.cs" />
-    <Compile Include="Linq\ExpressionVisitor\ProjectionExpressionFinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryBinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryFormatter.cs" />
     <Compile Include="Linq\ExpressionVisitor\RedundantSubqueryRemover.cs" />
     <Compile Include="Linq\ExpressionVisitor\Replacer.cs" />
-    <Compile Include="Linq\ExpressionVisitor\SingleCellOptimizer.cs" />
     <Compile Include="Linq\ExpressionVisitor\SmartEqualizer.cs" />
     <Compile Include="Linq\ExpressionVisitor\SubqueryRemover.cs" />
     <Compile Include="Linq\ExpressionVisitor\TranslatorBuilder.cs" />
     <Compile Include="Linq\ExpressionVisitor\UnusedColumnRemover.cs" />
     <Compile Include="Linq\DbExpressions.Signum.cs" />
-    <Compile Include="Connection\FieldReader.cs" />
     <Compile Include="Linq\Meta\MetaEvaluator.cs" />
     <Compile Include="Linq\Meta\MetaExpression.cs" />
     <Compile Include="Linq\ProjectionReader.cs" />
@@ -144,8 +148,6 @@
     <Compile Include="Engine\Saver.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Engine\Retriever.cs" />
-    <Compile Include="Engine\SqlParameterBuilder.cs" />
     <Compile Include="Engine\SqlPreCommand.cs" />
     <Compile Include="Linq\ViewAttributes.cs" />
     <Compile Include="Engine\SchemaComparer.cs" />
@@ -154,32 +156,30 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Include="Retriever.cs" />
+    <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
     <Compile Include="Schema\Schema.Save.cs" />
-    <Compile Include="Schema\Schema.Retrieve.cs" />
     <Compile Include="Schema\SchemaBuilder\SchemaBuilder.cs" />
     <Compile Include="Schema\SchemaBuilder\SchemaBuilderSettings.cs" />
     <Compile Include="Schema\SchemaBuilder\NameSequence.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EntityCache.cs" />
     <Compile Include="Engine\SqlBuilder.cs" />
-    <Compile Include="Connection\Executor.cs" />
-    <Compile Include="Connection\Connection.cs" />
-    <Compile Include="Connection\ConnectionScope.cs" />
-    <Compile Include="Connection\Transaction.cs" />
+    <Compile Include="Schema\UniqueIndex.cs" />
     <Compile Include="ServerBasic.cs" />
     <Compile Include="TypesLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Schema\Schema.cd" />
-    <None Include="SignumFramework.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>

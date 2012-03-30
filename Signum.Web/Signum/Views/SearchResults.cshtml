@@ -1,35 +1,54 @@
-@using Signum.Entities.DynamicQuery
+﻿@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reflection
 @using Signum.Web.Properties
 @using Signum.Engine
 @model Context
 
-@{ FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+@{ 
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
-   bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
+   var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+   Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+   Implementations implementations = entityColumn.Implementations;
+   bool viewable = (bool)ViewData[ViewDataKeys.View] && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
+   bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
 
+   FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
+   
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-   Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];}
+   Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
+
+   int columnsCount = queryResult.Columns.Count() + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0);
+}
+
+@if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
+{ 
+    <tr class="sf-tr-multiply">
+        <td class="sf-td-multiply ui-state-highlight" colspan="@columnsCount">
+            <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+            @ViewData[ViewDataKeys.MultipliedMessage]
+        </td>
+    </tr>
+}
+
 @foreach (var row in queryResult.Rows)
 {
     Lite entityField = row.Entity;
     <tr data-entity="@entityField.Key()">
-        @if (findOptions.AllowMultiple.HasValue)
+        @if (allowMultiple.HasValue)
         {
             <td>
-                @if (findOptions.AllowMultiple.Value)
+                @if (allowMultiple.Value)
                 {
                     @Html.CheckBox(
                         Model.Compose("rowSelection", row.Index.ToString()),
-                        new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr });
+                          new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString() });
 
                 }
                 else
                 {
                     @Html.RadioButton(
                              Model.Compose("rowSelection"),
-                        entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr);
+                        entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString());
                 }
             </td>
         }
@@ -47,3 +66,16 @@
         }
     </tr>
 }
+
+@if (queryResult.Rows.IsNullOrEmpty())
+{
+    <tr>
+        <td colspan="@columnsCount">@Resources.Signum_noResults</td>
+    </tr>
+}
+
+@{ 
+    ViewData[ViewDataKeys.ElementsPerPage] = queryResult.ElementsPerPage;
+    ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
+}
+@Html.Partial(Navigator.Manager.PaginationView, Model)

@@ -1,25 +1,37 @@
 ﻿@using System.Configuration
 @using Signum.Web.Properties
-
 @model TypeContext
-           
-<h2>
+@{
+    ModifiableEntity modifiable = Model.UntypedValue as ModifiableEntity;
+    string partialViewName = ViewData[ViewDataKeys.PartialViewName].ToString();
+}               
+<div>
     @Html.AntiForgeryToken()
     @Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId])
     @Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName])
-    <span class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)</span>
-     @if(string.IsNullOrEmpty(ViewBag.Title))
-     {
-         ViewBag.Title = Model.UntypedValue.TryToString();
-     }
-    <span class="sf-entity-title">@(ViewBag.Title)</span>
-</h2>
-<div class="sf-button-bar">
-    @if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
+    <div class="ui-widget-header ui-corner-all sf-normal-control-header">
+        <span class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(modifiable)</span>
+        @Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.ControlID)
+    </div>
+    <div class="clearall"></div>
+    @if(string.IsNullOrEmpty(ViewBag.Title))
     {
-        <a id="ebSave" class="sf-entity-button sf-save" onclick="javascript:new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
+        ViewBag.Title = modifiable.TryToString();
     }
-    @ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html)
+    <span class="sf-entity-title">@(ViewBag.Title)</span>
+</div>
+<div class="sf-button-bar">
+    @if (Model != null && Navigator.Manager.ShowSave(modifiable.GetType()) && !Model.ReadOnly)
+    {
+        <a id="ebSave" class="sf-entity-button sf-save" onclick="new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
+    }
+    @ButtonBarEntityHelper.GetForEntity(new ToolBarButtonContext
+    { 
+        Buttons = ViewButtons.Save,
+        ControllerContext = this.ViewContext,
+        PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
+        Prefix =  Model.ControlID
+    },  (ModifiableEntity)Model.UntypedValue).ToString(Html)
 </div>
 
 <div class="clearall"></div>
@@ -28,5 +40,5 @@
     @Html.NormalPageHeader()
 </div>
 <div id="divMainControl" class="sf-main-control">
-    @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
+    @{ Html.RenderPartial(partialViewName, Model);}
 </div>

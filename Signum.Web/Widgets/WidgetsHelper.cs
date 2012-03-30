@@ -9,7 +9,7 @@ using Signum.Entities;
 
 namespace Signum.Web
 {
-    public delegate WidgetItem GetWidgetDelegate(HtmlHelper helper, ModifiableEntity entity, string partialViewName);
+    public delegate WidgetItem GetWidgetDelegate(ModifiableEntity entity, string partialViewName, string prefix);
 
     public class WidgetItem
     {
@@ -30,18 +30,19 @@ namespace Signum.Web
         /// </summary>
         public MvcHtmlString Label { get; set; }
 
-
         /// <summary>
         /// The different widgets
         /// </summary>
         public MvcHtmlString Content { get; set; }
+
+        public static string CssClassHighlighted = "ui-state-highlight ui-corner-all";
     }
 
     public static class WidgetsHelper
     {
         public static event GetWidgetDelegate GetWidgetsForView;
 
-        public static List<WidgetItem> GetWidgetsListForViewName(this HtmlHelper helper, ModifiableEntity entity, string partialViewName)
+        public static List<WidgetItem> GetWidgetsForEntity(ModifiableEntity entity, string partialViewName, string prefix)
         {
             List<WidgetItem> widgets = new List<WidgetItem>();
             if (entity != null)
@@ -49,26 +50,32 @@ namespace Signum.Web
                 if (GetWidgetsForView != null)
                     widgets.AddRange(GetWidgetsForView.GetInvocationList()
                         .Cast<GetWidgetDelegate>()
-                        .Select(d => d(helper, entity, partialViewName))
+                        .Select(d => d(entity, partialViewName, prefix))
                         .NotNull().ToList());
             }
             return widgets;
         }
 
-        private static string WidgetsToString(HtmlHelper helper, List<string> widgets)
+        public static MvcHtmlString RenderWidgetsForEntity(this HtmlHelper helper, ModifiableEntity entity, string partialViewName, string prefix)
         {
-            if (widgets == null || widgets.Count == 0)
-                return "";
+            List<WidgetItem> widgets = GetWidgetsForEntity(entity, partialViewName, prefix);
 
-            StringBuilder sb = new StringBuilder();
+            if (widgets == null)
+                return MvcHtmlString.Empty;
 
-            foreach (string widget in widgets)
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("ul").Class("sf-widgets-container")))
             {
-                if (widget != "")
-                    sb.AppendLine(widget);
+                foreach (WidgetItem widget in widgets)
+                {
+                    using (sb.Surround(new HtmlTag("li").IdName(widget.Id).Class("sf-dropdown sf-widget")))
+                    {
+                        sb.AddLine(widget.Label);
+                        sb.AddLine(widget.Content);
+                    }
+                }
             }
-
-            return sb.ToString();
+            return sb.ToHtml();
         }
     }
 }

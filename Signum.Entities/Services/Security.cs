@@ -16,6 +16,18 @@ namespace Signum.Services
             byte[] encodedBytes = provider.ComputeHash(originalBytes);
             return BitConverter.ToString(encodedBytes);
         }
+
+        public static string GetSHA1(string str)
+        {
+            SHA1 sha1 = SHA1Managed.Create();
+            ASCIIEncoding encoding = new ASCIIEncoding();
+            byte[] stream = null;
+            StringBuilder sb = new StringBuilder();
+            stream = sha1.ComputeHash(encoding.GetBytes(str));
+            for (int i = 0; i < stream.Length; i++)
+                sb.AppendFormat("{0:x2}", stream[i]);
+            return sb.ToString();
+        }
     }
 
     public class CryptorEngine
@@ -68,5 +80,29 @@ namespace Signum.Services
                 return UTF8Encoding.UTF8.GetString(resultArray);
             }
         }
+
+
+        public static string CalculateMD5Hash(string input)
+        {
+            // step 1, calculate MD5 hash from input
+
+            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+            return CalculateMD5Hash(inputBytes);
+        }
+
+        public static string CalculateMD5Hash(byte[] inputBytes)
+        {
+            MD5 md5 = System.Security.Cryptography.MD5.Create();
+            byte[] hash = md5.ComputeHash(inputBytes);
+
+            // step 2, convert byte array to hex string
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++)
+            {
+                sb.Append(hash[i].ToString("X2"));
+            }
+            return sb.ToString();
+        }
+
     }
 }

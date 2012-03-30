@@ -10,6 +10,8 @@ using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
+using System.Diagnostics;
 
 namespace Signum.Entities
 {
@@ -33,7 +35,7 @@ namespace Signum.Entities
         public Lite(int id, string toStr)
             : base(typeof(T), id)
         {
-            this.ToStr = toStr;
+            this.toStr = toStr;
         }
 
         public Lite(Type runtimeType, int id)
@@ -46,7 +48,7 @@ namespace Signum.Entities
         public Lite(Type runtimeType, int id, string toStr)
             :this(runtimeType, id)
         {
-            this.ToStr = toStr;
+            this.toStr = toStr;
         }
 
         internal Lite(T entity)
@@ -66,6 +68,11 @@ namespace Signum.Entities
             protected set { entityOrNull = value; }
         }
 
+        public bool IsNew
+        {
+            get { return entityOrNull != null && entityOrNull.IsNew; }
+        }
+
         public T Entity 
         {
             get
@@ -77,12 +84,12 @@ namespace Signum.Entities
         }
     }
 
-    [Serializable]
+    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
     public abstract class Lite : Modifiable, IComparable, IComparable<Lite>
     {
         Type runtimeType;
         int? id;
-        string toStr;
+        protected string toStr;
 
         protected Lite()
         {
@@ -91,7 +98,7 @@ namespace Signum.Entities
         protected Lite(Type runtimeType, int id)
         {
             if (runtimeType == null || !typeof(IdentifiableEntity).IsAssignableFrom(runtimeType))
-                throw new InvalidOperationException("Type {0} does not implement {1}".Formato(runtimeType, typeof(IIdentifiable)));
+                throw new InvalidOperationException("Type {0} does not implement {1}".Formato(runtimeType, typeof(IdentifiableEntity)));
 
             this.runtimeType = runtimeType;
             this.id = id;
@@ -112,12 +119,6 @@ namespace Signum.Entities
             if (UntypedEntityOrNull != null)
                 id = UntypedEntityOrNull.Id;
             return id.Value;
-        }
-
-        public void RefreshToStr()
-        {
-            if (UntypedEntityOrNull != null)
-                ToStr = UntypedEntityOrNull.toStr;
         }
 
         public Type RuntimeType
@@ -155,8 +156,8 @@ namespace Signum.Entities
                 throw new InvalidOperationException("Entities do not match");
 
             this.UntypedEntityOrNull = ei;
-            if (ei != null && this.ToStr == null)
-                this.ToStr = ei.ToString();
+            if (ei != null && this.toStr == null)
+                this.toStr = ei.ToString();
         } 
 
         public void ClearEntity()
@@ -164,6 +165,7 @@ namespace Signum.Entities
             if (id == null)
                 throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
+            this.toStr = this.UntypedEntityOrNull.ToString();
             this.UntypedEntityOrNull = null;
         }
 
@@ -172,9 +174,7 @@ namespace Signum.Entities
             if (UntypedEntityOrNull != null)
             {
                 UntypedEntityOrNull.PreSaving(ref graphModified);
-                toStr = UntypedEntityOrNull.ToStr;
             }
-            //Is better to have an old string than having nothing
         }
 
         public override bool SelfModified
@@ -190,9 +190,8 @@ namespace Signum.Entities
         {
             if (this.UntypedEntityOrNull != null)
                 return this.UntypedEntityOrNull.ToString();
-            if (this.toStr != null)
-                return this.toStr;
-            return "{0}({1})".Formato(this.RuntimeType, this.id);
+
+            return this.toStr;
         }
 
     
@@ -208,8 +207,7 @@ namespace Signum.Entities
 
         public static Lite Create(Type type, int id, Type runtimeType, string toStr)
         {
-            Lite result = (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), runtimeType, id);
-            result.ToStr = toStr;
+            Lite result = (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), runtimeType, id, toStr);
             return result;
         }
 
@@ -223,14 +221,7 @@ namespace Signum.Entities
             ConstructorInfo ci = Reflector.GenerateLite(type).GetConstructor(bf, null, new[] { type }, null);
 
             Lite result = (Lite)ci.Invoke(new[] { entidad });
-            result.ToStr = entidad.TryToString();
             return result;
-        }
-
-        public string ToStr
-        {
-            get { return toStr; }
-            internal set { toStr = value; }
         }
 
         public override bool Equals(object obj)
@@ -266,10 +257,10 @@ namespace Signum.Entities
 
         static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
 
-        public static Lite ParseLite(Type liteType, string liteKey, Func<string, Type> resolveType)
+        public static Lite ParseLite(Type staticType, string liteKey, Func<string, Type> resolveType)
         {
             Lite result;
-            string error = TryParseLite(liteType, liteKey, resolveType, out result);
+            string error = TryParseLite(staticType, liteKey, resolveType, out result);
             if (error == null)
             {
                 return result;
@@ -280,7 +271,7 @@ namespace Signum.Entities
             }
         }
 
-        public static string TryParseLite(Type liteType, string liteKey, Func<string, Type> resolveType, out Lite result)
+        public static string TryParseLite(Type staticType, string liteKey, Func<string, Type> resolveType, out Lite result)
         {
             result = null;
             if (string.IsNullOrEmpty(liteKey))
@@ -300,7 +291,7 @@ namespace Signum.Entities
 
             string toStr = match.Groups["toStr"].Value; //maybe null
 
-            result = Lite.Create(liteType, id, type, toStr);
+            result = Lite.Create(staticType, id, type, toStr);
             return null;
         }
 
@@ -311,7 +302,7 @@ namespace Signum.Entities
 
         public string KeyLong(Func<Type, string> typeName)
         {
-            return "{0};{1};{2}".Formato(typeName(this.RuntimeType), this.Id, this.ToStr);
+            return "{0};{1};{2}".Formato(typeName(this.RuntimeType), this.Id, this.ToString());
         }
 
         public int CompareTo(Lite other)
@@ -326,12 +317,16 @@ namespace Signum.Entities
 
             throw new InvalidOperationException("obj is not a Lite"); 
         }
+
+        public void SetToString(string toStr)
+        {
+            this.toStr = toStr;
+        }
     }
 
 
     public static class LiteUtils
     {
-      
         public static Lite<T> ToLite<T>(this T entity)
           where T : class, IIdentifiable
         {
@@ -341,7 +336,7 @@ namespace Signum.Entities
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-            return new Lite<T>(entity.GetType(), entity.Id) { ToStr = entity.ToString() };
+            return new Lite<T>(entity.GetType(), entity.Id, entity.ToString());
         }
 
         public static Lite<T> ToLite<T>(this T entity, string toStr)
@@ -353,7 +348,7 @@ namespace Signum.Entities
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-            return new Lite<T>(entity.GetType(), entity.Id) { ToStr = toStr };
+            return new Lite<T>(entity.GetType(), entity.Id, toStr);
         }
 
         public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IIdentifiable
@@ -377,7 +372,7 @@ namespace Signum.Entities
             if (entity == null)
                 return null;
 
-            return new Lite<T>(entity) { ToStr = entity.ToString() };
+            return new Lite<T>(entity);
         }
 
         public static Lite<T> ToLiteFat<T>(this T entity, string toStr) where T : class, IIdentifiable
@@ -385,7 +380,7 @@ namespace Signum.Entities
             if (entity == null)
                 return null;
 
-            return new Lite<T>(entity) { ToStr = toStr };
+            return new Lite<T>(entity);
         }
 
         public static Lite<T> ToLite<T>(this Lite lite)
@@ -394,13 +389,10 @@ namespace Signum.Entities
             if (lite == null)
                 return null;
 
-            if (lite is Lite<T>)
-                return (Lite<T>)lite;
-
             if (lite.UntypedEntityOrNull != null)
-                return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = lite.ToStr };
+                return new Lite<T>((T)(object)lite.UntypedEntityOrNull);
             else
-                return new Lite<T>(lite.RuntimeType, lite.Id) { ToStr = lite.ToStr };
+                return new Lite<T>(lite.RuntimeType, lite.Id, lite.ToString());
         }
 
         public static Lite<T> ToLite<T>(this Lite lite, string toStr)
@@ -409,13 +401,10 @@ namespace Signum.Entities
             if (lite == null)
                 return null;
 
-            if (lite is Lite<T>)
-                return (Lite<T>)lite;
-
             if (lite.UntypedEntityOrNull != null)
-                return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = toStr };
+                return new Lite<T>((T)(object)lite.UntypedEntityOrNull);
             else
-                return new Lite<T>(lite.RuntimeType, lite.Id) { ToStr = toStr };
+                return new Lite<T>(lite.RuntimeType, lite.Id, lite.ToString());
         }
 
 
@@ -442,12 +431,12 @@ namespace Signum.Entities
         {
             static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeDN type) => type.ToLite()).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 Expression lite = arguments[0];
                 Expression entity = arguments[1];
 
-               return Expression.Equal(lite, Expression.Call(null, miToLazy.MakeGenericMethod(typeArguments[0]), entity));
+                return Expression.Equal(lite, Expression.Call(null, miToLazy.MakeGenericMethod(mi.GetGenericArguments()[0]), entity));
             }
         }
 
@@ -472,7 +461,7 @@ namespace Signum.Entities
 
         class IsExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Equal(arguments[0], arguments[1]);
             }
@@ -495,6 +484,11 @@ namespace Signum.Entities
                 return lite1.Id == lite2.Id;
             else
                 return object.ReferenceEquals(lite1.EntityOrNull, lite2.EntityOrNull);
+        }
+
+        public static XDocument EntityDGML(this IdentifiableEntity entity)
+        {
+            return GraphExplorer.FromRoot(entity).EntityDGML(); 
         }
     }
 }

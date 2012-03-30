@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
@@ -42,9 +43,37 @@ namespace Signum.Entities.Basics
             set { Set(ref checkDate, value, () => CheckDate); }
         }
 
+        static Expression<Func<AlertDN, bool>> NotAttendedExpression =
+            a => (a.AlertDate.HasValue && a.AlertDate <= DateTime.Now) && !a.CheckDate.HasValue;
+        public bool NotAttended
+        {
+            get { return NotAttendedExpression.Evaluate(this); }
+        }
+
+        static Expression<Func<AlertDN, bool>> AttendedExpression =
+            a => a.CheckDate.HasValue;
+        public bool Attended
+        {
+            get { return AttendedExpression.Evaluate(this); }
+        }
+
+        static Expression<Func<AlertDN, bool>> FutureExpression =
+            a => !a.CheckDate.HasValue && (!a.AlertDate.HasValue || a.AlertDate > DateTime.Now);
+        public bool Future
+        {
+            get { return FutureExpression.Evaluate(this); }
+        }
+
         public override string ToString()
         {
             return text.EtcLines(200);
         }
     }
+
+    public enum AlertQueries
+    {
+        NotAttended,
+        Attended,
+        Future
+    }   
 }

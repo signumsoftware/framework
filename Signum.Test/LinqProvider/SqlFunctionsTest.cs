@@ -11,6 +11,8 @@ using Signum.Utilities;
 using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Maps;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test.LinqProvider
 {
@@ -29,38 +31,15 @@ namespace Signum.Test.LinqProvider
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLog = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }
 
         [TestMethod]
         public void StringFunctions()
         {
-            var artists = Database.Query<ArtistDN>(); 
-            Assert.IsTrue(artists.Any(a=>a.Name.IndexOf('M') == 0));
-            Assert.IsTrue(artists.Any(a => a.Name.Contains("Jackson")));
-            Assert.IsTrue(artists.Any(a => a.Name.StartsWith("Billy")));
-            Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
-            Assert.IsTrue(artists.Any(a => a.Name.Like("%Michael%")));
-
-            Dump((ArtistDN a)=> a.Name.Length);
-            Dump((ArtistDN a)=>a.Name.ToLower());
-            Dump((ArtistDN a)=>a.Name.ToUpper());
-            Dump((ArtistDN a) => a.Name.TrimStart());
-            Dump((ArtistDN a) => a.Name.TrimEnd());
-            Dump((ArtistDN a) => a.Name.Substring(2).InSql());
-            Dump((ArtistDN a) => a.Name.Substring(2, 2).InSql());
-
-            Dump((ArtistDN a) => a.Name.Left(2).InSql());
-            Dump((ArtistDN a) => a.Name.Right(2).InSql());
-            Dump((ArtistDN a) => a.Name.Reverse().InSql());
-            Dump((ArtistDN a) => a.Name.Replicate(2).InSql());
-        }
-
-        [TestMethod]
-        public void DateTimeFunctions()
-        {
             var artists = Database.Query<ArtistDN>();
             Assert.IsTrue(artists.Any(a => a.Name.IndexOf('M') == 0));
+            Assert.IsTrue(artists.Any(a => a.Name.IndexOf("Mi") == 0));
             Assert.IsTrue(artists.Any(a => a.Name.Contains("Jackson")));
             Assert.IsTrue(artists.Any(a => a.Name.StartsWith("Billy")));
             Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
@@ -81,36 +60,88 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void DateDifFunctions()
+        public void DateTimeFunctions()
         {
-            Dump((NoteDN n) => n.CreationTime.Year);
-            Dump((NoteDN n) => n.CreationTime.Month);
-            Dump((NoteDN n) => n.CreationTime.Day);
-            Dump((NoteDN n) => n.CreationTime.DayOfYear);
-            Dump((NoteDN n) => n.CreationTime.Hour);
-            Dump((NoteDN n) => n.CreationTime.Minute);
-            Dump((NoteDN n) => n.CreationTime.Second);
-            Dump((NoteDN n) => n.CreationTime.Millisecond);
-           
+            Dump((NoteWithDateDN n) => n.CreationTime.Year);
+            Dump((NoteWithDateDN n) => n.CreationTime.Month);
+            Dump((NoteWithDateDN n) => n.CreationTime.Day);
+            Dump((NoteWithDateDN n) => n.CreationTime.DayOfYear);
+            Dump((NoteWithDateDN n) => n.CreationTime.Hour);
+            Dump((NoteWithDateDN n) => n.CreationTime.Minute);
+            Dump((NoteWithDateDN n) => n.CreationTime.Second);
+            Dump((NoteWithDateDN n) => n.CreationTime.Millisecond);
+        }
 
-            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());
-            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalHours.InSql());
-            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
-            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
-            Dump((NoteDN n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
+        [TestMethod]
+        public void DateDiffFunctions()
+        {
+            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalHours.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
         }
 
         [TestMethod]
         public void DateFunctions()
         {
-            Dump((NoteDN n) => n.CreationTime.Date);
+            Dump((NoteWithDateDN n) => n.CreationTime.Date);
+
+            if (Schema.Current.Settings.IsDbType(typeof(TimeSpan)))
+            {
+                Dump((NoteWithDateDN n) => n.CreationTime.TimeOfDay);
+            }
         }
 
         [TestMethod]
         public void DayOfWeekFunction()
         {
-            var list = Database.Query<NoteDN>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
+            var list = Database.Query<NoteWithDateDN>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
                 .Select(n => n.CreationTime.DayOfWeek).ToList();
+        }
+
+        [TestMethod]
+        public void TimeSpanFunction()
+        {
+            if (!Schema.Current.Settings.IsDbType(typeof(TimeSpan)))
+                return;
+
+            var durations = Database.MListQuery((AlbumDN a) => a.Songs).Select(mle => mle.Element.Duration).Where(d => d != null);
+
+            Debug.WriteLine(durations.Select(d => d.Value.Hours.InSql()).ToString(", "));
+            Debug.WriteLine(durations.Select(d => d.Value.Minutes.InSql()).ToString(", "));
+            Debug.WriteLine(durations.Select(d => d.Value.Seconds.InSql()).ToString(", "));
+            Debug.WriteLine(durations.Select(d => d.Value.Milliseconds.InSql()).ToString(", "));
+
+
+            Debug.WriteLine((from n in Database.Query<NoteWithDateDN>()
+                             from d in Database.MListQuery((AlbumDN a) => a.Songs)
+                             where d.Element.Duration != null
+                             select (n.CreationTime + d.Element.Duration.Value).InSql()).ToString(", "));
+
+            Debug.WriteLine((from n in Database.Query<NoteWithDateDN>()
+                             from d in Database.MListQuery((AlbumDN a) => a.Songs)
+                             where d.Element.Duration != null
+                             select (n.CreationTime - d.Element.Duration.Value).InSql()).ToString(", "));
+        }
+
+
+        [TestMethod]
+        public void SqlHierarchyIdFunction()
+        {
+            if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+                return;
+
+            var nodes = Database.Query<LabelDN>().Select(a => a.Node);
+ 
+            Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => n.GetAncestor(1).InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => (int)(short)n.GetLevel().InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => n.ToString().InSql()).ToString(", "));
+
+
+            Debug.WriteLine(nodes.Where(n => (bool)(n.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null) != SqlHierarchyId.Null)).ToString(", "));
+            Debug.WriteLine(nodes.Where(n => (bool)(n.GetReparentedValue(n.GetAncestor(0), SqlHierarchyId.GetRoot()) != SqlHierarchyId.Null)).ToString(", "));
         }
 
         [TestMethod]
@@ -132,12 +163,13 @@ namespace Signum.Test.LinqProvider
             Dump((AlbumDN a) => Math.Log10(a.Year));
             Dump((AlbumDN a) => Math.Ceiling(a.Year + 0.5).InSql());
             Dump((AlbumDN a) => Math.Round(a.Year + 0.5).InSql());
+            Dump((AlbumDN a) => Math.Truncate(a.Year + 0.5).InSql());
         }
 
         public void Dump<T,S>(Expression<Func<T, S>> bla)
             where T:IdentifiableEntity
         {
-            Debug.WriteLine(Database.Query<T>().Select(a => bla.Invoke(a).InSql()).ToString(","));
+            Debug.WriteLine(Database.Query<T>().Select(a => bla.Evaluate(a).InSql()).ToString(","));
         }
     }
 }

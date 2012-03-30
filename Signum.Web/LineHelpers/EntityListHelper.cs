@@ -29,7 +29,7 @@ namespace Signum.Web
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
 
                 sb.AddLine(helper.HiddenStaticInfo(entityList));
-                sb.AddLine(helper.Hidden(entityList.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityList).TryToString() ?? ""));
+                sb.AddLine(helper.Hidden(entityList.Compose(EntityListBaseKeys.ListPresent), ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                 if (entityList.ElementType.IsEmbeddedEntity())
@@ -41,7 +41,10 @@ namespace Signum.Web
                 using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field-list")) : null)
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
-                    using (sbSelect.Surround(new HtmlTag("select").IdName(entityList.ControlID).Attr("multiple", "multiple").Attr("ondblclick", entityList.GetViewing()).Class("sf-entity-list")))
+                    
+                    var sbSelectContainer = new HtmlTag("select").IdName(entityList.ControlID).Class("sf-entity-list").Attr("multiple", "multiple");
+                    
+                    using (sbSelect.Surround(sbSelectContainer))
                     {
                         if (entityList.UntypedValue != null)
                         {
@@ -52,19 +55,20 @@ namespace Signum.Web
 
                     sb.Add(sbSelect.ToHtml());
 
-                    HtmlStringBuilder sbBtns = new HtmlStringBuilder();
-                    sbBtns.AddLine(ListBaseHelper.CreateButton(helper, entityList, null).Surround("li"));
-                    sbBtns.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("li"));
-                    sbBtns.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("li"));
-
-                    sb.AddLine(sbBtns.ToHtml().Surround("ul"));
+                    using (sb.Surround(new HtmlTag("ul")))
+                    {
+                        sb.AddLine(ListBaseHelper.ViewButton(helper, entityList).Surround("li"));
+                        sb.AddLine(ListBaseHelper.CreateButton(helper, entityList, null).Surround("li"));
+                        sb.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("li"));
+                        sb.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("li"));
+                    }
                 }
             }
 
             return sb.ToHtml();
         }
 
-        private static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
+        static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
@@ -73,7 +77,9 @@ namespace Signum.Web
 
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
-            if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, entityList) || (itemTC.Value as IIdentifiable).IsNew)
+            if (typeof(T).IsEmbeddedEntity() || 
+                EntityBaseHelper.RequiresLoadAll(helper, entityList) || 
+                (itemTC.Value.GetType().IsIIdentifiable() && (itemTC.Value as IIdentifiable).IsNew))
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityList));
             else if (itemTC.Value != null)
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));
@@ -90,7 +96,7 @@ namespace Signum.Web
                                 .Class("sf-entity-list-option")
                                 .SetInnerText(
                                     (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
-                                    (itemTC.Value as Lite).TryCC(i => i.ToStr) ??
+                                    (itemTC.Value as Lite).TryCC(i => i.ToString()) ??
                                     (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? "")
                                 .ToHtml(TagRenderMode.Normal));
             

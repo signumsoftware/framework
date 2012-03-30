@@ -9,12 +9,15 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
     public class QueryFilterer : SimpleExpressionVisitor
     {
-        static GenericInvoker miFilter = GenericInvoker.Create(() => Schema.Current.OnFilterQuery<TypeDN>(null));
+        static GenericInvoker<Func<Schema, IQueryable, IQueryable>> miFilter = new GenericInvoker<Func<Schema, IQueryable, IQueryable>>((s,q) => s.OnFilterQuery<TypeDN>((IQueryable<TypeDN>)q));
+
+        bool filter;
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
@@ -22,12 +25,17 @@ namespace Signum.Engine.Linq
             {
                 IQueryable query = (IQueryable)c.Value;
 
-                if (query.IsBase() && typeof(IdentifiableEntity).IsAssignableFrom(query.ElementType))
+                if (query.IsBase())
                 {
-                    IQueryable newQuery = (IQueryable)miFilter.GetInvoker(c.Type.GetGenericArguments())(Schema.Current, query);
+                    Type identType = c.Type.GetGenericArguments().SingleEx();
 
-                    if (newQuery != query)
-                        return newQuery.Expression;
+                    if (filter && Schema.Current.Tables.ContainsKey(identType))
+                    {
+                        IQueryable newQuery = miFilter.GetInvoker(identType)(Schema.Current, query);
+                        
+                        if (newQuery != query)
+                            return newQuery.Expression;
+                    }
 
                     return c;
                 }
@@ -36,16 +44,17 @@ namespace Signum.Engine.Linq
                     /// <summary>
                     /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
                     /// </summary>
-                    return DbQueryProvider.Clean(query.Expression);
+                    return DbQueryProvider.Clean(query.Expression, filter, null);
                 }
             }
 
             return base.VisitConstant(c);
         }
 
-        internal static Expression Filter(Expression expression)
+        
+        internal static Expression Filter(Expression expression, bool filter)
         {
-            return new QueryFilterer().Visit(expression);
+            return new QueryFilterer { filter = filter }.Visit(expression);
         }
     }
 }

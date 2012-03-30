@@ -47,12 +47,12 @@ namespace Signum.Engine.Linq
                 if (exp.Type.IsAssignableFrom(typeof(IQueryable<>)))
                     return ExpressionEvaluator.PartialEval(exp);
 
-                return (ConstantExpression)miConstant.GetInvoker(exp.Type)();
+                return miConstant.GetInvoker(exp.Type)();
             }
             return base.Visit(exp);
         }
 
-        static GenericInvoker miConstant = GenericInvoker.Create(() => Constant<int>());
+        static GenericInvoker<Func<ConstantExpression>> miConstant = new GenericInvoker<Func<ConstantExpression>>(() => Constant<int>());
         static ConstantExpression Constant<T>()
         {
             return Expression.Constant(default(T), typeof(T)); 

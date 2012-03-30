@@ -132,26 +132,17 @@
   <data name="Alerts" xml:space="preserve">
     <value>Alerts</value>
   </data>
-  <data name="Checked" xml:space="preserve">
-    <value>Checked</value>
-  </data>
   <data name="CreateAlert" xml:space="preserve">
     <value>Create alert</value>
   </data>
   <data name="CreateNote" xml:space="preserve">
     <value>Create note</value>
   </data>
-  <data name="Future" xml:space="preserve">
-    <value>Future</value>
-  </data>
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
     <value>View notes</value>
-  </data>
-  <data name="Warned" xml:space="preserve">
-    <value>Warned</value>
   </data>
   <data name="View" xml:space="preserve">
     <value>View</value>
@@ -177,26 +168,14 @@
   <data name="Type0NotAllowed" xml:space="preserve">
     <value>Type {0} not allowed</value>
   </data>
-  <data name="Average" xml:space="preserve">
-    <value>Average</value>
-  </data>
   <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
     <value>Delete Filter</value>
-  </data>
-  <data name="ExecutedXTimes" xml:space="preserve">
-    <value>Executed x times</value>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>
   </data>
   <data name="Signum_hideFilters" xml:space="preserve">
     <value>Hide filters</value>
-  </data>
-  <data name="Maximum" xml:space="preserve">
-    <value>Maximum</value>
-  </data>
-  <data name="Minimum" xml:space="preserve">
-    <value>Minimum</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
@@ -215,12 +194,6 @@
   </data>
   <data name="Value" xml:space="preserve">
     <value>Value</value>
-  </data>
-  <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
-    <value>Show</value>
-  </data>
-  <data name="Excel" xml:space="preserve">
-    <value>Excel</value>
   </data>
   <data name="CalendarClose" xml:space="preserve">
     <value>Done</value>
@@ -243,9 +216,6 @@
   <data name="Signum_error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="Signum_executing" xml:space="preserve">
-    <value>Executing...</value>
-  </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>No elements selected</value>
   </data>
@@ -261,14 +231,8 @@
   <data name="Signum_saved" xml:space="preserve">
     <value>Saved</value>
   </data>
-  <data name="Signum_saving" xml:space="preserve">
-    <value>Saving</value>
-  </data>
   <data name="Signum_search" xml:space="preserve">
     <value>Search</value>
-  </data>
-  <data name="Signum_searching" xml:space="preserve">
-    <value>Searching...</value>
   </data>
   <data name="NotPossibleToaAssign0" xml:space="preserve">
     <value>Not possible to assign {0}</value>
@@ -315,10 +279,49 @@
   <data name="Signum_reorderColumn_MoveRight" xml:space="preserve">
     <value>Move right</value>
   </data>
-  <data name="SearchControl_RowsFound" xml:space="preserve">
-    <value>rows found</value>
+  <data name="Signum_selectToken" xml:space="preserve">
+    <value>Select a token</value>
   </data>
-  <data name="SearchControl_ShowNRows_Rows" xml:space="preserve">
-    <value>rows</value>
+  <data name="ChooseAType" xml:space="preserve">
+    <value>Choose a type</value>
+  </data>
+  <data name="Quicklinks" xml:space="preserve">
+    <value>Quick links</value>
+  </data>
+  <data name="InvalidFormat" xml:space="preserve">
+    <value>Invalid format</value>
+  </data>
+  <data name="NoteCreated" xml:space="preserve">
+    <value>Note created</value>
+  </data>
+  <data name="AlertCreated" xml:space="preserve">
+    <value>Alert created</value>
+  </data>
+  <data name="Alerts_Attended" xml:space="preserve">
+    <value>Attended</value>
+  </data>
+  <data name="Alerts_Future" xml:space="preserve">
+    <value>Future</value>
+  </data>
+  <data name="Alerts_NotAttended" xml:space="preserve">
+    <value>Not attended</value>
+  </data>
+  <data name="Query0IsNotAllowed" xml:space="preserve">
+    <value>Query {0} is not allowed</value>
+  </data>
+  <data name="SearchControl_Pagination_Of" xml:space="preserve">
+    <value>of</value>
+  </data>
+  <data name="SearchControl_Pagination_Results" xml:space="preserve">
+    <value>results</value>
+  </data>
+  <data name="SearchControl_Pagination_Rows" xml:space="preserve">
+    <value>Rows</value>
+  </data>
+  <data name="SearchControl_Pagination_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Signum_loading" xml:space="preserve">
+    <value>Loading...</value>
   </data>
 </root>

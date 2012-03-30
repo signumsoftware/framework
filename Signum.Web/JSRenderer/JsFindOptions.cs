@@ -11,7 +11,7 @@ namespace Signum.Web
     {
         public JsValue<string> Prefix { get; set; }
         public FindOptions FindOptions { get; set; }
-        public JsValue<int?> Top { get; set; }
+        public JsValue<int?> ElementsPerPage { get; set; }
         /// <summary>
         /// To be called to open a Find window
         /// </summary>
@@ -34,7 +34,7 @@ namespace Signum.Web
                 JsOptionsBuilder options = new JsOptionsBuilder(true)
                 {
                     {"prefix", Prefix.TryCC(t=>t.ToJS())},
-                    {"top", Top.TryCC(t=>t.ToJS()) },
+                    {"elems", ElementsPerPage.TryCC(t=>t.ToJS()) },
                     {"navigatorControllerUrl", NavigatorControllerUrl.TryCC(t=>t.ToJS()) ?? RouteHelper.New().SignumAction("PartialFind").SingleQuote() },
                     {"searchControllerUrl",SearchControllerUrl.TryCC(t=>t.ToJS()) ?? RouteHelper.New().SignumAction("Search").SingleQuote() },
                     {"onOk",OnOk.TryCC(t=>t.ToJS())},
@@ -52,50 +52,43 @@ namespace Signum.Web
 
     public class JsFindNavigator : JsInstruction
     {
-        public JsFindNavigator(Func<string> renderer)
-            : base(renderer)
-        {            
-        }
-
-        public static JsFindNavigator New(JsFindOptions options)
-        { 
-            return new JsFindNavigator(() =>
-                "new SF.FindNavigator({0})".Formato(options.ToJS()));
-        }
-
-        public static JsFindNavigator JsOpenFinder(JsFindOptions options)
+        public JsFindNavigator(JsFindOptions options)
         {
-            return new JsFindNavigator(() => 
-                New(options).ToJS() + ".openFinder()");
+            Renderer = () => "new SF.FindNavigator({0})".Formato(options.ToJS());
         }
 
-        public static JsFindNavigator JsSelectedItems(JsFindOptions options)
-        {
-            return new JsFindNavigator(() =>
-                New(options).ToJS() + ".selectedItems()");
+        /// <summary>
+        /// To be used when we only need to locate and retrieve values of an already open finder
+        /// </summary>
+        /// <param name="prefix"></param>
+        public JsFindNavigator(JsValue<string> prefix)
+            : this(new JsFindOptions { Prefix = prefix })
+        {   
         }
 
-        public static JsInstruction HasSelectedItems(JsValue<string> prefix, JsFunction onSuccess)
+        public JsInstruction openFinder()
         {
-            return HasSelectedItems(new JsFindOptions { Prefix = prefix }, onSuccess);
+            return new JsInstruction(() => "{0}.openFinder()".Formato(this.ToJS()));
         }
 
-        public static JsInstruction HasSelectedItems(JsFindOptions options, JsFunction onSuccess)
+        public JsInstruction selectedItems(JsFindOptions options)
         {
-            return new JsInstruction(() => 
-                New(options).ToJS() + ".hasSelectedItems({0})".Formato(onSuccess.ToJS()));
+            return new JsInstruction(() => "{0}.selectedItems()".Formato(this.ToJS()));
         }
 
-        public static JsFindNavigator JsSplitSelectedIds(JsFindOptions options)
+        public JsInstruction hasSelectedItems(JsFunction onSuccess)
         {
-            return new JsFindNavigator(() =>
-                New(options).ToJS() + ".splitSelectedIds()");
+            return new JsInstruction(() => "{0}.hasSelectedItems({1})".Formato(this.ToJS(), onSuccess.ToJS()));
         }
 
-        public static JsInstruction JsRequestData(JsFindOptions options)
+        public JsInstruction splitSelectedIds()
         {
-            return new JsInstruction(() => 
-                New(options).ToJS() + ".requestDataForSearch()");
+            return new JsInstruction(() => "{0}.splitSelectedIds()".Formato(this.ToJS()));
+        }
+
+        public JsInstruction requestData()
+        {
+            return new JsInstruction(() => "{0}.requestDataForSearch()".Formato(this.ToJS()));
         }
     }
 }

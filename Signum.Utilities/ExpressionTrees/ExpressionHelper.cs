@@ -14,11 +14,11 @@ namespace Signum.Utilities.ExpressionTrees
     public static class ExpressionHelper
     {
         [DebuggerStepThrough]
-        public static ReadOnlyCollection<T> NewIfChange<T>( this ReadOnlyCollection<T> collection, Func<T,T> newValue)
-            where T:class
+        public static ReadOnlyCollection<T> NewIfChange<T>(this ReadOnlyCollection<T> collection, Func<T, T> newValue)
+            where T : class
         {
             if (collection == null)
-                return null; 
+                return null;
 
             List<T> alternate = null;
             for (int i = 0, n = collection.Count; i < n; i++)
@@ -27,7 +27,9 @@ namespace Signum.Utilities.ExpressionTrees
                 T newItem = newValue(item);
                 if (alternate == null && item != newItem)
                 {
-                    alternate = collection.Take(i).ToList();
+                    alternate = new List<T>(n);
+                    for (int j = 0; j < i; j++)
+                        alternate.Add(collection[j]);
                 }
                 if (alternate != null && newItem != null)
                 {
@@ -92,10 +94,34 @@ namespace Signum.Utilities.ExpressionTrees
             return expression;
         }
 
+
+        [DebuggerStepThrough]
+        public static Expression RemoveNullify(this Expression expression)
+        {
+            if (expression.NodeType == ExpressionType.Convert && expression.Type == ((UnaryExpression)expression).Operand.Type.Nullify())
+                return ((UnaryExpression)expression).Operand;
+            return expression;
+        }
+
+        [DebuggerStepThrough]
+        public static Expression RemoveUnNullify(this Expression expression)
+        {
+            if (expression.NodeType == ExpressionType.Convert && expression.Type == ((UnaryExpression)expression).Operand.Type.UnNullify())
+                return ((UnaryExpression)expression).Operand;
+
+            if (expression.NodeType == ExpressionType.MemberAccess && ((MemberExpression)expression).Member.Name == "Value" && expression.Type == ((MemberExpression)expression).Expression.Type.UnNullify())
+                return ((MemberExpression)expression).Expression;
+
+            return expression;
+        }
+
         [DebuggerStepThrough]
         public static Expression GetArgument(this MethodCallExpression mce, string parameterName)
         {
-            int index = Array.FindIndex(mce.Method.GetParameters(), p => p.Name == parameterName);
+            int index = FindParameter(mce.Method.GetParameters(), parameterName);
+
+            if (index == -1)
+                throw new ArgumentException("parameterName '{0}' not found".Formato(parameterName));
 
             return mce.Arguments[index];
         }
@@ -103,16 +129,32 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static Expression TryGetArgument(this MethodCallExpression mce, string parameterName)
         {
-            int index = Array.FindIndex(mce.Method.GetParameters(), p => p.Name == parameterName);
+            int index = FindParameter(mce.Method.GetParameters(), parameterName);
 
             return index == -1 ? null : mce.Arguments[index];
         }
+
+        [DebuggerStepThrough]
+        private static int FindParameter(ParameterInfo[] parameters, string parameterName)
+        {
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].Name == parameterName)
+                    return i;
+            }
+
+            return -1;
+        }
+      
 
         [DebuggerStepThrough]
         public static LambdaExpression StripQuotes(this Expression e)
         {
             if (e == null)
                 return null;
+
+            if (e is ConstantExpression)
+                return (LambdaExpression)((ConstantExpression)e).Value;
 
             while (e.NodeType == ExpressionType.Quote)
             {

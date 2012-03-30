@@ -62,7 +62,7 @@ namespace Signum.Utilities.ExpressionTrees
         };
 
 
-        public static string ParameterName(this ParameterInfo pi)
+        public static string ParameterSignature(this ParameterInfo pi)
         {
             return "{0} {1}".Formato(pi.ParameterType.TypeName(), pi.Name);
         }
@@ -85,12 +85,19 @@ namespace Signum.Utilities.ExpressionTrees
             return method.Name;
         }
 
+        public static string ConstructorSignature(this ConstructorInfo constructor)
+        {
+            return "{0}({1})".Formato(
+                constructor.DeclaringType.TypeName(),
+                constructor.GetParameters().ToString(p => p.ParameterSignature(), ", "));
+        }
+
         public static string MethodSignature(this MethodInfo method)
         {
             return "{0} {1}({2})".Formato(
                 method.ReturnType.TypeName(),
                 method.MethodName(),
-                method.GetParameters().ToString(p => p.ParameterName(), ", "));
+                method.GetParameters().ToString(p => p.ParameterSignature(), ", "));
         }
 
         public static string MemberName(this MemberInfo mi)
@@ -148,7 +155,12 @@ namespace Signum.Utilities.ExpressionTrees
              StringBuilder sb = new StringBuilder();
              using (StringWriter w = new StringWriter(sb))
              {
-                 provider.GenerateCodeFromExpression(GetRightExpressionForValue(valor, type, importedNamespaces), w, options);
+                 var expr = GetRightExpressionForValue(valor, type, importedNamespaces);
+                 if(expr != null)
+                     provider.GenerateCodeFromExpression(expr, w, options);
+
+                 w.Write(valor.ToString());
+
                  return w.ToString();
              }
         }

@@ -24,20 +24,13 @@ namespace Signum.Web
         public static MvcHtmlString BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
         {
             return baseLine.LabelVisible && !baseLine.OnlyValue ?
-                           helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, "sf-label-line") :
-                           MvcHtmlString.Empty;
+                   helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, baseLine.LabelClass) :
+                   MvcHtmlString.Empty;
         }
 
         public static bool RequiresLoadAll(HtmlHelper helper, EntityBase eb)
         {
-            bool hasChanged = helper.GetChangeTicks(eb.ControlID) > 0;
-            
-            //To pre-load an entity in a Line, it has to have changed and also at least one of its properties
-            Dictionary<string, long> ticks = (Dictionary<string, long>)helper.ViewData[ViewDataKeys.ChangeTicks];
-            bool propertyHasChanged = ticks != null && ticks.Any(kvp => kvp.Value > 0 && kvp.Key.StartsWith(eb.ControlID) && kvp.Key != eb.ControlID);
-            
-            return (eb.IsNew == true) || 
-                   (eb.UntypedValue != null && hasChanged && propertyHasChanged);
+            return eb.IsNew == true;
         }
 
         public static MvcHtmlString RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
@@ -58,13 +51,8 @@ namespace Signum.Web
             else
             {
                 vdd = new ViewDataDictionary(tc);
-                helper.PropagateSFKeys(vdd);
             }
-
-
-            if (line.ReloadOnChange)
-                vdd[ViewDataKeys.Reactive] = true;
-
+            
             string partialViewName = line.PartialViewName;
             if (string.IsNullOrEmpty(partialViewName))
                 partialViewName = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
@@ -74,10 +62,14 @@ namespace Signum.Web
                 case RenderMode.Content:
                     return helper.Partial(partialViewName, vdd);
                 case RenderMode.Popup:
-                    vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
+                    vdd[ViewDataKeys.PartialViewName] = partialViewName;
+                    vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
+                    vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
                     return helper.Partial(Navigator.Manager.PopupControlView, vdd);
                 case RenderMode.PopupInDiv:
-                    vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
+                    vdd[ViewDataKeys.PartialViewName] = partialViewName;
+                    vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
+                    vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
                         helper.Partial(Navigator.Manager.PopupControlView, vdd),
                         "",
@@ -99,13 +91,16 @@ namespace Signum.Web
 
         public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.View)
+            if (!entityBase.View || (entityBase is EntityLine && entityBase.ViewMode == ViewMode.Navigate))
+                return MvcHtmlString.Empty;
+
+            if (entityBase.ViewMode == ViewMode.Navigate && !entityBase.Type.CleanType().IsIIdentifiable())
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.GetViewing() },
-                { "data-icon", "ui-icon-circle-arrow-e" },
+                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-arrow-e" : "ui-icon-arrowthick-1-e" },
                 { "data-text", false}
             };
 
@@ -125,10 +120,15 @@ namespace Signum.Web
             if (!entityBase.Create)
                 return MvcHtmlString.Empty;
 
+            Type type = entityBase.Type.CleanType();
+
+            if (entityBase.ViewMode == ViewMode.Navigate && (!Navigator.IsViewable(type, EntitySettingsContext.Admin) || !type.IsIIdentifiable()))
+                return MvcHtmlString.Empty;
+
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.GetCreating() },
-                { "data-icon", "ui-icon-circle-plus" },
+                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-plus" : "ui-icon-plusthick" },
                 { "data-text", false}
             };
 
@@ -196,19 +196,23 @@ namespace Signum.Web
                                 EntityBaseHelper.JsEscape(template.ToHtmlString())));
         }
 
-        internal static void ConfigureEntityBase(EntityBase eb, Type entityType)
+        public static void ConfigureEntityBase(EntityBase eb, Type entityType)
         {
             Common.TaskSetImplementations(eb);
 
+            ConfigureEntityButtons(eb, entityType);
+        }
+
+        public static void ConfigureEntityButtons(EntityBase eb, Type entityType)
+        {
             if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
             {
-                eb.Create = Navigator.IsCreable(entityType, false);
-                eb.View = Navigator.IsViewable(entityType, false);
-                eb.Find = Navigator.IsFindable(entityType);
+                eb.Create = eb.Create && Navigator.IsCreable(entityType, eb.EntitySettingsContext);
+                eb.View = eb.View && Navigator.IsViewable(entityType, eb.EntitySettingsContext);
+                eb.Find = eb.Find && Navigator.IsFindable(entityType);
 
-                EntityLine el = eb as EntityLine;
-                if (el != null)
-                    el.Navigate = Navigator.IsNavigable(entityType, false);
+                bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
+                eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
             }
         }
     }

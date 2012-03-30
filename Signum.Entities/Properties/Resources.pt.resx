@@ -408,4 +408,37 @@
   <data name="TypeDN_TableName" xml:space="preserve">
     <value>Table Name</value>
   </data>
+  <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
+    <value>Tentativa de modificar entidade bloqueada {0}</value>
+  </data>
+  <data name="AlertDN_Attended" xml:space="preserve">
+    <value>Participou</value>
+  </data>
+  <data name="AlertDN_Future" xml:space="preserve">
+    <value>Futuro</value>
+  </data>
+  <data name="AlertDN_NotAttended" xml:space="preserve">
+    <value>Não participou</value>
+  </data>
+  <data name="AlertQueries_Attended" xml:space="preserve">
+    <value>Participou</value>
+  </data>
+  <data name="AlertQueries_Future" xml:space="preserve">
+    <value>Futuro</value>
+  </data>
+  <data name="AlertQueries_NotAttended" xml:space="preserve">
+    <value>Não participou</value>
+  </data>
+  <data name="CollectionElementType" xml:space="preserve">
+    <value>Tipo de elemento de coleção</value>
+  </data>
+  <data name="CollectionElementType_All" xml:space="preserve">
+    <value>Todos</value>
+  </data>
+  <data name="CollectionElementType_Any" xml:space="preserve">
+    <value>Qualquer</value>
+  </data>
+  <data name="CollectionElementType_Element" xml:space="preserve">
+    <value>Elemento</value>
+  </data>
 </root>

@@ -11,6 +11,13 @@
       </SnippetTypes>
     </Header>
     <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+          <Namespace>Signum.Utilities</Namespace>
+          <Namespace>System.Linq.Expressions</Namespace>
+        </Import>
+      </Imports>
       <Declarations>
         <Literal>
           <ID>methodName</ID>
@@ -38,7 +45,7 @@
             $paramName$ => ; 
         public static $returnType$ $methodName$(this $type$ $paramName$)
         {
-            return $methodName$Expression.Invoke($paramName$);
+            return $methodName$Expression.Evaluate($paramName$);
         }]]>
       </Code>
     </Snippet>

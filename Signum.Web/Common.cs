@@ -29,7 +29,6 @@ namespace Signum.Web
             //CommonTask += new CommonTask(TaskSetImplementations);
             CommonTask += new CommonTask(TaskSetReadOnly);
             CommonTask += new CommonTask(TaskSetHtmlProperties);
-            CommonTask += new CommonTask(TaskSetReloadOnChange);
         }
 
         public static void FireCommonTasks(BaseLine eb)
@@ -40,14 +39,14 @@ namespace Signum.Web
         #region Tasks
         public static void TaskSetLabelText(BaseLine bl)
         {
-            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
                 bl.LabelText = bl.PropertyRoute.PropertyInfo.NiceName();
         }
 
         static void TaskSetUnitText(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && vl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 UnitAttribute ua = bl.PropertyRoute.PropertyInfo.SingleAttribute<UnitAttribute>();
                 if (ua != null)
@@ -58,7 +57,7 @@ namespace Signum.Web
         static void TaskSetFormatText(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 string format = Reflector.FormatString(bl.PropertyRoute);
                 if (format != null)
@@ -92,7 +91,7 @@ namespace Signum.Web
 
         public static void TaskSetReadOnly(BaseLine bl)
         {
-            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if (bl.PropertyRoute.PropertyInfo.IsReadOnly() || bl.ReadOnly)
                 {
@@ -104,7 +103,7 @@ namespace Signum.Web
         public static void TaskSetHtmlProperties(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 var atribute = bl.PropertyRoute.PropertyInfo.SingleAttribute<StringLengthValidatorAttribute>();
                 if (atribute != null)
@@ -119,26 +118,17 @@ namespace Signum.Web
                 }
             }
         }
-
-        public static void TaskSetReloadOnChange(BaseLine bl)
-        {
-            if (bl != null)
-            {
-                var atribute = bl.PropertyRoute.PropertyInfo.SingleAttribute<ReloadEntityOnChange>();
-                if (atribute != null)
-                    bl.ReloadOnChange = true;
-            }
-        }
 #endregion
 
         #region TypeContext
         internal static TypeContext UntypedWalkExpression(TypeContext tc, LambdaExpression lambda)
         {
             Type returnType = lambda.Body.Type;
-            return (TypeContext)miWalkExpression.GetInvoker(tc.Type, returnType)(tc, lambda);
+            return miWalkExpression.GetInvoker(tc.Type, returnType)(tc, lambda);
         }
 
-        static GenericInvoker miWalkExpression = GenericInvoker.Create(() => Common.WalkExpression<TypeDN, TypeDN>(null, null));
+        static GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>> miWalkExpression = 
+            new GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>>((tc, le) => Common.WalkExpression<TypeDN, TypeDN>((TypeContext<TypeDN>)tc, (Expression<Func<TypeDN, TypeDN>>)le));
         public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             return MemberAccessGatherer.WalkExpression(tc, lambda);
@@ -195,7 +185,7 @@ namespace Signum.Web
                         if (lite.UntypedEntityOrNull != null)
                             return Lite.Create(liteType, lite.UntypedEntityOrNull);
                         else
-                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToStr);
+                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToString());
                     }
                 }
 

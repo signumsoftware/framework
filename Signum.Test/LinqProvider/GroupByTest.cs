@@ -28,7 +28,7 @@ namespace Signum.Test.LinqProvider
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLog = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }
 
         [TestMethod]
@@ -41,6 +41,20 @@ namespace Signum.Test.LinqProvider
         public void GroupEntityByEnum()
         {
             var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex).ToList();
+        }
+
+
+        //[TestMethod]
+        //public void GroupEntityByTypeFie()
+        //{
+        //    var list = Database.Query<AlbumDN>().GroupBy(a => a.GetType()).ToList();
+        //}
+
+
+        [TestMethod]
+        public void GroupEntityByTypeIb()
+        {
+            var list = Database.Query<AwardNominationDN>().GroupBy(a => a.Award.GetType()).ToList();
         }
 
         [TestMethod]
@@ -79,6 +93,19 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = (from a in Database.Query<ArtistDN>()
                               group a by a.Sex into g
                               select new { Sex = g.Key, DeadArtists = (int?)g.Count(a => a.Dead) }).ToList();
+        }
+
+        [TestMethod]
+        public void GroupEntityByTypeFieCount()
+        {
+            var list = Database.Query<AlbumDN>().GroupBy(a => a.GetType()).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+        }
+
+
+        [TestMethod]
+        public void GroupEntityByTypeIbCount()
+        {
+            var list = Database.Query<AlbumDN>().GroupBy(a => a.Author.GetType()).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
         }
 
         [TestMethod]
@@ -154,6 +181,13 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().Sum(a => a.Name.Length);
         }
 
+
+        [TestMethod]
+        public void RootSumNoArgs()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Select(a => a.Name.Length).Sum();
+        }
+
         [TestMethod]
         public void RootSumWhere()
         {
@@ -186,9 +220,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void RootMaxNoArgs()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Select(a => a.Name.Length).Max();
+        }
+
+        [TestMethod]
         public void RootMaxException()
         {
-            Assert2.Throws<SqlNullValueException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
+            Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
         }
 
         [TestMethod]
@@ -200,7 +240,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootMinException()
         {
-            Assert2.Throws<SqlNullValueException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
+            Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
         }
 
         [TestMethod]
@@ -282,5 +322,17 @@ namespace Signum.Test.LinqProvider
                                                select al2.ToLite()).FirstOrDefault()
                           }).ToList();
         }
+
+        [TestMethod]
+        public void GroupBySelectMany()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex).SelectMany(a => a).ToList();
+        }
+
+        //[TestMethod]
+        //public void SumSum()
+        //{
+        //    var songsAlbum = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => m.Id));
+        //}
     }
 }

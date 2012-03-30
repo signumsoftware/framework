@@ -52,12 +52,14 @@ namespace Signum.Utilities.DataStructures
 
         public bool Connected(T from, T to)
         {
-            return Get(from).Contains(to);
+            return RelatedTo(from).Contains(to);
         }
 
         public bool TryConnected(T from, T to)
         {
-            return TryGet(from).TryCS(hs => hs.Contains(to)) ?? false;
+            var hs = TryGet(from);
+
+            return hs != null && hs.Contains(to);
         }
 
         public void Add(T from)
@@ -148,17 +150,15 @@ namespace Signum.Utilities.DataStructures
             return adjacency.TryGetC(node);
         }
 
-        HashSet<T> Get(T node)
-        {
-            var result = adjacency.TryGetC(node);
-            if (result == null)
-                throw new InvalidOperationException("The node {0} is not in the graph".Formato(node));
-            return result;
-        }
-
         HashSet<T> TryGetOrAdd(T node)
         {
-            return adjacency.GetOrCreate(node, () => new HashSet<T>(Comparer));
+            HashSet<T> result;
+            if (adjacency.TryGetValue(node, out result))
+                return result;
+
+            result = new HashSet<T>(Comparer);
+            adjacency.Add(node, result);
+            return result;
         }
 
         public HashSet<T> TryRelatedTo(T node)
@@ -168,7 +168,10 @@ namespace Signum.Utilities.DataStructures
 
         public HashSet<T> RelatedTo(T node)
         {
-            return Get(node);
+            var result = adjacency.TryGetC(node);
+            if (result == null)
+                throw new InvalidOperationException("The node {0} is not in the graph".Formato(node));
+            return result;
         }
 
         /// <summary>
@@ -179,15 +182,19 @@ namespace Signum.Utilities.DataStructures
             return this.Where(n => Connected(n, node));
         }
 
-        /// <summary>
-        /// Recursive relationships
-        /// </summary>
         public HashSet<T> IndirectlyRelatedTo(T node)
         {
+            return IndirectlyRelatedTo(node, false);
+        }
+
+        public HashSet<T> IndirectlyRelatedTo(T node, bool includeParentNode)
+        {
             HashSet<T> set = new HashSet<T>();
+            if (includeParentNode)
+                set.Add(node);
             IndirectlyRelatedTo(node, set);
             return set;
-        }
+        } 
 
         void IndirectlyRelatedTo(T node, HashSet<T> set)
         {
@@ -301,13 +308,16 @@ namespace Signum.Utilities.DataStructures
 
         public void Expand(T node, Func<T, IEnumerable<T>> expandFunction)
         {
-            if (Contains(node)) return;
+            if (adjacency.ContainsKey(node)) 
+                return;
 
-            Add(node); //necesario para ciclos
+            var hs = new HashSet<T>(Comparer);
+            adjacency.Add(node, hs);
+            
             foreach (var item in expandFunction(node))
             {
                 Expand(item, expandFunction);
-                Add(node, item);
+                hs.Add(item);
             }
         }
 
@@ -335,7 +345,7 @@ namespace Signum.Utilities.DataStructures
 
         public XDocument ToDGML()
         {
-            return ToDGML(a => a.ToString() ?? "[null]", a => ColorGenerator.ColorFor(a.GetType().FullName.GetHashCode()));
+            return ToDGML(a => a.ToString() ?? "[null]", a => ColorExtensions.ToHtmlColor(a.GetType().FullName.GetHashCode()));
         }
 
         public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor)
@@ -540,11 +550,5 @@ namespace Signum.Utilities.DataStructures
         }
     };
 
-    public static class ColorGenerator
-    {
-        public static string ColorFor(int value)
-        {
-            return "#" + (value & 0xffffff).ToString("X6");
-        }
-    }
+    
 }

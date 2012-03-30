@@ -1,4 +1,4 @@
-@using $custommessage$.Web.Controllers
+﻿@using $custommessage$.Web.Controllers
 <!doctype html>
 <html>
 <head>
@@ -9,9 +9,9 @@
        "~/signum/content/SF_NormalPage.css",
        "~/signum/content/SF_Notify.css",
        "~/signum/content/SF_Search.css",
-       "~/content/smoothness/jquery-ui-1.8.9.custom.css",
+       "~/content/smoothness/jquery-ui-1.8.14.css",
        "~/content/site.css")
-    @Html.ScriptsJs("~/scripts/jquery-1.5.min.js", "~/scripts/jquery-ui-1.8.9.custom.min.js")
+    @Html.ScriptsJs("~/scripts/jquery-1.6.2.min.js", "~/scripts/jquery-ui-1.8.14.min.js")
     @Html.ScriptsJs("~/signum/resources/" + System.Globalization.CultureInfo.CurrentCulture.Name + ".js")
     @Html.ScriptsJs("~/signum/calendarResources/" + System.Globalization.CultureInfo.CurrentCulture.Name + ".js")
     @Html.ScriptsJs("~/signum/scripts/SF_Utils.js", "~/signum/scripts/SF_jquery-ui-datepicker-extension.js", "~/scripts/newcontent.js")
@@ -22,7 +22,7 @@
 </head>
 <body>
     <div id="wrap">
-        <header>
+        <header id="header">
             <div id="title">
                 <h1>@(Html.ActionLink("$custommessage$ Application", (HomeController h)=>h.Index())) </h1>
             </div>
@@ -33,13 +33,15 @@
                     @{ Html.RenderPartial("Menu", ViewData["current"] = Context.Request.RawUrl);}
                 </div>
             </div>
-            <div id="content">
-                @RenderBody()
+            <div id="contentContainer">
+            	<div id="content">
+                	@RenderBody()
+  				</div>              	
             </div>
-            <div class="clear">
+            <div class="clearall">
             </div>
         </div>
-        <footer>
+        <footer id="footer">
             <span id="powered">Powered by <a href="http://www.signumframework.com">Signum Framework</a></span>
         </footer>
     </div>

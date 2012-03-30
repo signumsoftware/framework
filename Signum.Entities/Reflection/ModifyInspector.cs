@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
@@ -45,7 +45,8 @@ namespace Signum.Entities.Reflection
                 {
                     IEnumerable col = obj as IEnumerable;
                     foreach (Modifiable item in col)
-                        yield return item;
+                        if (item != null)
+                            yield return item;
                 }
             }           
             else
@@ -75,7 +76,8 @@ namespace Signum.Entities.Reflection
                 {
                     IEnumerable col = obj as IEnumerable;
                     foreach (Modifiable item in col)
-                        yield return item;
+                        if (item != null)
+                            yield return item;
                 }
             }
             else

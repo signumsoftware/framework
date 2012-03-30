@@ -42,7 +42,7 @@ namespace Signum.Web
 
         public string Compose(string nameToAppend)
         {
-            return ControlID.Add(nameToAppend, Separator);
+            return ControlID.Add(Separator, nameToAppend);
         }
 
         public string Compose(params string[] namesToAppend)
@@ -64,8 +64,7 @@ namespace Signum.Web
             ReadOnly =8,
             ValueFirst = 16,
             ShowFieldDiv =32,
-            ShowTicks = 64,
-            OnlyValue = 128
+            OnlyValue = 64
         }
 
         BoolStyles styleValues;
@@ -103,7 +102,6 @@ namespace Signum.Web
             ReadOnly = false,
             ValueFirst = false,
             ShowFieldDiv = true,
-            ShowTicks = true,
             OnlyValue = false
         };
 
@@ -151,12 +149,6 @@ namespace Signum.Web
             set { this[BoolStyles.ShowFieldDiv] = value; }
         }
 
-        public bool ShowTicks
-        {
-            get { return this[BoolStyles.ShowTicks] ?? Parent.ShowTicks; }
-            set { this[BoolStyles.ShowTicks] = value; }
-        }
-
         public override string ToString()
         {
             return ControlID; 
@@ -172,18 +164,34 @@ namespace Signum.Web
     #region TypeContext
     public abstract class TypeContext : Context
     {
-        public const string Ticks = "sfTicks";
-
         public abstract object UntypedValue { get; }
 
         public abstract Type Type { get; }
 
         public PropertyRoute PropertyRoute { get; private set; }
 
-        protected TypeContext(Context parent, string controlID, PropertyRoute propertyRoute)
+        protected TypeContext(Context parent, string controlID, PropertyRoute route)
             :base(parent, controlID)
         {
-            this.PropertyRoute = propertyRoute;
+            this.PropertyRoute = route;
+        }
+
+        public RuntimeInfo RuntimeInfo()
+        {
+            if (this.UntypedValue == null)
+                return new RuntimeInfo() { RuntimeType = null };
+
+            Type type = this.UntypedValue.GetType();
+            if (type.IsLite())
+                return new RuntimeInfo((Lite)this.UntypedValue);
+
+            if (type.IsEmbeddedEntity())
+                return new RuntimeInfo((EmbeddedEntity)this.UntypedValue);
+
+            if (type.IsIdentifiableEntity())
+                return new RuntimeInfo((IdentifiableEntity)this.UntypedValue);
+
+            throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(type));
         }
 
         internal abstract TypeContext Clone(object newValue);

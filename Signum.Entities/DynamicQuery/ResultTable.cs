@@ -38,11 +38,11 @@ namespace Signum.Entities.DynamicQuery
          
         public ResultRow[] Rows { get; private set; }
 
-        public ResultTable(params ResultColumn[] columns)
+        public ResultTable(ResultColumn[] columns, int totalElements, int currentPage, int? elementsPerPage)
         {
-            int rows = columns.Select(a => a.Values.Length).Distinct().Single("Unsyncronized number of rows in the results");
+            int rows = columns.Select(a => a.Values.Length).Distinct().SingleEx(()=>"Unsyncronized number of rows in the results");
 
-            ResultColumn entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefault(); ;
+            ResultColumn entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx(); ;
             if (entityColumn != null)
             {
                 this.EntityColumn = ((ColumnToken)entityColumn.Column.Token).Column;
@@ -54,6 +54,10 @@ namespace Signum.Entities.DynamicQuery
                 Columns[i].Index = i;
 
             this.Rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
+
+            this.TotalElements = totalElements;
+            this.CurrentPage = currentPage;
+            this.ElementsPerPage = elementsPerPage; 
         }
 
 
@@ -66,6 +70,26 @@ namespace Signum.Entities.DynamicQuery
                 dt.Rows.Add(Columns.Select((_, i) => row[i]).ToArray());
             }
             return dt;
+        }
+
+        public int TotalElements { get; private set; }
+        public int CurrentPage { get; private set; }
+
+        public int? ElementsPerPage { get; private set; }
+
+        public int TotalPages
+        {
+            get { return !ElementsPerPage.HasValue ? 1 : (TotalElements + ElementsPerPage.Value - 1) / ElementsPerPage.Value; } //Round up
+        }
+
+        public int? StartElementIndex
+        {
+            get { return !ElementsPerPage.HasValue ? (int?)null : (ElementsPerPage * (CurrentPage - 1)) + 1; }
+        }
+
+        public int? EndElementIndex
+        {
+            get { return !ElementsPerPage.HasValue ? (int?)null : StartElementIndex.Value + Rows.Count() - 1; }
         }
     }
 
@@ -99,7 +123,7 @@ namespace Signum.Entities.DynamicQuery
 
         public T GetValue<T>(string columnName)
         {
-            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).Single("column not found")];
+            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(()=>"column not found")];
         }
 
         public T GetValue<T>(int columnIndex)

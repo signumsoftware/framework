@@ -5,102 +5,100 @@ using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Collections.Concurrent;
+using Signum.Utilities.ExpressionTrees;
+using System.Collections.ObjectModel;
 
 namespace Signum.Utilities.Reflection
 {
-    public delegate object InvokeDelegate(params object[] parameters);
-
-    public class GenericInvoker
+    public class GenericInvoker<T>
     {
-        ConcurrentDictionary<object, InvokeDelegate> executor = new ConcurrentDictionary<object, InvokeDelegate>();
+        readonly ConcurrentDictionary<object, T> executor = new ConcurrentDictionary<object, T>();
+        readonly Expression<T> expression;
+        readonly int numParams;
+        readonly Func<Type[], object> getKey;
 
-        MethodInfo methodInfo;
-        Func<Type[], object> GetKey;
-
-        private GenericInvoker(MethodInfo methodInfo)
+        public GenericInvoker(Expression<T> expression)
         {
-            if (!methodInfo.IsGenericMethod)
-                throw new ArgumentException("Argument mi should be a generic method definition");
+            this.expression = expression;
+            this.numParams = GenericParametersVisitor.GenericParameters(expression);
 
-            if (!methodInfo.IsGenericMethodDefinition)
-                this.methodInfo = methodInfo.GetGenericMethodDefinition();
-            else
-                this.methodInfo = methodInfo;
+            ParameterExpression tp = Expression.Parameter(typeof(Type[]));
 
-            GetKey = GetTupleConsturctor(this.methodInfo.GetGenericArguments().Length);
+            this.getKey = Expression.Lambda<Func<Type[], object>>(TupleReflection.TupleChainConstructor(0.To(numParams)
+                                                         .Select(i => Expression.ArrayAccess(tp, Expression.Constant(i)))), tp).Compile();
         }
 
-        Func<Type[], object> GetTupleConsturctor(int numParams)
+        public T GetInvoker(params Type[] types)
         {
-            switch (numParams)
+            return executor.GetOrAdd(getKey(types), (object o) =>
             {
-                case 1: return t => t[0];
-                case 2: return t => Tuple.Create(t[0], t[1]);
-                case 3: return t => Tuple.Create(t[0], t[1], t[2]);
-                case 4: return t => Tuple.Create(t[0], t[1], t[2], t[3]);
-                case 5: return t => Tuple.Create(t[0], t[1], t[2], t[3], t[4]);
-                case 6: return t => Tuple.Create(t[0], t[1], t[2], t[3], t[4], t[5]);
-                case 7: return t => Tuple.Create(t[0], t[1], t[2], t[3], t[4], t[5], t[6]);
-                default: throw new InvalidOperationException("8 or more generic parameters not supported");
-            }
+                if (types.Length != numParams)
+                    throw new InvalidOperationException("Invalid generic arguments ({0} instead of {1})".Formato(types.Length, numParams));
+
+                return GeneratorVisitor.GetGenerator<T>(expression, types).Compile();
+            });
+        }
+    }
+
+    internal class GenericParametersVisitor : SimpleExpressionVisitor
+    {
+        int genericParameters;
+
+        public static int GenericParameters(LambdaExpression expression)
+        {
+            var gpv = new GenericParametersVisitor();
+            gpv.Visit(expression);
+            return gpv.genericParameters;
         }
 
-        public InvokeDelegate GetInvoker(params Type[] types)
+        protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            return executor.GetOrAdd(GetKey(types), (object o) => CreateInvoker(types));
+            if(!m.Method.IsGenericMethod)
+                throw new InvalidOperationException("Should be an expression calling a generic method");
+
+            genericParameters = m.Method.GetGenericMethodDefinition().GetGenericArguments().Length;
+
+            return m;
+        } 
+    }
+
+    class GeneratorVisitor : SimpleExpressionVisitor
+    {
+        Type[] types;
+
+        public static Expression<T> GetGenerator<T>(Expression<T> expression, Type[] types)
+        {
+            return (Expression<T>)new GeneratorVisitor { types = types }.Visit(expression);
         }
 
-        InvokeDelegate CreateInvoker(Type[] types)
+        protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            var args = Expression.Parameter(typeof(object[]), "args");
+            MethodInfo mi= m.Method.GetGenericMethodDefinition().MakeGenericMethod(types); 
+            var result = Expression.Call(m.Object, mi, m.Arguments.Zip(mi.GetParameters(), (e,p)=>Convert(e, p.ParameterType)));
+            return result; 
+        }
 
-            MethodInfo mi = methodInfo.MakeGenericMethod(types);
+        protected override Expression VisitLambda(LambdaExpression lambda)
+        {
+            var returnType = lambda.Type.GetMethod("Invoke").ReturnType;
 
-            Expression body = mi.IsStatic ?
-                     Expression.Call(mi, mi.GetParameters().Select(p => Access(args, p.Position, p.ParameterType))) :
-                     Expression.Call(Access(args, 0, mi.DeclaringType), mi,
-                    mi.GetParameters().Select(p => Access(args, p.Position + 1, p.ParameterType)));
-
-            if (mi.ReturnType == typeof(void))
+            Expression body = Convert(this.Visit(lambda.Body), returnType);
+            if (body != lambda.Body)
             {
-                body = Expression.Block(body, Expression.Constant(null, typeof(object)));
+                return Expression.Lambda(lambda.Type, body, lambda.Parameters);
             }
-            else if (mi.ReturnType.IsValueType || mi.ReturnType.IsNullable())
-            {
-                body = Expression.Convert(body, typeof(object)); 
-            }
-
-            return Expression.Lambda<InvokeDelegate>(body, args).Compile();
+            return lambda;
         }
 
-        Expression Access(ParameterExpression args, int index, Type type)
+        private Expression Convert(Expression result, Type type)
         {
-            return Expression.Convert(Expression.ArrayIndex(args, Expression.Constant(index)), type);
-        }
+            if (result.Type == type)
+                return result;
 
-        public static GenericInvoker Create(MethodInfo mi)
-        {
-            return new GenericInvoker(mi);
-        }
+            if (result.NodeType == ExpressionType.Convert)
+                result = ((UnaryExpression)result).Operand;
 
-        public static GenericInvoker Create(Expression<Action> expression)
-        {
-            return new GenericInvoker(ReflectionTools.GetMethodInfo(expression));
-        }
-
-        public static GenericInvoker Create<T>(Expression<Action<T>> expression)
-        {
-            return new GenericInvoker(ReflectionTools.GetMethodInfo(expression));
-        }
-
-        public static GenericInvoker Create<R>(Expression<Func<R>> expression)
-        {
-            return new GenericInvoker(ReflectionTools.GetMethodInfo(expression));
-        }
-
-        public static GenericInvoker Create<T, R>(Expression<Func<T, R>> expression)
-        {
-            return new GenericInvoker(ReflectionTools.GetMethodInfo(expression));
+            return Expression.Convert(result, type);
         }
     }
 }

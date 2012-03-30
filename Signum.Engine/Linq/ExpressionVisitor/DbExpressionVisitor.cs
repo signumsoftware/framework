@@ -20,77 +20,143 @@ namespace Signum.Engine.Linq
         protected override Expression Visit(Expression exp)
         {
             if (exp == null)
-            {
                 return null;
-            }
-            switch ((DbExpressionType)exp.NodeType)
-            {
-                case DbExpressionType.Table:
+
+            switch (exp.NodeType)
+            {  
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                case ExpressionType.Not:
+                case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
+                case ExpressionType.ArrayLength:
+                case ExpressionType.Quote:
+                case ExpressionType.TypeAs:
+                case ExpressionType.UnaryPlus:
+                    return this.VisitUnary((UnaryExpression)exp);
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.Divide:
+                case ExpressionType.Modulo:
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
+                case ExpressionType.Coalesce:
+                case ExpressionType.ArrayIndex:
+                case ExpressionType.RightShift:
+                case ExpressionType.LeftShift:
+                case ExpressionType.ExclusiveOr:
+                case ExpressionType.Power:
+                    return this.VisitBinary((BinaryExpression)exp);
+                case ExpressionType.TypeIs:
+                    return this.VisitTypeIs((TypeBinaryExpression)exp);
+                case ExpressionType.Conditional:
+                    return this.VisitConditional((ConditionalExpression)exp);
+                case ExpressionType.Constant:
+                    return this.VisitConstant((ConstantExpression)exp);
+                case ExpressionType.Parameter:
+                    return this.VisitParameter((ParameterExpression)exp);
+                case ExpressionType.MemberAccess:
+                    return this.VisitMemberAccess((MemberExpression)exp);
+                case ExpressionType.Call:
+                    return this.VisitMethodCall((MethodCallExpression)exp);
+                case ExpressionType.Lambda:
+                    return this.VisitLambda((LambdaExpression)exp);
+                case ExpressionType.New:
+                    return this.VisitNew((NewExpression)exp);
+                case ExpressionType.NewArrayInit:
+                case ExpressionType.NewArrayBounds:
+                    return this.VisitNewArray((NewArrayExpression)exp);
+                case ExpressionType.Invoke:
+                    return this.VisitInvocation((InvocationExpression)exp);
+                case ExpressionType.MemberInit:
+                    return this.VisitMemberInit((MemberInitExpression)exp);
+                case ExpressionType.ListInit:
+                    return this.VisitListInit((ListInitExpression)exp);
+               
+                case (ExpressionType)DbExpressionType.Table:
                     return this.VisitTable((TableExpression)exp);
-                case DbExpressionType.Column:
+                case (ExpressionType)DbExpressionType.Column:
                     return this.VisitColumn((ColumnExpression)exp);
-                case DbExpressionType.Select:
+                case (ExpressionType)DbExpressionType.Select:
                     return this.VisitSelect((SelectExpression)exp);
-                case DbExpressionType.Join:
+                case (ExpressionType)DbExpressionType.Join:
                     return this.VisitJoin((JoinExpression)exp);
-                case DbExpressionType.Projection:
+                case (ExpressionType)DbExpressionType.Projection:
                     return this.VisitProjection((ProjectionExpression)exp);
-                case DbExpressionType.ChildProjection:
+                case (ExpressionType)DbExpressionType.ChildProjection:
                     return this.VisitChildProjection((ChildProjectionExpression)exp);
-                case DbExpressionType.Aggregate:
+                case (ExpressionType)DbExpressionType.Aggregate:
                     return this.VisitAggregate((AggregateExpression)exp);
-                case DbExpressionType.AggregateSubquery:
+                case (ExpressionType)DbExpressionType.AggregateSubquery:
                     return this.VisitAggregateSubquery((AggregateSubqueryExpression)exp);
-                case DbExpressionType.SqlCast:
+                case (ExpressionType)DbExpressionType.SqlCast:
                     return this.VisitSqlCast((SqlCastExpression)exp);
-                case DbExpressionType.SqlEnum:
+                case (ExpressionType)DbExpressionType.SqlEnum:
                     return this.VisitSqlEnum((SqlEnumExpression)exp);
-                case DbExpressionType.SqlFunction:
+                case (ExpressionType)DbExpressionType.SqlFunction:
                     return this.VisitSqlFunction((SqlFunctionExpression)exp);
-                case DbExpressionType.SqlConstant:
-                    return this.VisitSqlConstant((SqlConstantExpression)exp); 
-                case DbExpressionType.Case:
-                    return this.VisitCase((CaseExpression)exp); 
-                case DbExpressionType.RowNumber:
+                case (ExpressionType)DbExpressionType.SqlConstant:
+                    return this.VisitSqlConstant((SqlConstantExpression)exp);
+                case (ExpressionType)DbExpressionType.Case:
+                    return this.VisitCase((CaseExpression)exp);
+                case (ExpressionType)DbExpressionType.RowNumber:
                     return this.VisitRowNumber((RowNumberExpression)exp);
-                case DbExpressionType.Like:
+                case (ExpressionType)DbExpressionType.Like:
                     return this.VisitLike((LikeExpression)exp);
-                case DbExpressionType.In:
-                case DbExpressionType.Scalar:
-                case DbExpressionType.Exists:
+                case (ExpressionType)DbExpressionType.In:
+                case (ExpressionType)DbExpressionType.Scalar:
+                case (ExpressionType)DbExpressionType.Exists:
                     return this.VisitSubquery((SubqueryExpression)exp);
-                case DbExpressionType.IsNull:
+                case (ExpressionType)DbExpressionType.IsNull:
                     return this.VisitIsNull((IsNullExpression)exp);
-                case DbExpressionType.IsNotNull:
+                case (ExpressionType)DbExpressionType.IsNotNull:
                     return this.VisitIsNotNull((IsNotNullExpression)exp);
-                case DbExpressionType.Delete:
+                case (ExpressionType)DbExpressionType.Delete:
                     return this.VisitDelete((DeleteExpression)exp);
-                case DbExpressionType.Update:
+                case (ExpressionType)DbExpressionType.Update:
                     return this.VisitUpdate((UpdateExpression)exp);
-                case DbExpressionType.CommandAggregate:
+                case (ExpressionType)DbExpressionType.CommandAggregate:
                     return this.VisitCommandAggregate((CommandAggregateExpression)exp);
-                case DbExpressionType.SelectRowCount:
+                case (ExpressionType)DbExpressionType.SelectRowCount:
                     return this.VisitSelectRowCount((SelectRowCountExpression)exp);
-                case DbExpressionType.FieldInit:
-                    
+                case (ExpressionType)DbExpressionType.FieldInit:
                     return this.VisitFieldInit((FieldInitExpression)exp);
-                case DbExpressionType.EmbeddedFieldInit:
-                    return this.VisitEmbeddedFieldInit((EmbeddedFieldInitExpression)exp); 
-                case DbExpressionType.ImplementedBy:
+                case (ExpressionType)DbExpressionType.EmbeddedFieldInit:
+                    return this.VisitEmbeddedFieldInit((EmbeddedFieldInitExpression)exp);
+                case (ExpressionType)DbExpressionType.ImplementedBy:
                     return this.VisitImplementedBy((ImplementedByExpression)exp);
-                case DbExpressionType.ImplementedByAll:
-                    return this.VisitImplementedByAll((ImplementedByAllExpression)exp);     
-                case  DbExpressionType.LiteReference:
+                case (ExpressionType)DbExpressionType.ImplementedByAll:
+                    return this.VisitImplementedByAll((ImplementedByAllExpression)exp);
+                case (ExpressionType)DbExpressionType.LiteReference:
                     return this.VisitLiteReference((LiteReferenceExpression)exp);
-                case DbExpressionType.MList:
+                case (ExpressionType)DbExpressionType.TypeFieldInit:
+                    return this.VisitTypeFieldInit((TypeFieldInitExpression)exp);
+                case (ExpressionType)DbExpressionType.TypeImplementedBy:
+                    return this.VisitTypeImplementedBy((TypeImplementedByExpression)exp);
+                case (ExpressionType)DbExpressionType.TypeImplementedByAll:
+                    return this.VisitTypeImplementedByAll((TypeImplementedByAllExpression)exp);
+                case (ExpressionType)DbExpressionType.MList:
                     return this.VisitMList((MListExpression)exp);
+                case (ExpressionType)DbExpressionType.MListElement:
+                    return this.VisitMListElement((MListElementExpression)exp);
 
                 default:
                     return base.Visit(exp);
             }
         }
 
-      
         protected virtual Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
             var commands = VisitCommands(cea.Commands);
@@ -139,14 +205,6 @@ namespace Signum.Engine.Linq
             return src;
         }
 
-        protected virtual Expression VisitMList(MListExpression ml)
-        {
-            var newBackID = Visit(ml.BackID);
-            if (newBackID != ml.BackID)
-                return new MListExpression(ml.Type, newBackID, ml.RelationalTable);
-            return ml;
-        }
-
         protected virtual Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             var newRef = Visit(lite.Reference);
@@ -156,6 +214,54 @@ namespace Signum.Engine.Linq
             if (newRef != lite.Reference || newToStr != lite.ToStr || newId != lite.Id || newTypeId != lite.TypeId)
                 return new LiteReferenceExpression(lite.Type, newRef, newId, newToStr, newTypeId);
             return lite;
+        }
+
+        protected virtual Expression VisitTypeFieldInit(TypeFieldInitExpression typeFie)
+        {
+            var externalId = Visit(typeFie.ExternalId);
+
+            if (externalId != typeFie.ExternalId)
+                return new TypeFieldInitExpression(externalId, typeFie.TypeValue);
+
+            return typeFie;
+        }
+
+        protected virtual Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
+        {
+            var implementations = typeIb.TypeImplementations
+                 .NewIfChange(ri => Visit(ri.ExternalId).Map(c => c == ri.ExternalId ? ri : new TypeImplementationColumnExpression(ri.Type, c)));
+
+            if (implementations != typeIb.TypeImplementations)
+                return new TypeImplementedByExpression(implementations);
+            return typeIb;
+        }
+
+        protected virtual Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
+        {
+            var column = Visit(typeIba.TypeColumn);
+
+            if (column != typeIba.TypeColumn)
+                return new TypeImplementedByAllExpression(column);
+
+            return typeIba;
+        }
+
+        protected virtual Expression VisitMList(MListExpression ml)
+        {
+            var newBackID = Visit(ml.BackID);
+            if (newBackID != ml.BackID)
+                return new MListExpression(ml.Type, newBackID, ml.RelationalTable);
+            return ml;
+        }
+
+        protected virtual Expression VisitMListElement(MListElementExpression mle)
+        {
+            var rowId = Visit(mle.RowId);
+            var parent = (FieldInitExpression)Visit(mle.Parent);
+            var element = Visit(mle.Element);
+            if (rowId != mle.RowId || parent != mle.Parent || element != mle.Parent)
+                return new MListElementExpression(rowId, parent, element, mle.Table);
+            return mle;
         }
 
         protected virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
@@ -184,7 +290,7 @@ namespace Signum.Engine.Linq
         protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             var id = Visit(reference.Id);
-            var typeId = Visit(reference.TypeId);
+            var typeId = (TypeImplementedByAllExpression)Visit(reference.TypeId);
             var implementations = reference.Implementations
                .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
 
@@ -211,27 +317,19 @@ namespace Signum.Engine.Linq
         {
             return token;
         }
-
-
-        protected Dictionary<FieldInitExpression, FieldInitExpression> fieCache = new Dictionary<FieldInitExpression, FieldInitExpression>();
-
+     
         protected virtual Expression VisitFieldInit(FieldInitExpression fie)
         {
-            return fieCache.GetOrCreate(fie, () =>
-            {
-                var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
+            var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
 
-                var id = Visit(fie.ExternalId);
-                var typeId = Visit(fie.TypeId);
-                var other = Visit(fie.OtherCondition);
+            var id = Visit(fie.ExternalId);
 
-                var token = VisitProjectionToken(fie.Token);
+            var token = VisitProjectionToken(fie.Token);
 
-                if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token || fie.TypeId != typeId)
-                    return new FieldInitExpression(fie.Type, fie.TableAlias, id, typeId, other, token) { Bindings = bindings };
+            if (fie.Bindings != bindings || fie.ExternalId != id || fie.Token != token)
+                return new FieldInitExpression(fie.Type, fie.TableAlias, id, token) { Bindings = bindings };
 
-                return fie;
-            });
+            return fie;
         }
 
         protected virtual Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
@@ -349,7 +447,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.Distinct, top,  columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top,  columns, from, where, orderBy, groupBy);
 
             return select;
         }
@@ -373,13 +471,13 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression VisitProjection(ProjectionExpression proj)
         {
-            SelectExpression source = (SelectExpression)this.Visit(proj.Source);
+            SelectExpression source = (SelectExpression)this.Visit(proj.Select);
             Expression projector = this.Visit(proj.Projector);
             ProjectionToken token = VisitProjectionToken(proj.Token);
 
-            if (source != proj.Source || projector != proj.Projector || token != proj.Token)
+            if (source != proj.Select || projector != proj.Projector || token != proj.Token)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction, token);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
             }
             return proj;
         }
@@ -391,16 +489,17 @@ namespace Signum.Engine.Linq
 
             if (proj != child.Projection || key != child.OuterKey)
             {
-                return new ChildProjectionExpression(proj, key);
+                return new ChildProjectionExpression(proj, key, child.IsLazyMList, child.Type);
             }
             return child;
         }
 
         protected virtual Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
+            Expression obj = Visit(sqlFunction.Object);
             ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
-            if(args != sqlFunction.Arguments)
-                return new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args); 
+            if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
+                return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); 
             return sqlFunction;
         }
 

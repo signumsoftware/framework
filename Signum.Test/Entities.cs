@@ -5,11 +5,12 @@ using System.Text;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test
 {
     [Serializable]
-    public class NoteDN : Entity
+    public class NoteWithDateDN : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
         string text;
@@ -37,11 +38,11 @@ namespace Signum.Test
 
         public override string ToString()
         {
-            return text;
+            return "{0} -> {1}".Formato(creationTime, text);
         }
     }
 
-    [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
+
     public interface IAuthorDN : IIdentifiable
     {
         string Name { get; }
@@ -101,7 +102,7 @@ namespace Signum.Test
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
-        MList<Lite<ArtistDN>> friends;
+        MList<Lite<ArtistDN>> friends = new MList<Lite<ArtistDN>>();
         public MList<Lite<ArtistDN>> Friends
         {
             get { return friends; }
@@ -112,19 +113,20 @@ namespace Signum.Test
              a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
         public string FullName
         {
-            get{ return FullNameExpression.Invoke(this); }
+            get{ return FullNameExpression.Evaluate(this); }
         }
 
         static Expression<Func<ArtistDN, bool>> LonelyExpression =
             a => !a.Friends.Any();
         public bool Lonely()
         {
-            return LonelyExpression.Invoke(this);
+            return LonelyExpression.Evaluate(this);
         }
 
+        static Expression<Func<ArtistDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
@@ -153,13 +155,15 @@ namespace Signum.Test
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        MList<ArtistDN> members;
+        MList<ArtistDN> members = new MList<ArtistDN>();
         public MList<ArtistDN> Members
         {
             get { return members; }
             set { Set(ref members, value, () => Members); }
         }
 
+
+        [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
         AwardDN lastAward;
         public AwardDN LastAward
         {
@@ -167,7 +171,8 @@ namespace Signum.Test
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
-        MList<AwardDN> otherAwards;
+        [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
+        MList<AwardDN> otherAwards = new MList<AwardDN>();
         public MList<AwardDN> OtherAwards 
         {
             get { return otherAwards; }
@@ -178,23 +183,24 @@ namespace Signum.Test
             b => b.Name + " (" + b.Members.Count + " members )";
         public string FullName
         {
-            get { return FullNameExpression.Invoke(this); }
+            get { return FullNameExpression.Evaluate(this); }
         }
 
         static Expression<Func<BandDN, bool>> LonelyExpression =
             b => !b.Members.Any();
         public bool Lonely()
         {
-            return LonelyExpression.Invoke(this);
+            return LonelyExpression.Evaluate(this);
         }
 
+        static Expression<Func<BandDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
-    [Serializable, ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
+    [Serializable]
     public abstract class AwardDN : Entity
     {
         int year;
@@ -269,9 +275,18 @@ namespace Signum.Test
             set { Set(ref owner, value, () => Owner); }
         }
 
+        [UniqueIndex]
+        SqlHierarchyId node;
+        public SqlHierarchyId Node
+        {
+            get { return node; }
+            set { Set(ref node, value, () => Node); }
+        }
+
+        static Expression<Func<LabelDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
@@ -293,7 +308,7 @@ namespace Signum.Test
         }
     }
 
-    [Serializable, UseSessionWhenNew]
+    [Serializable]
     public class AlbumDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -313,6 +328,7 @@ namespace Signum.Test
             set { Set(ref year, value, () => Year); }
         }
 
+        [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
         IAuthorDN author;
         [NotNullValidator]
         public IAuthorDN Author
@@ -321,7 +337,7 @@ namespace Signum.Test
             set { Set(ref author, value, () => Author); }
         }
 
-        MList<SongDN> songs;
+        MList<SongDN> songs = new MList<SongDN>();
         public MList<SongDN> Songs
         {
             get { return songs; }
@@ -342,9 +358,10 @@ namespace Signum.Test
             set { Set(ref label, value, () => Label); }
         }
 
+        static Expression<Func<AlbumDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
         }
     }
 
@@ -360,17 +377,55 @@ namespace Signum.Test
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        int? duration;
-        [Unit("s")]
-        public int? Duration
+        TimeSpan? duration;
+        public TimeSpan? Duration
         {
             get { return duration; }
-            set { Set(ref duration, value, () => Duration); }
+            set
+            {
+                if (Set(ref duration, value, () => Duration))
+                    seconds = duration == null ? null : (int?)duration.Value.TotalSeconds;
+            }
         }
 
+        int? seconds;
+        public int? Seconds
+        {
+            get { return seconds; }
+            set { Set(ref seconds, value, () => Seconds); }
+        }
+
+        static Expression<Func<SongDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
-            return name;
+            return ToStringExpression.Evaluate(this);
+        }
+    }
+
+    [Serializable]
+    public class AwardNominationDN : Entity
+    {
+        [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
+        Lite<IAuthorDN> author;
+        public Lite<IAuthorDN> Author
+        {
+            get { return author; }
+            set { Set(ref author, value, () => Author); }
+        }
+
+        [ImplementedBy(typeof(GrammyAwardDN), typeof(PersonalAwardDN), typeof(AmericanMusicAwardDN))]
+        Lite<AwardDN> award;
+        public Lite<AwardDN> Award
+        {
+            get { return award; }
+            set { Set(ref award, value, () => Award); }
+        }
+
+        int year;
+        public int Year
+        {
+            get { return year; }
+            set { Set(ref year, value, () => Year); }
         }
     }
 }

@@ -11,11 +11,11 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class AliasGatherer : DbExpressionVisitor
     {
-        HashSet<string> aliases = new HashSet<string>();
+        HashSet<Alias> aliases = new HashSet<Alias>();
 
         private AliasGatherer() { }
 
-        public static HashSet<string> Gather(Expression source)
+        public static HashSet<Alias> Gather(Expression source)
         {
             AliasGatherer ap = new AliasGatherer();
             ap.Visit(source);

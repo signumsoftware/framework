@@ -12,16 +12,9 @@
     <RootNamespace>Signum.Web</RootNamespace>
     <AssemblyName>Signum.Web</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
   </PropertyGroup>
@@ -45,6 +38,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>C:/Program%20Files%20(x86)/Microsoft%20SQL%20Server/100/SDK/Assemblies/Microsoft.SqlServer.Types.dll</HintPath>
+    </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
@@ -85,15 +81,20 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="Facades\QueryRequestModelBinder.cs" />
+    <Compile Include="Facades\ViewOptions.cs" />
     <Compile Include="HtmlHelpers\CalendarHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Facades\Constructor.cs" />
+    <Compile Include="HtmlHelpers\PagerExtensions.cs" />
     <Compile Include="HtmlHelpers\ScriptHtmlHelper.cs" />
     <Compile Include="ButtonBar\ContextualItem.cs" />
     <Compile Include="ControllerAttributes\ExecutionContextAttribute.cs" />
     <Compile Include="ControllerAttributes\SignumExceptionHandlerAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
+    <Compile Include="Lines\HourMinuteLine.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">
@@ -113,6 +114,12 @@
     <Compile Include="PortableAreas\Repositories\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\Repositories\LocalizedJavaScriptRepository.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Controllers\JsonConverters.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />
@@ -149,15 +156,26 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NormalPage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Signum\Views\Pagination.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Pagination.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Signum\Views\PopupControl.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PopupControl.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Signum\Views\PopupOkControl1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PopupOkControl.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Signum\Views\SearchControl.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControl.cshtml</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Signum\Views\SearchPopupControl.cs">
       <AutoGen>True</AutoGen>
@@ -178,6 +196,16 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ValueLineBox.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Views\Widgets\Alert.cs">
+      <DependentUpon>Alert.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Signum\Views\Widgets\Note.cs">
+      <DependentUpon>Note.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Signum\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
@@ -207,12 +235,9 @@
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Widgets\AlertWidgetHelper.cs" />
+    <Compile Include="Widgets\AlertsClient.cs" />
+    <Compile Include="Widgets\NotesClient.cs" />
     <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
     <Compile Include="Widgets\NoteWidgetHelper.cs" />
     <Compile Include="Widgets\WidgetsHelper.cs" />
@@ -235,6 +260,14 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Signum\Views\PopupOkControl.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PopupOkControl1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Signum\Views\Pagination.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Pagination.cs</LastGenOutput>
+    </Content>
     <None Include="Signum\Views\SearchResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchResults.cs</LastGenOutput>
@@ -243,10 +276,13 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>FilterBuilder.cs</LastGenOutput>
     </None>
-    <None Include="Signum\Views\SearchControl.cshtml">
+    <Content Include="Signum\Content\SF_Widgets.css" />
+    <Content Include="Signum\Scripts\SF_Widgets.js" />
+    <Content Include="Signum\Views\SearchControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchControl.cs</LastGenOutput>
-    </None>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Signum\Views\SearchPage.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchPage.cs</LastGenOutput>
@@ -275,9 +311,16 @@
     </Content>
     <Content Include="Signum\Images\calendar.png" />
     <Content Include="Signum\Scripts\SF_Utils.js" />
+    <Content Include="Signum\Views\Widgets\Note.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Note.cs</LastGenOutput>
+    </Content>
+    <Content Include="Signum\Views\Widgets\Alert.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Alert.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SignumFramework.pfx" />
     <Content Include="Web.config" />
     <Content Include="Signum\Views\Web.config" />
   </ItemGroup>
@@ -321,7 +364,9 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Error.cs</LastGenOutput>
     </None>
-    <EmbeddedResource Include="Properties\Resources.es.resx" />
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">

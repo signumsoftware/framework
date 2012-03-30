@@ -11,6 +11,8 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading;
 using System.Diagnostics;
+using System.Data.Common;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine
 {
@@ -23,49 +25,31 @@ namespace Signum.Engine
 
     public abstract class SqlPreCommand
     {
-        public class SqlPair
-        {
-            public readonly SqlPreCommand New;
-            public readonly SqlPreCommand Remainig;
-
-            public SqlPair(SqlPreCommand @new, SqlPreCommand remaining)
-            {
-                this.New = @new;
-                this.Remainig = remaining;
-            }
-        }
-
         public abstract IEnumerable<SqlPreCommandSimple> Leaves();
 
         protected internal abstract void GenerateScript(StringBuilder sb);
 
-        protected internal abstract void GenerateParameters(List<SqlParameter> list);
+        protected internal abstract void GenerateParameters(List<DbParameter> list);
 
         protected internal abstract int NumParameters { get; }
+
+        /// <summary>
+        /// For debugging purposes
+        /// </summary>
+        public string PlainSql()
+        {
+            StringBuilder sb = new StringBuilder();
+            this.PlainSql(sb);
+            return sb.ToString(); 
+        }
+
+        protected internal abstract void PlainSql(StringBuilder sb);
 
         public abstract SqlPreCommandSimple ToSimple();
 
         public override string ToString()
         {
             return this.PlainSql();
-        }
-
-        protected internal abstract SqlPair Split(ref int remainingParameters);
-
-        public IEnumerable<SqlPreCommand> Splits(int numParams)
-        {
-            SqlPreCommand rem = this;
-            while (rem != null)
-            {
-                int remainingParams = numParams;
-                SqlPreCommand.SqlPair pair = rem.Split(ref remainingParams);
-                if (pair.New == null)
-                    throw new InvalidOperationException("There is a SqlPreComandSimple with more than {0} parameters".Formato(numParams));
-
-                yield return pair.New;
-
-                rem = pair.Remainig;
-            }
         }
 
         public static SqlPreCommand Combine(Spacing spacing, params SqlPreCommand[] sentences)
@@ -81,6 +65,8 @@ namespace Signum.Engine
 
             return new SqlPreCommandConcat(spacing, sentences);
         }
+
+        public abstract SqlPreCommand Clone(); 
     }
 
     public static class SqlPreCommandExtensions
@@ -89,22 +75,6 @@ namespace Signum.Engine
         {
             return SqlPreCommand.Combine(spacing, preCommands.ToArray());
         }
-
-        static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
-        /// <summary>
-        /// For debugging purposes
-        /// </summary>
-        public static string PlainSql(this SqlPreCommand command)
-        {
-            SqlPreCommandSimple cs = command.ToSimple();
-            if (cs.Parameters == null)
-                return cs.Sql;
-
-            var dic = cs.Parameters.ToDictionary(a=>a.ParameterName, a=>Encode(a.Value)); 
-
-            return regex.Replace(cs.Sql, m=> dic.TryGetC(m.Value) ?? m.Value);
-        }
-
 
         public static void OpenSqlFile(this SqlPreCommand command)
         {
@@ -132,37 +102,19 @@ namespace Signum.Engine
 
             Process.Start(fileName); 
         }
-
-        static string Encode(object value)
-        {
-            if (value == null || value == DBNull.Value)
-                return "NULL";
-
-            if (value is string)
-                return "\'" + ((string)value).Replace("'", "''") + "'";
-
-            if (value is DateTime)
-                return "convert(datetime, '{0:s}', 126)".Formato(value);
-
-            if (value is bool)
-               return (((bool)value) ? 1 : 0).ToString();
-
-            return value.ToString();
-        }
     }
 
     public class SqlPreCommandSimple : SqlPreCommand
     {
         public string Sql { get; private set; }
-        public List<SqlParameter> Parameters { get; private set; }
-        internal IdentifiableEntity EntityToUpdate { get;  set; }
+        public List<DbParameter> Parameters { get; private set; }
 
         public SqlPreCommandSimple(string sql)
         {
             this.Sql = sql;
         }
 
-        public SqlPreCommandSimple(string sql, List<SqlParameter> parameters)
+        public SqlPreCommandSimple(string sql, List<DbParameter> parameters)
         {
             this.Sql = sql;
             this.Parameters = parameters;
@@ -178,7 +130,7 @@ namespace Signum.Engine
             sb.Append(Sql);
         }
 
-        protected internal override void GenerateParameters(List<SqlParameter> list)
+        protected internal override void GenerateParameters(List<DbParameter> list)
         {
             if (Parameters != null)
                 list.AddRange(Parameters);
@@ -194,11 +146,63 @@ namespace Signum.Engine
             get { return Parameters.TryCS(p => p.Count) ?? 0; }
         }
 
-        protected internal override SqlPair Split(ref int remainingParameters)
+        static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
+      
+        static string Encode(object value)
         {
-            return (remainingParameters -= this.NumParameters) >= 0 ?
-                 new SqlPair(this, null) :
-                 new SqlPair(null, this);
+            if (value == null || value == DBNull.Value)
+                return "NULL";
+
+            if (value is string)
+                return "\'" + ((string)value).Replace("'", "''") + "'";
+
+            if (value is DateTime)
+                return "convert(datetime, '{0:s}', 126)".Formato(value);
+
+            if (value is TimeSpan)
+                return "convert(time, '{0:g}')".Formato(value);
+
+            if (value is bool)
+                return (((bool)value) ? 1 : 0).ToString();
+
+            if (value is SqlHierarchyId)
+                return "CAST('{0}' AS hierarchyid)".Formato(value);
+
+            return value.ToString();
+        }
+
+        protected internal override void PlainSql(StringBuilder sb)
+        {
+            if (Parameters.IsNullOrEmpty())
+                sb.Append(Sql);
+            else
+            {
+
+                var dic = Parameters.ToDictionary(a => a.ParameterName, a => Encode(a.Value));
+
+                sb.Append(regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value));
+            }
+        }
+
+        public override SqlPreCommand Clone()
+        {
+            return new SqlPreCommandSimple(Sql, Parameters == null ? null : Parameters
+                .Select(p => Connector.Current.CloneParameter(p))
+                .ToList());
+        }
+
+        public SqlPreCommandSimple AddComment(string comment)
+        {
+            if (comment.HasText())
+            {
+                int index = Sql.IndexOf("\r\n");
+                if (index == -1)
+                    Sql = Sql + " -- " + comment;
+                else
+                    Sql = Sql.Insert(index, " -- " + comment);
+            }
+
+            return this;
         }
     }
 
@@ -232,7 +236,7 @@ namespace Signum.Engine
             if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
         }
 
-        protected internal override void GenerateParameters(List<SqlParameter> list)
+        protected internal override void GenerateParameters(List<DbParameter> list)
         {
             foreach (SqlPreCommand com in Commands)
                 com.GenerateParameters(list);
@@ -243,7 +247,7 @@ namespace Signum.Engine
             StringBuilder sb = new StringBuilder();
             GenerateScript(sb);
 
-            List<SqlParameter> parameters = new List<SqlParameter>();
+            List<DbParameter> parameters = new List<DbParameter>();
             GenerateParameters(parameters);
 
             return new SqlPreCommandSimple(sb.ToString(), parameters);
@@ -261,25 +265,24 @@ namespace Signum.Engine
             get { return Commands.Sum(c => c.NumParameters); }
         }
 
-        protected internal override SqlPair Split(ref int remParameters)
+        protected internal override void PlainSql(StringBuilder sb)
         {
-            SqlPair lastPair = null;
-            int i = 0;
-            for (; i < Commands.Length && (lastPair == null || lastPair.Remainig == null); i++)
-                lastPair = Commands[i].Split(ref remParameters);
+            string sep = separators[Spacing];
+            bool borrar = false;
+            foreach (SqlPreCommand com in Commands)
+            {
+                com.PlainSql(sb);
+                sb.Append(sep);
+                borrar = true;
+            }
 
-            //i es la posicion del siguiente a procesar
-            if (i == Commands.Length && lastPair.Remainig == null)
-                return new SqlPair(this, null);
-
-            if (i == 0 || i == 1 && lastPair.New == null)
-                return new SqlPair(null, this);
-
-            return new SqlPair(
-               Commands.Take(i - 1).And(lastPair.New).Combine(Spacing),
-               Commands.Skip(i).PreAnd(lastPair.Remainig).Combine(Spacing));
+            if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
         }
 
+        public override SqlPreCommand Clone()
+        {
+            return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());  
+        }
     }
 
 }

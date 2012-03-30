@@ -20,7 +20,7 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
     public abstract class ValidatorAttribute : Attribute
     {
-        public bool DisableOnCorrupt { get; set; }
+        public Func<ModifiableEntity, bool> IsApplicable; 
         public string ErrorMessage { get; set; }
 
         public int Order { get; set; }
@@ -29,9 +29,9 @@ namespace Signum.Entities
         //Used for documentation purposes only
         public abstract string HelpMessage { get; }
 
-        public string Error(PropertyInfo property, object value)
+        public string Error(ModifiableEntity entity, PropertyInfo property, object value)
         {
-            if (DisableOnCorrupt && !Corruption.Strict)
+            if (IsApplicable != null && !IsApplicable(entity))
                 return null;
 
             string defaultError = OverrideError(value);
@@ -51,7 +51,7 @@ namespace Signum.Entities
             Assembly assembly = property.DeclaringType.Assembly;
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
-                string key = property.DeclaringType.Name.Add(property.Name, "_").Add(validator.GetType().Name, "_");
+                string key = property.DeclaringType.Name.Add("_", property.Name).Add("_", validator.GetType().Name);
                 string result = assembly.GetDefaultResourceManager().GetString(key);
                 if (result != null)
                     return result;
@@ -137,7 +137,7 @@ namespace Signum.Entities
                     max != -1 ? Resources.HaveMaximun0Characters.Formato(max) : null;
 
                 if (allowNulls)
-                    result = result.Add(Resources.OrBeNull, " ");
+                    result = result.Add(" ", Resources.OrBeNull);
 
                 return result;
             }
@@ -191,9 +191,12 @@ namespace Signum.Entities
 
     public class EMailValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex EmailRegex = new Regex(@"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}" +
-                          @"\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\" +
-                          @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$", RegexOptions.IgnoreCase);
+        public static readonly Regex EmailRegex = new Regex(
+                          @"^(([^<>()[\]\\.,;:\s@\""]+"
+                        + @"(\.[^<>()[\]\\.,;:\s@\""]+)*)|(\"".+\""))@"
+                        + @"((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
+                        + @"\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+"
+                        + @"[a-zA-Z]{2,}))$", RegexOptions.IgnoreCase);
 
         public EMailValidatorAttribute()
             : base(EmailRegex)
@@ -449,10 +452,8 @@ namespace Signum.Entities
         protected override string OverrideError(object value)
         {
             IList list = (IList)value;
-            if (list == null)
-                return null;
 
-            int val = list.Count;
+            int val = list == null? 0: list.Count;
 
             if ((ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
                 (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
@@ -492,9 +493,9 @@ namespace Signum.Entities
         { }
 
     }
+
     public class DateTimePrecissionValidatorAttribute : ValidatorAttribute
     {
-
         public DateTimePrecision Precision { get; private set; }
 
         public DateTimePrecissionValidatorAttribute(DateTimePrecision precision)
@@ -526,6 +527,55 @@ namespace Signum.Entities
                     case DateTimePrecision.Minutes: return "g";
                     case DateTimePrecision.Seconds: return "G";
                     case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern + ".fff";
+                    default: return "";
+                }
+            }
+        }
+
+        public override string HelpMessage
+        {
+            get
+            {
+                return Resources.HaveAPrecisionOf + " " + Precision.NiceToString().ToLower();
+            }
+        }
+    }
+
+    public class TimeSpanPrecissionValidatorAttribute : ValidatorAttribute
+    {
+        public DateTimePrecision Precision { get; private set; }
+
+        public TimeSpanPrecissionValidatorAttribute(DateTimePrecision precision)
+        {
+            this.Precision = precision;
+        }
+
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            var prec = ((TimeSpan)value).GetPrecision();
+            if (prec > Precision)
+                return "{{0}} has a precission of {0} instead of {1}".Formato(prec, Precision);
+
+            if(((TimeSpan)value).Days != 0)
+                return "{{0}} has days".Formato(prec, Precision);
+
+            return null;
+        }
+
+        public string FormatString
+        {
+            get
+            {
+                var dtfi = CultureInfo.CurrentCulture.DateTimeFormat;
+                switch (Precision)
+                {
+                    case DateTimePrecision.Hours: return "HH";
+                    case DateTimePrecision.Minutes: return dtfi.ShortTimePattern;
+                    case DateTimePrecision.Seconds: return "c";
+                    case DateTimePrecision.Milliseconds: return dtfi.LongTimePattern + ".fff";
                     default: return "";
                 }
             }
@@ -580,7 +630,8 @@ namespace Signum.Entities
         Uppercase,
         Lowercase
     }
-
+    
+    [ForceLocalization]
     public enum ComparisonType
     {
         EqualTo,
@@ -631,8 +682,10 @@ namespace Signum.Entities
             if (index == -1)
                 return null;
 
-            return dictionary.GetOrThrow(state, Resources.State0NotRegisteredInStateValidator)[index];
+            return Necessary(state, index);
         }
+
+      
 
         public string Validate(E entity, PropertyInfo pi, bool showState)
         {
@@ -642,7 +695,7 @@ namespace Signum.Entities
 
             S state = getState(entity);
 
-            bool? necessary = dictionary.GetOrThrow(state, Resources.State0NotRegisteredInStateValidator)[index];
+            bool? necessary = Necessary(state, index);
 
             if (necessary == null)
                 return null;
@@ -668,7 +721,12 @@ namespace Signum.Entities
             if (index == -1)
                 throw new ArgumentException("The property is not registered");
 
-            return dictionary[state][index];
+            return Necessary(state, index);
+        }
+
+        bool? Necessary(S state, int index)
+        {
+            return dictionary.GetOrThrow(state, "State {0} not registered in StateValidator")[index];
         }
 
         public IEnumerator GetEnumerator() //just to use object initializer

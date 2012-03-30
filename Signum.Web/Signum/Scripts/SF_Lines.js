@@ -14,7 +14,6 @@ SF.registerModule("Lines", function () {
 
     SF.EBaseLine.prototype = {
         entity: "sfEntity",
-        ticks: "sfTicks",
 
         runtimeInfo: function () {
             return new SF.RuntimeInfo(this.options.prefix);
@@ -22,12 +21,6 @@ SF.registerModule("Lines", function () {
 
         staticInfo: function () {
             return SF.StaticInfo(this.options.prefix);
-        },
-
-        setTicks: function () {
-            SF.log("EBaseLine setTicks");
-            if ($('#' + SF.Keys.reactive).length > 0)
-                this.runtimeInfo().ticks(new Date().getTime());
         },
 
         pf: function (s) {
@@ -54,14 +47,6 @@ SF.registerModule("Lines", function () {
             //Abstract function
         },
 
-        fireOnEntityChangedWithTicks: function (hasEntity) {
-            SF.log("EBaseLine fireOnEntityChangedWithTicks");
-            this.setTicks();
-            this.updateButtonsDisplay(hasEntity);
-            if (!SF.isEmpty(this.options.onEntityChanged))
-                this.options.onEntityChanged();
-        },
-
         fireOnEntityChanged: function (hasEntity) {
             SF.log("EBaseLine fireOnEntityChanged");
             this.updateButtonsDisplay(hasEntity);
@@ -76,7 +61,7 @@ SF.registerModule("Lines", function () {
             this.runtimeInfo().removeEntity();
 
             this.removeSpecific();
-            this.fireOnEntityChangedWithTicks(false);
+            this.fireOnEntityChanged(false);
         },
 
         getRuntimeType: function (typeChooserUrl, _onTypeFound) {
@@ -85,7 +70,7 @@ SF.registerModule("Lines", function () {
             if (types.length == 1)
                 return _onTypeFound(types[0]);
 
-            SF.openChooser(this.options.prefix, _onTypeFound, null, null, { controllerUrl: typeChooserUrl });
+            SF.openTypeChooser(this.options.prefix, _onTypeFound, { controllerUrl: typeChooserUrl });
         },
 
         create: function (_viewOptions, typeChooserUrl) {
@@ -98,16 +83,22 @@ SF.registerModule("Lines", function () {
 
         typedCreate: function (_viewOptions) {
             SF.log("EBaseline typedCreate");
-            if (SF.isEmpty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in EBaseline typedCreate. Call create instead";
+            if (SF.isEmpty(_viewOptions.type)) {
+                throw "ViewOptions type parameter must not be null in EBaseline typedCreate. Call create instead";
+            }
+            if (_viewOptions.navigate) {
+                window.open(_viewOptions.controllerUrl.substring(0, _viewOptions.controllerUrl.lastIndexOf("/") + 1) + _viewOptions.type, "_blank");
+                return;
+            }
             var viewOptions = this.viewOptionsForCreating(_viewOptions);
             var template = window[SF.compose(this.options.prefix, "sfTemplate")];
             if (!SF.isEmpty(template)) { //Template pre-loaded: In case of a list, it will be created with "_0" itemprefix => replace it with the current one
                 template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
                 new SF.ViewNavigator(viewOptions).showCreateOk(template);
             }
-            else
+            else {
                 new SF.ViewNavigator(viewOptions).createOk();
-            this.setTicks();
+            }
         },
 
         find: function (_findOptions, typeChooserUrl) {
@@ -144,14 +135,6 @@ SF.registerModule("Lines", function () {
 
             if (staticInfo.isReadOnly()) {
                 extraParams.readOnly = true;
-            }
-
-            //If reactive => send reactive flag, tabId, and Id & Runtime of the main entity
-            if ($('#' + SF.Keys.reactive).length !== 0) {
-                extraParams[SF.Keys.reactive] = true;
-                extraParams[SF.Keys.tabId] = $('#' + SF.Keys.tabId).val();
-                extraParams[SF.Keys.antiForgeryToken] = $("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").val();
-                extraParams[SF.Keys.runtimeInfo] = new SF.RuntimeInfo('').value();
             }
 
             return extraParams;
@@ -210,7 +193,6 @@ SF.registerModule("Lines", function () {
             SF.log("ELine view");
             var viewOptions = this.viewOptionsForViewing(_viewOptions);
             new SF.ViewNavigator(viewOptions).viewOk();
-            this.setTicks();
         };
 
         this.viewOptionsForViewing = function (_viewOptions) {
@@ -219,7 +201,7 @@ SF.registerModule("Lines", function () {
             var info = this.runtimeInfo();
             return $.extend({
                 containerDiv: SF.compose(this.options.prefix, self.entity),
-                onOk: function () { return self.onViewingOk(_viewOptions.validationControllerUrl); },
+                onOk: function () { return self.onViewingOk(_viewOptions.validationOptions.controllerUrl); },
                 onOkClosed: function () { self.fireOnEntityChanged(true); },
                 onCancelled: null,
                 controllerUrl: null,
@@ -241,7 +223,7 @@ SF.registerModule("Lines", function () {
             var self = this;
             return $.extend({
                 containerDiv: "",
-                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationControllerUrl, _viewOptions.type); },
+                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions.controllerUrl, _viewOptions.type); },
                 onOkClosed: function () { self.fireOnEntityChanged(true); },
                 onCancelled: null,
                 controllerUrl: null,
@@ -272,7 +254,7 @@ SF.registerModule("Lines", function () {
             return $.extend({
                 prefix: this.options.prefix,
                 onOk: function (selectedItems) { return self.onFindingOk(selectedItems); },
-                onOkClosed: function () { self.fireOnEntityChangedWithTicks(true); },
+                onOkClosed: function () { self.fireOnEntityChanged(true); },
                 allowMultiple: false
             }, _findOptions);
         };
@@ -299,7 +281,7 @@ SF.registerModule("Lines", function () {
                 link: ""
             }];
             this.onFindingOk(selectedItems);
-            this.fireOnEntityChangedWithTicks(true);
+            this.fireOnEntityChanged(true);
         };
 
         this.removeSpecific = function () {
@@ -332,7 +314,6 @@ SF.registerModule("Lines", function () {
                 SF.triggerNewContent($("#" + this.options.detailDiv));
             }
             this.onCreated(viewOptions.type);
-            this.setTicks();
         };
 
         this.viewOptionsForCreating = function (_viewOptions) {
@@ -352,7 +333,7 @@ SF.registerModule("Lines", function () {
         this.onCreated = function (runtimeType) {
             SF.log("EDLine onCreated");
             this.newEntity(runtimeType);
-            this.fireOnEntityChangedWithTicks(true);
+            this.fireOnEntityChanged(true);
         };
 
         this.find = function (_findOptions, _viewOptions, typeChooserUrl) {
@@ -376,7 +357,7 @@ SF.registerModule("Lines", function () {
             return $.extend({
                 prefix: this.options.prefix,
                 onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-                onOkClosed: function () { self.fireOnEntityChangedWithTicks(true); },
+                onOkClosed: function () { self.fireOnEntityChanged(true); },
                 allowMultiple: false
             }, _findOptions);
         };
@@ -433,27 +414,7 @@ SF.registerModule("Lines", function () {
                 extraParams.readOnly = true;
             }
 
-            //If reactive => send reactive flag, tabId, and Id & Runtime of the main entity
-            if ($('#' + SF.Keys.reactive).length > 0) {
-                extraParams[SF.Keys.reactive] = true;
-                extraParams[SF.Keys.tabId] = $('#' + SF.Keys.tabId).val();
-                extraParams[SF.Keys.antiForgeryToken] = $("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").val();
-                extraParams[SF.Keys.runtimeInfo] = new SF.RuntimeInfo('').value();
-            }
-
             return extraParams;
-        };
-
-        this.setTicks = function () {
-            SF.log("EList setTicks");
-            if ($('#' + SF.Keys.reactive).length > 0)
-                $(this.pf(this.ticks)).val(new Date().getTime());
-        };
-
-        this.setItemTicks = function (itemPrefix) {
-            SF.log("EList setItemTicks");
-            if ($('#' + SF.Keys.reactive).length > 0)
-                this.itemRuntimeInfo(itemPrefix).ticks(new Date().getTime());
         };
 
         this.itemRuntimeInfo = function (itemPrefix) {
@@ -507,7 +468,7 @@ SF.registerModule("Lines", function () {
             var newIndex = +this.getLastIndex() + 1;
             var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
             return $.extend({
-                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationControllerUrl, _viewOptions.type, itemPrefix); },
+                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions.controllerUrl, _viewOptions.type, itemPrefix); },
                 onOkClosed: function () { self.fireOnEntityChanged(); },
                 onCancelled: null,
                 controllerUrl: null,
@@ -521,7 +482,6 @@ SF.registerModule("Lines", function () {
             var validatorResult = this.checkValidation(validateUrl, runtimeType, itemPrefix);
             if (validatorResult.acceptChanges) {
                 this.newListItem(clonedElements, runtimeType, itemPrefix, validatorResult.newToStr);
-                this.setItemTicks(itemPrefix);
             }
             return validatorResult.acceptChanges;
         };
@@ -529,7 +489,7 @@ SF.registerModule("Lines", function () {
         this.newListItem = function (clonedElements, runtimeType, itemPrefix, newToStr) {
             SF.log("EList newListItem");
             var listInfo = this.staticInfo();
-            var itemInfoValue = new SF.RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
+            var itemInfoValue = new SF.RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n');
             listInfo.find().after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue))
                 .after(SF.hiddenDiv(SF.compose(itemPrefix, this.entity), ""));
             $('#' + SF.compose(itemPrefix, this.entity)).append(clonedElements);
@@ -553,9 +513,14 @@ SF.registerModule("Lines", function () {
         this.viewInIndex = function (_viewOptions, selectedItemPrefix) {
             SF.log("EList viewInIndex");
             var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
+            if (viewOptions.navigate) {
+                var itemInfo = this.itemRuntimeInfo(selectedItemPrefix);
+                if (!SF.isEmpty(itemInfo.id())) {
+                    window.open(_viewOptions.controllerUrl.substring(0, _viewOptions.controllerUrl.lastIndexOf("/") + 1) + itemInfo.runtimeType() + "/" + itemInfo.id(), "_blank");
+                }
+                return;
+            }
             new SF.ViewNavigator(viewOptions).viewOk();
-            this.setTicks();
-            this.setItemTicks(selectedItemPrefix);
         };
 
         this.viewOptionsForViewing = function (_viewOptions, itemPrefix) {
@@ -564,7 +529,7 @@ SF.registerModule("Lines", function () {
             var info = this.itemRuntimeInfo(itemPrefix);
             return $.extend({
                 containerDiv: SF.compose(itemPrefix, self.entity),
-                onOk: function () { return self.onViewingOk(_viewOptions.validationControllerUrl, itemPrefix); },
+                onOk: function () { return self.onViewingOk(_viewOptions.validationOptions.controllerUrl, itemPrefix); },
                 onOkClosed: function () { self.fireOnEntityChanged(); },
                 onCancelled: null,
                 controllerUrl: null,
@@ -607,8 +572,6 @@ SF.registerModule("Lines", function () {
                 this.newListItem('', item.type, itemPrefix, item.toStr);
                 this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
                 $('#' + SF.compose(itemPrefix, SF.Keys.toStr)).html(item.toStr);
-
-                this.setItemTicks(itemPrefix);
             }
             return true;
         };
@@ -627,18 +590,14 @@ SF.registerModule("Lines", function () {
             $.each([SF.Keys.runtimeInfo, SF.Keys.toStr, this.entity, SF.EList.index], function (i, key) {
                 $("#" + SF.compose(selectedItemPrefix, key)).remove();
             });
-            this.fireOnEntityChangedWithTicks();
+            this.fireOnEntityChanged();
         };
 
         this.updateButtonsDisplay = function () {
             SF.log("EList updateButtonsDisplay");
-            var btnRemove = $(this.pf("btnRemove"));
-            if ($('#' + this.options.prefix + " > option").length !== 0) {
-                btnRemove.show();
-            }
-            else {
-                btnRemove.hide();
-            }
+            var hasElements = $('#' + this.options.prefix + " > option").length > 0;
+            $(this.pf("btnRemove")).toggle(hasElements);
+            $(this.pf("btnView")).toggle(hasElements);
         };
     };
 
@@ -659,11 +618,12 @@ SF.registerModule("Lines", function () {
 
         this.itemsContainer = "sfItemsContainer";
         this.repeaterItem = "sfRepeaterItem";
+        this.repeaterItemClass = "sf-repeater-element";
 
         this.canAddItems = function () {
             SF.log("ERep canAddItems");
             if (!SF.isEmpty(this.options.maxElements)) {
-                if ($(this.pf(this.itemsContainer) + " > div[name$=" + this.repeaterItem + "]").length >= +this.options.maxElements) {
+                if ($(this.pf(this.itemsContainer) + " > ." + this.repeaterItemClass).length >= +this.options.maxElements) {
                     return false;
                 }
             }
@@ -672,21 +632,13 @@ SF.registerModule("Lines", function () {
 
         this.getLastIndex = function () {
             SF.log("ERep getLastIndex");
-            var lastElement = $(this.pf(this.itemsContainer) + " > div[name$=" + this.repeaterItem + "]:last");
+            var lastElement = $(this.pf(this.itemsContainer) + " > ." + this.repeaterItemClass + ":last");
             var lastIndex = -1;
             if (lastElement.length !== 0) {
                 var nameSelected = lastElement[0].id;
                 lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(this.repeaterItem) - 1);
             }
             return lastIndex;
-        };
-
-        this.fireOnEntityChangedWithTicks = function () {
-            SF.log("ERep fireOnEntityChangedWithTicks");
-            this.setTicks();
-            if (!SF.isEmpty(this.options.onEntityChanged)) {
-                this.options.onEntityChanged();
-            }
         };
 
         this.typedCreate = function (_viewOptions) {
@@ -709,7 +661,6 @@ SF.registerModule("Lines", function () {
                     self.onItemCreated(newHtml, viewOptions);
                 });
             }
-            this.setTicks();
         };
 
         this.viewOptionsForCreating = function (_viewOptions) {
@@ -733,20 +684,21 @@ SF.registerModule("Lines", function () {
             var itemPrefix = viewOptions.prefix;
             this.newRepItem(newHtml, viewOptions.type, itemPrefix);
             this.fireOnEntityChanged();
-            this.setItemTicks(itemPrefix);
         };
 
         this.newRepItem = function (newHtml, runtimeType, itemPrefix) {
             SF.log("ERep newRepItem");
             var listInfo = this.staticInfo();
-            var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
+            var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n');
 
-            var $div = $("<div id='" + SF.compose(itemPrefix, this.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.repeaterItem) + "' class='sf-repeater-element'>" +
+            var $div = $("<fieldset id='" + SF.compose(itemPrefix, this.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.repeaterItem) + "' class='" + this.repeaterItemClass + "'>" +
+                "<legend>" +
                 "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' href=\"javascript:new SF.ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (SF.isEmpty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}).remove('" + itemPrefix + "');\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + this.options.removeItemLinkText + "</a>" +
+                "</legend>" +
                 SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) +
                 "<div id='" + SF.compose(itemPrefix, this.entity) + "' name='" + SF.compose(itemPrefix, this.entity) + "'>" +
                 "</div>" + //sfEntity
-                "</div>" //sfRepeaterItem          
+                "</fieldset>"
                 );
 
             $(this.pf(this.itemsContainer)).append($div);
@@ -782,7 +734,6 @@ SF.registerModule("Lines", function () {
 
             var findOptions = this.createFindOptions(_findOptions, _viewOptions);
             new SF.FindNavigator(findOptions).openFinder();
-            this.setTicks();
         },
 
     this.createFindOptions = function (_findOptions, _viewOptions) {
@@ -818,9 +769,7 @@ SF.registerModule("Lines", function () {
                 //View results in the repeater
                 var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
-                SF.triggerNewContent($(SF.compose(itemPrefix, this.entity)));                
-
-                this.setItemTicks(itemPrefix);
+                SF.triggerNewContent($(SF.compose(itemPrefix, this.entity)));
             }
             return true;
         };
@@ -828,7 +777,18 @@ SF.registerModule("Lines", function () {
         this.remove = function (itemPrefix) {
             SF.log("ERep remove");
             $('#' + SF.compose(itemPrefix, this.repeaterItem)).remove();
-            this.fireOnEntityChangedWithTicks();
+            this.fireOnEntityChanged();
+        };
+
+        this.updateButtonsDisplay = function () {
+            SF.log("ERep updateButtonsDisplay");
+            var $buttons = $(this.pf("btnFind"), this.pf("btnFind"));
+            if (this.canAddItems()) {
+                $buttons.show();
+            }
+            else {
+                $buttons.hide();
+            }
         };
     };
 
@@ -858,7 +818,6 @@ SF.registerModule("Lines", function () {
                 SF.triggerNewContent($('#' + viewOptions.containerDiv));
             }
             this.onItemCreated(viewOptions);
-            this.setTicks();
         };
 
         this.viewOptionsForCreating = function (_viewOptions) {
@@ -904,7 +863,6 @@ SF.registerModule("Lines", function () {
             var itemPrefix = viewOptions.prefix;
             this.newListItem('', viewOptions.type, itemPrefix);
             this.fireOnEntityChanged();
-            this.setItemTicks(itemPrefix);
         };
 
         this.view = function (_viewOptions) {
@@ -925,10 +883,8 @@ SF.registerModule("Lines", function () {
             else {
                 var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
-                SF.triggerNewContent($('#' + _viewOptions.containerDiv));
+                SF.triggerNewContent($('#' + viewOptions.containerDiv));
             }
-            this.setTicks();
-            this.setItemTicks(selectedItemPrefix);
         };
 
         this.viewOptionsForViewing = function (_viewOptions, itemPrefix) {
@@ -977,7 +933,6 @@ SF.registerModule("Lines", function () {
             this.restoreCurrent();
             var findOptions = this.createFindOptions(_findOptions, _viewOptions);
             new SF.FindNavigator(findOptions).openFinder();
-            this.setTicks();
         },
 
     this.createFindOptions = function (_findOptions, _viewOptions) {
@@ -1009,8 +964,6 @@ SF.registerModule("Lines", function () {
 
                 //View result in the detailDiv
                 $('#' + this.options.prefix).dblclick();
-
-                this.setItemTicks(itemPrefix);
             }
             return true;
         };
@@ -1083,7 +1036,21 @@ SF.registerModule("Lines", function () {
             var runtimeInfo = this.runtimeInfo();
             runtimeInfo.setEntity(newRuntimeType, newId);
             $(this.pf(this.entity)).html(''); //Clean
-            this.fireOnEntityChangedWithTicks(newEntity);
+            this.fireOnEntityChanged(newEntity);
+        };
+
+        this.view = function (_viewOptions) {
+            SF.log("ELine view");
+            var viewOptions = this.viewOptionsForViewing(_viewOptions);
+            if (viewOptions.navigate) {
+                var runtimeInfo = this.runtimeInfo();
+                if (!SF.isEmpty(runtimeInfo.id())) {
+                    window.open(viewOptions.controllerUrl.substring(0, viewOptions.controllerUrl.lastIndexOf("/") + 1) + runtimeInfo.runtimeType() + "/" + runtimeInfo.id(), "_blank");
+                }
+            }
+            else {
+                new SF.ViewNavigator(viewOptions).viewOk();
+            }
         };
     };
 
@@ -1120,11 +1087,8 @@ SF.registerModule("Lines", function () {
             source: function (request, response) {
                 if (lastXhr)
                     lastXhr.abort();
-                lastXhr = SF.ajax({
+                lastXhr = $.ajax({
                     url: options.url,
-                    type: "post",
-                    async: true,
-                    dataType: "json",
                     data: { types: options.types, l: options.count || 5, q: request.term },
                     success: function (data) {
                         lastXhr = null;

@@ -19,16 +19,18 @@ using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web
 {
-    public class CountSearchControlOptions
+    public class CountSearchControl
     {
-        public CountSearchControlOptions()
-        {
-            Navigate = true;
-            PopupView = false;
-        }
-
         public bool Navigate { get; set; }
-        public bool PopupView { get; set; }
+        public string PopupViewPrefix { get; set; }
+        public WriteQueryName WriteQueryName { get; set; }
+    }
+
+    public enum WriteQueryName
+    {
+        No,
+        Span,
+        Field
     }
 
     public static class SearchControlHelper
@@ -38,54 +40,79 @@ namespace Signum.Web
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
             Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
 
-            helper.ViewData.Model = context;
+            var viewData = new ViewDataDictionary(context);
+            viewData[ViewDataKeys.FindOptions] = findOptions;
+            viewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            helper.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-            
-            if (!helper.ViewData.ContainsKey(ViewDataKeys.Title))
-                helper.ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
-            
-            return helper.Partial(Navigator.Manager.SearchControlView, helper.ViewData);
+            viewData[ViewDataKeys.Title] = helper.ViewData.ContainsKey(ViewDataKeys.Title) ?
+                helper.ViewData[ViewDataKeys.Title] :
+                Navigator.Manager.SearchTitle(findOptions.QueryName);
+
+            return helper.Partial(Navigator.Manager.SearchControlView, viewData);
         }
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions)
+        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions, Action<CountSearchControl> settingsModifier)
         {
-            return CountSearchControl(helper, findOptions, null);
-        }
+            var options = new CountSearchControl();
+            if (settingsModifier != null)
+                settingsModifier(options);
 
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix)
-        {
-            return CountSearchControl(helper, findOptions, prefix, null);
-        }
-
-        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix, CountSearchControlOptions options)
-        {
-            if (options == null)
-                options = new CountSearchControlOptions();
+            findOptions.SearchOnLoad = true;
 
             int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
             {
                 FilterOptions = findOptions.FilterOptions
-            });            
+            });
 
             JsFindOptions foptions = new JsFindOptions
             {
-                Prefix = prefix,
+                Prefix = options.PopupViewPrefix,
                 FindOptions = findOptions
             };
 
-           string result = options.Navigate ?
-               "<a class=\"count-search valueLine\" href='{0}'>{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
-               "<span class=\"count-search valueLine\">{0}</span>".Formato(count);
+            HtmlStringBuilder sb = new HtmlStringBuilder();
 
-           if (options.PopupView)
-               result += helper.Button(prefix + "csbtnView",
-                  Resources.View,
-                  "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()),
-                  "sf-line-button sf-view", null);
+            if (options.WriteQueryName == WriteQueryName.Span)
+                sb.Add(new HtmlTag("span")
+                    .Class("count-search")
+                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
+                    .SetInnerText(QueryUtils.GetNiceName(findOptions.QueryName)));
 
-           return MvcHtmlString.Create(result);
+            if (options.Navigate)
+            {
+                sb.Add(new HtmlTag("a")
+                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
+                    .Attr("href", foptions.FindOptions.ToString())
+                    .SetInnerText(count.ToString()));
+            }
+            else
+            {
+                sb.Add(new HtmlTag("span")
+                    .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
+                    .SetInnerText(options.WriteQueryName == WriteQueryName.Span ? " (" + count.ToString() + ")" : count.ToString()));
+            }
+
+            if (options.PopupViewPrefix != null)
+            {
+                var htmlAttr = new Dictionary<string, object>
+                    {
+                        { "onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()) },
+                        { "data-icon", "ui-icon-circle-arrow-e" },
+                        { "data-text", false}
+                    };
+
+                sb.Add(helper.Href(options.PopupViewPrefix + "csbtnView",
+                      Resources.LineButton_View,
+                      "",
+                      Resources.LineButton_View,
+                      "sf-line-button sf-view",
+                      htmlAttr));
+            }
+
+            if (options.WriteQueryName == WriteQueryName.Field)
+                return helper.Field(QueryUtils.GetNiceName(findOptions.QueryName), sb.ToHtml());
+
+            return sb.ToHtml();
         }
 
         public static MvcHtmlString NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, Context context, int index)
@@ -122,13 +149,13 @@ namespace Signum.Web
                             htmlAttr));
                     }
                 }
-                
-                using (sb.Surround(new HtmlTag("td"))) 
+
+                using (sb.Surround(new HtmlTag("td")))
                 {
                     sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
 
-                    foreach(var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
-                       sb.AddLine(new HtmlTag("span").Class("sf-filter-token").SetInnerText(t.ToString()).ToHtml());
+                    foreach (var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
+                        sb.AddLine(new HtmlTag("span").Class("sf-filter-token ui-widget-content ui-corner-all").SetInnerText(t.ToString()).ToHtml());
                 }
 
                 using (sb.Surround("td"))
@@ -150,7 +177,7 @@ namespace Signum.Web
                 {
                     Context valueContext = new Context(context, "value_" + index.ToString());
 
-                    if (filterOptions.Frozen)
+                    if (filterOptions.Frozen && !filterOptions.Token.Type.IsLite())
                     {
                         string txtValue = (filterOptions.Value != null) ? filterOptions.Value.ToString() : "";
                         sb.AddLine(helper.TextBox(valueContext.ControlID, txtValue, new { @readonly = "readonly" }));
@@ -159,44 +186,88 @@ namespace Signum.Web
                         sb.AddLine(PrintValueField(helper, valueContext, filterOptions));
                 }
             }
-            
+
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString TokensCombo(this HtmlHelper helper, object queryName, IEnumerable<SelectListItem> items, Context context, int index, bool writeExpander)
+        public static MvcHtmlString RootTokensCombo(QueryDescription queryDescription, QueryToken queryToken)
+        {
+            var columns = new HtmlStringBuilder();
+            columns.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+            foreach (var c in queryDescription.Columns)
+            {
+                var option = new HtmlTag("option")
+                    .Attr("value", c.Name)
+                    .SetInnerText(c.DisplayName);
+
+                if (queryToken != null && c.Name == queryToken.Key)
+                    option.Attr("selected", "selected");
+
+                columns.AddLine(option.ToHtml());
+            }
+
+            return columns.ToHtml();
+        }
+
+        public static MvcHtmlString TokensCombo(List<QueryToken> queryTokens, QueryToken selected)
+        {
+            var options = new HtmlStringBuilder();
+            options.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+            foreach (var qt in queryTokens)
+            {
+                var option = new HtmlTag("option")
+                            .Attr("value", qt.Key)
+                            .SetInnerText(qt.ToString());
+
+                if (selected != null && qt.Key == selected.Key)
+                    option.Attr("selected", "selected");
+
+                string canColumn = QueryUtils.CanColumn(qt);
+                if (canColumn.HasText())
+                    option.Attr("data-column", canColumn);
+
+                string canFilter = QueryUtils.CanFilter(qt);
+                if (canFilter.HasText())
+                    option.Attr("data-filter", canFilter);
+
+                options.AddLine(option.ToHtml());
+            }
+
+            return options.ToHtml();
+        }
+
+        public static MvcHtmlString TokenOptionsCombo(this HtmlHelper helper, object queryName, MvcHtmlString options, Context context, int index, bool writeExpander)
         {
             MvcHtmlString expander = null;
             if (writeExpander)
                 expander = helper.TokensComboExpander(context, index);
 
-            MvcHtmlString drop = helper.DropDownList(context.Compose("ddlTokens_" + index), items,
-                new
-                {
-                    style = (writeExpander) ? "display:none" : "",
-                    onchange = "javascript:new SF.FindNavigator({{prefix:\"{0}\",webQueryName:\"{1}\"}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) + 
-                               ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');"
-                });
+            HtmlTag dropdown = new HtmlTag("select").IdName(context.Compose("ddlTokens_" + index))
+                .InnerHtml(options)
+                .Attr("onchange", "new SF.FindNavigator({{prefix:'{0}',webQueryName:'{1}'}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) +
+                    ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');");
 
-            return expander == null? drop: expander.Concat(drop);
+            if (writeExpander)
+                dropdown.Attr("style", "display:none");
+
+            MvcHtmlString drop = dropdown.ToHtml();
+
+            return expander == null ? drop : expander.Concat(drop);
         }
 
-        private static MvcHtmlString TokensComboExpander(this HtmlHelper helper, Context context, int index)
-        { 
+        static MvcHtmlString TokensComboExpander(this HtmlHelper helper, Context context, int index)
+        {
             return helper.Span(
-                context.Compose("lblddlTokens_" + index), 
+                context.Compose("lblddlTokens_" + index),
                 "[...]",
                 "sf-subtokens-expander",
-                new Dictionary<string, object>
-                { 
-                    { "onclick", "$('#{0}').remove();$('#{1}').show().focus().click();".Formato(context.Compose("lblddlTokens_" + index), context.Compose("ddlTokens_" + index))}
-                });
+                null);
         }
 
-        public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken queryToken, Context context)
+        public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken queryToken, object queryName, Context context)
         {
-            var queryName = helper.ViewData[ViewDataKeys.QueryName];
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            
+
             var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
 
             if (tokenPath.Count > 0)
@@ -204,33 +275,21 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            var items = qd.Columns.Select(c => new SelectListItem
-            {
-                Text = c.DisplayName,
-                Value = c.Name,
-                Selected = queryToken != null && c.Name == queryToken.Key
-            }).ToList();
+            sb.AddLine(SearchControlHelper.TokenOptionsCombo(
+                helper, queryName, SearchControlHelper.RootTokensCombo(qd, queryToken), context, 0, false));
 
-            items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-            sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, items, context, 0, false));
-            
             for (int i = 0; i < tokenPath.Count; i++)
             {
                 QueryToken t = tokenPath[i];
-                QueryToken[] subtokens = t.SubTokens();
-                if (subtokens != null)
+                List<QueryToken> subtokens = t.SubTokens();
+                if (!subtokens.IsEmpty())
                 {
-                    var subitems = subtokens.Select(qt => new SelectListItem
-                    {
-                        Text = qt.ToString(),
-                        Value = qt.Key,
-                        Selected = i + 1 < tokenPath.Count && qt.Key == tokenPath[i+1].Key
-                    }).ToList();
-                    subitems.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-                    sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
+                    bool moreTokens = i + 1 < tokenPath.Count;
+                    sb.AddLine(SearchControlHelper.TokenOptionsCombo(
+                        helper, queryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
                 }
             }
-            
+
             return sb.ToHtml();
         }
 
@@ -238,42 +297,59 @@ namespace Signum.Web
         {
             if (filterOption.Token.Type.IsLite())
             {
-                Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type); 
-                if (lite != null && string.IsNullOrEmpty(lite.ToStr))
-                    Database.FillToStr(lite);
+                Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type);
+                if (lite != null && string.IsNullOrEmpty(lite.ToString()))
+                    Database.FillToString(lite);
 
                 Type cleanType = Reflector.ExtractLite(filterOption.Token.Type);
                 if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))
                 {
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        LabelVisible = false,
-                        //BreakLine = false,
-                        Implementations = filterOption.Token.Implementations()
+                        Implementations = filterOption.Token.Implementations(),
                     };
-                    EntityBaseHelper.ConfigureEntityBase(ec, filterOption.Token.Type.CleanType());
+                    EntityBaseHelper.ConfigureEntityButtons(ec, filterOption.Token.Type.CleanType());
+                    ec.LabelVisible = false;
+                    ec.Create = false;
+                    ec.ReadOnly = filterOption.Frozen;
                     return EntityComboHelper.InternalEntityCombo(helper, ec);
                 }
                 else
                 {
                     EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        LabelVisible = false,
-                        //BreakLine = false,
-                        Create = false,
-                        Implementations = filterOption.Token.Implementations()
+                        Implementations = filterOption.Token.Implementations(),
                     };
-                    EntityBaseHelper.ConfigureEntityBase(el, filterOption.Token.Type.CleanType());
+                    if (el.Implementations.TryCS(i => i.IsByAll) == true)
+                        el.Autocomplete = false;
+
+                    EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
+                    el.LabelVisible = false;
                     el.Create = false;
+                    el.ReadOnly = filterOption.Frozen;
 
                     return EntityLineHelper.InternalEntityLine(helper, el);
                 }
+            }
+            else if (filterOption.Token.Type.IsEmbeddedEntity())
+            {
+                EmbeddedEntity lite = (EmbeddedEntity)Common.Convert(filterOption.Value, filterOption.Token.Type);
+                EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
+                {
+                    Implementations = filterOption.Token.Implementations(),
+                };
+                EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
+                el.LabelVisible = false;
+                el.Create = false;
+                el.ReadOnly = filterOption.Frozen;
+
+                return EntityLineHelper.InternalEntityLine(helper, el);
             }
             else
             {
                 ValueLineType vlType = ValueLineHelper.Configurator.GetDefaultValueLineType(filterOption.Token.Type);
                 return ValueLineHelper.Configurator.Constructor[vlType](
-                        helper,  new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute()));
+                        helper, new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute()));
             }
 
             throw new InvalidOperationException("Invalid filter for type {0}".Formato(filterOption.Token.Type.Name));

@@ -14,6 +14,7 @@ using Signum.Engine.Properties;
 using System.Data;
 using Signum.Engine.Maps;
 using Signum.Entities.DynamicQuery;
+using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
@@ -44,7 +45,7 @@ namespace Signum.Engine.Linq
             return "@p" + (parameter++);
         }
 
-        MethodInfo miUnsafeCreateParameter = ReflectionTools.GetMethodInfo(() => SqlParameterBuilder.UnsafeCreateParameter(null, SqlDbType.BigInt, false, null));
+        MethodInfo miCreateParameter = ReflectionTools.GetMethodInfo((ParameterBuilder s) => s.CreateParameter(null, SqlDbType.BigInt, null, false, null));
 
         ParameterInfo CreateParameter(Expression value)
         {
@@ -55,36 +56,37 @@ namespace Signum.Engine.Linq
             if (clrType.IsEnum)
                 clrType = typeof(int);
 
-            SqlDbType sqlDbType = Schema.Current.Settings.TypeValues.TryGetS(clrType) ?? SqlDbType.Variant;
+
+            var typePair = Schema.Current.Settings.GetSqlDbTypePair(clrType);
 
             Expression valExpression = value.Type.IsNullable() ? 
                 Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :
                 (Expression)Expression.Convert(value, typeof(object));
 
+            var pb = Connector.Current.ParameterBuilder;
+
             return new ParameterInfo
             {
-                Expression = Expression.Call(null, miUnsafeCreateParameter,
+                Expression = Expression.Call(Expression.Constant(pb), miCreateParameter,
                    Expression.Constant(name),
-                   Expression.Constant(sqlDbType),
+                   Expression.Constant(typePair.SqlDbType),
+                   Expression.Constant(typePair.UdtTypeName, typeof(string)),
                    Expression.Constant(nullable),
                    valExpression),
                 Name = name
-            };
-                
-                
-               
+            }; 
         }
 
         private QueryFormatter() { }
 
 
-        static internal string Format(Expression expression, out Expression<Func<SqlParameter[]>> getParameters)
+        static internal string Format(Expression expression, out Expression<Func<DbParameter[]>> getParameters)
         {
             QueryFormatter qf = new QueryFormatter();
             qf.Visit(expression);
 
-            getParameters = Expression.Lambda<Func<SqlParameter[]>>(
-                Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.Values.Select(pi=>pi.Expression).ToArray()));
+            getParameters = Expression.Lambda<Func<DbParameter[]>>(
+                Expression.NewArrayInit(typeof(DbParameter), qf.parameterExpressions.Values.Select(pi => pi.Expression).ToArray()));
 
             return qf.sb.ToString();
         }
@@ -264,9 +266,12 @@ namespace Signum.Engine.Linq
                 Visit(when.Value);
                 AppendNewLine(Indentation.Same); 
             }
-            sb.Append("ELSE ");
-            Visit(cex.DefaultValue);
-            AppendNewLine(Indentation.Outer);
+            if (cex.DefaultValue != null)
+            {
+                sb.Append("ELSE ");
+                Visit(cex.DefaultValue);
+                AppendNewLine(Indentation.Outer);
+            }
             sb.Append("END");
             AppendNewLine(Indentation.Outer);
 
@@ -353,18 +358,13 @@ namespace Signum.Engine.Linq
             return castExpr;
         }
 
-        internal static bool IsSupported(Type type)
-        {
-            return type == typeof(Guid) || Type.GetTypeCode(type) != TypeCode.Object;
-        }
-
         protected override Expression VisitConstant(ConstantExpression c)
         {
             if (c.Value == null)
                 sb.Append("NULL");
             else
             {
-                if (!IsSupported(c.Value.GetType()))
+                if (!Schema.Current.Settings.IsDbType(c.Value.GetType().UnNullify()))
                     throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
                 var pi = parameterExpressions.GetOrCreate(c, ()=> this.CreateParameter(c));
@@ -380,7 +380,7 @@ namespace Signum.Engine.Linq
                 sb.Append("NULL");
             else
             {
-                if (!IsSupported(c.Value.GetType()))
+                if (!Schema.Current.Settings.IsDbType(c.Value.GetType().UnNullify()))
                     throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
                 if (c.Value.Equals(true))
@@ -397,11 +397,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (column.Alias.HasText())
-            {
-                sb.Append(column.Alias.SqlScape());
-                sb.Append(".");
-            }
+            sb.Append(column.Alias.Name.SqlScape());
+            sb.Append(".");
             sb.Append(column.Name.SqlScape());
 
             return column;
@@ -417,7 +414,7 @@ namespace Signum.Engine.Linq
             }
 
             sb.Append("SELECT ");
-            if (select.Distinct)
+            if (select.IsDistinct)
                 sb.Append("DISTINCT ");
 
             if (select.Top != null)
@@ -517,6 +514,11 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
+            if (sqlFunction.Object != null)
+            {
+                Visit(sqlFunction.Object);
+                sb.Append(".");
+            }
             sb.Append(sqlFunction.SqlFunction);
             sb.Append("(");
             for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
@@ -563,7 +565,7 @@ namespace Signum.Engine.Linq
                 }
 
                 sb.Append(" AS ");
-                sb.Append(((SourceWithAliasExpression)source).Alias.SqlScape());
+                sb.Append(((SourceWithAliasExpression)source).Alias.Name.SqlScape());
             }
             else
                 this.VisitJoin((JoinExpression)source);

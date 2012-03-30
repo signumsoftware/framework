@@ -10,6 +10,7 @@ using Signum.Engine.Properties;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
+using System.Data.SqlServerCe;
 
 namespace Signum.Engine.Exceptions
 {
@@ -23,7 +24,7 @@ namespace Signum.Engine.Exceptions
 
         static Regex indexRegex = new Regex(@"\'IX_(?<table>[^_]+)(_(?<field>[^_]+))+.*\'"); 
 
-        public UniqueKeyException(SqlException inner) : base(null, inner) 
+        public UniqueKeyException(Exception inner) : base(null, inner) 
         {
             Match m = indexRegex.Match(inner.Message);
             if (m.Success)
@@ -67,7 +68,7 @@ namespace Signum.Engine.Exceptions
 
         protected ForeignKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
        
-        public ForeignKeyException(SqlException inner) : base(null, inner) 
+        public ForeignKeyException(Exception inner) : base(null, inner) 
         {
             Match m = indexRegex.Match(inner.Message);
             
@@ -78,7 +79,7 @@ namespace Signum.Engine.Exceptions
                 TableType = Schema.Current.Tables
                     .Where(kvp => kvp.Value.Name == TableName)
                     .Select(p => p.Key)
-                    .SingleOrDefault();
+                    .SingleOrDefaultEx();
             }
 
             if(inner.Message.Contains("INSERT"))
@@ -92,7 +93,7 @@ namespace Signum.Engine.Exceptions
                     ReferedTableType = Schema.Current.Tables
                                     .Where(kvp => kvp.Value.Name == ReferedTableName)
                                     .Select(p => p.Key)
-                                    .SingleOrDefault();
+                                    .SingleOrDefaultEx();
 
                     ReferedTableType = Reflector.ExtractEnumProxy(ReferedTableType) ?? ReferedTableType; 
                 }
@@ -127,7 +128,7 @@ namespace Signum.Engine.Exceptions
 
         protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        public EntityNotFoundException(Type type, int[] ids)
+        public EntityNotFoundException(Type type, params int[] ids)
             : base(Resources.EntityWithType0AndId1NotFound.Formato(type.Name, ids.ToString(", ")))
         {
             this.Type = type;
@@ -136,12 +137,18 @@ namespace Signum.Engine.Exceptions
     }
 
     [Serializable]
-    public class OrderByNotLastException : Exception
+    public class ConcurrencyException: Exception
     {
-        public OrderByNotLastException(SqlException inner)
-            : base("The translated query has an ORDERBY in a innner SELECT statement, write the query in a different way", inner)
-        {
+        public Type Type { get; private set; }
+        public int[] Ids { get; private set; }
 
+        protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+        public ConcurrencyException(Type type, params int[] ids)
+            : base(Resources.ConcurrencyErrorOnDatabaseTable0Id1.Formato(type.NiceName(), ids.ToString(", ")))
+        {
+            this.Type = type;
+            this.Ids = ids;
         }
     }
 }

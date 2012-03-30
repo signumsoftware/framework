@@ -385,7 +385,7 @@ namespace Signum.Utilities.ExpressionTrees
             string arrayType = na.Type.GetElementType().Name;
 
             if (na.NodeType == ExpressionType.NewArrayBounds)
-                return "new {0}[{1}]".Formato(arrayType, VisitReal(na.Expressions.Single()));
+                return "new {0}[{1}]".Formato(arrayType, VisitReal(na.Expressions.SingleEx()));
             else
                 return "new {0}[] {1}".Formato(arrayType, Block(na.Expressions, VisitReal, collapse));
         } 
@@ -395,7 +395,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             string body = Visit(lambda.Body, lambda.NodeType);
             if (lambda.Parameters.Count == 1)
-                return "{0} => {1}".Formato(Visit(lambda.Parameters.Single(), lambda.NodeType), body);
+                return "{0} => {1}".Formato(Visit(lambda.Parameters.SingleEx(), lambda.NodeType), body);
             else
                 return "({0}) => {1}".Formato(lambda.Parameters.ToString(p => Visit(p, lambda.NodeType), ","), body);
         }

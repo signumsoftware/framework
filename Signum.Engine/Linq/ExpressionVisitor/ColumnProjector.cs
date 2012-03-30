@@ -39,63 +39,70 @@ namespace Signum.Engine.Linq
         HashSet<Expression> candidates;
         ProjectionToken[] tokens;
         ProjectionToken newToken;
-        string[] knownAliases;
-        string newAlias;
+        Alias[] knownAliases;
+        Alias newAlias;
 
 
         private ColumnProjector() { }
 
-        static internal ColumnExpression SingleProjection(ColumnDeclaration declaration, string newAlias, Type columnType)
+        static internal ColumnExpression SingleProjection(ColumnDeclaration declaration, Alias newAlias, Type columnType)
         {
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(ProjectionExpression projector, string newAlias)
+        static internal ProjectedColumns ProjectColumns(ProjectionExpression projector, Alias newAlias)
         {
-            return ProjectColumns(projector.Projector, newAlias, projector.Source.KnownAliases, new[] { projector.Token });
+            return ProjectColumns(projector.Projector, newAlias, projector.Select.KnownAliases, new[] { projector.Token });
         }
 
-        static internal ProjectedColumns ProjectColumnsGroupBy(Expression projector, string newAlias, string[] knownAliases, ProjectionToken[] tokens)
+        static internal ProjectedColumns ProjectColumnsGroupBy(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
         {
-            ProjectionToken newToken = new ProjectionToken();
-
-            Expression newProj;
-            var candidates = DbExpressionNominator.NominateGroupBy(projector, knownAliases, out newProj);
-
-            ColumnProjector cp = new ColumnProjector
+            using (HeavyProfiler.LogNoStackTrace(role:"CP"))
             {
-                tokens = tokens,
-                newToken = newToken,
-                newAlias = newAlias,
-                knownAliases = knownAliases,
-                candidates = candidates
-            };
+                ProjectionToken newToken = new ProjectionToken();
 
-            Expression e = cp.Visit(newProj);
+                Expression newProj;
+                var candidates = DbExpressionNominator.NominateGroupBy(projector, knownAliases, out newProj);
 
-            return new ProjectedColumns(e, cp.generator.columns.AsReadOnly(), newToken);
+                ColumnProjector cp = new ColumnProjector
+                {
+                    tokens = tokens,
+                    newToken = newToken,
+                    newAlias = newAlias,
+                    knownAliases = knownAliases,
+                    candidates = candidates
+                };
+
+                Expression e = cp.Visit(newProj);
+
+                return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken); 
+            }
         }
 
-        static internal ProjectedColumns ProjectColumns(Expression projector, string newAlias, string[] knownAliases, ProjectionToken[] tokens)
+        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
         {
-            ProjectionToken newToken = new ProjectionToken(); 
-
-            Expression newProj;
-            var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj);
-
-            ColumnProjector cp = new ColumnProjector
+            using (HeavyProfiler.LogNoStackTrace(role: "CP"))
             {
-                tokens = tokens,
-                newToken = newToken,
-                newAlias = newAlias,
-                knownAliases = knownAliases,
-                candidates = candidates
-            };
+                ProjectionToken newToken = new ProjectionToken();
 
-            Expression e = cp.Visit(newProj);
+                Expression newProj;
+                var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj);
 
-            return new ProjectedColumns(e, cp.generator.columns.AsReadOnly(), newToken);
+                ColumnProjector cp = new ColumnProjector
+                {
+                    tokens = tokens,
+                    newToken = newToken,
+                    newAlias = newAlias,
+                    knownAliases = knownAliases,
+                    candidates = candidates
+                };
+
+                Expression e = cp.Visit(newProj);
+
+                return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken);
+            }
         }
+
 
         protected override Expression Visit(Expression expression)
         {
@@ -120,9 +127,6 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    if (ConditionsRewriter.IsBooleanExpression(expression))
-                        expression = ConditionsRewriter.MakeSqlValue(expression);
-                   
                     return generator.NewColumn(expression).GetReference(newAlias); ;
                 }
             }
@@ -140,18 +144,49 @@ namespace Signum.Engine.Linq
 
             return token;
         }
+
+        Dictionary<ImplementedByAllExpression, Expression> ibas = new Dictionary<ImplementedByAllExpression, Expression>();
+        protected override Expression VisitImplementedByAll(ImplementedByAllExpression iba)
+        {
+            return ibas.GetOrCreate(iba, () => base.VisitImplementedByAll(iba));
+        }
+
+        Dictionary<ImplementedByExpression, Expression> ibs = new Dictionary<ImplementedByExpression, Expression>();
+        protected override Expression VisitImplementedBy(ImplementedByExpression ib)
+        {
+            return ibs.GetOrCreate(ib, () => base.VisitImplementedBy(ib));
+        }
+
+
+        Dictionary<FieldInitExpression, Expression> fies = new Dictionary<FieldInitExpression, Expression>();
+        protected override Expression VisitFieldInit(FieldInitExpression fie)
+        {
+            return fies.GetOrCreate(fie, () => base.VisitFieldInit(fie));
+        }
     }
 
     internal class ColumnGenerator
     {
-        public List<ColumnDeclaration> columns = new List<ColumnDeclaration>();
+        public ColumnGenerator()
+        {
+        }
+
+        public ColumnGenerator(IEnumerable<ColumnDeclaration> columns)
+        {
+            foreach (var item in columns)
+                this.columns.Add(item.Name, item);
+        }
+
+        public IEnumerable<ColumnDeclaration> Columns { get { return columns.Values; } }
+
+        Dictionary<string, ColumnDeclaration> columns = new Dictionary<string, ColumnDeclaration>(StringComparer.InvariantCultureIgnoreCase);
         int iColumn;
         
         public string GetUniqueColumnName(string name)
         {
             string baseName = name;
             int suffix = 1;
-            while (this.columns.Select(c => c.Name).Contains(name))
+            while (this.columns.ContainsKey(name))
                 name = baseName + (suffix++);
             return name;
         }
@@ -165,7 +200,7 @@ namespace Signum.Engine.Linq
         {
             string columnName = GetUniqueColumnName(ce.Name);
             var result = new ColumnDeclaration(columnName, ce);
-            columns.Add(result);
+            columns.Add(result.Name, result);
             return result; 
         }
 
@@ -173,7 +208,7 @@ namespace Signum.Engine.Linq
         {
             string columnName = GetNextColumnName();
             var result = new ColumnDeclaration(columnName, exp);
-            columns.Add(result);
+            columns.Add(result.Name, result);
             return result; 
         }
     }

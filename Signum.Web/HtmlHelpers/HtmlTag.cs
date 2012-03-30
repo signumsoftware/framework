@@ -7,10 +7,11 @@ using System.Web.Routing;
 using System.Text;
 using Signum.Utilities;
 using System.Collections;
+using System.IO;
 
 namespace Signum.Web
 {
-    public class HtmlTag
+    public class HtmlTag : IHtmlString
     {
         TagBuilder tagBuilder;
         public TagBuilder TagBuilder
@@ -143,6 +144,11 @@ namespace Signum.Web
         {
             return tag.ToHtml(TagRenderMode.Normal);
         }
+
+        public string ToHtmlString()
+        {
+            return tagBuilder.ToString(TagRenderMode.Normal);
+        }
     }
 
     public static class HtmlStringExtensions
@@ -223,5 +229,7 @@ namespace Signum.Web
         {
             throw new NotImplementedException("just to use collection initializers");
         }
+
+        public System.IO.TextWriter TextWriter { get { return new StringWriter(sb); } }
     }
 }

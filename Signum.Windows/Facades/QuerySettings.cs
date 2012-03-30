@@ -48,6 +48,13 @@ namespace Signum.Windows
         public static Dictionary<PropertyRoute, Func<Binding, DataTemplate>> PropertyFormatters { get; set; }
         public static List<FormatterRule> FormatRules { get; set; }
 
+        Dictionary<string, Func<Binding, DataTemplate>> formatters;
+        public Dictionary<string, Func<Binding, DataTemplate>> Formatters
+        {
+            get { return formatters ?? (formatters = new Dictionary<string, Func<Binding, DataTemplate>>()); }
+            set { formatters = value; }
+        }
+
         static QuerySettings()
         {
             FormatRules = new List<FormatterRule>
@@ -68,6 +75,9 @@ namespace Signum.Windows
                     c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
                 new FormatterRule(FormatterPriority.Type, "DateTime",
                     c=>c.Type.UnNullify() == typeof(DateTime), 
+                    c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),    
+                new FormatterRule(FormatterPriority.Type, "TimeSpan",
+                    c=>c.Type.UnNullify() == typeof(TimeSpan), 
                     c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
                 new FormatterRule(FormatterPriority.Type, "Lite",
                     c=>c.Type.IsLite(), //Not on entities! 
@@ -87,8 +97,12 @@ namespace Signum.Windows
             PropertyFormatters.Add(PropertyRoute.Construct(property), formatter);
         }
 
-        public static Func<Binding, DataTemplate> GetFormatter(Column column)
+        public Func<Binding, DataTemplate> GetFormatter(Column column)
         {
+            Func<Binding, DataTemplate> cf;
+            if (formatters != null && formatters.TryGetValue(column.Name, out cf))
+                return cf; 
+
             PropertyRoute route = column.Token.GetPropertyRoute();
             if (route != null)
             {
@@ -101,6 +115,8 @@ namespace Signum.Windows
 
             return fr.Formatter(column);
         }
+
+        public Func<QueryDescription, ISimpleFilterBuilder> SimpleFilterBuilder;
     }
 
     public class FormatterPriority

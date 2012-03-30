@@ -31,7 +31,7 @@ namespace Signum.Test.LinqProvider
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLog = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }      
      
         [TestMethod]
@@ -67,8 +67,8 @@ namespace Signum.Test.LinqProvider
                         let label = a.Label
                         select new
                         {
-                            Artist = label.Country.ToStr,
-                            Author = a.Label.ToStr
+                            Artist = label.Country.Name,
+                            Author = a.Label.Name
                         }).ToList();
 
             Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
@@ -110,11 +110,66 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<AlbumDN>().Select(a => a.ToLite(a.Label.Name)).ToList();
         }
 
+
+        [TestMethod]
+        public void SelectType()
+        {
+            var list = Database.Query<AlbumDN>()
+                .Select(a => a.GetType()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectTypeNull()
+        {
+            var list = Database.Query<LabelDN>()
+                .Select(a => new { Label = a.ToLite(), Owner = a.Owner, OwnerType = a.Owner.Entity.GetType() }).ToList();
+        }
+
         [TestMethod]
         public void SelectLiteIB()
         {
             var list = Database.Query<AlbumDN>()
                 .Select(a => a.Author.ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectTypeIBA()
+        {
+            var list = Database.Query<NoteWithDateDN>()
+                .Select(a => new { Type = a.Target.GetType(), Target = a.Target.ToLite() }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectTypeLiteIB()
+        {
+            var list = Database.Query<AwardNominationDN>()
+                .Select(a => a.Award.RuntimeType).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityWithLiteIb()
+        {
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.Entity is GrammyAwardDN).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityWithLiteIbType()
+        {
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.Entity.GetType() == typeof(GrammyAwardDN)).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityWithLiteIbTypeContains()
+        {
+            Type[] types = new Type[] { typeof(GrammyAwardDN) }; 
+
+            var list = Database.Query<AwardNominationDN>().Where(a => types.Contains(a.Award.Entity.GetType())).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityWithLiteIbRuntimeType()
+        {
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.RuntimeType == typeof(GrammyAwardDN)).ToList();
         }
 
         [TestMethod]
@@ -164,7 +219,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = (from a in Database.Query<AlbumDN>()
                         let band = (BandDN)a.Author
-                        select new { Artist = band.LastAward.ToStr, Author = a.Author.ToStr }).ToList();
+                        select new { Artist = band.ToString(), Author = a.Author.ToString() }).ToList();
 
             Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
         }
@@ -174,17 +229,23 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumDN>()
                 .Select(a => a.Author.ToLite())
-                .Where(a => a.ToStr.StartsWith("Michael")).ToList();
+                .Where(a => a.ToString().StartsWith("Michael")).ToList();
         }
 
         [TestMethod]
         public void SelectLiteIBA()
         {
-            var list = Database.Query<NoteDN>().Select(a => a.Target.ToLite()).ToList();
+            var list = Database.Query<NoteWithDateDN>().Select(a => a.Target.ToLite()).ToList();
         }
 
         [TestMethod]
         public void SelectEntity()
+        {
+            var list = Database.Query<AlbumDN>().ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityNone()
         {
             var list = Database.Query<AlbumDN>().ToList();
         }
@@ -212,7 +273,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEntityIBA()
         {
-            var list = Database.Query<NoteDN>().Select(a => a.Target).ToList();
+            var list = Database.Query<NoteWithDateDN>().Select(a => a.Target).ToList();
         }
 
         [TestMethod]
@@ -252,12 +313,27 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectCastIBA()
         {
-            var list = (from n in Database.Query<NoteDN>()
+            var list = (from n in Database.Query<NoteWithDateDN>()
                         select 
                         ((ArtistDN)n.Target).Name ??
                         ((AlbumDN)n.Target).Name ??
                         ((BandDN)n.Target).Name).ToList();
 
+        }
+
+        [TestMethod]
+        public void SelectCastIBACastOperator()
+        {
+            var list = (from n in Database.Query<NoteWithDateDN>()
+                        select n.Target).Cast<BandDN>().ToList();
+        }
+
+
+        [TestMethod]
+        public void SelectCastIBAOfTypeOperator()
+        {
+            var list = (from n in Database.Query<NoteWithDateDN>()
+                        select n.Target).OfType<BandDN>().ToList();
         }
 
         [TestMethod]
@@ -271,10 +347,56 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectCastIsIBA()
         {
-            var list = (from n in Database.Query<NoteDN>()
+            var list = (from n in Database.Query<NoteWithDateDN>()
                         select n.Target is ArtistDN ?
                         ((ArtistDN)n.Target).Name :
                         ((BandDN)n.Target).Name).ToList(); //Just to full-nominate
+        }
+
+        [TestMethod]
+        public void SelectConditionalMember()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner == null ? l : l.Owner.Entity).Name).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectConditionalToLite()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner == null ? l : l.Owner.Entity).ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectConditionalGetType()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner == null ? l : l.Owner.Entity).GetType()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectCoallesceMember()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner.Entity ?? l ).Name).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectCoallesceToLite()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner.Entity ?? l ).ToLite()).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectCoallesceGetType()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner.Entity ?? l).GetType()).ToList();
+
         }
 
         [TestMethod]
@@ -287,7 +409,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEntityEquals()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
             var list = Database.Query<AlbumDN>().Select(a => a.Author == michael).ToList(); 
         }
@@ -295,7 +417,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectBoolExpression()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
             var list = Database.Query<AlbumDN>().Select(a => a.Author == michael).ToList();
         }
@@ -328,21 +450,21 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectThrowIntNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Id).ToArray());
         }
 
         [TestMethod]
         public void SelectThrowBoolNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Dead).ToArray());
         }
         
         [TestMethod]
         public void SelectThrowEnumNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Sex).ToArray());
         }
 
@@ -395,8 +517,8 @@ namespace Signum.Test.LinqProvider
         {
             var durations = (from a in Database.Query<AlbumDN>()
                              from s in a.Songs
-                             where s.Duration.HasValue
-                             select s.Duration.Value).ToArray();
+                             where s.Seconds.HasValue
+                             select s.Seconds.Value).ToArray();
         }
 
         [TestMethod]
@@ -404,8 +526,8 @@ namespace Signum.Test.LinqProvider
         {
             var durations = (from a in Database.Query<AlbumDN>()
                              from s in a.Songs
-                             where s.Duration.HasValue
-                             select s.Duration == null).ToArray();
+                             where s.Seconds.HasValue
+                             select s.Seconds == null).ToArray();
         }
 
         [TestMethod]
@@ -450,22 +572,27 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectSingleCellWhere()
+        {
+            var list = Database.Query<BandDN>().Where(b => b.Members.OrderBy(a => a.Sex).Select(a => a.Sex).FirstEx() == Sex.Male).Select(a => a.Name).ToList();
+        }
+
+        [TestMethod]
         public void SelectSingleCellSingle()
         {
-            var list = Database.Query<BandDN>()
-                .Select(b => new
-                {
-                    FirstName = b.Members.Select(m => m.Name).First(),
-                    FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
-                    SingleName = b.Members.Take(1).Select(m => m.Name).Single(),
-                    SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefault(),
-                }).ToList();
+            var list = Database.Query<BandDN>().Select(b => new
+            {
+                FirstName = b.Members.Select(m => m.Name).FirstEx(),
+                FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
+                SingleName = b.Members.Take(1).Select(m => m.Name).SingleEx(),
+                SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefaultEx(),
+            }).ToList();
         }
 
         [TestMethod]
         public void SelectMemoryEntity()
         {
-            var artist = Database.Query<ArtistDN>().First();
+            var artist = Database.Query<ArtistDN>().FirstEx();
 
             var songs = Database.Query<AlbumDN>().Select(a => new
             {
@@ -477,7 +604,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectMemoryLite()
         {
-            var artist = Database.Query<ArtistDN>().Select(a=>a.ToLite()).First();
+            var artist = Database.Query<ArtistDN>().Select(a=>a.ToLite()).FirstEx();
 
             var songs = Database.Query<AlbumDN>().Select(a => new
             {
@@ -496,6 +623,39 @@ namespace Signum.Test.LinqProvider
         public void SelectOutsideLiteNull()
         {
             var awards = Database.Query<GrammyAwardDN>().Select(a => ((AmericanMusicAwardDN)(AwardDN)a).ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListLite()
+        {
+            var lists = (from mle in Database.MListQuery((ArtistDN a) => a.Friends)
+                         select new { Artis = mle.Parent.Name, Friend = mle.Element.Entity.Name }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListEntity()
+        {
+            var lists = (from mle in Database.MListQuery((BandDN a) => a.Members)
+                         select new { Band = mle.Parent.Name, Artis = mle.Element.Name }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListEmbedded()
+        {
+            var lists = (from mle in Database.MListQuery((AlbumDN a) => a.Songs)
+                         select mle).ToList();
+        }
+
+        [TestMethod]
+        public void SelectToStrField()
+        {
+            var list = Database.Query<NoteWithDateDN>().Select(a => a.ToStringProperty).ToList();
+        }
+
+        [TestMethod]
+        public void SelectFakedToString()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.ToStringProperty).ToList();
         }
     }
 

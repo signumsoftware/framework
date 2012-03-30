@@ -44,8 +44,8 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(fo.QueryName);
 
-            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, queryDescription);
-            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, queryDescription);
+            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
+            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
             fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
 
             if (parameters.AllKeys.Contains("allowMultiple"))
@@ -54,6 +54,9 @@ namespace Signum.Web
                 if (bool.TryParse(parameters["allowMultiple"], out aux))
                     fo.AllowMultiple = aux;
             }
+
+            if (parameters.AllKeys.Contains("allowChangeColumns"))
+                fo.AllowChangeColumns = bool.Parse(parameters["allowChangeColumns"]);
 
             if (parameters.AllKeys.Contains("async"))
             {
@@ -82,11 +85,11 @@ namespace Signum.Web
             if (parameters.AllKeys.Contains("view"))
                 fo.View = bool.Parse(parameters["view"]);
 
-            if (parameters.AllKeys.Contains("top"))
+            if (parameters.AllKeys.Contains("elems"))
             {
-                int aux;
-                if (int.TryParse(parameters["top"], out aux))
-                    fo.Top = aux;
+                int elems;
+                if (int.TryParse(parameters["elems"], out elems))
+                    fo.ElementsPerPage = elems;
             }
 
             if (parameters.AllKeys.Contains("searchOnLoad"))
@@ -96,11 +99,11 @@ namespace Signum.Web
         }
 
         //name1,operation1,value1;name2,operation2,value2; being values CSV encoded
-        static Regex filterRegex = new Regex(
+        internal static Regex FilterRegex = new Regex(
             "(?<token>[^;,]+),(?<op>[^;,]+),(?<value>'(?:[^']+|'')*'|[^;,]*);".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
-        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription queryDescription)
+        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, Func<QueryToken, List<QueryToken>> subTokens)
         {
             List<FilterOption> result = new List<FilterOption>();
 
@@ -111,12 +114,12 @@ namespace Signum.Web
             if (!field.HasText())
                 return result;
 
-            var matches = filterRegex.Matches(field).Cast<Match>();
+            var matches = FilterRegex.Matches(field).Cast<Match>();
 
             return matches.Select(m =>
             {
                 string name = m.Groups["token"].Value;
-                var token = QueryUtils.Parse(name, queryDescription);
+                var token = QueryUtils.Parse(name, subTokens);
                 return new FilterOption
                 {
                     ColumnName = name,
@@ -129,11 +132,11 @@ namespace Signum.Web
         }
 
         //order1,-order2; minus symbol indicating descending
-        static Regex orderRegex = new Regex(
+        internal static Regex OrderRegex = new Regex(
             "(?<token>-?[^;,]+);".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
-        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, QueryDescription queryDescription)
+        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, Func<QueryToken, List<QueryToken>> subTokens)
         {
             List<OrderOption> result = new List<OrderOption>();
 
@@ -143,7 +146,7 @@ namespace Signum.Web
             if (!field.HasText())
                 return result;
 
-            var matches = orderRegex.Matches(field).Cast<Match>();
+            var matches = OrderRegex.Matches(field).Cast<Match>();
 
             return matches.Select(m =>
             {
@@ -152,14 +155,14 @@ namespace Signum.Web
                 string token = orderType == OrderType.Ascending ? tokenCapture : tokenCapture.Substring(1, tokenCapture.Length - 1);
                 return new OrderOption
                 {
-                    Token = QueryUtils.Parse(token, queryDescription),
+                    Token = QueryUtils.Parse(token, subTokens),
                     OrderType = orderType
                 };
             }).ToList();
         }
 
         //columnName1,displayName1;columnName2,displayName2; being displayNames CSV encoded
-        static Regex columnRegex = new Regex(
+        internal static Regex ColumnRegex = new Regex(
             "(?<token>[^;,]+)(,(?<name>'(?:[^']+|'')*'|[^;,]*))?;".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
@@ -173,7 +176,7 @@ namespace Signum.Web
             if (!field.HasText())
                 return result;
 
-            var matches = columnRegex.Matches(field).Cast<Match>();
+            var matches = ColumnRegex.Matches(field).Cast<Match>();
 
             return matches.Select(m =>
             {
@@ -187,7 +190,7 @@ namespace Signum.Web
             }).ToList();
         }
 
-        static string DecodeValue(string s)
+        public static string DecodeValue(string s)
         {
             if (s.StartsWith("\""))
             {
@@ -202,7 +205,7 @@ namespace Signum.Web
             }
         }
 
-        internal static object Convert(string value, Type type)
+        public static object Convert(string value, Type type)
         {
             if (type.UnNullify() == typeof(bool))
             {
@@ -216,7 +219,7 @@ namespace Signum.Web
                 return null;
             }
             if (type.UnNullify().IsLite())
-                return TypeLogic.ParseLite(Reflector.ExtractLite(type), value);
+                return Database.FillToString(TypeLogic.ParseLite(Reflector.ExtractLite(type), value));
 
             return ReflectionTools.Parse(value, type); 
         }

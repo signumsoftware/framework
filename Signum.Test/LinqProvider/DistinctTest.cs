@@ -27,7 +27,7 @@ namespace Signum.Test.LinqProvider
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLog = new DebugTextWriter();
+            Connector.CurrentLogger = new DebugTextWriter();
         }
 
         [TestMethod]
@@ -58,6 +58,14 @@ namespace Signum.Test.LinqProvider
         public void DistinctIb()
         {
             var authors = Database.Query<AlbumDN>().Select(a => a.Author).Distinct().ToList();
+        }
+
+        [TestMethod]
+        public void DistinctCount()
+        {
+            var count1 = Database.Query<AlbumDN>().Select(a => a.Name).Distinct().Select(a => a).Count();
+            var count2 = Database.Query<AlbumDN>().Select(a => a.Name).Distinct().ToList().Count();
+            Assert.AreEqual(count1, count2);
         }
     }
 }

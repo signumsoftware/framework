@@ -34,16 +34,16 @@ namespace Signum.Engine.Linq
         {
             this.Visit(proj.Projector);
 
-            SelectExpression source = (SelectExpression)this.Visit(proj.Source);
+            SelectExpression source = (SelectExpression)this.Visit(proj.Select);
             Expression projector = this.Visit(proj.Projector);
 
             ProjectionToken token = VisitProjectionToken(proj.Token);
 
-            if (source != proj.Source || projector != proj.Projector || token != proj.Token)
+            if (source != proj.Select || projector != proj.Projector || token != proj.Token)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction, token);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
             }
-            return proj;       
+            return proj;
         }
 
         protected override Expression VisitTable(TableExpression table)
@@ -114,6 +114,7 @@ namespace Signum.Engine.Linq
             this.VisitOrderBy(select.OrderBy);
             this.VisitGroupBy(select.GroupBy);
 
+
             SourceExpression from = this.VisitSource(select.From);
 
             Expression top = this.Visit(select.Top);
@@ -132,20 +133,20 @@ namespace Signum.Engine.Linq
             CurrentScope.SetRange(askedColumns);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy);
 
             return select;
         }
 
-        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, string currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
+        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, Alias currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
         {
-            List<ColumnDeclaration> result = columns.ToList();
+            ColumnGenerator cg = new ColumnGenerator(columns);
          
             foreach (var col in askedColumns.Keys.ToArray())
             {
                 if (col.Alias == currentAlias)
                 {
-                    Expression expr = columns.Single(cd => cd.Name == col.Name).Expression;
+                    Expression expr = columns.SingleEx(cd => cd.Name == col.Name).Expression;
 
                     askedColumns[col] = expr.NodeType == (ExpressionType)DbExpressionType.SqlConstant? expr: col;
                 }
@@ -155,11 +156,10 @@ namespace Signum.Engine.Linq
                     ColumnExpression colExp = expr as ColumnExpression;
                     if (colExp != null)
                     {
-                        ColumnDeclaration cd = result.FirstOrDefault(c => c.Expression.Equals(col));
+                        ColumnDeclaration cd = cg.Columns.FirstOrDefault(c => c.Expression.Equals(col));
                         if (cd == null)
                         {
-                            cd = new ColumnDeclaration(GetUniqueColumnName(result, colExp.Name), colExp);
-                            result.Add(cd);
+                            cd = cg.MapColumn(colExp);
                         }
 
                         askedColumns[col] = new ColumnExpression(col.Type, currentAlias, cd.Name);
@@ -172,8 +172,8 @@ namespace Signum.Engine.Linq
             }
 
 
-            if (columns.Count != result.Count)
-                return result.ToReadOnly();
+            if (columns.Count != cg.Columns.Count())
+                return cg.Columns.ToReadOnly();
 
             return columns;
         }
@@ -192,6 +192,7 @@ namespace Signum.Engine.Linq
             scopes = scopes.Push(new Dictionary<ColumnExpression, Expression>());
             return new Disposable(() => scopes = scopes.Pop());
         }
+
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
