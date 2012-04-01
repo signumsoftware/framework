@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -122,6 +123,12 @@ namespace Signum.Windows
             }
 
             Token = tokens.LastOrDefault();
+        }
+
+        void cbi_Loaded(object sender, RoutedEventArgs e)
+        {
+            //throw new NotImplementedException();
+            string num = AutomationProperties.GetItemStatus((ComboBoxItem)sender);
         }
 
         public QueryTokenBuilder()

@@ -103,6 +103,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="DynamicQuery\FilterLine.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DynamicQuery\PageSizeSelector.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -124,6 +128,9 @@
     <Compile Include="DynamicQuery\DynamicQueryBachRequest.cs" />
     <Compile Include="DynamicQuery\ElementsInPageLabel.xaml.cs">
       <DependentUpon>ElementsInPageLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\FilterLine.xaml.cs">
+      <DependentUpon>FilterLine.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicQuery\PageSizeSelector.xaml.cs">
       <DependentUpon>PageSizeSelector.xaml</DependentUpon>

@@ -17,6 +17,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Signum.Entities.DynamicQuery;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -247,6 +248,28 @@ namespace Signum.Windows
         void searchControl_DoubleClick()
         {
             OkAndClose();
+            
+        }
+
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new SearchWindowAutomationPeer(this);
+        }
+        
+    }
+
+    public class SearchWindowAutomationPeer : WindowAutomationPeer
+    {
+        public SearchWindowAutomationPeer(SearchWindow owner)
+            : base(owner)
+        {   
+         
+        }
+
+        protected override string GetItemStatusCore()
+        {
+            return QueryUtils.GetQueryUniqueKey(((SearchWindow)Owner).QueryName);
         }
     }
 
