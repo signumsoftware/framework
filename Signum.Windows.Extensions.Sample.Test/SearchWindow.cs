@@ -21,18 +21,14 @@ namespace Signum.Windows.Extensions.Sample.Test
                 //win.Core.MenuItemInvoke("Music");
                 using (SearchWindowProxy albums = new SearchWindowProxy(win.Owner.MenuItemOpenWindow("Music", "Albumes")))
                 {
-                    albums.SelectToken("Entity.Name");
-                    var filter = albums.AddFilter();
-                    filter.SetOperation(FilterOperation.Contains);
+                    albums.AddFilter("Entity.Name", FilterOperation.Contains, "Olmo");
+
                     albums.Search();
                     using (NormalWindowProxy album = albums.OpenItemByIndex(0))
                     {
 
 
                     }
-                    //win.Core.ChildById("txtA").Pattern<ValuePattern>().SetValue("10");
-                    //win.Core.ChildById("txtB").Pattern<ValuePattern>().SetValue("5");
-
                 }
             }
 

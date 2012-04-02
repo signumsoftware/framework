@@ -25,8 +25,6 @@ namespace Signum.Windows.UIAutomation
 
             var lastFilter = SearchControl.LastFilter();
 
-
-
             return null;
         }
 
