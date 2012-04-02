@@ -48,9 +48,9 @@ namespace Signum.Engine.Chart
 
             dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.RuntimeType == type).ToDictionary(a=>a.Related));
 
-            double[] bright = dic.Count < 18 ? new double[]{.80}:
-                            dic.Count < 72 ? new double[]{.90, .50}:
-                            new double[]{1, .60, .30};
+            double[] bright = dic.Count < 18 ? new double[]{.60}:
+                            dic.Count < 72 ? new double[]{.90, .60}:
+                            new double[] { .90, .60, .30 };
 
             var hues = (dic.Count / bright.Length);
 
@@ -62,7 +62,7 @@ namespace Signum.Engine.Chart
             {
                 for (int h = 0; h < hues; h++)
                 {
-                    values[i * hues + h].Color = new ColorDN { Argb = ColorExtensions.FromHsv(h * hueStep, .8, bright[i]).ToArgb() };
+                    values[i * hues + h].Color = new ColorDN { Argb = ColorExtensions.FromHsv(240 - h * hueStep, .8, bright[i]).ToArgb() };
                 }
             }
 
@@ -123,6 +123,9 @@ namespace Signum.Engine.Chart
 
         public static Color? ColorFor(Lite lite)
         {
+            if (lite == null)
+                return null;
+
             return Colors.Value.TryGetC(lite.RuntimeType).TryGetS(lite.Id);
         }
     }
