@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using Signum.Entities;
 using Signum.Engine;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
@@ -65,7 +66,9 @@ namespace Signum.Web
             Enum myEnum = obj as Enum;
             if (myEnum != null)
             {
+                result["Id"] = Convert.ToInt32(myEnum);
                 result["Value"] = myEnum.ToString();
+                result["ToStr"] =  myEnum.NiceToString();
             }
 
             return result;
