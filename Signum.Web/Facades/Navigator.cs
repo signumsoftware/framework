@@ -807,8 +807,18 @@ namespace Signum.Web
         protected internal virtual string ResolveWebTypeName(Type type)
         {
             var es = EntitySettings.TryGetC(type);
-            return es != null ? es.WebTypeName : 
-                TypeLogic.GetCleanName(type); //For types registered in the schema but not in web
+            if (es != null)
+                return es.WebTypeName;
+
+            if (type.IsIdentifiableEntity())
+            {
+                var cleanName = TypeLogic.TryGetCleanName(type);
+                if (cleanName != null)
+                    return cleanName;
+            }
+
+            throw new InvalidOperationException("Impossible to resolve WebTypeName for '{0}' because is not registered in Navigator's EntitySettings".Formato(type.Name) + 
+                (type.IsIdentifiableEntity() ? " or the Schema" : null));
         }
 
         protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
