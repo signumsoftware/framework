@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.Web.Mvc;
+using System.Linq.Expressions;
 
 namespace Signum.Web
 {
@@ -71,6 +73,16 @@ namespace Signum.Web
                     RouteHelper.New().SignumAction("GetChooser"));
         }
 
+        public static JsInstruction Submit<T>(Expression<Action<T>> action) where T : Controller
+        {
+            return Submit(RouteHelper.New().Action(action));
+        }
+
+        public static JsInstruction Submit<T>(Expression<Action<T>> action, JsInstruction requestExtraJsonData) where T:Controller
+        {
+            return Submit(RouteHelper.New().Action(action), requestExtraJsonData);
+        }
+
         public static JsInstruction Submit(JsValue<string> controllerUrl)
         {
             return new JsInstruction(() => "SF.submit({0})".Formato(controllerUrl.ToJS()));
@@ -90,6 +102,11 @@ namespace Signum.Web
                 throw new ArgumentException("requestExtraJsonData must be given to SubmitOnly. Use Submit otherwise");
 
             return new JsInstruction(() => "SF.submitOnly({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
+        }
+
+        public static JsInstruction AjaxCall<T>(Expression<Action<T>> action, JsInstruction requestData, JsFunction onSuccess) where T : Controller
+        {
+            return AjaxCall(RouteHelper.New().Action(action), requestData, onSuccess);
         }
 
         public static JsInstruction AjaxCall(JsValue<string> controllerUrl, JsInstruction requestData, JsFunction onSuccess)
