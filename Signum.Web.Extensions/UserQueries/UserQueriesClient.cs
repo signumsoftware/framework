@@ -86,7 +86,7 @@ namespace Signum.Web.UserQueries
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                     Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
 
-                ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
+                ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
                 ButtonBarEntityHelper.RegisterEntityButtons<UserQueryDN>((ctx, entity) =>
                 {
@@ -117,9 +117,9 @@ namespace Signum.Web.UserQueries
             }
         }
         
-        static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
+        static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
-            if (prefix.HasText())
+            if (ctx.Prefix.HasText())
                 return null;
 
             var allowed = TypeAuthLogic.GetAllowed(typeof(UserQueryDN)).Max().GetUI();
@@ -129,11 +129,11 @@ namespace Signum.Web.UserQueries
             var items = new List<ToolBarButton>();
 
             Lite<UserQueryDN> currentUserQuery = null;
-            string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
+            string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                currentUserQuery = new Lite<UserQueryDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
+                currentUserQuery = new Lite<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
 
-            foreach (var uq in UserQueryLogic.GetUserQueries(queryName))
+            foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName))
             {
                 string uqName = uq.InDB().Select(q => q.DisplayName).SingleOrDefaultEx();
                 items.Add(new ToolBarButton
@@ -153,10 +153,10 @@ namespace Signum.Web.UserQueries
                 string uqNewText = Resources.UserQueries_CreateNew;
                 items.Add(new ToolBarButton
                 {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserQueryNew"),
+                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), new JsFindNavigator(prefix).requestData()).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), new JsFindNavigator(ctx.Prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }
@@ -166,7 +166,7 @@ namespace Signum.Web.UserQueries
                 string uqEditText = Resources.UserQueries_Edit;
                 items.Add(new ToolBarButton
                 {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserQueryEdit"),
+                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
                     AltText = uqEditText,
                     Text = uqEditText,
                     Href = Navigator.ViewRoute(currentUserQuery),
@@ -179,7 +179,7 @@ namespace Signum.Web.UserQueries
             {
                 new ToolBarMenu
                 { 
-                    Id = TypeContextUtilities.Compose(prefix, "tmUserQueries"),
+                    Id = TypeContextUtilities.Compose(ctx.Prefix, "tmUserQueries"),
                     AltText = uqUserQueriesText,
                     Text = uqUserQueriesText,
                     DivCssClass = ToolBarButton.DefaultQueryCssClass,

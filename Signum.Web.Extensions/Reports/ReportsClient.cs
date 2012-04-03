@@ -88,7 +88,7 @@ namespace Signum.Web.Reports
                 }
 
                 if (toExcelPlain || excelReport)
-                    ButtonBarQueryHelper.GetButtonBarForQueryName +=new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName); 
+                    ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName); 
             }
         }
 
@@ -115,19 +115,19 @@ namespace Signum.Web.Reports
             }
         }
 
-        static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
+        static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
             Lite<UserQueryDN> currentUserQuery = null;
-            string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
+            string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                currentUserQuery = new Lite<UserQueryDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
+                currentUserQuery = new Lite<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
 
             ToolBarButton plain = new ToolBarButton
             {
-                Id = TypeContextUtilities.Compose(prefix, "qbToExcelPlain"),
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
                 AltText = Resources.ExcelReport,
                 Text = Resources.ExcelReport,
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((currentUserQuery != null ? currentUserQuery.IdOrNull : null), prefix)).ToJS(),
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((currentUserQuery != null ? currentUserQuery.IdOrNull : null), ctx.Prefix)).ToJS(),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
@@ -138,7 +138,7 @@ namespace Signum.Web.Reports
                 if (ToExcelPlain)
                     items.Add(plain);
 
-                List<Lite<ExcelReportDN>> reports = ReportsLogic.GetExcelReports(queryName);
+                List<Lite<ExcelReportDN>> reports = ReportsLogic.GetExcelReports(ctx.QueryName);
 
                 if (reports.Count > 0)
                 {
@@ -151,7 +151,7 @@ namespace Signum.Web.Reports
                         {
                             AltText = report.ToString(),
                             Text = report.ToString(),
-                            OnClick = Js.SubmitOnly(RouteHelper.New().Action("ExcelReport", "Report"), "$.extend({{excelReport:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato(report.Id, prefix)).ToJS(),
+                            OnClick = Js.SubmitOnly(RouteHelper.New().Action("ExcelReport", "Report"), "$.extend({{excelReport:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato(report.Id, ctx.Prefix)).ToJS(),
                             DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });
                     }
@@ -161,10 +161,10 @@ namespace Signum.Web.Reports
 
                 items.Add(new ToolBarButton
                 {
-                    Id = TypeContextUtilities.Compose(prefix, "qbReportAdminister"),
+                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"),
                     AltText = Resources.ExcelAdminister,
                     Text = Resources.ExcelAdminister,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Administer", "Report"), "{{webQueryName:'{0}'}}".Formato(Navigator.ResolveWebQueryName(queryName))).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Administer", "Report"), "{{webQueryName:'{0}'}}".Formato(Navigator.ResolveWebQueryName(ctx.QueryName))).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
 
@@ -172,7 +172,7 @@ namespace Signum.Web.Reports
                 {
                     new ToolBarMenu
                     { 
-                        Id = TypeContextUtilities.Compose(prefix, "tmExcel"),
+                        Id = TypeContextUtilities.Compose(ctx.Prefix, "tmExcel"),
                         AltText = "Excel", 
                         Text = "Excel",
                         DivCssClass = ToolBarButton.DefaultQueryCssClass,

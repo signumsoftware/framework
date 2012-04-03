@@ -106,7 +106,7 @@ namespace Signum.Web.Chart
                     }
                 });
 
-                ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
+                ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
                 RouteTable.Routes.MapRoute(null, "ChartFor/{webQueryName}",
                     new { controller = "Chart", action = "Index", webQueryName = "" });
@@ -222,19 +222,21 @@ namespace Signum.Web.Chart
             return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToOrder()).ToList();
         }
 
-        static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(System.Web.Mvc.ControllerContext controllerContext, object queryName, Type entityType, string prefix)
+        static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
             if (!ChartPermissions.ViewCharting.IsAuthorized())
                 return null;
 
             string chartNewText = Resources.Chart_Chart;
-            return new ToolBarButton[] {
+
+            return new[]
+            {
                 new ToolBarButton
                 {
-                    Id = TypeContextUtilities.Compose(prefix, "qbChartNew"),
+                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
                     AltText = chartNewText,
                     Text = chartNewText,
-                    OnClick =  Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(prefix).requestData()).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(ctx.Prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 }
             };

@@ -35,7 +35,7 @@ namespace Signum.Web.Operations
 
             Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);
             Constructor.ConstructorManager.VisualGeneralConstructor += new Func<ConstructContext, ActionResult>(Manager.ConstructorManager_VisualGeneralConstructor); 
-            ButtonBarQueryHelper.GetButtonBarForQueryName += Manager.ButtonBar_GetButtonBarForQueryName;
+            ButtonBarQueryHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarForQueryName);
 
             if (contextualMenuInSearchWindow)
                 OperationsContextualItemsHelper.Start();
@@ -61,7 +61,7 @@ namespace Signum.Web.Operations
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
 
-        internal ToolBarButton[] ButtonBar_GetButtonBarElement(ToolBarButtonContext ctx, ModifiableEntity entity)
+        internal ToolBarButton[] ButtonBar_GetButtonBarElement(EntityButtonContext ctx, ModifiableEntity entity)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -109,19 +109,19 @@ namespace Signum.Web.Operations
             return buttons.ToArray();
         }
 
-        internal ToolBarButton[] ButtonBar_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
+        internal ToolBarButton[] ButtonBar_GetButtonBarForQueryName(QueryButtonContext qbc)
         {
-            if (entityType == null || queryName == null)
+            if (qbc.EntityType == null || qbc.QueryName == null)
                 return null;
 
-            var list = OperationLogic.ServiceGetQueryOperationInfos(entityType);
+            var list = OperationLogic.ServiceGetQueryOperationInfos(qbc.EntityType);
             var contexts = (from oi in list
                            let os = (QueryOperationSettings)Settings.TryGetC(oi.Key)
                            let ctx = new QueryOperationContext
                            {
                                OperationSettings = os,
                                OperationInfo = oi,
-                               Prefix = prefix
+                               Prefix = qbc.Prefix
                            }
                            where os == null || os.IsVisible == null || os.IsVisible(ctx)
                            select ctx).ToList();
