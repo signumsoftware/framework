@@ -12,8 +12,8 @@ namespace Signum.Engine.WikiMarkup
     {
         public WikiSettings(bool format)
         {
-            Strong = Em = Underlined = Strike = Lists = Titles = format; 
-            LineBreaks = MaxTwoLineBreaks = true;
+            EncodeHtml = CodeRegion = LineBreaks = Strong = Em = Underlined = Strike = Lists = Titles = format;
+            MaxTwoLineBreaks = true;
         }
 
         public Func<string, string> TokenParser;
@@ -25,6 +25,10 @@ namespace Signum.Engine.WikiMarkup
         public bool Titles { get; set; }
         public bool LineBreaks { get; set; }
 
+        public bool EncodeHtml { get; set; }
+
+        public bool CodeRegion { get; set; }
+
         public bool MaxTwoLineBreaks { get; set; }
 
     }
@@ -35,24 +39,58 @@ namespace Signum.Engine.WikiMarkup
 
         public static string WikiParse(this string content, WikiSettings settings)
         {
-            string result;
+            string result = content;
 
-            //1: Replace token delimiters which are different from their encoded string so that they are not encoded
-            result = Regex.Replace(content, "'{2,}", m => "####" + m.Length + "####");
+            Dictionary<string, string> codeRegions = null;
+            result = SaveCodeRegions(result, out codeRegions);
 
-            //2: Encode all text
-            result = HttpUtility.HtmlEncode(result);
+            if (settings.EncodeHtml)
+            {
+                //1: Replace token delimiters which are different from their encoded string so that they are not encoded
+                result = Regex.Replace(result, "'{2,}", m => "####" + m.Length + "####");
 
-            //3: Replace encrypted tokens to original tokens 
-            result = Regex.Replace(content, "####(?<count>\\d+)####", m => new string('\'', m.Groups["count"].Length));
-            
-            //4: Process tokens
+                //2: Encode all text
+                result = HttpUtility.HtmlEncode(result);
+
+                //3: Replace encrypted tokens to original tokens 
+                result = Regex.Replace(result, "####(?<count>\\d+)####", m => new string('\'', int.Parse(m.Groups["count"].Value)));
+            }
+
             result = ProcessTokens(result, settings);
 
-            //5: Process format
             result = ProcessFormat(result, settings);
-           
+
+            result = WriteCodeRegions(result, codeRegions, settings);
+
             return result.Trim();
+        }
+
+        private static string WriteCodeRegions(string result, Dictionary<string, string> codeRegions, WikiSettings settings)
+        {
+            result = Regex.Replace(result, @"%%%CODE%(?<guid>.+)%%%", m =>
+            {
+                var value = codeRegions[m.Groups["guid"].Value];
+                return settings.CodeRegion ?
+                    "<pre><code>" + (settings.EncodeHtml ? HttpUtility.HtmlEncode(value) : value) + "</code></pre>" :
+                    codeRegions[m.Groups["guid"].Value];
+            });
+            return result;
+        }
+
+        private static string SaveCodeRegions(string content, out Dictionary<string, string> codeRegions)
+        {
+            var regions =  new Dictionary<string, string>();
+
+            var result =  Regex.Replace(content, @"\< *code( lang\ *= *\""(?<lang>.*)\"")? *\>(?<code>.*)\</ *code *\>", m =>
+            {
+                var guid = Guid.NewGuid();
+                regions.Add(guid.ToString(), m.Groups["code"].Value);
+                return "%%%CODE%{0}%%%".Formato(guid);
+            }, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+            codeRegions = regions;
+
+            return result;
         }
 
         static string ProcessTokens(string content, WikiSettings settings)
@@ -111,14 +149,14 @@ namespace Signum.Engine.WikiMarkup
 
             // Replacing lists
             content = Regex.Replace(content,
-     "^\\s*(?<begin>\\*{1}[ ]?)(?<content>.+)(?<end>[^*]?)[\\n]*",
-     settings.Lists ? "<li>${content}</li>" : "${content} ",
-     RegexOptions.Compiled | RegexOptions.Multiline);
+             "^\\s*(?<begin>\\*{1}[ ]?)(?<content>.+)(?<end>[^*]?)[\\n]*",
+             settings.Lists ? "<li>${content}</li>" : "${content} ",
+             RegexOptions.Compiled | RegexOptions.Multiline);
 
             content = Regex.Replace(content,
-     "^\\s*(?<begin>\\#{1}[ ]?)(?<content>.+)(?<end>[^#]?)[\\n]*",
-     settings.Lists ? "<oli>${content}</oli>" : "${content} ",
-     RegexOptions.Compiled | RegexOptions.Multiline);
+             "^\\s*(?<begin>\\#{1}[ ]?)(?<content>.+)(?<end>[^#]?)[\\n]*",
+             settings.Lists ? "<oli>${content}</oli>" : "${content} ",
+             RegexOptions.Compiled | RegexOptions.Multiline);
 
             content = Regex.Replace(content,
             "(?<content>\\<li\\>{1}.+\\<\\/li\\>)",
@@ -126,14 +164,14 @@ namespace Signum.Engine.WikiMarkup
             RegexOptions.Compiled);
 
             content = Regex.Replace(content,
-       "(?<content>\\<oli\\>{1}.+\\<\\/oli\\>)",
-        settings.Lists ? "<ol>${content}</ol>" : "${content} ",
-       RegexOptions.Compiled);
+           "(?<content>\\<oli\\>{1}.+\\<\\/oli\\>)",
+            settings.Lists ? "<ol>${content}</ol>" : "${content} ",
+           RegexOptions.Compiled);
 
             content = Regex.Replace(content,
-       "(?<content>oli\\>{1})",
-       "li>",
-       RegexOptions.Compiled);
+           "(?<content>oli\\>{1})",
+           "li>",
+           RegexOptions.Compiled);
 
 
             // Replacing titles
