@@ -128,7 +128,7 @@ WriteLiteral("</button>                \r\n");
 WriteLiteral("        ");
 
 
-   Write(ButtonBarEntityHelper.GetForEntity(new ToolBarButtonContext
+   Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         { 
            Buttons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
            ControllerContext = this.ViewContext,

@@ -134,7 +134,7 @@ WriteLiteral("</a>  \r\n");
 WriteLiteral("    ");
 
 
-Write(ButtonBarEntityHelper.GetForEntity(new ToolBarButtonContext
+Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     { 
         Buttons = ViewButtons.Save,
         ControllerContext = this.ViewContext,

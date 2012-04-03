@@ -10,34 +10,31 @@ using Signum.Entities;
  
 namespace Signum.Web
 {
-
-    public class ToolBarButtonContext
+    public class EntityButtonContext
     {
         public ControllerContext ControllerContext { get; internal set; }
         public string PartialViewName { get; internal set; }
         public string Prefix{ get; internal set; }
         public ViewButtons Buttons { get; internal set; }
     }
-
-    public delegate ToolBarButton[] GetToolBarButtonEntityDelegate<T>(ToolBarButtonContext ctx, T entity);
     
     public static class ButtonBarEntityHelper
     {
         static Dictionary<Type, List<Delegate>> entityButtons = new Dictionary<Type, List<Delegate>>();
-        static List<GetToolBarButtonEntityDelegate<ModifiableEntity>> globalButtons = new List<GetToolBarButtonEntityDelegate<ModifiableEntity>>();
+        static List<Func<EntityButtonContext, ModifiableEntity, ToolBarButton[]>> globalButtons = new List<Func<EntityButtonContext, ModifiableEntity, ToolBarButton[]>>();
 
-        public static void RegisterEntityButtons<T>(GetToolBarButtonEntityDelegate<T> getToolBarButtons)
+        public static void RegisterEntityButtons<T>(Func<EntityButtonContext, T, ToolBarButton[]> getToolBarButtons)
             where T : ModifiableEntity
         {
             entityButtons.GetOrCreate(typeof(T)).Add(getToolBarButtons);
         }
 
-        public static void RegisterGlobalButtons(GetToolBarButtonEntityDelegate<ModifiableEntity> getToolBarButtons)
+        public static void RegisterGlobalButtons(Func<EntityButtonContext, ModifiableEntity, ToolBarButton[]> getToolBarButtons)
         {
             globalButtons.Add(getToolBarButtons);
         }
 
-        public static List<ToolBarButton> GetForEntity(ToolBarButtonContext ctx, ModifiableEntity entity)
+        public static List<ToolBarButton> GetForEntity(EntityButtonContext ctx, ModifiableEntity entity)
         {
             List<ToolBarButton> links = new List<ToolBarButton>();
 
@@ -56,21 +53,30 @@ namespace Signum.Web
             return links;
         }
     }
-    
-    public delegate ToolBarButton[] GetToolBarButtonQueryDelegate(ControllerContext controllerContext, object queryName, Type entityType, string prefix);
+
+    public class QueryButtonContext
+    {
+        public object QueryName { get; internal set; }
+        public Type EntityType { get; internal set; }
+        public string Prefix { get; internal set; }
+        public ControllerContext ControllerContext { get; internal set; }
+    }
 
     public static class ButtonBarQueryHelper
     {
-        public static event GetToolBarButtonQueryDelegate GetButtonBarForQueryName;
+        static List<Func<QueryButtonContext, ToolBarButton[]>> globalButtons = new List<Func<QueryButtonContext, ToolBarButton[]>>();
 
-        public static List<ToolBarButton> GetButtonBarElementsForQuery(ControllerContext context, object queryName, Type entityType, string prefix)
+        static Dictionary<object, List<Func<QueryButtonContext, ToolBarButton[]>>> queryButtons = new Dictionary<object, List<Func<QueryButtonContext, ToolBarButton[]>>>();
+
+        public static List<ToolBarButton> GetButtonBarElementsForQuery(QueryButtonContext ctx)
         {
             List<ToolBarButton> elements = new List<ToolBarButton>();
-            if (GetButtonBarForQueryName != null)
-                elements.AddRange(GetButtonBarForQueryName.GetInvocationList()
-                    .Cast<GetToolBarButtonQueryDelegate>()
-                    .Select(d => d(context, queryName, entityType, prefix) ?? Enumerable.Empty<ToolBarButton>())
-                    .NotNull().SelectMany(d => d).ToList());
+            var querySpecific = queryButtons.TryGetC(ctx.QueryName);
+            if (querySpecific != null)
+                elements.AddRange(querySpecific.SelectMany(d => d(ctx) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
+
+            if (globalButtons != null)
+                elements.AddRange(globalButtons.SelectMany(d => d(ctx) ?? Enumerable.Empty<ToolBarButton>()).NotNull().ToList());
 
             foreach (var el in elements)
             {
@@ -79,6 +85,16 @@ namespace Signum.Web
             }
 
             return elements;
+        }
+
+        public static void RegisterQueryButton(object queryName, Func<QueryButtonContext, ToolBarButton[]> buttonFactory)
+        {
+            queryButtons.GetOrCreate(queryName).Add(buttonFactory);
+        }
+
+        public static void RegisterGlobalButtons(Func<QueryButtonContext, ToolBarButton[]> buttonsFactory)
+        {
+            globalButtons.Add(buttonsFactory);
         }
 
         public static MvcHtmlString ToString(this List<ToolBarButton> elements, HtmlHelper helper)
