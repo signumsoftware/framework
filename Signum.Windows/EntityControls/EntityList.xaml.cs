@@ -132,33 +132,15 @@ namespace Signum.Windows
 
             IList list = EnsureEntities();
 
-            if (Move)
-            {
-                int index = InsertIndex();
-                if (value is object[])
-                {
-                    object[] array = ((object[])value);
-
-                    for (int i = 0; i < array.Length; i++)
-                    {
-                        list.Insert(index + i, array[i]);
-                    }
-                }
-                else
-                    list.Insert(index, value);
-
-                SetEntityUserInteraction(list[index]);
-            }
+            int index = Move ? InsertIndex() : list.Count;
+            if (value is IEnumerable)
+                foreach (var item in (IEnumerable)value)
+                    list.Insert(index++, item);
             else
-            {
-                if (value is object[])
-                    foreach (var a in ((object[])value))
-		                 list.Add(a);
-                else
-                    list.Add(value);
+                list.Insert(index, value);
 
-                SetEntityUserInteraction(list[list.Count - 1]); 
-            }
+            if (index > 0)
+                SetEntityUserInteraction(list[index - 1]);
         }
 
         protected override void btView_Click(object sender, RoutedEventArgs e)
