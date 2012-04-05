@@ -313,7 +313,7 @@ namespace Signum.Windows
             else if (Implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
             else
-                return Navigator.SelectType(this.FindCurrentWindow(), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+                return Navigator.SelectType(Window.GetWindow(this), ((ImplementedByAttribute)Implementations).ImplementedTypes);
         }
 
         protected object OnCreate()
@@ -327,8 +327,8 @@ namespace Signum.Windows
                 Type type = SelectType();
                 if (type == null)
                     return null;
-                   
-                object entity = Constructor.Construct(type, this.FindCurrentWindow());
+
+                object entity = Constructor.Construct(type, Window.GetWindow(this));
 
                 value = Server.Convert(entity, Type);
             }

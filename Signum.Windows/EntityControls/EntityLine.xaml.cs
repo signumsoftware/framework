@@ -19,6 +19,9 @@ using System.Reflection;
 using System.ComponentModel;
 using Signum.Entities;
 using System.Collections;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
+using System.Windows.Threading;
 
 namespace Signum.Windows
 {
@@ -164,5 +167,39 @@ namespace Signum.Windows
                 ActivateAutoComplete();
         }
 
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new EntityLinePeer(this);
+        }
+
+    }
+
+    public class EntityLinePeer : LineBasePeer, IInvokeProvider
+    {
+        public EntityLinePeer(EntityLine el)
+            : base(el)
+        {
+        }
+
+        public override object GetPattern(PatternInterface patternInterface)
+        {
+            if (patternInterface == PatternInterface.Invoke)
+                return this;
+
+            return base.GetPattern(patternInterface);
+        }
+
+        public void Invoke()
+        {
+            if (!base.IsEnabled() || !((EntityLine)Owner).AutoComplete)
+                throw new InvalidOperationException("AutoComplete not enabled");
+
+            base.Dispatcher.BeginInvoke(DispatcherPriority.Input, new DispatcherOperationCallback(obj =>
+            {
+                ((EntityLine)base.Owner).ActivateAutoComplete();
+                return null;
+            }), null);
+
+        }
     }
 }

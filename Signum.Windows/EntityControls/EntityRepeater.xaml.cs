@@ -35,7 +35,6 @@ namespace Signum.Windows
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
-            Common.SetCurrentWindow((DependencyObject)sender, this.FindCurrentWindow());
         }
 
         protected override void btCreate_Click(object sender, RoutedEventArgs e)

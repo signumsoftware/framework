@@ -28,8 +28,8 @@
 				</RadialGradientBrush>
 			</Border.BorderBrush>
             <StackPanel  TextBlock.Foreground="{DynamicResource BlueBorder}" HorizontalAlignment="Left" Orientation="Vertical" Margin="6">
-			    <TextBox x:Name="textBox" TextBlock.FontWeight="SemiBold"  IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}"/>
-                <TextBox Text="{Binding ToStringProperty, Mode=OneWay}" IsReadOnly="True" Foreground="#ff666666" Background="Transparent" BorderThickness="0" FontSize="14" />
+			    <TextBox x:Name="tbEntityId" TextBlock.FontWeight="SemiBold"  IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}"/>
+                <TextBox x:Name="tbEntityToStr" Text="{Binding ToStringProperty, Mode=OneWay}" IsReadOnly="True" Foreground="#ff666666" Background="Transparent" BorderThickness="0" FontSize="14" />
             </StackPanel>
 		</Border>
 	</Border>

@@ -24,6 +24,7 @@ using System.Windows.Documents;
 using Signum.Windows.DynamicQuery;
 using System.Diagnostics;
 using System.Collections.Specialized;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -730,7 +731,7 @@ namespace Signum.Windows
             else if (Implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
             else
-                return Navigator.SelectType(this.FindCurrentWindow(), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+                return Navigator.SelectType(Window.GetWindow(this), ((ImplementedByAttribute)Implementations).ImplementedTypes);
         }
 
 
@@ -739,7 +740,7 @@ namespace Signum.Windows
             if (!Create)
                 return;
 
-            IdentifiableEntity result = Creating == null ? (IdentifiableEntity)Constructor.Construct(SelectType(), this.FindCurrentWindow()) : Creating();
+            IdentifiableEntity result = Creating == null ? (IdentifiableEntity)Constructor.Construct(SelectType(), Window.GetWindow(this)) : Creating();
 
             if (result == null)
                 return;
@@ -882,7 +883,7 @@ namespace Signum.Windows
                 return;
 
             string result = token.NiceName();
-            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
+            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, Window.GetWindow(this)))
             {
                 ClearResults();
 
@@ -916,7 +917,7 @@ namespace Signum.Windows
 
             ColumnInfo col = (ColumnInfo)gvch.Tag;
             string result = col.Column.DisplayName;
-            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
+            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, Window.GetWindow(this)))
             {
                 col.Column.DisplayName = result;
                 gvch.Content = result;
@@ -973,6 +974,29 @@ namespace Signum.Windows
         private void btFilters_Unchecked(object sender, RoutedEventArgs e)
         {
             rowFilters.Height = new GridLength(); //Auto
+        }
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new SearchControlPeer(this);
+        }
+    }
+
+    public class SearchControlPeer : UserControlAutomationPeer
+    {
+        public SearchControlPeer(SearchControl sc)
+            : base(sc)
+        {
+        }
+
+        protected override string GetItemStatusCore()
+        {
+            var pr = Common.GetTypeContext(Owner);
+
+            if (pr == null)
+                return null;
+
+            return pr.ToString();
         }
     }
 
