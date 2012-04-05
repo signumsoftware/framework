@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using Signum.Utilities;
+using System.IO;
 
 namespace Signum.Engine.Authorization
 {
@@ -71,6 +72,8 @@ namespace Signum.Engine.Authorization
 
                 result.Save();
 
+                File.AppendAllText(@"c:\log\userTickets.txt", "\r\nNew Ticket\t" + result.Ticket);
+
                 return tr.Commit(result.StringTicket());
             }
 
@@ -83,16 +86,24 @@ namespace Signum.Engine.Authorization
                 Tuple<int, string> pair = UserTicketDN.ParseTicket(ticket);
 
                 UserDN result = Database.Retrieve<UserDN>(pair.Item1);
-                CleanExpiredTickets(result); 
-                
+                CleanExpiredTickets(result);
+
+                File.AppendAllText(@"c:\log\userTickets.txt", "\r\nRequested Ticket\t" + pair.Item2);
+                File.AppendAllText(@"c:\log\userTickets.txt", "\r\nServer Tickets\t" + result.Tickets().Select(a => a.Ticket).ToString(" | "));
+
                 UserTicketDN userTicket = result.Tickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
                 if (userTicket == null)
+                {
+                    File.AppendAllText(@"c:\log\userTickets.txt", "\r\nInvalid Ticket!!!!!!!!");
                     throw new UnauthorizedAccessException("User attempted to log in with an invalid ticket");
+                }
 
                 userTicket.Ticket = Guid.NewGuid().ToString();
                 userTicket.Device = device;
                 userTicket.ConnectionDate = TimeZoneManager.Now;
                 userTicket.Save();
+
+                File.AppendAllText(@"c:\log\userTickets.txt", "\r\nUpdated Ticket\t" + userTicket.Ticket);
 
                 ticket = userTicket.StringTicket(); 
 
@@ -107,16 +118,24 @@ namespace Signum.Engine.Authorization
 
         public static int CleanExpiredTickets(UserDN user)
         {
+            if(Database.Query<UserTicketDN>().Count() == 0)
+                File.AppendAllText(@"c:\log\userTickets.txt", "\r\n<<<<<<<<CLEAN STATE >>>>>>>\r\n");
+
             DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
-            int result = user.Tickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
+            int expired = user.Tickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
+            if (expired > 0)
+                File.AppendAllText(@"c:\log\userTickets.txt", "\r\n{0} Tickets expired!!!!!!!!".Formato(expired));
 
             List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Select(t => t.ToLite()).ToList().Skip(MaxTicketsPerUser).ToList();
 
-            if (tooMuch.IsEmpty()) return result;
+            if (tooMuch.IsEmpty()) 
+                return expired;
 
             Database.DeleteList<UserTicketDN>(tooMuch);
 
-            return result + tooMuch.Count; 
+            File.AppendAllText(@"c:\log\userTickets.txt", "\r\nToo much tickets, {0} removed!!!!!!!!".Formato(tooMuch.Count));
+
+            return expired + tooMuch.Count; 
         }
 
         public static int CleanAllExpiredTickets()
