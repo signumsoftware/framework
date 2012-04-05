@@ -8,14 +8,14 @@ namespace Signum.Windows.UIAutomation
 {
     public class WindowProxy : IDisposable
     {
-        public AutomationElement Owner { get; private set; }
+        public AutomationElement Element { get; private set; }
 
         private WindowPattern wp;
 
-        public WindowProxy(AutomationElement automationElement)
+        public WindowProxy(AutomationElement element)
         {
-            this.Owner = automationElement;
-            wp = automationElement.Pattern<WindowPattern>();
+            this.Element = element;
+            wp = element.Pattern<WindowPattern>();
         }
 
         public void Dispose()

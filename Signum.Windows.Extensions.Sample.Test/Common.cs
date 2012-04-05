@@ -19,13 +19,13 @@ namespace Signum.Windows.Extensions.Sample.Test
         {
             using (WindowProxy login = new WindowProxy(FindOrStartWindow()))
             {
-                login.Owner.ChildById("tbUserName").Pattern<ValuePattern>().SetValue(userName);
-                login.Owner.ChildById("tbPassword").Pattern<ValuePattern>().SetValue(password);
+                login.Element.ChildById("tbUserName").Value(userName);
+                login.Element.ChildById("tbPassword").Value(password);
 
-                login.Owner.ChildById("btLogin").Pattern<InvokePattern>().Invoke();
+                login.Element.ChildById("btLogin").ButtonInvoke();
             }
 
-            return new WindowProxy(AutomationElement.RootElement.WaitChild(10000, a => a.Current.Name == "Music Database"));
+            return new WindowProxy(AutomationElement.RootElement.WaitChild(a => a.Current.Name == "Music Database", 10000));
         }
 
         private static AutomationElement FindOrStartWindow()
@@ -39,7 +39,7 @@ namespace Signum.Windows.Extensions.Sample.Test
 
             p.WaitForInputIdle();
 
-            return AutomationElement.RootElement.WaitChild(5000, a => a.Current.ProcessId == p.Id);
+            return AutomationElement.RootElement.WaitChild(a => a.Current.ProcessId == p.Id, 5000);
         }
     }
 }

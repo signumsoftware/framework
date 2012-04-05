@@ -224,7 +224,7 @@ namespace Signum.Windows.Chart
             if (string.IsNullOrEmpty(errors))
                 return false;
 
-            MessageBox.Show(this.FindCurrentWindow(), "There are errors in the chart settings:\r\n" + errors, "Errors in the chart", MessageBoxButton.OK, MessageBoxImage.Stop);
+            MessageBox.Show(Window.GetWindow(this), "There are errors in the chart settings:\r\n" + errors, "Errors in the chart", MessageBoxButton.OK, MessageBoxImage.Stop);
 
             return true;
         }
@@ -272,7 +272,7 @@ namespace Signum.Windows.Chart
 
                 string message = "There are null values in {0} ({1}). \r\n Filter values?".Formato(ct.Token.ToString(), ct.PropertyLabel);
 
-                if (MessageBox.Show(this.FindCurrentWindow(), message, "Filter Null values?", MessageBoxButton.YesNo, MessageBoxImage.Hand) == MessageBoxResult.Yes)
+                if (MessageBox.Show(Window.GetWindow(this), message, "Filter Null values?", MessageBoxButton.YesNo, MessageBoxImage.Hand) == MessageBoxResult.Yes)
                 {
                     QueryToken token = ct.Token;
 

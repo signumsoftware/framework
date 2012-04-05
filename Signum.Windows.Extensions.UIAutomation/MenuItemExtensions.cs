@@ -13,23 +13,11 @@ namespace Signum.Windows.UIAutomation
         {
             var menuItem = MenuItemFind(window, menuNames);
 
-            var previous = AutomationElement.RootElement.Children(a => a.Current.ProcessId == window.Current.ProcessId).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
-
-            menuItem.Pattern<InvokePattern>().Invoke();
-
-            AutomationElement newWindow = null;
-
-            window.Wait(5000, () =>
-            {
-                newWindow = AutomationElement.RootElement
-                    .Children(a => a.Current.ProcessId == window.Current.ProcessId)
-                    .FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
-
-                return newWindow != null;
-            });
+            AutomationElement newWindow = window.GetWindowAfter(
+                () => menuItem.ButtonInvoke(),
+                () => "New windows opened after menu " + menuNames.ToString(" -> "));
 
             return newWindow;
-
         }
 
         public static AutomationElement MenuItemFind(AutomationElement window, params string[] menuNames)

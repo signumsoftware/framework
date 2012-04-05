@@ -84,7 +84,7 @@ namespace Signum.Windows.Reports
                     Title = Prop.Resources.FindLocationFoExcelReport
                 };
 
-                if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
+                if (sfd.ShowDialog(Window.GetWindow(this)) == true)
                 {
                     byte[] result = Server.Return((IExcelReportServer r) => r.ExecuteExcelReport(reportLite, SearchControl.GetQueryRequest(true)));
 

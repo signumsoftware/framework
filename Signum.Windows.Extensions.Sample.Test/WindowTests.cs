@@ -7,11 +7,13 @@ using System.Diagnostics;
 using Signum.Windows.UIAutomation;
 using System.Windows.Automation;
 using Signum.Entities.DynamicQuery;
+using Signum.Test;
+using Signum.Entities;
 
 namespace Signum.Windows.Extensions.Sample.Test
 {
     [TestClass]
-    public class SearchWindow
+    public class WindowTests
     {
         [TestMethod]
         public void Search()
@@ -19,12 +21,13 @@ namespace Signum.Windows.Extensions.Sample.Test
             using (WindowProxy win = Common.StartAndLogin())
             {
                 //win.Core.MenuItemInvoke("Music");
-                using (SearchWindowProxy albums = new SearchWindowProxy(win.Owner.MenuItemOpenWindow("Music", "Albumes")))
+                using (SearchWindowProxy albums = new SearchWindowProxy(win.Element.MenuItemOpenWindow("Music", "Albumes")))
                 {
-                    albums.AddFilter("Entity.Name", FilterOperation.Contains, "Olmo");
+                    albums.AddFilterString("Entity.Name", FilterOperation.Contains, "A");
+                    albums.AddFilterString("Entity.Author", FilterOperation.EqualTo, "Smashing");
 
                     albums.Search();
-                    using (NormalWindowProxy album = albums.OpenItemByIndex(0))
+                    using (NormalWindowProxy album = albums.ViewElementAt(0))
                     {
 
 
