@@ -15,7 +15,6 @@ using Signum.Engine.Authorization;
 using Signum.Utilities;
 using Signum.Entities.Reports;
 using Signum.Engine.Basics;
-using Signum.Web.UserQueries;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
