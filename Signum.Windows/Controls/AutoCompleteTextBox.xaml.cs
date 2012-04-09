@@ -332,6 +332,8 @@ namespace Signum.Windows
             AutoCompleteTextBox ac = ((AutoCompleteTextBox)base.Owner);
             ac.Text = value;
             ac.delayTimer_Tick(null, null);
+            if (ac.AllowFreeText && ac.lstBox.Items.Count == 0)
+                ac.Close(CloseReason.LostFocus);
         }
 
         public string Value
