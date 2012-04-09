@@ -24,7 +24,7 @@
 		MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=me, Mode=OneWay}"
 		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
 		<ContentPresenter Margin="1" Grid.Column="1" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Content="{Binding Path=ValueControl, ElementName=me, Mode=TwoWay}"/>
-        <TextBlock Text="{Binding Path=UnitText, ElementName=me, Mode=Default}" Grid.Column="2" VerticalAlignment="Center"  />
+        <TextBlock Text="{Binding Path=UnitText, ElementName=me, Mode=Default}" Grid.Column="2" VerticalAlignment="Center"  x:Name="unit" />
 	</Grid>
 
 </m:LineBase>

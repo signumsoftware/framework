@@ -29,7 +29,7 @@ namespace Signum.Windows
 
         void EntityTitle_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            textBox.Text = GetTitle(e.NewValue as ModifiableEntity);
+            tbEntityId.Text = GetTitle(e.NewValue as ModifiableEntity);
         }
 
         string GetTitle(ModifiableEntity mod)
@@ -53,7 +53,7 @@ namespace Signum.Windows
 
         public void SetTitleText(string text)
         {
-            textBox.Text = text;
+            tbEntityId.Text = text;
         }
     }
 }

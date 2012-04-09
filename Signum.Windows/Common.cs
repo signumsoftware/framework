@@ -127,13 +127,10 @@ namespace Signum.Windows
 
         public static readonly DependencyProperty DelayedRoutesProperty =
             DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
-
-
         public static bool GetDelayedRoutes(DependencyObject obj)
         {
             return (bool)obj.GetValue(DelayedRoutesProperty);
         }
-
         public static void SetDelayedRoutes(DependencyObject obj, bool value)
         {
             obj.SetValue(DelayedRoutesProperty, value);
@@ -484,23 +481,6 @@ namespace Signum.Windows
         public static void RemoveChangeDataContextHandler(DependencyObject d, ChangeDataContextHandler handler)
         {
             ((UIElement)d).RemoveHandler(ChangeDataContextEvent, handler);
-        }
-
-        public static readonly DependencyProperty CurrentWindowProperty =
-            DependencyProperty.RegisterAttached("CurrentWindow", typeof(Window), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
-        public static Window GetCurrentWindow(DependencyObject obj)
-        {
-            return (Window)obj.GetValue(CurrentWindowProperty);
-        }
-        public static void SetCurrentWindow(DependencyObject obj, Window value)
-        {
-            obj.SetValue(CurrentWindowProperty, value);
-        }
-
-        public static Window FindCurrentWindow(this FrameworkElement fe)
-        {
-            return fe.FollowC(a => (FrameworkElement)(a.Parent ?? a.TemplatedParent))
-                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().FirstEx(() => "Parent window not found");
         }
 
         public static IDisposable OverrideCursor(System.Windows.Input.Cursor cursor)

@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
 using Signum.Utilities;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -61,6 +63,8 @@ namespace Signum.Windows
 
             if (this.Type == null)
                 throw new InvalidOperationException("Type property is not set for control {0}".Formato(LabelText));
+
+            AutomationProperties.SetItemStatus(this, Common.GetTypeContext(this).TryToString() ?? "");
         }
     }
 
