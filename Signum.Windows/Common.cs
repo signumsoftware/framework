@@ -20,6 +20,7 @@ using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -265,6 +266,7 @@ namespace Signum.Windows
             RouteTask += TaskSetImplementations;
             RouteTask += TaskSetCollaspeIfNull;
             RouteTask += TaskSetNotNullItemsSource;
+            RouteTask += TaskSetAutomationItemStatus;
 
             LabelOnlyRouteTask += TaskSetLabelText;
 
@@ -273,6 +275,7 @@ namespace Signum.Windows
             ColumnRouteTask += TaskColumnSetReadOnly;
             ColumnLabelOnlyRouteTask += TaskColumnSetLabelText;
         }
+
 
         static void TaskColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
         {
@@ -468,6 +471,14 @@ namespace Signum.Windows
                 {
                     vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify());
                 }
+            }
+        }
+
+        static void TaskSetAutomationItemStatus(FrameworkElement fe, string route, PropertyRoute context)
+        {
+            if (fe.NotSet(AutomationProperties.ItemStatusProperty))
+            {
+                AutomationProperties.SetItemStatus(fe, context.TryToString() ?? "");
             }
         }
 
