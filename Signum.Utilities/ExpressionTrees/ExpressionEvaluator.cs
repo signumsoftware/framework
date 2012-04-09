@@ -52,8 +52,15 @@ namespace Signum.Utilities.ExpressionTrees
                     }
 
                 case ExpressionType.Convert:
-                    var conv = (UnaryExpression)expression;
-                    return ReflectionTools.ChangeType(Eval(conv.Operand), conv.Type);
+                    {
+                        var conv = (UnaryExpression)expression;
+                        var operand = Eval(conv.Operand);
+
+                        if (operand is IConvertible)
+                            return ReflectionTools.ChangeType(operand, conv.Type);
+
+                        return operand;
+                    }
                 case ExpressionType.Call:
                     {
                         var call = (MethodCallExpression)expression;
