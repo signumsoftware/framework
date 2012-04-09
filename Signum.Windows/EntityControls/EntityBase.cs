@@ -9,6 +9,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Windows.Input;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -303,7 +304,38 @@ namespace Signum.Windows
             if (EntityChanged != null)
                 EntityChanged(this, isUserInteraction, oldValue, newValue);
 
+            AutomationProperties.SetHelpText(this, GetEntityString(newValue));
+
             UpdateVisibility();
+        }
+
+        private string GetEntityString(object newValue)
+        {
+            if (newValue == null)
+                return "";
+
+            if (newValue is EmbeddedEntity)
+                return newValue.GetType().Name;
+
+            var ident = newValue as IdentifiableEntity;
+            if (ident != null)
+            {
+                if (ident.IsNew)
+                    return "{0};New".Formato(Server.ServerTypes[ident.GetType()].CleanName);
+
+                return ident.ToLite().Key(t => Server.ServerTypes[t].CleanName);
+            }
+
+            var lite = newValue as Lite;
+            if (lite != null)
+            {
+                if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
+                    return "{0};New".Formato(Server.ServerTypes[lite.RuntimeType].CleanName);
+
+                return lite.Key(t => Server.ServerTypes[t].CleanName);
+            }
+
+            throw new InvalidOperationException("Unexpected entity of type {0}".Formato(newValue.GetType()));
         }
 
         public Type SelectType()

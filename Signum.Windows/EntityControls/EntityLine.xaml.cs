@@ -174,7 +174,7 @@ namespace Signum.Windows
 
     }
 
-    public class EntityLinePeer : LineBasePeer, IInvokeProvider
+    public class EntityLinePeer : UserControlAutomationPeer, IInvokeProvider
     {
         public EntityLinePeer(EntityLine el)
             : base(el)

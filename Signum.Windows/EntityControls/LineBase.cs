@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.ComponentModel;
 using Signum.Utilities;
 using System.Windows.Automation.Peers;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -62,29 +63,8 @@ namespace Signum.Windows
 
             if (this.Type == null)
                 throw new InvalidOperationException("Type property is not set for control {0}".Formato(LabelText));
-        }
 
-        protected override AutomationPeer OnCreateAutomationPeer()
-        {
-            return new LineBasePeer(this);
-        }
-    }
-
-    public class LineBasePeer : UserControlAutomationPeer
-    {
-        public LineBasePeer(LineBase lb)
-            : base(lb)
-        {
-        }
-
-        protected override string GetItemStatusCore()
-        {
-            var pr =  Common.GetTypeContext(Owner);
-
-            if (pr == null)
-                return null;
-
-            return pr.ToString();
+            AutomationProperties.SetItemStatus(this, Common.GetTypeContext(this).TryToString() ?? "");
         }
     }
 
