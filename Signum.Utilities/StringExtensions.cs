@@ -22,8 +22,10 @@ namespace Signum.Utilities
 
         public static string DefaultText(this string str, string defaultText)
         {
-            if (str.HasText()) return str;
-            else return defaultText;
+            if (str.HasText()) 
+                return str;
+            else 
+                return defaultText;
         }
 
         public static string AssertHasText(this string str, string errorMessage)

@@ -173,5 +173,13 @@ namespace Signum.Engine
 
             return lite.Key(rt => TypeToName.GetOrThrow(rt, "The type {0} is not registered in the Schema"));
         }
+
+        public static string KeyLong(this Lite lite)
+        {
+            if (lite == null)
+                return null;
+
+            return lite.KeyLong(rt => TypeToName.GetOrThrow(rt, "The type {0} is not registered in the Schema"));
+        }
     }
 }
