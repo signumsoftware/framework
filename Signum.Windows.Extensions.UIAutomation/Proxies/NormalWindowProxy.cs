@@ -12,9 +12,14 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows.UIAutomation
 {
-    public class NormalWindowProxy<T>: WindowProxy where T: ModifiableEntity
+    public class NormalWindowProxy<T>: WindowProxy, ILineContainer<T> where T: ModifiableEntity
     {
         public PropertyRoute PreviousRoute { get; set; }
+
+        AutomationElement ILineContainer.Element
+        {
+            get { return this.MainControl; }
+        }
 
         public NormalWindowProxy(AutomationElement element)
             : base(element)
@@ -98,89 +103,6 @@ namespace Signum.Windows.UIAutomation
                 () => "Executing {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time), time);
         }
 
-        public ValueLineProxy ValueLine(Expression<Func<T, object>> property)
-        {
-            PropertyRoute route = GetRoute(property);
-
-            var valueLine = MainControl.Descendant(a => a.Current.ClassName == "ValueLine" && a.Current.ItemStatus == route.ToString());
-
-            return new ValueLineProxy(valueLine, route);
-        }
-
-        public V ValueLineValue<V>(Expression<Func<T, V>> property)
-        {
-            PropertyRoute route = GetRoute(property);
-
-            var valueLine = MainControl.Descendant(a => a.Current.ClassName == "ValueLine" && a.Current.ItemStatus == route.ToString());
-
-            return (V)new ValueLineProxy(valueLine, route).Value;
-        }
-
-        public void ValueLineValue<V>(Expression<Func<T, V>> property, V value)
-        {
-            PropertyRoute route = GetRoute(property);
-
-            var valueLine = MainControl.Descendant(a => a.Current.ClassName == "ValueLine" && a.Current.ItemStatus == route.ToString());
-
-            new ValueLineProxy(valueLine, route).Value = value;
-        }
-
-        public EntityLineProxy EntityLine(Expression<Func<T, object>> property)
-        {
-            PropertyRoute route = GetRoute(property);
-
-            var entityLine = MainControl.Descendant(a => a.Current.ClassName == "EntityLine" && a.Current.ItemStatus == route.ToString());
-
-            return new EntityLineProxy(entityLine, route);
-        }
-
-        public EntityComboProxy EntityCombo(Expression<Func<T, object>> property)
-        {
-            PropertyRoute route = GetRoute(property);
-
-            var entityCombo = MainControl.Descendant(a => a.Current.ClassName == "EntityCombo" && a.Current.ItemStatus == route.ToString());
-
-            return new EntityComboProxy(entityCombo, route);
-        }
-
-        public EntityDetailsProxy EntityDetails(Expression<Func<T, object>> property)
-        {
-            PropertyRoute route = GetRoute(property);
-
-            var entityDetails = MainControl.Descendant(a => a.Current.ClassName == "EntityDetails" && a.Current.ItemStatus == route.ToString());
-
-            return new EntityDetailsProxy(entityDetails, route);
-        }
-
-        public EntityListProxy EntityList(Expression<Func<T, object>> property)
-        {
-            PropertyRoute route = GetRoute(property);
-
-            var entityList = MainControl.Descendant(a => a.Current.ClassName == "EntityList" && a.Current.ItemStatus == route.ToString());
-
-            return new EntityListProxy(entityList, route);
-        }
-
-        public EntityRepeaterProxy EntityRepeater(Expression<Func<T, object>> property)
-        {
-            PropertyRoute route = GetRoute(property);
-
-            var entityRepeater = MainControl.Descendant(a => a.Current.ClassName == "EntityRepeater" && a.Current.ItemStatus == route.ToString());
-
-            return new EntityRepeaterProxy(entityRepeater, route);
-        }
-
-        private PropertyRoute GetRoute<S>(Expression<Func<T, S>> property)
-        {
-            PropertyRoute result = PreviousRoute ?? PropertyRoute.Root(typeof(T));
-
-            foreach (var mi in Reflector.GetMemberList(property))
-            {
-                result = result.Add(mi);
-            }
-            return result;
-        }
-
         public override void Dispose()
         {
             if (base.Close())
@@ -208,6 +130,8 @@ namespace Signum.Windows.UIAutomation
             }
         }
     }
+
+  
 
     public class ButtonBarProxy
     {

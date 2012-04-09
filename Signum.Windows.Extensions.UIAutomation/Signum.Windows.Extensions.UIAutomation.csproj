@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="BasicExtensions.cs" />
     <Compile Include="ConditionBuilder.cs" />
+    <Compile Include="Proxies\LineContainer.cs" />
     <Compile Include="Proxies\SelectWindoProxy.cs" />
     <Compile Include="Proxies\ValueLineProxy.cs" />
     <Compile Include="FindExtensions.cs" />

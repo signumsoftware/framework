@@ -80,5 +80,27 @@ namespace Signum.Windows.UIAutomation
             }, actionDescription, timeOut ?? WindowAfterTimeout);
             return newWindow;
         }
+
+        public static void SelectByName(this List<AutomationElement> list, string toString, Func<string> containerDescription)
+        {
+            var filtered = list.Where(a => a.Current.Name == toString).ToList();
+
+            if (filtered.Count == 1)
+            {
+                filtered.SingleEx().Pattern<SelectionItemPattern>().Select();
+            }
+            else
+            {
+                filtered = list.Where(a => a.Current.Name.Contains(toString, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+                if (filtered.Count == 0)
+                    throw new InvalidOperationException("No element found on {0} with ToString '{1}'. Found: \r\n{2}".Formato(containerDescription(), toString, list.ToString(a => a.Current.Name, "\r\n")));
+
+                if (filtered.Count > 1)
+                    throw new InvalidOperationException("Ambiguous elements found on {0} with ToString '{1}'. Found: \r\n{2}".Formato(containerDescription(), toString, filtered.ToString(a => a.Current.Name, "\r\n")));
+
+                filtered.Single().Pattern<SelectionItemPattern>().Select();
+            }
+        }
     }
 }

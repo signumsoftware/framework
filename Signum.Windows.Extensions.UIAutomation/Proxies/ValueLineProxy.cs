@@ -167,7 +167,7 @@ namespace Signum.Windows.UIAutomation
             {
                 using(var selector = new SelectorWindowProxy(win))
                 {
-                    win = Element.GetModalWindowAfter(() => selector.SelectType(value.RuntimeType),
+                    win = Element.GetWindowAfter(() => selector.SelectType(value.RuntimeType),
                         () => "Open SearchWindow on {0} after type selector took more than {1} ms".Formato(this, SearchWindowTimeout), SearchWindowTimeout);
                 }
             }
@@ -195,7 +195,7 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement CreateBasic(int? timeOut = null)
         {
-            var win = Element.GetModalWindowAfter(
+            var win = Element.GetWindowAfter(
                 () => CreateButton.ButtonInvoke(),
                 () => "Create a new entity on {0}".Formato(this), timeOut);
             return win;
@@ -210,7 +210,7 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement FindBasic(int? timeOut = null)
         {
-            var win = Element.GetModalWindowAfter(
+            var win = Element.GetWindowAfter(
                 () => FindButton.ButtonInvoke(),
                 () => "Search entity on {0}".Formato(this), timeOut);
             return win;
@@ -218,7 +218,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T: ModifiableEntity
         {
-            var win = Element.GetModalWindowAfter(
+            var win = Element.GetWindowAfter(
                 () => ViewButton.ButtonInvoke(),
                 () => "View entity on {0}".Formato(this), timeOut);
 
@@ -228,28 +228,6 @@ namespace Signum.Windows.UIAutomation
         public void Remove()
         {
             RemoveButton.ButtonInvoke();
-        }
-
-        protected void SelectByString(List<AutomationElement> list, string toString)
-        {
-            var filtered = list.Where(a => a.Current.Name == toString).ToList();
-
-            if (filtered.Count == 1)
-            {
-                filtered.SingleEx().Pattern<SelectionItemPattern>().Select();
-            }
-            else
-            {
-                filtered = list.Where(a => a.Current.Name.Contains(toString, StringComparison.InvariantCultureIgnoreCase)).ToList();
-
-                if (filtered.Count == 0)
-                    throw new InvalidOperationException("No element found on {0} with ToString '{1}'. Found: \r\n{2}".Formato(this, toString, list.ToString(a => a.Current.Name, "\r\n")));
-
-                if (filtered.Count > 1)
-                    throw new InvalidOperationException("Ambiguous elements found on {0} with ToString '{1}'. Found: \r\n{2}".Formato(this, toString, filtered.ToString(a => a.Current.Name, "\r\n")));
-
-                filtered.Single().Pattern<SelectionItemPattern>().Select();
-            }
         }
     }
 
@@ -280,7 +258,7 @@ namespace Signum.Windows.UIAutomation
 
             var list = lb.Children(a => a.Current.ControlType == ControlType.ListItem);
 
-            SelectByString(list, toString);
+            list.SelectByName(toString, ()=>this.ToString());
         }
 
         protected override bool FastSelect(Lite value)
@@ -329,7 +307,7 @@ namespace Signum.Windows.UIAutomation
 
             var list = ComboBox.ChildrenAll();
 
-            SelectByString(list, toString);
+            list.SelectByName(toString, ()=>this.ToString());
         }
 
         protected override bool FastSelect(Lite lite)
@@ -347,9 +325,14 @@ namespace Signum.Windows.UIAutomation
         }
     }
 
-    public class EntityDetailsProxy : EntityBaseProxy
+    public class EntityDetailProxy : EntityBaseProxy
     {
-        public EntityDetailsProxy(AutomationElement element, PropertyRoute route)
+        public AutomationElement GetDetailControl()
+        {
+            return Element.Child(a => a.Current.ControlType != ControlType.Text && a.Current.ControlType != ControlType.Button);
+        }
+
+        public EntityDetailProxy(AutomationElement element, PropertyRoute route)
             : base(element, route)
         {
         }
@@ -382,7 +365,7 @@ namespace Signum.Windows.UIAutomation
         {
             var list = ListBox.ChildrenAll();
 
-            SelectByString(list, toString);
+            list.SelectByName(toString, () => this.ToString());
         }
     }
 
@@ -391,6 +374,31 @@ namespace Signum.Windows.UIAutomation
         public EntityRepeaterProxy(AutomationElement element, PropertyRoute route)
             : base(element, route)
         {
+        }
+
+        public List<RepeaterLineProxy> GetRepeaterElements()
+        {
+            return Element.Children(a => a.Current.ClassName == "EntityRepeaterLineBorder").Select(ae => new RepeaterLineProxy(ae)).ToList();
+        }
+    }
+
+    public class RepeaterLineProxy
+    {
+        public AutomationElement Element { get; private set; }
+
+        public RepeaterLineProxy(AutomationElement element)
+        {
+            this.Element = element;
+        }
+
+        public AutomationElement RemoveButton
+        {
+            get { return Element.ChildById("btnRemove"); }
+        }
+
+        public void Remove()
+        {
+            RemoveButton.ButtonInvoke();
         }
     }
 }
