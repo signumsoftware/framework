@@ -17,6 +17,7 @@ using System.Windows.Controls;
 using Signum.Entities.Reflection;
 using Signum.Windows.Extensions.Properties;
 using Signum.Utilities.ExpressionTrees;
+using System.Windows.Automation;
 
 namespace Signum.Windows.Operations
 {
@@ -202,8 +203,9 @@ namespace Signum.Windows.Operations
                 Image = GetImage(operationInfo.Key, os),
                 Background = GetBackground(operationInfo.Key, os),
                 Tag = operationInfo,
-                ToolTip = operationInfo.CanExecute,
             };
+
+            AutomationProperties.SetItemStatus(button, OperationDN.UniqueKey(operationInfo.Key));
 
             args.SenderButton = button;
 
@@ -212,6 +214,7 @@ namespace Signum.Windows.Operations
                 button.ToolTip = operationInfo.CanExecute;
                 button.IsEnabled = false;
                 ToolTipService.SetShowOnDisabled(button, true);
+                AutomationProperties.SetHelpText(button, operationInfo.CanExecute);
             }
             else
             {

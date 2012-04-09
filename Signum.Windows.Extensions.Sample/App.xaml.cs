@@ -95,10 +95,10 @@ namespace Signum.Windows.Extensions.Sample
             //SchedulerClient.Start();
 
             LinksWidget.Start();
-            ReportClient.Start(false, false);
+            ReportClient.Start(true, false);
 
             Links.RegisterGlobalLinks((r, c) => new[]{
-                new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN) )
+                new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN))
                 {
                     FilterOptions = { new FilterOption("Target", r) },
                     OrderOptions = { new OrderOption("Start") },
