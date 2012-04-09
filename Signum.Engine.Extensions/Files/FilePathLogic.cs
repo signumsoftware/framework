@@ -63,8 +63,6 @@ namespace Signum.Engine.Files
                                                f.Name
                                            }).ToDynamic();
 
-                FilePathDN.UrlPathEncode = HttpUtility.UrlPathEncode;
-
                 sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
 
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");

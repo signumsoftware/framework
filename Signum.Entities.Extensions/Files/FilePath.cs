@@ -110,7 +110,7 @@ namespace Signum.Entities.Files
 
         static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp => 
             fp.Repository != null && fp.Repository.WebPrefix.HasText() ?
-                fp.Repository.WebPrefix + "/" + UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
+                fp.Repository.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
                 null;
 
         public string FullWebPath
@@ -120,8 +120,6 @@ namespace Signum.Entities.Files
                 return FullWebPathExpression.Evaluate(this);
             }
         }
-
-        public static Func<string, string> UrlPathEncode;
 
         public override string ToString()
         {
@@ -139,5 +137,123 @@ namespace Signum.Entities.Files
     public class WebDownload
     {
         public string FullWebPath;
+    }
+
+    public class HttpFilePathUtils
+    {
+        public static string UrlPathEncode(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+            int index = value.IndexOf('?');
+            if (index >= 0)
+            {
+                return (UrlPathEncode(value.Substring(0, index)) + value.Substring(index));
+            }
+            return UrlEncodeSpaces(UrlEncodeNonAscii(value, Encoding.UTF8));
+        }
+
+        static string UrlEncodeSpaces(string str)
+        {
+            if ((str != null) && (str.IndexOf(' ') >= 0))
+            {
+                str = str.Replace(" ", "%20");
+            }
+            return str;
+        }
+
+        static string UrlEncodeNonAscii(string str, Encoding e)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+            if (e == null)
+            {
+                e = Encoding.UTF8;
+            }
+            byte[] bytes = e.GetBytes(str);
+            byte[] buffer2 = UrlEncodeNonAscii(bytes, 0, bytes.Length, false);
+            return Encoding.ASCII.GetString(buffer2);
+        }
+
+        static byte[] UrlEncodeNonAscii(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
+        {
+            if (!ValidateUrlEncodingParameters(bytes, offset, count))
+            {
+                return null;
+            }
+            int num = 0;
+            for (int i = 0; i < count; i++)
+            {
+                if (IsNonAsciiByte(bytes[offset + i]))
+                {
+                    num++;
+                }
+            }
+            if (!alwaysCreateNewReturnValue && (num == 0))
+            {
+                return bytes;
+            }
+            byte[] buffer = new byte[count + (num * 2)];
+            int num3 = 0;
+            for (int j = 0; j < count; j++)
+            {
+                byte b = bytes[offset + j];
+                if (IsNonAsciiByte(b))
+                {
+                    buffer[num3++] = 0x25;
+                    buffer[num3++] = (byte)IntToHex((b >> 4) & 15);
+                    buffer[num3++] = (byte)IntToHex(b & 15);
+                }
+                else
+                {
+                    buffer[num3++] = b;
+                }
+            }
+            return buffer;
+        }
+
+
+        static bool ValidateUrlEncodingParameters(byte[] bytes, int offset, int count)
+        {
+            if ((bytes == null) && (count == 0))
+            {
+                return false;
+            }
+            if (bytes == null)
+            {
+                throw new ArgumentNullException("bytes");
+            }
+            if ((offset < 0) || (offset > bytes.Length))
+            {
+                throw new ArgumentOutOfRangeException("offset");
+            }
+            if ((count < 0) || ((offset + count) > bytes.Length))
+            {
+                throw new ArgumentOutOfRangeException("count");
+            }
+            return true;
+        }
+
+        static char IntToHex(int n)
+        {
+            if (n <= 9)
+            {
+                return (char)(n + 0x30);
+            }
+            return (char)((n - 10) + 0x61);
+        }
+
+        static bool IsNonAsciiByte(byte b)
+        {
+            if (b < 0x7f)
+            {
+                return (b < 0x20);
+            }
+            return true;
+        }
     }
 }
