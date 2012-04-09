@@ -128,7 +128,6 @@ namespace Signum.Windows
         void cbi_Loaded(object sender, RoutedEventArgs e)
         {
             //throw new NotImplementedException();
-            string num = AutomationProperties.GetItemStatus((ComboBoxItem)sender);
         }
 
         public QueryTokenBuilder()

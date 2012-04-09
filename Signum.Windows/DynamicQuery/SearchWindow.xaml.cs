@@ -18,6 +18,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Signum.Entities.DynamicQuery;
 using System.Windows.Automation.Peers;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -195,6 +196,8 @@ namespace Signum.Windows
                 niceQueryName = "- " + niceQueryName;
 
             tbQueryName.Text = niceQueryName;
+
+            AutomationProperties.SetItemStatus(this, QueryUtils.GetQueryUniqueKey(QueryName));
         }
 
         void ButtonsChanged()
@@ -249,27 +252,6 @@ namespace Signum.Windows
         {
             OkAndClose();
             
-        }
-
-
-        protected override AutomationPeer OnCreateAutomationPeer()
-        {
-            return new SearchWindowAutomationPeer(this);
-        }
-        
-    }
-
-    public class SearchWindowAutomationPeer : WindowAutomationPeer
-    {
-        public SearchWindowAutomationPeer(SearchWindow owner)
-            : base(owner)
-        {   
-         
-        }
-
-        protected override string GetItemStatusCore()
-        {
-            return QueryUtils.GetQueryUniqueKey(((SearchWindow)Owner).QueryName);
         }
     }
 

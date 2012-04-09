@@ -284,8 +284,8 @@ namespace Signum.Windows
         public string Path { get; set; }
         public QueryToken Token { get; set; }
         public OrderType OrderType { get; set; }
-        
-        public ColumnOrderInfo ColumnOrderInfo; 
+
+        internal SortGridViewColumnHeader Header; 
 
         public Order ToOrder()
         {
