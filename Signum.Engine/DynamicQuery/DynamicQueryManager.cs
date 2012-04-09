@@ -229,7 +229,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 this.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                 this.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
-                this.Implementations = ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes);
+                this.Implementations = ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes, type.CleanType());
                 this.PropertyRoute = cm.PropertyRoutes.FirstOrDefault();
             }
 

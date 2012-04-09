@@ -13,6 +13,7 @@ using Signum.Engine.Properties;
 using Signum.Entities;
 using Signum.Engine.Linq;
 using System.Collections;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -22,7 +23,12 @@ namespace Signum.Engine.DynamicQuery
         {
             Type[] types;
             if (implementations == null)
+            {
+                if (!Schema.Current.Tables.ContainsKey(liteType))
+                    throw new InvalidOperationException("Type {0} is not in the schema".Formato(liteType));
+
                 types = new[] { liteType };
+            }
             else if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll not supported for FindLiteLike");
             else
