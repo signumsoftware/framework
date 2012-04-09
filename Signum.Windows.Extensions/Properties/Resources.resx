@@ -228,4 +228,7 @@
   <data name="Message" xml:space="preserve">
     <value>Message</value>
   </data>
+  <data name="Login_UserName_Watermark" xml:space="preserve">
+    <value>user</value>
+  </data>
 </root>

@@ -61,7 +61,7 @@
             </Image>
             <TextBlock x:Name="txtError" TextWrapping="WrapWithOverflow" Margin="4,0,4,0" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"  Foreground="Red" VerticalAlignment="Center"  />
             <Label FontWeight="Bold" VerticalAlignment="Center" Content="{m:Loc Login_UserName}" Grid.Column="1" Grid.Row="4" Target="{Binding ElementName=tbUserName, Mode=OneWay}"   HorizontalContentAlignment="Right" />
-            <m:WatermarkTextBox x:Name="tbUserName" Grid.Column="2" Grid.Row="4" Margin="2,2,8,2" HelpText="{m:Loc Login_UserName}" />
+            <m:WatermarkTextBox x:Name="tbUserName" Grid.Column="2" Grid.Row="4" Margin="2,2,8,2" HelpText="{m:Loc Login_UserName_Watermark}" />
 
             <Label FontWeight="Bold" VerticalAlignment="Stretch" Content="{m:Loc Login_Password}" Grid.Column="1" Grid.Row="5" Target="{Binding ElementName=tbPassword, Mode=OneWay}" HorizontalContentAlignment="Right" />
             <PasswordBox x:Name="tbPassword" Grid.Column="2" Grid.Row="5" Margin="2,2,8,2"/>
