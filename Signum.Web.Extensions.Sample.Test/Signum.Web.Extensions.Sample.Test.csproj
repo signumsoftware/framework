@@ -145,7 +145,7 @@
     <None Include="otLines.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="otTestsIU.orderedtest">
+    <None Include="otTestsWeb.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="otSearchControl.orderedtest">
