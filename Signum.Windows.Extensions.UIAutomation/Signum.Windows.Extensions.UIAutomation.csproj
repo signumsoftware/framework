@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="BasicExtensions.cs" />
     <Compile Include="ConditionBuilder.cs" />
+    <Compile Include="Proxies\SelectWindoProxy.cs" />
     <Compile Include="Proxies\ValueLineProxy.cs" />
     <Compile Include="FindExtensions.cs" />
     <Compile Include="MenuItemExtensions.cs" />
@@ -91,6 +92,10 @@
     <Compile Include="Proxies\WindowProxy.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
+      <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
+      <Name>Signum.Engine</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>

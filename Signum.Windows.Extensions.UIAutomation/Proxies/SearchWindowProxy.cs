@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Automation;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -28,14 +29,39 @@ namespace Signum.Windows.UIAutomation
             SearchControl.AddColumn(token, displayName);
         }
 
+        public void SortColumn(string token, OrderType orderType)
+        {
+            SearchControl.SortColumn(token, orderType);
+        }
+
         public void Search()
         {
             SearchControl.Search();
         }
 
-        public NormalWindowProxy ViewElementAt(int index)
+        public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
-            return SearchControl.ViewElementAt(index); 
+            return SearchControl.ViewElementAt<T>(index); 
+        }
+
+        public void SelectElementAt(int index)
+        {
+            SearchControl.SelectElementAt(index);
+        }
+
+        public AutomationElement OkButton
+        {
+            get { return Element.ChildById("btOk"); }
+        }
+
+        public AutomationElement CanelButton
+        {
+            get { return Element.ChildById("btCancel"); }
+        }
+
+        public void Ok()
+        {
+            OkButton.ButtonInvoke();
         }
     }
 
@@ -77,7 +103,7 @@ namespace Signum.Windows.UIAutomation
         {
             TreeWalker tw = new TreeWalker(ConditionBuilder.ToCondition(ae => ae.Current.ClassName == "FilterLine"));
 
-            var filterLine =  tw.GetLastChild(GetFilterBuilder());
+            var filterLine =  tw.GetLastChild(FilterBuilderControl);
 
             if (filterLine == null)
                 throw new ElementNotAvailableException("Last FilterLine not found");
@@ -85,17 +111,27 @@ namespace Signum.Windows.UIAutomation
             return new FilterOptionProxy(filterLine);
         }
 
-        public AutomationElement GetFilterBuilder()
+        public AutomationElement FilterBuilderControl
         {
-            return Element.ChildById("filterBuilder");
+            get{ return Element.ChildById("filterBuilder");}
+        }
+
+        public AutomationElement SearchButton
+        {
+            get{ return Element.ChildById("btFind");}
         }
 
         public void Search()
         {
-            Element.ChildById("btFind").ButtonInvoke();
+            SearchButton.ButtonInvoke();
 
+            WaitSearch();
+        }
+
+        private void WaitSearch()
+        {
             Element.Wait(
-                () => Element.ChildById("btFind").Current.IsEnabled,
+                () => SearchButton.Current.IsEnabled,
                 () => "Waiting after search on SearchControl {0}".Formato(Element.Current.ItemStatus));
         }
 
@@ -130,18 +166,18 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public NormalWindowProxy View(int? timeOut = null)
+        public NormalWindowProxy<T> View<T>(int? timeOut = null) where T : IdentifiableEntity
         {
             var win = Element.GetWindowAfter(
                 () => Element.ChildById("btView").ButtonInvoke(),
                 () => "View selected entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
-            return new NormalWindowProxy(win);
+            return new NormalWindowProxy<T>(win);
         }
 
-        public NormalWindowProxy Create()
+        public NormalWindowProxy<T> Create<T>() where T:IdentifiableEntity
         {
-            return new NormalWindowProxy(CreateBasic());
+            return new NormalWindowProxy<T>(CreateBasic());
         }
 
         private AutomationElement CreateBasic(int? timeOut = null)
@@ -157,10 +193,26 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("menu"); }
         }
 
-
         public AutomationElement Results
         {
             get { return Element.ChildById("lvResult"); }
+        }
+
+        public AutomationElement ResultColumns
+        {
+            get { return Results.Child(a => a.Current.ControlType == ControlType.Header); }
+        }
+
+        public void SortColumn(string token, OrderType orderType)
+        {
+            var columnHeader = ResultColumns.Child(a => a.Current.ControlType == ControlType.HeaderItem && a.Current.ItemStatus == token);
+
+            columnHeader.ButtonInvoke();
+
+            while (columnHeader.Current.HelpText != orderType.ToString())
+                columnHeader.ButtonInvoke();
+
+            WaitSearch();
         }
 
         public List<AutomationElement> GetRows()
@@ -168,16 +220,21 @@ namespace Signum.Windows.UIAutomation
             return Results.Children(c => c.Current.ControlType == ControlType.DataItem);
         }
 
-        public NormalWindowProxy ViewElementAt(int index)
+        public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
+        {
+            SelectElementAt(index);
+
+            return View<T>();
+        }
+
+        public void SelectElementAt(int index)
         {
             var rows = GetRows();
 
-            if(rows.Count <= index)
+            if (rows.Count <= index)
                 throw new IndexOutOfRangeException("Row with index {0} not found, only {1} results on SearchControl {2}".Formato(index, rows.Count, Element.Current.ItemStatus));
 
             rows[index].Pattern<SelectionItemPattern>().Select();
-
-            return View();
         }
 
         public string GetNumResults()
@@ -208,6 +265,7 @@ namespace Signum.Windows.UIAutomation
                 item.Pattern<SelectionItemPattern>().Select();
             }
         }
+
     }
 
     public class PagerProxy
@@ -257,11 +315,11 @@ namespace Signum.Windows.UIAutomation
             switch (valueControl.Current.ClassName)
             {
                 case "ValueLine":
-                    new ValueLineProxy(valueControl).Value = value;
+                    new ValueLineProxy(valueControl, null).StringValue = value;
                     break;
 
                 case "EntityLine":
-                    new EntityLineProxy(valueControl).AutoComplete(value);
+                    new EntityLineProxy(valueControl, null).AutoComplete(value);
                     break;
                 default: throw new InvalidOperationException();
             }

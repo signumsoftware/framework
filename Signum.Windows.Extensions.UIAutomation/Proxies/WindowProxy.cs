@@ -18,7 +18,7 @@ namespace Signum.Windows.UIAutomation
             wp = element.Pattern<WindowPattern>();
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             Close();
         }
@@ -28,7 +28,7 @@ namespace Signum.Windows.UIAutomation
             wp.WaitForInputIdle(milliseconds);
         }
 
-        private bool Close()
+        public virtual bool Close()
         {
             try
             {
@@ -43,6 +43,51 @@ namespace Signum.Windows.UIAutomation
 
                 throw ena;
             }
+        }
+
+        public MessageBoxProxy TryGetCurrentMessageBox()
+        {
+            var win = Element.TryChild(a => a.Current.ControlType == ControlType.Window && a.Current.ClassName == "#32770");
+
+            if (win != null)
+                return new MessageBoxProxy(win);
+
+            return null;
+        }
+
+        public MessageBoxProxy WaitCurrentMessageBox()
+        {
+            var win = Element.WaitChild(a => a.Current.ControlType == ControlType.Window && a.Current.ClassName == "#32770");
+
+            return new MessageBoxProxy(win);
+        }
+    }
+
+
+    public class MessageBoxProxy : WindowProxy
+    {
+        public MessageBoxProxy(AutomationElement element): base(element)
+        {
+        }
+
+        public AutomationElement OkButton
+        {
+            get { return Element.TryChildById("1") ?? Element.ChildById("2"); }
+        }
+
+        public AutomationElement CancelButton
+        {
+            get { return Element.ChildById("2"); }//Warning!!
+        }
+
+        public AutomationElement YesButton
+        {
+            get { return Element.ChildById("6"); }
+        }
+
+        public AutomationElement NoButton
+        {
+            get { return Element.ChildById("7"); }
         }
     }
 }

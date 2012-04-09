@@ -41,6 +41,7 @@ namespace Signum.Windows.UIAutomation
             return element.Pattern<ValuePattern>().Current.Value;
         }
 
+        public static int WindowAfterTimeout = 5 * 1000;
 
         public static AutomationElement GetWindowAfter(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
         {
@@ -57,7 +58,7 @@ namespace Signum.Windows.UIAutomation
                     .FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 return newWindow != null;
-            }, actionDescription, timeOut ?? 5000);
+            }, actionDescription, timeOut ?? WindowAfterTimeout);
             return newWindow;
         }
 
@@ -76,7 +77,7 @@ namespace Signum.Windows.UIAutomation
                 newWindow = walker.GetFirstChild(parentWindow);
 
                 return newWindow != null;
-            }, actionDescription, timeOut ?? 5000);
+            }, actionDescription, timeOut ?? WindowAfterTimeout);
             return newWindow;
         }
     }

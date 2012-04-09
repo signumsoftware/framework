@@ -12,8 +12,8 @@ namespace Signum.Windows.UIAutomation
 {
     public static class WaitExtensions
     {
-        public static int DefaultTimeOut = 2000;
         public static int DefaultSleep = 200;
+        public static int DefaultTimeOut = 2 * 1000;
 
         public static void Wait(this AutomationElement automationElement, Func<bool> waitCondition, Func<string> actionDescription, int? timeOut = null)
         {
@@ -30,7 +30,7 @@ namespace Signum.Windows.UIAutomation
                     return;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeOut))
-                    throw new TimeoutException("Wait condition failed after {0} ms: ".Formato(timeOut ?? DefaultTimeOut, actionDescription == null ? null : actionDescription()));
+                    throw new TimeoutException("Wait condition failed after {0} ms: ".Formato(timeOut ?? DefaultTimeOut) + actionDescription == null ? null : actionDescription());
             }
         }
 
