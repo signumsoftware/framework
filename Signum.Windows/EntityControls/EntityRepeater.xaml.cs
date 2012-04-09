@@ -12,6 +12,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections;
 using Signum.Entities;
+using System.Windows.Automation.Peers;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -120,6 +122,37 @@ namespace Signum.Windows
         protected override bool IsItemItsOwnContainerOverride(object item)
         {
             return item is ContentControl;
+        }
+    }
+
+    public class EntityRepeaterLineBorder: Border
+    {
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new EntityRepeaterLineBorderAutomationPeer(this);
+        }
+    }
+
+    class EntityRepeaterLineBorderAutomationPeer : FrameworkElementAutomationPeer
+    {
+        public EntityRepeaterLineBorderAutomationPeer(EntityRepeaterLineBorder owner)
+            : base(owner)
+        {
+        }
+
+        protected override AutomationControlType GetAutomationControlTypeCore()
+        {
+            return AutomationControlType.Custom;
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return base.Owner.GetType().Name;
+        }
+
+        protected override string GetItemStatusCore()
+        {
+            return Common.GetTypeContext(Owner).TryToString();
         }
     }
 }
