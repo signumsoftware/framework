@@ -181,8 +181,9 @@ namespace Signum.Windows.Chart
         }
 
         public void GenerateChart()
-        { 
-            UpdateFiltersAndOrdersRequests();
+        {
+            Request.Filters = filterBuilder.Filters.Select(f => f.ToFilter()).ToList();
+            Request.Orders = OrderOptions.Select(o => o.ToOrder()).ToList();
 
             var request = Request;
 
@@ -200,18 +201,16 @@ namespace Signum.Windows.Chart
                 () => execute.IsEnabled = true);
         }
 
-        private void UpdateFiltersAndOrdersRequests()
-        {
-            Request.Filters = filterBuilder.Filters.Select(f => f.ToFilter()).ToList();
-            Request.Orders = OrderOptions.Select(o => o.ToOrder()).ToList();
-        }
-
         private void ReDrawChart()
         {
             if (!Request.Chart.NeedNewQuery)
             {
                 if (resultTable != null)
                     SetResults();
+            }
+            else
+            {    
+                ClearResults();
             }
         }
 
@@ -310,49 +309,19 @@ namespace Signum.Windows.Chart
 
         void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
         {
-            GridViewColumnHeader header = (GridViewColumnHeader)sender;
-            ColumnInfo ci = (ColumnInfo)header.Tag;
+            SortGridViewColumnHeader header = sender as SortGridViewColumnHeader;
 
-            if (ci == null)
+            if (header == null)
                 return;
 
-            string canOrder = QueryUtils.CanOrder(ci.Column.Token);
+            string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);
             if (canOrder.HasText())
             {
                 MessageBox.Show(canOrder);
                 return;
             }
 
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (OrderOptions.Count == 1 && OrderOptions[0].ColumnOrderInfo.TryCC(coi => coi.Header) == header))
-            {
-
-            }
-            else
-            {
-                foreach (var oo in OrderOptions)
-                {
-                    if (oo.ColumnOrderInfo != null)
-                        oo.ColumnOrderInfo.CleanAdorner();
-                }
-
-                OrderOptions.Clear();
-            }
-
-            OrderOption order = OrderOptions.SingleOrDefaultEx(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
-            if (order != null)
-            {
-                order.ColumnOrderInfo.FlipAdorner();
-                order.OrderType = order.ColumnOrderInfo.OrderType;
-            }
-            else
-            {
-                OrderOptions.Add(new OrderOption()
-                {
-                    Token = ci.Column.Token,
-                    OrderType = OrderType.Ascending,
-                    ColumnOrderInfo = new ColumnOrderInfo(header, OrderType.Ascending, OrderOptions.Count)
-                });
-            }
+            header.ChangeOrders(OrderOptions);         
 
             GenerateChart();
         }
@@ -360,8 +329,12 @@ namespace Signum.Windows.Chart
         public void ClearResults()
         {
             resultTable = null;
+            gvResults.Columns.Clear();
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;
+
+            var keys = Request.ChartTokens().Select(a => a.Token).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
+            OrderOptions.RemoveAll(a => !(a.Token is AggregateToken) && !keys.Contains(a.Token.FullKey()));
         }
 
         private void FillGridView()
@@ -371,27 +344,16 @@ namespace Signum.Windows.Chart
             {
                 gvResults.Columns.Add(new GridViewColumn
                 {
-                    Header = new GridViewColumnHeader
+                    Header = new SortGridViewColumnHeader
                     {
                         Content = rc.Column.DisplayName,
-                        Tag = new ColumnInfo(rc.Column)
+                        RequestColumn = rc.Column,
                     },
                     CellTemplate = CreateDataTemplate(rc),
                 });
             }
 
-            for (int i = 0; i < OrderOptions.Count; i++)
-            {
-                OrderOption oo = OrderOptions[i];
-                QueryToken token = (QueryToken)oo.Token;
-
-                GridViewColumnHeader header = gvResults.Columns
-                    .Select(c => (GridViewColumnHeader)c.Header)
-                    .FirstOrDefault(c => ((ColumnInfo)c.Tag).Column.Name == token.FullKey());
-
-                if (header != null)
-                    oo.ColumnOrderInfo = new ColumnOrderInfo(header, oo.OrderType, i);
-            }
+            SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
         }
 
         DataTemplate CreateDataTemplate(ResultColumn c)
