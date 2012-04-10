@@ -42,7 +42,7 @@ namespace Signum.Engine.Mailing
                 dqm[typeof(NewsletterDN)] = (from n in Database.Query<NewsletterDN>()
                                              select new
                                              {
-                                                 Entity = n.ToLite(),
+                                                 Entity = n,
                                                  n.Id,
                                                  Nombre = n.Name,
                                                  Texto = n.HtmlBody.Etc(100),
@@ -53,7 +53,7 @@ namespace Signum.Engine.Mailing
                 dqm[typeof(NewsletterDeliveryDN)] = (from e in Database.Query<NewsletterDeliveryDN>()
                                                      select new
                                                      {
-                                                         Entity = e.ToLite(),
+                                                         Entity = e,
                                                          e.Id,
                                                          e.Newsletter,
                                                          e.Recipient,

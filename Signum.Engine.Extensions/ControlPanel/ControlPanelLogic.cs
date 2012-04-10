@@ -29,7 +29,7 @@ namespace Signum.Engine.ControlPanel
                 dqm[typeof(ControlPanelDN)] = (from cp in Database.Query<ControlPanelDN>()
                                             select new
                                             {
-                                                Entity = cp.ToLite(),
+                                                Entity = cp,
                                                 cp.DisplayName,
                                                 cp.Related,
                                             }).ToDynamic();
@@ -37,7 +37,7 @@ namespace Signum.Engine.ControlPanel
                 dqm[typeof(LinkListPartDN)] = (from cp in Database.Query<LinkListPartDN>()
                                                select new
                                                {
-                                                   Entity = cp.ToLite(),
+                                                   Entity = cp,
                                                    ToStr = cp.ToString(),
                                                    Links = cp.Links.Count
                                                }).ToDynamic();
@@ -45,7 +45,7 @@ namespace Signum.Engine.ControlPanel
                 dqm[typeof(CountSearchControlPartDN)] = (from cp in Database.Query<CountSearchControlPartDN>()
                                                select new
                                                {
-                                                   Entity = cp.ToLite(),
+                                                   Entity = cp,
                                                    ToStr = cp.ToString(),
                                                    Links = cp.UserQueries.Count
                                                }).ToDynamic(); 

@@ -33,7 +33,7 @@ namespace Signum.Engine.Chart
                 dqm[typeof(ChartColorDN)] = (from cc in Database.Query<ChartColorDN>()
                                              select new
                                              {
-                                                 Entity = cc.ToLite(),
+                                                 Entity = cc,
                                                  cc.Related,
                                                  cc.Color,
                                              }).ToDynamic();

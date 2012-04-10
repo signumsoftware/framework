@@ -58,7 +58,7 @@ namespace Signum.Engine.Scheduler
                       (from ct in Database.Query<CustomTaskDN>()
                        select new
                        {
-                           Entity = ct.ToLite(),
+                           Entity = ct,
                            ct.Id,
                            ct.Name,
                        }).ToDynamic();
@@ -67,9 +67,9 @@ namespace Signum.Engine.Scheduler
                      (from cte in Database.Query<CustomTaskExecutionDN>()
                       select new
                       {
-                          Entity = cte.ToLite(),
+                          Entity = cte,
                           cte.Id,
-                          CustomTask = cte.CustomTask.ToLite(),
+                          cte.CustomTask,
                           cte.StartTime,
                           cte.EndTime,
                           cte.Exception,

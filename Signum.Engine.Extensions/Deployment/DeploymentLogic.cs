@@ -26,7 +26,7 @@ namespace Signum.Engine.Deployment
                     (from r in Database.Query<DeploymentLogDN>()
                      select new
                      {
-                         Entity = r.ToLite(),
+                         Entity = r,
                          r.Id,
                          r.CreationDate,
                          r.Version,

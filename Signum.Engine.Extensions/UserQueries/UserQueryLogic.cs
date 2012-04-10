@@ -29,8 +29,8 @@ namespace Signum.Engine.UserQueries
                 dqm[typeof(UserQueryDN)] = (from uq in Database.Query<UserQueryDN>()
                                             select new
                                             {
-                                                Entity = uq.ToLite(),
-                                                Query = uq.Query.ToLite(),
+                                                Entity = uq,
+                                                uq.Query,
                                                 uq.Id,
                                                 uq.DisplayName,
                                                 Filters = uq.Filters.Count,

@@ -46,7 +46,7 @@ namespace Signum.Engine.Processes
                      (from p in Database.Query<DemoPackageDN>()
                       select new
                       {
-                          Entity = p.ToLite(),
+                          Entity = p,
                           p.Id,
                           p.Name,
                           Lines = (int?)p.Lines().Count()
@@ -56,7 +56,7 @@ namespace Signum.Engine.Processes
                     (from pl in Database.Query<DemoPackageLineDN>()
                      select new
                      {
-                         Entity = pl.ToLite(),
+                         Entity = pl,
                          Package = pl.Package,
                          pl.Id,
                          pl.FinishTime,

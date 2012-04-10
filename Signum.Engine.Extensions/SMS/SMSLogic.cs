@@ -39,7 +39,7 @@ namespace Signum.Engine.SMS
                 dqm[typeof(SMSMessageDN)] = (from m in Database.Query<SMSMessageDN>()
                                              select new
                                              {
-                                                 Entity = m.ToLite(),
+                                                 Entity = m,
                                                  m.Id,
                                                  Source = m.From,
                                                  m.DestinationNumber,
@@ -51,13 +51,13 @@ namespace Signum.Engine.SMS
                 dqm[typeof(SMSTemplateDN)] = (from t in Database.Query<SMSTemplateDN>()
                                               select new
                                               {
-                                                  Entity = t.ToLite(),
+                                                  Entity = t,
                                                   t.Id,
                                                   t.Name,
                                                   IsActive = t.IsActiveNow(),
                                                   Message = t.Message.Etc(50),
                                                   Source = t.From,
-                                                  AssociatedType = t.AssociatedType.ToLite(),
+                                                  t.AssociatedType,
                                                   t.State,
                                                   t.StartDate,
                                                   t.EndDate,
@@ -338,7 +338,7 @@ namespace Signum.Engine.SMS
                 dqm[typeof(SMSSendPackageDN)] = (from e in Database.Query<SMSSendPackageDN>()
                                                  select new
                                                  {
-                                                     Entity = e.ToLite(),
+                                                     Entity = e,
                                                      e.Id,
                                                      e.Name,
                                                      e.NumLines,
@@ -348,7 +348,7 @@ namespace Signum.Engine.SMS
                 dqm[typeof(SMSUpdatePackageDN)] = (from e in Database.Query<SMSUpdatePackageDN>()
                                                    select new
                                                    {
-                                                       Entity = e.ToLite(),
+                                                       Entity = e,
                                                        e.Id,
                                                        e.Name,
                                                        e.NumLines,

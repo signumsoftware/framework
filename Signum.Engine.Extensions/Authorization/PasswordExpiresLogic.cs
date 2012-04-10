@@ -24,7 +24,7 @@ namespace Signum.Engine.Authorization
                     (from e in Database.Query<PasswordExpiresIntervalDN>()
                      select new
                      {
-                         Entity = e.ToLite(),
+                         Entity = e,
                          e.Id,
                          e.Enabled,
                          e.Days,

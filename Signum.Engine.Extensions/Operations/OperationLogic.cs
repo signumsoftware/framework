@@ -105,10 +105,10 @@ namespace Signum.Engine.Operations
                 dqm[typeof(OperationLogDN)] = (from lo in Database.Query<OperationLogDN>()
                                                select new
                                                {
-                                                   Entity = lo.ToLite(),
+                                                   Entity = lo,
                                                    lo.Id,
                                                    Target = lo.Target,
-                                                   Operation = lo.Operation.ToLite(),
+                                                   lo.Operation,
                                                    User = lo.User,
                                                    lo.Start,
                                                    lo.End,
@@ -118,7 +118,7 @@ namespace Signum.Engine.Operations
                 dqm[typeof(OperationDN)] = (from lo in Database.Query<OperationDN>()
                                             select new
                                             {
-                                                Entity = lo.ToLite(),
+                                                Entity = lo,
                                                 lo.Id,
                                                 lo.Name,
                                                 lo.Key,

@@ -26,7 +26,7 @@ namespace Signum.Engine.Authorization
                 dqm[typeof(SessionLogDN)] = (from sl in Database.Query<SessionLogDN>()
                                              select new
                                              {
-                                                 Entity = sl.ToLite(),
+                                                 Entity = sl,
                                                  sl.Id,
                                                  sl.User,
                                                  sl.SessionStart,

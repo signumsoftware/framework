@@ -61,7 +61,7 @@ namespace Signum.Engine.Scheduler
                      (from st in Database.Query<CalendarDN>()
                       select new
                       {
-                          Entity = st.ToLite(),
+                          Entity = st,
                           st.Id,
                           st.Name,
                           Holidays = st.Holidays.Count,
@@ -72,12 +72,12 @@ namespace Signum.Engine.Scheduler
                     (from st in Database.Query<ScheduledTaskDN>()
                      select new
                      {
-                         Entity = st.ToLite(),
+                         Entity = st,
                          st.Id,
-                         Task = st.Task.ToLite(),
+                         st.Task,
                          st.NextDate,
                          st.Suspended,
-                         Rule = st.Rule.ToLite(),
+                         st.Rule,
                      }).ToDynamic();
             }
         }

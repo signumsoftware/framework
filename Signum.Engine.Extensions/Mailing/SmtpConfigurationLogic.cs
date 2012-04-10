@@ -32,7 +32,7 @@ namespace Signum.Engine.Mailing
                 dqm[typeof(SMTPConfigurationDN)] = (from s in Database.Query<SMTPConfigurationDN>()
                                                     select new
                                                     {
-                                                        Entity = s.ToLite(),
+                                                        Entity = s,
                                                         s.Id,
                                                         s.Name,
                                                         s.Host,
@@ -46,7 +46,7 @@ namespace Signum.Engine.Mailing
                 dqm[SMTPConfigurationQueries.NoCredentialsData] = (from s in Database.Query<SMTPConfigurationDN>()
                                                                    select new
                                                                    {
-                                                                       Entity = s.ToLite(),
+                                                                       Entity = s,
                                                                        s.Id,
                                                                        s.Name,
                                                                        s.Host,
@@ -58,7 +58,7 @@ namespace Signum.Engine.Mailing
                 dqm[typeof(ClientCertificationFileDN)] = (from c in Database.Query<ClientCertificationFileDN>()
                                                           select new
                                                           {
-                                                              Entity = c.ToLite(),
+                                                              Entity = c,
                                                               c.Id,
                                                               c.Name,
                                                               CertFileType = c.CertFileType.NiceToString(),

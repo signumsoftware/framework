@@ -30,9 +30,9 @@ namespace Signum.Engine.Reports
                 dqm[typeof(ExcelReportDN)] = (from s in Database.Query<ExcelReportDN>()
                                               select new
                                               {
-                                                  Entity = s.ToLite(),
+                                                  Entity = s,
                                                   s.Id,
-                                                  Query = s.Query.ToLite(),
+                                                  s.Query,
                                                   s.File.FileName,
                                                   s.DisplayName,
                                                   s.Deleted,
