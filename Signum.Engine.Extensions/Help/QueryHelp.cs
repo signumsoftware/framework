@@ -100,17 +100,8 @@ namespace Signum.Engine.Help
         {
             using (AuthLogic.Disable())
             {
-                ColumnDescriptionFactory[] columns = null;
-                if (key as Enum != null)
-                {
-                    Enum query = (Enum)key;
-                    columns = DynamicQueryManager.Current[query].StaticColumns;
-                }
-                else
-                {
-                    Type query = (Type)key;
-                    columns = DynamicQueryManager.Current[key].StaticColumns;
-                }
+                ColumnDescriptionFactory[] columns = DynamicQueryManager.Current[key].StaticColumns.Value;
+             
                 return columns;
             }
         }

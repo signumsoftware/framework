@@ -77,7 +77,7 @@ namespace Signum.Windows.Operations
                     entity = settings.Constructor(new ConstructorFromManyEventArgs
                     {
                         Entities = lites,
-                        Window = b.FindCurrentWindow(),
+                        Window = Window.GetWindow(b),
                         OperationInfo = operationInfo,
                         QueryName = queryName
                     });

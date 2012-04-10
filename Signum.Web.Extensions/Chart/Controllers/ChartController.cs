@@ -162,7 +162,7 @@ namespace Signum.Web.Chart
 
             if (chartRequest.Chart.GroupResults)
             {
-                var filters = chartRequest.Filters.Where(a=>!(a.Token is AggregateToken)).Select(f => new FilterOption { Token = f.Token, Value = f.Value, Operation = f.Operation }).ToList();
+                var filters = chartRequest.Filters.Where(a=>!(a.Token is AggregateToken)).Select(f => new FilterOption { Token = f.Token, ColumnName = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
 
                 var chartTokenFilters = new List<FilterOption>
                 {

@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Services;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using System.Windows;
 
 namespace Signum.Windows.Processes
 {
@@ -44,7 +45,7 @@ namespace Signum.Windows.Processes
         static ProcessExecutionDN ProcessOperation_Plan(EntityOperationEventArgs<ProcessExecutionDN> args)
         {
             DateTime plan = TimeZoneManager.Now;
-            if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, args.SenderButton.FindCurrentWindow()))
+            if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, Window.GetWindow(args.SenderButton)))
             {
                 return  ((ProcessExecutionDN)args.Entity).ToLite().ExecuteLite(ProcessOperation.Plan, plan); 
             }

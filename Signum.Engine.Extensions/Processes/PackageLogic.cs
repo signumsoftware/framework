@@ -40,9 +40,9 @@ namespace Signum.Engine.Processes
                      (from p in Database.Query<PackageDN>()
                       select new
                       {
-                          Entity = p.ToLite(),
+                          Entity = p,
                           p.Id,
-                          Operation = p.Operation.ToLite(),
+                          p.Operation,
                           p.Name ,
                           Lines = (int?)Database.Query<PackageLineDN>().Count(pl => pl.Package == p.ToLite())
                       }).ToDynamic();
@@ -51,7 +51,7 @@ namespace Signum.Engine.Processes
                     (from pl in Database.Query<PackageLineDN>()
                      select new
                      {
-                         Entity = pl.ToLite(),
+                         Entity = pl,
                          Package = pl.Package,
                          pl.Id,
                          pl.Target,

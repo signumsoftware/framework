@@ -42,7 +42,7 @@ namespace Signum.Windows.Authorization
                     new QuickLinkAction("Type Rules", () => 
                         new TypeRules 
                         { 
-                            Owner = c.FindCurrentWindow(),
+                            Owner = Window.GetWindow(c),
                             Role = r.ToLite(), 
                             Properties = PropertyAuthClient.Started, 
                             Operations = OperationAuthClient.Started,

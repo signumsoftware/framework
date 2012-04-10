@@ -83,7 +83,7 @@ namespace Signum.Engine.Mailing
                 dqm[typeof(EmailTemplateDN)] = (from e in Database.Query<EmailTemplateDN>()
                                                 select new
                                                 {
-                                                    Entity = e.ToLite(),
+                                                    Entity = e,
                                                     e.Id,
                                                     e.FullClassName,
                                                     e.FriendlyName,
@@ -92,7 +92,7 @@ namespace Signum.Engine.Mailing
                 dqm[typeof(EmailMessageDN)] = (from e in Database.Query<EmailMessageDN>()
                                                select new
                                                {
-                                                   Entity = e.ToLite(),
+                                                   Entity = e,
                                                    e.Id,
                                                    e.Recipient,
                                                    e.State,
@@ -185,7 +185,7 @@ namespace Signum.Engine.Mailing
                 dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
                                                select new
                                                {
-                                                   Entity = e.ToLite(),
+                                                   Entity = e,
                                                    e.Id,
                                                    e.Name,
                                                    e.NumLines,

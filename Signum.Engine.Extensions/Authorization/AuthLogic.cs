@@ -67,7 +67,7 @@ namespace Signum.Engine.Authorization
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
                                        select new
                                        {
-                                           Entity = r.ToLite(),
+                                           Entity = r,
                                            r.Id,
                                            r.Name,
                                        }).ToDynamic();
@@ -76,24 +76,23 @@ namespace Signum.Engine.Authorization
                                               from rc in r.Roles
                                               select new
                                               {
-                                                  Entity = r.ToLite(),
+                                                  Entity = r,
                                                   r.Id,
                                                   r.Name,
-
                                                   Refered = rc,
                                               }).ToDynamic();
 
                 dqm[typeof(UserDN)] = (from e in Database.Query<UserDN>()
                                        select new
                                        {
-                                           Entity = e.ToLite(),
+                                           Entity = e,
                                            e.Id,
                                            e.UserName,
                                            e.Email,
-                                           Rol = e.Role.ToLite(),
+                                           e.Role,
                                            e.PasswordNeverExpires,
                                            e.PasswordSetDate,
-                                           Related = e.Related.ToLite(),
+                                           e.Related,
                                        }).ToDynamic();
 
                 UserGraph.Register();

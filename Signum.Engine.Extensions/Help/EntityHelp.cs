@@ -28,8 +28,7 @@ namespace Signum.Engine.Help
         public Dictionary<Enum, OperationHelp> Operations;
         public Dictionary<object, QueryHelp> Queries
         {
-            get { return HelpLogic.GetQueryHelps(this.Type)
-                .TryCC(qhs=>qhs.ToDictionary(qh=>qh.Key));}
+            get { return HelpLogic.state.Value.GetQueryHelps(this.Type).ToDictionary(qh => qh.Key); }
         }
         public string FileName;
         public string Language;
@@ -314,9 +313,9 @@ namespace Signum.Engine.Help
 
             //Queries (key)
             //TODO: Añadir UserDescriptions a las búsquedas + campos
-            List<QueryHelp> qh = HelpLogic.GetQueryHelps(Type);
-            if (qh != null)
-                foreach (var p in qh)
+            var queries = Queries.Values;
+            if (queries != null)
+                foreach (var p in queries)
                 {
                     m = regex.Match(QueryUtils.GetNiceName(p.Key).RemoveDiacritics());
                     if (m.Success)

@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Services;
 using Signum.Entities.Authorization;
 using Signum.Entities;
+using System.Windows;
 
 namespace Signum.Windows.Authorization
 {
@@ -21,10 +22,10 @@ namespace Signum.Windows.Authorization
                 bool authorized = BasicPermissions.AdminRules.TryIsAuthorized() ?? true;
                 return new QuickLink[]
                 {
-                        new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r.ToLite(), Owner = c.FindCurrentWindow() }.Show())
-                        { 
-                            IsVisible = authorized
-                        },
+                    new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r.ToLite(), Owner = Window.GetWindow(c) }.Show())
+                    { 
+                        IsVisible = authorized
+                    },
                 };
             });
         }

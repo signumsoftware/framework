@@ -29,11 +29,11 @@ namespace Signum.Engine.Authorization
                 dqm[typeof(ResetPasswordRequestDN)] = (from e in Database.Query<ResetPasswordRequestDN>()
                                                        select new
                                                        {
-                                                           Entity = e.ToLite(),
+                                                           Entity = e,
                                                            e.Id,
                                                            e.RequestDate,
                                                            e.Code,
-                                                           User = e.User.ToLite(),
+                                                           e.User,
                                                            e.User.Email
                                                        }).ToDynamic();
 

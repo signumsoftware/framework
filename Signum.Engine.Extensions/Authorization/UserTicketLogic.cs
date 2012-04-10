@@ -29,7 +29,7 @@ namespace Signum.Engine.Authorization
                 dqm[typeof(UserTicketDN)] = (from ut in Database.Query<UserTicketDN>()
                                              select new
                                              {
-                                                 Entity = ut.ToLite(),
+                                                 Entity = ut,
                                                  ut.Id,
                                                  ut.User,
                                                  ut.Ticket,

@@ -26,7 +26,7 @@ namespace Signum.Engine.Exceptions
                     (from r in Database.Query<ExceptionDN>()
                      select new
                      {
-                         Entity = r.ToLite(),
+                         Entity = r,
                          r.Id,
                          r.CreationDate,
                          r.ExceptionType,

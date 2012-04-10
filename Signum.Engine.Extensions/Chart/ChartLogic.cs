@@ -36,8 +36,8 @@ namespace Signum.Engine.Chart
                 dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()
                                             select new
                                             {
-                                                Entity = uq.ToLite(),
-                                                Query = uq.Query.ToLite(),
+                                                Entity = uq,
+                                                uq.Query,
                                                 uq.Id,
                                                 uq.DisplayName,
                                                 Filters = uq.Filters.Count,

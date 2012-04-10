@@ -12,6 +12,7 @@ using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Utilities;
 using System.IO;
 using Signum.Services;
+using System.Windows;
 
 namespace Signum.Windows.Reports
 {
@@ -36,7 +37,7 @@ namespace Signum.Windows.Reports
                 Title = Prop.Resources.FindLocationFoExcelReport
             };
 
-            if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
+            if (sfd.ShowDialog(Window.GetWindow(this)) == true)
             {
 
                 var request = SearchControl.GetQueryRequest(true);

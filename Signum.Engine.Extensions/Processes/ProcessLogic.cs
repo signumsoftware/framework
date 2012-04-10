@@ -97,7 +97,7 @@ namespace Signum.Engine.Processes
                               join pe in Database.Query<ProcessExecutionDN>().DefaultIfEmpty() on p equals pe.Process into g
                               select new
                               {
-                                  Entity = p.ToLite(),
+                                  Entity = p,
                                   p.Id,
                                   p.Name
                               }).ToDynamic();
@@ -106,10 +106,10 @@ namespace Signum.Engine.Processes
                              (from pe in Database.Query<ProcessExecutionDN>()
                               select new
                               {
-                                  Entity = pe.ToLite(),
+                                  Entity = pe,
                                   pe.Id,
                                   Resume = pe.ToString(),
-                                  Process = pe.Process.ToLite(),
+                                  pe.Process,
                                   State = pe.State,
                                   pe.CreationDate,
                                   pe.PlannedDate,

@@ -36,7 +36,7 @@ namespace Signum.Engine.Files
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
                                                  select new
                                                  {
-                                                     Entity = r.ToLite(),
+                                                     Entity = r,
                                                      r.Id,
                                                      r.Name,
                                                      r.Active,
@@ -47,10 +47,10 @@ namespace Signum.Engine.Files
                 dqm[typeof(FilePathDN)] = (from p in Database.Query<FilePathDN>()
                                            select new
                                            {
-                                               Entity = p.ToLite(),
+                                               Entity = p,
                                                p.Id,
                                                p.FileName,
-                                               FileType = p.FileType.ToLite(),
+                                               p.FileType,
                                                p.FullPhysicalPath,
                                                p.FullWebPath,
                                                Repository = p.Repository.ToLite()
@@ -59,7 +59,7 @@ namespace Signum.Engine.Files
                 dqm[typeof(FileTypeDN)] = (from f in Database.Query<FileTypeDN>()
                                            select new
                                            {
-                                               Entity = f.ToLite(),
+                                               Entity = f,
                                                f.Name
                                            }).ToDynamic();
 

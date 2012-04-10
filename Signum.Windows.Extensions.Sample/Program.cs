@@ -90,7 +90,7 @@ namespace Signum.Windows.Extensions.Sample
         {
             Login login = new Login
             {
-                Title = "Music Database",
+                Title = "Login on Music Database",
                 UserName = Settings.Default.Autologin,
                 Password = "",
                 ProductName = "Music Database",

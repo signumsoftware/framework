@@ -105,10 +105,6 @@
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Framework\Signum.Web\Signum.Web.csproj">
-      <Project>{61898D02-521F-49AB-928B-F80615D55CA3}</Project>
-      <Name>Signum.Web</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
       <Project>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</Project>
       <Name>Signum.Engine.Extensions</Name>
@@ -121,17 +117,9 @@
       <Project>{4D7D1542-2C5B-45D3-BC62-0D7290899EF7}</Project>
       <Name>Signum.Test.Extensions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Web.Extensions.Sample\Signum.Web.Extensions.Sample.csproj">
-      <Project>{4E8F08F7-6EA9-4D06-A2F5-CFAD4C1364E8}</Project>
-      <Name>Signum.Web.Extensions.Sample</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Signum.Web.Extensions.Selenium\Signum.Web.Extensions.Selenium.csproj">
       <Project>{18048DCC-7069-4BC1-8BE0-99010C7D9082}</Project>
       <Name>Signum.Web.Extensions.Selenium</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Web.Extensions\Signum.Web.Extensions.csproj">
-      <Project>{86EE7792-96CF-4420-997B-8C811E2B166D}</Project>
-      <Name>Signum.Web.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -157,7 +145,7 @@
     <None Include="otLines.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="otTestsIU.orderedtest">
+    <None Include="otTestsWeb.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="otSearchControl.orderedtest">

@@ -235,6 +235,9 @@
     <value>Repetir:</value>
   </data>
   <data name="Login_UserName" xml:space="preserve">
-    <value>Username:</value>
+    <value>Usuario:</value>
+  </data>
+  <data name="Login_UserName_Watermark" xml:space="preserve">
+    <value>usuario</value>
   </data>
 </root>
