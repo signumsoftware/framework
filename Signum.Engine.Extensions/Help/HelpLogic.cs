@@ -37,44 +37,53 @@ namespace Signum.Engine.Help
         public static string HelpDirectory = "HelpXml";
         public static string BaseUrl = "Help";
 
-        static Dictionary<Type, EntityHelp> TypeToHelpFiles
+        public class HelpState
         {
-            get { return HelpLogic.typeToHelpFiles.ThrowIfNullC(Resources.HelpNotLoaded); }
-            set { HelpLogic.typeToHelpFiles = value; }
+            public Dictionary<Type, EntityHelp> TypeToHelpFiles;
+
+            public Dictionary<string, NamespaceHelp> Namespaces;
+            public Dictionary<string, AppendixHelp> Appendices;
+
+            public Dictionary<Type, List<object>> TypeToQueryFiles;
+            public Dictionary<object, QueryHelp> QueryColumns;
+
+            public List<QueryHelp> GetQueryHelps(Type type)
+            {
+                var list = TypeToQueryFiles.TryGetC(type);
+
+                if(list == null)
+                    return new List<QueryHelp>();
+
+                return list.Select(o => QueryColumns[o]).ToList();
+            }
         }
 
-        static Dictionary<Type, EntityHelp> typeToHelpFiles;
-
-        static Dictionary<string, NamespaceHelp> Namespaces;
-        static Dictionary<string, AppendixHelp> Appendices;
-
-        static Dictionary<Type, List<object>> TypeToQueryFiles;
-        static Dictionary<object, QueryHelp> QueryColumns;
+        internal static Lazy<HelpState> state = new Lazy<HelpState>(Schema_Initialize, System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
       
         public static NamespaceHelp GetNamespace(string @namespace)
         {
-            return Namespaces.TryGetC(@namespace);
+            return state.Value.Namespaces.TryGetC(@namespace);
         }
 
         public static List<NamespaceHelp> GetNamespaces()
         {
-            return Namespaces.Select(kvp => kvp.Value).ToList();
+            return state.Value.Namespaces.Select(kvp => kvp.Value).ToList();
         }
 
         public static List<AppendixHelp> GetAppendices()
         {
-            return Appendices.Select(kvp => kvp.Value).ToList();
+            return state.Value.Appendices.Select(kvp => kvp.Value).ToList();
         }
 
         public static AppendixHelp GetAppendix(string appendix)
         {
-            return Appendices.TryGetC(appendix);
+            return state.Value.Appendices.TryGetC(appendix);
         }
 
         public static Type[] AllTypes()
         {
-            return TypeToHelpFiles.Keys.ToArray();
+            return state.Value.TypeToHelpFiles.Keys.ToArray();
         }
 
         public static string EntityUrl(Type entityType)
@@ -105,66 +114,58 @@ namespace Signum.Engine.Help
 
         public static EntityHelp GetEntityHelp(Type entityType)
         {
-            return TypeToHelpFiles[entityType];
+            return state.Value.TypeToHelpFiles[entityType];
         }
 
         public static List<KeyValuePair<Type, EntityHelp>> GetEntitiesHelp()
         {
-            return TypeToHelpFiles.ToList();
+            return state.Value.TypeToHelpFiles.ToList();
         }
 
         public static QueryHelp GetQueryHelp(string query)
         {
-            return QueryColumns[QueryLogic.TryToQueryName(query)];
+            return state.Value.QueryColumns[QueryLogic.TryToQueryName(query)];
         }
 
-        public static List<QueryHelp> GetQueryHelps(Type type)
-        {
-            return TypeToQueryFiles.TryGetC(type) != null ?
-                (from o in TypeToQueryFiles.TryGetC(type)
-                     select QueryColumns[o]).ToList()
-                : null;
-        }
+    
 
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_Initialize;
             }
         }
 
         public static void ReloadDocumentEntity(EntityHelp entityHelp)
         {
-            TypeToHelpFiles[entityHelp.Type] = EntityHelp.Load(entityHelp.Type, XDocument.Load(entityHelp.FileName), entityHelp.FileName);
+            state.Value.TypeToHelpFiles[entityHelp.Type] = EntityHelp.Load(entityHelp.Type, XDocument.Load(entityHelp.FileName), entityHelp.FileName);
         }
 
         public static void ReloadDocumentQuery(QueryHelp queryHelp)
         {
-            QueryColumns[queryHelp.Key] = QueryHelp.Load(XDocument.Load(queryHelp.FileName), queryHelp.FileName);
+            state.Value.QueryColumns[queryHelp.Key] = QueryHelp.Load(XDocument.Load(queryHelp.FileName), queryHelp.FileName);
         }
 
         public static void ReloadDocumentNamespace(NamespaceHelp namespaceHelp)
         {
-            Namespaces[namespaceHelp.Name] = NamespaceHelp.Load(XDocument.Load(namespaceHelp.FileName), namespaceHelp.FileName);
+            state.Value.Namespaces[namespaceHelp.Name] = NamespaceHelp.Load(XDocument.Load(namespaceHelp.FileName), namespaceHelp.FileName);
         }
 
         public static void ReloadDocumentAppendix(AppendixHelp appendixHelp)
         {
-            Appendices[appendixHelp.Name] = AppendixHelp.Load(XDocument.Load(appendixHelp.FileName), appendixHelp.FileName);
+            state.Value.Appendices[appendixHelp.Name] = AppendixHelp.Load(XDocument.Load(appendixHelp.FileName), appendixHelp.FileName);
         }
 
-        static void Schema_Initialize()
+        static HelpState Schema_Initialize()
         {
+            if (!Directory.Exists(HelpDirectory))
+                throw new InvalidOperationException("Help directory does not exist ('{0}')".Formato(HelpDirectory));
+
+            HelpState result = new HelpState();
+
             Type[] types = Schema.Current.Tables.Select(t => t.Key).ToArray();
 
             var typesDic = types.ToDictionary(a => a.FullName);
-
-            if (!Directory.Exists(HelpDirectory))
-            {
-                TypeToHelpFiles = new Dictionary<Type, EntityHelp>();
-                return;
-            }
 
             var entitiesDocuments = LoadDocuments(EntitiesDirectory);
             var namespacesDocuments = LoadDocuments(NamespacesDirectory);
@@ -180,7 +181,7 @@ namespace Signum.Engine.Help
 
 
                 //tipo a entityHelp
-                TypeToHelpFiles = typeHelpInfo.ToDictionary(p => p.Type);
+                result.TypeToHelpFiles = typeHelpInfo.ToDictionary(p => p.Type);
             }
 
             //Scope
@@ -190,7 +191,7 @@ namespace Signum.Engine.Help
                                     where namespaceName != null
                                     select NamespaceHelp.Load(doc.Document, doc.File);
 
-                Namespaces = nameSpaceInfo.ToDictionary(a => a.Name);
+                result.Namespaces = nameSpaceInfo.ToDictionary(a => a.Name);
             }
 
             //Scope
@@ -200,7 +201,7 @@ namespace Signum.Engine.Help
                                    where namespaceName != null
                                    select AppendixHelp.Load(doc.Document, doc.File);
 
-                Appendices = appendixInfo.ToDictionary(a => a.Name);
+                result.Appendices = appendixInfo.ToDictionary(a => a.Name);
             }
 
             //Scope
@@ -211,10 +212,12 @@ namespace Signum.Engine.Help
                                   select QueryHelp.Load(doc.Document, doc.File);
 
 
-                TypeToQueryFiles = queriesInfo.GroupToDictionary(qh=>GetQueryType(qh.Key), qh=>qh.Key);
-                
-                QueryColumns = queriesInfo.ToDictionary(a => a.Key);
+                result.TypeToQueryFiles = queriesInfo.GroupToDictionary(qh => GetQueryType(qh.Key), qh => qh.Key);
+
+                result.QueryColumns = queriesInfo.ToDictionary(a => a.Key);
             }
+
+            return result;
         }
 
         public static Type GetQueryType(object query)
