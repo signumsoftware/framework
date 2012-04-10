@@ -20,9 +20,7 @@ namespace Signum.Engine.DynamicQuery
                 throw new ArgumentNullException("execute");
 
             this.Execute = execute;
-
-            InitializeColumns(mi => null);
-        }
+        }        
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {

@@ -269,5 +269,37 @@ namespace Signum.Entities.DynamicQuery
 
             return null;
         }
+
+
+        static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity ident) => ident.ToLite()).GetGenericMethodDefinition();
+        internal static Expression ExtractEntity(this Expression expression, bool idAndToStr)
+        {
+            if (Reflector.ExtractLite(expression.Type) != null)
+            {
+                MethodCallExpression mce = expression as MethodCallExpression;
+                if (mce != null && mce.Method.IsInstantiationOf(miToLite))
+                    return mce.Arguments[0];
+
+                if (!idAndToStr)
+                    return Expression.Property(expression, "Entity");
+            }
+            return expression;
+        }
+
+        internal static Expression BuildLite(this Expression expression)
+        {
+            if (Reflector.IsIIdentifiable(expression.Type))
+                return Expression.Call(miToLite.MakeGenericMethod(expression.Type), expression);
+
+            return expression;
+        }
+
+        internal static Type BuildLite(this Type type)
+        {
+            if (Reflector.IsIIdentifiable(type))
+                return Reflector.GenerateLite(type);
+
+            return type;
+        }
     }
 }
