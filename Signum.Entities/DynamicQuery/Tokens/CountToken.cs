@@ -45,7 +45,7 @@ namespace Signum.Entities.DynamicQuery
 
             var result = Expression.Call(miCount.MakeGenericMethod(parentResult.Type.ElementType()), parentResult);
 
-            return BuildLite(result.Nullify());
+            return result.Nullify().BuildLite();
         }
 
         protected override List<QueryToken> SubTokensInternal()

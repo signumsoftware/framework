@@ -28,7 +28,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return BuildLite(PropertyInfo.PropertyType).Nullify(); }
+            get { return PropertyInfo.PropertyType.BuildLite().Nullify(); }
         }
 
         public override string ToString()
@@ -46,8 +46,8 @@ namespace Signum.Entities.DynamicQuery
             var baseExpression = Parent.BuildExpression(context);
 
             Expression result = Expression.Property(baseExpression, PropertyInfo);
-            
-            return BuildLite(result).Nullify();
+
+            return result.BuildLite().Nullify();
         }
 
         protected override List<QueryToken> SubTokensInternal()

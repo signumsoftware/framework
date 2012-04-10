@@ -13,8 +13,8 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ContentControl}">
-                            <Border BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1">
-                                <Grid Loaded="Grid_Loaded" m:Common.TypeContext="{m:ContinueRoute /}">
+                            <m:EntityRepeaterLineBorder BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1" m:Common.TypeContext="{m:ContinueRoute /}">
+                                <Grid Loaded="Grid_Loaded" >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition  Width="*"/>
                                         <ColumnDefinition  Width="Auto"/>
@@ -31,7 +31,7 @@
                                         VerticalAlignment="Top"
                                         Grid.Column="1"/>
                                 </Grid>
-                            </Border>
+                            </m:EntityRepeaterLineBorder>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>

@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
 using Signum.Utilities;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {

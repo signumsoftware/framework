@@ -27,23 +27,36 @@ namespace Signum.Engine.DynamicQuery
         int ExecuteQueryCount(QueryCountRequest request);
         Lite ExecuteUniqueEntity(UniqueEntityRequest request);
         Expression Expression { get; } //Optional
-        ColumnDescriptionFactory[] StaticColumns { get; } 
+        Lazy<ColumnDescriptionFactory[]> StaticColumns { get; } 
     }
 
     public abstract class DynamicQuery<T> : IDynamicQuery
     {
-        public ColumnDescriptionFactory[] StaticColumns { get; private set; } 
+        public Lazy<ColumnDescriptionFactory[]> StaticColumns { get; private set; } 
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
         public abstract Lite ExecuteUniqueEntity(UniqueEntityRequest request);
 
-        protected void InitializeColumns(Func<MemberInfo, Meta> getMeta)
+        public DynamicQuery()
         {
-            this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
-              .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, getMeta(e.MemberInfo))).ToArray();
+            StaticColumns = new Lazy<ColumnDescriptionFactory[]>(() =>
+                {
+                    using (HeavyProfiler.Log("InitColums"))
+                    {
+                        return InitializeColumns();
+                    }
+                });
+        }
 
-            StaticColumns.Where(a => a.IsEntity).SingleEx(()=>"Entity column not found"); 
+        protected virtual ColumnDescriptionFactory[] InitializeColumns()
+        {
+            var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+              .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, null)).ToArray();
+
+            result.Where(a => a.IsEntity).SingleEx(() => "Entity column not found");
+
+            return result;
         }
 
         public QueryDescription GetDescription(object queryName)
@@ -57,13 +70,13 @@ namespace Signum.Engine.DynamicQuery
 
         public List<ColumnDescription> GetColumnDescriptions()
         {
-            return StaticColumns.Where(f => f.IsAllowed()).Select(f => f.BuildColumnDescription()).ToList();
+            return StaticColumns.Value.Where(f => f.IsAllowed()).Select(f => f.BuildColumnDescription()).ToList();
         }
 
         public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
-            ColumnDescriptionFactory col = StaticColumns.SingleEx(a => a.Name == member.Name);
+            ColumnDescriptionFactory col = StaticColumns.Value.SingleEx(a => a.Name == member.Name);
             change(col);
 
             return this;
@@ -71,7 +84,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescriptionFactory EntityColumn()
         {
-            return StaticColumns.Where(c => c.IsEntity).SingleEx(()=>"There's no Entity column");
+            return StaticColumns.Value.Where(c => c.IsEntity).SingleEx(()=>"There's no Entity column");
         }
 
         public virtual Expression Expression
@@ -150,7 +163,7 @@ namespace Signum.Engine.DynamicQuery
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
 
-            var dic = descriptions.ToDictionary(cd => (QueryToken)new ColumnToken(cd), cd => (Expression)Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name));
+            var dic = descriptions.ToDictionary(cd => (QueryToken)new ColumnToken(cd), cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLite());
 
             return new DQueryable<T>(query.Select(a => (object)a), new BuildExpressionContext(typeof(T), pe, dic));
         }

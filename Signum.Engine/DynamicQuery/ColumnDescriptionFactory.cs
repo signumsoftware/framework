@@ -70,12 +70,12 @@ namespace Signum.Engine.DynamicQuery
             Type = mi.ReturningType();
             Meta = meta;
 
-            if (Type.IsIIdentifiable())
-                throw new InvalidOperationException("The Type of column {0} is a subtype of IIdentifiable, use a Lite instead".Formato(mi.MemberName()));
+            //if (Type.IsIIdentifiable())
+            //    throw new InvalidOperationException("The Type of column {0} is a subtype of IIdentifiable, use a Lite instead".Formato(mi.MemberName()));
 
-            Type cleanType = Reflector.ExtractLite(Type);
-            if (IsEntity && cleanType == null)
-                throw new InvalidOperationException("Entity must be a Lite");
+            Type cleanType = Reflector.ExtractLite(Type) ?? Type;
+            if (IsEntity && !cleanType.IsIIdentifiable())
+                throw new InvalidOperationException("Entity must be a Lite or an IIdentifiable");
 
             if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoutes.All(pr => pr.PropertyRouteType != PropertyRouteType.Root))
             {
@@ -164,7 +164,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescription BuildColumnDescription()
         {
-            return new ColumnDescription(Name, Type)
+            return new ColumnDescription(Name, Reflector.IsIIdentifiable(Type) ? Reflector.GenerateLite(Type) : Type)
             {
                 PropertyRoutes = propertyRoutes,
                 Implementations = Implementations,

@@ -7,6 +7,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Linq.Expressions;
 using System.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -22,10 +23,18 @@ namespace Signum.Engine.DynamicQuery
                 throw new ArgumentNullException("query");
 
             this.Query = query;
+        }
 
-            metas = DynamicQuery.QueryMetadata(query);
+        protected override ColumnDescriptionFactory[] InitializeColumns()
+        {
+            metas = DynamicQuery.QueryMetadata(Query);
 
-            InitializeColumns(mi => metas[mi.Name]);
+            var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+              .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, metas[e.MemberInfo.Name])).ToArray();
+
+            result.Where(a => a.IsEntity).SingleEx(() => "Entity column not found");
+            
+            return result;
         }
 
         public override ResultTable ExecuteQuery(QueryRequest request)

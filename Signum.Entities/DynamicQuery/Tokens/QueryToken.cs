@@ -168,37 +168,6 @@ namespace Signum.Entities.DynamicQuery
                   .Select(p => (QueryToken)new BagPropertyToken(this, p));
         }
 
-        static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity ident) => ident.ToLite()).GetGenericMethodDefinition();
-        protected static Expression ExtractEntity(Expression expression, bool idAndToStr)
-        {
-            if (Reflector.ExtractLite(expression.Type) != null)
-            {
-                MethodCallExpression mce = expression as MethodCallExpression;
-                if (mce != null && mce.Method.IsInstantiationOf(miToLite))
-                    return mce.Arguments[0];
-
-                if (!idAndToStr)
-                    return Expression.Property(expression, "Entity");
-            }
-            return expression;
-        }
-
-        protected static Expression BuildLite(Expression expression)
-        {
-            if (Reflector.IsIIdentifiable(expression.Type))
-                return Expression.Call(miToLite.MakeGenericMethod(expression.Type), expression);
-
-            return expression;
-        }
-
-        public static Type BuildLite(Type type)
-        {
-            if (Reflector.IsIIdentifiable(type))
-                return Reflector.GenerateLite(type);
-
-            return type;
-        }
-
         public string FullKey()
         {
             if (Parent == null)
