@@ -33,10 +33,7 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                LiteFilterValueConverter.ResolveType = TypeLogic.TryGetType;
-                LiteFilterValueConverter.TypeCleanName = TypeLogic.GetCleanName;
-
-               // QueryManagers = queryManagers;
+                // QueryManagers = queryManagers;
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_Initializing;
 
                 sb.Include<QueryDN>();

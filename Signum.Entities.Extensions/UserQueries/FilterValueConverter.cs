@@ -330,10 +330,7 @@ namespace Signum.Entities.UserQueries
                 return FilterValueConverter.Continue;
             }
 
-            if (TypeCleanName == null)
-                throw new InvalidOperationException("LiteFilterValueConverter.TypeCleanName not set");
-
-            result = ((Lite)value).Key(TypeCleanName);
+            result = ((Lite)value).Key(QueryUtils.TypeCleanName);
             return null;
         }
 
@@ -345,11 +342,8 @@ namespace Signum.Entities.UserQueries
                 return FilterValueConverter.Continue;
             }
 
-            if (ResolveType == null)
-                throw new InvalidOperationException("LiteFilterValueConverter.ResolveType not set");
-
             Lite lResult;
-            string error = Lite.TryParseLite(Reflector.ExtractLite(type), value, ResolveType, out lResult);
+            string error = Lite.TryParseLite(Reflector.ExtractLite(type), value, QueryUtils.ResolveType, out lResult);
 
             if (error == null)
             {
@@ -362,9 +356,6 @@ namespace Signum.Entities.UserQueries
                 return error;
             }
         }
-
-        public static Func<string, Type> ResolveType;
-        public static Func<Type, string> TypeCleanName; 
     }
 
     public class CurrentUserConverter : IFilterValueConverter

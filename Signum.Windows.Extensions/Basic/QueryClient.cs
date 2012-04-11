@@ -21,9 +21,6 @@ namespace Signum.Windows
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 queryNames = Server.Return((IDynamicQueryServer s) => s.GetQueryNames().ToDictionary(a => QueryUtils.GetQueryUniqueKey(a)));
-                
-                LiteFilterValueConverter.ResolveType = Server.TryGetType;
-                LiteFilterValueConverter.TypeCleanName = Server.GetCleanName;
             }
         }
 
