@@ -9,6 +9,7 @@ using Signum.Engine.Properties;
 using Signum.Utilities;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine
 {
@@ -61,6 +62,9 @@ namespace Signum.Engine
 
             current.TypeToDN = dict;
             current.DnToType = dict.Inverse();
+
+            QueryUtils.ResolveType = TypeLogic.TryGetType;
+            QueryUtils.TypeCleanName = TypeLogic.GetCleanName;
 
             //current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
             //current.NameToType = current.TypeToName.Inverse("CleanTypeNames");

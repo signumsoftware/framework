@@ -89,6 +89,10 @@ namespace Signum.Windows
             };
 
             PropertyFormatters = new Dictionary<PropertyRoute, Func<Binding, DataTemplate>>();
+
+
+            QueryUtils.ResolveType = Server.TryGetType;
+            QueryUtils.TypeCleanName = Server.GetCleanName;
         }
 
         public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> property, Func<Binding, DataTemplate> formatter)
