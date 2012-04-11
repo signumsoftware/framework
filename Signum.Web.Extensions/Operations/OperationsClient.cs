@@ -41,19 +41,14 @@ namespace Signum.Web.Operations
                 OperationsContextualItemsHelper.Start();
         }
 
-        public static class Audit
+        public static void AddSetting(OperationSettings setting)
         {
-            public static List<string> SowSaveAndOperations()
-            {
-                return (from t in Schema.Current.Tables.Values
-                        where !t.Type.IsEmbeddedEntity()
-                        let es = Navigator.Manager.EntitySettings.TryGetC(t.Type)
-                        where es != null && es.OnShowSave() && OperationLogic.GetAllOperationInfos(t.Type)
-                                                                .Any(a => a.OperationType == OperationType.ConstructorFrom ||
-                                                                        a.OperationType == OperationType.Delete ||
-                                                                        a.OperationType == OperationType.Execute)
-                        select "Type {0} has registered operations but ShowSave = true".Formato(t.Type.Name)).ToList();
-            }
+            Manager.Settings.AddOrThrow(setting.Key, setting, "EntitySettings {0} repeated");
+        }
+
+        public static void AddSettings(List<OperationSettings> settings)
+        {
+            Manager.Settings.AddRange(settings, s => s.Key, s => s, "EntitySettings");
         }
     }
 

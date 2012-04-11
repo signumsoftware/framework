@@ -41,27 +41,27 @@ namespace Signum.Web.SMS
                     new EmbeddedEntitySettings<MultipleSMSModel>() { PartialViewName = e => ViewPrefix.Formato("MultipleSMS"), ShowSave = false},
                 });
 
-                OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings> 
+                OperationsClient.AddSettings(new List<OperationSettings> 
                 {
-                    {SMSMessageOperations.CreateSMSMessageFromTemplate, new EntityOperationSettings
+                    new EntityOperationSettings(SMSMessageOperations.CreateSMSMessageFromTemplate)
                     {
                         OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMSMessageFromTemplate", "SMS"))
                         .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
-                    }},
+                    },
 
-                    {SMSProviderOperations.SendSMSMessagesFromTemplate, new QueryOperationSettings
+                    new QueryOperationSettings(SMSProviderOperations.SendSMSMessagesFromTemplate)
                     {
                         RequestExtraJsonData = "function(){ return { providerWebQueryName: $('#sfWebQueryName').val() }; }",
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessagesFromTemplate","SMS"))
                                 .ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
-                    }},
+                    },
 
-                    {SMSProviderOperations.SendSMSMessage, new QueryOperationSettings
+                    new QueryOperationSettings(SMSProviderOperations.SendSMSMessage)
                     {
                         RequestExtraJsonData = "function(){ return { providerWebQueryName: $('#sfWebQueryName').val() }; }",
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessages","SMS"))
                                 .ajaxSelected(ctx.Prefix, JsOpSuccess.DefaultDispatcher),
-                    }},
+                    },
                 });
 
                 ButtonBarEntityHelper.RegisterEntityButtons<MultipleSMSModel>((ctx, entity) => 

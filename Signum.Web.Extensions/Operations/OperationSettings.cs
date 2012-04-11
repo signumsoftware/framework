@@ -16,6 +16,13 @@ namespace Signum.Web.Operations
 {
     public abstract class OperationSettings
     {
+        public OperationSettings(Enum key)
+        {
+            this.Key = key; 
+        }
+
+        public Enum Key { get; private set; }
+
         public string Text { get; set; }
         public string AltText { get; set; }
         public string RequestExtraJsonData { get; set; }
@@ -23,6 +30,11 @@ namespace Signum.Web.Operations
 
     public class ConstructorSettings : OperationSettings
     {
+        public ConstructorSettings(Enum operationKey)
+            : base(operationKey)
+        {
+        }
+
         public Func<ConstructorOperationContext, ViewResultBase> VisualConstructor { get; set; }
         public Func<ConstructorOperationContext, IdentifiableEntity> Constructor { get; set; }
         public Func<ConstructorOperationContext, bool> IsVisible { get; set; }
@@ -30,6 +42,11 @@ namespace Signum.Web.Operations
 
     public class EntityOperationSettings : OperationSettings
     {
+        public EntityOperationSettings(Enum operationKey)
+            : base(operationKey)
+        {
+        }
+
         static EntityOperationSettings()
         {
             CssClass = _ => "sf-operation";
@@ -56,6 +73,12 @@ namespace Signum.Web.Operations
 
     public class QueryOperationSettings : OperationSettings
     {
+        public QueryOperationSettings(Enum operationKey)
+            : base(operationKey)
+        {
+        }
+
+
         public Func<QueryOperationContext, bool> IsVisible { get; set; }
         public Func<QueryOperationContext, JsInstruction> OnClick { get; set; }
 

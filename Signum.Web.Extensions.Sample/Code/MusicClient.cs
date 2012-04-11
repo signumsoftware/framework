@@ -69,26 +69,26 @@ namespace Signum.Web.Extensions.Sample
                     };
                 });
 
-                OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
+                OperationsClient.AddSettings( new List<OperationSettings>
                 {
-                    { AlbumOperation.Clone, new EntityOperationSettings 
+                    new EntityOperationSettings(AlbumOperation.Clone)
                     { 
                         OnContextualClick = ctx => Js.Confirm("Do you wish to clone album {0}".Formato(ctx.Entity.ToString()),
                             new JsOperationConstructorFrom(ctx.Options()).ajax(ctx.Prefix, JsOpSuccess.DefaultContextualDispatcher)),
                         IsVisible = ctx => true,
-                    }},
-                    { AlbumOperation.CreateFromBand, new EntityOperationSettings 
+                    },
+                    new EntityOperationSettings(AlbumOperation.CreateFromBand)
                     { 
                         OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
                             .validateAndAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
 
                         OnContextualClick = ctx => Js.Confirm("Do you wish to create an album for band {0}".Formato(ctx.Entity.ToString()),
                             new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music")).ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
-                    }},
-                    { AlbumOperation.CreateGreatestHitsAlbum, new QueryOperationSettings
+                    },
+                    new QueryOperationSettings(AlbumOperation.CreateGreatestHitsAlbum)
                     {
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("CreateGreatestHitsAlbum", "Music")).submitSelected()
-                    }},
+                    },
                 });
             }
         }

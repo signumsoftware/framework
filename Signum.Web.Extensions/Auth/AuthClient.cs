@@ -139,27 +139,27 @@ namespace Signum.Web.Auth
                     }
                 };
 
-                OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
+                OperationsClient.AddSettings(new List<OperationSettings>
                 {
-                    { UserOperation.SetPassword, new EntityOperationSettings 
+                    new EntityOperationSettings(UserOperation.SetPassword) 
                     { 
                         OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("SetPassword","Auth"))
                             .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                         IsContextualVisible = _ => false
-                    }},
+                    },
 
-                    { UserOperation.SaveNew, new EntityOperationSettings 
+                    new EntityOperationSettings(UserOperation.SaveNew) 
                     { 
                         OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveNewUser","Auth"))
                             .validateAndAjax()
-                    }},
+                    },
 
-                    { UserOperation.Save, new EntityOperationSettings 
+                    new EntityOperationSettings(UserOperation.Save) 
                     { 
                         OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveUser","Auth"))
                             .validateAndAjax(),
                         IsContextualVisible = _ => false
-                    }},
+                    },
                 });
             }
         }
