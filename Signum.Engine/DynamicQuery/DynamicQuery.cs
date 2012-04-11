@@ -324,7 +324,7 @@ namespace Signum.Engine.DynamicQuery
             if (str == null)
                 throw new ApplicationException(str);
 
-            Expression body = filters.Select(f => f.GetCondition(context)).Aggregate((e1, e2) => Expression.And(e1, e2));
+            Expression body = filters.Select(f => f.GetCondition(context)).AggregateAnd();
 
             return Expression.Lambda<Func<object, bool>>(body, context.Parameter);
         }

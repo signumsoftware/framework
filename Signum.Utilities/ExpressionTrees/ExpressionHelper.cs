@@ -115,6 +115,36 @@ namespace Signum.Utilities.ExpressionTrees
             return expression;
         }
 
+        public static Expression AggregateAnd(this IEnumerable<Expression> expressions)
+        {
+            var enumerator = expressions.GetEnumerator();
+
+            if(!enumerator.MoveNext())
+                return Expression.Constant(true);
+
+            Expression acum = enumerator.Current;
+
+            while(enumerator.MoveNext())
+                acum = Expression.And(acum, enumerator.Current);
+
+            return acum;
+        }
+
+        public static Expression AggregateOr(this IEnumerable<Expression> expressions)
+        {
+            var enumerator = expressions.GetEnumerator();
+
+            if (!enumerator.MoveNext())
+                return Expression.Constant(false);
+
+            Expression acum = enumerator.Current;
+
+            while (enumerator.MoveNext())
+                acum = Expression.Or(acum, enumerator.Current);
+
+            return acum;
+        }
+
         [DebuggerStepThrough]
         public static Expression GetArgument(this MethodCallExpression mce, string parameterName)
         {

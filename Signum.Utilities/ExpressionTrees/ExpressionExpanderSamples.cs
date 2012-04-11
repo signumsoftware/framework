@@ -43,8 +43,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         public Expression Expand(Expression instance, Expression[] parameters, MethodInfo mi)
         {
-            return parameters.Select(p => (Expression)Expression.Call(instance, miContains, p))
-                .Aggregate((a, b) => Expression.Or(a, b));
+            return parameters.Select(p => (Expression)Expression.Call(instance, miContains, p)).AggregateOr();
         }
 	}
 
@@ -54,8 +53,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         public Expression Expand(Expression instance, Expression[] parameters, MethodInfo mi)
         {
-            return parameters.Select(p => (Expression)Expression.Call(instance, miContains, p))
-                .Aggregate((a, b) => Expression.And(a, b));
+            return parameters.Select(p => (Expression)Expression.Call(instance, miContains, p)).AggregateAnd();
         }
     }
 
