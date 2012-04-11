@@ -85,29 +85,32 @@ namespace Signum.Engine.Authorization
             { 
                 Tuple<int, string> pair = UserTicketDN.ParseTicket(ticket);
 
-                UserDN result = Database.Retrieve<UserDN>(pair.Item1);
-                CleanExpiredTickets(result);
+                UserDN user = Database.Retrieve<UserDN>(pair.Item1);
+                CleanExpiredTickets(user);
 
                 File.AppendAllText(@"c:\log\userTickets.txt", "\r\nRequested Ticket\t" + pair.Item2);
-                File.AppendAllText(@"c:\log\userTickets.txt", "\r\nServer Tickets\t" + result.Tickets().Select(a => a.Ticket).ToString(" | "));
+                File.AppendAllText(@"c:\log\userTickets.txt", "\r\nServer Tickets\t" + user.Tickets().Select(a => a.Ticket).ToString(" | "));
 
-                UserTicketDN userTicket = result.Tickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
+                UserTicketDN userTicket = user.Tickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
                 if (userTicket == null)
                 {
                     File.AppendAllText(@"c:\log\userTickets.txt", "\r\nInvalid Ticket!!!!!!!!");
                     throw new UnauthorizedAccessException("User attempted to log in with an invalid ticket");
                 }
 
-                userTicket.Ticket = Guid.NewGuid().ToString();
-                userTicket.Device = device;
-                userTicket.ConnectionDate = TimeZoneManager.Now;
-                userTicket.Save();
+                UserTicketDN result = new UserTicketDN
+                {
+                    User = user.ToLite(),
+                    Device = device,
+                    ConnectionDate = TimeZoneManager.Now,
+                    Ticket = Guid.NewGuid().ToString(),
+                }.Save();
 
                 File.AppendAllText(@"c:\log\userTickets.txt", "\r\nUpdated Ticket\t" + userTicket.Ticket);
 
-                ticket = userTicket.StringTicket(); 
+                ticket = result.StringTicket(); 
 
-                return tr.Commit(result);
+                return tr.Commit(user);
             }
         }
 
