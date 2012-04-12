@@ -325,10 +325,11 @@ WriteLiteral("</a>\r\n");
 WriteLiteral("        ");
 
 
-   Write(ButtonBarQueryHelper.GetButtonBarElementsForQuery(new  QueryButtonContext
+   Write(ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
         {
             ControllerContext = this.ViewContext,
             QueryName = findOptions.QueryName,
+            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
             EntityType = entitiesType,
             Prefix = Model.ControlID
         }).ToString(Html));
