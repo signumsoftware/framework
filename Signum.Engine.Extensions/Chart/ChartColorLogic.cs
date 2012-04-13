@@ -52,21 +52,33 @@ namespace Signum.Engine.Chart
                             dic.Count < 72 ? new double[]{.90, .60}:
                             new double[] { .90, .60, .30 };
 
-            var hues = (dic.Count / bright.Length);
+
+
+            var hues = DivideRoundUp(dic.Count, bright.Length);
 
             var hueStep = 360 / hues;
 
             var values = dic.Values.ToList();
 
-            for (int i = 0; i < bright.Length; i++)
+            for (int b = 0; b < bright.Length; b++)
             {
                 for (int h = 0; h < hues; h++)
                 {
-                    values[i * hues + h].Color = new ColorDN { Argb = ColorExtensions.FromHsv(240 - h * hueStep, .8, bright[i]).ToArgb() };
+                    int pos = b * hues + h;
+
+                    if (pos >= values.Count) // last round
+                        break;
+
+                    values[pos].Color = new ColorDN { Argb = ColorExtensions.FromHsv(240 - h * hueStep, .8, bright[b]).ToArgb() };
                 }
             }
 
             values.SaveList();
+        }
+
+        private static int DivideRoundUp(int number, int divisor)
+        {
+            return ((number - 1) / divisor) + 1;
         }
 
         public static void AssertFewEntities(Type type)
