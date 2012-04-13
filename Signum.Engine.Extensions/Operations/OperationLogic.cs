@@ -42,7 +42,6 @@ namespace Signum.Engine.Operations
 
     public static class OperationLogic
     {
-
         static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogOperationsExpression = 
             o => Database.Query<OperationLogDN>().Where(a=>a.Operation == o);
         public static IQueryable<OperationLogDN> LogOperations(this OperationDN o)

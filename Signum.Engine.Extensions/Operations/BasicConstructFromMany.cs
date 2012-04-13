@@ -21,24 +21,24 @@ namespace Signum.Engine.Operations
         where T : class, IIdentifiable
         where F: class, IIdentifiable
     {
-        public Enum Key { get; private set; }
-        public Type Type { get { return typeof(F); } }
-        public OperationType OperationType { get { return OperationType.ConstructorFromMany; } }
-        
-        public bool Lite { get { return true; } }
-        public bool Returns { get { return true; } }
-        public Type ReturnType { get { return typeof(T); } }
+        protected readonly Enum key;
+        Enum IOperation.Key { get { return key; } }
+        Type IOperation.Type { get { return typeof(F); } }
+        OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
+
+        bool IOperation.Returns { get { return true; } }
+        Type IOperation.ReturnType { get { return typeof(T); } }
 
         public Func<List<Lite<F>>, object[], T> Construct { get; set; }
 
         public BasicConstructFromMany(Enum key)
         {
-            this.Key = key; 
+            this.key = key; 
         }
 
         IIdentifiable IConstructorFromManyOperation.Construct(List<Lite> lites, params object[] args)
         {
-            OperationLogic.AssertOperationAllowed(Key);
+            OperationLogic.AssertOperationAllowed(key);
 
             using (OperationLogic.AllowSave<F>())
             using (OperationLogic.AllowSave<T>())
@@ -49,7 +49,7 @@ namespace Signum.Engine.Operations
                     {
                         OperationLogDN log = new OperationLogDN
                         {
-                            Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                            Operation = EnumLogic<OperationDN>.ToEntity(key),
                             Start = TimeZoneManager.Now,
                             User = UserDN.Current.ToLite()
                         };
@@ -97,12 +97,12 @@ namespace Signum.Engine.Operations
         public virtual void AssertIsValid()
         {
             if (Construct == null)
-                throw new InvalidOperationException("Operation {0} Constructor initialized".Formato(Key));       
+                throw new InvalidOperationException("Operation {0} Constructor initialized".Formato(key));       
         }
 
         public override string ToString()
         {
-            return "{0} ConstructFromMany {1} -> {2}".Formato(Key, typeof(F), typeof(T));
+            return "{0} ConstructFromMany {1} -> {2}".Formato(key, typeof(F), typeof(T));
         }
 
     }

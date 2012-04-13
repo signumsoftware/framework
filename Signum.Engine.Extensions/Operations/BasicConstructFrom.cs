@@ -21,13 +21,14 @@ namespace Signum.Engine.Operations
         where T : class, IIdentifiable
         where F : class, IIdentifiable
     {
-        public Enum Key { get; private set; }
-        public Type Type { get { return typeof(F); } }
-        public OperationType OperationType { get { return OperationType.ConstructorFrom; } }
+        protected readonly Enum key;
+        Enum IOperation.Key { get { return key; } }
+        Type IOperation.Type { get { return typeof(F); } }
+        OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
 
         public bool Lite { get; set; }
-        public bool Returns { get; set; }
-        public Type ReturnType { get { return typeof(T); } }
+        bool IOperation.Returns { get { return true; } }
+        Type IOperation.ReturnType { get { return typeof(T); } }
 
         public bool AllowsNew { get; set; }
 
@@ -36,8 +37,7 @@ namespace Signum.Engine.Operations
 
         public BasicConstructFrom(Enum key)
         {
-            this.Key = key;
-            this.Returns = true;
+            this.key = key;
             this.Lite = true;
         }
 
@@ -59,7 +59,7 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructorFromOperation.Construct(IIdentifiable entity, params object[] args)
         {
-            OperationLogic.AssertOperationAllowed(Key);
+            OperationLogic.AssertOperationAllowed(key);
 
             string error = OnCanConstruct(entity);
             if (error != null)
@@ -74,7 +74,7 @@ namespace Signum.Engine.Operations
                     {
                         OperationLogDN log = new OperationLogDN
                         {
-                            Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                            Operation = EnumLogic<OperationDN>.ToEntity(key),
                             Start = TimeZoneManager.Now,
                             User = UserDN.Current.ToLite()
                         };
@@ -118,12 +118,12 @@ namespace Signum.Engine.Operations
         public virtual void AssertIsValid()
         {
             if (Construct == null)
-                throw new InvalidOperationException("Operation {0} does not hace Construct initialized".Formato(Key));
+                throw new InvalidOperationException("Operation {0} does not hace Construct initialized".Formato(key));
         }
 
         public override string ToString()
         {
-            return "{0} ConstructFrom {1} -> {2}".Formato(Key, typeof(F), typeof(T));
+            return "{0} ConstructFrom {1} -> {2}".Formato(key, typeof(F), typeof(T));
         }
     }
 }

@@ -22,12 +22,13 @@ namespace Signum.Engine.Operations
     public class BasicDelete<T> : IDeleteOperation
       where T : class, IIdentifiable
     {
-        public Enum Key { get; private set; }
-        public Type Type { get { return typeof(T); } }
-        public OperationType OperationType { get { return OperationType.Delete; } }
-        public bool Lite { get { return true; } }
-        public bool Returns { get { return false; } }
-        public Type ReturnType { get { return null; } }
+        protected readonly Enum key;
+        Enum IOperation.Key { get { return key; } }
+        Type IOperation.Type { get { return typeof(T); } }
+        OperationType IOperation.OperationType { get { return OperationType.Delete; } }
+        public bool Lite { get; set; }
+        bool IOperation.Returns { get { return false; } }
+        Type IOperation.ReturnType { get { return null; } }
 
         public bool AllowsNew { get { return false; } }
 
@@ -36,7 +37,8 @@ namespace Signum.Engine.Operations
 
         public BasicDelete(Enum key)
         {
-            this.Key = key;
+            this.key = key;
+            this.Lite = true;
         }
 
         string IEntityOperation.CanExecute(IIdentifiable entity)
@@ -57,7 +59,7 @@ namespace Signum.Engine.Operations
 
         void IDeleteOperation.Delete(IIdentifiable entity, params object[] parameters)
         {
-            OperationLogic.AssertOperationAllowed(Key);
+            OperationLogic.AssertOperationAllowed(key);
 
             string error = OnCanDelete((T)entity);
             if (error != null)
@@ -66,7 +68,7 @@ namespace Signum.Engine.Operations
             
             OperationLogDN log = new OperationLogDN
             {
-                Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                Operation = EnumLogic<OperationDN>.ToEntity(key),
                 Start = TimeZoneManager.Now,
                 User = UserDN.Current.ToLite()
             };
@@ -131,12 +133,12 @@ namespace Signum.Engine.Operations
         public virtual void AssertIsValid()
         {
             if (Delete == null)
-                throw new InvalidOperationException("Operation {0} does not have Delete initialized".Formato(Key));
+                throw new InvalidOperationException("Operation {0} does not have Delete initialized".Formato(key));
         }
 
         public override string ToString()
         {
-            return "{0} Delete {1}".Formato(Key, typeof(T));
+            return "{0} Delete {1}".Formato(key, typeof(T));
         }
     }
 }

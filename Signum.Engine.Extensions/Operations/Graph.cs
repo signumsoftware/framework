@@ -51,7 +51,7 @@ namespace Signum.Engine.Operations
             {
                 S state = Graph<E, S>.GetState(entity);
 
-                string stateError = state.InState(Key, FromStates);
+                string stateError = state.InState(key, FromStates);
                 if (stateError.HasText())
                     return stateError; 
 
@@ -79,10 +79,10 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Key));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
 
                 if (FromStates == null)
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Key));
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(key));
             }
         }
 
@@ -98,7 +98,7 @@ namespace Signum.Engine.Operations
             {
                 S state = Graph<E, S>.GetState(entity);
                 if (FromStates != null && !FromStates.Contains(state))
-                    return Resources.ImpossibleToExecute0FromState1.Formato(Key, state);
+                    return Resources.ImpossibleToExecute0FromState1.Formato(key, state);
 
                 return base.OnCanDelete(entity);
             }
@@ -117,7 +117,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (FromStates == null)
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Key));
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(key));
             }
         }
 
@@ -152,7 +152,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Key));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
              
             }
         }
@@ -190,7 +190,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Key));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
             }
         }
 
@@ -226,7 +226,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Key));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
             }
         }
 
@@ -289,7 +289,7 @@ namespace Signum.Engine.Operations
                             Add("[All States]", "[Deleted]", item.Key);
                         else
                             foreach (var s in dOp.FromStates)
-                                Add(s.ToString(), "[Deleted]", dOp.Key);
+                                Add(s.ToString(), "[Deleted]", item.Key);
 
 
                     } break;

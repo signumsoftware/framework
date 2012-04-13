@@ -21,23 +21,24 @@ namespace Signum.Engine.Operations
     public class BasicConstruct<T> : IConstructOperation
         where T: class, IIdentifiable
     {
-        public Enum Key { get; private set; }        
-        public Type Type { get { return typeof(T); } }
-        public OperationType OperationType { get { return OperationType.Constructor; } }
-        public bool Returns { get { return true; } }
-        public Type ReturnType { get { return typeof(T); } }
+        protected readonly Enum key;
+        Enum IOperation.Key { get { return key; } }
+        Type IOperation.Type { get { return typeof(T); } }
+        OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
+        bool IOperation.Returns { get { return true; } }
+        Type IOperation.ReturnType { get { return typeof(T); } }
 
         public bool Lite { get { return false; } }
         public Func<object[], T> Construct { get; set; }
 
         public BasicConstruct(Enum key)
         {
-            this.Key = key; 
+            this.key = key; 
         }
 
         IIdentifiable IConstructOperation.Construct(params object[] args)
         {
-            OperationLogic.AssertOperationAllowed(Key);
+            OperationLogic.AssertOperationAllowed(key);
 
             using (OperationLogic.AllowSave<T>())
             {
@@ -47,7 +48,7 @@ namespace Signum.Engine.Operations
                     {
                         OperationLogDN log = new OperationLogDN
                         {
-                            Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                            Operation = EnumLogic<OperationDN>.ToEntity(key),
                             Start = TimeZoneManager.Now,
                             User = UserDN.Current.ToLite()
                         };
@@ -90,12 +91,12 @@ namespace Signum.Engine.Operations
         public virtual void AssertIsValid()
         {
             if (Construct == null)
-                throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(Key));
+                throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(key));
         }
 
         public override string ToString()
         {
-            return "{0} Construct {1}".Formato(Key, typeof(T));
+            return "{0} Construct {1}".Formato(key, typeof(T));
         }
     }
 }
