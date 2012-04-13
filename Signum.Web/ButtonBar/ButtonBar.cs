@@ -57,6 +57,7 @@ namespace Signum.Web
     public class QueryButtonContext
     {
         public object QueryName { get; internal set; }
+        public ToolBarButton[] ManualQueryButtons { get; internal set; }
         public Type EntityType { get; internal set; }
         public string Prefix { get; internal set; }
         public ControllerContext ControllerContext { get; internal set; }
@@ -71,6 +72,10 @@ namespace Signum.Web
         public static List<ToolBarButton> GetButtonBarElementsForQuery(QueryButtonContext ctx)
         {
             List<ToolBarButton> elements = new List<ToolBarButton>();
+
+            if (ctx.ManualQueryButtons != null)
+                elements.AddRange(ctx.ManualQueryButtons);
+
             var querySpecific = queryButtons.TryGetC(ctx.QueryName);
             if (querySpecific != null)
                 elements.AddRange(querySpecific.SelectMany(d => d(ctx) ?? Enumerable.Empty<ToolBarButton>()).NotNull());

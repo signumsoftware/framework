@@ -121,10 +121,11 @@
                     hasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser") : "");
             <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@Resources.Search_Create</a>
         }
-        @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new  QueryButtonContext
+        @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
         {
             ControllerContext = this.ViewContext,
             QueryName = findOptions.QueryName,
+            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
             EntityType = entitiesType,
             Prefix = Model.ControlID
         }).ToString(Html)

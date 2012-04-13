@@ -20,7 +20,8 @@ namespace Signum.Web
         public const string OnOk = "sfOnOk";
         public const string SaveVisible = "sfSaveVisible";
         public const string OnSave = "sfOnSave";
-        
+
+        public const string ManualToolbarButtons = "sfManualToolbarButtons";
         public const string FindOptions = "sfFindOptions";
         public const string FilterOptions = "sfFilterOptions";
         public const string View = "sfView";
