@@ -22,6 +22,18 @@ namespace Signum.Web.Profiler
                 viewData.Add("profiler", profiler);
         }
 
+        public override void OnActionExecuted(ActionExecutedContext filterContext)
+        {
+            if (filterContext.Exception != null)
+            {
+                ViewDataDictionary viewData = filterContext.Controller.ViewData;
+                Dispose(viewData, "profiler");
+                Dispose(viewData, "elapsed");
+            }
+
+            base.OnActionExecuted(filterContext);
+        }
+
         public override void OnResultExecuting(ResultExecutingContext filterContext)
         {
             if (filterContext.Controller.ViewData.ContainsKey("profiler"))
