@@ -58,8 +58,11 @@ namespace Signum.Utilities
     {
         public static string NiceToString(this Enum a)
         {
-            return DescriptionManager.GetDescription(EnumFieldCache.Get(a)) ??
-                a.ToString().NiceName();
+            var fi = EnumFieldCache.Get(a.GetType()).TryGetC(a);
+            if (fi != null)
+                return DescriptionManager.GetDescription(fi) ?? a.ToString().NiceName();
+
+            return a.ToString().NiceName();
         }
 
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
