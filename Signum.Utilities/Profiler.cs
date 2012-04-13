@@ -93,11 +93,31 @@ namespace Signum.Utilities
 
     public static class HeavyProfiler
     {
+        public static TimeSpan MaxEnabledTime = TimeSpan.FromMinutes(5);
+
+        public static long? TimeLimit;
+
         public static int MaxTotalEntriesCount = 1000;
 
-        public static int TotalEntriesCount { get; private set; }
 
-        public static bool Enabled { get; set; }
+        static bool enabled;
+        public static bool Enabled
+        {
+            get { return enabled; }
+            set
+            {
+                enabled = value;
+
+                if (value)
+                {
+                    TimeLimit = PerfCounter.Ticks + PerfCounter.FrequencyMilliseconds * (long)MaxEnabledTime.TotalMilliseconds;
+                }
+                else
+                {
+                    TimeLimit = null;
+                }
+            }
+        }
 
         static readonly Variable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy"); 
 
@@ -108,7 +128,6 @@ namespace Signum.Utilities
             lock (Entries)
             {
                 Entries.Clear();
-                TotalEntriesCount = 0;
             }
         }
 
@@ -122,40 +141,34 @@ namespace Signum.Utilities
 
         public static Tracer Log(string role = null, string aditionalData = null)
         {
-            if (!Enabled)
+            if (!enabled)
                 return null;
 
-            if (TotalEntriesCount > MaxTotalEntriesCount)
-            {
-                Enabled = false;
-                return null;
-            }
+            var tracer = CreateNewEntry(role, aditionalData, true);
 
-            var saveCurrent = CreateNewEntry(role, aditionalData, true);
-
-            return new Tracer { saveCurrent = saveCurrent };
+            return tracer;
         }
 
         public static Tracer LogNoStackTrace(string role)
         {
-            if (!Enabled)
+            if (!enabled)
                 return null;
 
-            if (TotalEntriesCount > MaxTotalEntriesCount)
-            {
-                Enabled = false;
-                return null;
-            }
+            var tracer = CreateNewEntry(role, null, false);
 
-            var saveCurrent = CreateNewEntry(role, null, false);
-
-            return new Tracer { saveCurrent = saveCurrent };
+            return tracer;
         }
 
-        private static HeavyProfilerEntry CreateNewEntry(string role, string aditionalData, bool stackTrace)
+        private static Tracer CreateNewEntry(string role, string aditionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
 
+            if (TimeLimit.Value < beforeStart)
+            {
+                Enabled = false;
+                Clean();
+                return null;
+            }
 
             var saveCurrent = current.Value;
 
@@ -172,7 +185,7 @@ namespace Signum.Utilities
 
             newCurrent.Start = PerfCounter.Ticks;
 
-            return saveCurrent;
+            return new Tracer { saveCurrent = saveCurrent };
         }
 
         public class Tracer : IDisposable
@@ -183,8 +196,6 @@ namespace Signum.Utilities
             {
                 var cur = current.Value;
                 cur.End = PerfCounter.Ticks;
-
-                TotalEntriesCount++;
 
                 if (saveCurrent == null)
                 {
@@ -226,12 +237,12 @@ namespace Signum.Utilities
 
             tracer.Dispose();
 
-            tracer.saveCurrent = CreateNewEntry(role, aditionalData, hasStackTrace); 
-        }
+            var newTracer = CreateNewEntry(role, aditionalData, hasStackTrace);
 
-        public static void CleanCurrent() //To fix possible non-dispossed ones
-        {
-            current.Value = null; 
+            if (newTracer != null)
+            {
+                tracer.saveCurrent = newTracer.saveCurrent; 
+            }
         }
 
         public static IEnumerable<HeavyProfilerEntry> AllEntries()
