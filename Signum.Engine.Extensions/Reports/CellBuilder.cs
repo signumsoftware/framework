@@ -58,14 +58,14 @@ namespace Signum.Engine.Reports
             return DefaultTemplateCells.TryGetS(tc) ?? TemplateCells.General;
         }
 
-        public Dictionary<TemplateCells, CellValues> DefaultCellValues = new Dictionary<TemplateCells, CellValues> 
+        public Dictionary<TemplateCells, CellValues?> DefaultCellValues = new Dictionary<TemplateCells, CellValues?> 
         {
-            {TemplateCells.Date, CellValues.Date},
-            {TemplateCells.DateTime, CellValues.Date},
+            {TemplateCells.Date, null},
+            {TemplateCells.DateTime, null},
             {TemplateCells.Text, CellValues.InlineString},
             {TemplateCells.General, CellValues.InlineString},
-            {TemplateCells.Number, CellValues.Number},
-            {TemplateCells.Decimal, CellValues.Number}
+            {TemplateCells.Number, null},
+            {TemplateCells.Decimal, null}
         };
 
         public Dictionary<TemplateCells, UInt32Value> DefaultStyles;
