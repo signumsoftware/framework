@@ -1202,7 +1202,7 @@ namespace Signum.Engine.Linq
 
                 FieldInitExpression[] fies = ib.Implementations.Where(imp => b.TypeOperand.IsAssignableFrom(imp.Type)).Select(imp=>imp.Field).ToArray();
 
-                return fies.Select(f => (Expression)Expression.NotEqual(f.ExternalId, NullId)).AggregateOr();
+                return fies.Select(f => (Expression)Expression.NotEqual(f.ExternalId.Nullify(), NullId)).AggregateOr();
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {

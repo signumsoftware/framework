@@ -43,7 +43,7 @@ namespace Signum.Engine.DynamicQuery
                         case PropertyRouteType.FieldOrProperty:
                             Format = GetFormat(propertyRoutes);
                             Unit = GetUnit(propertyRoutes);
-                            Implementations = AggregateImplementations(PropertyRoutes);
+                            Implementations = AggregateImplementations(PropertyRoutes, Type.CleanType());
                             return;
                         case PropertyRouteType.MListItems:
                             Format = Reflector.FormatString(propertyRoutes[0].Type);
@@ -83,14 +83,13 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        internal static Implementations AggregateImplementations(PropertyRoute[] routes)
+        internal static Implementations AggregateImplementations(PropertyRoute[] routes, Type cleanType)
         {
-            Type type = routes.Select(a => a.Type).Distinct().SingleEx().CleanType();
-
-            return AggregateImplementations(routes.Select(a => a.GetImplementations() ?? new ImplementedByAttribute(a.Type.CleanType())).NotNull(), type);
+            return AggregateImplementations(routes.Select(a => a.GetImplementations() ??
+                new ImplementedByAttribute(a.Type.CleanType())).NotNull(), cleanType);
         }
 
-        private static Implementations AggregateImplementations(IEnumerable<Implementations> collection, Type type)
+        private static Implementations AggregateImplementations(IEnumerable<Implementations> collection, Type cleanType)
         {
             if (collection.IsEmpty())
                 return null;
@@ -99,7 +98,7 @@ namespace Signum.Engine.DynamicQuery
             if (only != null)
             {
                 ImplementedByAttribute ib = only as ImplementedByAttribute;
-                if (ib != null && ib.ImplementedTypes.Length == 1 && ib.ImplementedTypes[0] == type)
+                if (ib != null && ib.ImplementedTypes.Length == 1 && ib.ImplementedTypes[0] == cleanType)
                     return null;
 
                 return only;
@@ -114,7 +113,7 @@ namespace Signum.Engine.DynamicQuery
                 .Distinct()
                 .ToArray();
 
-            if (types.Length == 1 && types[0] == type)
+            if (types.Length == 1 && types[0] == cleanType)
                 return null;
          
             return new ImplementedByAttribute(types);
