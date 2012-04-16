@@ -57,7 +57,7 @@ namespace Signum.Web.Files
 
         public ActionResult Upload()
         {
-            bool shouldSaveFilePath = !RuntimeInfo.FromFormValue((string)Request.Form[EntityBaseKeys.RuntimeInfo]).IsNew;
+            bool shouldSaveFilePath = !RuntimeInfo.FromFormValue((string)Request["fileParentRuntimeInfo"]).IsNew;
 
             FilePathDN fp = null;
             string formFieldId = "";
@@ -141,6 +141,7 @@ namespace Signum.Web.Files
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(TypeContextUtilities.Compose(prefix, "DivNew")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "DivOld")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "btnRemove")));
+                sb.AppendLine("var frame = parDoc.getElementById('{0}'); frame.parentNode.removeChild(frame);".Formato(TypeContextUtilities.Compose(prefix, "frame")));
             }
             else
             {
