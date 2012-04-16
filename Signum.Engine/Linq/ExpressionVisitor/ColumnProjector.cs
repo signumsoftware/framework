@@ -57,50 +57,44 @@ namespace Signum.Engine.Linq
 
         static internal ProjectedColumns ProjectColumnsGroupBy(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
         {
-            using (HeavyProfiler.LogNoStackTrace(role:"CP"))
+            ProjectionToken newToken = new ProjectionToken();
+
+            Expression newProj;
+            var candidates = DbExpressionNominator.NominateGroupBy(projector, knownAliases, out newProj);
+
+            ColumnProjector cp = new ColumnProjector
             {
-                ProjectionToken newToken = new ProjectionToken();
+                tokens = tokens,
+                newToken = newToken,
+                newAlias = newAlias,
+                knownAliases = knownAliases,
+                candidates = candidates
+            };
 
-                Expression newProj;
-                var candidates = DbExpressionNominator.NominateGroupBy(projector, knownAliases, out newProj);
+            Expression e = cp.Visit(newProj);
 
-                ColumnProjector cp = new ColumnProjector
-                {
-                    tokens = tokens,
-                    newToken = newToken,
-                    newAlias = newAlias,
-                    knownAliases = knownAliases,
-                    candidates = candidates
-                };
-
-                Expression e = cp.Visit(newProj);
-
-                return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken); 
-            }
+            return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken);
         }
 
         static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
         {
-            using (HeavyProfiler.LogNoStackTrace(role: "CP"))
+            ProjectionToken newToken = new ProjectionToken();
+
+            Expression newProj;
+            var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj);
+
+            ColumnProjector cp = new ColumnProjector
             {
-                ProjectionToken newToken = new ProjectionToken();
+                tokens = tokens,
+                newToken = newToken,
+                newAlias = newAlias,
+                knownAliases = knownAliases,
+                candidates = candidates
+            };
 
-                Expression newProj;
-                var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj);
+            Expression e = cp.Visit(newProj);
 
-                ColumnProjector cp = new ColumnProjector
-                {
-                    tokens = tokens,
-                    newToken = newToken,
-                    newAlias = newAlias,
-                    knownAliases = knownAliases,
-                    candidates = candidates
-                };
-
-                Expression e = cp.Visit(newProj);
-
-                return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken);
-            }
+            return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken);
         }
 
 
