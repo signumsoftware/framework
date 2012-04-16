@@ -360,7 +360,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.DeleteFilter(0);
             selenium.FilterSelectToken(0, "label=IAuthor", true);
             selenium.ExpandTokens(1);
-            selenium.FilterSelectToken(1, "value=({0})".Formato(typeof(ArtistDN).FullName.Replace(".", ":")), true);
+            selenium.FilterSelectToken(1, "value=(Artist)", true);
             selenium.ExpandTokens(2);
             selenium.FilterSelectToken(2, "Id", false);
             selenium.AddFilter(0);
