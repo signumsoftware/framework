@@ -24,7 +24,7 @@ namespace Signum.Engine.Chart
 
         public static readonly int Limit = 360; 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
