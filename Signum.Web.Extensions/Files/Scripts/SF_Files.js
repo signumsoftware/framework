@@ -35,7 +35,7 @@ SF.registerModule("Files", function () {
             var files = e.target.files || e.dataTransfer.files;
             e.stopPropagation();
             e.preventDefault();
-            
+
             if (files.length == 0) {
                 this.fileDropHover(e, false);
                 return;
@@ -47,10 +47,12 @@ SF.registerModule("Files", function () {
 
                 var fileName = f.name;
 
+                var $divNew = $(this.pf("DivNew"));
+
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", $(this.pf("DivNew")).attr("data-drop-url"), true);
+                xhr.open("POST", $divNew.attr("data-drop-url"), true);
                 xhr.setRequestHeader("X-FileName", fileName);
-                xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, new SF.RuntimeInfo().find().val());
+                xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, new SF.RuntimeInfo($divNew.attr("data-parent-prefix")).find().val());
                 xhr.setRequestHeader("X-Prefix", this.options.prefix);
                 xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().find().val());
                 xhr.setRequestHeader("X-FileType", $(this.pf("FileType")).val());
@@ -60,8 +62,7 @@ SF.registerModule("Files", function () {
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
-                            SF.log(xhr.responseText);
-                            $(self.pf("DivNew iframe")).html(xhr.responseText);
+                            self.createTargetIframe().html(xhr.responseText);
                         }
                         else {
                             SF.log("Error", xhr.statusText);
@@ -92,23 +93,46 @@ SF.registerModule("Files", function () {
             SF.log("FLine prepareSyncUpload");
             //New file in FileLine but not to be uploaded asyncronously => prepare form for multipart and set runtimeInfo
             $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
-            var mform = $('form');
-            mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
+            var $mform = $('form');
+            $mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
             this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
         };
 
         this.upload = function () {
             SF.log("FLine upload");
             this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
-            $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
-            $(this.pf('') + 'loading').show();
-            var mform = $('form');
-            var cEncType = mform.attr('enctype');
-            var cEncoding = mform.attr('encoding');
-            var cTarget = mform.attr('target');
-            var cAction = mform.attr('action');
-            mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data').attr('target', 'frame' + this.options.prefix).attr('action', this.options.controllerUrl).submit();
-            mform.attr('enctype', cEncType || "").attr('encoding', cEncoding || "").attr('target', cTarget || "").attr('action', cAction || "");
+
+            var $fileInput = $(this.pf(''));
+            $fileInput[0].setAttribute('value', $fileInput[0].value);
+            $(this.pf('loading')).show();
+
+            this.createTargetIframe();
+
+            var $fileForm = $('<form></form>')
+                .attr('method', 'post').attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data')
+                .attr('target', SF.compose(this.options.prefix, "frame")).attr('action', this.options.controllerUrl)
+                .hide()
+                .appendTo($('body'));
+
+            var $divNew = $(this.pf("DivNew"));
+            var $clonedDivNew = $divNew.clone(true);
+            $divNew.after($clonedDivNew).appendTo($fileForm);
+
+            var $parentPrefix = $("<input />").attr("type", "hidden")
+                .attr("name", "fileParentRuntimeInfo")
+                .val(new SF.RuntimeInfo($divNew.attr("data-parent-prefix")).find().val())
+                .addClass("sf-file-parent-prefix").appendTo($fileForm);
+
+            var $tabId = $("#" + SF.Keys.tabId).clone().appendTo($fileForm);
+            var $antiForgeryToken = $("input[name=" + SF.Keys.antiForgeryToken + "]").clone().appendTo($fileForm);
+
+            $fileForm.submit().remove();
+        };
+
+        this.createTargetIframe = function () {
+            var name = SF.compose(this.options.prefix, "frame");
+            return $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>")
+                .appendTo($("body"));
         };
 
         this.onChanged = function () {

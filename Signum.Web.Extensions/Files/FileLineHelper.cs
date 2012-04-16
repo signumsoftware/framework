@@ -32,31 +32,12 @@ namespace Signum.Web.Files
             using (fileLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
             using (fileLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
-                sb.AddLine(helper.HiddenEntityInfo(fileLine));
-
                 sb.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/SF_Files.css") }).ToHtmlSelf());
 
                 sb.AddLine(new HtmlTag("script")
                     .Attr("type", "text/javascript")
                     .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
                     .ToHtml());
-
-                if (fileLine.PropertyRoute.Type == typeof(FilePathDN))
-                {
-                    FilePathDN filePath = value as FilePathDN;
-                    if (filePath != null)
-                    {
-                        sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
-                            EnumDN.UniqueKey(filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
-                    }
-                    else
-                    {
-                        if (fileLine.FileType == null)
-                            throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));                    
-                        
-                        sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), EnumDN.UniqueKey(fileLine.FileType)));
-                    }
-                }
 
                 if (value != null)
                     sb.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
@@ -97,8 +78,36 @@ namespace Signum.Web.Files
                     }
                 }
 
-                using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivNew")).Attr("style", "display:" + (hasEntity ? "none" : "block")).Class("sf-file-line-new").Attr("data-drop-url", RouteHelper.New().Action<FileController>(fc => fc.UploadDropped()))))
+                var filesParentPrefix = ((TypeContext)fileLine).FollowC(fl => (TypeContext)fl.Parent).First(ctx => ctx.Type != typeof(FilePathDN) && ctx.Type != typeof(MList<FilePathDN>)).ControlID;
+
+                var divNew = new HtmlTag("div", fileLine.Compose("DivNew"))
+                    .Class("sf-file-line-new")
+                    .Attr("style", "display:" + (hasEntity ? "none" : "block"))
+                    .Attr("data-drop-url", RouteHelper.New().Action<FileController>(fc => fc.UploadDropped()))
+                    .Attr("data-parent-prefix", filesParentPrefix.HasText() ? filesParentPrefix : "");
+
+                using (sb.Surround(divNew))
+                //using (sb.Surround(new HtmlTag("form").Attrs(new { method = "post", enctype = "multipart/form-data", encoding = "multipart/form-data", target = "frame" + fileLine.ControlID })))
                 {
+                    sb.AddLine(helper.HiddenEntityInfo(fileLine));
+
+                    if (fileLine.PropertyRoute.Type == typeof(FilePathDN))
+                    {
+                        FilePathDN filePath = value as FilePathDN;
+                        if (filePath != null)
+                        {
+                            sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
+                                EnumDN.UniqueKey(filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
+                        }
+                        else
+                        {
+                            if (fileLine.FileType == null)
+                                throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
+
+                            sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), EnumDN.UniqueKey(fileLine.FileType)));
+                        }
+                    }
+
                     var label = EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID);
 
                     if (!fileLine.ValueFirst)
@@ -108,7 +117,6 @@ namespace Signum.Web.Files
                     {
                         sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID)));
                         sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
-                        sb.AddLine(MvcHtmlString.Create("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID)));
                         
                         if (fileLine.ValueFirst)
                             sb.AddLine(label);

@@ -31,6 +31,8 @@ namespace Signum.Engine.Chart
 
                 PermissionAuthLogic.RegisterTypes(typeof(ChartPermissions));
 
+                ChartColorLogic.Start(sb, dqm);
+
                 sb.Include<UserChartDN>();
 
                 dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()
