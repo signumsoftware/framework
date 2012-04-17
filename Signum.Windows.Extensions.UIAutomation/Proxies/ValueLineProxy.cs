@@ -61,10 +61,14 @@ namespace Signum.Windows.UIAutomation
                 {
                     case "TextBox":
                         return ValueControl.Value();
+                    case "NumericTextBox":
+                        return ValueControl.Value();
                     case "ComboBox":
                         return ValueControl.ComboGetSelectedItem().Current.Name;
                     case "TimePicker":
                         return ValueControl.ChildById("textBox").Value();
+                    case "DateTimePicker":
+                        return ValueControl.ChildById("PART_EditableTextBox").Value();
                     default:
                         throw new NotImplementedException("Unexpected Value Control of type {0}".Formato(ValueControl.Current.ClassName));
                 }
@@ -77,11 +81,17 @@ namespace Signum.Windows.UIAutomation
                     case "TextBox":
                         ValueControl.Value(value);
                         break;
+                    case "NumericTextBox":
+                        ValueControl.Value(value);
+                        break;
                     case "ComboBox":
                         ValueControl.ComboSelectItem(a => a.Current.Name == value);
                         break;
                     case "TimePicker":
                         ValueControl.ChildById("textBox").Value(value);
+                        break;
+                    case "DateTimePicker":
+                        ValueControl.ChildById("PART_EditableTextBox").Value(value);
                         break;
                     default:
                         throw new NotImplementedException("Unexpected Value Control of type {0}".Formato(ValueControl.Current.ClassName));
@@ -100,7 +110,7 @@ namespace Signum.Windows.UIAutomation
             set
             {
                 StringValue = value == null ? null :
-                    value is IFormattable ? ((IFormattable)value).ToString(Reflector.FormatString(PropertyRoute), null) :
+                    value is IFormattable ? ((IFormattable)value).ToString(ValueControl.Current.ItemStatus ?? Reflector.FormatString(PropertyRoute), null) :
                     value.ToString();
             } 
         }

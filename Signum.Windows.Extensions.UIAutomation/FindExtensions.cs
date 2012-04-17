@@ -85,6 +85,21 @@ namespace Signum.Windows.UIAutomation
             return result;
         }
 
+        public static List<AutomationElement> DescendantsByCondition(this AutomationElement parent, Condition condition)
+        {
+            return parent.ElementsByCondition(TreeScope.Descendants, condition);
+        }
+
+        public static List<AutomationElement> ChildrenByCondition(this AutomationElement parent, Condition condition)
+        {
+            return parent.ElementsByCondition(TreeScope.Children, condition);
+        }
+
+        public static List<AutomationElement> ElementsByCondition(this AutomationElement parent, TreeScope scope, Condition condition)
+        {
+            return parent.FindAll(scope, condition).Cast<AutomationElement>().ToList();
+        }
+
    
 
         public static AutomationElement TryDescendant(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
@@ -125,31 +140,6 @@ namespace Signum.Windows.UIAutomation
             return result;
         }
 
-        public static List<AutomationElement> DescendantsAll(this AutomationElement parent)
-        {
-            return parent.ElementsByCondition(TreeScope.Descendants, PropertyCondition.TrueCondition);
-        }
-
-        public static List<AutomationElement> ChildrenAll(this AutomationElement parent)
-        {
-            return parent.ElementsByCondition(TreeScope.Children, PropertyCondition.TrueCondition);
-        }
-
-        public static List<AutomationElement> DescendantsByCondition(this AutomationElement parent, Condition condition)
-        {
-            return parent.ElementsByCondition(TreeScope.Descendants, condition);
-        }
-
-        public static List<AutomationElement> ChildrenByCondition(this AutomationElement parent, Condition condition)
-        {
-            return parent.ElementsByCondition(TreeScope.Children, condition);
-        }
-
-        public static List<AutomationElement> ElementsByCondition(this AutomationElement parent, TreeScope scope,  Condition condition)
-        {
-            return parent.FindAll(scope, condition).Cast<AutomationElement>().ToList();
-        }
-
 
         public static List<AutomationElement> Descendants(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
         {
@@ -170,6 +160,17 @@ namespace Signum.Windows.UIAutomation
         }
 
 
+
+
+        public static List<AutomationElement> DescendantsAll(this AutomationElement parent)
+        {
+            return parent.ElementsByCondition(TreeScope.Descendants, PropertyCondition.TrueCondition);
+        }
+
+        public static List<AutomationElement> ChildrenAll(this AutomationElement parent)
+        {
+            return parent.ElementsByCondition(TreeScope.Children, PropertyCondition.TrueCondition);
+        }
 
     }
 }
