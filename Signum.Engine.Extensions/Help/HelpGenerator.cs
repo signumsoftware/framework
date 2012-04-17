@@ -193,7 +193,7 @@ namespace Signum.Engine.Help
         {
             ColumnDescriptionFactory cdf = dynamicQuery.EntityColumn();
 
-            return Resources.QueryOf0.Formato(Reflector.ExtractLite(cdf.Type).TypeLinks(cdf.Implementations));
+            return Resources.QueryOf0.Formato(cdf.Type.CleanType().TypeLinks(cdf.Implementations));
         }
 
         internal static string GetQueryColumnHelp(ColumnDescriptionFactory kvp)
@@ -208,14 +208,10 @@ namespace Signum.Engine.Help
 
         private static string QueryColumnType(ColumnDescriptionFactory kvp)
         {
-            if (Reflector.IsIIdentifiable(kvp.Type))
-            {
-                return kvp.Type.TypeLinks(kvp.Implementations);
-            }
-            else if (kvp.Type.IsLite())
-            {
-                Type cleanType = Reflector.ExtractLite(kvp.Type);
+            var cleanType = kvp.Type.CleanType();
 
+            if (Reflector.IsIIdentifiable(cleanType))
+            {
                 return cleanType.TypeLinks(kvp.Implementations);
             }
             else if (Reflector.IsEmbeddedEntity(kvp.Type))

@@ -324,7 +324,7 @@ namespace Signum.Engine.Help
             //var appendicesDocuments = LoadDocuments(AppendicesFolder);
 
             Replacements replacements = new Replacements();
-            //Scope
+            //Namespaces
             {
                 var should = types.Select(type => type.Namespace).Distinct().ToDictionary(a => a);
 
@@ -354,7 +354,7 @@ namespace Signum.Engine.Help
                  });
             }
 
-            //Scope
+            //Types
             {
                 var should = types.ToDictionary(type => type.FullName);
 
