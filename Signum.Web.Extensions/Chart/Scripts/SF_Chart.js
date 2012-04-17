@@ -753,7 +753,7 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".enterData(data.series, 'rect', 'color-rect')" + this.brt +
             ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
             ".attr('width', legendRectWidth).attr('height', fontSize)" + this.brt +
-            ".attr('fill', function(s) { return v.dimension2.color ||color(JSON.stringify(s.dimension2)); });" + this.br +
+            ".attr('fill', function(s) { return s.dimension2.color ||color(JSON.stringify(s.dimension2)); });" + this.br +
             this.br +
             "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')" + this.brt +
             ".enterData(data.series, 'text', 'color-text')" + this.brt +
