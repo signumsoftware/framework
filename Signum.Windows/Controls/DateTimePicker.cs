@@ -16,6 +16,8 @@ using System.Windows.Media;
 using System.Windows.Threading; // DispatcherPriority
 using Signum.Utilities; 
 using Signum.Windows;
+using System.Windows.Automation.Peers;
+using System.Collections.Generic;
 
 
 namespace Signum.Windows
@@ -74,9 +76,9 @@ namespace Signum.Windows
       
         }
 
-        TextBox textBox;
-        System.Windows.Controls.Calendar monthCalendar;
-        PickerBase pickerBase;
+        internal TextBox textBox;
+        internal System.Windows.Controls.Calendar monthCalendar;
+        internal PickerBase pickerBase;
 
         public override void OnApplyTemplate()
         {
@@ -175,6 +177,11 @@ namespace Signum.Windows
             }
         }
 
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new DateTimePickerAutomationPeer(this);
+        }
+
         //protected override void OnDropDownOpenChanged(DependencyPropertyChangedEventArgs e)
         //{
         //    if (((bool)e.NewValue) && this.Value.HasValue)
@@ -183,5 +190,44 @@ namespace Signum.Windows
         //    }
         //    base.OnDropDownOpenChanged(e);
         //}
+    }
+
+    class DateTimePickerAutomationPeer : FrameworkElementAutomationPeer
+    {
+        public DateTimePickerAutomationPeer(DateTimePicker dateTimePicker)
+            : base(dateTimePicker)
+        {
+        }
+
+        protected override List<AutomationPeer> GetChildrenCore()
+        {
+            List<AutomationPeer> childrenCore = new List<AutomationPeer>();
+            DateTimePicker dtp = (DateTimePicker)base.Owner;
+
+            AutomationPeer tb = UIElementAutomationPeer.CreatePeerForElement(dtp.textBox);
+            if (tb != null)
+                childrenCore.Add(tb);
+
+            AutomationPeer button = UIElementAutomationPeer.CreatePeerForElement(dtp.pickerBase.toggleButton);
+            if (button != null)
+                childrenCore.Add(button);
+
+            AutomationPeer month = UIElementAutomationPeer.CreatePeerForElement(dtp.monthCalendar);
+            if (month != null)
+                childrenCore.Add(month);
+
+            return childrenCore;
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return typeof(DateTimePicker).Name;
+        }
+
+        protected override string GetItemStatusCore()
+        {
+            DateTimePicker dtp = (DateTimePicker)base.Owner;
+            return dtp.DateTimeConverter.Format;
+        }
     }
 }

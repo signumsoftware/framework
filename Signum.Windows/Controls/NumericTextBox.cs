@@ -8,6 +8,8 @@ using System.Windows.Input;
 using System.Windows.Data;
 using System.Diagnostics;
 using System.Reflection;
+using System.Windows.Automation;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -57,7 +59,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty NullableNumericConverterProperty =
-            DependencyProperty.Register("NullableNumericConverter", typeof(NullableNumericConverter), typeof(NumericTextBox), new UIPropertyMetadata(NullableNumericConverter.Number));
+            DependencyProperty.Register("NullableNumericConverter", typeof(NullableNumericConverter), typeof(NumericTextBox), new UIPropertyMetadata(NullableNumericConverter.Number, (s,e)=>((NumericTextBox)s).ConverterChanged(e.NewValue)));
         public NullableNumericConverter NullableNumericConverter
         {
             get { return (NullableNumericConverter)GetValue(NullableNumericConverterProperty); }
@@ -72,6 +74,10 @@ namespace Signum.Windows
             set { SetValue(ShowAnchorProperty, value); }
         }
 
+        private void ConverterChanged(object converter)
+        {
+            AutomationProperties.SetItemStatus(this, ((NullableNumericConverter)converter).TryCC(c => c.Format));
+        }
 
         public NumericTextBox()
         {
