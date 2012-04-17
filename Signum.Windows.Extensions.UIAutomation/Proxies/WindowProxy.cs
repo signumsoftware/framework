@@ -32,6 +32,9 @@ namespace Signum.Windows.UIAutomation
         {
             try
             {
+                if (Element.Current.IsOffscreen)
+                    return false;
+
                 wp.Close();
 
                 return true;
