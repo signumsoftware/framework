@@ -73,8 +73,7 @@ namespace Signum.Engine.DynamicQuery
             //if (Type.IsIIdentifiable())
             //    throw new InvalidOperationException("The Type of column {0} is a subtype of IIdentifiable, use a Lite instead".Formato(mi.MemberName()));
 
-            Type cleanType = Reflector.ExtractLite(Type) ?? Type;
-            if (IsEntity && !cleanType.IsIIdentifiable())
+            if (IsEntity && !Type.CleanType().IsIIdentifiable())
                 throw new InvalidOperationException("Entity must be a Lite or an IIdentifiable");
 
             if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoutes.All(pr => pr.PropertyRouteType != PropertyRouteType.Root))
@@ -125,7 +124,7 @@ namespace Signum.Engine.DynamicQuery
                 return OverrideDisplayName();
 
             if (IsEntity)
-                return this.Type.NiceName();
+                return this.Type.CleanType().NiceName();
 
             if (propertyRoutes != null && 
                 propertyRoutes[0].PropertyRouteType == PropertyRouteType.FieldOrProperty &&
@@ -177,7 +176,7 @@ namespace Signum.Engine.DynamicQuery
         public Type DefaultEntityType()
         {
             if (Implementations == null)
-                return Reflector.ExtractLite(this.Type);
+                return this.Type.CleanType();
 
             if (Implementations.IsByAll)
                 return null;
@@ -188,7 +187,7 @@ namespace Signum.Engine.DynamicQuery
         public bool CompatibleWith(Type entityType)
         {
             if (Implementations == null)
-                return Reflector.ExtractLite(this.Type) == entityType;
+                return Type.CleanType() == entityType;
 
             if (Implementations.IsByAll)
                 return true;
