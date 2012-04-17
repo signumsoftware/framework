@@ -25,6 +25,9 @@ namespace Signum.Windows
         public static readonly IValueConverter Identity =
             ConverterFactory.New((object v) => v, (object v) => v);
 
+        public static readonly IValueConverter EntityKey =
+            ConverterFactory.New((ResultRow row) => row.Entity.Key(Server.GetCleanName));
+
         public static readonly IValueConverter ToLite =
            ConverterFactory.New((IIdentifiable ei) => ei == null? null : Lite.Create(ei.GetType(), (IdentifiableEntity)ei));
 
