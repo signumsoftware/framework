@@ -13,9 +13,9 @@ namespace Signum.Utilities
     {
         static Dictionary<string, IUntypedVariable> threadVariables = new Dictionary<string, IUntypedVariable>();
 
-        public static ThreadLocalVariable<T> ThreadVariable<T>(string name)
+        public static ThreadVariable<T> ThreadVariable<T>(string name)
         {
-            var variable = new ThreadLocalVariable<T>(name);
+            var variable = new ThreadVariable<T>(name);
             threadVariables.AddOrThrow(name, variable, "Thread variable {0} already defined");
             return variable;
         }
@@ -127,11 +127,11 @@ namespace Signum.Utilities
         }
     }
 
-    public class ThreadLocalVariable<T> : Variable<T>
+    public class ThreadVariable<T> : Variable<T>
     {
         ThreadLocal<T> store = new ThreadLocal<T>();
 
-        public ThreadLocalVariable(string name) : base(name) { }
+        public ThreadVariable(string name) : base(name) { }
 
         public override T Value
         {
