@@ -160,7 +160,7 @@
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="AutomationProperties.ItemStatus" Value="{Binding m:Converters.EntityKey}"/>
+                    <Setter Property="AutomationProperties.ItemStatus" Value="{Binding, Converter={x:Static m:Converters.EntityKey}}"/>
                     <EventSetter Event="Control.MouseDoubleClick" Handler="lvResult_MouseDoubleClick"/>
                 </Style>
             </ListView.ItemContainerStyle>
