@@ -42,13 +42,6 @@ namespace Signum.Engine.UserQueries
             }
         }
 
-        public static UserQueryDN ToUserQuery(this QueryRequest request)
-        {
-            return request.ToUserQuery(
-                DynamicQueryManager.Current.QueryDescription(request.QueryName),
-                QueryLogic.RetrieveOrGenerateQuery(request.QueryName)); 
-        }
-
         public static UserQueryDN ParseAndSave(this UserQueryDN userQuery)
         {
             if (!userQuery.IsNew || userQuery.queryName == null)

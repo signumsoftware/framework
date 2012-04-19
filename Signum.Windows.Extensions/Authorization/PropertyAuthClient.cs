@@ -38,6 +38,9 @@ namespace Signum.Windows.Authorization
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
 
+            if (TypeAuthClient.GetAllowed(route.RootType).Max().GetUI() == TypeAllowedBasic.None)
+                return PropertyAllowed.None;
+
             return propertyRules.GetAllowed(route);
         }
 

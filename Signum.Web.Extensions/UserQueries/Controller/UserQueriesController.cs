@@ -42,12 +42,19 @@ namespace Signum.Web.UserQueries
         {
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
-            
-            var userQuery = request.ToUserQuery();
+
+            var userQuery = ToUserQuery(request);
 
             userQuery.Related = UserDN.Current.ToLite<IdentifiableEntity>();
 
             return Navigator.View(this, userQuery);
+        }
+
+        public static UserQueryDN ToUserQuery(QueryRequest request)
+        {
+            return request.ToUserQuery(
+                DynamicQueryManager.Current.QueryDescription(request.QueryName),
+                QueryLogic.RetrieveOrGenerateQuery(request.QueryName), FindOptions.DefaultElementsPerPage);
         }
 
         public ActionResult Delete(Lite<UserQueryDN> lite)

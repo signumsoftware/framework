@@ -70,7 +70,7 @@ namespace Signum.Engine.Mailing
                 },
                 Orders = new List<Order>(),
                 Columns = tokens.Select(t => new Column(t, t.NiceName())).ToList(),
-                ElementsPerPage = null,
+                ElementsPerPage = QueryRequest.AllElements,
             }); 
 
             var lines = resultTable.Rows.Select(r => 

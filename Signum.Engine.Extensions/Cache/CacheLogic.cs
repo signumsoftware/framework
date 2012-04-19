@@ -40,6 +40,16 @@ namespace Signum.Engine.Cache
             void SetEntities(Type referingType, DirectedGraph<Modifiable> entities);
         }
 
+
+        static readonly ThreadVariable<bool> inCache = Statics.ThreadVariable<bool>("inCache");
+
+        static IDisposable SetInCache()
+        {
+            var oldInCache = inCache.Value;
+            inCache.Value = true;
+            return new Disposable(() => inCache.Value = oldInCache);
+        }
+
         class SemiCached<T> : CacheController<T>, ICacheLogicController, IInstanceController
             where T : IdentifiableEntity
         {
@@ -220,6 +230,7 @@ namespace Signum.Engine.Cache
             public Dictionary<int, T> Dictionary { get { return pack.Value.Dictionary; } }
          
             Lazy<Pack> pack;
+            
 
             public CacheLogicController(Schema schema)
             {
@@ -227,7 +238,8 @@ namespace Signum.Engine.Cache
                 {
                     using (new EntityCache(true))
                     using (Schema.Current.GlobalMode())
-                    using (Transaction tr = Transaction.ForceNew())
+                    using (Transaction tr = inCache.Value ? new Transaction(): Transaction.ForceNew())
+                    using (SetInCache())
                     using (HeavyProfiler.Log("CACHE"))
                     {
                         DisabledTypesDuringTransaction().Add(typeof(T));
@@ -245,7 +257,7 @@ namespace Signum.Engine.Cache
                             }
                         }
 
-                        Interlocked.Increment(ref loads); 
+                        Interlocked.Increment(ref loads);
 
                         return tr.Commit(new Pack(result));
                     }

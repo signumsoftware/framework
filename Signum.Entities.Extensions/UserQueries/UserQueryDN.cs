@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Reflection;
 using Signum.Entities.Reports;
 using System.Linq.Expressions;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.UserQueries
 {
@@ -82,7 +83,7 @@ namespace Signum.Entities.UserQueries
         }
 
         int? elementsPerPage;
-        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, -1)]
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }
@@ -108,6 +109,14 @@ namespace Signum.Entities.UserQueries
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => ElementsPerPage) && ElementsPerPage <= 0 && ElementsPerPage != -1)
+                return Resources.ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero;
+
+            return base.PropertyValidation(pi);
         }
 
         internal void ParseData(QueryDescription description)
@@ -313,27 +322,27 @@ namespace Signum.Entities.UserQueries
 
     public static class UserQueryUtils
     {
-        public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query)
+        public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query, int defaultElementsPerPage)
         {
             var tuple = SmartColumns(request.Columns, qd.Columns);
 
             return new UserQueryDN
             {
                 Query = query,
-                Filters = request.Filters.Select(f => new QueryFilterDN 
-                { 
-                    Token = f.Token, 
-                    Operation = f.Operation, 
-                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type) 
+                Filters = request.Filters.Select(f => new QueryFilterDN
+                {
+                    Token = f.Token,
+                    Operation = f.Operation,
+                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type)
                 }).ToMList(),
                 ColumnsMode = tuple.Item1,
                 Columns = tuple.Item2,
-                Orders = request.Orders.Select(oo => new QueryOrderDN 
-                { 
-                    Token = oo.Token, 
-                    OrderType = oo.OrderType 
+                Orders = request.Orders.Select(oo => new QueryOrderDN
+                {
+                    Token = oo.Token,
+                    OrderType = oo.OrderType
                 }).ToMList(),
-                ElementsPerPage = request.ElementsPerPage
+                ElementsPerPage = (request.ElementsPerPage == defaultElementsPerPage) ? (int?)null : request.ElementsPerPage,
             };
         }
 

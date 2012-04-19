@@ -72,12 +72,18 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(role, property);
         }
 
-        public static PropertyAllowed GetPropertyAllowed(this PropertyRoute property)
+        public static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
         {
             if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
                 return PropertyAllowed.Modify;
 
-            return cache.GetAllowed(RoleDN.Current.ToLite(), property);
+            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                return GetPropertyAllowed(route.Parent);
+
+            if (TypeAuthLogic.GetAllowed(route.RootType).Max().GetUI() == TypeAllowedBasic.None)
+                return PropertyAllowed.None;
+
+            return cache.GetAllowed(RoleDN.Current.ToLite(), route);
         }
 
         public static DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()

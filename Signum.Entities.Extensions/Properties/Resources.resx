@@ -309,4 +309,7 @@
   <data name="ColorsFor0" xml:space="preserve">
     <value>Colors for {0}</value>
   </data>
+  <data name="ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero" xml:space="preserve">
+    <value>{0} should be -1 (all), empty (default), or a number greater than zero</value>
+  </data>
 </root>
