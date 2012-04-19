@@ -8,6 +8,7 @@
     using System.Collections.ObjectModel;
     using System.Collections.Generic;
     using Signum.Utilities;
+    using System.Linq;
 
     public sealed class Worksheet : IWriter, IReader, IExpressionWriter
     {
@@ -103,6 +104,28 @@
             if (this._options != null)
             {
                 ((IWriter) this._options).WriteXml(writer);
+            }
+            if (this._table != null)
+            {
+                var breaks = this.Table.Rows.Where(a => a.PageBreak).Select(a => a.Index);
+
+                if (breaks.Any())
+                {
+                    writer.WriteStartElement("PageBreaks", Namespaces.Excel);
+                    {
+                        writer.WriteStartElement("RowBreaks");
+                        foreach (var brk in breaks)
+                        {
+                            writer.WriteStartElement("RowBreak");
+                            writer.WriteElementString("Row", brk.ToString());
+                            writer.WriteEndElement();
+                        }
+                        writer.WriteEndElement();
+                    }
+                    writer.WriteEndElement();
+                }
+
+                ((IWriter)this._table).WriteXml(writer);
             }
             if (this._autoFilter != null)
             {
