@@ -278,7 +278,7 @@ namespace Signum.Engine.Chart
             var cols = columns.Select(c => Tuple.Create(c,
                 Expression.Lambda(c.Token.BuildExpression(context), context.Parameter))).ToList();
 
-            return values.ToResultTable(cols, values.Length, 0, null);
+            return values.ToResultTable(cols, values.Length, 0, QueryRequest.AllElements);
         }
     }
 }

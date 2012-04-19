@@ -39,7 +39,7 @@ namespace Signum.Windows.UserQueries
         {
             QueryDescription description = Navigator.Manager.GetQueryDescription(searchControl.QueryName);
 
-            return searchControl.GetQueryRequest(true).ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName));
+            return searchControl.GetQueryRequest(true).ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName), FindOptions.DefaultElementsPerPage);
         }
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
@@ -68,7 +68,7 @@ namespace Signum.Windows.UserQueries
                      
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
 
-            searchControl.ElementsPerPage = uq.ElementsPerPage;
+            searchControl.ElementsPerPage = uq.ElementsPerPage ?? FindOptions.DefaultElementsPerPage;
         }
     }
 }
