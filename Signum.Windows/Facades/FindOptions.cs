@@ -63,7 +63,7 @@ namespace Signum.Windows
             set { this.columnOptions = value; }
         }
 
-        int? elementsPerPage = DefaultElementsPerPage;
+        int? elementsPerPage;
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }

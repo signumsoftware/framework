@@ -62,6 +62,9 @@ namespace Signum.Web
             set { this.columnOptions = value; }
         }
 
+        public static int DefaultElementsPerPage = 50;
+
+
         int? elementsPerPage;
         /// <summary>
         /// If null, use QuerySettings one
@@ -70,16 +73,6 @@ namespace Signum.Web
         {
             get { return elementsPerPage; }
             set { elementsPerPage = value; }
-        }
-
-        bool elementsPerPageEmpty;
-        /// <summary>
-        /// Force empty ElementsPerPage (if set to true, ElementsPerPage will be ignored)
-        /// </summary>
-        public bool ElementsPerPageEmpty
-        {
-            get { return elementsPerPageEmpty; }
-            set { elementsPerPageEmpty = value; }
         }
 
         public FindOptions() { }
@@ -194,7 +187,7 @@ namespace Signum.Web
                 Filters = FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(fo => fo.ToOrder()).ToList(),
                 Columns = ColumnOptions.Select(co => co.ToColumn(qd)).ToList(),
-                ElementsPerPage = elementsPerPage,
+                ElementsPerPage = elementsPerPage ?? FindOptions.DefaultElementsPerPage,
             };
         }
 

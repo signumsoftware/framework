@@ -21,7 +21,9 @@ namespace Signum.Entities.DynamicQuery
 
         public List<Order> Orders { get; set; }
 
-        public int? ElementsPerPage { get; set; }
+        public int ElementsPerPage { get; set; }
+
+        public const int AllElements = -1;
 
         public int CurrentPage { get; set; }
 
@@ -29,7 +31,7 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                if (ElementsPerPage == null)
+                if (ElementsPerPage  == AllElements)
                     return null;
 
                 return (ElementsPerPage * (CurrentPage + 1)) - 1; 

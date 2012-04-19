@@ -175,7 +175,7 @@
                     <td colspan="@columnsCount">@Resources.Signum_noResults</td>
                 </tr>
                 @{ 
-                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage ?? (findOptions.ElementsPerPageEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage);
+                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage) ?? FindOptions.DefaultElementsPerPage;
                     ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
                     ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
                 }

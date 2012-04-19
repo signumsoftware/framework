@@ -451,8 +451,7 @@ namespace Signum.Web
             QuerySettings = new Dictionary<object, QuerySettings>();
         }
 
-        public static int QueryMaxResults = 50;
-
+        
         public event Action Initializing;
         public bool Initialized { get; private set; }
         internal void Initialize()
@@ -475,7 +474,7 @@ namespace Signum.Web
                     foreach (object o in DynamicQueryManager.Current.GetQueryNames())
                     {
                         if (!QuerySettings.ContainsKey(o))
-                            QuerySettings.Add(o, new QuerySettings(o) { ElementsPerPage = QueryMaxResults });
+                            QuerySettings.Add(o, new QuerySettings(o));
                         if (!QuerySettings[o].WebQueryName.HasText())
                             QuerySettings[o].WebQueryName = GenerateWebQueryName(o);
                     }

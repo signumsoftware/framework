@@ -471,22 +471,22 @@ namespace Signum.Engine.DynamicQuery
         #endregion
 
         #region TryPaginatePartial
-        public static DEnumerableCount<T> TryPaginatePartial<T>(this DQueryable<T> query, int? num)
+        public static DEnumerableCount<T> TryPaginatePartial<T>(this DQueryable<T> query, int? maxElementIndex)
         {
             int count = query.Query.Count();
 
-            if (num.HasValue)
-                return new DEnumerableCount<T>(query.Query.Take(num.Value).ToList(), query.Context, count);
+            if (maxElementIndex.HasValue)
+                return new DEnumerableCount<T>(query.Query.Take(maxElementIndex.Value).ToList(), query.Context, count);
 
             return new DEnumerableCount<T>(query.Query.ToList(), query.Context, count);
         }
 
-        public static DEnumerableCount<T> TryPaginatePartial<T>(this DEnumerable<T> collection, int? num)
+        public static DEnumerableCount<T> TryPaginatePartial<T>(this DEnumerable<T> collection, int? maxElementIndex)
         {
             int count = collection.Collection.Count(); 
 
-            if (num.HasValue)
-                return new DEnumerableCount<T>(collection.Collection.Take(num.Value), collection.Context, count);
+            if (maxElementIndex.HasValue)
+                return new DEnumerableCount<T>(collection.Collection.Take(maxElementIndex.Value), collection.Context, count);
 
             return new DEnumerableCount<T>(collection.Collection, collection.Context, count);
         }
@@ -494,9 +494,9 @@ namespace Signum.Engine.DynamicQuery
 
         #region Paginate
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, int? elementsPerPage, int currentPage)
+        public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, int elementsPerPage, int currentPage)
         {
-            if (!elementsPerPage.HasValue)
+            if (elementsPerPage == QueryRequest.AllElements)
             {
                 var array = query.Query.ToArray();
                 return new DEnumerableCount<T>(array, query.Context, array.Length);
@@ -509,16 +509,16 @@ namespace Signum.Engine.DynamicQuery
 
             var q = query.Query;
             if (currentPage != 1)
-                q = q.Skip((currentPage - 1) * elementsPerPage.Value);
+                q = q.Skip((currentPage - 1) * elementsPerPage);
 
-            q = q.Take(elementsPerPage.Value);
+            q = q.Take(elementsPerPage);
 
             return new DEnumerableCount<T>(q.ToArray(), query.Context, totalElements);
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, int? elementsPerPage, int currentPage)
         {
-            if (!elementsPerPage.HasValue)
+            if (elementsPerPage == QueryRequest.AllElements)
                 return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.Collection.Count());
 
             if (currentPage <= 0)
@@ -534,9 +534,9 @@ namespace Signum.Engine.DynamicQuery
             return new DEnumerableCount<T>(c, collection.Context, totalElements);
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, int? elementsPerPage, int currentPage)
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, int elementsPerPage, int currentPage)
         {
-            if (!elementsPerPage.HasValue)
+            if (elementsPerPage == QueryRequest.AllElements)
                 return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.TotalElements);
 
             if (currentPage <= 0)
@@ -544,9 +544,9 @@ namespace Signum.Engine.DynamicQuery
 
             var c = collection.Collection;
             if (currentPage != 1)
-                c = c.Skip((currentPage - 1) * elementsPerPage.Value);
+                c = c.Skip((currentPage - 1) * elementsPerPage);
 
-            c = c.Take(elementsPerPage.Value);
+            c = c.Take(elementsPerPage);
 
             return new DEnumerableCount<T>(c, collection.Context, collection.TotalElements);
         }
@@ -570,7 +570,7 @@ namespace Signum.Engine.DynamicQuery
             return ToResultTable(array, columnAccesors, collection.TotalElements, req.CurrentPage, req.ElementsPerPage);
         }
 
-        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors, int totalElements, int currentPage, int? elementsPerPage)
+        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors, int totalElements, int currentPage, int elementsPerPage)
         {
             var columnValues = columnAccesors.Select(c => new ResultColumn(
                 c.Item1,

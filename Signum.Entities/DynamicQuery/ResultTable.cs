@@ -38,7 +38,7 @@ namespace Signum.Entities.DynamicQuery
          
         public ResultRow[] Rows { get; private set; }
 
-        public ResultTable(ResultColumn[] columns, int totalElements, int currentPage, int? elementsPerPage)
+        public ResultTable(ResultColumn[] columns, int totalElements, int currentPage, int elementsPerPage)
         {
             int rows = columns.Select(a => a.Values.Length).Distinct().SingleEx(()=>"Unsyncronized number of rows in the results");
 
@@ -75,21 +75,21 @@ namespace Signum.Entities.DynamicQuery
         public int TotalElements { get; private set; }
         public int CurrentPage { get; private set; }
 
-        public int? ElementsPerPage { get; private set; }
+        public int ElementsPerPage { get; private set; }
 
         public int TotalPages
         {
-            get { return !ElementsPerPage.HasValue ? 1 : (TotalElements + ElementsPerPage.Value - 1) / ElementsPerPage.Value; } //Round up
+            get { return ElementsPerPage == -1 ? 1 : (TotalElements + ElementsPerPage - 1) / ElementsPerPage; } //Round up
         }
 
         public int? StartElementIndex
         {
-            get { return !ElementsPerPage.HasValue ? (int?)null : (ElementsPerPage * (CurrentPage - 1)) + 1; }
+            get { return ElementsPerPage == -1 ? (int?)null : (ElementsPerPage * (CurrentPage - 1)) + 1; }
         }
 
         public int? EndElementIndex
         {
-            get { return !ElementsPerPage.HasValue ? (int?)null : StartElementIndex.Value + Rows.Count() - 1; }
+            get { return ElementsPerPage == -1 ? (int?)null : StartElementIndex.Value + Rows.Count() - 1; }
         }
     }
 

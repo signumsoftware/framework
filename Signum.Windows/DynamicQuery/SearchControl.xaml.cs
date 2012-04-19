@@ -90,10 +90,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ElementsPerPageProperty =
-            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(null, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
-        public int? ElementsPerPage
+            DependencyProperty.Register("ElementsPerPage", typeof(int), typeof(SearchControl), new UIPropertyMetadata(QueryRequest.AllElements, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
+        public int ElementsPerPage
         {
-            get { return (int?)GetValue(ElementsPerPageProperty); }
+            get { return (int)GetValue(ElementsPerPageProperty); }
             set { SetValue(ElementsPerPageProperty, value); }
         }
 

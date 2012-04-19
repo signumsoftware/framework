@@ -442,7 +442,7 @@ WriteLiteral("</td>\r\n                </tr>\r\n");
 
 
                    
-                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage ?? (findOptions.ElementsPerPageEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage);
+                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage) ?? FindOptions.DefaultElementsPerPage;
                     ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
                     ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
                 
