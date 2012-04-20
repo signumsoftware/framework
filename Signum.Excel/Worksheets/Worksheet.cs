@@ -9,6 +9,7 @@
     using System.Collections.Generic;
     using Signum.Utilities;
     using System.Linq;
+    using System.Globalization;
 
     public sealed class Worksheet : IWriter, IReader, IExpressionWriter
     {
@@ -111,21 +112,19 @@
 
                 if (breaks.Any())
                 {
-                    writer.WriteStartElement("PageBreaks", Namespaces.Excel);
+                    writer.WriteStartElement(Namespaces.ExcelPrefix, "PageBreaks", Namespaces.Excel);
                     {
-                        writer.WriteStartElement("RowBreaks");
+                          writer.WriteStartElement(Namespaces.ExcelPrefix, "RowBreaks", Namespaces.Excel);
                         foreach (var brk in breaks)
                         {
-                            writer.WriteStartElement("RowBreak");
-                            writer.WriteElementString("Row", brk.ToString());
+                            writer.WriteStartElement(Namespaces.ExcelPrefix, "RowBreak", Namespaces.Excel);
+                            writer.WriteElementString("Row", Namespaces.Excel,brk.ToString(CultureInfo.InvariantCulture));
                             writer.WriteEndElement();
                         }
                         writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
                 }
-
-                ((IWriter)this._table).WriteXml(writer);
             }
             if (this._autoFilter != null)
             {
