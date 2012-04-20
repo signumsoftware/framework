@@ -266,7 +266,7 @@ namespace Signum.Entities.Authorization
             {
                 if (rules.DefaultRule != GetDefaultRule(rules.Role))
                 {
-                    ((IManualAuth<Type, TypeAllowed>)this).SetDefaultRule(rules.Role, rules.DefaultRule);
+                    ((IManualAuth<Type, TypeAllowedAndConditions>)this).SetDefaultRule(rules.Role, rules.DefaultRule);
                     Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).UnsafeDelete();
                     return;
                 }
