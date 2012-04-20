@@ -41,6 +41,24 @@ namespace Signum.Windows.UIAutomation
             return element.Pattern<ValuePattern>().Current.Value;
         }
 
+        public static ToggleState Check(this AutomationElement element)
+        {
+            var  ck= element.Pattern<TogglePattern>();
+            if(ck.Current.ToggleState != ToggleState.On)
+                ck.Toggle();
+            return ck.Current.ToggleState;
+        }
+
+        public static ToggleState UnCheck(this AutomationElement element)
+        {
+            var ck = element.Pattern<TogglePattern>();
+            if (ck.Current.ToggleState != ToggleState.Off)
+                ck.Toggle();
+            return ck.Current.ToggleState;
+        }
+
+
+
         public static int WindowAfterTimeout = 5 * 1000;
 
         public static AutomationElement GetWindowAfter(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
