@@ -135,11 +135,10 @@ namespace Signum.Web.UserQueries
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName))
             {
-                string uqName = uq.InDB().Select(q => q.DisplayName).SingleOrDefaultEx();
                 items.Add(new ToolBarButton
                 {
-                    Text = uqName,
-                    AltText = uqName,
+                    Text = uq.ToString(),
+                    AltText = uq.ToString(),
                     Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq)),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });

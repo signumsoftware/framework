@@ -256,11 +256,10 @@ namespace Signum.Web.Chart
 
             foreach (var uc in ChartLogic.GetUserCharts(queryName))
             {
-                string ucName = uc.InDB().Select(q => q.DisplayName).SingleOrDefaultEx();
                 items.Add(new ToolBarButton
                 {
-                    Text = ucName,
-                    AltText = ucName,
+                    Text = uc.ToString(),
+                    AltText = uc.ToString(),
                     Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc)),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
                 });
