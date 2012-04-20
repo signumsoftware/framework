@@ -100,7 +100,7 @@ namespace Signum.Entities.UserQueries
 
     public class SmartDateTimeFilterValueConverter : IFilterValueConverter
     {
-        public class SmartSpan
+        public class SmartDateTimeSpan
         {
             const string part = @"^((\+\d+)|(-\d+)|(\d+))$";
             static Regex partRegex = new Regex(part);
@@ -113,7 +113,7 @@ namespace Signum.Entities.UserQueries
             public string Minute;
             public string Second;
 
-            public static string TryParse(string str, out SmartSpan result)
+            public static string TryParse(string str, out SmartDateTimeSpan result)
             {
                 if (string.IsNullOrEmpty(str))
                 {
@@ -128,7 +128,7 @@ namespace Signum.Entities.UserQueries
                     return "Invalid Format: yyyy/mm/dd hh:mm:ss";
                 }
 
-                result = new SmartSpan();
+                result = new SmartDateTimeSpan();
 
                 return
                     Assert(match, "year", "yyyy", 0, int.MaxValue, out result.Year) ??
@@ -179,18 +179,18 @@ namespace Signum.Entities.UserQueries
                 int minute = Mix(now.Minute, Minute, "mm");
                 int second = Mix(now.Second, Second, "ss");
 
-                minute += Math.DivRem(second, 60, out second);
-                hour += Math.DivRem(minute, 60, out minute);
-                day += Math.DivRem(hour, 24, out hour);
+                minute += second.DivMod(60, out second);
+                hour += minute.DivMod(60, out minute);
+                day += hour.DivMod(24, out hour);
                 
-                DateDivRem(ref year, ref month, ref day);
+                DateDivMod(ref year, ref month, ref day);
 
                 return new DateTime(year, month, day, hour, minute, second);
             }
 
-            private static void DateDivRem(ref int year, ref int month, ref int day)
+            private static void DateDivMod(ref int year, ref int month, ref int day)
             {
-                year += MonthDivRem(ref month); // We need right month for DaysInMonth
+                year += MonthDivMod(ref month); // We need right month for DaysInMonth
 
                 int daysInMonth;
                 while (day > (daysInMonth = DateTime.DaysInMonth(year, month)))
@@ -198,19 +198,19 @@ namespace Signum.Entities.UserQueries
                     day -= daysInMonth;
 
                     month++;
-                    year += MonthDivRem(ref month);
+                    year += MonthDivMod(ref month);
                 }
                 
                 while (day <= 0)
                 {
                     month--;
-                    year += MonthDivRem(ref month);
+                    year += MonthDivMod(ref month);
 
                     day += DateTime.DaysInMonth(year, month);
                 }
             }
 
-            private static int MonthDivRem(ref int month)
+            private static int MonthDivMod(ref int month)
             {
                 int year = 0;
 
@@ -242,9 +242,9 @@ namespace Signum.Entities.UserQueries
                 return int.Parse(rule);
             }
 
-            public static SmartSpan Substract(DateTime date, DateTime now)
+            public static SmartDateTimeSpan Substract(DateTime date, DateTime now)
             {
-                var ss = new SmartSpan
+                var ss = new SmartDateTimeSpan
                 {
                     Year = Diference(now.Year - date.Year, "yyyy") ?? date.Year.ToString("0000"),
                     Month = Diference(now.Month - date.Month, "mm") ?? date.Month.ToString("00"),
@@ -292,15 +292,15 @@ namespace Signum.Entities.UserQueries
 
             DateTime dateTime = (DateTime)value;
 
-            SmartSpan ss = SmartSpan.Substract(dateTime, TimeZoneManager.Now);
+            SmartDateTimeSpan ss = SmartDateTimeSpan.Substract(dateTime, TimeZoneManager.Now);
             result = ss.ToString();
             return null;
         }
 
         public string TryParse(string value, Type type, out object result)
         {
-            SmartSpan ss;
-            string error = SmartSpan.TryParse(value, out ss);
+            SmartDateTimeSpan ss;
+            string error = SmartDateTimeSpan.TryParse(value, out ss);
 
             if (error != null)
             {
