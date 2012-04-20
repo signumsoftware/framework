@@ -125,6 +125,76 @@ namespace Signum.Utilities
         
         #endregion
 
+        #region Math
+
+        //http://en.wikipedia.org/wiki/Modulo_operation
+        public static int Mod(this int a, int b)
+        {
+            int result = a % b;
+
+            if (a < 0)
+                result += b;
+
+            if (b < 0)
+                result -= b;
+
+            return result;
+        }
+
+
+        public static long Mod(this long a, long b)
+        {
+            long mod = a % b;
+
+            if (a < 0)
+                mod += b;
+
+            if (b < 0)
+                mod -= b;
+
+            return mod;
+        }
+
+        public static int DivMod(this int a, int b, out int mod)
+        {
+            int result = Math.DivRem(a, b, out mod);
+
+            if (a < 0)
+            {
+                result--;
+                mod += b;
+            }
+
+            if (b < 0)
+            {
+                result++;
+                mod -= b;
+            }
+
+            return result;
+        }
+
+        public static long DivMod(this long a, long b, out long mod)
+        {
+            long result = Math.DivRem(a, b, out mod);
+
+            if (a < 0)
+            {
+                result--;
+                mod += b;
+            }
+
+            if (b < 0)
+            {
+                result++;
+                mod -= b;
+            }
+
+            return result;
+        }
+
+        #endregion
+
         public static T? DefaultToNull<T>(this T value)
             where T : struct
         {
