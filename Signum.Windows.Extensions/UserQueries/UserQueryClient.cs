@@ -28,11 +28,10 @@ namespace Signum.Windows.UserQueries
 
         static SearchControlMenuItem SearchControl_GetCustomMenuItems(object queryName, Type entityType)
         {
-            var tab = TypeAuthClient.GetAllowed(typeof(UserQueryDN)).Max().GetUI();
-            if (tab < TypeAllowedBasic.Read)
+            if (!Navigator.IsViewable(typeof(UserQueryDN), true))
                 return null;
 
-            return new UserQueryMenuItem(tab);
+            return new UserQueryMenuItem();
         }
 
         internal static UserQueryDN FromSearchControl(SearchControl searchControl)

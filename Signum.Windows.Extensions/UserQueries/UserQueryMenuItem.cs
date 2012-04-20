@@ -23,10 +23,8 @@ namespace Signum.Windows.UserQueries
 {
     public class UserQueryMenuItem : SearchControlMenuItem
     {
-        TypeAllowedBasic tab;
-        public UserQueryMenuItem(TypeAllowedBasic tab)
+        public UserQueryMenuItem()
         {
-            this.tab = tab;
         }
 
         public static readonly DependencyProperty CurrentUserQueryProperty =
@@ -89,7 +87,7 @@ namespace Signum.Windows.UserQueries
 
             Items.Add(new Separator());
 
-            if (tab == TypeAllowedBasic.Create)
+            if (Navigator.IsCreable(typeof(UserQueryDN), true))
             {
                 Items.Add(new MenuItem()
                 {
