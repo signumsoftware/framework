@@ -370,6 +370,16 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Files\Views\FileRepository.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FileRepository.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Files\Views\_ViewStart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Views\Newsletter.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1000,6 +1010,15 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Files\Views\FileRepository.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>FileRepository.cs</LastGenOutput>
+    </Content>
+    <Content Include="Files\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Files\Views\Web.config" />
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>

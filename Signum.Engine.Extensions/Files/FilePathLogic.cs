@@ -53,7 +53,7 @@ namespace Signum.Engine.Files
                                                p.FileType,
                                                p.FullPhysicalPath,
                                                p.FullWebPath,
-                                               Repository = p.Repository.ToLite()
+                                               p.Repository
                                            }).ToDynamic();
 
                 dqm[typeof(FileTypeDN)] = (from f in Database.Query<FileTypeDN>()

@@ -23,6 +23,8 @@ namespace Signum.Web.Files
 {
     public static class FilesClient
     {
+        public static string ViewPrefix = "~/Files/Views/{0}.cshtml";
+
         public static void Start(bool filePath, bool embeddedFile)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -33,8 +35,14 @@ namespace Signum.Web.Files
 
                 if (filePath)
                 {
-                    var es = new EntitySettings<FilePathDN>(EntityType.Default);
-                    Navigator.AddSetting(es);
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<FileRepositoryDN>(EntityType.Admin){PartialViewName = e => ViewPrefix.Formato("FileRepository")},
+                        new EntitySettings<FilePathDN>(EntityType.Default),
+                        new EntitySettings<FileTypeDN>(EntityType.ServerOnly),
+                    });
+
+                    var es = Navigator.EntitySettings<FilePathDN>();
                      
                     var baseMapping = (Mapping<FilePathDN>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
