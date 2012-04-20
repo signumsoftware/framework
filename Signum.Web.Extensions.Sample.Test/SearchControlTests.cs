@@ -114,7 +114,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
             Assert.IsTrue(selenium.IsElementPresent("jq=.sf-pagination-left:contains('5')"));
-            selenium.SetElementsPerPageToFinder(""); 
+            selenium.SetElementsPerPageToFinder("-1"); 
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
             Assert.IsTrue(selenium.IsElementPresent("jq=.sf-pagination-left:contains('12')"));
@@ -190,7 +190,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.SetElementsPerPageToFinder("5", prefix);
             selenium.Search(prefix);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(5, prefix));
-            selenium.SetElementsPerPageToFinder("", prefix); 
+            selenium.SetElementsPerPageToFinder("-1", prefix); 
             selenium.Search(prefix);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(8, prefix));
         }

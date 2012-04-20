@@ -112,6 +112,8 @@
                 this._height = value ?? Namespaces.NullValue;
             }
         }
+
+        public bool PageBreak { get; set; }
     }
 }
 

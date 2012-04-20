@@ -93,6 +93,9 @@ namespace Signum.Windows.UIAutomation
                     case "DateTimePicker":
                         ValueControl.ChildById("PART_EditableTextBox").Value(value);
                         break;
+                    case "CheckBox":
+                        ValueControl.ChildById("checkbox").Value(value);
+                        break;
                     default:
                         throw new NotImplementedException("Unexpected Value Control of type {0}".Formato(ValueControl.Current.ClassName));
                 }
