@@ -96,9 +96,16 @@ namespace Signum.Engine
                     object result = cmd.ExecuteScalar();
                     return result;
                 }
+                catch (SqlTypeException ex)
+                {
+                    var nex = HandleSqlTypeException(ex, preCommand);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
+                }
                 catch (SqlException ex)
                 {
-                    var nex = HandleException(ex);
+                    var nex = HandleSqlException(ex);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -117,9 +124,16 @@ namespace Signum.Engine
                     int result = cmd.ExecuteNonQuery();
                     return result;
                 }
+                catch (SqlTypeException ex)
+                {
+                    var nex = HandleSqlTypeException(ex, preCommand);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
+                }
                 catch (SqlException ex)
                 {
-                    var nex = HandleException(ex);
+                    var nex = HandleSqlException(ex);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -127,10 +141,10 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override void ExecuteDataReader(SqlPreCommandSimple command, Action<FieldReader> forEach)
+        protected internal override void ExecuteDataReader(SqlPreCommandSimple preCommand, Action<FieldReader> forEach)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(command, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con))
             using (HeavyProfiler.Log("SQL", cmd.CommandText))
             {
                 try
@@ -150,15 +164,22 @@ namespace Signum.Engine
                         catch (SqlTypeException ex)
                         {
                             FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
-                            fieldEx.Command = command;
+                            fieldEx.Command = preCommand;
                             fieldEx.Row = row;
                             throw fieldEx;
                         }
                     }
                 }
+                catch (SqlTypeException ex)
+                {
+                    var nex = HandleSqlTypeException(ex, preCommand);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
+                }
                 catch (SqlException ex)
                 {
-                    var nex = HandleException(ex);
+                    var nex = HandleSqlException(ex);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -174,9 +195,16 @@ namespace Signum.Engine
                 SqlCommand cmd = NewCommand(preCommand, null);
                 return cmd.ExecuteReader();
             }
+            catch (SqlTypeException ex)
+            {
+                var nex = HandleSqlTypeException(ex, preCommand);
+                if (nex == ex)
+                    throw;
+                throw nex;
+            }
             catch (SqlException ex)
             {
-                var nex = HandleException(ex);
+                var nex = HandleSqlException(ex);
                 if (nex == ex)
                     throw;
                 throw nex;
@@ -197,9 +225,16 @@ namespace Signum.Engine
                     da.Fill(result);
                     return result;
                 }
+                catch (SqlTypeException ex)
+                {
+                    var nex = HandleSqlTypeException(ex, preCommand);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
+                } 
                 catch (SqlException ex)
                 {
-                    var nex = HandleException(ex);
+                    var nex = HandleSqlException(ex);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -220,9 +255,16 @@ namespace Signum.Engine
                     da.Fill(result);
                     return result;
                 }
+                catch (SqlTypeException ex)
+                {
+                    var nex = HandleSqlTypeException(ex, preCommand);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
+                }
                 catch (SqlException ex)
                 {
-                    var nex = HandleException(ex);
+                    var nex = HandleSqlException(ex);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -230,7 +272,24 @@ namespace Signum.Engine
             }
         }
 
-        private Exception HandleException(SqlException ex)
+        public Exception HandleSqlTypeException(SqlTypeException ex, SqlPreCommandSimple command)
+        {
+            if (ex.Message.Contains("DateTime"))
+            {
+                var mins = command.Parameters.Where(a => DateTime.MinValue.Equals(a.Value));
+
+                if(mins.Any())
+                {
+                    return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".Formato(
+                        mins.CommaAnd(a=>a.ParameterName),
+                        mins.Count() == 1 ? "is": "are"), ex);
+                }
+            }
+
+            return ex;
+        }
+
+        private Exception HandleSqlException(SqlException ex)
         {
             switch (ex.Number)
             {
