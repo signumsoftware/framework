@@ -80,7 +80,7 @@ namespace Signum.Engine.Authorization
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
 
-            if (TypeAuthLogic.GetAllowed(route.RootType).Max().GetUI() == TypeAllowedBasic.None)
+            if (TypeAuthLogic.GetAllowed(route.RootType).Max().Get(ExecutionContext.Current == ExecutionContext.UserInterface) == TypeAllowedBasic.None)
                 return PropertyAllowed.None;
 
             return cache.GetAllowed(RoleDN.Current.ToLite(), route);
