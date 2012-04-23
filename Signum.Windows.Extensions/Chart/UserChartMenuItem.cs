@@ -34,13 +34,9 @@ namespace Signum.Windows.Chart
 
         public ChartWindow ChartWindow { get; set; }
 
-        TypeAllowedBasic tab; 
-
         public UserChartMenuItem()
         {
-            tab = TypeAuthClient.GetAllowed(typeof(UserChartDN)).Max().GetUI();
-
-            if (tab < TypeAllowedBasic.Read)
+            if (!Navigator.IsViewable(typeof(UserChartDN), true))
                 Visibility = System.Windows.Visibility.Hidden;
 
             this.Loaded += new RoutedEventHandler(UserChartMenuItem_Loaded);
@@ -114,7 +110,7 @@ namespace Signum.Windows.Chart
 
             Items.Add(new Separator());
 
-            if (tab == TypeAllowedBasic.Create)
+            if (Navigator.IsCreable(typeof(UserChartDN),  true))
             {
                 Items.Add(new MenuItem()
                 {

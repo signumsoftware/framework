@@ -244,8 +244,7 @@ namespace Signum.Web.Chart
 
         public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {
-            var allowed = TypeAuthLogic.GetAllowed(typeof(UserChartDN)).Max().GetUI();
-            if (allowed < TypeAllowedBasic.Read)
+            if (!Navigator.IsViewable(typeof(UserChartDN), EntitySettingsContext.Admin))
                 return null;
             
             var items = new List<ToolBarButton>();
@@ -257,11 +256,10 @@ namespace Signum.Web.Chart
 
             foreach (var uc in ChartLogic.GetUserCharts(queryName))
             {
-                string ucName = uc.InDB().Select(q => q.DisplayName).SingleOrDefaultEx();
                 items.Add(new ToolBarButton
                 {
-                    Text = ucName,
-                    AltText = ucName,
+                    Text = uc.ToString(),
+                    AltText = uc.ToString(),
                     Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc)),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
                 });
@@ -270,7 +268,7 @@ namespace Signum.Web.Chart
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
-            if (allowed == TypeAllowedBasic.Create)
+            if (Navigator.IsCreable(typeof(UserChartDN), EntitySettingsContext.Admin))
             {
                 string uqNewText = Resources.UserChart_CreateNew;
                 items.Add(new ToolBarButton

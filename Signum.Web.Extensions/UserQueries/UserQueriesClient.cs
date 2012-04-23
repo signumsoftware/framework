@@ -122,8 +122,8 @@ namespace Signum.Web.UserQueries
             if (ctx.Prefix.HasText())
                 return null;
 
-            var allowed = TypeAuthLogic.GetAllowed(typeof(UserQueryDN)).Max().GetUI();
-            if (allowed < TypeAllowedBasic.Read)
+
+            if (!Navigator.IsViewable(typeof(UserQueryDN), EntitySettingsContext.Admin))
                 return null;
 
             var items = new List<ToolBarButton>();
@@ -135,11 +135,10 @@ namespace Signum.Web.UserQueries
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName))
             {
-                string uqName = uq.InDB().Select(q => q.DisplayName).SingleOrDefaultEx();
                 items.Add(new ToolBarButton
                 {
-                    Text = uqName,
-                    AltText = uqName,
+                    Text = uq.ToString(),
+                    AltText = uq.ToString(),
                     Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq)),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });
@@ -148,7 +147,7 @@ namespace Signum.Web.UserQueries
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
-            if (allowed == TypeAllowedBasic.Create)
+            if (Navigator.IsCreable(typeof(UserQueryDN), EntitySettingsContext.Admin))
             {
                 string uqNewText = Resources.UserQueries_CreateNew;
                 items.Add(new ToolBarButton
