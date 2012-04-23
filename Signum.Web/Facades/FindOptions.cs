@@ -154,8 +154,10 @@ namespace Signum.Web
                 AllowMultiple.HasValue ? "allowMultiple=" + AllowMultiple.ToString() : null,
                 !AllowChangeColumns ? "allowChangeColumns=false" : null,
                 FilterMode != FilterMode.Visible ? "filterMode=" + FilterMode.ToString() : null,
-                (FilterOptions != null && FilterOptions.Count > 0) ? ("filters=" + FilterOptions.ToString(fo => fo.ToString(), ";") + ";") : null,
-                (OrderOptions != null && OrderOptions.Count > 0) ? ("orders=" + OrderOptions.ToString(oo => (oo.OrderType == OrderType.Descending ? "-" : "") + oo.ColumnName, ";") + ";") : null
+                (FilterOptions != null && FilterOptions.Count > 0) ? ("filters=" + FilterOptions.ToString(";") + ";") : null,
+                (OrderOptions != null && OrderOptions.Count > 0) ? ("orders=" + OrderOptions.ToString(";") + ";") : null,
+                (ColumnOptions != null && ColumnOptions.Count > 0) ? ("columns=" + ColumnOptions.ToString(";") + ";") : null, 
+                (ColumnOptionsMode != ColumnOptionsMode.Add ? ColumnOptionsMode.ToString().SingleQuote() : null)
             }.NotNull().ToString("&");
 
             if (options.HasText())
@@ -174,7 +176,9 @@ namespace Signum.Web
             op.Add("create", !Create ? "false" : null);
             op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
             op.Add("allowChangeColumns", !AllowChangeColumns ? "false" : null);
-            op.Add("filters", filterOptions.IsEmpty() ? null : (filterOptions.ToString(fo => fo.ToString(), ";") + ";").SingleQuote());
+            op.Add("filters", filterOptions.IsEmpty() ? null : (filterOptions.ToString(";") + ";").SingleQuote());
+            op.Add("orders", OrderOptions.IsEmpty() ? null : (OrderOptions.ToString(";") + ";").SingleQuote());
+            op.Add("columns", ColumnOptions.IsEmpty() ? null : (ColumnOptions.ToString(";") + ";").SingleQuote()); 
             op.Add("columnMode", ColumnOptionsMode != ColumnOptionsMode.Add ? ColumnOptionsMode.ToString().SingleQuote() : null);
         }
 
@@ -335,6 +339,11 @@ namespace Signum.Web
         {
             return new Order(Token, OrderType);
         }
+
+        public override string ToString()
+        {
+            return OrderType == OrderType.Descending ? "-" : "" + ColumnName;
+        }
     }
 
     public enum FilterMode
@@ -363,6 +372,11 @@ namespace Signum.Web
         {
             var token = QueryUtils.Parse(ColumnName, qd);
             return new Column(token, DisplayName.DefaultText(token.NiceName()));
+        }
+
+        public override string ToString()
+        {
+            return DisplayName.HasText() ? "{0},{1}".Formato(ColumnName, DisplayName) : ColumnName;
         }
     }  
 }
