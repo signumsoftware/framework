@@ -83,7 +83,10 @@ namespace Signum.Entities.DynamicQuery
             if (parent == null)
                 return null;
 
-            return parent.Add("Item");
+            if (parent.Type.ElementType() != null)
+                return parent.Add("Item");
+
+            return parent; 
         }
 
         public override string NiceName()
