@@ -6,7 +6,7 @@
 @model Context
 
 @{ 
-   int? elems = (int?)ViewData[ViewDataKeys.ElementsPerPage];
+   int elems = (int)ViewData[ViewDataKeys.ElementsPerPage];
    FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
    int columnsCount = (int)ViewData[ViewDataKeys.SearchControlColumnsCount];
 
@@ -33,7 +33,7 @@
             <span>@Resources.SearchControl_Pagination_Rows</span>
             @{ 
                 var topItems = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i.ToString() == elems.TryToString() }).ToList();
-                topItems.Add(new SelectListItem { Text = Resources.SearchControl_Pagination_All, Value = "", Selected = elems == null });
+                topItems.Add(new SelectListItem { Text = Resources.SearchControl_Pagination_All, Value = "-1", Selected = elems == -1 });
             }
             @Html.DropDownList(Model.Compose("sfElems"), topItems, new { @class = "sf-pagination-size" })
         </div>

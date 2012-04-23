@@ -115,6 +115,19 @@ namespace Signum.Windows
             }
         }
 
+        public static void ExecuteNoRetryOnSessionExpired<S>(Action<S> action)
+            where S : class
+        {
+            S server = current as S;
+            if (server == null)
+                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(server.GetType(), typeof(S)));
+
+            using (HeavyProfiler.Log("WCFClient", "{0}".Formato(typeof(S).TypeName())))
+            {
+                action(server);
+            }
+        }
+
         static void HandleSessionException(MessageSecurityException e)
         {
             MessageBox.Show(Properties.Resources.SessionExpired, Properties.Resources.SessionExpired, MessageBoxButton.OK, MessageBoxImage.Hand);

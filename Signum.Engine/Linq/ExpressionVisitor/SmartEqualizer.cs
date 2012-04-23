@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
             if (exp1.NodeType == ExpressionType.New && exp2.NodeType == ExpressionType.New)
             {
                 return (exp1 as NewExpression).Arguments.ZipStrict(
-                       (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).Aggregate((a, b) => Expression.And(a, b));
+                       (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).AggregateAnd();
             }
 
             Expression result;
@@ -178,7 +178,7 @@ namespace Signum.Engine.Linq
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy) return TypeIbIbEquals((TypeImplementedByExpression)exp1, (TypeImplementedByExpression)exp2);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll) return TypeIbIbaEquals((TypeImplementedByExpression)exp1, (TypeImplementedByAllExpression)exp2);
             }
-            else if (exp1.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
+            else if (exp1.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
             {
                 if (exp2.NodeType == ExpressionType.Constant) return TypeConstantIbaEquals((ConstantExpression)exp2, (TypeImplementedByAllExpression)exp1);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeFieldInit) return TypeFieIbaEquals((TypeFieldInitExpression)exp2, (TypeImplementedByAllExpression)exp1);
@@ -204,10 +204,7 @@ namespace Signum.Engine.Linq
         {
             if (ce.IsNull())
             {
-                if (typeIb.TypeImplementations.IsEmpty())
-                    return True;
-
-                return typeIb.TypeImplementations.Select(imp => EqualsToNull(imp.ExternalId)).Aggregate(Expression.And);
+                return typeIb.TypeImplementations.Select(imp => EqualsToNull(imp.ExternalId)).AggregateAnd();
             }
 
             Type type = (Type)ce.Value;
@@ -277,19 +274,15 @@ namespace Signum.Engine.Linq
             var joins = (from imp1 in typeIb1.TypeImplementations
                          join imp2 in typeIb2.TypeImplementations on imp1.Type equals imp2.Type
                          select Expression.And(new IsNotNullExpression(imp1.ExternalId), new IsNotNullExpression(imp2.ExternalId))).ToList();
- 
-            if(joins.IsEmpty())
-                return False;
 
-            return joins.Aggregate(Expression.Or);
+            return joins.AggregateOr();
         }
 
         private static Expression TypeIbIbaEquals(TypeImplementedByExpression typeIb, TypeImplementedByAllExpression typeIba)
         {
-            if (typeIb.TypeImplementations.IsEmpty())
-                return False;
-
-            return typeIb.TypeImplementations.Select(imp => Expression.And(new IsNotNullExpression(imp.ExternalId), EqualNullable(typeIba.TypeColumn, QueryBinder.TypeConstant(imp.Type)))).Aggregate(Expression.Or);
+            return typeIb.TypeImplementations
+                .Select(imp => Expression.And(new IsNotNullExpression(imp.ExternalId), EqualNullable(typeIba.TypeColumn, QueryBinder.TypeConstant(imp.Type))))
+                .AggregateOr();
         }
 
         internal static Expression TypeIn(Expression typeExpr, IEnumerable<Type> collection)
@@ -318,11 +311,8 @@ namespace Signum.Engine.Linq
             {
                 var typeIb = (TypeImplementedByExpression)typeExpr;
 
-                if (typeIb.TypeImplementations.IsEmpty())
-                    return False;
-
                 return typeIb.TypeImplementations.Where(imp => collection.Contains(imp.Type))
-                    .Select(imp => (Expression)new IsNotNullExpression(imp.ExternalId)).Aggregate(Expression.Or);
+                    .Select(imp => (Expression)new IsNotNullExpression(imp.ExternalId)).AggregateOr();
             }
 
             if (typeExpr.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
@@ -373,15 +363,15 @@ namespace Signum.Engine.Linq
 
             ImplementedByExpression ib = newItem as ImplementedByExpression;
             if (ib != null)
-                return ib.Implementations.ToDictionary(a => a.Type, a => a.Field).JoinDictionary(entityIDs, (t, f, values) => Expression.And(
-                    new IsNotNullExpression(f.ExternalId),
-                    InExpression.FromValues(f.ExternalId, values))).Values.Aggregate((a, b) => Expression.Or(a, b));
+                return ib.Implementations.ToDictionary(a => a.Type, a => a.Field).JoinDictionary(entityIDs,
+                    (t, f, values) => Expression.And(new IsNotNullExpression(f.ExternalId), InExpression.FromValues(f.ExternalId, values)))
+                    .Values.AggregateOr();
 
             ImplementedByAllExpression iba = newItem as ImplementedByAllExpression;
             if (iba != null)
                 return entityIDs.Select(kvp => Expression.And(
                     EqualNullable(QueryBinder.TypeConstant(kvp.Key), iba.TypeId.TypeColumn),
-                    InExpression.FromValues(iba.Id, kvp.Value))).Aggregate((a, b) => Expression.Or(a, b));
+                    InExpression.FromValues(iba.Id, kvp.Value))).AggregateOr();
 
             throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".Formato(newItem.Type.Name));
         }
@@ -425,7 +415,7 @@ namespace Signum.Engine.Linq
                 if (tE2 == DbExpressionType.FieldInit) return FieIbEquals((FieldInitExpression)e2, (ImplementedByExpression)e1);
                 else if (tE2 == DbExpressionType.ImplementedBy) return IbIbEquals((ImplementedByExpression)e1, (ImplementedByExpression)e2);
                 else if (tE2 == DbExpressionType.ImplementedByAll) return IbIbaEquals((ImplementedByExpression)e1, (ImplementedByAllExpression)e2);
-                else if (e2.IsNull()) return ((ImplementedByExpression)e1).Implementations.Select(a => EqualsToNull(a.Field.ExternalId)).Aggregate((a, b) => Expression.And(a, b));
+                else if (e2.IsNull()) return ((ImplementedByExpression)e1).Implementations.Select(a => EqualsToNull(a.Field.ExternalId)).AggregateAnd();
                 else return null;
             else if (tE1 == DbExpressionType.ImplementedByAll)
                 if (tE2 == DbExpressionType.FieldInit) return FieIbaEquals((FieldInitExpression)e2, (ImplementedByAllExpression)e1);
@@ -435,7 +425,7 @@ namespace Signum.Engine.Linq
                 else return null;
             else if (e1.IsNull())
                 if (tE2 == DbExpressionType.FieldInit) return EqualsToNull(((FieldInitExpression)e2).ExternalId);
-                else if (tE2 == DbExpressionType.ImplementedBy) return ((ImplementedByExpression)e2).Implementations.Select(a => EqualsToNull(a.Field.ExternalId)).Aggregate((a, b) => Expression.And(a, b));
+                else if (tE2 == DbExpressionType.ImplementedBy) return ((ImplementedByExpression)e2).Implementations.Select(a => EqualsToNull(a.Field.ExternalId)).AggregateAnd();
                 else if (tE2 == DbExpressionType.ImplementedByAll) return EqualsToNull(((ImplementedByAllExpression)e2).Id);
                 else if (e2.IsNull()) return True;
                 else return null;
@@ -476,9 +466,8 @@ namespace Signum.Engine.Linq
         static Expression IbIbEquals(ImplementedByExpression ib, ImplementedByExpression ib2)
         {
             var list = ib.Implementations.Join(ib2.Implementations, i => i.Type, j => j.Type, (i, j) => EqualNullable(i.Field.ExternalId, j.Field.ExternalId)).ToList();
-            if(list.Count == 0)
-                return False;
-            return list.Aggregate((e1, e2) => Expression.Or(e1, e2));
+
+            return list.AggregateOr();
         }
 
         static Expression IbIbaEquals(ImplementedByExpression ib, ImplementedByAllExpression iba)
@@ -487,10 +476,7 @@ namespace Signum.Engine.Linq
                 EqualNullable(iba.Id, i.Field.ExternalId),
                 EqualNullable(iba.TypeId.TypeColumn, QueryBinder.TypeConstant(i.Field.Type)))).ToList();
 
-            if (list.Count == 0)
-                return False;
-
-            return list.Aggregate((e1, e2) => Expression.Or(e1, e2));
+            return list.AggregateOr();
         }
 
 

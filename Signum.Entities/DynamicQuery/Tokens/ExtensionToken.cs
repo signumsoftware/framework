@@ -46,7 +46,7 @@ namespace Signum.Entities.DynamicQuery
         public override string Unit { get { return unit; } }
 
         Type type;
-        public override Type Type { get { return BuildLite(type).Nullify(); } }
+        public override Type Type { get { return type.BuildLite().Nullify(); } }
 
         string key;
         public override string Key { get { return key; } }
@@ -63,9 +63,9 @@ namespace Signum.Entities.DynamicQuery
             if (BuildExtension == null)
                 throw new InvalidOperationException("ExtensionToken.BuildExtension not set");
 
-            var result = BuildExtension(Parent.Type.CleanType(), Key, ExtractEntity(Parent.BuildExpression(context), false));
+            var result = BuildExtension(Parent.Type.CleanType(), Key, Parent.BuildExpression(context).ExtractEntity(false));
 
-            return BuildLite(result).Nullify();
+            return result.BuildLite().Nullify();
         }
 
         public PropertyRoute propertyRoute;

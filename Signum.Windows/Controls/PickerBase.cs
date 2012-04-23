@@ -85,7 +85,7 @@ namespace Signum.Windows
             if (e.NewValue != null)base.AddLogicalChild(e.NewValue);
         }
 
-        ToggleButton toggleButton;
+        internal ToggleButton toggleButton;
         Popup popup; 
         public override void OnApplyTemplate()
         {

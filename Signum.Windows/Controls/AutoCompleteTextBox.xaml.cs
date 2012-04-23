@@ -11,6 +11,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Media;
 using Signum.Utilities;
+using System.Windows.Automation.Peers;
+using System.Collections.Generic;
+using System.Windows.Automation.Provider;
 
 namespace Signum.Windows
 {
@@ -68,7 +71,7 @@ namespace Signum.Windows
             delayTimer.Tick += new EventHandler(delayTimer_Tick);
         }
 
-        void delayTimer_Tick(object sender, EventArgs e)
+        public void delayTimer_Tick(object sender, EventArgs e)
         {
             delayTimer.Stop();
 
@@ -281,6 +284,62 @@ namespace Signum.Windows
         //{
         //    Console.WriteLine("Lost");
         //}
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new AutoCompleteAutomationPeer(this);
+        }
+
+    }
+
+    public class AutoCompleteAutomationPeer : UserControlAutomationPeer, IValueProvider
+    {
+        public AutoCompleteAutomationPeer(AutoCompleteTextBox ac)
+            : base(ac)
+        {
+        }
+
+        protected override List<AutomationPeer> GetChildrenCore()
+        {
+            List<AutomationPeer> childrenCore = new List<AutomationPeer>();
+            AutoCompleteTextBox owner = (AutoCompleteTextBox)base.Owner;
+            if (owner.pop.IsOpen)
+            {
+                AutomationPeer item = UIElementAutomationPeer.CreatePeerForElement(owner.lstBox);
+                if (item == null)
+                    return childrenCore;
+
+                childrenCore.Add(item);
+            }
+            return childrenCore;
+        }
+
+        public override object GetPattern(PatternInterface patternInterface)
+        {
+            if (patternInterface == PatternInterface.Value)
+                return this;
+
+            return base.GetPattern(patternInterface);
+        }
+
+        public bool IsReadOnly
+        {
+            get { return !((AutoCompleteTextBox)base.Owner).IsEnabled; }
+        }
+
+        public void SetValue(string value)
+        {
+            AutoCompleteTextBox ac = ((AutoCompleteTextBox)base.Owner);
+            ac.Text = value;
+            ac.delayTimer_Tick(null, null);
+            if (ac.AllowFreeText && ac.lstBox.Items.Count == 0)
+                ac.Close(CloseReason.LostFocus);
+        }
+
+        public string Value
+        {
+            get { return ((AutoCompleteTextBox)base.Owner).Text; }
+        }
     }
 
     public enum CloseReason

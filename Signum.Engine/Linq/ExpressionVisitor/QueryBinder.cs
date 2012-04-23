@@ -334,8 +334,7 @@ namespace Signum.Engine.Linq
                 Type oType = predicate.Parameters[0].Type;
                 Expression[] exp = ((IEnumerable)constSource.Value).Cast<object>().Select(o => Expression.Invoke(predicate, Expression.Constant(o, oType))).ToArray();
 
-                Expression where = isAll ? (exp.IsEmpty() ? SmartEqualizer.True : exp.Aggregate((a, b) => Expression.And(a, b))) :
-                                           (exp.IsEmpty() ? SmartEqualizer.False : exp.Aggregate((a, b) => Expression.Or(a, b)));
+                Expression where = isAll ? exp.AggregateAnd() : exp.AggregateOr();
 
                 return this.Visit(where);
             }
@@ -562,7 +561,7 @@ namespace Signum.Engine.Linq
 
             Expression subqueryCorrelation = keyPC.Columns.IsEmpty() ? null : 
                 keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullableGroupBy(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
-                    .Aggregate((a, b) => Expression.And(a, b));
+                    .AggregateAnd();
 
             // build subquery that projects the desired element
             Alias elementAlias = NextSelectAlias();
@@ -1203,10 +1202,7 @@ namespace Signum.Engine.Linq
 
                 FieldInitExpression[] fies = ib.Implementations.Where(imp => b.TypeOperand.IsAssignableFrom(imp.Type)).Select(imp=>imp.Field).ToArray();
 
-                if (fies.IsEmpty())
-                    return Expression.Constant(false);
-
-                return fies.Select(f => (Expression)Expression.NotEqual(f.ExternalId.Nullify(), NullId)).Aggregate((f1, f2) => Expression.Or(f1, f2));
+                return fies.Select(f => (Expression)Expression.NotEqual(f.ExternalId.Nullify(), NullId)).AggregateOr();
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
@@ -1386,11 +1382,14 @@ namespace Signum.Engine.Linq
         {
             ProjectionExpression pr = VisitCastProjection(source);
 
-            MemberInitExpression mie = (MemberInitExpression)set.Body;
             ParameterExpression param = set.Parameters[0];
 
+            List<ColumnAssignment> assignments = new List<ColumnAssignment>();
+
             map.Add(param, pr.Projector);
-            List<ColumnAssignment> assigments = mie.Bindings.SelectMany(m => ColumnAssigments(param, m)).ToList();
+
+            FillColumnAssigments(assignments, param, set.Body);
+
             map.Remove(param);
 
             pr = ApplyExpansions(pr);
@@ -1421,9 +1420,48 @@ namespace Signum.Engine.Linq
 
             return new CommandAggregateExpression(new CommandExpression[]
             { 
-                new UpdateExpression(table, pr.Select, condition, assigments),
+                new UpdateExpression(table, pr.Select, condition, assignments),
                 new SelectRowCountExpression()
             });
+        }
+
+        static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => Administrator.SetReadonly(null, (IdentifiableEntity a) => a.Id, 1)).GetGenericMethodDefinition();
+
+        public void FillColumnAssigments(List<ColumnAssignment> assignments, Expression param, Expression body)
+        {
+            if (body is MethodCallExpression)
+            {
+                var mce = (MethodCallExpression)body;
+
+                if (!mce.Method.IsInstantiationOf(miSetReadonly))
+                    throw InvalidBody();
+
+                var prev = mce.Arguments[0];
+                if (prev.NodeType != ExpressionType.New)
+                    FillColumnAssigments(assignments, param, prev);
+
+                var pi = ReflectionTools.BasePropertyInfo(mce.Arguments[1].StripQuotes());
+
+                Expression colExpression = Visit(Expression.MakeMemberAccess(param, Reflector.FindFieldInfo(body.Type, pi)));
+                Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
+                Expression expression = Visit(cleaned);
+                assignments.AddRange(Assign(colExpression, expression));
+
+            }
+            else if (body is MemberInitExpression)
+            {
+                var mie = (MemberInitExpression)body;
+                assignments.AddRange(mie.Bindings.SelectMany(m => ColumnAssigments(param, m)));
+
+            }else
+            {
+                throw InvalidBody();
+            }
+        }
+
+        private Exception InvalidBody()
+        {
+            throw new InvalidOperationException("The only allowed expressions on UnsafeUpdate are: object initializers, or calling Administrator.SetReadonly");
         }
 
         private ColumnAssignment[] ColumnAssigments(Expression obj, MemberBinding m)

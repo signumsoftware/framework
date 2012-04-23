@@ -14,7 +14,7 @@
             <button id="@Model.Compose("ebSave")" class="sf-entity-button sf-save" @(ViewData[ViewDataKeys.OnSave] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnSave] + "\"") : null)>
                 @Resources.Save</button>                
         }
-        @ButtonBarEntityHelper.GetForEntity(new ToolBarButtonContext
+        @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         { 
            Buttons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
            ControllerContext = this.ViewContext,
@@ -24,7 +24,7 @@
     </div>
     @Html.ValidationSummaryAjax(Model)
     @Html.PopupHeader()
-    <div id="@Model.Compose("divMainControl")" class="sf-main-control">
+    <div id="@Model.Compose("divMainControl")" class="sf-main-control" data-prefix="@Model.ControlID">
         @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
     </div>
 </div>

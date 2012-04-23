@@ -20,6 +20,7 @@ using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -127,13 +128,10 @@ namespace Signum.Windows
 
         public static readonly DependencyProperty DelayedRoutesProperty =
             DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
-
-
         public static bool GetDelayedRoutes(DependencyObject obj)
         {
             return (bool)obj.GetValue(DelayedRoutesProperty);
         }
-
         public static void SetDelayedRoutes(DependencyObject obj, bool value)
         {
             obj.SetValue(DelayedRoutesProperty, value);
@@ -268,6 +266,7 @@ namespace Signum.Windows
             RouteTask += TaskSetImplementations;
             RouteTask += TaskSetCollaspeIfNull;
             RouteTask += TaskSetNotNullItemsSource;
+            RouteTask += TaskSetAutomationItemStatus;
 
             LabelOnlyRouteTask += TaskSetLabelText;
 
@@ -276,6 +275,7 @@ namespace Signum.Windows
             ColumnRouteTask += TaskColumnSetReadOnly;
             ColumnLabelOnlyRouteTask += TaskColumnSetLabelText;
         }
+
 
         static void TaskColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
         {
@@ -474,6 +474,14 @@ namespace Signum.Windows
             }
         }
 
+        static void TaskSetAutomationItemStatus(FrameworkElement fe, string route, PropertyRoute context)
+        {
+            if (fe.NotSet(AutomationProperties.ItemStatusProperty))
+            {
+                AutomationProperties.SetItemStatus(fe, context.TryToString() ?? "");
+            }
+        }
+
         #endregion
 
         public static readonly RoutedEvent ChangeDataContextEvent = EventManager.RegisterRoutedEvent("ChangeDataContext", RoutingStrategy.Bubble, typeof(ChangeDataContextHandler), typeof(Common));
@@ -484,23 +492,6 @@ namespace Signum.Windows
         public static void RemoveChangeDataContextHandler(DependencyObject d, ChangeDataContextHandler handler)
         {
             ((UIElement)d).RemoveHandler(ChangeDataContextEvent, handler);
-        }
-
-        public static readonly DependencyProperty CurrentWindowProperty =
-            DependencyProperty.RegisterAttached("CurrentWindow", typeof(Window), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
-        public static Window GetCurrentWindow(DependencyObject obj)
-        {
-            return (Window)obj.GetValue(CurrentWindowProperty);
-        }
-        public static void SetCurrentWindow(DependencyObject obj, Window value)
-        {
-            obj.SetValue(CurrentWindowProperty, value);
-        }
-
-        public static Window FindCurrentWindow(this FrameworkElement fe)
-        {
-            return fe.FollowC(a => (FrameworkElement)(a.Parent ?? a.TemplatedParent))
-                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().FirstEx(() => "Parent window not found");
         }
 
         public static IDisposable OverrideCursor(System.Windows.Input.Cursor cursor)

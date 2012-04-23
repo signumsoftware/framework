@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Windows;
 using System.Globalization;
 using Signum.Utilities;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -60,7 +61,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty TimeSpanConverterProperty =
-            DependencyProperty.Register("TimeSpanConverter", typeof(TimeSpanConverter), typeof(TimePicker), new UIPropertyMetadata(TimeSpanConverter.Minutes));
+            DependencyProperty.Register("TimeSpanConverter", typeof(TimeSpanConverter), typeof(TimePicker), new UIPropertyMetadata(TimeSpanConverter.Minutes, (s,e)=>((TimePicker)s).OnConverterChanged(e.NewValue)));
         public TimeSpanConverter TimeSpanConverter
         {
             get { return (TimeSpanConverter)GetValue(TimeSpanConverterProperty); }
@@ -73,6 +74,11 @@ namespace Signum.Windows
         {
             get { return (TimeSpan?)GetValue(TimePartProperty); }
             set { SetValue(TimePartProperty, value); }
+        }
+
+        private void OnConverterChanged(object converter)
+        {
+            AutomationProperties.SetItemStatus(this, ((TimeSpanConverter)converter).TryCC(c => c.Format));
         }
 
         private void TimePartChanged(DependencyPropertyChangedEventArgs e)

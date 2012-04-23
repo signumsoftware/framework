@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -30,6 +31,8 @@ namespace Signum.Windows
         private void SetTokens(QueryToken token)
         {
             itemsControl.ItemsSource = token.FollowC(a => a.Parent).Reverse().ToArray();
+
+            AutomationProperties.SetHelpText(this, token.FullKey());
         }
      
         public QueryTokenRenderer()

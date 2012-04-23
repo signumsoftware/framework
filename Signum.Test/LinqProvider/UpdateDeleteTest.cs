@@ -228,6 +228,18 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
         [TestMethod]
+        public void UpdateFieSetReadonly()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                LabelDN label = Database.Query<LabelDN>().FirstEx();
+
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN().SetReadonly(al => al.Label, label));
+                //tr.Commit();
+            }
+        }
+
+        [TestMethod]
         public void UpdateFieToLite()
         {
             using (Transaction tr = new Transaction())

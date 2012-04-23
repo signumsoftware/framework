@@ -24,7 +24,7 @@
                 <ComboBoxItem Content="50" Tag="50"/>
                 <ComboBoxItem Content="100" Tag="100"/>
                 <ComboBoxItem Content="200" Tag="200"/>
-                <ComboBoxItem Content="{m:Loc All}" Tag="{x:Null}"/>
+                <ComboBoxItem Content="{m:Loc All}" Tag="-1"/>
             </ComboBox.Items>
         </ComboBox>
     </StackPanel>

@@ -151,6 +151,7 @@ SF.registerModule("Validator", function () {
                     if (controlID != this.globalErrorsKey && controlID != "") {
                         var $control = $('#' + controlID);
                         $control.addClass(this.inputErrorClass);
+                        $('#' + SF.compose(controlID, SF.Keys.toStr) + ',#' + SF.compose(controlID, SF.Keys.link)).addClass(this.inputErrorClass);
                         if (this.valOptions.showInlineErrors && $control.hasClass(this.inlineErrorVal)) {
                             if ($control.next().hasClass("ui-datepicker-trigger")) {
                                 if (SF.isEmpty(fixedInlineErrorText)) {

@@ -17,6 +17,8 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Signum.Entities.DynamicQuery;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -73,10 +75,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ElementsPerPageProperty =
-          DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchWindow), new UIPropertyMetadata(200));
-        public int? ElementsPerPage
+          DependencyProperty.Register("ElementsPerPage", typeof(int), typeof(SearchWindow), new UIPropertyMetadata(QueryRequest.AllElements));
+        public int ElementsPerPage
         {
-            get { return (int?)GetValue(ElementsPerPageProperty); }
+            get { return (int)GetValue(ElementsPerPageProperty); }
             set { SetValue(ElementsPerPageProperty, value); }
         }
 
@@ -194,6 +196,8 @@ namespace Signum.Windows
                 niceQueryName = "- " + niceQueryName;
 
             tbQueryName.Text = niceQueryName;
+
+            AutomationProperties.SetItemStatus(this, QueryUtils.GetQueryUniqueKey(QueryName));
         }
 
         void ButtonsChanged()
@@ -247,6 +251,7 @@ namespace Signum.Windows
         void searchControl_DoubleClick()
         {
             OkAndClose();
+            
         }
     }
 

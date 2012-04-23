@@ -24,6 +24,8 @@ using System.Windows.Documents;
 using Signum.Windows.DynamicQuery;
 using System.Diagnostics;
 using System.Collections.Specialized;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -88,10 +90,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ElementsPerPageProperty =
-            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(null, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
-        public int? ElementsPerPage
+            DependencyProperty.Register("ElementsPerPage", typeof(int), typeof(SearchControl), new UIPropertyMetadata(QueryRequest.AllElements, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
+        public int ElementsPerPage
         {
-            get { return (int?)GetValue(ElementsPerPageProperty); }
+            get { return (int)GetValue(ElementsPerPageProperty); }
             set { SetValue(ElementsPerPageProperty, value); }
         }
 
@@ -328,11 +330,6 @@ namespace Signum.Windows
 
         ColumnDescription entityColumn;
 
-        private static ColumnInfo GetColumnInfo(GridViewColumn gvc)
-        {
-            return (ColumnInfo)((GridViewColumnHeader)gvc.Header).Tag;
-        }
-
         ResultTable resultTable;
         public ResultTable ResultTable { get { return resultTable; } }
         public QuerySettings Settings { get; private set; }
@@ -393,7 +390,7 @@ namespace Signum.Windows
 
             Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
 
-            CompleteOrderColumns();
+            SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
             if (IsVisible)
             {
@@ -406,6 +403,8 @@ namespace Signum.Windows
                 IsVisibleChanged += SearchControl_IsVisibleChanged;
 
             UpdateVisibility();
+
+            AutomationProperties.SetItemStatus(this, QueryUtils.GetQueryUniqueKey(QueryName));
         }
 
 
@@ -426,23 +425,6 @@ namespace Signum.Windows
             btCreateFilter.ToolTip = canFilter;
 
             return QueryUtils.SubTokens(arg, Description.Columns);
-        }
-
-        private void CompleteOrderColumns()
-        {
-            for (int i = 0; i < OrderOptions.Count; i++)
-            {
-                OrderOption oo = OrderOptions[i];
-
-                var fullKey = oo.Token.FullKey();
-                
-                GridViewColumnHeader header = gvResults.Columns
-                    .Select(c => (GridViewColumnHeader)c.Header)
-                    .FirstOrDefault(c => ((ColumnInfo)c.Tag).Column.Name == fullKey);
-
-                if (header != null)
-                    oo.ColumnOrderInfo = new ColumnOrderInfo(header, oo.OrderType, i);
-            }
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
@@ -536,11 +518,11 @@ namespace Signum.Windows
         {
             GridViewColumn gvc = new GridViewColumn
             {
-                Header = new GridViewColumnHeader
+                Header = new SortGridViewColumnHeader
                 {
                     Content = col.DisplayName,
-                    Tag = new ColumnInfo(col),
-                    ContextMenu = (ContextMenu)FindResource("contextMenu")
+                    ContextMenu = (ContextMenu)FindResource("contextMenu"),
+                    RequestColumn = col,
                 },
             };
             gvResults.Columns.Add(gvc);
@@ -601,7 +583,7 @@ namespace Signum.Windows
                 QueryName = QueryName,
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
-                Columns = gvResults.Columns.Select(gvc => GetColumnInfo(gvc).Column).ToList(),
+                Columns = gvResults.Columns.Select(gvc => ((SortGridViewColumnHeader)gvc.Header).RequestColumn).ToList(),
                 ElementsPerPage = ElementsPerPage,
                 CurrentPage = CurrentPage,
             };
@@ -625,14 +607,14 @@ namespace Signum.Windows
         {
             gvResults.Columns.ZipForeach(resultTable.Columns, (gvc, rc) =>
             {
-                var ci = GetColumnInfo(gvc);
+                var header = (SortGridViewColumnHeader)gvc.Header;
 
-                Debug.Assert(rc.Column.Token.Equals(ci.Column.Token));
+                Debug.Assert(rc.Column.Token.Equals(header.RequestColumn.Token));
 
-                if (ci.ResultColumn == null || ci.ResultColumn.Index != rc.Index)
+                if (header.ResultColumn == null || header.ResultColumn.Index != rc.Index)
                     gvc.CellTemplate = CreateDataTemplate(rc);
 
-                ci.ResultColumn = rc; 
+                header.ResultColumn = rc; 
             });             
 
             lvResult.ItemsSource = resultTable.Rows;
@@ -730,7 +712,7 @@ namespace Signum.Windows
             else if (Implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
             else
-                return Navigator.SelectType(this.FindCurrentWindow(), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+                return Navigator.SelectType(Window.GetWindow(this), ((ImplementedByAttribute)Implementations).ImplementedTypes);
         }
 
 
@@ -739,7 +721,7 @@ namespace Signum.Windows
             if (!Create)
                 return;
 
-            IdentifiableEntity result = Creating == null ? (IdentifiableEntity)Constructor.Construct(SelectType(), this.FindCurrentWindow()) : Creating();
+            IdentifiableEntity result = Creating == null ? (IdentifiableEntity)Constructor.Construct(SelectType(), Window.GetWindow(this)) : Creating();
 
             if (result == null)
                 return;
@@ -790,69 +772,37 @@ namespace Signum.Windows
 
         void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
         {
-            GridViewColumnHeader header = (GridViewColumnHeader)sender;
-            ColumnInfo ci = (ColumnInfo)header.Tag;
+            SortGridViewColumnHeader header = sender as SortGridViewColumnHeader;
 
-            if (ci == null)
+            if (header == null)
                 return;
 
-            string canOrder = QueryUtils.CanOrder(ci.Column.Token);
+            string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);
             if (canOrder.HasText())
             {
                 MessageBox.Show(canOrder);
                 return; 
             }
 
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (OrderOptions.Count == 1 && OrderOptions[0].ColumnOrderInfo.TryCC(coi=>coi.Header) == header))
-            {
-
-            }
-            else
-            {
-                foreach (var oo in OrderOptions)
-                {
-                    if (oo.ColumnOrderInfo != null)
-                        oo.ColumnOrderInfo.CleanAdorner();
-                }
-
-                OrderOptions.Clear();
-            }
-
-            OrderOption order = OrderOptions.SingleOrDefaultEx(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
-            if (order != null)
-            {
-                order.ColumnOrderInfo.FlipAdorner();
-                order.OrderType = order.ColumnOrderInfo.OrderType;
-            }
-            else
-            {
-                OrderOptions.Add(new OrderOption()
-                {
-                    Token = ci.Column.Token,
-                    OrderType = OrderType.Ascending,
-                    ColumnOrderInfo = new ColumnOrderInfo(header, OrderType.Ascending, OrderOptions.Count)
-                });
-            }
+            header.ChangeOrders(OrderOptions);
 
             Search();
         }
 
         public static event MenuItemForQueryName GetCustomMenuItems;
 
-        FilterOption CreateFilter(GridViewColumnHeader header)
+        FilterOption CreateFilter(SortGridViewColumnHeader header)
         {
-            ColumnInfo column = (ColumnInfo)header.Tag;
-
             if (resultTable != null)
             {
                 ResultRow row = (ResultRow)lvResult.SelectedItem;
                 if (row != null)
                 {
-                    object value = row[column.ResultColumn];
+                    object value = row[header.ResultColumn];
 
                     return new FilterOption
                     {
-                        Token = column.Column.Token,
+                        Token = header.RequestColumn.Token,
                         Operation = FilterOperation.EqualTo,
                         Value = value is EmbeddedEntity ? null : value
                     };
@@ -861,9 +811,9 @@ namespace Signum.Windows
 
             return new FilterOption
             {
-                Token = column.Column.Token,
+                Token = header.RequestColumn.Token,
                 Operation = FilterOperation.EqualTo,
-                Value = FilterOption.DefaultValue(column.Column.Type),
+                Value = FilterOption.DefaultValue(header.RequestColumn.Type),
             };
         }
 
@@ -882,7 +832,7 @@ namespace Signum.Windows
                 return;
 
             string result = token.NiceName();
-            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
+            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, Window.GetWindow(this)))
             {
                 ClearResults();
 
@@ -912,13 +862,12 @@ namespace Signum.Windows
             if (!AllowChangeColumns)
                 return;
 
-            GridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
-            ColumnInfo col = (ColumnInfo)gvch.Tag;
-            string result = col.Column.DisplayName;
-            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
+            string result = gvch.RequestColumn.DisplayName;
+            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, Window.GetWindow(this)))
             {
-                col.Column.DisplayName = result;
+                gvch.RequestColumn.DisplayName = result;
                 gvch.Content = result;
             }
         }
@@ -928,7 +877,7 @@ namespace Signum.Windows
             if (!AllowChangeColumns)
                 return;
 
-            GridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
             gvResults.Columns.Remove(gvch.Column);
 
@@ -937,14 +886,14 @@ namespace Signum.Windows
 
         private void filter_Click(object sender, RoutedEventArgs e)
         {
-            GridViewColumnHeader gvch = GetMenuItemHeader(sender);
+            SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
             FilterOptions.Add(CreateFilter(gvch)); 
         }
 
-        private static GridViewColumnHeader GetMenuItemHeader(object sender)
+        private static SortGridViewColumnHeader GetMenuItemHeader(object sender)
         {
-            return (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+            return (SortGridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
         }
 
         public void Reinitialize(List<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders)
@@ -964,7 +913,7 @@ namespace Signum.Windows
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
             Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
-            CompleteOrderColumns();
+            SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
 
             UpdateMultiplyMessage(true); 

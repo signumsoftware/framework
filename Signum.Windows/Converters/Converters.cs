@@ -25,6 +25,9 @@ namespace Signum.Windows
         public static readonly IValueConverter Identity =
             ConverterFactory.New((object v) => v, (object v) => v);
 
+        public static readonly IValueConverter EntityKey =
+            ConverterFactory.New((ResultRow row) => row.Entity.Key(Server.GetCleanName));
+
         public static readonly IValueConverter ToLite =
            ConverterFactory.New((IIdentifiable ei) => ei == null? null : Lite.Create(ei.GetType(), (IdentifiableEntity)ei));
 
@@ -120,7 +123,7 @@ namespace Signum.Windows
 
         public static readonly IValueConverter ColorConverter = ConverterFactory.New(
             (ColorDN c) => c == null ? null : (Color?)Color.FromArgb(c.A, c.R, c.G, c.B),
-            (Color? c) => c == null ? null : new ColorDN(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
+            (Color? c) => c == null ? null : ColorDN.FromARGB(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
 
         public static readonly IMultiValueConverter And = ConverterFactory.New(
             (bool a, bool b) => a && b);

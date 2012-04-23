@@ -120,7 +120,7 @@ namespace Signum.Entities
             }
         }
 
-        public bool SetToStr<T>(ref T field, T value, Expression<Func<T>> property)
+        protected bool SetToStr<T>(ref T field, T value, Expression<Func<T>> property)
         {
             if (this.Set(ref field, value, property))
             {

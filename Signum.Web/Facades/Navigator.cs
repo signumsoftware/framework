@@ -451,8 +451,7 @@ namespace Signum.Web
             QuerySettings = new Dictionary<object, QuerySettings>();
         }
 
-        public static int QueryMaxResults = 50;
-
+        
         public event Action Initializing;
         public bool Initialized { get; private set; }
         internal void Initialize()
@@ -475,7 +474,7 @@ namespace Signum.Web
                     foreach (object o in DynamicQueryManager.Current.GetQueryNames())
                     {
                         if (!QuerySettings.ContainsKey(o))
-                            QuerySettings.Add(o, new QuerySettings(o) { ElementsPerPage = QueryMaxResults });
+                            QuerySettings.Add(o, new QuerySettings(o));
                         if (!QuerySettings[o].WebQueryName.HasText())
                             QuerySettings[o].WebQueryName = GenerateWebQueryName(o);
                     }
@@ -807,8 +806,18 @@ namespace Signum.Web
         protected internal virtual string ResolveWebTypeName(Type type)
         {
             var es = EntitySettings.TryGetC(type);
-            return es != null ? es.WebTypeName : 
-                TypeLogic.GetCleanName(type); //For types registered in the schema but not in web
+            if (es != null)
+                return es.WebTypeName;
+
+            if (type.IsIdentifiableEntity())
+            {
+                var cleanName = TypeLogic.TryGetCleanName(type);
+                if (cleanName != null)
+                    return cleanName;
+            }
+
+            throw new InvalidOperationException("Impossible to resolve WebTypeName for '{0}' because is not registered in Navigator's EntitySettings".Formato(type.Name) + 
+                (type.IsIdentifiableEntity() ? " or the Schema" : null));
         }
 
         protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity

@@ -27,7 +27,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return BuildLite(entityType); }
+            get { return entityType.BuildLite(); }
         }
 
         public override string ToString()
@@ -37,16 +37,16 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "({0})".Formato(entityType.FullName.Replace(".", ":")); }
+            get { return "({0})".Formato(QueryUtils.TypeCleanName(entityType)); }
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             Expression baseExpression = Parent.BuildExpression(context);
 
-            Expression result = Expression.TypeAs(ExtractEntity(baseExpression, false), entityType);
+            Expression result = Expression.TypeAs(baseExpression.ExtractEntity(false), entityType);
 
-            return BuildLite(result);
+            return result.BuildLite();
         }
 
         protected override List<QueryToken> SubTokensInternal()

@@ -664,6 +664,11 @@ namespace Signum.Web
             ElementMapping = Mapping.New<S>();
         }
 
+        public BaseMListMapping(Mapping<S> elementMapping)
+        {
+            this.ElementMapping = elementMapping;
+        }
+
         public IEnumerable<MappingContext<S>> GenerateItemContexts(MappingContext<MList<S>> ctx)
         {
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
@@ -679,6 +684,16 @@ namespace Signum.Web
 
     public class MListMapping<S> : BaseMListMapping<S>
     {
+        public MListMapping()
+            : base()
+        {
+        }
+
+        public MListMapping(Mapping<S> elementMapping)
+            : base(elementMapping)
+        {
+        }
+
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
             if (ctx.Empty())
@@ -710,6 +725,16 @@ namespace Signum.Web
 
     public class MListCorrelatedMapping<S> : MListMapping<S>
     {
+         public MListCorrelatedMapping()
+            : base()
+        {
+        }
+
+         public MListCorrelatedMapping(Mapping<S> elementMapping)
+            : base(elementMapping)
+        {
+        }
+
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
             MList<S> list = ctx.Value;
@@ -744,6 +769,15 @@ namespace Signum.Web
         public Mapping<K> KeyPropertyMapping{get;set;}
         
         public MListDictionaryMapping(Func<S, K> getKey, string route)
+        {
+            this.GetKey = getKey;
+
+            this.KeyPropertyMapping = Mapping.New<K>();
+
+            this.Route = route;
+        }
+
+        public MListDictionaryMapping(Func<S, K> getKey, string route, Mapping<S> elementMapping): base(elementMapping)
         {
             this.GetKey = getKey;
 

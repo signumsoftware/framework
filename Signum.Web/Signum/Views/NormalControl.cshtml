@@ -25,7 +25,7 @@
     {
         <a id="ebSave" class="sf-entity-button sf-save" onclick="new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
     }
-    @ButtonBarEntityHelper.GetForEntity(new ToolBarButtonContext
+    @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     { 
         Buttons = ViewButtons.Save,
         ControllerContext = this.ViewContext,
@@ -39,6 +39,6 @@
     @Html.ValidationSummaryAjax()
     @Html.NormalPageHeader()
 </div>
-<div id="divMainControl" class="sf-main-control">
+<div id="divMainControl" class="sf-main-control" data-prefix="@Model.ControlID">
     @{ Html.RenderPartial(partialViewName, Model);}
 </div>

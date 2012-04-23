@@ -15,6 +15,7 @@ using System.Linq;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using System.Windows.Input;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -49,12 +50,7 @@ namespace Signum.Windows
 		{
 			this.InitializeComponent();
             this.Loaded += new RoutedEventHandler(ErrorSummary_Loaded);
-            this.expander.Expanded += new RoutedEventHandler(expander_Expanded);
 		}
-
-        void expander_Expanded(object sender, RoutedEventArgs e)
-        {
-        }
 
       
 
@@ -72,13 +68,6 @@ namespace Signum.Windows
             lb.SetBinding(ItemsControl.ItemsSourceProperty, multi);
             
             this.SetBinding(HasErrorsProperty, new Binding("ItemsSource") {  Source = lb, Converter = Converters.ErrorListToBool });
-        }
-
-        object GetAllErrors()
-        {
-            return (from fe in this.Parent.Children<FrameworkElement>(WhereFlags.VisualTree | WhereFlags.Recursive)
-                    from e in Validation.GetErrors(fe)
-                    select new { fe, e });
         }
 
         void ErrorHandler(object sender, ValidationErrorEventArgs args)
@@ -101,6 +90,32 @@ namespace Signum.Windows
         {
             if (this.PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs("BindingExceptions"));
+        }
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new ErrorSummaryAutomationPeer(this);
+        }
+    }
+
+    class ErrorSummaryAutomationPeer : UserControlAutomationPeer
+    {
+        public ErrorSummaryAutomationPeer(ErrorSummary summary)
+            : base(summary)
+        {
+        }
+
+        protected override string GetHelpTextCore()
+        {
+            var es = ((ErrorSummary)Owner);
+
+            var exceptions = es.BindingExceptions.ToString(a => a.Exception.Message, "\r\n");
+
+            var dei = es.DataContext as IDataErrorInfo;
+            if (dei != null)
+                return "\r\n".Combine(exceptions, dei.Error);
+
+            return exceptions;
         }
     }
 }

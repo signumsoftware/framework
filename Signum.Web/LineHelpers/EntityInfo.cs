@@ -176,5 +176,13 @@ namespace Signum.Web
                 IsNew = parts[2]=="n" ? true : false
             };
         }
+
+        public Lite<T> ToLite<T>()  where T : class, IIdentifiable
+        {
+            if(IsNew)
+                throw new InvalidOperationException("The RuntimeInfo represents a new entity");
+
+            return new Lite<T>(this.RuntimeType, this.IdOrNull.Value);
+        }
     }
 }

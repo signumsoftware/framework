@@ -431,7 +431,7 @@ namespace Signum.Utilities
         }
     }
 
-    class PerfCounter
+    public class PerfCounter
     {
         [DllImport("kernel32.dll")]
         private static extern bool QueryPerformanceFrequency(out long lpFrequency);

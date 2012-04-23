@@ -140,7 +140,7 @@ namespace Signum.Engine.Linq
         {
             if (u.NodeType == ExpressionType.Not)
             {
-                Expression operand = MakeSqlCondition(u.Operand);
+                Expression operand = MakeSqlCondition(this.Visit(u.Operand));
                 if (operand != u.Operand)
                 {
                     return Expression.Not(operand);
@@ -204,6 +204,30 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
+       
+
+        protected override Expression VisitCase(CaseExpression cex)
+        {
+            if (IsBooleanExpression(cex))
+            {
+                var result = cex.Whens.Select(a => Expression.And(MakeSqlCondition(Visit(a.Condition)), MakeSqlCondition(Visit(a.Value)))).AggregateOr();
+
+                if (cex.DefaultValue == null)
+                    return null;
+
+                return Expression.Or(result, MakeSqlCondition(Visit(cex.DefaultValue)));
+            }
+            else
+            {
+                var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
+                var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
+
+                if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
+                    return new CaseExpression(newWhens, newDefault);
+                return cex;
+            }
+        }
+
         protected override When VisitWhen(When when)
         {
             var newCondition = MakeSqlCondition(Visit(when.Condition));
@@ -211,16 +235,6 @@ namespace Signum.Engine.Linq
             if (when.Condition != newCondition || newValue != when.Value)
                 return new When(newCondition, newValue);
             return when;
-        }
-
-        protected override Expression VisitCase(CaseExpression cex)
-        {
-            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
-            var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
-
-            if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
-                return new CaseExpression(newWhens, newDefault);
-            return cex;
         }
 
         protected override Expression VisitAggregate(AggregateExpression aggregate)

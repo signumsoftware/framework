@@ -19,6 +19,11 @@ using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web
 {
+    public class SearchControl
+    {
+        public ToolBarButton[] QueryButtons { get; set; }
+    }
+
     public class CountSearchControl
     {
         public bool Navigate { get; set; }
@@ -37,6 +42,15 @@ namespace Signum.Web
     {
         public static MvcHtmlString SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context)
         {
+            return SearchControl(helper, findOptions, context, null);
+        }
+
+        public static MvcHtmlString SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context, Action<SearchControl> settingsModifier)
+        {
+            var options = new SearchControl();
+            if (settingsModifier != null)
+                settingsModifier(options);
+
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
             Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
 
@@ -47,6 +61,9 @@ namespace Signum.Web
             viewData[ViewDataKeys.Title] = helper.ViewData.ContainsKey(ViewDataKeys.Title) ?
                 helper.ViewData[ViewDataKeys.Title] :
                 Navigator.Manager.SearchTitle(findOptions.QueryName);
+
+            if (!options.QueryButtons.IsNullOrEmpty())
+                viewData[ViewDataKeys.ManualToolbarButtons] = options.QueryButtons;
 
             return helper.Partial(Navigator.Manager.SearchControlView, viewData);
         }

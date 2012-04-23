@@ -33,7 +33,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return BuildLite(PropertyInfo.PropertyType).Nullify(); }
+            get { return PropertyInfo.PropertyType.BuildLite().Nullify(); }
         }
 
         public override string ToString()
@@ -53,16 +53,16 @@ namespace Signum.Entities.DynamicQuery
             if (PropertyInfo.Is((IdentifiableEntity ident) => ident.Id) ||
                 PropertyInfo.Is((IdentifiableEntity ident) => ident.ToStringProperty))
             {
-                baseExpression = ExtractEntity(baseExpression, true);
+                baseExpression = baseExpression.ExtractEntity(true);
 
                 return Expression.Property(baseExpression, PropertyInfo.Name).Nullify(); // Late binding over Lite or Identifiable
             }
 
-            baseExpression = ExtractEntity(baseExpression, false);
+            baseExpression = baseExpression.ExtractEntity(false);
 
             Expression result = Expression.Property(baseExpression, PropertyInfo);
-            
-            return BuildLite(result).Nullify();
+
+            return result.BuildLite().Nullify();
         }
 
         protected override List<QueryToken> SubTokensInternal()

@@ -71,6 +71,11 @@ namespace Signum.Web
             return new JsInstruction(() => "{0}.openFinder()".Formato(this.ToJS()));
         }
 
+        public JsInstruction search()
+        {
+            return new JsInstruction(() => "{0}.search()".Formato(this.ToJS()));
+        }
+
         public JsInstruction selectedItems(JsFindOptions options)
         {
             return new JsInstruction(() => "{0}.selectedItems()".Formato(this.ToJS()));

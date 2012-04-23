@@ -38,15 +38,20 @@ namespace Signum.Entities.Reflection
         static Reflector()
         {
             DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
-            DescriptionManager.CleanType = t => ExtractLite(t) ?? t; //To allow Lite<T>
+            DescriptionManager.CleanType = CleanType; //To allow Lite<T>
         }
 
-        public static string CleanTypeName(Type type)
+        public static string CleanTypeName(Type t)
         {
-            if (type.Name.EndsWith("DN"))
-                return type.Name.Substring(0, type.Name.Length - 2);
+            return t.Name.RemovePostfix("DN").RemovePostfix("Model");
+        }
 
-            return type.Name;
+        static string RemovePostfix(this string text, string postfix)
+        {
+            if (text.EndsWith(postfix) && text != postfix)
+                return text.Substring(0, text.Length - postfix.Length);
+
+            return text;
         }
 
         public static bool IsMList(this Type ft)

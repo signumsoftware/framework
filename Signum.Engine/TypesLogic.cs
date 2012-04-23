@@ -9,6 +9,7 @@ using Signum.Engine.Properties;
 using Signum.Utilities;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine
 {
@@ -62,8 +63,11 @@ namespace Signum.Engine
             current.TypeToDN = dict;
             current.DnToType = dict.Inverse();
 
-            current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
-            current.NameToType = current.TypeToName.Inverse("CleanTypeNames");
+            QueryUtils.ResolveType = TypeLogic.TryGetType;
+            QueryUtils.TypeCleanName = TypeLogic.GetCleanName;
+
+            //current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
+            //current.NameToType = current.TypeToName.Inverse("CleanTypeNames");
         }
         
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
@@ -172,6 +176,14 @@ namespace Signum.Engine
                 return null;
 
             return lite.Key(rt => TypeToName.GetOrThrow(rt, "The type {0} is not registered in the Schema"));
+        }
+
+        public static string KeyLong(this Lite lite)
+        {
+            if (lite == null)
+                return null;
+
+            return lite.KeyLong(rt => TypeToName.GetOrThrow(rt, "The type {0} is not registered in the Schema"));
         }
     }
 }

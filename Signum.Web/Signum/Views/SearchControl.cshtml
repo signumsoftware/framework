@@ -121,7 +121,14 @@
                     hasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser") : "");
             <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@Resources.Search_Create</a>
         }
-        @ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, Model.ControlID).ToString(Html)
+        @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
+        {
+            ControllerContext = this.ViewContext,
+            QueryName = findOptions.QueryName,
+            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
+            EntityType = entitiesType,
+            Prefix = Model.ControlID
+        }).ToString(Html)
     </div>
     @if (findOptions.FilterMode != FilterMode.OnlyResults)
     {
@@ -168,7 +175,7 @@
                     <td colspan="@columnsCount">@Resources.Signum_noResults</td>
                 </tr>
                 @{ 
-                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage ?? (findOptions.ElementsPerPageEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage);
+                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage) ?? FindOptions.DefaultElementsPerPage;
                     ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
                     ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
                 }

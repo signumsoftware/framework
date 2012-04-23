@@ -28,7 +28,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return BuildLite(Parent.Type.ElementType().Nullify()); }
+            get { return Parent.Type.ElementType().Nullify().BuildLite(); }
         }
 
         public override string ToString()
@@ -83,7 +83,10 @@ namespace Signum.Entities.DynamicQuery
             if (parent == null)
                 return null;
 
-            return parent.Add("Item");
+            if (parent.Type.ElementType() != null)
+                return parent.Add("Item");
+
+            return parent; 
         }
 
         public override string NiceName()
@@ -131,7 +134,7 @@ namespace Signum.Entities.DynamicQuery
 
         internal Expression CreateExpression(ParameterExpression parameter)
         {
-            return BuildLite(parameter).Nullify();
+            return parameter.BuildLite().Nullify();
         }
 
         public static List<CollectionElementToken> GetElements(HashSet<QueryToken> allTokens)

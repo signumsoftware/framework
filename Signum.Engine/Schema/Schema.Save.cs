@@ -169,15 +169,23 @@ namespace Signum.Engine.Maps
             }
         }
 
-        private void SetToStrField(IdentifiableEntity entity)
+        private bool SetToStrField(IdentifiableEntity entity)
         {
             var toStrColumn = ToStrColumn;
             if (toStrColumn != null)
             {
-                entity.toStr = entity.ToString();
-                if (entity.toStr.HasText() && toStrColumn.Size.HasValue && entity.toStr.Length > toStrColumn.Size)
-                    entity.toStr = entity.toStr.Substring(0, toStrColumn.Size.Value);
+                var newStr = entity.ToString();
+                if (newStr.HasText() && toStrColumn.Size.HasValue && newStr.Length > toStrColumn.Size)
+                    newStr = newStr.Substring(0, toStrColumn.Size.Value);
+
+                if (entity.toStr != newStr)
+                {
+                    entity.toStr = newStr;
+                    return true;
+                }
             }
+
+            return false;
         }
 
         private Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertMulti(int num, InsertCache result)
@@ -503,8 +511,9 @@ namespace Signum.Engine.Maps
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, string comment = null)
         {
-            bool dirty = false; 
+            bool dirty = false;
             ident.PreSaving(ref dirty);
+            SetToStrField(ident);
 
             var ic = inserter.Value;
             SqlPreCommandSimple insert = new SqlPreCommandSimple(ic.SqlInsertPattern("", false), ic.InsertParameters(ident, new Forbidden(), "")).AddComment(comment);
@@ -532,6 +541,8 @@ namespace Signum.Engine.Maps
 
             bool dirty = false;
             ident.PreSaving(ref dirty);
+            if (SetToStrField(ident)) 
+                ident.SetSelfModified();
 
             if (!ident.SelfModified)
                 return null;

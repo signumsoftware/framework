@@ -7,7 +7,11 @@
         <StackPanel.Resources>
             <Style TargetType="ComboBox" x:Key="{x:Type ComboBox}">
                 <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="Margin" Value="1,0,0,1"/>                
+                <Setter Property="Margin" Value="1,0,0,1"/>
+            </Style>
+            <Style TargetType="ComboBoxItem" x:Key="{x:Type ComboBoxItem}">
+                <Setter Property="AutomationProperties.ItemStatus" Value="{Binding Key}"/>
+                <EventSetter Event="Loaded" Handler="cbi_Loaded"/>
             </Style>
         </StackPanel.Resources>
     </StackPanel>

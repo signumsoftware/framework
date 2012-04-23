@@ -60,6 +60,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void StringContains()
+        {
+            var list = Database.Query<AlbumDN>().Where(a => !a.Author.ToString().Contains("Hola")).ToList();
+        }
+
+        [TestMethod]
         public void DateTimeFunctions()
         {
             Dump((NoteWithDateDN n) => n.CreationTime.Year);

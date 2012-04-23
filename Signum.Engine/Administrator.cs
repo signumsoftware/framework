@@ -11,6 +11,10 @@ using System.Collections.Generic;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.SchemaInfoTables;
 using System.Data.SqlServerCe;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
+using System.Reflection;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine
 {
@@ -133,11 +137,35 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
         }
 
-        public static T SetId<T>(int id, T ident)
-            where T:IdentifiableEntity
+        public static T SetId<T>(this T ident, int id)
+            where T : IdentifiableEntity
         {
             ident.id = id;
-            return ident; 
+            return ident;
+        }
+
+        public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
+            where T : ModifiableEntity
+        {
+            var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
+
+            Action<T, V> setter = ReadonlySetterCache<T>.Getter<V>(pi);
+
+            setter(ident, value);
+
+            ident.SetSelfModified();
+
+            return ident;
+        }
+
+        class ReadonlySetterCache<T> where T : ModifiableEntity
+        {
+            static ConcurrentDictionary<string, Delegate> cache = new ConcurrentDictionary<string, Delegate>();
+
+            internal static Action<T, V> Getter<V>(PropertyInfo pi)
+            {
+                return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
+            }
         }
 
         public static T SetNew<T>(T ident)

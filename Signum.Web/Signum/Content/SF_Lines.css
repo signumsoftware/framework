@@ -146,6 +146,7 @@ a.sf-value-line, span.sf-value-line{
 {
     float: none;
     display: inline-block;
+    height: 1em;
 }
 
 fieldset.sf-repeater-field
