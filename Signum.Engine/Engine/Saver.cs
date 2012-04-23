@@ -61,7 +61,7 @@ namespace Signum.Engine
 
             notModified.ForEach(node => identifiables.RemoveFullNode(node, None));
 
-            //separa las conexiones 'prohibidas' de las buenas
+            //takes apart the 'forbidden' connections from the good ones
             DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
 
             if (backEdges.IsEmpty())
