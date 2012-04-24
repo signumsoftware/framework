@@ -84,6 +84,9 @@ namespace Signum.Engine.DynamicQuery
 
         internal static Implementations AggregateImplementations(PropertyRoute[] routes, Type cleanType)
         {
+            if (!cleanType.IsIIdentifiable())
+                return null;
+
             return AggregateImplementations(routes.Select(a => a.GetImplementations() ??
                 new ImplementedByAttribute(a.Type.CleanType())).NotNull(), cleanType);
         }

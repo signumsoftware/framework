@@ -13,7 +13,7 @@ SF.registerModule("FindNavigator", function () {
             elems: null,
             filters: null, //List of filter names "token1,operation1,value1;token2,operation2,value2"
             filterMode: null,
-            orders: null, //A Json array like ["columnName1","-columnName2"] => will order by columnname1 asc, then by columnname2 desc
+            orders: null, //A Json array like "columnName1,-columnName2" => will order by columnname1 asc, then by columnname2 desc
             columns: null, //List of column names "token1,displayName1;token2,displayName2"
             columnMode: null,
             allowChangeColumns: true,

@@ -75,12 +75,12 @@ WriteLiteral("\" data-title=\"");
 
                                               Write(Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity));
 
-WriteLiteral("\">\r\n    <h2><span class=\"sf-entity-title\">");
+WriteLiteral("\">\r\n    <span class=\"sf-entity-title\">");
 
 
-                                  Write(ViewBag.Title ?? Model.UntypedValue.TryToString());
+                              Write(ViewBag.Title ?? Model.UntypedValue.TryToString());
 
-WriteLiteral("</span></h2>\r\n    <div class=\"sf-button-bar\">\r\n");
+WriteLiteral("</span>\r\n    <div class=\"sf-button-bar\">\r\n");
 
 
          if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])

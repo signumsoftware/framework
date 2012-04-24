@@ -2,7 +2,7 @@
 @using Signum.Web.Properties
 @model TypeContext
 <div id="@Model.Compose("panelPopup")" data-title="@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)">
-    <h2><span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString())</span></h2>
+    <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString())</span>
     <div class="sf-button-bar">
         @if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
         {  

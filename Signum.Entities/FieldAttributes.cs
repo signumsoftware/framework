@@ -42,6 +42,9 @@ namespace Signum.Entities
 
         public ImplementedByAttribute(params Type[] types)
         {
+            if (types.Any(t => !t.IsIdentifiableEntity()))
+                throw new InvalidOperationException("{0} are not {1}".Formato(types.Where(t => !t.IsIdentifiableEntity()).CommaOr(a => a.Name), typeof(IdentifiableEntity).Name));
+
             implementedTypes = types;
         }
 
