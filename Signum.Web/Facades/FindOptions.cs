@@ -342,7 +342,7 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            return OrderType == OrderType.Descending ? "-" : "" + ColumnName;
+            return (OrderType == OrderType.Descending ? "-" : "") + ColumnName;
         }
     }
 
