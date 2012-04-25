@@ -115,16 +115,12 @@ namespace Signum.Engine.Authorization
         public static int CleanExpiredTickets(UserDN user)
         {
             DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
+
             int expired = user.Tickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
-         
-            List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Select(t => t.ToLite()).ToList().Skip(MaxTicketsPerUser).ToList();
 
-            if (tooMuch.IsEmpty()) 
-                return expired;
+            int tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Skip(MaxTicketsPerUser).UnsafeDelete();
 
-            Database.DeleteList<UserTicketDN>(tooMuch);
-
-            return expired + tooMuch.Count; 
+            return expired + tooMuch; 
         }
 
         public static int CleanAllExpiredTickets()
