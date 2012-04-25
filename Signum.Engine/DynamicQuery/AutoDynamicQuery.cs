@@ -55,7 +55,11 @@ namespace Signum.Engine.DynamicQuery
 
         public override int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Query.ToDQueryable(GetColumnDescriptions()).Where(request.Filters).Query.Count();
+            return Query.ToDQueryable(GetColumnDescriptions())
+                .SelectMany(request.Multiplications)
+                .Where(request.Filters)
+                .Query
+                .Count();
         }
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
@@ -64,6 +68,7 @@ namespace Signum.Engine.DynamicQuery
 
             DQueryable<T> orderQuery = Query
                 .ToDQueryable(GetColumnDescriptions())
+                .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(new List<Column> { ex});
