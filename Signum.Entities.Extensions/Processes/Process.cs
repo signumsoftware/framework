@@ -219,12 +219,6 @@ namespace Signum.Entities.Processes
         Suspend,
     }
 
-    public enum ProcessQueries
-    {
-        CurrentExecutions,
-        ErrorExecutions,
-    }
-
     public enum ProcessPermissions
     {
         ViewProcessControlPanel
