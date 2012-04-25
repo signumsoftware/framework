@@ -58,6 +58,9 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         void SetFacadeMethodRules(FacadeMethodRulePack rules);
+
+        [OperationContract, NetDataContract]
+        DefaultDictionary<string, bool> FacadeMethodRules();
     }
 
     [ServiceContract]

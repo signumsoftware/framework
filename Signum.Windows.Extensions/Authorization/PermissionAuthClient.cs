@@ -59,10 +59,10 @@ namespace Signum.Windows.Authorization
     }
 
     [MarkupExtensionReturnType(typeof(bool))]
-    public class PermissionExtension : MarkupExtension
+    public class PermissionAllowedExtension : MarkupExtension
     {
         Enum permission;
-        public PermissionExtension(object value)
+        public PermissionAllowedExtension(object value)
         {
             this.permission = (Enum)value;
         }

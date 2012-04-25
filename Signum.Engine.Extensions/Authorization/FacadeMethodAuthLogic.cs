@@ -82,5 +82,10 @@ namespace Signum.Engine.Authorization
             if (!GetFacadeMethodAllowed(mi))
                 throw new UnauthorizedAccessException(Resources.AccessToFacadeMethod0IsNotAllowed.Formato(mi.Name));
         }
+
+        public static DefaultDictionary<string, bool> FacadeMethodRules()
+        {
+            return cache.GetDefaultDictionary();
+        }
     }
 }
