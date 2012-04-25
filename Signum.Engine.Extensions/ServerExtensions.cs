@@ -282,6 +282,14 @@ namespace Signum.Services
               () => FacadeMethodAuthLogic.SetFacadeMethodRules(rules));
         }
 
+        public DefaultDictionary<string, bool> FacadeMethodRules()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => FacadeMethodAuthLogic.FacadeMethodRules());
+
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         #region IQueryAuthServer Members
@@ -441,5 +449,6 @@ namespace Signum.Services
                 ProfilerLogic.ProfilerEntries(entries)); 
         }
         #endregion
+
     }
 }

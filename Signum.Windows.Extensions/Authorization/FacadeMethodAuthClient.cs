@@ -6,12 +6,15 @@ using Signum.Services;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using System.Windows;
+using System.Windows.Markup;
 
 namespace Signum.Windows.Authorization
 {
     public static class FacadeMethodAuthClient
     {
         public static bool Started { get; private set; }
+
+        static DefaultDictionary<string, bool> autorizedFacadeMethods;
 
         internal static void Start()
         {
@@ -28,7 +31,44 @@ namespace Signum.Windows.Authorization
                     },
                 };
             });
+
+            autorizedFacadeMethods = Server.Return((IFacadeMethodAuthServer s) => s.FacadeMethodRules());
         }
 
+        public static bool GetAllowed(string facadeMethodName)
+        {
+            return autorizedFacadeMethods.GetAllowed(facadeMethodName);
+        }
+    }
+
+
+    [MarkupExtensionReturnType(typeof(bool))]
+    public class FacadeMethodAllowedExtension : MarkupExtension
+    {
+        string methodName;
+        public FacadeMethodAllowedExtension(object value)
+        {
+            this.methodName = (string)value;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return FacadeMethodAuthClient.GetAllowed(methodName);
+        }
+    }
+
+    [MarkupExtensionReturnType(typeof(Visibility))]
+    public class FacadeMethodVisiblityExtension : MarkupExtension
+    {
+        string methodName;
+        public FacadeMethodVisiblityExtension(object value)
+        {
+            this.methodName = (string)value;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return FacadeMethodAuthClient.GetAllowed(methodName) ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 }
