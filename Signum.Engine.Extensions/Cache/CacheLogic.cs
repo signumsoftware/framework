@@ -172,7 +172,7 @@ namespace Signum.Engine.Cache
                 throw NoComplete();
             }
 
-            public override Lite<T> RetriveLite(int id)
+            public override string GetToString(int id)
             {
                 throw NoComplete();
             }
@@ -370,10 +370,10 @@ namespace Signum.Engine.Cache
                 return pack.Value.Dictionary.Keys;
             }
 
-            public override Lite<T> RetriveLite(int id) 
+            public override string GetToString(int id) 
             {
                 Interlocked.Increment(ref hits); 
-                return pack.Value.Dictionary[id].ToLite<T>(); 
+                return pack.Value.Dictionary[id].ToString(); 
             }
 
             readonly Action<T, T, IRetriever> completer = Completer.GetCompleter<T>();
