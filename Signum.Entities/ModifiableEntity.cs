@@ -242,8 +242,10 @@ namespace Signum.Entities
 
         void NotifyPrivate(string propertyName)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            var handler = PropertyChanged;
+
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
         static long temporalIdCounter = 0;
