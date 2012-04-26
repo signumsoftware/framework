@@ -29,7 +29,7 @@ namespace Signum.Engine.Operations
         }
 
         public interface IGraphInnerOperation : IGraphOperation
-        { 
+        {
             S ToState { get; }
         }
 
@@ -43,7 +43,8 @@ namespace Signum.Engine.Operations
             }
             public S[] FromStates { get; set; }
 
-            public Execute(Enum key) : base(key)
+            public Execute(Enum key)
+                : base(key)
             {
             }
 
@@ -53,7 +54,7 @@ namespace Signum.Engine.Operations
 
                 string stateError = state.InState(key, FromStates);
                 if (stateError.HasText())
-                    return stateError; 
+                    return stateError;
 
                 return base.OnCanExecute(entity);
             }
@@ -73,7 +74,7 @@ namespace Signum.Engine.Operations
 
                 base.OnEndOperation(entity);
             }
-        
+
             public override void AssertIsValid()
             {
                 base.AssertIsValid();
@@ -90,7 +91,8 @@ namespace Signum.Engine.Operations
         {
             public S[] FromStates { get; set; }
 
-            public Delete(Enum key) : base(key)
+            public Delete(Enum key)
+                : base(key)
             {
             }
 
@@ -153,7 +155,7 @@ namespace Signum.Engine.Operations
 
                 if (toState == null)
                     throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
-             
+
             }
         }
 
@@ -263,48 +265,48 @@ namespace Signum.Engine.Operations
                     if (dic == null || !dic.ContainsKey(to))
                         result.Add(from, to, key.ToString());
                     else
-                        result.Add(from, to, dic[to] + ", " + key.ToString()); 
-                }; 
-            
-            foreach (var item in OperationLogic.GraphOperations<E,S>())
+                        result.Add(from, to, dic[to] + ", " + key.ToString());
+                };
+
+            foreach (var item in OperationLogic.GraphOperations<E, S>())
             {
                 switch (item.OperationType)
                 {
                     case OperationType.Execute:
-                    {
-                        Execute gOp = (Execute)item;
+                        {
+                            Execute gOp = (Execute)item;
 
-                        if (gOp.FromStates == null)
-                            Add("[All States]", gOp.ToState.ToString(), item.Key);
-                        else
-                            foreach (var s in gOp.FromStates)
-                                Add(s.ToString(), gOp.ToState.ToString(), item.Key);
+                            if (gOp.FromStates == null)
+                                Add("[All States]", gOp.ToState.ToString(), item.Key);
+                            else
+                                foreach (var s in gOp.FromStates)
+                                    Add(s.ToString(), gOp.ToState.ToString(), item.Key);
 
 
-                    } break;
+                        } break;
                     case OperationType.Delete:
-                    {
-                        Delete dOp = (Delete)item;
-                        if (dOp.FromStates == null)
-                            Add("[All States]", "[Deleted]", item.Key);
-                        else
-                            foreach (var s in dOp.FromStates)
-                                Add(s.ToString(), "[Deleted]", item.Key);
+                        {
+                            Delete dOp = (Delete)item;
+                            if (dOp.FromStates == null)
+                                Add("[All States]", "[Deleted]", item.Key);
+                            else
+                                foreach (var s in dOp.FromStates)
+                                    Add(s.ToString(), "[Deleted]", item.Key);
 
 
-                    } break;
+                        } break;
                     case OperationType.Constructor:
                     case OperationType.ConstructorFrom:
                     case OperationType.ConstructorFromMany:
-                    {
-                        string from = item.OperationType == OperationType.Constructor ? "[New]" :
-                                        item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
-                                        item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
+                        {
+                            string from = item.OperationType == OperationType.Constructor ? "[New]" :
+                                            item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
+                                            item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
 
-                        Add(from, ((IGraphInnerOperation)item).ToState.ToString(), item.Key);
+                            Add(from, ((IGraphInnerOperation)item).ToState.ToString(), item.Key);
 
 
-                    } break;
+                        } break;
                 }
             }
 
@@ -336,7 +338,7 @@ namespace Signum.Engine.Operations
             S state = GetState(entity);
 
             if (!state.Equals(operation.ToState))
-                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".Formato(operation.Key ,operation.ToState, state));
+                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".Formato(operation.Key, operation.ToState, state));
 
             OnEnterState(state, entity);
         }

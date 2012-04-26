@@ -53,7 +53,7 @@ namespace Signum.Engine.Operations
 
             if (CanExecute != null)
                 return CanExecute(entity);
-            
+
             return null;
         }
 
@@ -74,58 +74,58 @@ namespace Signum.Engine.Operations
 
             using (OperationLogic.AllowSave<T>())
             {
-            try
-            {
-                using (Transaction tr = new Transaction())
+                try
                 {
-                    OnBeginOperation((T)entity);
-
-                    Execute((T)entity, parameters);
-
-                    OnEndOperation((T)entity);
-
-                    entity.Save(); //Nothing happens if already saved
-
-                    log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
-                    log.End = TimeZoneManager.Now;
-                    using (AuthLogic.Disable())
-                        log.Save();
-
-                    tr.Commit();
-                }
-            }
-            catch (Exception ex)
-            {  
-                OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
-
-                if (!entity.IsNew)
-                {
-                    if (Transaction.AvoidIndependentTransactions)
-                        throw; 
-
-                    var exLog = ex.LogException();
-
-                    using (Transaction tr2 = Transaction.ForceNew())
+                    using (Transaction tr = new Transaction())
                     {
-                        OperationLogDN log2 = new OperationLogDN
-                        {
-                            Operation = log.Operation,
-                            Start = log.Start,
-                            User = log.User,
-                            Target = entity.ToLite<IIdentifiable>(),
-                            Exception = exLog.ToLite(),
-                            End = TimeZoneManager.Now
-                        };
+                        OnBeginOperation((T)entity);
 
+                        Execute((T)entity, parameters);
+
+                        OnEndOperation((T)entity);
+
+                        entity.Save(); //Nothing happens if already saved
+
+                        log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
+                        log.End = TimeZoneManager.Now;
                         using (AuthLogic.Disable())
-                            log2.Save();
+                            log.Save();
 
-                        tr2.Commit();
+                        tr.Commit();
                     }
                 }
-                throw;
+                catch (Exception ex)
+                {
+                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
+
+                    if (!entity.IsNew)
+                    {
+                        if (Transaction.AvoidIndependentTransactions)
+                            throw;
+
+                        var exLog = ex.LogException();
+
+                        using (Transaction tr2 = Transaction.ForceNew())
+                        {
+                            OperationLogDN log2 = new OperationLogDN
+                            {
+                                Operation = log.Operation,
+                                Start = log.Start,
+                                User = log.User,
+                                Target = entity.ToLite<IIdentifiable>(),
+                                Exception = exLog.ToLite(),
+                                End = TimeZoneManager.Now
+                            };
+
+                            using (AuthLogic.Disable())
+                                log2.Save();
+
+                            tr2.Commit();
+                        }
+                    }
+                    throw;
+                }
             }
-        }
         }
 
         protected virtual void OnBeginOperation(T entity)

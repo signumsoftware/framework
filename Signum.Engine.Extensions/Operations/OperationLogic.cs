@@ -37,13 +37,13 @@ namespace Signum.Engine.Operations
     {
         bool Lite { get; }
         bool AllowsNew { get; }
-        string CanExecute(IIdentifiable entity); 
+        string CanExecute(IIdentifiable entity);
     }
 
     public static class OperationLogic
     {
-        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogOperationsExpression = 
-            o => Database.Query<OperationLogDN>().Where(a=>a.Operation == o);
+        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogOperationsExpression =
+            o => Database.Query<OperationLogDN>().Where(a => a.Operation == o);
         public static IQueryable<OperationLogDN> LogOperations(this OperationDN o)
         {
             return LogOperationsExpression.Evaluate(o);
@@ -84,12 +84,12 @@ namespace Signum.Engine.Operations
             return new Disposable(() => allowedTypes.Value = allowedTypes.Value.Pop());
         }
 
-       
+
 
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null,null))); 
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -113,7 +113,7 @@ namespace Signum.Engine.Operations
                                                    lo.End,
                                                    lo.Exception
                                                }).ToDynamic();
-             
+
                 dqm[typeof(OperationDN)] = (from lo in Database.Query<OperationDN>()
                                             select new
                                             {
@@ -134,7 +134,7 @@ namespace Signum.Engine.Operations
             if (ident.Modified == true && IsSaveProtected(ident.GetType()))
                 throw new InvalidOperationException("Saving {0} is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
                     ident.GetType().NiceName(),
-                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => EnumDN.UniqueKey(k)))); 
+                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => EnumDN.UniqueKey(k))));
         }
 
         #region Events
@@ -142,7 +142,7 @@ namespace Signum.Engine.Operations
         public static event OperationHandler BeginOperation;
         public static event OperationHandler EndOperation;
         public static event ErrorOperationHandler ErrorOperation;
-        public static event AllowOperationHandler AllowOperation; 
+        public static event AllowOperationHandler AllowOperation;
 
         internal static void OnBeginOperation(IOperation operation, IIdentifiable entity)
         {
@@ -166,8 +166,8 @@ namespace Signum.Engine.Operations
         {
             if (AllowOperation != null)
                 return AllowOperation(operationKey);
-            else 
-                return true; 
+            else
+                return true;
         }
 
         public static void AssertOperationAllowed(Enum operationKey)
@@ -190,7 +190,7 @@ namespace Signum.Engine.Operations
 
             if (operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false)
             {
-                ProtectedSaveTypes.Add(operation.Type); 
+                ProtectedSaveTypes.Add(operation.Type);
             }
         }
 
@@ -209,7 +209,7 @@ namespace Signum.Engine.Operations
             return new OperationInfo
             {
                 Key = operation.Key,
-                Lite = (operation as IEntityOperation).TryCS(eo=>eo.Lite),
+                Lite = (operation as IEntityOperation).TryCS(eo => eo.Lite),
                 Returns = operation.Returns,
                 OperationType = operation.OperationType,
                 CanExecute = canExecute,
@@ -280,7 +280,7 @@ namespace Signum.Engine.Operations
         public static string CanExecute<T>(this T entity, Enum operationKey)
            where T : class, IIdentifiable
         {
-            var op = Find<IEntityOperation>(entity.GetType(), operationKey); 
+            var op = Find<IEntityOperation>(entity.GetType(), operationKey);
             return op.CanExecute(entity);
         }
         #endregion
@@ -306,7 +306,7 @@ namespace Signum.Engine.Operations
         #region Construct
         public static IIdentifiable ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
-            var op = Find<IConstructOperation>(type, operationKey); 
+            var op = Find<IConstructOperation>(type, operationKey);
             return op.Construct(args);
         }
 
@@ -430,15 +430,15 @@ namespace Signum.Engine.Operations
             return (T)args[pos];
         }
 
-        public static T TryGetArgC<T>(this object[] args, int pos) where T:class
+        public static T TryGetArgC<T>(this object[] args, int pos) where T : class
         {
             if (pos < 0)
                 throw new ArgumentException("pos");
 
             if (args == null || args.Length <= pos || args[pos] == null)
-                 return null;
+                return null;
 
-            if(!(args[pos] is T))
+            if (!(args[pos] is T))
                 throw new ArgumentException("The operation needs a {0} in the argument {1}".Formato(typeof(T), pos));
 
             return (T)args[pos];
@@ -483,12 +483,12 @@ namespace Signum.Engine.Operations
             return operations.TryGetValue(type).TryGetC(operation) != null;
         }
 
-     
+
     }
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
     public delegate bool AllowOperationHandler(Enum operationKey);
 
-   
+
 }
