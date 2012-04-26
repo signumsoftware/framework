@@ -315,7 +315,10 @@ namespace Signum.Web.Auth
 
             using (AuthLogic.Disable())
             {
-                context.Value.Execute(UserOperation.Save);
+                using (OperationLogic.AllowSave<UserDN>())
+                {
+                    context.Value.Save();
+                }
                 //remove pending requests
                 Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == request.Code).UnsafeDelete();
             }
