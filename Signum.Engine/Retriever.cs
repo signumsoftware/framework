@@ -17,7 +17,7 @@ namespace Signum.Engine
         T Request<T>(int? id) where T : IdentifiableEntity;
         T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
         T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable;
-        Lite<T> RequestLiteIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
+        Lite<T> RequestLite<T>(int? id, Type runtimeType) where T : class, IIdentifiable;
         T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity; 
         IRetriever Parent { get; }
     }
@@ -128,14 +128,13 @@ namespace Signum.Engine
             return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id); 
         }
 
-        public Lite<T> RequestLiteIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
+        public Lite<T> RequestLite<T>(int? id, Type runtimeType) where T : class, IIdentifiable
         {
             if (id == null)
-                return null; 
+                return null;
 
-            Type type = Schema.Current.IdToType[typeId.Value];
-            IdentityTuple tuple = new IdentityTuple(type, id.Value);
-            Lite<T> result = new Lite<T>(type, id.Value);
+            IdentityTuple tuple = new IdentityTuple(runtimeType, id.Value);
+            Lite<T> result = new Lite<T>(runtimeType, id.Value);
             if (liteRequests == null)
                 liteRequests = new Dictionary<IdentityTuple, List<Lite>>();
             liteRequests.GetOrCreate(tuple).Add(result);
@@ -210,6 +209,8 @@ namespace Signum.Engine
 
             if (liteRequests != null)
             {
+                var groups = liteRequests.GroupBy(kvp => kvp.Key.Type);
+
                 while (liteRequests.Count > 0)
                 {
                     var group = liteRequests.GroupBy(a => a.Key.Type).FirstEx();
@@ -253,7 +254,12 @@ namespace Signum.Engine
         static readonly GenericInvoker<Func<List<int>, Dictionary<int, string>>> giGetStrings = new GenericInvoker<Func<List<int>, Dictionary<int, string>>>(ids => GetStrings<IdentifiableEntity>(ids));
         static Dictionary<int, string> GetStrings<T>(List<int> ids) where T : IdentifiableEntity
         {
-            return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToDictionary();
+            ICacheController cc = Schema.Current.CacheController(typeof(T));
+
+            if (cc != null && cc.IsComplete && cc.Enabled)
+                return ids.ToDictionary(a => a, a => cc.GetToString(a));
+            else
+                return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToDictionary();
         }
     }
 
@@ -287,9 +293,9 @@ namespace Signum.Engine
             return Parent.RequestIBA<T>(id, typeId);
         }
 
-        public Lite<T> RequestLiteIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
+        public Lite<T> RequestLite<T>(int? id, Type runtimeType) where T : class, IIdentifiable
         {
-            return Parent.RequestLiteIBA<T>(id, typeId);
+            return Parent.RequestLite<T>(id, runtimeType);
         }
 
         public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity

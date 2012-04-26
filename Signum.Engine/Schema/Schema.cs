@@ -519,6 +519,8 @@ namespace Signum.Engine.Maps
         event Action Invalidation;
 
         bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
+
+        string GetToString(int id);
     }
 
     public abstract class CacheController<T> : ICacheController 
@@ -538,7 +540,7 @@ namespace Signum.Engine.Maps
 
         public abstract bool CompleteCache(T entity, IRetriever retriver);
 
-        public abstract Lite<T> RetriveLite(int id);
+        public abstract string GetToString(int id);
     }
 
     public class EntityEvents<T> : IEntityEvents

@@ -298,8 +298,9 @@ namespace Signum.Engine.Linq
         public readonly Expression Id;
         public readonly Expression ToStr;
         public readonly Expression TypeId;
+        public readonly bool CustomToString;
 
-        public LiteReferenceExpression(Type type, Expression reference, Expression id, Expression toStr, Expression typeId) :
+        public LiteReferenceExpression(Type type, Expression reference, Expression id, Expression toStr, Expression typeId, bool customToString) :
             base(DbExpressionType.LiteReference, type)
         {
             if (reference != null)
@@ -314,6 +315,7 @@ namespace Signum.Engine.Linq
             this.Id = id;
             this.ToStr = toStr;
             this.TypeId = typeId;
+            this.CustomToString = customToString;
         }
 
         public override string ToString()

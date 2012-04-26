@@ -26,18 +26,34 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
-            var newToStr = Visit(lite.ToStr);
             var newId = Visit(lite.Id);
             var newTypeId = Visit(lite.TypeId);
-            return new LiteReferenceExpression(lite.Type, null, newId, newToStr, newTypeId);
+
+            var newToStr = !lite.CustomToString && IsCacheable(newTypeId) ? null : Visit(lite.ToStr);
+
+            return new LiteReferenceExpression(lite.Type, null, newId, newToStr, newTypeId, lite.CustomToString);
+        }
+
+        private bool IsCacheable(Expression newTypeId)
+        {
+            TypeFieldInitExpression tfie= newTypeId as TypeFieldInitExpression;
+
+            if (tfie != null)
+                return IsCompletlyCached(tfie.TypeValue);
+
+            TypeImplementedByExpression tibe = newTypeId as TypeImplementedByExpression;
+
+            if (tibe != null)
+                return tibe.TypeImplementations.All(t => IsCompletlyCached(t.Type));
+
+            return false;
         }
 
         protected override Expression VisitFieldInit(FieldInitExpression fie)
         {
             fie = new FieldInitExpression(fie.Type, fie.TableAlias, fie.ExternalId, fie.Token) { Bindings = fie.Bindings.ToList() };
 
-            var cc = Schema.Current.CacheController(fie.Type);
-            if (previousTypes.Contains(fie.Type) || cc != null && cc.Enabled && cc.IsComplete /*just to force cache before executing the query*/)
+            if (previousTypes.Contains(fie.Type) || IsCompletlyCached(fie.Type))
             {
                 fie.Bindings.Clear();
                 fie.TableAlias = null;
@@ -58,6 +74,12 @@ namespace Signum.Engine.Linq
             previousTypes = previousTypes.Pop();
 
             return result;
+        }
+
+        private bool IsCompletlyCached(Type type)
+        { 
+            var cc = Schema.Current.CacheController(type);
+            return cc != null && cc.Enabled && cc.IsComplete; /*just to force cache before executing the query*/
         }
 
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)

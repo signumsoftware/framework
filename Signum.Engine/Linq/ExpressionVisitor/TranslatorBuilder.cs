@@ -196,7 +196,7 @@ namespace Signum.Engine.Linq
             static MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<TypeDN>(null, null)).GetGenericMethodDefinition();
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeDN>(null)).GetGenericMethodDefinition();
             static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeDN>(1, 1)).GetGenericMethodDefinition();
-            static MethodInfo miRequestLiteIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLiteIBA<TypeDN>(1, null)).GetGenericMethodDefinition();
+            static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<TypeDN>(1, null)).GetGenericMethodDefinition();
             static MethodInfo miEmbeddedPostRetrieving = ReflectionTools.GetMethodInfo((IRetriever r) => r.EmbeddedPostRetrieving<EmbeddedEntity>(null)).GetGenericMethodDefinition();
 
             Scope scope; 
@@ -376,15 +376,15 @@ namespace Signum.Engine.Linq
                     return Expression.Constant(null, lite.Type);
                 else if (toStr == null)
                 {
-                    var typeId = Visit(NullifyColumn(((TypeImplementedByAllExpression)lite.TypeId).TypeColumn));
+                    var type = Visit(lite.TypeId);
 
-                    return Expression.Call(retriever, miRequestLiteIBA.MakeGenericMethod(liteType), id.Nullify(), typeId);
+                    return Expression.Call(retriever, miRequestLite.MakeGenericMethod(liteType), id.Nullify(), type);
                 }
                 else
                 {
-                    var typeId = Visit(lite.TypeId);
+                    var type = Visit(lite.TypeId);
 
-                    Type constantTypeId = ConstantType(typeId);
+                    Type constantTypeId = ConstantType(type);
              
                     NewExpression liteConstructor;
                     if (constantTypeId == liteType)
@@ -395,7 +395,7 @@ namespace Signum.Engine.Linq
                     else
                     {
                         ConstructorInfo ciLite = lite.Type.GetConstructor(new[] { typeof(Type), typeof(int), typeof(string) });
-                        liteConstructor = Expression.New(ciLite, typeId, id.UnNullify(), toStr);
+                        liteConstructor = Expression.New(ciLite, type, id.UnNullify(), toStr);
                     }
 
                     return Expression.Condition(id.NotEqualsNulll(), liteConstructor, Expression.Constant(null, lite.Type));

@@ -1713,14 +1713,15 @@ namespace Signum.Engine.Linq
 
 
 
-        public Expression MakeLite(Type type, Expression entity, Expression toStr)
+        public Expression MakeLite(Type type, Expression entity, Expression customToStr)
         {
-            if (toStr == null && !(entity is ImplementedByAllExpression))
-                toStr = BindMethodCall(Expression.Call(entity, FieldInitExpression.ToStringMethod));
+            Expression baseToStr = null;
+            if (customToStr == null && !(entity is ImplementedByAllExpression))
+                baseToStr = BindMethodCall(Expression.Call(entity, FieldInitExpression.ToStringMethod));
 
             Expression id = GetId(entity);
             Expression typeId = GetEntityType(entity);
-            return new LiteReferenceExpression(type, entity, id, toStr, typeId);
+            return new LiteReferenceExpression(type, entity, id, customToStr ?? baseToStr, typeId, customToStr != null);
         }
 
         public Expression GetId(Expression expression)
