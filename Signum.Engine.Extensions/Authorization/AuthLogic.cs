@@ -96,13 +96,12 @@ namespace Signum.Engine.Authorization
                                        }).ToDynamic();
 
                 UserGraph.Register();
-                new BasicExecute<UserDN>(UserOperation.SetPassword)
+
+                new BasicDelete<RoleDN>(RoleOperations.Delete)
                 {
-                    Lite = true,
-                    Execute = (u, args) =>
+                    Delete = (r, args) =>
                     {
-                        string passwordHash = args.TryGetArgC<string>(0);
-                        u.PasswordHash = passwordHash;
+                        r.Delete();
                     }
                 }.Register();
             }

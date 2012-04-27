@@ -46,8 +46,15 @@ namespace Signum.Entities.Authorization
             }
         }
     }
+
+
     public enum RoleQueries
     {
         ReferedBy
+    }
+
+    public enum RoleOperations
+    {
+        Delete
     }
 }

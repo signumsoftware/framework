@@ -66,6 +66,16 @@ namespace Signum.Engine.Authorization
                 AllowsNew = false,
                 Lite = true
             }.Register();
+
+            new BasicExecute<UserDN>(UserOperation.SetPassword)
+            {
+                Lite = true,
+                Execute = (u, args) =>
+                {
+                    string passwordHash = args.TryGetArgC<string>(0);
+                    u.PasswordHash = passwordHash;
+                }
+            }.Register();
         }
     }
 }
