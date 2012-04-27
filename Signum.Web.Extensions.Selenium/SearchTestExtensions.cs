@@ -5,6 +5,7 @@ using System.Text;
 using Selenium;
 using Signum.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq.Expressions;
 
 namespace Signum.Web.Selenium
 {
@@ -492,7 +493,7 @@ namespace Signum.Web.Selenium
                 quickLinkIndexBase1));
         }
 
-        public static Func<bool> ThereAreNRows(this ISelenium selenium, int n, string prefix)
+        public static Expression<Func<bool>> ThereAreNRows(this ISelenium selenium, int n, string prefix)
         {
             if (n == 0)
                 n = 1; //there will be a row with the "no results" message
@@ -504,7 +505,7 @@ namespace Signum.Web.Selenium
                 !selenium.IsElementPresent(noRow);
         }
 
-        public static Func<bool> ThereAreNRows(this ISelenium selenium, int n)
+        public static Expression<Func<bool>> ThereAreNRows(this ISelenium selenium, int n)
         {
             return ThereAreNRows(selenium, n, "");
         }
