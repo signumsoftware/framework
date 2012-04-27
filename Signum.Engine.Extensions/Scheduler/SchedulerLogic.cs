@@ -96,7 +96,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        static void Transaction_RealCommit()
+        static void Transaction_RealCommit(Dictionary<string, object> userData)
         {
             ReloadPlan();
         }

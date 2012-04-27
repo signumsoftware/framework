@@ -72,7 +72,7 @@ namespace Signum.Engine.Mailing
         static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident)
         {
             if (ident.Modified.Value)
-                Transaction.PostRealCommit += () => smtpConfigurations = null;
+                Transaction.PostRealCommit += ud => smtpConfigurations = null;
         }
 
         static void SetCache()

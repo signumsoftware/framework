@@ -121,7 +121,7 @@ namespace Signum.Engine.Cache
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
 
-                Transaction.PostRealCommit += () =>
+                Transaction.PostRealCommit += ud =>
                 {
                     Interlocked.Increment(ref invalidations);
                     cachedEntities[referingType].Clear();
@@ -300,7 +300,7 @@ namespace Signum.Engine.Cache
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
 
-                Transaction.PostRealCommit += () =>
+                Transaction.PostRealCommit += ud =>
                 {
                     InvalidateAllConnectedTypes(typeof(T), true);
                 }; 
@@ -334,7 +334,7 @@ namespace Signum.Engine.Cache
             void DisableAndInvalidate()
             {
                 DisabledTypesDuringTransaction().Add(typeof(T));
-                Transaction.PostRealCommit += () => Invalidate(false);
+                Transaction.PostRealCommit += ud => Invalidate(false);
             }
 
             public void Invalidate(bool isClean)

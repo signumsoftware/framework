@@ -131,7 +131,7 @@ namespace Signum.Engine.Processes
         static void ProcessExecution_Saving(ProcessExecutionDN pe)
         {
             if (pe.Modified.Value)
-                Transaction.PostRealCommit += () =>
+                Transaction.PostRealCommit += ud =>
                 {
                     switch (pe.State)
                     {

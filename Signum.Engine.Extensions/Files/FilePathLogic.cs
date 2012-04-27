@@ -88,7 +88,7 @@ namespace Signum.Engine.Files
         {
             var list = query.Select(a => a.FullPhysicalPath).ToList();
 
-            Transaction.PostRealCommit += () =>
+            Transaction.PostRealCommit += ud =>
             {
                 foreach (var fullPath in list)
                 {
