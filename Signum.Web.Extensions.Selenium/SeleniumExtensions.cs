@@ -7,6 +7,7 @@ using Selenium;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Utilities;
+using System.Linq.Expressions;
 
 namespace Signum.Web.Selenium
 {
@@ -126,23 +127,30 @@ namespace Signum.Web.Selenium
         //public const int DefaultAjaxTimeout = 10000;
         public const int DefaultAjaxTimeout = 15000;
 
-        public static void WaitAjaxFinished(this ISelenium selenium, Func<bool> condition)
+        public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition)
         {
             WaitAjaxFinished(selenium, condition, DefaultAjaxTimeout);
         }
 
-        public static void WaitAjaxFinished(this ISelenium selenium, Func<bool> condition, int timeout)
+        public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition, int? timeout = null)
         {
-            DateTime limit = DateTime.Now.AddMilliseconds(timeout);
-            Debug.WriteLine(timeout);
-            Debug.WriteLine(condition());
-            while (DateTime.Now < limit && !condition())
+            var func = condition.Compile();
+
+            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
+
+            if (func())
+                return;
+
+            do
             {
-                Debug.WriteLine(DateTime.Now < limit);
-                Debug.WriteLine(condition());
                 Thread.Sleep(500);
-            }
-            Assert.IsTrue(condition());
+
+                if (func())
+                    return;
+
+            } while (DateTime.Now < limit);
+
+            throw new TimeoutException("The expression took more than {0} ms:\r\n{1}".Formato(timeout ?? DefaultAjaxTimeout, condition.NiceToString()));
         }
 
         public static string PopupSelector(string prefix)
