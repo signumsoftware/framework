@@ -184,11 +184,11 @@
   <data name="ExpressedIn" xml:space="preserve">
     <value>expresado en </value>
   </data>
-  <data name="LastExecution" xml:space="preserve">
-    <value>Última ejecución</value>
+  <data name="TheTextForTheSMSMessageExceedsTheLengthLimit" xml:space="preserve">
+    <value>El texto del mensaje SMS supera el límite de longitud</value>
   </data>
-  <data name="Executions" xml:space="preserve">
-    <value>Ejecuciones</value>
+  <data name="StatusCanNotBeUpdatedForNonSentMessages" xml:space="preserve">
+    <value>Estado no puede ser actualizado para mensajes no enviados</value>
   </data>
   <data name="IncorrectPassword" xml:space="preserve">
     <value>Contraseña incorrecta</value>
@@ -271,8 +271,8 @@
   <data name="HelpNotLoaded" xml:space="preserve">
     <value>Ayuda no cargada</value>
   </data>
-  <data name="NotRegisteredInEmailLogic" xml:space="preserve">
-    <value>{0} no está resgistrado en EmailLogic</value>
+  <data name="NotAuthorizedTo01" xml:space="preserve">
+    <value>No autorizado a {0} {1}</value>
   </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
     <value>El ProcessExecution {0} ya no está ejecutándose</value>

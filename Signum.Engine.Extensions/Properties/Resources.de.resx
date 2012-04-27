@@ -310,7 +310,4 @@
   <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
     <value>Sie verlangt vor kurzem ein neues Passwort</value>
   </data>
-  <data name="NotAuthorizedToRead0NoApplicableEntityGroups" xml:space="preserve">
-    <value>Not authorized to read {0} (no applicable entity groups)</value>
-  </data>
 </root>
