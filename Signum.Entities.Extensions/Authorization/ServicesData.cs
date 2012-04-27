@@ -180,7 +180,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
+    [Serializable, AvoidLocalization]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
         public TypeAllowedAndConditions(TypeAllowed fallback, ReadOnlyCollection<TypeConditionRule> conditions)
@@ -249,7 +249,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
+    [Serializable, AvoidLocalization]
     public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
     {
         public TypeConditionRule(Enum conditionName, TypeAllowed allowed)
