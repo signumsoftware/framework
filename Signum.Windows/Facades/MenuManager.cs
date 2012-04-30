@@ -24,17 +24,34 @@ namespace Signum.Windows
             Tasks += TaskSetHeader;
             Tasks += TaskSetIcon;
             Tasks += TaskKeyboardShortcut;
+            Tasks += TaskCleanSeparators;
         }
+
+       
      
         public static void TaskKeyboardShortcut(MenuItem menuItem)
-        {
+        { 
             ShortcutHelper.SetMenuItemShortcuts(menuItem);
         }
 
         public static void TaskCollapseSubMenuParent(MenuItem menuItem)
         {
-            if (menuItem.Items.Count > 0 && menuItem.Items.Cast<MenuItem>().All(mi => mi.Visibility == Visibility.Collapsed))
+            if (menuItem.Items.Count > 0 && menuItem.Items.OfType<MenuItem>().All(mi => mi.Visibility == Visibility.Collapsed))
                 menuItem.Visibility = Visibility.Collapsed;
+        }
+
+        static void TaskCleanSeparators(MenuItem menuItem)
+        {
+            menuItem.Items.Cast<Control>().Where(a => a.Visibility == Visibility.Visible).BiSelect((first, second) =>
+            {
+                if (second is Separator && first is Separator)
+                    return (Separator)second;
+                if (second is Separator && first == null)
+                    return (Separator)second;
+                if (first is Separator && second == null)
+                    return (Separator)first;
+                return null;
+            }, BiSelectOptions.InitialAndFinal).NotNull().ToList().ForEach(a => a.Visibility = Visibility.Collapsed);
         }
 
         public static void TaskSetHeader(MenuItem menuItem)

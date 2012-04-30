@@ -186,7 +186,7 @@ namespace Signum.Engine
         {
             var cc = CanUseCache<RT>(true);
             if (cc != null)
-                return cc.RetriveLite(id).ToLite<T>();
+                return new Lite<T>(typeof(RT), id, cc.GetToString(id));
 
             var result = Database.Query<RT>().Select(a => a.ToLite<T>()).SingleOrDefaultEx(a => a.Id == id);
             if (result == null)
@@ -199,7 +199,7 @@ namespace Signum.Engine
         {
             var cc = CanUseCache<T>(true);
             if (cc != null)
-                return cc.RetriveLite(id);
+                return new Lite<T>(id, cc.GetToString(id));
 
             var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
             if (result == null)
@@ -233,7 +233,7 @@ namespace Signum.Engine
         {
             var cc = CanUseCache<T>(true);
             if (cc != null)
-                return cc.RetriveLite(id).ToString();
+                return cc.GetToString(id).ToString();
 
             return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
         }
@@ -290,7 +290,7 @@ namespace Signum.Engine
             var cc = CanUseCache<T>(true);
             if (cc != null)
             {
-                return cc.GetAllIds().Select(id => cc.RetriveLite(id)).ToList();
+                return cc.GetAllIds().Select(id => new Lite<T>(id, cc.GetToString(id))).ToList();
             }
 
             return Database.Query<T>().Select(e => e.ToLite()).ToList();
@@ -375,7 +375,7 @@ namespace Signum.Engine
             var cc = CanUseCache<T>(true);
             if (cc != null)
             {
-                return ids.Select(id => cc.RetriveLite(id)).ToList();
+                return ids.Select(id => new Lite<T>(id, cc.GetToString(id))).ToList();
             }
 
             var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToDictionary(a => a.Id);

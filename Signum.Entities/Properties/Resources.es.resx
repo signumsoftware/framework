@@ -150,9 +150,6 @@
   <data name="_0IsNotAllowedOnState1" xml:space="preserve">
     <value>{0} no está permitido en estado  {1}</value>
   </data>
-  <data name="_0IsNotAValidIdentifier" xml:space="preserve">
-    <value>'{0}' no es un identificador válido</value>
-  </data>
   <data name="And" xml:space="preserve">
     <value> y </value>
   </data>
@@ -267,9 +264,6 @@
   <data name="InvalidFormat" xml:space="preserve">
     <value>Formato inválido</value>
   </data>
-  <data name="LockeableEntity_Locked" xml:space="preserve">
-    <value>Bloqueado</value>
-  </data>
   <data name="Lowercase" xml:space="preserve">
     <value>Minúsculas</value>
   </data>
@@ -300,8 +294,8 @@
   <data name="Second" xml:space="preserve">
     <value>Segundo</value>
   </data>
-  <data name="State0NotRegisteredInStateValidator" xml:space="preserve">
-    <value>El estado {0} no está registrado en StateValidator</value>
+  <data name="TheNumberOf0IsBeingMultipliedBy1" xml:space="preserve">
+    <value>El número de {0} está siendo multiplicado por {1}</value>
   </data>
   <data name="Telephone" xml:space="preserve">
     <value>Teléfono</value>
@@ -363,8 +357,8 @@
   <data name="ColorDN" xml:space="preserve">
     <value>Color</value>
   </data>
-  <data name="ColorDN_Hex" xml:space="preserve">
-    <value>Hex</value>
+  <data name="FilterOperation_NotStartsWith" xml:space="preserve">
+    <value>no empieza por</value>
   </data>
   <data name="CorruptEntity" xml:space="preserve">
     <value>Entidad corruptible</value>
@@ -429,28 +423,31 @@
   <data name="AlertQueries_NotAttended" xml:space="preserve">
     <value>No asistió</value>
   </data>
+  <data name="FilterOperation_NotLike" xml:space="preserve">
+    <value>no como</value>
+  </data>
+  <data name="FilterOperation_NotEndsWith" xml:space="preserve">
+    <value>no termina con</value>
+  </data>
+  <data name="FilterOperation_NotContains" xml:space="preserve">
+    <value>no contiene</value>
+  </data>
+  <data name="ColorDN_Argb" xml:space="preserve">
+    <value>Argb</value>
+  </data>
   <data name="CollectionElementType" xml:space="preserve">
-    <value>Tipo de elemento de colección</value>
+    <value>Tipo elemento de colección</value>
   </data>
   <data name="CollectionElementType_All" xml:space="preserve">
     <value>Todos</value>
   </data>
   <data name="CollectionElementType_Any" xml:space="preserve">
-    <value>Cualquiera</value>
+    <value>Alguno</value>
   </data>
   <data name="CollectionElementType_Element" xml:space="preserve">
     <value>Elemento</value>
   </data>
-  <data name="FilterOperation_NotContains" xml:space="preserve">
-    <value>no contiene</value>
-  </data>
-  <data name="FilterOperation_NotEndsWith" xml:space="preserve">
-    <value>no acaba por</value>
-  </data>
-  <data name="FilterOperation_NotLike" xml:space="preserve">
-    <value>no like</value>
-  </data>
-  <data name="FilterOperation_NotStartsWith" xml:space="preserve">
-    <value>no empieza por</value>
+  <data name="ComparisonType" xml:space="preserve">
+    <value>Tipo comparación</value>
   </data>
 </root>

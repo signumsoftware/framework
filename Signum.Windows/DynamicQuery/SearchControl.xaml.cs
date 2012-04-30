@@ -303,11 +303,24 @@ namespace Signum.Windows
             timer.Tick += new EventHandler(timer_Tick);
         }
 
+        public static readonly DependencyProperty HideIfNotFindableProperty =
+            DependencyProperty.Register("HideIfNotFindable", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool HideIfNotFindable
+        {
+            get { return (bool)GetValue(HideIfNotFindableProperty); }
+            set { SetValue(HideIfNotFindableProperty, value); }
+        }
+
         private void QueryNameChanged(DependencyPropertyChangedEventArgs s)
         {
             if (DesignerProperties.GetIsInDesignMode(this) || s.NewValue == null)
             {
                 return;
+            }
+
+            if (s.NewValue != null && !Navigator.IsFindable(s.NewValue))
+            {
+                HideSeachControl(this);
             }
 
             Settings = Navigator.GetQuerySettings(s.NewValue);
@@ -327,6 +340,12 @@ namespace Signum.Windows
             if (entityColumn == null)
                 throw new InvalidOperationException("Entity Column not found");
         }
+
+        public static Action<SearchControl> HideSeachControl = sc =>
+        {
+            var emptyParent = (FrameworkElement)sc.VisualParents().Where(a => a is SearchControl || a is GroupBox || a is TabControl || a is Panel && ((Panel)a).Children.Count == 0).Last();
+            emptyParent.Visibility = Visibility.Collapsed;
+        };
 
         ColumnDescription entityColumn;
 

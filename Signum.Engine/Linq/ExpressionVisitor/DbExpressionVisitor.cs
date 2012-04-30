@@ -212,7 +212,7 @@ namespace Signum.Engine.Linq
             var newId = Visit(lite.Id);
             var newTypeId = Visit(lite.TypeId);
             if (newRef != lite.Reference || newToStr != lite.ToStr || newId != lite.Id || newTypeId != lite.TypeId)
-                return new LiteReferenceExpression(lite.Type, newRef, newId, newToStr, newTypeId);
+                return new LiteReferenceExpression(lite.Type, newRef, newId, newToStr, newTypeId, lite.CustomToString);
             return lite;
         }
 

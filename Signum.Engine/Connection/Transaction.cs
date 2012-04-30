@@ -41,7 +41,7 @@ namespace Signum.Engine
 
         interface ICoreTransaction
         {
-            event Action PostRealCommit;
+            event Action<Dictionary<string, object>> PostRealCommit;
             void CallPostRealCommit();
             event Action PreRealCommit;
             DbConnection Connection { get; }
@@ -68,7 +68,7 @@ namespace Signum.Engine
                 this.parent = parent;
             }
 
-            public event Action PostRealCommit
+            public event Action<Dictionary<string, object>> PostRealCommit
             {
                 add { parent.PostRealCommit += value; }
                 remove { parent.PostRealCommit -= value; }
@@ -115,7 +115,7 @@ namespace Signum.Engine
             public DbTransaction Transaction { get; private set; }
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action PostRealCommit;
+            public event Action<Dictionary<string, object>> PostRealCommit;
             public event Action PreRealCommit;
 
             IsolationLevel? IsolationLevel;
@@ -164,9 +164,9 @@ namespace Signum.Engine
             {
                 if (PostRealCommit != null)
                 {
-                    foreach (Action item in PostRealCommit.GetInvocationList())
+                    foreach (Action<Dictionary<string, object>> item in PostRealCommit.GetInvocationList())
                     {
-                        item();
+                        item(this.UserData);
                     }
                 }
             }
@@ -211,7 +211,7 @@ namespace Signum.Engine
             string savePointName;
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action PostRealCommit;
+            public event Action<Dictionary<string, object>> PostRealCommit;
             public event Action PreRealCommit;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
@@ -286,7 +286,7 @@ namespace Signum.Engine
             public DbTransaction Transaction { get{return null;}}
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
-            public event Action PostRealCommit;
+            public event Action<Dictionary<string, object>> PostRealCommit;
             public event Action PreRealCommit;
 
             public NoneTransaction(ICoreTransaction parent)
@@ -453,7 +453,7 @@ namespace Signum.Engine
             return currents.Value.GetOrThrow(Connector.Current, "No Transaction created yet");
         }
 
-        public static event Action PostRealCommit
+        public static event Action<Dictionary<string, object>> PostRealCommit
         {
             add { GetCurrent().PostRealCommit += value; }
             remove { GetCurrent().PostRealCommit -= value; }

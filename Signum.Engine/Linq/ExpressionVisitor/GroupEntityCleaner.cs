@@ -46,7 +46,7 @@ namespace Signum.Engine.Linq
             var newTypeId = Visit(lite.TypeId);
             var reference = Visit(lite.Reference);
             var toStr = Visit(lite.ToStr);
-            return new LiteReferenceExpression(lite.Type, reference, newId, toStr, newTypeId);
+            return new LiteReferenceExpression(lite.Type, reference, newId, toStr, newTypeId, lite.CustomToString);
         }
 
         protected override Expression VisitFieldInit(FieldInitExpression fieldInit)

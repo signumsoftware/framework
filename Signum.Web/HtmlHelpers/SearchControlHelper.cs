@@ -29,6 +29,7 @@ namespace Signum.Web
         public bool Navigate { get; set; }
         public string PopupViewPrefix { get; set; }
         public WriteQueryName WriteQueryName { get; set; }
+        public string QueryLabelText { get; set; }
     }
 
     public enum WriteQueryName
@@ -93,7 +94,7 @@ namespace Signum.Web
                 sb.Add(new HtmlTag("span")
                     .Class("count-search")
                     .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
-                    .SetInnerText(QueryUtils.GetNiceName(findOptions.QueryName)));
+                    .SetInnerText(options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName)));
 
             if (options.Navigate)
             {
