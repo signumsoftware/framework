@@ -43,7 +43,7 @@ namespace Signum.Engine.Authorization
                         var methods = FacadeMethodLogic.RetrieveOrGenerateFacadeMethods().ToDictionary(a => a.ToString());
                         return cache.ImportXml(x, "FacadeMethods", "FacadeMethod", roles, str =>
                         {
-                            var m = methods[str];
+                            var m = methods.GetOrThrow(str);
                             if (m.IsNew)
                                 m.Save();
                             return m;
