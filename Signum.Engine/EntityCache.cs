@@ -18,8 +18,10 @@ namespace Signum.Engine
 {
     public class EntityCache: IDisposable
     {
-        internal class RealEntityCache : Dictionary<IdentityTuple, IdentifiableEntity>
+        internal class RealEntityCache
         {
+            readonly Dictionary<IdentityTuple, IdentifiableEntity> dic = new Dictionary<IdentityTuple,IdentifiableEntity>();
+
             public void Add(IdentifiableEntity ie)
             {
                 if (ie == null)
@@ -27,22 +29,22 @@ namespace Signum.Engine
 
                 var tuple = new IdentityTuple(ie);
 
-                IdentifiableEntity ident = this.TryGetC(tuple);
+                IdentifiableEntity ident = dic.TryGetC(tuple);
 
                 if (ident == null)
-                    this.Add(tuple, ie);
+                    dic.Add(tuple, ie);
                 else if (ident != ie)
                    throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".Formato(ie.GetType().Name, ie.id));
             }
 
             public bool Contains(Type type, int id)
             {
-                return this.ContainsKey(new IdentityTuple(type, id));
+                return dic.ContainsKey(new IdentityTuple(type, id));
             }
 
             public IdentifiableEntity Get(Type type, int id)
             {
-                return this.TryGetC(new IdentityTuple(type, id));
+                return dic.TryGetC(new IdentityTuple(type, id));
             }
 
             public void AddFullGraph(IdentifiableEntity ie)
@@ -76,6 +78,11 @@ namespace Signum.Engine
             internal bool HasRetriever
             {
                 get{return retriever != null; }
+            }
+
+            internal bool TryGetValue(IdentityTuple tuple, out IdentifiableEntity result)
+            {
+                return dic.TryGetValue(tuple, out result);
             }
         }
 
