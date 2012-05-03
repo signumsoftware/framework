@@ -318,7 +318,7 @@ namespace Signum.Windows
                 return;
             }
 
-            if (s.NewValue != null && !Navigator.IsFindable(s.NewValue))
+            if (!Navigator.IsFindable(s.NewValue))
             {
                 HideSeachControl(this);
             }
