@@ -4,7 +4,6 @@
     xmlns:m="clr-namespace:Signum.Windows"
     x:Class="Signum.Windows.EntityLine"
     x:Name="me" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:diagnostics="clr-namespace:System.Diagnostics;assembly=WindowsBase"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="332.993" 
     
     Style="{DynamicResource toolTip}">

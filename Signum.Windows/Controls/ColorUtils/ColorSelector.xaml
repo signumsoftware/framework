@@ -4,7 +4,6 @@
     xmlns:m="clr-namespace:Signum.Windows"
     xmlns:mc="clr-namespace:Signum.Windows.ColorUtils"
     xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
-    xmlns:diagnostics="clr-namespace:System.Diagnostics;assembly=WindowsBase"
     x:Name="me">
 	<UserControl.Resources>
 		<DrawingBrush 
