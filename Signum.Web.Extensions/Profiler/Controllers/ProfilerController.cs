@@ -17,6 +17,7 @@ using Signum.Entities;
 using Signum.Web.Controllers;
 using System.Collections.Generic;
 using Signum.Entities.Profiler;
+using Signum.Engine.Profiler;
 
 namespace Signum.Web.Profiler
 {
@@ -137,6 +138,18 @@ namespace Signum.Web.Profiler
             Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
             return RedirectToAction("Times");
         }
+
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult OverrideSessionTimeout(int? sec)
+        {
+            ProfilerPermissions.OverrideSessionTimeout.Authorize();
+
+            ProfilerLogic.SessionTimeout = sec;
+
+            return Content("Session Timeout overriden to {0} seconds".Formato(ProfilerLogic.SessionTimeout));
+        }
+
     }
 
     public enum SqlProfileResumeOrder

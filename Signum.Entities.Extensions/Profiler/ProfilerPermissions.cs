@@ -9,5 +9,6 @@ namespace Signum.Entities.Profiler
     {
         ViewTimeTracker,
         ViewHeavyProfiler, 
+        OverrideSessionTimeout
     }
 }

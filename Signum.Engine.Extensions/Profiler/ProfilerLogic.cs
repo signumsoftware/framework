@@ -7,12 +7,20 @@ using System.Reflection;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Authorization;
 using Signum.Entities.Profiler;
+using Signum.Utilities;
 
 namespace Signum.Engine.Profiler
 {
     public static class ProfilerLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool timeTracker, bool heavyProfiler)
+        static Variable<int?> SessionTimeoutVariable = Statics.SessionVariable<int?>("sessionTimeout");
+        public static int? SessionTimeout
+        {
+            get { return SessionTimeoutVariable.Value; }
+            set { SessionTimeoutVariable.Value = value; }
+        }
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -21,6 +29,9 @@ namespace Signum.Engine.Profiler
 
                 if (heavyProfiler)
                     PermissionAuthLogic.RegisterPermissions(ProfilerPermissions.ViewHeavyProfiler); 
+
+                if(overrideSessionTimeout)
+                    PermissionAuthLogic.RegisterPermissions(ProfilerPermissions.OverrideSessionTimeout); 
             }
         }
     }
