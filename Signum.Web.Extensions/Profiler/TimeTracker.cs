@@ -4,10 +4,12 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Engine;
+using Signum.Engine.Profiler;
 
 namespace Signum.Web.Profiler
 {
-    public class TrackTimeFilter : ActionFilterAttribute
+    public class ProfilerFilter : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
@@ -20,6 +22,14 @@ namespace Signum.Web.Profiler
             IDisposable profiler = HeavyProfiler.Log(role: "MvcRequest", aditionalData: filterContext.HttpContext.Request.Url.PathAndQuery);
             if (profiler != null)
                 viewData.Add("profiler", profiler);
+
+
+            if (ProfilerLogic.SessionTimeout != null)
+            {
+                IDisposable sessionTimeout = Connector.CommandTimeoutScope(ProfilerLogic.SessionTimeout.Value);
+                if (sessionTimeout != null)
+                    viewData.Add("sessiontimeout", sessionTimeout);
+            }
         }
 
         public override void OnActionExecuted(ActionExecutedContext filterContext)
@@ -29,6 +39,7 @@ namespace Signum.Web.Profiler
                 ViewDataDictionary viewData = filterContext.Controller.ViewData;
                 Dispose(viewData, "profiler");
                 Dispose(viewData, "elapsed");
+                Dispose(viewData, "sessiontimeout");
             }
 
             base.OnActionExecuted(filterContext);
@@ -51,6 +62,7 @@ namespace Signum.Web.Profiler
             Dispose(viewData, "viewProfiler");
             Dispose(viewData, "profiler");
             Dispose(viewData, "elapsed");
+            Dispose(viewData, "sessiontimeout");
         }
 
         private void Dispose(ViewDataDictionary viewData, string key)
