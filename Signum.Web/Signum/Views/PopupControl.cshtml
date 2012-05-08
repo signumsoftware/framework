@@ -1,0 +1,30 @@
+﻿@using Signum.Entities.Reflection
+@using Signum.Web.Properties
+@model TypeContext
+<div id="@Model.Compose("panelPopup")" data-title="@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)">
+    <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString())</span>
+    <div class="sf-button-bar">
+        @if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
+        {  
+            <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
+                OK</button>                
+        }
+        @if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible] && Navigator.Manager.ShowSave(Model.UntypedValue.GetType()))
+        {  
+            <button id="@Model.Compose("ebSave")" class="sf-entity-button sf-save" @(ViewData[ViewDataKeys.OnSave] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnSave] + "\"") : null)>
+                @Resources.Save</button>                
+        }
+        @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
+        { 
+           Buttons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
+           ControllerContext = this.ViewContext,
+           PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
+           Prefix =  Model.ControlID
+        },  (ModifiableEntity)Model.UntypedValue).ToString(Html)
+    </div>
+    @Html.ValidationSummaryAjax(Model)
+    @Html.PopupHeader()
+    <div id="@Model.Compose("divMainControl")" class="sf-main-control" data-prefix="@Model.ControlID">
+        @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
+    </div>
+</div>

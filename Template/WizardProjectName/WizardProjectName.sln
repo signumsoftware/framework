@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizardProjectName", "WizardProjectName\WizardProjectName.csproj", "{7D6E351E-9F48-406C-808C-6232A967088D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{92AF1731-87D9-4714-B180-343BA7044313}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://192.168.0.8:8080/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Test\\Test.csproj
+		SccProjectName1 = Test
+		SccLocalPath1 = Test
+		SccProjectUniqueName2 = WizardProjectName\\WizardProjectName.csproj
+		SccProjectName2 = WizardProjectName
+		SccLocalPath2 = WizardProjectName
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D6E351E-9F48-406C-808C-6232A967088D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D6E351E-9F48-406C-808C-6232A967088D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D6E351E-9F48-406C-808C-6232A967088D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D6E351E-9F48-406C-808C-6232A967088D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92AF1731-87D9-4714-B180-343BA7044313}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92AF1731-87D9-4714-B180-343BA7044313}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92AF1731-87D9-4714-B180-343BA7044313}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92AF1731-87D9-4714-B180-343BA7044313}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

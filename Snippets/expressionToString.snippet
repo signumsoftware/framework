@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Expression ToString</Title>
+      <Shortcut>expressionToString</Shortcut>
+      <Description>New Extension ToString that removes toStr column</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Utilities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>System.Linq.Expressions</Namespace>
+        </Import>
+      </Imports>
+      <Declarations>
+        <Literal>
+          <ID>methodName</ID>
+          <ToolTip>NameOfTheMethod</ToolTip>
+          <Default>Method</Default>
+        </Literal>
+        <Literal>
+          <ID>type</ID>
+          <ToolTip>Type</ToolTip>
+          <Default>IdentifiableEntity</Default>
+        </Literal>
+        <Literal>
+          <ID>field</ID>
+          <ToolTip>Field Name</ToolTip>
+          <Default>Name</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[static Expression<Func<$type$, string>> ToStringExpression = e => e.$field$; 
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
