@@ -52,7 +52,7 @@ namespace Signum.Engine
         {
             var old = scopeTimeout.Value;
             scopeTimeout.Value = timeout;
-            return new Disposable(() => scopeTimeout.Value = timeout);
+            return new Disposable(() => scopeTimeout.Value = old);
         }
 
 
