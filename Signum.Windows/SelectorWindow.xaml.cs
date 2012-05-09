@@ -52,27 +52,38 @@ namespace Signum.Windows
             set { SetValue(MessageProperty, value); }
         }
 
-        public static bool ShowDialog<T>(T[] elements, Func<T, ImageSource> relatedImage, Func<T, string> relatedText, out T selectedElement)
-        {
-            return ShowDialog<T>(elements, relatedImage, relatedText, out selectedElement, Signum.Windows.Properties.Resources.SelectAnElement, Signum.Windows.Properties.Resources.SelectAnElement, null);
-        }
 
-        public static bool ShowDialog<T>(T[] elements, Func<T, ImageSource> relatedImage, Func<T, string> relatedText, out T selectedElement, string title, string message, Window owner)
+        public static bool ShowDialog<T>(IEnumerable<T> elements, out T selectedElement,
+            Func<T, ImageSource> elementIcon = null,
+            Func<T, string> elementText = null,
+            string title = null,
+            string message = null,
+            Window owner = null)
         {
-            if (relatedImage == null)
-                relatedImage = o => null;
-            if (relatedText == null)
-                relatedText = o => o.ToString();
-            SelectorWindow w = new SelectorWindow(){
+            if (title == null)
+                title = Signum.Windows.Properties.Resources.SelectAnElement;
+
+            if (message == null)
+                message = Signum.Windows.Properties.Resources.SelectAnElement;
+
+            if (elementIcon == null)
+                elementIcon = o => null;
+
+            if (elementText == null)
+                elementText = o => o.ToString();
+
+            SelectorWindow w = new SelectorWindow()
+            {
                 Owner = owner,
                 Title = title,
                 Message = message,
-                Elements = elements.Select(e => new ElementInfo() 
+                Elements = elements.Select(e => new ElementInfo()
                 {
                     Element = e,
-                    Image = relatedImage(e),
-                    Text = relatedText(e)
-                }).ToArray()};
+                    Image = elementIcon(e),
+                    Text = elementText(e)
+                }).ToArray()
+            };
             bool res = w.ShowDialog() ?? false;
             if (res)
                 selectedElement = (T)w.SelectedElement;
