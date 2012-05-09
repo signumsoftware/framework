@@ -31,7 +31,18 @@ namespace Signum.Engine.Maps
 
         public TimeZoneMode TimeZoneMode { get; set; }
 
-        public Assembly MainAssembly { get; set; }
+        Version version;
+        public Version Version
+        {
+            get
+            {
+                if (version == null)
+                    throw new InvalidOperationException("Schema.Version is not set");
+
+                return version; 
+            }
+            set { this.version = value; }
+        }
 
         public SchemaSettings Settings { get; private set; }
 
@@ -280,13 +291,13 @@ namespace Signum.Engine.Maps
 
         public class InitEventDictionary
         {
-            Dictionary<InitLevel, InitEventHandler> dict = new Dictionary<InitLevel, InitEventHandler>();
+            Dictionary<InitLevel, Action> dict = new Dictionary<InitLevel, Action>();
 
             Dictionary<MethodInfo, long> times = new Dictionary<MethodInfo, long>();
 
             InitLevel? initLevel;
 
-            public InitEventHandler this[InitLevel level]
+            public Action this[InitLevel level]
             {
                 get { return dict.TryGetC(level); }
                 set
@@ -312,13 +323,13 @@ namespace Signum.Engine.Maps
 
             void InitializeJust(InitLevel currentLevel)
             {
-                InitEventHandler h = dict.TryGetC(currentLevel);
+                Action h = dict.TryGetC(currentLevel);
                 if (h == null)
                     return;
 
-                var handlers = h.GetInvocationList().Cast<InitEventHandler>();
+                var handlers = h.GetInvocationList().Cast<Action>();
 
-                foreach (InitEventHandler handler in handlers)
+                foreach (Action handler in handlers)
                 {
                     Stopwatch sw = Stopwatch.StartNew();
                     handler();
@@ -473,8 +484,8 @@ namespace Signum.Engine.Maps
 
         internal Dictionary<string, ITable> GetDatabaseTables()
         {
-            return Schema.Current.Tables.Values.SelectMany(t =>
-                t.Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd(t))
+            return Schema.Current.Tables.Values
+                .SelectMany(t => t.RelationalTables().Cast<ITable>().PreAnd(t))
                 .ToDictionary(a => a.Name);
         }
 
@@ -620,10 +631,6 @@ namespace Signum.Engine.Maps
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
     public delegate void QueryHandler<T>(IQueryable<T> query);
-
-    public delegate void InitEventHandler();
-    public delegate void SyncEventHandler();
-    public delegate void GenSchemaEventHandler();
 
     public class SavedEventArgs
     {
