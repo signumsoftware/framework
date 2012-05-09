@@ -239,7 +239,7 @@ namespace Signum.Engine
                 entity.Modified = null;
                 entity.IsNew = false;
 
-                entityCache.Add(kvp.Key, entity);
+                entityCache.Add(entity);
             }
 
             if(embeddedPostRetrieving != null)
