@@ -3,15 +3,9 @@
 @Html.ScriptCss("~/Mailing/Content/Mail.css")
 @using (var nc = Html.TypeContext<NewsletterDN>())
 {  
-    <div class="@(nc.Value.State == NewsletterState.Created ? "" : "sf-tabs")">
-        @if (!nc.Value.IsNew)
-        {
-            <ul>
-                <li><a href="#emTabMain">Newsletter</a></li>
-                <li><a href="#emTabSend">Deliveries</a></li>
-            </ul>
-        }
-        <div id="emTabMain">
+    <div class="@(nc.Value.IsNew ? "" : "sf-tabs")">
+        <fieldset id="emTabMain">
+            <legend>Newsletter</legend>
             @Html.ValueLine(nc, n => n.Name)
            
             @Html.HiddenRuntimeInfo(nc, n => n.Query)
@@ -54,21 +48,22 @@
             @Html.EntityCombo(nc, n => n.SMTPConfig)
             @Html.ValueLine(nc, n => n.From)
             @Html.ValueLine(nc, n => n.DiplayFrom)
-        </div>
+        </fieldset>
         @if (!nc.Value.IsNew)
         {
-            <div id="emTabSend">
+            <fieldset id="emTabSend">
+                <legend>Deliveries</legend>
                 @Html.ValueLine(nc, n => n.NumLines)
                 @Html.ValueLine(nc, n => n.NumErrors)
                 <fieldset>
                     <legend>Email recipients</legend>
                     @Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
-               {
-                   FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
-                   SearchOnLoad = true,
-               }, new Context(nc, "ncSent"))
+                    {
+                        FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
+                        SearchOnLoad = true,
+                    }, new Context(nc, "ncSent"))
                 </fieldset>
-            </div>
+            </fieldset>
         }
     </div>    
 }
