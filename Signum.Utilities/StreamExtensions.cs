@@ -21,17 +21,6 @@ namespace Signum.Utilities
             }
         }
 
-        public static void CopyTo(this Stream origin, Stream destiny)
-        {
-            byte[] buffer = new byte[BufferSize];
-            while (true)
-            {
-                int read = origin.Read(buffer, 0, buffer.Length);
-                if (read <= 0)
-                    return;
-                destiny.Write(buffer, 0, read);
-            }
-        }
 
         public static void WriteAllBytes(this Stream str, byte[] data)
         {
@@ -81,6 +70,84 @@ namespace Signum.Utilities
             {
                 return StreamsAreEqual(s1, s2);
             }
+        }
+    }
+
+    public class ProgresssStream : Stream
+    {
+        readonly Stream InnerStream;
+
+        public event EventHandler ProgressChanged;
+
+        public ProgresssStream(Stream innerStream)
+        {
+            this.InnerStream = innerStream;
+        }
+
+        public double GetProgress()
+        {
+            return ((double)Position) / Length;
+        }
+
+        public override bool CanRead
+        {
+            get { return InnerStream.CanRead; }
+        }
+
+        public override bool CanSeek
+        {
+            get { return InnerStream.CanSeek; }
+        }
+
+        public override bool CanWrite
+        {
+            get { return InnerStream.CanWrite; }
+        }
+
+        public override void Flush()
+        {
+            InnerStream.Flush();
+        }
+
+        public override long Length
+        {
+            get { return InnerStream.Length; }
+        }
+
+        public override long Position
+        {
+            get { return InnerStream.Position; }
+            set { InnerStream.Position = value; }
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            int result = InnerStream.Read(buffer, offset, count);
+            if (ProgressChanged != null)
+                ProgressChanged(this, EventArgs.Empty);
+            return result;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            return InnerStream.Seek(offset, origin);
+        }
+
+        public override void SetLength(long value)
+        {
+            InnerStream.SetLength(value);
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            InnerStream.Write(buffer, offset, count);
+            if (ProgressChanged != null)
+                ProgressChanged(this, EventArgs.Empty);
+        }
+
+        public override void Close()
+        {
+            InnerStream.Close();
         }
     }
 }
