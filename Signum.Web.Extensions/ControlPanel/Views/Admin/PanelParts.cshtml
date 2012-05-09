@@ -10,21 +10,20 @@
         <tr>
         @for (int col = 1; col <= Model.NumberOfColumns; col++)
         { 
-            
-            <td class="sf-cp-column" data-column="@col">
-                <div class="sf-cp-droppable"></div>
+            <td class="sf-ftbl-column" data-column="@col">
+                <div class="sf-ftbl-droppable"></div>
                 @for (int row = 1; row <= rowNumber; row++)
                 {
                     PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
                     if (pp != null)
                     {
-                        <div class="sf-cp-part-container">
+                        <div class="sf-ftbl-part-container">
                             @{ 
                                 var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).FirstEx();
                                 Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPart"), ppTc);    
                             }
                         </div>
-                        <div class="sf-cp-droppable"></div>
+                        <div class="sf-ftbl-droppable"></div>
                     }
                 }
             </td>

@@ -1,68 +1,17 @@
-﻿.sf-cp-column
-{
-    float: left;
-    vertical-align: top;   
-    min-width: 100px;
-}
-.sf-cp-part-container
-{
-    padding: 0 10px;    
-    vertical-align: top;
-    min-height: 30px;    
-}
-#sfCpContainer
+﻿#sfCpContainer
 {
     width: 100%;
 }
-#sfCpContainer .sf-cp-part-container
+#sfCpContainer .sf-ftbl-part-container
 {
     padding: 10px; 
 }
-.sf-cp-part
-{
-    padding: 2px;    
-}
-.sf-cp-part-header
-{
-    padding: 3px 10px;
-    line-height: 20px;
-    margin-bottom: 2px;     
-}
+
 #sfCpAdminContainer .ui-draggable-dragging
 {
     cursor: default !important;    
 }
-.sf-cp-part-header .sf-remove
-{
-    float: right;
-    margin: 8px 4px 0 0;
-}
-.sf-cp-part-header .sf-value-line
-{
-    padding-left: 5px;    
-}
-.sf-cp-dragging
-{
-    border: dotted 1px #bbb;
-}
-.sf-cp-droppable
-{
-    height: 20px;
-}
-.sf-cp-droppable-active
-{
-    border: dashed #888 4px !important;
-    height: 50px;
-}
-.sf-cp-part .sf-repeater-element
-{
-    padding: 2px 10px;
-}
-.sf-cp-part .sf-repeater-element legend
-{
-    float: left;
-    margin-right: 10px;
-}
+
 .sf-cp-link-list li
 {
     padding: 5px 0 5px 5px;
