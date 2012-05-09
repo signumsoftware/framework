@@ -532,7 +532,7 @@ namespace Signum.Engine.Linq
 
                 FieldInitExpression fie = new FieldInitExpression(lite.RuntimeType, null, id, ProjectionToken.External);
 
-                Type staticType = Reflector.ExtractLite(liteType);
+                Type staticType = Lite.Extract(liteType);
                 Expression reference = staticType == fie.Type ? (Expression)fie :
                     new ImplementedByExpression(staticType,
                         new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());

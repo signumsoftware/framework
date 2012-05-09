@@ -100,7 +100,7 @@ namespace Signum.Web
 
             EntityRepeater el = new EntityRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            EntityBaseHelper.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S));
+            EntityBaseHelper.ConfigureEntityBase(el, typeof(S).CleanType());
 
             Common.FireCommonTasks(el);
 

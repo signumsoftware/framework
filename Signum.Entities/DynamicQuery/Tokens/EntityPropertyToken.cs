@@ -112,7 +112,7 @@ namespace Signum.Entities.DynamicQuery
             PropertyRoute parent = Parent.GetPropertyRoute();
             if (parent == null)
             {
-                Type type = Reflector.ExtractLite(Parent.Type); //Because Parent.Type is always a lite
+                Type type = Lite.Extract(Parent.Type); //Because Parent.Type is always a lite
                 if (type != null)
                     return PropertyRoute.Root(type).Add(PropertyInfo);
 
@@ -120,7 +120,7 @@ namespace Signum.Entities.DynamicQuery
             }
             else
             {
-                Type type = Reflector.ExtractLite(parent.Type); //Because Add doesn't work with lites
+                Type type = Lite.Extract(parent.Type); //Because Add doesn't work with lites
                 if (type != null)
                     return PropertyRoute.Root(type).Add(PropertyInfo);
 

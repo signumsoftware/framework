@@ -57,7 +57,7 @@ namespace Signum.Entities
         {
             if(value == null) return null; 
 
-            IdentifiableEntity ident = (IdentifiableEntity)Activator.CreateInstance(Reflector.GenerateEnumProxy(value.GetType()));
+            IdentifiableEntity ident = (IdentifiableEntity)Activator.CreateInstance(Generate(value.GetType()));
             ident.Id = Convert.ToInt32(value);
 
             return ident;
@@ -67,7 +67,7 @@ namespace Signum.Entities
         {
             if (ident == null) return null;
 
-            Type enumType = Reflector.ExtractEnumProxy(ident.GetType());
+            Type enumType = Extract(ident.GetType());
 
             return (Enum)Enum.ToObject(enumType, ident.id);
         }
@@ -86,5 +86,18 @@ namespace Signum.Entities
         {
             return GetValues(enumType).Select(a => FromEnum(a));
         }
+
+        public static Type Generate(Type enumType)
+        {
+            return typeof(EnumProxy<>).MakeGenericType(enumType);
+        }
+
+        public static Type Extract(Type enumProxyType)
+        {
+            if (enumProxyType.IsGenericType && enumProxyType.GetGenericTypeDefinition() == typeof(EnumProxy<>))
+                return enumProxyType.GetGenericArguments()[0];
+            return null;
+        }
+
     }
 }

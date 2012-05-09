@@ -659,7 +659,7 @@ namespace Signum.Windows
             Type liteType = null;
             if (entity == null)
             {
-                liteType = Reflector.ExtractLite(entityOrLite.GetType());
+                liteType = Lite.Extract(entityOrLite.GetType());
                 entity = Server.Retrieve((Lite)entityOrLite);
             }
 

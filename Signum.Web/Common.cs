@@ -175,7 +175,7 @@ namespace Signum.Web
 
             if (type.IsLite())
             {
-                Type liteType = Reflector.ExtractLite(type);
+                Type liteType = Lite.Extract(type);
 
                 if (objType.IsLite())
                 {

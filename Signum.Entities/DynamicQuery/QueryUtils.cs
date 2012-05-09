@@ -83,7 +83,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.String:
                     return FilterType.String;
                 case TypeCode.Object:
-                    if (Reflector.ExtractLite(type) != null)
+                    if (type.IsLite())
                         return FilterType.Lite;
 
                     if (type.IsIIdentifiable())
@@ -277,7 +277,7 @@ namespace Signum.Entities.DynamicQuery
         static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity ident) => ident.ToLite()).GetGenericMethodDefinition();
         internal static Expression ExtractEntity(this Expression expression, bool idAndToStr)
         {
-            if (Reflector.ExtractLite(expression.Type) != null)
+            if (expression.Type.IsLite())
             {
                 MethodCallExpression mce = expression as MethodCallExpression;
                 if (mce != null && mce.Method.IsInstantiationOf(miToLite))
@@ -300,7 +300,7 @@ namespace Signum.Entities.DynamicQuery
         internal static Type BuildLite(this Type type)
         {
             if (Reflector.IsIIdentifiable(type))
-                return Reflector.GenerateLite(type);
+                return Lite.Generate(type);
 
             return type;
         }
