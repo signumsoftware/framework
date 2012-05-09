@@ -179,6 +179,11 @@ namespace Signum.Engine.Maps
         {
             return Fields.Values.SelectMany(f => f.Field.GetTables());
         }
+
+        public IEnumerable<RelationalTable> RelationalTables()
+        {
+            return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
+        }
     }
 
     public class EntityField
