@@ -1,0 +1,23 @@
+﻿<Window x:Class="Signum.Windows.Disconnected.DownloadDatabase"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:swd="clr-namespace:Signum.Windows.Disconnected"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="SingleBorderWindow"
+        Title="Downloading database..." MinWidth="400" 
+        ResizeMode="NoResize">
+    <StackPanel>
+        <GroupBox Header="Generating">
+            <StackPanel>
+                <ProgressBar Height="20" x:Name="pbGenerating" />
+                <Expander Header="Details">
+                    <swd:DownloadStatistics x:Name="ctrlStats"/>
+                </Expander>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="Downloading">
+            <ProgressBar Height="20" x:Name="pbDownloading"/>
+        </GroupBox>
+    </StackPanel>
+</Window>
