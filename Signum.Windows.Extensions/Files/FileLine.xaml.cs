@@ -121,7 +121,7 @@ namespace Signum.Windows.Files
 
             if (Type.IsLite())
             {
-                cleanType = Reflector.ExtractLite(Type);
+                cleanType = Lite.Extract(Type);
             }
             else
             {

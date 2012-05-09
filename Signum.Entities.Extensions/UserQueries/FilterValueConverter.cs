@@ -343,7 +343,7 @@ namespace Signum.Entities.UserQueries
             }
 
             Lite lResult;
-            string error = Lite.TryParseLite(Reflector.ExtractLite(type), value, QueryUtils.ResolveType, out lResult);
+            string error = Lite.TryParseLite(Lite.Extract(type), value, QueryUtils.ResolveType, out lResult);
 
             if (error == null)
             {

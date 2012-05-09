@@ -62,18 +62,18 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
      
-        var identType = type.IsEnum? Reflector.GenerateEnumProxy(type) : type;
+        var identType = type.IsEnum ? EnumProxy.Generate(type) : type;
         
-        
+    
 WriteTo(@__razor_helper_writer, Html.Field(Signum.Entities.Extensions.Properties.Resources.ColorsFor0.Formato(type.NiceName()),
                  Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
-                 (ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)))));
+                          (ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)))));
 
-                                                                                             
-    
+                                                                                                      ;
+
 });
 
-    }
+}
 
 
         public _Page_Chart_Views_ChartToken_cshtml()
@@ -98,6 +98,10 @@ WriteTo(@__razor_helper_writer, Html.Field(Signum.Entities.Extensions.Properties
 
 
 
+
+
+
+WriteLiteral("\r\n");
 
 
  using (var tc = Html.TypeContext<ChartTokenDN>())
@@ -155,9 +159,7 @@ WriteLiteral("</a>\r\n        </td>\r\n    </tr>\r\n");
 
 
     
-    
-
-     
+   
     
 
 WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r\n        <td>\r\n     " +
@@ -180,10 +182,10 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
 
                         if (type.IsEnum || type.IsIdentifiableEntity())
                         {
-                            
-                       Write(ColorLink(type));
+                
+           Write(ColorLink(type));
 
-                                            ;
+                                ;
                         }
                     }
                     else if (!imp.IsByAll)

@@ -14,6 +14,7 @@ using Signum.Utilities;
 using System.Globalization;
 using Signum.Entities.Reflection;
 using Signum.Engine.Extensions.Properties;
+using Signum.Entities;
 #endregion
 
 namespace Signum.Engine.Reports

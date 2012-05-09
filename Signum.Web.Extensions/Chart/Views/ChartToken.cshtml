@@ -9,6 +9,14 @@
 @using Signum.Web.Chart
 @using Signum.Engine.Authorization;
 @using Signum.Entities.Authorization;
+@helper ColorLink(Type type)
+    {
+        var identType = type.IsEnum ? EnumProxy.Generate(type) : type;
+        
+    @Html.Field(Signum.Entities.Extensions.Properties.Resources.ColorsFor0.Formato(type.NiceName()),
+                 Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
+                          (ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType))));
+}
 @using (var tc = Html.TypeContext<ChartTokenDN>())
 {
     if (tc.Value == null)
@@ -41,14 +49,7 @@
         </td>
     </tr>
     
-    @helper ColorLink(Type type)
-    {
-        var identType = type.IsEnum? Reflector.GenerateEnumProxy(type) : type;
-        
-        @Html.Field(Signum.Entities.Extensions.Properties.Resources.ColorsFor0.Formato(type.NiceName()),
-                 Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
-                 (ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType))))
-    }
+   
     
     <tr class="sf-chart-token-config" style="display: none">
         <td>
@@ -67,7 +68,7 @@
 
                         if (type.IsEnum || type.IsIdentifiableEntity())
                         {
-                            @ColorLink(type);
+                @ColorLink(type);
                         }
                     }
                     else if (!imp.IsByAll)

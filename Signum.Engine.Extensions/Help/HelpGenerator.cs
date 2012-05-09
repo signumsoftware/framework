@@ -35,7 +35,7 @@ namespace Signum.Engine.Help
             }
             else if (pr.Type.IsLite())
             {
-                Type cleanType = Reflector.ExtractLite(pr.Type);
+                Type cleanType = Lite.Extract(pr.Type);
 
                 return EntityProperty(pr, cleanType, cleanType.TypeLinks(imp)) + validations;
             }
@@ -53,7 +53,7 @@ namespace Signum.Engine.Help
                 }
                 else if (elemType.IsLite())
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), Reflector.ExtractLite(elemType).TypeLinks(imp)) + validations;
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), Lite.Extract(elemType).TypeLinks(imp)) + validations;
                 }
                 else if (Reflector.IsEmbeddedEntity(elemType))
                 {
