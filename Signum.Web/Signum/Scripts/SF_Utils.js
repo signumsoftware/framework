@@ -457,7 +457,30 @@ SF.NewContentProcessor = {
     },
 
     defaultTabs: function ($newContent) {
-        $newContent.find(".sf-tabs").tabs();
+        var $tabContainer = $newContent.find(".sf-tabs:not(.ui-tabs)").prepend($("<ul></ul>"));
+
+        $tabContainer.tabs();
+
+        var $tabs = $tabContainer.children("fieldset");
+        $tabs.each(function () {
+            var $this = $(this);
+            var $legend = $this.children("legend");
+            if ($legend.length == 0) {
+                $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
+                throw "No legend specified for tab";
+            }
+            var legend = $legend.html();
+
+            var id = $this.attr("id");
+            if (SF.isEmpty(id)) {
+                $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
+                throw "No id set for tab with legend: " + legend;
+            }
+            else {
+                $tabContainer.tabs("add", "#" + id, legend);
+                $legend.remove();
+            }
+        });
     },
 
     defaultSlider: function ($newContent) {
