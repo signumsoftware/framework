@@ -57,7 +57,7 @@ namespace Signum.Services
                     el.ControllerName = GetType().Name;
                     el.ActionName = mi.Name;
                     el.QueryString = description;
-                    el.Version = Schema.Current.MainAssembly.GetName().Version.ToString();
+                    el.Version = Schema.Current.Version.ToString();
                 });
                 throw new FaultException(e.Message);
             }
