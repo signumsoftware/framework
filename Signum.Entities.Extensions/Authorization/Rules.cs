@@ -133,6 +133,7 @@ namespace Signum.Entities.Authorization
         Modify,
     }
 
+    [AvoidLocalization]
     public enum TypeAllowed
     {
         None =             TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,

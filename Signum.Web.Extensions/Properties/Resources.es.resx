@@ -426,4 +426,55 @@
   <data name="Chart_Query0IsNotAllowed" xml:space="preserve">
     <value>No se permite la consulta {0}</value>
   </data>
+  <data name="_0Rules" xml:space="preserve">
+    <value>reglas de {0}</value>
+  </data>
+  <data name="AuthAdmin_AddCondition" xml:space="preserve">
+    <value>Agregar condición</value>
+  </data>
+  <data name="AuthAdmin_ChooseACondition" xml:space="preserve">
+    <value>Elija una condición</value>
+  </data>
+  <data name="AuthAdmin_RemoveCondition" xml:space="preserve">
+    <value>Quitar condición</value>
+  </data>
+  <data name="Chart_AreYouSureOfDeletingUserChart0" xml:space="preserve">
+    <value>¿Está seguro de eliminar el gráfico de usuario {0}?</value>
+  </data>
+  <data name="Chart_Dimension" xml:space="preserve">
+    <value>Dimensión</value>
+  </data>
+  <data name="Chart_Group" xml:space="preserve">
+    <value>Grupo</value>
+  </data>
+  <data name="Chart_ToggleInfo" xml:space="preserve">
+    <value>Más opciones</value>
+  </data>
+  <data name="CreatePalette" xml:space="preserve">
+    <value>Crear paleta</value>
+  </data>
+  <data name="Insert" xml:space="preserve">
+    <value>Insertar</value>
+  </data>
+  <data name="RemainingCharacters" xml:space="preserve">
+    <value>Caracteres restantes</value>
+  </data>
+  <data name="RemoveNonValidCharacters" xml:space="preserve">
+    <value>Quitar caracteres no válidos</value>
+  </data>
+  <data name="UserChart_CreateNew" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="UserChart_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="UserChart_ExportData" xml:space="preserve">
+    <value>Exportar datos</value>
+  </data>
+  <data name="UserChart_UserCharts" xml:space="preserve">
+    <value>Gráficos de usuario</value>
+  </data>
+  <data name="ViewPalette" xml:space="preserve">
+    <value>Ver paleta</value>
+  </data>
 </root>

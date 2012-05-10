@@ -77,7 +77,7 @@ namespace Signum.Web.ControlPanel
                         {
                             Id = TypeContextUtilities.Compose(ctx.Prefix, "CreatePart"),
                             Text = Resources.ControlPanel_CreateNewPart,
-                            Enabled = panel.IsNew ? false : true,
+                            Enabled = !panel.IsNew,
                             AltText = panel.IsNew ? Resources.ControlPanel_YouMustSaveThePanelBeforeAddingParts : Resources.ControlPanel_CreateNewPart,
                             OnClick = panel.IsNew ? "" : 
                                 JsValidator.EntityIsValid(new JsValidatorOptions

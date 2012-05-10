@@ -32,6 +32,11 @@ namespace Signum.Windows.Authorization
                 };
             });
 
+            AuthClient.UpdateCacheEvent += new Action(AuthClient_UpdateCacheEvent);
+        }
+
+        static void AuthClient_UpdateCacheEvent()
+        {
             autorizedFacadeMethods = Server.Return((IFacadeMethodAuthServer s) => s.FacadeMethodRules());
         }
 

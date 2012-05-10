@@ -2,8 +2,9 @@
 @using Signum.Web.ControlPanel
 @using System.Reflection
 
-@Html.ScriptsJs("~/ControlPanel/Scripts/SF_ControlPanel.js")
-@Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css")
+@Html.ScriptsJs("~/ControlPanel/Scripts/SF_FlowTable.js")
+@Html.ScriptCss("~/ControlPanel/Content/SF_FlowTable.css",
+                "~/ControlPanel/Content/SF_ControlPanel.css")
 
 <div>
     @using (var tc = Html.TypeContext<ControlPanelDN>())
@@ -17,3 +18,9 @@
         <div class="clearall"></div>   
     }
 </div>
+
+<script type="text/javascript">
+    $(function () {
+        SF.FlowTable.init($("#sfCpAdminContainer"));
+    });
+</script>
