@@ -117,7 +117,7 @@ namespace Signum.Windows.Authorization
                 if (tag == null)
                     return;
 
-                Type type = tag as Type ?? (tag as AdminOptions).TryCC(a => a.Type);
+                Type type = tag as Type;
 
                 if (type != null && Navigator.Manager.EntitySettings.ContainsKey(type))
                 {
