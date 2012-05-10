@@ -185,12 +185,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="AdminWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="DynamicQuery\QueryTokenBuilder.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -461,7 +455,6 @@
     <Compile Include="Facades\MenuManager.cs" />
     <Compile Include="Facades\ShortcutHelper.cs" />
     <Compile Include="Facades\ViewOptions.cs" />
-    <Compile Include="Facades\AdminOptions.cs" />
     <Compile Include="Facades\FindOptions.cs" />
     <Compile Include="Facades\QuerySettings.cs" />
     <Compile Include="Facades\EntitySettings.cs" />
@@ -482,9 +475,6 @@
     <Compile Include="Controls\PickerBase.cs" />
     <Compile Include="Converters\Converter.cs" />
     <Compile Include="Converters\Converters.cs" />
-    <Compile Include="AdminWindow.xaml.cs">
-      <DependentUpon>AdminWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Converters\GradientConverter.cs" />
     <Compile Include="Converters\NotNullValidationRule.cs" />
     <Compile Include="Converters\FormatStringConverter.cs" />
