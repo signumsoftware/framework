@@ -255,14 +255,8 @@
   <data name="Signum_saved" xml:space="preserve">
     <value>Guardado</value>
   </data>
-  <data name="Signum_saving" xml:space="preserve">
-    <value>Guardando</value>
-  </data>
   <data name="Signum_search" xml:space="preserve">
     <value>Buscar</value>
-  </data>
-  <data name="Signum_searching" xml:space="preserve">
-    <value>Buscando...</value>
   </data>
   <data name="_0HasAnInvalidFormat" xml:space="preserve">
     <value>{0} tiene un formato no válido</value>
@@ -294,8 +288,8 @@
   <data name="Signum_executed" xml:space="preserve">
     <value>Ejecutado</value>
   </data>
-  <data name="Signum_executing" xml:space="preserve">
-    <value>Ejecutando...</value>
+  <data name="Signum_loading" xml:space="preserve">
+    <value>Cargando...</value>
   </data>
   <data name="Signum_hideFilters" xml:space="preserve">
     <value>Ocultar filtros</value>
