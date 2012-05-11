@@ -187,7 +187,9 @@ namespace Signum.Web.Auth
                 user = context.Value;
             }
 
-            AuthLogic.ChangePassword(user.UserName,Security.EncodePassword( form[UserMapping.OldPasswordKey]), Security.EncodePassword(form[UserMapping.NewPasswordKey]));
+            AuthLogic.ChangePassword(user.ToLite(),
+                Security.EncodePassword(form[UserMapping.OldPasswordKey]), 
+                Security.EncodePassword(form[UserMapping.NewPasswordKey]));
             Login(user.UserName, form[UserMapping.NewPasswordKey], false, null);
 
             return RedirectToAction("ChangePasswordSuccess");

@@ -15,6 +15,7 @@ using Signum.Services;
 using Signum.Windows;
 
 using Signum.Entities.Authorization;
+using Signum.Entities;
 
 namespace Signum.Windows.Authorization
 {
@@ -32,24 +33,24 @@ namespace Signum.Windows.Authorization
             get { return pb1.Password; }
         }
 
-        UserDN user=UserDN.Current;
-        public UserDN User
-        {
-            get { return user; }
-            set { user = value; }
-        }
+        public UserDN User { get; set; }
+
         private void bntOk_Click(object sender, RoutedEventArgs e)
         {
             if (pb1.Password != pb2.Password)
             {
-                MessageBox.Show(this, "Password do not match", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, Signum.Windows.Extensions.Properties.Resources.PasswordsDoNotMatch, MessageBoxImage.Error.ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            Server.Execute((ILoginServer s) => s.ChagePassword(user.UserName, user.PasswordHash, Security.EncodePassword(Password)));
-
-            MessageBox.Show(this, "Password changed", "Notice", MessageBoxButton.OK);
-
+            if (User.IsNew)
+            {
+                User.PasswordHash = Security.EncodePassword(Password);
+            }
+            else
+            {
+                Server.Execute((ILoginServer s) => s.ChagePassword(User.ToLite(), User.PasswordHash, Security.EncodePassword(Password)));
+            }
             DialogResult = false;
         }
 

@@ -83,15 +83,13 @@ namespace Signum.Services
             }
         }
 
-
-        public virtual void ChagePassword(string username, string passwordHash, string newPasswordHash)
+        public virtual void ChagePassword(Lite<UserDN> user, string passwordHash, string newPasswordHash)
         {
             Execute(MethodInfo.GetCurrentMethod(), () =>
             {
-                AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+                AuthLogic.ChangePassword(user, passwordHash, newPasswordHash);
             });
         }
-
 
         public virtual void LoginChagePassword(string username, string passwordHash, string newPasswordHash)
         {
