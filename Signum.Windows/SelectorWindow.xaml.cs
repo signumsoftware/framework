@@ -74,6 +74,7 @@ namespace Signum.Windows
 
             SelectorWindow w = new SelectorWindow()
             {
+                WindowStartupLocation = owner == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.CenterOwner,
                 Owner = owner,
                 Title = title,
                 Message = message,
