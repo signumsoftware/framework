@@ -198,6 +198,16 @@ namespace Signum.Engine
             });
         }
 
+        public static IDisposable DisableIdentity(string tableName)
+        {
+            SqlBuilder.SetIdentityInsert(tableName, true).ExecuteNonQuery();
+
+            return new Disposable(() =>
+            {
+                SqlBuilder.SetIdentityInsert(tableName, false).ExecuteNonQuery();
+            });
+        }
+
         public static void SaveDisableIdentity<T>(T entities)
             where T : IdentifiableEntity
         {
