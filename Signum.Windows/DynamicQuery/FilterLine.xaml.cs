@@ -58,7 +58,7 @@ namespace Signum.Windows
                 if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                     Server.FillToStr(lite);
 
-                Type cleanType = Reflector.ExtractLite(type);
+                Type cleanType = Lite.Extract(type);
 
                 if (Reflector.IsLowPopulation(cleanType) && !(implementations is ImplementedByAllAttribute))
                 {

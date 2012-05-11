@@ -659,7 +659,7 @@ namespace Signum.Windows
             Type liteType = null;
             if (entity == null)
             {
-                liteType = Reflector.ExtractLite(entityOrLite.GetType());
+                liteType = Lite.Extract(entityOrLite.GetType());
                 entity = Server.Retrieve((Lite)entityOrLite);
             }
 
@@ -832,8 +832,12 @@ namespace Signum.Windows
                 return implementations[0];
 
             Type sel;
-            if (SelectorWindow.ShowDialog(implementations, t => Navigator.Manager.GetEntityIcon(t, true), 
-                t => t.NiceName(), out sel, Properties.Resources.TypeSelector, Properties.Resources.PleaseSelectAType, parent))
+            if (SelectorWindow.ShowDialog(implementations, out sel,
+                elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
+                elementText: t => t.NiceName(),
+                title: Properties.Resources.TypeSelector,
+                message: Properties.Resources.PleaseSelectAType,
+                owner: parent))
                 return sel;
             return null;
         }

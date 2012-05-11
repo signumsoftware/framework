@@ -117,14 +117,14 @@ namespace Signum.Engine.Linq
                 {
                     LiteReferenceExpression liteRef = (LiteReferenceExpression)Visit(m.GetArgument("lite"));
 
-                    Expression entity = EntityCasting(liteRef.Reference, Reflector.ExtractLite(m.Type));
+                    Expression entity = EntityCasting(liteRef.Reference, Lite.Extract(m.Type));
 
                     return MakeLite(m.Type, entity, toStr);
                 }
                 else
                 {
                     var entity = Visit(m.GetArgument("entity"));
-                    var converted = EntityCasting(entity, Reflector.ExtractLite(m.Type));
+                    var converted = EntityCasting(entity, Lite.Extract(m.Type));
                     return MakeLite(m.Type, converted, toStr);
                 }
             }
@@ -1045,8 +1045,8 @@ namespace Signum.Engine.Linq
 
             if (whens.All(e => e.Value is LiteReferenceExpression))
             {
-                Expression entity = CombineWhens(whens.Select(w => new When(w.Condition, 
-                    ((LiteReferenceExpression)w.Value).Reference)).ToList(), Reflector.ExtractLite(returnType));
+                Expression entity = CombineWhens(whens.Select(w => new When(w.Condition,
+                    ((LiteReferenceExpression)w.Value).Reference)).ToList(), Lite.Extract(returnType));
 
                 return MakeLite(returnType, entity, null);
             }

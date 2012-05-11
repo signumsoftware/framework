@@ -69,7 +69,7 @@ namespace Signum.Windows
             {
                 changing = true;
 
-                object newEntity = CleanLite ? Entity : Server.Convert(Entity, Reflector.GenerateLite(CleanType ?? Type));
+                object newEntity = CleanLite ? Entity : Server.Convert(Entity, Lite.Generate(CleanType ?? Type));
 
                 if (!isLoaded || newEntity != null && !combo.Items.Contains(newEntity))
                     combo.Items.Add(newEntity);
@@ -160,7 +160,7 @@ namespace Signum.Windows
                     combo.Items.Add(lite);
                 }
 
-                var selectedItem = !CleanLite ? Server.Convert(Entity, Reflector.GenerateLite(Type)) : Entity;
+                var selectedItem = !CleanLite ? Server.Convert(Entity, Lite.Generate(Type)) : Entity;
 
                 if (selectedItem != null && !combo.Items.Contains(selectedItem))
                     combo.Items.Add(selectedItem);

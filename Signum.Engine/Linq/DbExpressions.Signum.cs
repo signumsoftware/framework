@@ -305,7 +305,7 @@ namespace Signum.Engine.Linq
         {
             if (reference != null)
             {
-                Type cleanType = Reflector.ExtractLite(type);
+                Type cleanType = Lite.Extract(type);
 
                 if (cleanType != reference.Type)
                     throw new ArgumentException("The type {0} is not the Lite version of {1}".Formato(type.TypeName(), reference.Type.TypeName()));

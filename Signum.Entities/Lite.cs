@@ -197,17 +197,17 @@ namespace Signum.Entities
     
         public static Lite Create(Type type, int id)
         {
-            return (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), type, id);
+            return (Lite)Activator.CreateInstance(Generate(type), type, id);
         }
 
         public static Lite Create(Type type, int id, Type runtimeType)
         {
-            return (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), runtimeType, id);
+            return (Lite)Activator.CreateInstance(Generate(type), runtimeType, id);
         }
 
         public static Lite Create(Type type, int id, Type runtimeType, string toStr)
         {
-            Lite result = (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), runtimeType, id, toStr);
+            Lite result = (Lite)Activator.CreateInstance(Generate(type), runtimeType, id, toStr);
             return result;
         }
 
@@ -218,7 +218,7 @@ namespace Signum.Entities
 
             BindingFlags bf = BindingFlags.Default | BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic;
 
-            ConstructorInfo ci = Reflector.GenerateLite(type).GetConstructor(bf, null, new[] { type }, null);
+            ConstructorInfo ci = Generate(type).GetConstructor(bf, null, new[] { type }, null);
 
             Lite result = (Lite)ci.Invoke(new[] { entidad });
             return result;
@@ -321,6 +321,18 @@ namespace Signum.Entities
         public void SetToString(string toStr)
         {
             this.toStr = toStr;
+        }
+
+        public static Type Generate(Type identificableType)
+        {
+            return typeof(Lite<>).MakeGenericType(identificableType);
+        }
+
+        public static Type Extract(Type liteType)
+        {
+            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
+                return liteType.GetGenericArguments()[0];
+            return null;
         }
     }
 
@@ -489,6 +501,17 @@ namespace Signum.Entities
         public static XDocument EntityDGML(this IdentifiableEntity entity)
         {
             return GraphExplorer.FromRoot(entity).EntityDGML(); 
+        }
+
+
+        public static bool IsLite(this Type t)
+        {
+            return typeof(Lite).IsAssignableFrom(t);
+        }
+
+        public static Type CleanType(this Type t)
+        {
+            return Lite.Extract(t) ?? t;
         }
     }
 }

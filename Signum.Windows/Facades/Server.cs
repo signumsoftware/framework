@@ -251,7 +251,7 @@ namespace Signum.Windows
             
             if (type.IsLite())
             {
-                Type liteType = Reflector.ExtractLite(type); 
+                Type liteType = Lite.Extract(type); 
                 
                 if(objType.IsLite())
                 {
@@ -290,7 +290,7 @@ namespace Signum.Windows
             }
 
             Type liteType;
-            if (type.IsLite() && (liteType = Reflector.ExtractLite(type)).IsAssignableFrom(objType))
+            if (type.IsLite() && (liteType = Lite.Extract(type)).IsAssignableFrom(objType))
             {
                 return true;
             }

@@ -90,7 +90,7 @@ namespace Signum.Engine
         public static SqlPreCommand InsertEnumValuesScript()
         {
             return (from t in Schema.Current.Tables.Values
-                    let enumType = Reflector.ExtractEnumProxy(t.Type)
+                    let enumType = EnumProxy.Extract(t.Type)
                     where enumType != null
                     select (from ie in EnumProxy.GetEntities(enumType)
                             select t.InsertSqlSync(ie)).Combine(Spacing.Simple)).Combine(Spacing.Double);
@@ -116,7 +116,7 @@ namespace Signum.Engine
 
             foreach (var table in schema.Tables.Values)
             {
-                Type enumType = Reflector.ExtractEnumProxy(table.Type);
+                Type enumType = EnumProxy.Extract(table.Type);
                 if (enumType != null)
                 {
                     var should =  EnumProxy.GetEntities(enumType);
@@ -183,6 +183,11 @@ namespace Signum.Engine
             where T : IdentifiableEntity
         {
             Table table = Schema.Current.Table<T>();
+            return DisableIdentity(table);
+        }
+
+        public static IDisposable DisableIdentity(Table table)
+        {
             table.Identity = false;
             SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
@@ -190,6 +195,16 @@ namespace Signum.Engine
             {
                 table.Identity = true;
                 SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
+            });
+        }
+
+        public static IDisposable DisableIdentity(string tableName)
+        {
+            SqlBuilder.SetIdentityInsert(tableName, true).ExecuteNonQuery();
+
+            return new Disposable(() =>
+            {
+                SqlBuilder.SetIdentityInsert(tableName, false).ExecuteNonQuery();
             });
         }
 

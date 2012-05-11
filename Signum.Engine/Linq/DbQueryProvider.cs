@@ -36,6 +36,11 @@ namespace Signum.Engine.Linq
         {
             return this.Translate(expression, tr => tr.CleanCommandText());
         }
+
+        public SqlPreCommandSimple GetMainPreCommand(Expression expression)
+        {
+            return this.Translate(expression, tr => tr.MainPreCommand());
+        }
         
         public override object Execute(Expression expression)
         {

@@ -157,8 +157,8 @@ namespace Signum.Entities.Reflection
                 Node = n,
 
                 Fillcolor =  n is Lite? "white": color(n.GetType()),
-                Color = 
-                    n is Lite ? color(Reflector.ExtractLite(n.GetType())):
+                Color =
+                    n is Lite ? color(Lite.Extract(n.GetType())) :
                     (n.SelfModified ? "red" : n.Modified == true ? "red4" :"black"),
 
                 Shape = n is Lite ? "ellipse" :
@@ -236,10 +236,10 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified(lite)),
                new XAttribute("TypeName", lite.GetType().TypeName()), 
-               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(Reflector.ExtractLite(lite.GetType()).FullName.GetHashCode())),
+               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(Lite.Extract(lite.GetType()).FullName.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.RuntimeType.FullName.GetHashCode()).Replace("#", "#44")),
-               new XAttribute("Description", " ".Combine((lite.RuntimeType == Reflector.ExtractLite(lite.GetType())? "":  lite.RuntimeType.TypeName() ),   lite.IdOrNull.TryToString() ?? "New"))
+               new XAttribute("Description", " ".Combine((lite.RuntimeType == Lite.Extract(lite.GetType())? "":  lite.RuntimeType.TypeName() ),   lite.IdOrNull.TryToString() ?? "New"))
             };
         }
 
