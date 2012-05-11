@@ -53,7 +53,7 @@ namespace Signum.Windows.Disconnected
             }
 
 
-            currentLite = transferServer.BeginExportDatabase(machine);
+            currentLite = transferServer.BeginExportDatabase(UserDN.Current.ToLite(), machine);
 
             timer.Tick += new EventHandler(timer_Tick);
 
@@ -75,12 +75,11 @@ namespace Signum.Windows.Disconnected
 
                 if (current.State == DownloadStatisticsState.Error)
                 {
-                    this.Background = Brushes.Pink;
+                    expander.IsExpanded = true;
+                    pbGenerating.IsIndeterminate = false;
 
                     if (MessageBox.Show(Window.GetWindow(this), "There have been an error. View Details?", "Error generating database", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         Navigator.View(current.Exception);
-
-                    Close();
                 }
                 else
                 {
@@ -98,20 +97,20 @@ namespace Signum.Windows.Disconnected
 
         private void StartDownloading()
         {
-            var file = transferServer.EndExportDatabase(new DownloadDatabaseRequests { DownloadStatistics = currentLite });
+            var file = transferServer.EndExportDatabase(new DownloadDatabaseRequests { User =  UserDN.Current.ToLite(),DownloadStatistics = currentLite });
 
             pbDownloading.Minimum = 0;
             pbDownloading.Maximum = file.Length;
 
-            using (var ps = new ProgresssStream(new DeflateStream(file.Stream, CompressionMode.Decompress)))
+            using (var ps = new ProgresssStream(file.Stream))
             {
                 ps.ProgressChanged += (s, args) => pbDownloading.Value = ps.Position;
 
-                using (FileStream fs = File.OpenWrite(DisconnectedClient.BackupFileName))
+                using (FileStream fs = File.OpenWrite(DisconnectedClient.BackupFile))
                     ps.CopyTo(fs);
             }
 
-            MessageBox.Show(Window.GetWindow(this), "You have sucesfully downloaded a local database. \r\nThe application will turn off.\r\nChoose LocalDB ", "Download complete", MessageBoxButton.OK);
+            MessageBox.Show(Window.GetWindow(this), "You have sucesfully downloaded a local database. \r\nThe application will turn off now.\r\nNext time you start it up, choose LocalDB.", "Download complete", MessageBoxButton.OK);
 
             Environment.Exit(0);
         }

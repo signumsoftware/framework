@@ -7,7 +7,6 @@
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="CreationDate" />
-        <m:EntityLine m:Common.Route="User" />
         <m:ValueLine m:Common.Route="MachineName" />
         <m:ValueLine m:Common.Route="SeedMin" />
         <m:ValueLine m:Common.Route="SeedMax" />

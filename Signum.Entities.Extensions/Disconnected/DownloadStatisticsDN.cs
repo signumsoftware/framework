@@ -11,7 +11,7 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DownloadStatisticsDN : IdentifiableEntity
     {
-        DateTime creationDate;
+        DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate
         {
             get { return creationDate; }
@@ -27,7 +27,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? unlock;
-        [Format("ms")]
+        [Unit("ms")]
         public long? Unlock
         {
             get { return unlock; }
@@ -35,7 +35,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? createDatabase;
-        [Format("ms")]
+        [Unit("ms")]
         public long? CreateDatabase
         {
             get { return createDatabase; }
@@ -43,7 +43,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? createSchema;
-        [Format("ms")]
+        [Unit("ms")]
         public long? CreateSchema
         {
             get { return createSchema; }
@@ -51,7 +51,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? disableForeignKeys;
-        [Format("ms")]
+        [Unit("ms")]
         public long? DisableForeignKeys
         {
             get { return disableForeignKeys; }
@@ -66,7 +66,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? enableForeignKeys;
-        [Format("ms")]
+        [Unit("ms")]
         public long? EnableForeignKeys
         {
             get { return enableForeignKeys; }
@@ -74,7 +74,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? reseedIds;
-        [Format("ms")]
+        [Unit("ms")]
         public long? ReseedIds
         {
             get { return reseedIds; }
@@ -82,7 +82,7 @@ namespace Signum.Entities.Disconnected
         }
         
         long? backupDatabase;
-        [Format("ms")]
+        [Unit("ms")]
         public long? BackupDatabase
         {
             get { return backupDatabase; }
@@ -90,7 +90,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? dropDatabase;
-        [Format("ms")]
+        [Unit("ms")]
         public long? DropDatabase
         {
             get { return dropDatabase; }
@@ -98,7 +98,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? total;
-        [Format("ms")]
+        [Unit("ms")]
         public long? Total
         {
             get { return total; }
@@ -212,7 +212,7 @@ namespace Signum.Entities.Disconnected
         }
 
         long? copyTable;
-        [Format("ms")]
+        [Unit("ms")]
         public long? CopyTable
         {
             get { return copyTable; }

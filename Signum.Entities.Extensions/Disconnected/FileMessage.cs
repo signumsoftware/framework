@@ -5,6 +5,7 @@ using System.Text;
 using System.ServiceModel;
 using System.IO;
 using Signum.Services;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Disconnected
 {
@@ -57,16 +58,26 @@ namespace Signum.Entities.Disconnected
     {
         [MessageHeader(MustUnderstand = true)]
         public Lite<DownloadStatisticsDN> DownloadStatistics;
+
+        [MessageHeader(MustUnderstand = true)]
+        public Lite<UserDN> User;
+    }
+
+    [MessageContract]
+    public class UploadDatabaseRequest: FileMessage
+    {
+        [MessageHeader(MustUnderstand = true)]
+        public Lite<UserDN> User;
     }
 
     [ServiceContract]
     public interface IDisconnectedTransferServer
     {
         [OperationContract, NetDataContractAttribute]
-        UploadDatabaseResult UploadDatabase(FileMessage request);
+        UploadDatabaseResult UploadDatabase(UploadDatabaseRequest request);
 
         [OperationContract, NetDataContractAttribute]
-        Lite<DownloadStatisticsDN> BeginExportDatabase(Lite<DisconnectedMachineDN> machine);
+        Lite<DownloadStatisticsDN> BeginExportDatabase(Lite<UserDN> user, Lite<DisconnectedMachineDN> machine);
 
         [OperationContract, NetDataContractAttribute]
         FileMessage EndExportDatabase(DownloadDatabaseRequests statistics);
@@ -79,9 +90,12 @@ namespace Signum.Entities.Disconnected
         DownloadStatisticsDN GetDownloadEstimation(Lite<DisconnectedMachineDN> machine);
 
         [OperationContract, NetDataContractAttribute]
-        List<Lite<DisconnectedMachineDN>> CurrentMachines();
+        Lite<DisconnectedMachineDN> GetDisconnectedMachine(string machineName);
 
         [OperationContract, NetDataContractAttribute]
         UploadStatisticsDN GetUploadEstimation(Lite<DisconnectedMachineDN> machine);
+
+        [OperationContract, NetDataContractAttribute]
+        Dictionary<Type, StrategyPair> GetStrategyPairs();
     }
 }

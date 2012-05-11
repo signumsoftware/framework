@@ -16,11 +16,35 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Windows.Operations;
 using Signum.Entities.Disconnected;
+using Signum.Windows.Authorization;
 
 namespace Signum.Windows.Disconnected
 {
     public static class DisconnectedClient
     {
+        public static Func<IDisconnectedTransferServer> GetTransferServer;
+
+        public static Lite<DisconnectedMachineDN> CurrentDisconnectedMachine
+        {
+            get
+            {
+                if (GetCurrentDisconnectedMachine == null)
+                    throw new InvalidOperationException("DisconnectedClient.GetCurrentDisconnectedMachine is not set");
+
+                return GetCurrentDisconnectedMachine();
+            }
+        }
+
+        public static Func<Lite<DisconnectedMachineDN>> GetCurrentDisconnectedMachine; 
+
+        public static string BackupFile = "LocalDB.bak";
+        public static string DatabaseFile = "LocalDB.mdf";
+        public static string DatabaseLogFile = "LocalDB_log.ldf";
+
+        static Dictionary<Type, StrategyPair> strategies; 
+
+        public static bool OfflineMode { get; set; }
+     
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -29,8 +53,81 @@ namespace Signum.Windows.Disconnected
                 {
                     new EntitySettings<DisconnectedMachineDN>(EntityType.Admin) { View = dm => new DisconnectedMachine() },
                     new EntitySettings<DownloadStatisticsDN>(EntityType.ServerOnly) { View = dm => new DownloadStatistics() },
-                    new EmbeddedEntitySettings<DownloadStatisticsTableDN>{ View = (dm, r) => new DownloadStatisticsTable() },
                 });
+
+                Server.Connecting += UpdateCache;
+                UpdateCache();
+
+                Navigator.Manager.Initializing += () =>
+                {
+                    foreach (EntitySettings es in Navigator.Manager.EntitySettings.Values)
+                    {
+                        if (typeof(IdentifiableEntity).IsAssignableFrom(es.StaticType))
+                            miAttachTypeEvent.GetInvoker(es.StaticType)(es);
+                    }
+                };
+
+                Lite<DisconnectedMachineDN> current = null; 
+
+                GetCurrentDisconnectedMachine = () =>
+                {
+                    if (current != null)
+                        return current;
+
+                    current = Server.Return((IDisconnectedServer s) => s.GetDisconnectedMachine(Environment.MachineName));
+
+                    if (current == null)
+                        throw new ApplicationException("No {0} found for '{1}'".Formato(typeof(DisconnectedMachineDN).NiceName(), Environment.MachineName));
+
+                    return current;
+                };
+            }
+        }
+
+        static GenericInvoker<Action<EntitySettings>> miAttachTypeEvent = new GenericInvoker<Action<EntitySettings>>(es => AttachTypeEvent<TypeDN>((EntitySettings<TypeDN>)es));
+        private static void AttachTypeEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
+        {
+            settings.IsCreable += admin =>
+            {
+                if (OfflineMode)
+                    return strategies[typeof(T)].Upload != Upload.None;
+                else 
+                    return true;
+            };
+
+            settings.IsReadOnly += (entity, admin) =>
+            {
+                var upload = strategies[typeof(T)].Upload;
+
+                if (OfflineMode)
+                {
+                    if (upload == Upload.None)
+                        return true;
+
+                    if (entity == null || entity.IsNew)
+                        return false;
+
+                    if (upload == Upload.New)
+                        return !entity.IsNew;
+
+                    //Upload.Subset
+                    return !entity.IsNew && !((IDisconnectedEntity)entity).DisconnectedMachine.Is(CurrentDisconnectedMachine);
+                }
+                else
+                {
+                    if (upload == Upload.New && entity != null)
+                        return ((IDisconnectedEntity)entity).DisconnectedMachine != null;
+
+                    return true;
+                }
+            }; 
+        }
+
+        static void UpdateCache()
+        {
+            if (OfflineMode)
+            {
+                strategies = Server.Return((IDisconnectedServer ds) => ds.GetStrategyPairs());
             }
         }
 
@@ -38,36 +135,9 @@ namespace Signum.Windows.Disconnected
         {
             if (MessageBox.Show("Downloading a database will take a while and close your session. Are you sure?", "Confirm database download", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                var machines = Server.Return((IDisconnectedServer ds) => ds.CurrentMachines());
-
-                if (machines.IsEmpty())
-                {
-                    MessageBox.Show(owner,
-                        "You need to create a {0} for the user {1}".Formato(typeof(DisconnectedMachineDN).NiceName(), UserDN.Current),
-                        "No {0} found for the current user".Formato(typeof(DisconnectedMachineDN).NiceName()),
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-
-                    return;
-                }
-
-                var machine = machines.Only();
-
-                if (machine == null)
-                {
-                    if (!SelectorWindow.ShowDialog(machines, out machine))
-                        return;
-                }
-
-                new DownloadDatabase { machine = machine }.ShowDialog();
+                new DownloadDatabase { machine = DisconnectedClient.CurrentDisconnectedMachine }.ShowDialog();
             }
         }
 
-
-
-        public static Func<IDisconnectedTransferServer> GetTransferServer;
-
-        public static string BackupFileName = "LocalDB.bak";
-        public static string DatabaseFileName = "LocalDB.mdf";
     }
 }

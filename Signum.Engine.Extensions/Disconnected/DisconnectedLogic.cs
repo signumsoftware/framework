@@ -16,6 +16,7 @@ using Signum.Entities.Disconnected;
 using Signum.Utilities.Reflection;
 using System.IO;
 using System.IO.Compression;
+using System.Data.SqlClient;
 
 namespace Signum.Engine.Disconnected
 {
@@ -26,6 +27,7 @@ namespace Signum.Engine.Disconnected
         static Dictionary<Type, IDisconnectedStrategy> strategies = new Dictionary<Type, IDisconnectedStrategy>();
 
         public static ExportManager ExportManager = new ExportManager();
+        public static LocalRestoreManager LocalRestoreManager = new LocalRestoreManager();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -40,7 +42,6 @@ namespace Signum.Engine.Disconnected
                                                       {
                                                           Entity = dm,
                                                           dm.MachineName,
-                                                          dm.User,
                                                           dm.IsOffline,
                                                           dm.SeedMin,
                                                           dm.SeedMax,
@@ -67,18 +68,18 @@ namespace Signum.Engine.Disconnected
 
         public static void UnsafeLock(Lite<DisconnectedMachineDN> machine)
         {
-            foreach (var kvp in strategies)
+            foreach (var strategy in strategies.Values)
             {
-                if (kvp.Value.Upload == Upload.Subset)
-                    miUnsafeLock.MakeGenericMethod(kvp.Key).Invoke(null, new[] { machine });
+                if (strategy.Upload == Upload.Subset)
+                    miUnsafeLock.MakeGenericMethod(strategy.Type).Invoke(null, new object[] { machine, strategy });
             }
         }
 
         static readonly MethodInfo miUnsafeLock = typeof(DisconnectedLogic).GetMethod("UnsafeLock", BindingFlags.NonPublic | BindingFlags.Static);
-        static int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, Expression<Func<T, bool>> where) where T : IdentifiableEntity, IDisconnectedEntity, new()
+        static int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy) where T : IdentifiableEntity, IDisconnectedEntity, new()
         {
             using (Schema.Current.GlobalMode())
-                return Database.Query<T>().Where(where).UnsafeUpdate(a => new T { DisconnectedMachine = machine, LastOnlineTicks = a.Ticks });
+                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T { DisconnectedMachine = machine, LastOnlineTicks = a.Ticks });
         }
 
 
@@ -169,15 +170,15 @@ namespace Signum.Engine.Disconnected
             return Database.Query<UploadStatisticsDN>().OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
-        public static List<Lite<DisconnectedMachineDN>> CurrentMachines()
+        public static Lite<DisconnectedMachineDN> GetDisconnectedMachine(string machineName)
         {
-            return Database.Query<DisconnectedMachineDN>().Where(a => a.User == UserDN.Current).Select(a => a.ToLite()).ToList(); 
+            return Database.Query<DisconnectedMachineDN>().Where(a => a.MachineName == machineName).Select(a => a.ToLite()).SingleOrDefault(); 
         }
 
 
         class EnumProxyDisconnectedStrategy : IDisconnectedStrategy
         {
-            public Download Download { get { return Download.All; } }
+            public Download Download { get { return Download.None; } }
             public Upload Upload { get { return Upload.None; } }
 
 
@@ -200,6 +201,11 @@ namespace Signum.Engine.Disconnected
                 return new EnumProxyDisconnectedStrategy(type);
 
             return DisconnectedLogic.strategies[type];
+        }
+
+        public static Dictionary<Type, StrategyPair> GetStrategyPairs()
+        {
+            return strategies.Values.ToDictionary(a => a.Type, a => new StrategyPair { Download = a.Download, Upload = a.Upload });
         }
     }
 
@@ -289,19 +295,5 @@ namespace Signum.Engine.Disconnected
         {
             get { return typeof(T); }
         }
-    }
-
-    public enum Download
-    {
-        None,
-        All,
-        Subset
-    }
-
-    public enum Upload
-    {
-        None,
-        New,
-        Subset
     }
 }

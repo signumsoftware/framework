@@ -11,14 +11,16 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedMachineDN : Entity
     {
-        DateTime creationDate = DateTime.Now;
+        DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate
         {
             get { return creationDate; }
             private set { Set(ref creationDate, value, () => CreationDate); }
         }
 
+        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string machineName;
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string MachineName
         {
             get { return machineName; }
@@ -46,14 +48,6 @@ namespace Signum.Entities.Disconnected
             set { Set(ref seedMax, value, () => SeedMax); }
         }
 
-        UserDN user;
-        [NotNullValidator]
-        public UserDN User
-        {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
-        }
-
         static Expression<Func<DisconnectedMachineDN, string>> ToStringExpression = e => e.machineName;
         public override string ToString()
         {
@@ -68,14 +62,25 @@ namespace Signum.Entities.Disconnected
         Lite<DisconnectedMachineDN> DisconnectedMachine { get; set; }
     }
 
-    public enum DownloadStrategy
+    [Serializable]
+    public class StrategyPair
+    {
+        public Download Download;
+        public Upload Upload;
+    }
+
+    
+    public enum Download
     {
         None,
-        NoneUploadNew,
         All,
-        AllUploadNew,
-        Subset,
-        SubsetUploadNew,
-        SubsetUploadSubset,
+        Subset
+    }
+
+    public enum Upload
+    {
+        None,
+        New,
+        Subset
     }
 }

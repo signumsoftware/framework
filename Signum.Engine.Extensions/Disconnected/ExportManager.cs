@@ -18,11 +18,21 @@ using System.Windows;
 using System.Linq.Expressions;
 using Signum.Engine.Exceptions;
 using Signum.Entities.Exceptions;
+using Signum.Engine.Authorization;
+using System.Threading;
 
 namespace Signum.Engine.Disconnected
 {
     public class ExportManager
     {
+        class RunningExports
+        {
+            public Task Task;
+            public CancellationTokenSource CancelationSource;
+        }
+
+        Dictionary<Lite<DownloadStatisticsDN>, RunningExports> runningExports = new Dictionary<Lite<DownloadStatisticsDN>, RunningExports>();
+
         public Lite<DownloadStatisticsDN> BeginExportDatabase(DisconnectedMachineDN machine)
         {
             var downloadTables = Schema.Current.Tables.Values
@@ -39,30 +49,36 @@ namespace Signum.Engine.Disconnected
                 }).ToMList()
             }.Save().ToLite();
 
-            
-            Task.Factory.StartNew(() =>
+            var threadContext = Statics.ExportThreadContext();
+
+            var cancelationSource = new CancellationTokenSource();
+
+            var token = cancelationSource.Token;
+
+            var task = Task.Factory.StartNew(()=>
             {
+                Statics.ImportThreadContext(threadContext);
+
                 try
                 {
-
-                    using (Time(l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { Unlock = l })))
+                    using (Time(token, l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { Unlock = l })))
                         DisconnectedLogic.UnsafeLock(machine.ToLite());
 
                     string connectionString;
 
-                    using (Time(l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { CreateDatabase = l })))
+                    using (Time(token, l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { CreateDatabase = l })))
                         connectionString = CreateDatabase(machine);
 
                     var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current);
 
 
-                    using (Time(l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { CreateSchema = l })))
+                    using (Time(token, l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { CreateSchema = l })))
                     using (Connector.Override(newDatabase))
                     {
                         Administrator.TotalGeneration();
                     }
 
-                    using (Time(l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { DisableForeignKeys = l })))
+                    using (Time(token, l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { DisableForeignKeys = l })))
                     using (Connector.Override(newDatabase))
                     {
                         foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumProxy()))
@@ -75,22 +91,20 @@ namespace Signum.Engine.Disconnected
 
                     foreach (var tuple in downloadTables)
                     {
-                        using (Time(l => mlist.Where(a => a.Element.Type.RefersTo(tuple.Type.ToTypeDN()))
+                        using (Time(token, l => mlist.Where(a => a.Element.Type.RefersTo(tuple.Type.ToTypeDN()))
                             .UnsafeUpdate(s => new MListElement<DownloadStatisticsDN, DownloadStatisticsTableDN> { Element = new DownloadStatisticsTableDN { CopyTable = l } })))
                         {
                             CopyDownload(tuple.Table, tuple.Strategy, newDatabase);
                         }
                     }
 
-
-
-                    using (Time(l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { EnableForeignKeys = l })))
+                    using (Time(token, l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { EnableForeignKeys = l })))
                         foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumProxy()))
                         {
                             EnableForeignKey(tuple.Table);
                         }
 
-                    using (Time(l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { ReseedIds = l })))
+                    using (Time(token, l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { ReseedIds = l })))
                     using (Connector.Override(newDatabase))
                     {
                         foreach (var tuple in downloadTables)
@@ -102,11 +116,13 @@ namespace Signum.Engine.Disconnected
                         }
                     }
 
-                    using (Time(l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { BackupDatabase = l })))
+                    using (Time(token, l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { BackupDatabase = l })))
                         BackupDatabase(machine, stat, newDatabase);
 
-                    using (Time(l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { DropDatabase = l })))
+                    using (Time(token, l => stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { DropDatabase = l })))
                         DropDatabase(newDatabase);
+
+                    token.ThrowIfCancellationRequested();
 
                     stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { State = DownloadStatisticsState.Completed, Total = s.CalculateTotal() });
                 }
@@ -116,13 +132,25 @@ namespace Signum.Engine.Disconnected
 
                     stat.InDB().UnsafeUpdate(s => new DownloadStatisticsDN { Exception = ex.ToLite(), State = DownloadStatisticsState.Error });
                 }
+
+                runningExports.Remove(stat);
             });
+
+
+            runningExports.Add(stat, new RunningExports { Task = task, CancelationSource = cancelationSource });
 
             return stat;
         }
 
-        static IDisposable Time(Action<long> action)
+        public void AbortExport(Lite<DownloadStatisticsDN> stat)
         {
+            runningExports.GetOrThrow(stat).CancelationSource.Cancel();
+        }
+
+        static IDisposable Time(CancellationToken token, Action<long> action)
+        {
+            token.ThrowIfCancellationRequested();
+
             var t = PerfCounter.Ticks;
 
             return new Disposable(() =>
@@ -131,12 +159,14 @@ namespace Signum.Engine.Disconnected
 
                 action(elapsed);
             });
-        } 
+        }
 
 
-        private void DropDatabase(Connector newDatabase)
+        protected void DropDatabase(Connector newDatabase)
         {
-            Executor.ExecuteNonQuery("DROP DATABASE {0}".Formato(newDatabase.DatabaseName().SqlScape()));
+            Executor.ExecuteNonQuery(
+@"ALTER DATABASE [{0}] SET single_user WITH ROLLBACK IMMEDIATE
+DROP DATABASE {0}".Formato(newDatabase.DatabaseName().SqlScape()));
         }
 
         protected virtual string DatabaseFolder(DisconnectedMachineDN machine)
@@ -146,17 +176,17 @@ namespace Signum.Engine.Disconnected
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
         {
-            return Path.Combine(DatabaseFolder(machine), Connector.Current.DatabaseName() + "." + machine.MachineName + ".mdf");
+            return Path.Combine(DatabaseFolder(machine), Connector.Current.DatabaseName() + "_" + machine.MachineName + ".mdf");
         }
 
         protected virtual string DatabaseLogFileName(DisconnectedMachineDN machine)
         {
-            return Path.Combine(DatabaseFolder(machine), Connector.Current.DatabaseName() + "." + machine.MachineName + "_Log.ldf");
+            return Path.Combine(DatabaseFolder(machine), Connector.Current.DatabaseName() + "_" + machine.MachineName + "_Log.ldf");
         }
 
         protected virtual string DatabaseName(DisconnectedMachineDN machine)
         {
-            return Connector.Current.DatabaseName() + "." + machine.MachineName;
+            return Connector.Current.DatabaseName() + "_" + machine.MachineName;
         }
 
         protected virtual string CreateDatabase(DisconnectedMachineDN machine)
@@ -165,16 +195,29 @@ namespace Signum.Engine.Disconnected
 
             string fileName = DatabaseFileName(machine);
             string logFileName = DatabaseLogFileName(machine);
+            DropIfExists(databaseName);
 
-            string script = @"CREATE DATABASE " + databaseName + @" ON  PRIMARY 
-    ( NAME = N'AdventureWorks_Data', FILENAME = N'" + fileName + @"' , SIZE = 167872KB , MAXSIZE = UNLIMITED, FILEGROWTH = 16384KB )
+            string script = @"CREATE DATABASE [{0}] ON  PRIMARY 
+    ( NAME = N'{0}_Data', FILENAME = N'{1}' , SIZE = 167872KB , MAXSIZE = UNLIMITED, FILEGROWTH = 16384KB )
 LOG ON 
-    ( NAME = N'AdventureWorks_Log', FILENAME =  N'" + logFileName + "' , SIZE = 2048KB , MAXSIZE = 2048GB , FILEGROWTH = 16384KB )";
+    ( NAME = N'{0}_Log', FILENAME =  N'{2}' , SIZE = 2048KB , MAXSIZE = 2048GB , FILEGROWTH = 16384KB )".Formato(databaseName, fileName, logFileName);
 
             Executor.ExecuteNonQuery(script);
 
             return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName);
 
+        }
+
+        protected virtual void DropIfExists(string databaseName)
+        {
+            string dropDatabase =
+@"IF EXISTS(SELECT name FROM sys.databases WHERE name = '{0}')
+BEGIN
+     ALTER DATABASE [{0}] SET single_user WITH ROLLBACK IMMEDIATE
+     DROP DATABASE [{0}]
+END".Formato(databaseName);
+
+            Executor.ExecuteNonQuery(dropDatabase);
         }
 
         protected virtual void EnableForeignKey(Table table)
@@ -249,41 +292,49 @@ LOG ON
 
         protected virtual void CopyDownload(Table table, IDisconnectedStrategy strategy, Connector newDatabase)
         {
-            var filter = strategy.Download == Download.All? null: giGetWhere.GetInvoker(strategy.Type)(this, strategy);
+            var filter = strategy.Download == Download.All ? null : giGetWhere.GetInvoker(strategy.Type)(this, strategy);
 
-            using (Administrator.DisableIdentity(table))
-                CopyDownloadBasic(table, newDatabase, filter);
+            CopyDownloadBasic(table, newDatabase, filter);
 
             foreach (var rt in table.RelationalTables())
-                using (Administrator.DisableIdentity(table))
-                    CopyDownloadBasic(rt, newDatabase, filter);
+                CopyDownloadBasic(rt, newDatabase, filter == null? null: (SqlPreCommandSimple)filter.Clone());
         }
 
 
         protected virtual int CopyDownloadBasic(ITable table, Connector newDatabase, SqlPreCommandSimple filter)
         {
-            SqlPreCommandSimple command = new SqlPreCommandSimple(
-@"INSERT INTO {0}.{1} ({2})
-SELECT {2}
-FROM {1} table".Formato(newDatabase.DatabaseName().SqlScape(), table.Name.SqlScape(), table.Columns.Keys.ToString(c => "table." + c.SqlScape(), ", ")));
+            string fullOuterName = "{0}.dbo.{1}".Formato(newDatabase.DatabaseName().SqlScape(), table.Name.SqlScape());
+
+            string command = 
+@"INSERT INTO {0} ({2})
+SELECT {3}
+FROM {1} as [table]".Formato(
+                fullOuterName, 
+                table.Name.SqlScape(),
+                table.Columns.Keys.ToString(a=>a.SqlScape(), ", "),
+                table.Columns.Keys.ToString(a=>"[table]." + a.SqlScape(), ", "));
 
             if (filter != null)
             {
                 if (table is Table)
                 {
-                    command = new SqlPreCommandSimple(command.Sql + "\r\nWHERE table.Id in ({1})".Formato(filter.Sql), filter.Parameters);
+                    command += "\r\nWHERE [table].Id in ({0})".Formato(filter.Sql);
                 }
                 else
                 {
                     RelationalTable rt = (RelationalTable)table;
-
-                    command = new SqlPreCommandSimple(command.Sql +
-                        "\r\nJOIN {0} masterTable on table.{1} = masterTable.Id".Formato(rt.BackReference.ReferenceTable.Name.SqlScape(), rt.BackReference.Name) +
-                        "\r\nWHERE masterTable.Id in ({1})".Formato(filter.Sql), filter.Parameters);
+                    command += @"
+JOIN {0} [masterTable] on [table].{1} = [masterTable].Id
+WHERE [masterTable].Id in ({2})".Formato(rt.BackReference.ReferenceTable.Name.SqlScape(), rt.BackReference.Name.SqlScape(), filter.Sql);
                 }   
             }
 
-            return Executor.ExecuteNonQuery(command);
+            string fullCommand =
+                "SET IDENTITY_INSERT {0} ON\r\n".Formato(fullOuterName) +
+                command +
+                "SET IDENTITY_INSERT {0} ON\r\n".Formato(fullOuterName);
+
+            return Executor.ExecuteNonQuery(fullCommand, filter.TryCC(a => a.Parameters));
         }
 
         static readonly GenericInvoker<Func<ExportManager, IDisconnectedStrategy, SqlPreCommandSimple>> giGetWhere =

@@ -180,9 +180,6 @@
     <Compile Include="Disconnected\DownloadStatistics.xaml.cs">
       <DependentUpon>DownloadStatistics.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Disconnected\DownloadStatisticsTable.xaml.cs">
-      <DependentUpon>DownloadStatisticsTable.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>
@@ -463,10 +460,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Disconnected\DownloadStatistics.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Disconnected\DownloadStatisticsTable.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
