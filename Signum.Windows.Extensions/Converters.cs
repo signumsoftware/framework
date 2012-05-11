@@ -46,5 +46,9 @@ namespace Signum.Windows.Extensions
                 !d.HasValue ? null :
                 d.Value == AuthThumbnail.All ? Brushes.Green :
                 d.Value == AuthThumbnail.Mix ? Brushes.Gold : Brushes.DarkRed);
+
+
+        public static readonly IValueConverter NotNullToRedBrush = ConverterFactory.New(
+            (object d) => d == null ? null : Brushes.Pink);
     }
 }

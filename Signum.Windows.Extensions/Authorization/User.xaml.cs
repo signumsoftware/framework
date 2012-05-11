@@ -31,10 +31,21 @@ namespace Signum.Windows.Authorization
         private void changePassword_Click(object sender, RoutedEventArgs e)
         {
             UserDN user = (UserDN)DataContext;
-            var np = new NewPassword() { User = user, Owner = Window.GetWindow(this) };
+            var np = new NewPassword()
+            {
+                User = user,
+                Owner = Window.GetWindow(this)
+            };
+
+
             if (np.ShowDialog() == true)
             {
-                this.RaiseEvent(new ChangeDataContextEventArgs(user.ToLite().Retrieve()));
+                if (!user.IsNew)
+                {
+                    MessageBox.Show(Window.GetWindow(this), Signum.Windows.Extensions.Properties.Resources.PasswordChanged, MessageBoxImage.Information.ToString(), MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    this.RaiseEvent(new ChangeDataContextEventArgs(user.ToLite().Retrieve()));
+                }
             }
         }
     }

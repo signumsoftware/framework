@@ -281,16 +281,20 @@ namespace Signum.Engine.Authorization
 
         public static UserDN ChangePasswordLogin(string username, string passwordHash, string newPasswordHash)
         {
-            ChangePassword(username, passwordHash, newPasswordHash);
+            var userEntity = RetrieveUser(username, passwordHash);
+            userEntity.PasswordHash = newPasswordHash;
+            using (AuthLogic.Disable())
+                userEntity.Save();
+
             return Login(username, newPasswordHash);
         }
 
-        public static void ChangePassword(string username, string passwordHash, string newPasswordHash)
+        public static void ChangePassword(Lite<UserDN> user, string passwordHash, string newPasswordHash)
         {
-            var user = RetrieveUser(username, passwordHash);
-            user.PasswordHash = newPasswordHash;
+            var userEntity = user.RetrieveAndForget();
+            userEntity.PasswordHash = newPasswordHash;
             using (AuthLogic.Disable())
-                user.Save();
+                userEntity.Save();
         }
 
         public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] serviceInterfaces)

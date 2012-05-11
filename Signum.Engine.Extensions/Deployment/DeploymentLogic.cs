@@ -43,7 +43,7 @@ namespace Signum.Engine.Deployment
             new DeploymentLogDN
             {
                 CreationDate = TimeZoneManager.Now,
-                Version = Schema.Current.MainAssembly.TryCC(a => a.GetName().Version.ToString()),
+                Version = Schema.Current.Version.ToString(),
                 Description = description,
                 DataSourceName = Connector.Current.DataSourceName(),
                 DatabaseName = Connector.Current.DatabaseName(),

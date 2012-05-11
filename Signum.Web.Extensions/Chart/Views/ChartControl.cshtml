@@ -20,7 +20,7 @@
     bool viewable = (bool)ViewData[ViewDataKeys.View];
     
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+    Type entitiesType = Lite.Extract(entityColumn.Type);
 }
 
 <div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" data-add-filter-url="@Url.Action("AddFilter", "Chart")" data-prefix="@Model.ControlID" >

@@ -278,6 +278,24 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not allowed to modify existing {0} while offline.
+        /// </summary>
+        internal static string NotAllowedToModifyExisting0WhileOffline {
+            get {
+                return ResourceManager.GetString("NotAllowedToModifyExisting0WhileOffline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not allowed to save {0} while offline.
+        /// </summary>
+        internal static string NotAllowedToSave0WhileOffline {
+            get {
+                return ResourceManager.GetString("NotAllowedToSave0WhileOffline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not authorized to {0} {1}.
         /// </summary>
         internal static string NotAuthorizedTo01 {
@@ -418,6 +436,15 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string The0 {
             get {
                 return ResourceManager.GetString("The0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} with Id {1} ({2}) is locked by {3}.
+        /// </summary>
+        internal static string The0WithId12IsLockedBy3 {
+            get {
+                return ResourceManager.GetString("The0WithId12IsLockedBy3", resourceCulture);
             }
         }
         

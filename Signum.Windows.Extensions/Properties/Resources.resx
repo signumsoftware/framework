@@ -231,4 +231,10 @@
   <data name="Login_UserName_Watermark" xml:space="preserve">
     <value>user</value>
   </data>
+  <data name="PasswordsDoNotMatch" xml:space="preserve">
+    <value>Passwords do not match</value>
+  </data>
+  <data name="PasswordChanged" xml:space="preserve">
+    <value>Password changed</value>
+  </data>
 </root>

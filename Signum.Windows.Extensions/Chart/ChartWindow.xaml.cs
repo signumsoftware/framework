@@ -95,7 +95,7 @@ namespace Signum.Windows.Chart
             chartBuilder.Description = Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
             Settings = Navigator.GetQuerySettings(Request.QueryName);
             var entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
-            EntityType = Reflector.ExtractLite(entityColumn.Type);
+            EntityType = Lite.Extract(entityColumn.Type);
 
             qtbFilters.Token = null;
             qtbFilters.SubTokensEvent += new Func<QueryToken, List<QueryToken>>(qtbFilters_SubTokensEvent);
