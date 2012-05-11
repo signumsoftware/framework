@@ -1753,6 +1753,9 @@ namespace Signum.Engine.Linq
                 return Condition(Expression.NotEqual(GetId(bin.Left).Nullify(), NullId), GetId(bin.Left), GetId(bin.Right));
             }
 
+            if (expression.IsNull())
+                return NullId;
+
             throw new NotSupportedException("Id for {0}".Formato(expression.NiceToString()));
         }
 
@@ -1793,7 +1796,10 @@ namespace Signum.Engine.Linq
                     GetEntityType(bin.Left), GetEntityType(bin.Right));
             }
 
-            return null;
+            if (expression.IsNull())
+                return new TypeImplementedByExpression(new List<TypeImplementationColumnExpression>().ToReadOnly());
+
+            throw new NotSupportedException("Id for {0}".Formato(expression.NiceToString()));
         }
 
         private static Expression Condition(Expression test, Expression ifTrue, Expression ifFalse)
