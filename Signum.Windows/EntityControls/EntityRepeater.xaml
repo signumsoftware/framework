@@ -19,16 +19,16 @@
                                         <ColumnDefinition  Width="*"/>
                                         <ColumnDefinition  Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                        <ContentPresenter 
+                                    <ContentPresenter 
 						                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
-						                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-						                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+						                HorizontalAlignment="Stretch"  />
                                     <Button x:Name="btRemove" Click="btRemove_Click" 
                                         Style="{StaticResource RoundButton}" 
                                         Content="{StaticResource Remove}" 
                                         ToolTip="{m:Loc Remove}"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Top"
+                                        Loaded="btRemove_Loaded"
                                         Grid.Column="1"/>
                                 </Grid>
                             </m:EntityRepeaterLineBorder>
@@ -40,26 +40,32 @@
     </m:EntityListBase.Resources>
 
     <Grid x:Name="LayoutRoot">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="25"/>
-			<RowDefinition Height="Auto" />
-		</Grid.RowDefinitions>
-		<Grid Background="{DynamicResource LightBlueBackground}">
-			<StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-				<Image Stretch="None" Source="{Binding Icon, ElementName=me, Mode=Default}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" />
-				<Label Content="{Binding LabelText, ElementName=me, Mode=Default}" VerticalAlignment="Center" />
-			</StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Background="{DynamicResource LightBlueBackground}">
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                <Image Stretch="None" Source="{Binding Icon, ElementName=me, Mode=Default}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                <Label Content="{Binding LabelText, ElementName=me, Mode=Default}" VerticalAlignment="Center" />
+            </StackPanel>
             <StackPanel HorizontalAlignment="Right" Margin="0,1.5" Orientation="Horizontal">
                 <Button x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" ToolTip="{m:Loc Create}"   
                         Content="{StaticResource Create}"/>
                 <Button x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" ToolTip="{m:Loc Find}"   
                         Content="{StaticResource Find}"/>
             </StackPanel>
-		</Grid>
-		<m:RepeaterItemsControl Grid.Row="1"  x:Name="itemsControl"
+        </Grid>
+        <ScrollViewer x:Name="ScrollViewer"
+                      VerticalScrollBarVisibility="{Binding VerticalScrollBarVisibility, ElementName=me}"
+                      HorizontalScrollBarVisibility="{Binding HorizontalScrollBarVisibility, ElementName=me}" Grid.Row="1" >
+            <m:RepeaterItemsControl  x:Name="itemsControl"
 			ItemsSource="{Binding Entities, ElementName=me, Mode=Default}" 
 			ItemTemplate="{Binding EntityTemplate, ElementName=me, Mode=Default}" 
 			ItemContainerStyle="{DynamicResource RepeaterItemStyle}"
-			HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-	</Grid>
+            HorizontalContentAlignment="Stretch"
+			HorizontalAlignment="Stretch" 
+            VerticalAlignment="Stretch" />
+        </ScrollViewer>
+    </Grid>
 </m:EntityListBase>
