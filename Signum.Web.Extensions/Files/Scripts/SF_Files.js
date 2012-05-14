@@ -154,6 +154,9 @@ SF.registerModule("Files", function () {
         if ($this.find("sf-file-drop").length == 0) {
             var id = $this.attr("id");
             var prefix = id.substring(0, id.indexOf("DivNew"));
+            if (prefix.lastIndexOf("_") == prefix.length - 1) {
+                prefix = prefix.substr(0, prefix.length - 1);
+            }
             new SF.FLine({ prefix: prefix }).initDragDrop($this);
         }
     });

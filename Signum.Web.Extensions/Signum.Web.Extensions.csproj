@@ -833,8 +833,9 @@
     <Content Include="Chart\Content\SF_Chart.css" />
     <Content Include="Chart\Images\chartType.png" />
     <Content Include="Chart\Scripts\SF_Chart.js" />
+    <Content Include="ControlPanel\Content\SF_FlowTable.css" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
-    <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
+    <Content Include="ControlPanel\Scripts\SF_FlowTable.js" />
     <Content Include="ControlPanel\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>

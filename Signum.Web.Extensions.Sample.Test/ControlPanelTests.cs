@@ -96,9 +96,9 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Type(part2 + "Title", "My Links");
             CreateLinkListPartItem(selenium, part2, 0, "Best Band", "http://localhost/Signum.Web.Extensions.Sample/View/Band/1");
             CreateLinkListPartItem(selenium, part2, 1, "Best Artist", "http://localhost/Signum.Web.Extensions.Sample/View/Artist/1");
-            selenium.MouseDown("jq=#sfCpAdminContainer td[data-column=1] .sf-cp-part:eq(2)");
-            selenium.MouseMove("jq=#sfCpAdminContainer td[data-column=2] .sf-cp-droppable");
-            selenium.MouseUp("jq=#sfCpAdminContainer td[data-column=2] .sf-cp-droppable");
+            selenium.MouseDown("jq=#sfCpAdminContainer td[data-column=1] .sf-ftbl-part:eq(2)");
+            selenium.MouseMove("jq=#sfCpAdminContainer td[data-column=2] .sf-ftbl-droppable");
+            selenium.MouseUp("jq=#sfCpAdminContainer td[data-column=2] .sf-ftbl-droppable");
 
             selenium.EntityButtonSaveClick();
             selenium.WaitForPageToLoad(PageLoadTimeout);
