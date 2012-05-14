@@ -50,7 +50,7 @@ namespace Signum.Windows
             if(AutoChild)
             {
                 // when datacontext change is fired but its not loaded, it's quite possible that some Common.Routes are not working yet
-                if (newValue == null || !IsLoaded) 
+                if (newValue == null/* || !IsLoaded*/) 
                     Child = null;
                 else
                 {

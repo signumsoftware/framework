@@ -6,7 +6,6 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:dn="clr-namespace:Signum.Entities;assembly=Signum.Entities" 
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:diagnostics="clr-namespace:System.Diagnostics;assembly=WindowsBase"
 	mc:Ignorable="d">
 
     <SolidColorBrush x:Key="BlueBorder" Color="#FF0046AD"/>
