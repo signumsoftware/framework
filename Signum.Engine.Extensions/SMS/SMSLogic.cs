@@ -408,7 +408,7 @@ namespace Signum.Engine.SMS
         public static void SendSMS(SMSMessageDN message, Func<SMSMessageDN, string> sendAndGetTicket)
         {
             message.MessageID = sendAndGetTicket(message);
-            message.SendDate = DateTime.Now.TrimToSeconds();
+            message.SendDate = TimeZoneManager.Now.TrimToSeconds();
             //message.SendState = SendState.Sent;
             message.State = SMSMessageState.Sent;
             message.Save();
@@ -425,7 +425,7 @@ namespace Signum.Engine.SMS
         {
             var messages = new List<SMSMessageDN>();
             var IDs = send(template, phones);
-            var sendDate = DateTime.Now.TrimToSeconds();
+            var sendDate = TimeZoneManager.Now.TrimToSeconds();
             for (int i = 0; i < phones.Count; i++)
             {
                 var message = new SMSMessageDN { Message = template.Message, From = template.From };
