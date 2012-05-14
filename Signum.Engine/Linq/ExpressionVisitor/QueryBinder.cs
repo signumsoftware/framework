@@ -646,7 +646,7 @@ namespace Signum.Engine.Linq
             return DbExpressionNominator.FullNominate(expr);
         }
 
-        static MethodInfo miToUserInterface = ReflectionTools.GetMethodInfo(() => DateTime.Now.ToUserInterface()); 
+        static MethodInfo miToUserInterface = ReflectionTools.GetMethodInfo(() => DateTime.MinValue.ToUserInterface()); 
 
         protected virtual Expression BindThenBy(Expression source, LambdaExpression orderSelector, OrderType orderType)
         {
