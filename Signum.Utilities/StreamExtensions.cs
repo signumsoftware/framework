@@ -73,13 +73,13 @@ namespace Signum.Utilities
         }
     }
 
-    public class ProgresssStream : Stream
+    public class ProgressStream : Stream
     {
         readonly Stream InnerStream;
 
         public event EventHandler ProgressChanged;
 
-        public ProgresssStream(Stream innerStream)
+        public ProgressStream(Stream innerStream)
         {
             this.InnerStream = innerStream;
         }
