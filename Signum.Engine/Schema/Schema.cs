@@ -238,14 +238,14 @@ namespace Signum.Engine.Maps
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
-        internal SqlPreCommand SynchronizationScript(string schemaName)
+        internal SqlPreCommand SynchronizationScript(string schemaName, bool interactive = true)
         {
             if (Synchronizing == null)
                 return null;
 
             using (Sync.ChangeBothCultures(ForceCultureInfo))
             {
-                Replacements replacements = new Replacements();
+                Replacements replacements = new Replacements() { Interactive = interactive };
                 SqlPreCommand command = Synchronizing
                     .GetInvocationList()
                     .Cast<Func<Replacements, SqlPreCommand>>()
@@ -265,8 +265,13 @@ namespace Signum.Engine.Maps
                 if (command == null)
                     return null;
 
+                var replacementsComment = replacements.Interactive ? null: replacements.Select(r =>
+                    SqlPreCommandConcat.Combine(Spacing.Double, new SqlPreCommandSimple("-- Replacements on {0}".Formato(r.Key)),
+                        r.Value.Select(a => new SqlPreCommandSimple("--   {0} -> {1}".Formato(a.Key, a.Value))).Combine(Spacing.Simple))); 
+
                 return SqlPreCommand.Combine(Spacing.Double,
                     new SqlPreCommandSimple(Resources.StartOfSyncScriptGeneratedOn0.Formato(DateTime.Now)),
+                   
                     new SqlPreCommandSimple("use {0}".Formato(schemaName)),
                     command,
                     new SqlPreCommandSimple(Resources.EndOfSyncScript));
@@ -372,13 +377,13 @@ namespace Signum.Engine.Maps
         {
             this.Settings = settings;
 
-            Generating += Administrator.CreateTablesScript;
-            Generating += Administrator.InsertEnumValuesScript;
+            Generating += SchemaGenerator.CreateTablesScript;
+            Generating += SchemaGenerator.InsertEnumValuesScript;
             Generating += TypeLogic.Schema_Generating;
 
 
-            Synchronizing += Administrator.SynchronizeSchemaScript;
-            Synchronizing += Administrator.SynchronizeEnumsScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeSchemaScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeEnumsScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;

@@ -12,13 +12,13 @@ using Signum.Engine.Properties;
 
 namespace Signum.Engine
 {
-    public static class SchemaComparer
+    public static class SchemaSynchronizer
     {
         static readonly Dictionary<string, DiffViewIndex> defaultIndexes = new Dictionary<string, DiffViewIndex>();
 
         public static Func<Dictionary<string, DiffTable>> GetDatabaseDescription = DefaultGetDatabaseDescription;
 
-        public static SqlPreCommand SynchronizeSchema(Replacements replacements)
+        public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements)
         {
             Dictionary<string, DiffTable> database = GetDatabaseDescription();
 
@@ -211,6 +211,35 @@ namespace Signum.Engine
                            }).ToList();
 
             return indices.Select(a => SqlBuilder.RenameIndex(a.Table, a.Index, "F" + a.Index)).Combine(Spacing.Simple);  
+        }
+
+        public static SqlPreCommand SynchronizeEnumsScript(Replacements replacements)
+        {
+            Schema schema = Schema.Current;
+
+            List<SqlPreCommand> commands = new List<SqlPreCommand>();
+
+            foreach (var table in schema.Tables.Values)
+            {
+                Type enumType = EnumProxy.Extract(table.Type);
+                if (enumType != null)
+                {
+                    var should = EnumProxy.GetEntities(enumType);
+                    var current = Administrator.TryRetrieveAll(table.Type, replacements);
+
+                    SqlPreCommand com = Synchronizer.SynchronizeScript(
+                        current.ToDictionary(c => c.Id),
+                        should.ToDictionary(s => s.Id),
+                        (id, c) => table.DeleteSqlSync(c),
+                        (id, s) => table.InsertSqlSync(s),
+                        (id, c, s) => table.UpdateSqlSync(c),
+                        Spacing.Simple);
+
+                    commands.Add(com);
+                }
+            }
+
+            return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
         }
     }
 

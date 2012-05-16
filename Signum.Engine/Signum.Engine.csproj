@@ -102,6 +102,7 @@
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
     <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
+    <Compile Include="Engine\SchemaGenerator.cs" />
     <Compile Include="Engine\SqlUtils.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Database.cs" />
@@ -150,7 +151,7 @@
     </Compile>
     <Compile Include="Engine\SqlPreCommand.cs" />
     <Compile Include="Linq\ViewAttributes.cs" />
-    <Compile Include="Engine\SchemaComparer.cs" />
+    <Compile Include="Engine\SchemaSynchronizer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>

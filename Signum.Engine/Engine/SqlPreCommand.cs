@@ -76,11 +76,7 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(spacing, preCommands.ToArray());
         }
 
-        public static void OpenSqlFile(this SqlPreCommand command)
-        {
-            OpenSqlFile(command, "Sync {0:dd-MM-yyyy}.sql".Formato(DateTime.Now));
-        }
-
+     
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
             command.OpenSqlFile();
@@ -92,15 +88,25 @@ namespace Signum.Engine
             command.OpenSqlFile();
         }
 
+        public static void OpenSqlFile(this SqlPreCommand command)
+        {
+            OpenSqlFile(command, "Sync {0:dd-MM-yyyy}.sql".Formato(DateTime.Now));
+        }
+
         public static void OpenSqlFile(this SqlPreCommand command, string fileName)
         {
-            string content = command.PlainSql(); 
-
-            File.WriteAllText(fileName, content, Encoding.GetEncoding(1252));
+            Save(command, fileName);
 
             Thread.Sleep(1000);
 
             Process.Start(fileName); 
+        }
+
+        public static void Save(this SqlPreCommand command, string fileName)
+        {
+            string content = command.PlainSql();
+
+            File.WriteAllText(fileName, content, Encoding.GetEncoding(1252));
         }
     }
 

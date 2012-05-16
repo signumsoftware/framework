@@ -74,68 +74,11 @@ namespace Signum.Engine
             return Schema.Current.GenerationScipt();
         }
 
-        public static SqlPreCommand CreateTablesScript()
+        public static SqlPreCommand TotalSynchronizeScript(bool interactive = true)
         {
-            IEnumerable<ITable> tables = Schema.Current.GetDatabaseTables().Values;
-                
-            SqlPreCommand createTables = tables.Select(t => SqlBuilder.CreateTableSql(t)).Combine(Spacing.Double);
-
-            SqlPreCommand foreignKeys = tables.Select(t => SqlBuilder.AlterTableForeignKeys(t)).Combine(Spacing.Double);
-
-            SqlPreCommand indices = tables.Select(t => SqlBuilder.CreateAllIndices(t)).NotNull().Combine(Spacing.Double);
-
-            return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
-        }
-     
-        public static SqlPreCommand InsertEnumValuesScript()
-        {
-            return (from t in Schema.Current.Tables.Values
-                    let enumType = EnumProxy.Extract(t.Type)
-                    where enumType != null
-                    select (from ie in EnumProxy.GetEntities(enumType)
-                            select t.InsertSqlSync(ie)).Combine(Spacing.Simple)).Combine(Spacing.Double);
+            return Schema.Current.SynchronizationScript(Connector.Current.DatabaseName(), interactive); 
         }
 
-
-
-        public static SqlPreCommand TotalSynchronizeScript()
-        {
-            return Schema.Current.SynchronizationScript(Connector.Current.DatabaseName()); 
-        }
-
-        public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements)
-        {
-            return SchemaComparer.SynchronizeSchema(replacements);
-        }
-
-        public static SqlPreCommand SynchronizeEnumsScript(Replacements replacements)
-        {
-            Schema schema = Schema.Current;
-
-            List<SqlPreCommand> commands = new List<SqlPreCommand>();
-
-            foreach (var table in schema.Tables.Values)
-            {
-                Type enumType = EnumProxy.Extract(table.Type);
-                if (enumType != null)
-                {
-                    var should =  EnumProxy.GetEntities(enumType);
-                    var current = Administrator.TryRetrieveAll(table.Type, replacements);
-
-                    SqlPreCommand com = Synchronizer.SynchronizeScript(
-                        current.ToDictionary(c => c.Id),
-                        should.ToDictionary(s => s.Id),
-                        (id, c) => table.DeleteSqlSync(c),
-                        (id, s) => table.InsertSqlSync(s),
-                        (id, c, s) => table.UpdateSqlSync(c),
-                        Spacing.Simple);
-
-                    commands.Add(com);
-                }
-            }
-
-            return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
-        }
 
         public static T SetId<T>(this T ident, int id)
             where T : IdentifiableEntity
@@ -242,7 +185,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand RenameFreeIndexesScript()
         {
-            return SchemaComparer.RenameFreeIndexes();
+            return SchemaSynchronizer.RenameFreeIndexes();
         }
 
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
