@@ -35,9 +35,10 @@ namespace Signum.Windows.Disconnected
             }
         }
 
-        public static Func<Lite<DisconnectedMachineDN>> GetCurrentDisconnectedMachine; 
+        public static Func<Lite<DisconnectedMachineDN>> GetCurrentDisconnectedMachine;
 
-        public static string BackupFile = "LocalDB.bak";
+        public static string DownloadBackupFile = "LocalDB.Download.bak";
+        public static string UploadBackupFile = "LocalDB.Upload.bak";
         public static string DatabaseFile = "LocalDB.mdf";
         public static string DatabaseLogFile = "LocalDB_log.ldf";
 
@@ -51,8 +52,9 @@ namespace Signum.Windows.Disconnected
             {
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<DisconnectedMachineDN>(EntityType.Admin) { View = dm => new DisconnectedMachine() },
-                    new EntitySettings<DownloadStatisticsDN>(EntityType.ServerOnly) { View = dm => new DownloadStatistics() },
+                    new EntitySettings<DisconnectedMachineDN>(EntityType.AdminNotSaving) { View = dm => new DisconnectedMachine() },
+                    new EntitySettings<DisconnectedExportDN>(EntityType.ServerOnly) { View = dm => new DisconnectedExport() },
+                    new EntitySettings<DisconnectedImportDN>(EntityType.ServerOnly) { View = dm => new DisconnectedImport() },
                 });
 
                 Server.Connecting += UpdateCache;
@@ -115,28 +117,22 @@ namespace Signum.Windows.Disconnected
                 }
                 else
                 {
-                    if (upload == Upload.New && entity != null)
+                    if (upload == Upload.Subset && entity != null)
                         return ((IDisconnectedEntity)entity).DisconnectedMachine != null;
 
-                    return true;
+                    return false;
                 }
             }; 
         }
 
         static void UpdateCache()
         {
-            if (OfflineMode)
-            {
-                strategies = Server.Return((IDisconnectedServer ds) => ds.GetStrategyPairs());
-            }
+            strategies = Server.Return((IDisconnectedServer ds) => ds.GetStrategyPairs());
         }
 
         public static void DownloadDatabase(Window owner)
         {
-            if (MessageBox.Show("Downloading a database will take a while and close your session. Are you sure?", "Confirm database download", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-            {
-                new DownloadDatabase { machine = DisconnectedClient.CurrentDisconnectedMachine }.ShowDialog();
-            }
+
         }
 
     }

@@ -50,14 +50,14 @@ namespace Signum.Entities.Disconnected
     public class UploadDatabaseResult
     {
         [MessageHeader(MustUnderstand = true)]
-        public Lite<UploadStatisticsDN> UploadStatistics;
+        public Lite<DisconnectedImportDN> UploadStatistics;
     }
 
     [MessageContract]
     public class DownloadDatabaseRequests
     {
         [MessageHeader(MustUnderstand = true)]
-        public Lite<DownloadStatisticsDN> DownloadStatistics;
+        public Lite<DisconnectedExportDN> DownloadStatistics;
 
         [MessageHeader(MustUnderstand = true)]
         public Lite<UserDN> User;
@@ -68,6 +68,9 @@ namespace Signum.Entities.Disconnected
     {
         [MessageHeader(MustUnderstand = true)]
         public Lite<UserDN> User;
+
+        [MessageHeader(MustUnderstand = true)]
+        public Lite<DisconnectedMachineDN> Machine; 
     }
 
     [ServiceContract]
@@ -77,23 +80,23 @@ namespace Signum.Entities.Disconnected
         UploadDatabaseResult UploadDatabase(UploadDatabaseRequest request);
 
         [OperationContract, NetDataContractAttribute]
-        Lite<DownloadStatisticsDN> BeginExportDatabase(Lite<UserDN> user, Lite<DisconnectedMachineDN> machine);
+        Lite<DisconnectedExportDN> BeginExportDatabase(Lite<UserDN> user, Lite<DisconnectedMachineDN> machine);
 
         [OperationContract, NetDataContractAttribute]
-        FileMessage EndExportDatabase(DownloadDatabaseRequests statistics);
+        FileMessage EndExportDatabase(DownloadDatabaseRequests request);
     }
 
     [ServiceContract]
     public interface IDisconnectedServer
     {
         [OperationContract, NetDataContractAttribute]
-        DownloadStatisticsDN GetDownloadEstimation(Lite<DisconnectedMachineDN> machine);
+        DisconnectedExportDN GetDownloadEstimation(Lite<DisconnectedMachineDN> machine);
 
         [OperationContract, NetDataContractAttribute]
         Lite<DisconnectedMachineDN> GetDisconnectedMachine(string machineName);
 
         [OperationContract, NetDataContractAttribute]
-        UploadStatisticsDN GetUploadEstimation(Lite<DisconnectedMachineDN> machine);
+        DisconnectedImportDN GetUploadEstimation(Lite<DisconnectedMachineDN> machine);
 
         [OperationContract, NetDataContractAttribute]
         Dictionary<Type, StrategyPair> GetStrategyPairs();

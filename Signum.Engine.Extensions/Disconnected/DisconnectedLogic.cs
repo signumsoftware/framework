@@ -17,6 +17,7 @@ using Signum.Utilities.Reflection;
 using System.IO;
 using System.IO.Compression;
 using System.Data.SqlClient;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Disconnected
 {
@@ -24,18 +25,23 @@ namespace Signum.Engine.Disconnected
     {
         public static bool OfflineMode = false;
 
+        public static string DatabaseFolder = @"C:\Databases";
+        public static string BackupFolder = @"C:\Backups";
+        public static string BackupNetworkFolder = @"C:\Backups";
+
         static Dictionary<Type, IDisconnectedStrategy> strategies = new Dictionary<Type, IDisconnectedStrategy>();
 
         public static ExportManager ExportManager = new ExportManager();
-        public static LocalRestoreManager LocalRestoreManager = new LocalRestoreManager();
+        public static ImportManager ImportManager = new ImportManager();
+        public static LocalBackupManager LocalBackupManager = new LocalBackupManager();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DisconnectedMachineDN>();
-                sb.Include<DownloadStatisticsDN>();
-                sb.Include<UploadStatisticsDN>();
+                sb.Include<DisconnectedExportDN>();
+                sb.Include<DisconnectedImportDN>();
 
                 dqm[typeof(DisconnectedMachineDN)] = (from dm in Database.Query<DisconnectedMachineDN>()
                                                       select new
@@ -47,7 +53,7 @@ namespace Signum.Engine.Disconnected
                                                           dm.SeedMax,
                                                       }).ToDynamic();
 
-                dqm[typeof(DownloadStatisticsDN)] = (from dm in Database.Query<DownloadStatisticsDN>()
+                dqm[typeof(DisconnectedExportDN)] = (from dm in Database.Query<DisconnectedExportDN>()
                                                       select new
                                                       {
                                                           Entity = dm,
@@ -58,30 +64,25 @@ namespace Signum.Engine.Disconnected
                                                           dm.Exception,
                                                       }).ToDynamic();
 
+                new BasicExecute<DisconnectedMachineDN>(DisconnectedMachineOperations.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (dm, _) => { }
+                }.Register();
 
+                new BasicExecute<DisconnectedMachineDN>(DisconnectedMachineOperations.UnsafeUnlock)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (dm, _) => UnsafeUnlock(dm.ToLite())
+                }.Register();
 
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertDisconnectedStrategies;
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<IdentifiableEntity>(EntityEventsGlobal_Saving);
             }
         }
-
-        public static void UnsafeLock(Lite<DisconnectedMachineDN> machine)
-        {
-            foreach (var strategy in strategies.Values)
-            {
-                if (strategy.Upload == Upload.Subset)
-                    miUnsafeLock.MakeGenericMethod(strategy.Type).Invoke(null, new object[] { machine, strategy });
-            }
-        }
-
-        static readonly MethodInfo miUnsafeLock = typeof(DisconnectedLogic).GetMethod("UnsafeLock", BindingFlags.NonPublic | BindingFlags.Static);
-        static int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy) where T : IdentifiableEntity, IDisconnectedEntity, new()
-        {
-            using (Schema.Current.GlobalMode())
-                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T { DisconnectedMachine = machine, LastOnlineTicks = a.Ticks });
-        }
-
 
         public static void UnsafeUnlock(Lite<DisconnectedMachineDN> machine)
         {
@@ -125,49 +126,57 @@ namespace Signum.Engine.Disconnected
                 throw new InvalidOperationException("DisconnectedLogic's download strategies are not synchronized with the Schema.\r\n" +
                         (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
                         (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
+
+            ExportManager.Initialize();
+            ImportManager.Initialize();
         }
 
-        public static void Register<T>(Download download, Upload upload) where T : IdentifiableEntity
+        public static DisconnectedStrategy<T> Register<T>(Download download, Upload upload) where T : IdentifiableEntity
         {
-            Register(typeof(T), new DisconnectedStrategy<T>(download, null, upload, null));
+            return Register(new DisconnectedStrategy<T>(download, null, upload, null));
         }
 
-        public static void Register<T>(Expression<Func<T, bool>> downloadSubset, Upload upload) where T : IdentifiableEntity
+        public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> downloadSubset, Upload upload) where T : IdentifiableEntity
         {
-            Register(typeof(T), new DisconnectedStrategy<T>(Download.Subset, downloadSubset, upload, null));
+            return Register(new DisconnectedStrategy<T>(Download.Subset, downloadSubset, upload, null));
         }
 
-        public static void Register<T>(Download download, Expression<Func<T, bool>> uploadSubset) where T : IdentifiableEntity, IDisconnectedEntity
+        public static DisconnectedStrategy<T> Register<T>(Download download, Expression<Func<T, bool>> uploadSubset) where T : IdentifiableEntity, IDisconnectedEntity
         {
-            Register(typeof(T), new DisconnectedStrategy<T>(download, null, Upload.Subset, uploadSubset));
+            return Register(new DisconnectedStrategy<T>(download, null, Upload.Subset, uploadSubset));
         }
 
-        public static void Register<T>(Expression<Func<T, bool>> downloadSuperset, Expression<Func<T, bool>> uploadSubset) where T : IdentifiableEntity, IDisconnectedEntity
+        public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> downloadSuperset, Expression<Func<T, bool>> uploadSubset) where T : IdentifiableEntity, IDisconnectedEntity
         {
-            Register(typeof(T), new DisconnectedStrategy<T>(Download.Subset, downloadSuperset, Upload.Subset, uploadSubset));
+            return Register(new DisconnectedStrategy<T>(Download.Subset, downloadSuperset, Upload.Subset, uploadSubset));
         }
 
-        public static void Register<T>(Expression<Func<T, bool>> subset) where T : IdentifiableEntity, IDisconnectedEntity
+        public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> subset) where T : IdentifiableEntity, IDisconnectedEntity
         {
-            Register(typeof(T), new DisconnectedStrategy<T>(Download.Subset, subset, Upload.Subset, subset));
+            return Register(new DisconnectedStrategy<T>(Download.Subset, subset, Upload.Subset, subset));
         }
 
-        static void Register(Type type, IDisconnectedStrategy pair)
+        static DisconnectedStrategy<T> Register<T>(DisconnectedStrategy<T> stragety) where T : IdentifiableEntity
         {
-            if (type.IsEnumProxy())
+            if (typeof(T).IsEnumProxy())
                 throw new InvalidOperationException("EnumProxies can not be registered on DisconnectedLogic");
 
-            strategies.AddOrThrow(type, pair, "{0} has already been registered");
+            if (!Schema.Current.Tables.ContainsKey(typeof(T)))
+                throw new InvalidOperationException("{0} is not registered in the Schema".Formato(typeof(T).Name));
+
+            strategies.AddOrThrow(typeof(T), stragety, "{0} has already been registered");
+
+            return stragety;
         }
 
-        public static DownloadStatisticsDN GetDownloadEstimation(Lite<DisconnectedMachineDN> machine)
+        public static DisconnectedExportDN GetDownloadEstimation(Lite<DisconnectedMachineDN> machine)
         {
-            return Database.Query<DownloadStatisticsDN>().Where(a => a.Total.HasValue).OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+            return Database.Query<DisconnectedExportDN>().Where(a => a.Total.HasValue).OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
-        public static UploadStatisticsDN GetUploadEstimation(Lite<DisconnectedMachineDN> machine)
+        public static DisconnectedImportDN GetUploadEstimation(Lite<DisconnectedMachineDN> machine)
         {
-            return Database.Query<UploadStatisticsDN>().OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+            return Database.Query<DisconnectedImportDN>().OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
         public static Lite<DisconnectedMachineDN> GetDisconnectedMachine(string machineName)
@@ -181,7 +190,6 @@ namespace Signum.Engine.Disconnected
             public Download Download { get { return Download.None; } }
             public Upload Upload { get { return Upload.None; } }
 
-
             public EnumProxyDisconnectedStrategy(Type type)
             {
                 this.Type = type;
@@ -192,6 +200,23 @@ namespace Signum.Engine.Disconnected
             public void Saving(IdentifiableEntity ident)
             {
                 return;
+            }
+
+            public bool? DisableForeignKeys
+            {
+                get { return false; }
+                set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
+            }
+
+            public ICustomImporter Importer
+            {
+                get { return null; }
+                set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
+            }
+
+            public void CreateDefaultImporter()
+            {
+                throw new NotImplementedException();
             }
         }
 
@@ -217,7 +242,13 @@ namespace Signum.Engine.Disconnected
 
         Type Type { get; }
 
+        bool? DisableForeignKeys { get; set; }
+
         void Saving(IdentifiableEntity ident);
+
+        ICustomImporter Importer { get; set; }
+
+        void CreateDefaultImporter();
     }
 
     public class DisconnectedStrategy<T> : IDisconnectedStrategy where T : IdentifiableEntity
@@ -294,6 +325,16 @@ namespace Signum.Engine.Disconnected
         public Type Type
         {
             get { return typeof(T); }
+        }
+
+        public bool? DisableForeignKeys { get; set; }
+
+        public ICustomImporter Importer { get; set; }
+
+        public void CreateDefaultImporter()
+        {
+            if (Importer == null)
+                Importer = new BasicImporter<T>();
         }
     }
 }

@@ -170,15 +170,21 @@
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="Deployment\DeploymentClient.cs" />
+    <Compile Include="Disconnected\UploadProgress.xaml.cs">
+      <DependentUpon>UploadProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Disconnected\DisconnectedImport.xaml.cs">
+      <DependentUpon>DisconnectedImport.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Disconnected\DisconnectedClient.cs" />
     <Compile Include="Disconnected\DisconnectedMachine.xaml.cs">
       <DependentUpon>DisconnectedMachine.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Disconnected\DownloadDatabase.xaml.cs">
-      <DependentUpon>DownloadDatabase.xaml</DependentUpon>
+    <Compile Include="Disconnected\DownloadProgress.xaml.cs">
+      <DependentUpon>DownloadProgress.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Disconnected\DownloadStatistics.xaml.cs">
-      <DependentUpon>DownloadStatistics.xaml</DependentUpon>
+    <Compile Include="Disconnected\DisconnectedExport.xaml.cs">
+      <DependentUpon>DisconnectedExport.xaml</DependentUpon>
     </Compile>
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
@@ -451,15 +457,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Disconnected\UploadProgress.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Disconnected\DisconnectedImport.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Disconnected\DisconnectedMachine.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Disconnected\DownloadDatabase.xaml">
+    <Page Include="Disconnected\DownloadProgress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Disconnected\DownloadStatistics.xaml">
+    <Page Include="Disconnected\DisconnectedExport.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

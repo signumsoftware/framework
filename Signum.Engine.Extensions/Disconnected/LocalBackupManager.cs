@@ -10,7 +10,7 @@ using System.Data;
 
 namespace Signum.Engine.Disconnected
 {
-    public class LocalRestoreManager
+    public class LocalBackupManager
     {
         public virtual void RestoreLocalDatabase(string connectionString, string backupFile, string databaseFile, string databaseLogFile)
         {
@@ -30,35 +30,20 @@ namespace Signum.Engine.Disconnected
 
         protected virtual void DropIfExists(string databaseName)
         {
-            string dropDatabase =
-@"IF EXISTS(SELECT name FROM sys.databases WHERE name = '{0}')
-BEGIN
-     ALTER DATABASE [{0}] SET single_user WITH ROLLBACK IMMEDIATE
-     DROP DATABASE [{0}]
-END".Formato(databaseName);
-
-            Executor.ExecuteNonQuery(dropDatabase);
+            DisconnectedSql.DropIfExists(databaseName);
         }
 
         protected virtual void RestoreDatabase(string databaseName, string backupFile, string databaseFile, string databaseLogFile)
         {
-            DataTable dataTable = GetLogicalFileNames(backupFile);
-
-            string logicalDatabaseFile = dataTable.AsEnumerable().Single(a => a.Field<string>("Type") == "D").Field<string>("LogicalName");
-            string logicalDatabaseLogFile = dataTable.AsEnumerable().Single(a => a.Field<string>("Type") == "L").Field<string>("LogicalName");
-
-            new SqlPreCommandSimple(
-@"RESTORE DATABASE {0}
-FROM DISK = '{1}'
-WITH MOVE '{2}' TO '{3}',
-MOVE '{4}' TO '{5}'".Formato(databaseName, Absolutize(backupFile),
-                    logicalDatabaseFile, Absolutize(databaseFile),
-                    logicalDatabaseLogFile, Absolutize(databaseLogFile))).ExecuteNonQuery();
+            DisconnectedSql.RestoreDatabase(databaseName, 
+                Absolutize(backupFile), 
+                Absolutize(databaseFile), 
+                Absolutize(databaseLogFile));
         }
 
-        protected virtual DataTable GetLogicalFileNames(string backupFile)
+        public virtual void BackupDatabase(string databaseName, string backupFile)
         {
-            return Executor.ExecuteDataTable("RESTORE FILELISTONLY FROM DISK ='{0}'".Formato(Absolutize(backupFile)));
+            DisconnectedSql.BackupDatabase(databaseName, Absolutize(backupFile));
         }
 
         protected virtual string Absolutize(string backupFile)
@@ -67,6 +52,11 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, Absolutize(backupFile),
                 return backupFile;
 
             return Path.Combine(Directory.GetCurrentDirectory(), backupFile);
+        }
+
+        public void DropDatabase(string databaseName)
+        {
+            DisconnectedSql.DropDatabase(databaseName);
         }
     }
 }

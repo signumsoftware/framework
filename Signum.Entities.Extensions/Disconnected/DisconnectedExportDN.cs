@@ -5,11 +5,12 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Exceptions;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Signum.Entities.Disconnected
 {
     [Serializable]
-    public class DownloadStatisticsDN : IdentifiableEntity
+    public class DisconnectedExportDN : IdentifiableEntity
     {
         DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate
@@ -26,12 +27,12 @@ namespace Signum.Entities.Disconnected
             set { Set(ref machine, value, () => Machine); }
         }
 
-        long? unlock;
+        long? @lock;
         [Unit("ms")]
-        public long? Unlock
+        public long? Lock
         {
-            get { return unlock; }
-            set { Set(ref unlock, value, () => Unlock); }
+            get { return @lock; }
+            set { Set(ref @lock, value, () => Lock); }
         }
 
         long? createDatabase;
@@ -58,8 +59,8 @@ namespace Signum.Entities.Disconnected
             set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
         }
 
-        MList<DownloadStatisticsTableDN> copies = new MList<DownloadStatisticsTableDN>();
-        public MList<DownloadStatisticsTableDN> Copies
+        MList<DisconnectedExportTableDN> copies = new MList<DisconnectedExportTableDN>();
+        public MList<DisconnectedExportTableDN> Copies
         {
             get { return copies; }
             set { Set(ref copies, value, () => Copies); }
@@ -105,8 +106,8 @@ namespace Signum.Entities.Disconnected
             set { Set(ref total, value, () => Total); }
         }
 
-        DownloadStatisticsState state;
-        public DownloadStatisticsState State
+        DisconnectedExportState state;
+        public DisconnectedExportState State
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
@@ -119,7 +120,7 @@ namespace Signum.Entities.Disconnected
             set { Set(ref exception, value, () => Exception); }
         }
 
-        public double Ratio(DownloadStatisticsDN estimation)
+        public double Ratio(DisconnectedExportDN estimation)
         {
             double total = (long)estimation.Total.Value;
 
@@ -178,7 +179,7 @@ namespace Signum.Entities.Disconnected
             base.PostRetrieving();
         }
 
-        static Expression<Func<DownloadStatisticsDN, long>> CalculateTotalExpression =
+        static Expression<Func<DisconnectedExportDN, long>> CalculateTotalExpression =
             stat => (stat.CreateDatabase ?? 0) +
                 (stat.CreateSchema ?? 0) +
                 (stat.DisableForeignKeys ?? 0) +
@@ -193,7 +194,7 @@ namespace Signum.Entities.Disconnected
         }
     }
 
-    public enum DownloadStatisticsState
+    public enum DisconnectedExportState
     {
         InProgress,
         Completed,
@@ -201,7 +202,7 @@ namespace Signum.Entities.Disconnected
     }
 
     [Serializable]
-    public class DownloadStatisticsTableDN : EmbeddedEntity
+    public class DisconnectedExportTableDN : EmbeddedEntity
     {
         Lite<TypeDN> type;
         [NotNullValidator]
@@ -217,6 +218,14 @@ namespace Signum.Entities.Disconnected
         {
             get { return copyTable; }
             set { Set(ref copyTable, value, () => CopyTable); }
+        }
+
+        [SqlDbType(Size = int.MaxValue)]
+        string errors;
+        public string Errors
+        {
+            get { return errors; }
+            set { Set(ref errors, value, () => Errors); }
         }
 
         int order;

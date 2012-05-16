@@ -20,9 +20,9 @@ namespace Signum.Windows.Disconnected
     /// <summary>
     /// Interaction logic for DownloadStatistics.xaml
     /// </summary>
-    public partial class DownloadStatistics : UserControl
+    public partial class DisconnectedImport : UserControl
     {
-        public DownloadStatistics()
+        public DisconnectedImport()
         {
             InitializeComponent();
         }

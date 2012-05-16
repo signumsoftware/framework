@@ -21,22 +21,24 @@ using System.IO.Compression;
 namespace Signum.Windows.Disconnected
 {
     /// <summary>
-    /// Interaction logic for DownloadDatabase.xaml
+    /// Interaction logic for DownloadProgress.xaml
     /// </summary>
-    public partial class DownloadDatabase : Window
+    public partial class DownloadProgress : Window
     {
-        public DownloadDatabase()
+        public DownloadProgress()
         {
             InitializeComponent();
 
             this.Loaded += new RoutedEventHandler(DownloadDatabase_Loaded);
+
+            this.machine = DisconnectedClient.CurrentDisconnectedMachine;
         }
 
-        DownloadStatisticsDN estimation;
+        DisconnectedExportDN estimation;
 
-        Lite<DownloadStatisticsDN> currentLite;
+        Lite<DisconnectedExportDN> currentLite;
 
-        internal Lite<DisconnectedMachineDN> machine;
+        Lite<DisconnectedMachineDN> machine;
 
         IDisconnectedTransferServer transferServer = DisconnectedClient.GetTransferServer();
 
@@ -46,19 +48,15 @@ namespace Signum.Windows.Disconnected
         {
             estimation = Server.Return((IDisconnectedServer ds) => ds.GetDownloadEstimation(machine));
 
-            if (estimation != null)
-            {
-                pbDownloading.Minimum = 0;
-                pbDownloading.Maximum = 1;
-            }
-
+            pbGenerating.Minimum = 0;
+            pbGenerating.Maximum = 1;
 
             currentLite = transferServer.BeginExportDatabase(UserDN.Current.ToLite(), machine);
 
             timer.Tick += new EventHandler(timer_Tick);
 
             timer.Interval = TimeSpan.FromSeconds(1);
-         
+
             timer.Start();
         }
 
@@ -69,20 +67,22 @@ namespace Signum.Windows.Disconnected
             ctrlStats.DataContext = null;
             ctrlStats.DataContext = current;
 
-            if (current.State != DownloadStatisticsState.InProgress)
+            if (current.State != DisconnectedExportState.InProgress)
             {
                 timer.Stop();
 
-                if (current.State == DownloadStatisticsState.Error)
+                if (current.State == DisconnectedExportState.Error)
                 {
                     expander.IsExpanded = true;
                     pbGenerating.IsIndeterminate = false;
 
-                    if (MessageBox.Show(Window.GetWindow(this), "There have been an error. View Details?", "Error generating database", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    if (MessageBox.Show(Window.GetWindow(this), "There have been an error. View Details?", "Error exporting database", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         Navigator.View(current.Exception);
                 }
                 else
                 {
+                    pbGenerating.Value = 1;
+
                     StartDownloading();
                 }
             }
@@ -97,16 +97,20 @@ namespace Signum.Windows.Disconnected
 
         private void StartDownloading()
         {
-            var file = transferServer.EndExportDatabase(new DownloadDatabaseRequests { User =  UserDN.Current.ToLite(),DownloadStatistics = currentLite });
+            var file = transferServer.EndExportDatabase(new DownloadDatabaseRequests
+            {
+                User = UserDN.Current.ToLite(),
+                DownloadStatistics = currentLite
+            });
 
             pbDownloading.Minimum = 0;
             pbDownloading.Maximum = file.Length;
 
-            using (var ps = new ProgresssStream(file.Stream))
+            using (var ps = new ProgressStream(file.Stream))
             {
                 ps.ProgressChanged += (s, args) => pbDownloading.Value = ps.Position;
 
-                using (FileStream fs = File.OpenWrite(DisconnectedClient.BackupFile))
+                using (FileStream fs = File.OpenWrite(DisconnectedClient.DownloadBackupFile))
                     ps.CopyTo(fs);
             }
 

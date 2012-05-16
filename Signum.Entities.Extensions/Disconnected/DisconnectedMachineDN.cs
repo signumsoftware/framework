@@ -55,6 +55,12 @@ namespace Signum.Entities.Disconnected
         }
     }
 
+    public enum DisconnectedMachineOperations
+    {
+        Save,
+        UnsafeUnlock 
+    }
+
     public interface IDisconnectedEntity : IIdentifiable
     {
         long Ticks { get; set; }
