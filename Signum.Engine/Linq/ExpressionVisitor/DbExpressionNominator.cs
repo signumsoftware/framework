@@ -269,7 +269,7 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            if (Schema.Current.Settings.DBMS == DBMS.SqlServer2008)
+            if (Schema.Current.Settings.DBMS >= DBMS.SqlServer2008)
                 return Add(new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.CONVERT.ToString(), new[]
                 {
                     new SqlConstantExpression(SqlDbType.Date),
@@ -289,7 +289,7 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            if (Schema.Current.Settings.DBMS == DBMS.SqlServer2008)
+            if (Schema.Current.Settings.DBMS >= DBMS.SqlServer2008)
                 return Add(new SqlFunctionExpression(typeof(TimeSpan), null, SqlFunction.CONVERT.ToString(), new[]
                 {
                     new SqlConstantExpression(SqlDbType.Time),

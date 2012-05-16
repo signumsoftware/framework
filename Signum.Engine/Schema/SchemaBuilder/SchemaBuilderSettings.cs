@@ -17,9 +17,10 @@ namespace Signum.Engine.Maps
 {
     public enum DBMS
     {
+        SqlCompact,
         SqlServer2005,
         SqlServer2008,
-        SqlCompact
+        SqlServer2012,
     }
 
     public class SchemaSettings
@@ -32,7 +33,7 @@ namespace Signum.Engine.Maps
         public SchemaSettings(DBMS dbms)
         {
             DBMS = dbms;
-            if (dbms == Maps.DBMS.SqlServer2008)
+            if (dbms >= Maps.DBMS.SqlServer2008)
             {
                 TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
 
