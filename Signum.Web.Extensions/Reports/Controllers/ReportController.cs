@@ -47,7 +47,7 @@ namespace Signum.Web.Reports
 
             byte[] file = ReportsLogic.ExecuteExcelReport(excelReport, request);
 
-            return File(file, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(request.QueryName) + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
+            return File(file, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(request.QueryName) + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
             //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 
             //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
         }

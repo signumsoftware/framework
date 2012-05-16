@@ -137,7 +137,7 @@ namespace Signum.Engine.Mailing
                             .UnsafeUpdate(nd => new NewsletterDeliveryDN
                             {
                                 Sent = true,
-                                SendDate = DateTime.Now.TrimToSeconds(),
+                                SendDate = TimeZoneManager.Now.TrimToSeconds(),
                                 Exception = exLog
                             });
                     }
@@ -149,7 +149,7 @@ namespace Signum.Engine.Mailing
                             .UnsafeUpdate(nd => new NewsletterDeliveryDN
                             {
                                 Sent = true,
-                                SendDate = DateTime.Now.TrimToSeconds(),
+                                SendDate = TimeZoneManager.Now.TrimToSeconds(),
                             });
                     }
 
