@@ -1,0 +1,73 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:m="clr-namespace:Signum.Windows"
+    xmlns:dq="clr-namespace:Signum.Entities.DynamicQuery;assembly=Signum.Entities"
+	mc:Ignorable="d"
+	x:Class="Signum.Windows.FilterBuilder"
+	x:Name="UserControl">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="..\Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid  Grid.Row="1" x:Name="filtros" MinHeight="60" Margin="2,0,0,0">
+        <ListView IsSynchronizedWithCurrentItem="True" 
+                      x:Name="lvFilters" 
+                      m:Common.LabelVisible="False" 
+                      KeyDown="lvFilters_KeyDown" 
+                      Margin="2,0,26,4"
+                      AllowDrop="True"
+                      ItemsSource="{Binding Filters, ElementName=UserControl}"
+                      DragDrop.DragOver="lvFilters_DragOver"
+                      DragDrop.Drop="lvFilters_Drop"
+                  >
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridViewColumn Header="{m:Loc Field}" x:Name="firstColumn">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <m:QueryTokenRenderer Token="{Binding Token}" m:DragController.DragController="{Binding FilterDragController, ElementName=UserControl}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="{m:Loc Operation}" Width="100">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid MinWidth="80" HorizontalAlignment="Stretch">
+                                    <ComboBox 
+                                        SelectedItem="{Binding Operation}" 
+                                        ItemsSource="{Binding Token, Converter={x:Static m:Converters.TokenOperations}}"
+                                        IsEnabled="{Binding Frozen, Converter={x:Static m:Converters.Not}}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="{m:Loc Value}" Width="200">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid Loaded="Grid_Loaded" HorizontalAlignment="Stretch"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Button x:Name="btRemove" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" HorizontalAlignment="Right" d:LayoutOverrides="Width" VerticalAlignment="Top" Click="btRemove_Click" Margin="0,4,4,0"/>
+    </Grid>
+</UserControl>

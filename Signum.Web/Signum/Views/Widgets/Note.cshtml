@@ -1,0 +1,9 @@
+﻿@using Signum.Entities.Basics
+@using (var tc = Html.TypeContext<NoteDN>())
+{
+    @Html.EntityLine(tc, n => n.Target, el => el.ReadOnly = true)
+    @Html.ValueLine(tc, n => n.Text, vl => 
+    {
+        vl.ValueLineType = ValueLineType.TextArea;
+    });
+} 
