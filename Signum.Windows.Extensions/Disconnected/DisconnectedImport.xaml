@@ -24,7 +24,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="{Binding InsertedOrUpdated}" Grid.Column="0" VerticalAlignment="Center" />
                             <Label Content="{Binding Type}" Grid.Column="1" VerticalAlignment="Center" />
-                            <m:ValueLine m:Common.Route="CopyTable" Grid.Column="1" />
+                            <m:ValueLine m:Common.Route="CopyTable" Grid.Column="2" />
                         </Grid>
                     </DataTemplate>
                 </m:EntityRepeater.EntityTemplate>

@@ -119,7 +119,7 @@
     </Compile>
     <Compile Include="ControlPanel\ControlPanelLogic.cs" />
     <Compile Include="Deployment\DeploymentLogic.cs" />
-    <Compile Include="Disconnected\DisconnectedUtils.cs" />
+    <Compile Include="Disconnected\DisconnectedTools.cs" />
     <Compile Include="Disconnected\LocalBackupManager.cs" />
     <Compile Include="Disconnected\ImportManager.cs" />
     <Compile Include="Disconnected\DisconnectedLogic.cs" />

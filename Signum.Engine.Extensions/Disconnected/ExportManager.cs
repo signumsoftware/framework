@@ -79,7 +79,7 @@ namespace Signum.Engine.Disconnected
 
                 try
                 {
-                    using (Time(token, l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Lock = l })))
+                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Lock = l })))
                     {
                         foreach (var tuple in downloadTables)
                         {
@@ -91,20 +91,19 @@ namespace Signum.Engine.Disconnected
                     }
 
                     string connectionString;
-
-                    using (Time(token, l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateDatabase = l })))
+                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateDatabase = l })))
                         connectionString = CreateDatabase(machine);
 
                     var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current);
 
 
-                    using (Time(token, l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateSchema = l })))
+                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateSchema = l })))
                     using (Connector.Override(newDatabase))
                     {
                         Administrator.TotalGeneration();
                     }
 
-                    using (Time(token, l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DisableForeignKeys = l })))
+                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DisableForeignKeys = l })))
                     using (Connector.Override(newDatabase))
                     {
                         foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumProxy()))
@@ -119,13 +118,13 @@ namespace Signum.Engine.Disconnected
                     {
                         token.ThrowIfCancellationRequested();
 
-                        using (Time(token, l => UpdateExportTable(export, tuple.Type.ToTypeDN(), () => new DisconnectedExportTableDN { CopyTable = l })))
+                        using (token.MeasureTime(l => UpdateExportTable(export, tuple.Type.ToTypeDN(), () => new DisconnectedExportTableDN { CopyTable = l })))
                         {
                             CopyTable(tuple.Table, tuple.Strategy, newDatabase);
                         }
                     }
 
-                    using (Time(token, l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { EnableForeignKeys = l })))
+                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { EnableForeignKeys = l })))
                         foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumProxy()))
                         {
                             token.ThrowIfCancellationRequested();
@@ -133,24 +132,21 @@ namespace Signum.Engine.Disconnected
                             EnableForeignKeys(tuple.Table);
                         }
 
-                    using (Time(token, l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { ReseedIds = l })))
+                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { ReseedIds = l })))
                     using (Connector.Override(newDatabase))
                     {
-                        foreach (var tuple in downloadTables)
+                        foreach (var table in Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None))
                         {
                             token.ThrowIfCancellationRequested();
 
-                            if (tuple.Strategy.Upload != Upload.None)
-                            {
-                                Reseed(machine, tuple.Table);
-                            }
+                            Reseed(machine, table);
                         }
                     }
 
-                    using (Time(token, l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
+                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
                         BackupDatabase(machine, export, newDatabase);
 
-                    using (Time(token, l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DropDatabase = l })))
+                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DropDatabase = l })))
                         DropDatabase(newDatabase);
 
                     token.ThrowIfCancellationRequested();
@@ -204,7 +200,7 @@ namespace Signum.Engine.Disconnected
 
         protected virtual void DropDatabase(Connector newDatabase)
         {
-            DisconnectedSql.DropDatabase(newDatabase.DatabaseName());
+            DisconnectedTools.DropDatabase(newDatabase.DatabaseName());
         }
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
@@ -226,54 +222,45 @@ namespace Signum.Engine.Disconnected
         {
             string databaseName = DatabaseName(machine);
 
-            DisconnectedSql.DropIfExists(databaseName);
+            DisconnectedTools.DropIfExists(databaseName);
 
             string fileName = DatabaseFileName(machine);
             string logFileName = DatabaseLogFileName(machine);
 
-            DisconnectedSql.CreateDatabase(databaseName, fileName, logFileName);
+            DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
             return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName);
         }
 
         protected virtual void EnableForeignKeys(Table table)
         {
-            DisconnectedSql.EnableForeignKeys(table);
+            DisconnectedTools.EnableForeignKeys(table);
 
             foreach (var rt in table.RelationalTables())
-                DisconnectedSql.EnableForeignKeys(rt);
+                DisconnectedTools.EnableForeignKeys(rt);
         }
        
         protected virtual void DisableForeignKeys(Table table)
         {
-            DisconnectedSql.DisableForeignKeys(table);
+            DisconnectedTools.DisableForeignKeys(table);
 
             foreach (var rt in table.RelationalTables())
-                DisconnectedSql.DisableForeignKeys(rt);
+                DisconnectedTools.DisableForeignKeys(rt);
         }
-
-       
 
         protected virtual void Reseed(DisconnectedMachineDN machine, Table table)
         {
-            ReseedBasic(machine, table);
+            int? max = DisconnectedTools.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
 
-            foreach (var rt in table.RelationalTables())
-                ReseedBasic(machine, rt);
+            DisconnectedTools.SetNextId(table, (max + 1) ?? machine.SeedMin);
         }
 
-        protected virtual void ReseedBasic(DisconnectedMachineDN machine, ITable table)
-        {
-            int? max = DisconnectedSql.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
-
-            DisconnectedSql.SetSeed(table, max ?? (machine.SeedMin - 1));
-        }
 
         protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
 
-            DisconnectedSql.BackupDatabase(newDatabase.DatabaseName(), backupFileName);
+            DisconnectedTools.BackupDatabase(newDatabase.DatabaseName(), backupFileName);
         }
 
         public virtual string BackupNetworkFileName(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export)
@@ -342,20 +329,6 @@ FROM {1} as [table]".Formato(
             var query = Database.Query<T>().Where(pair.DownloadSubset).Select(a=>a.Id);
 
             return ((DbQueryProvider)query.Provider).GetMainPreCommand(query.Expression);
-        }
-
-        static IDisposable Time(CancellationToken token, Action<long> action)
-        {
-            token.ThrowIfCancellationRequested();
-
-            var t = PerfCounter.Ticks;
-
-            return new Disposable(() =>
-            {
-                var elapsed = (PerfCounter.Ticks - t) / PerfCounter.FrequencyMilliseconds;
-
-                action(elapsed);
-            });
         }
     }
 }

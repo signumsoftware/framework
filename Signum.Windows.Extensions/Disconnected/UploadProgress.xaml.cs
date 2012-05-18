@@ -18,6 +18,7 @@ using System.Windows.Threading;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Signum.Windows.Disconnected
 {
@@ -58,45 +59,54 @@ namespace Signum.Windows.Disconnected
 
         DispatcherTimer timer = new DispatcherTimer();
 
+        FileInfo fi = new FileInfo(DisconnectedClient.UploadBackupFile);
+
         void DownloadDatabase_Loaded(object sender, RoutedEventArgs e)
         {
             estimation = Server.Return((IDisconnectedServer ds) => ds.GetUploadEstimation(machine));
 
-            currentLite = UploadDatabase();
+            UploadDatabase().ContinueWith(cl =>
+            {
+                pbUploading.Dispatcher.BeginInvoke(() =>
+                {
+                    currentLite = cl.Result;
 
-            pbImporting.Minimum = 0;
-            pbImporting.Maximum = 1;
+                    pbImporting.Minimum = 0;
+                    pbImporting.Maximum = 1;
 
-            timer.Tick += new EventHandler(timer_Tick);
+                    timer.Tick += new EventHandler(timer_Tick);
 
-            timer.Interval = TimeSpan.FromSeconds(1);
+                    timer.Interval = TimeSpan.FromSeconds(1);
 
-            timer.Start();
+                    timer.Start();
+                });
+            });
         }
 
-        private Lite<DisconnectedImportDN> UploadDatabase()
+        private Task<Lite<DisconnectedImportDN>> UploadDatabase()
         {
-            FileInfo fi = new FileInfo(DisconnectedClient.UploadBackupFile);
-
             pbUploading.Minimum = 0;
             pbUploading.Maximum = fi.Length;
 
-            using (ProgressStream ps = new ProgressStream(fi.OpenRead()))
+            return Task.Factory.StartNew(() =>
             {
-                ps.ProgressChanged += (s, args) => pbUploading.Value = ps.Position;
-
-                var result = transferServer.UploadDatabase(new UploadDatabaseRequest
+                using (FileStream fs = fi.OpenRead())
+                using (ProgressStream ps = new ProgressStream(fs))
                 {
-                    FileName = fi.Name,
-                    Length = fi.Length,
-                    Stream = ps,
-                    OnDisposing = () => { fi.Delete(); },
-                    Machine = DisconnectedClient.CurrentDisconnectedMachine,
-                    User = UserDN.Current.ToLite(),
-                });
+                    ps.ProgressChanged += (s, args) => pbUploading.Dispatcher.BeginInvoke(() => pbUploading.Value = ps.Position);
 
-                return result.UploadStatistics;
-            }
+                    UploadDatabaseResult result = transferServer.UploadDatabase(new UploadDatabaseRequest
+                    {
+                        FileName = fi.Name,
+                        Length = fi.Length,
+                        Stream = ps,
+                        Machine = DisconnectedClient.CurrentDisconnectedMachine,
+                        User = UserDN.Current.ToLite(),
+                    });
+
+                    return result.UploadStatistics;
+                }
+            });
         }
 
         void timer_Tick(object sender, EventArgs e)
@@ -123,11 +133,12 @@ namespace Signum.Windows.Disconnected
                 }
                 else
                 {
+                    fi.Delete();
                     MessageBox.Show(Window.GetWindow(this), "You have sucesfully uploaded your local database, you can continue working.", "Upload complete", MessageBoxButton.OK);
                     Completed = true;
                     pbImporting.Value = 1; 
                     DialogResult = true;
-                    this.Close();
+                    
                 }
             }
             else

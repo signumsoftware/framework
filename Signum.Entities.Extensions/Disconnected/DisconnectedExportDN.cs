@@ -27,33 +27,33 @@ namespace Signum.Entities.Disconnected
             set { Set(ref machine, value, () => Machine); }
         }
 
-        long? @lock;
+        int? @lock;
         [Unit("ms")]
-        public long? Lock
+        public int? Lock
         {
             get { return @lock; }
             set { Set(ref @lock, value, () => Lock); }
         }
 
-        long? createDatabase;
+        int? createDatabase;
         [Unit("ms")]
-        public long? CreateDatabase
+        public int? CreateDatabase
         {
             get { return createDatabase; }
             set { Set(ref createDatabase, value, () => CreateDatabase); }
         }
 
-        long? createSchema;
+        int? createSchema;
         [Unit("ms")]
-        public long? CreateSchema
+        public int? CreateSchema
         {
             get { return createSchema; }
             set { Set(ref createSchema, value, () => CreateSchema); }
         }
 
-        long? disableForeignKeys;
+        int? disableForeignKeys;
         [Unit("ms")]
-        public long? DisableForeignKeys
+        public int? DisableForeignKeys
         {
             get { return disableForeignKeys; }
             set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
@@ -66,41 +66,41 @@ namespace Signum.Entities.Disconnected
             set { Set(ref copies, value, () => Copies); }
         }
 
-        long? enableForeignKeys;
+        int? enableForeignKeys;
         [Unit("ms")]
-        public long? EnableForeignKeys
+        public int? EnableForeignKeys
         {
             get { return enableForeignKeys; }
             set { Set(ref enableForeignKeys, value, () => EnableForeignKeys); }
         }
 
-        long? reseedIds;
+        int? reseedIds;
         [Unit("ms")]
-        public long? ReseedIds
+        public int? ReseedIds
         {
             get { return reseedIds; }
             set { Set(ref reseedIds, value, () => ReseedIds); }
         }
-        
-        long? backupDatabase;
+
+        int? backupDatabase;
         [Unit("ms")]
-        public long? BackupDatabase
+        public int? BackupDatabase
         {
             get { return backupDatabase; }
             set { Set(ref backupDatabase, value, () => BackupDatabase); }
         }
 
-        long? dropDatabase;
+        int? dropDatabase;
         [Unit("ms")]
-        public long? DropDatabase
+        public int? DropDatabase
         {
             get { return dropDatabase; }
             set { Set(ref dropDatabase, value, () => DropDatabase); }
         }
 
-        long? total;
+        int? total;
         [Unit("ms")]
-        public long? Total
+        public int? Total
         {
             get { return total; }
             set { Set(ref total, value, () => Total); }
@@ -123,9 +123,13 @@ namespace Signum.Entities.Disconnected
         public double Ratio(DisconnectedExportDN estimation)
         {
             double total = (long)estimation.Total.Value;
-
+ 
             double result = 0;
 
+            if (!Lock.HasValue)
+                return result;
+            result += (estimation.Lock.Value) / total;
+            
             if (!CreateDatabase.HasValue)
                 return result;
             result += (estimation.CreateDatabase.Value) / total;
@@ -179,16 +183,18 @@ namespace Signum.Entities.Disconnected
             base.PostRetrieving();
         }
 
-        static Expression<Func<DisconnectedExportDN, long>> CalculateTotalExpression =
-            stat => (stat.CreateDatabase ?? 0) +
-                (stat.CreateSchema ?? 0) +
-                (stat.DisableForeignKeys ?? 0) +
-                (stat.Copies.Sum(a => a.CopyTable ?? 0)) +
-                (stat.EnableForeignKeys ?? 0) +
-                (stat.ReseedIds ?? 0) +
-                (stat.BackupDatabase ?? 0) +
-                (stat.DropDatabase ?? 0); 
-        public long CalculateTotal()
+        static Expression<Func<DisconnectedExportDN, int>> CalculateTotalExpression =
+            stat =>
+                stat.Lock.Value +
+                stat.CreateDatabase.Value +
+                stat.CreateSchema.Value +
+                stat.DisableForeignKeys.Value +
+                stat.Copies.Sum(a => a.CopyTable.Value) +
+                stat.EnableForeignKeys.Value +
+                stat.ReseedIds.Value +
+                stat.BackupDatabase.Value +
+                stat.DropDatabase.Value;
+        public int CalculateTotal()
         {
             return CalculateTotalExpression.Evaluate(this);
         }
@@ -212,9 +218,9 @@ namespace Signum.Entities.Disconnected
             set { Set(ref type, value, () => Type); }
         }
 
-        long? copyTable;
+        int? copyTable;
         [Unit("ms")]
-        public long? CopyTable
+        public int? CopyTable
         {
             get { return copyTable; }
             set { Set(ref copyTable, value, () => CopyTable); }

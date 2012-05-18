@@ -25,25 +25,25 @@ namespace Signum.Entities.Disconnected
             set { Set(ref machine, value, () => Machine); }
         }
 
-        long? restoreDatabase;
+        int? restoreDatabase;
         [Unit("ms")]
-        public long? RestoreDatabase
+        public int? RestoreDatabase
         {
             get { return restoreDatabase; }
             set { Set(ref restoreDatabase, value, () => RestoreDatabase); }
         }
 
-        long? synchronizeSchema;       
+        int? synchronizeSchema;       
         [Unit("ms")]
-        public long? SynchronizeSchema
+        public int? SynchronizeSchema
         {
             get { return synchronizeSchema; }
             set { Set(ref synchronizeSchema, value, () => SynchronizeSchema); }
         }
 
-        long? disableForeignKeys;
+        int? disableForeignKeys;
         [Unit("ms")]
-        public long? DisableForeignKeys
+        public int? DisableForeignKeys
         {
             get { return disableForeignKeys; }
             set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
@@ -56,25 +56,33 @@ namespace Signum.Entities.Disconnected
             set { Set(ref copies, value, () => Copies); }
         }
 
-        long? enableForeignKeys;
+        int? unlock;
         [Unit("ms")]
-        public long? EnableForeignKeys
+        public int? Unlock
+        {
+            get { return unlock; }
+            set { Set(ref unlock, value, () => Unlock); }
+        }
+
+        int? enableForeignKeys;
+        [Unit("ms")]
+        public int? EnableForeignKeys
         {
             get { return enableForeignKeys; }
             set { Set(ref enableForeignKeys, value, () => EnableForeignKeys); }
         }
 
-        long? dropDatabase;
+        int? dropDatabase;
         [Unit("ms")]
-        public long? DropDatabase
+        public int? DropDatabase
         {
             get { return dropDatabase; }
             set { Set(ref dropDatabase, value, () => DropDatabase); }
         }
 
-        long? total;
+        int? total;
         [Unit("ms")]
-        public long? Total
+        public int? Total
         {
             get { return total; }
             set { Set(ref total, value, () => Total); }
@@ -96,13 +104,7 @@ namespace Signum.Entities.Disconnected
 
         public double Ratio(DisconnectedImportDN orientative)
         {
-            double total =
-                (orientative.RestoreDatabase ?? 0) +
-                (orientative.SynchronizeSchema ?? 0) +
-                (orientative.DisableForeignKeys ?? 0) +
-                (orientative.Copies.Sum(a => a.CopyTable ?? 0)) +
-                (orientative.EnableForeignKeys ?? 0) +
-                (orientative.DropDatabase ?? 0);
+            double total = orientative.Total.Value;
 
             double result = 0;
 
@@ -114,12 +116,24 @@ namespace Signum.Entities.Disconnected
                 return result;
             result += (orientative.SynchronizeSchema.Value) / total;
 
+            if (!DisableForeignKeys.HasValue)
+                return result;
+            result += (orientative.DisableForeignKeys.Value) / total;
+
             result += Copies.Where(c => c.CopyTable.HasValue).Join(
                 orientative.Copies.Where(o => o.CopyTable.HasValue && o.CopyTable.Value > 0),
                 c => c.Type, o => o.Type, (c, o) => o.CopyTable.Value / total).Sum();
 
             if (!Copies.All(a => a.CopyTable.HasValue))
                 return result;
+
+            if (!Unlock.HasValue)
+                return result;
+            result += (orientative.Unlock.Value) / total;
+            
+            if (!EnableForeignKeys.HasValue)
+                return result;
+            result += (orientative.EnableForeignKeys.Value) / total;
 
             if (!DropDatabase.HasValue)
                 return result;
@@ -142,10 +156,15 @@ namespace Signum.Entities.Disconnected
             base.PostRetrieving();
         }
 
-        static Expression<Func<DisconnectedImportDN, long>> CalculateTotalExpression =
-            stat => (stat.RestoreDatabase ?? 0) +
-                (stat.Copies.Sum(a => a.CopyTable ?? 0));
-        public long CalculateTotal()
+        static Expression<Func<DisconnectedImportDN, int>> CalculateTotalExpression =
+            stat => (stat.RestoreDatabase.Value) +
+                (stat.SynchronizeSchema.Value) +
+                (stat.DisableForeignKeys.Value) +
+                (stat.Copies.Sum(a => a.CopyTable.Value)) +
+                (stat.Unlock.Value) +
+                (stat.EnableForeignKeys.Value) +
+                (stat.DropDatabase.Value);
+        public int CalculateTotal()
         {
             return CalculateTotalExpression.Evaluate(this);
         }
@@ -169,9 +188,9 @@ namespace Signum.Entities.Disconnected
             set { Set(ref type, value, () => Type); }
         }
 
-        long? copyTable;
+        int? copyTable;
         [Unit("ms")]
-        public long? CopyTable
+        public int? CopyTable
         {
             get { return copyTable; }
             set { Set(ref copyTable, value, () => CopyTable); }
@@ -184,25 +203,25 @@ namespace Signum.Entities.Disconnected
             set { Set(ref foreignKeysDisabled, value, () => DisableForeignKeys); }
         }
 
-        int? inserted;
-        public int? Inserted
+        int? insertedRows;
+        public int? InsertedRows
         {
-            get { return inserted; }
-            set { Set(ref inserted, value, () => Inserted); }
+            get { return insertedRows; }
+            set { Set(ref insertedRows, value, () => InsertedRows); }
         }
 
-        int? updated;
-        public int? Updated
+        int? updatedRows;
+        public int? UpdatedRows
         {
-            get { return updated; }
-            set { Set(ref updated, value, () => Updated); }
+            get { return updatedRows; }
+            set { Set(ref updatedRows, value, () => UpdatedRows); }
         }
 
         public int? InsertedOrUpdated
         {
             get
             {
-                return Inserted + Updated;
+                return InsertedRows + UpdatedRows;
             }
         }
 

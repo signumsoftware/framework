@@ -133,27 +133,27 @@ namespace Signum.Engine.Disconnected
 
         public static DisconnectedStrategy<T> Register<T>(Download download, Upload upload) where T : IdentifiableEntity
         {
-            return Register(new DisconnectedStrategy<T>(download, null, upload, null));
+            return Register(new DisconnectedStrategy<T>(download, null, upload, null, new BasicImporter<T>()));
         }
 
         public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> downloadSubset, Upload upload) where T : IdentifiableEntity
         {
-            return Register(new DisconnectedStrategy<T>(Download.Subset, downloadSubset, upload, null));
+            return Register(new DisconnectedStrategy<T>(Download.Subset, downloadSubset, upload, null, new BasicImporter<T>()));
         }
 
         public static DisconnectedStrategy<T> Register<T>(Download download, Expression<Func<T, bool>> uploadSubset) where T : IdentifiableEntity, IDisconnectedEntity
         {
-            return Register(new DisconnectedStrategy<T>(download, null, Upload.Subset, uploadSubset));
+            return Register(new DisconnectedStrategy<T>(download, null, Upload.Subset, uploadSubset, new UpdateImporter<T>()));
         }
 
         public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> downloadSuperset, Expression<Func<T, bool>> uploadSubset) where T : IdentifiableEntity, IDisconnectedEntity
         {
-            return Register(new DisconnectedStrategy<T>(Download.Subset, downloadSuperset, Upload.Subset, uploadSubset));
+            return Register(new DisconnectedStrategy<T>(Download.Subset, downloadSuperset, Upload.Subset, uploadSubset, new UpdateImporter<T>()));
         }
 
         public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> subset) where T : IdentifiableEntity, IDisconnectedEntity
         {
-            return Register(new DisconnectedStrategy<T>(Download.Subset, subset, Upload.Subset, subset));
+            return Register(new DisconnectedStrategy<T>(Download.Subset, subset, Upload.Subset, subset, new UpdateImporter<T>()));
         }
 
         static DisconnectedStrategy<T> Register<T>(DisconnectedStrategy<T> stragety) where T : IdentifiableEntity
@@ -176,7 +176,7 @@ namespace Signum.Engine.Disconnected
 
         public static DisconnectedImportDN GetUploadEstimation(Lite<DisconnectedMachineDN> machine)
         {
-            return Database.Query<DisconnectedImportDN>().OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+            return Database.Query<DisconnectedImportDN>().Where(a => a.Total.HasValue).OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
         public static Lite<DisconnectedMachineDN> GetDisconnectedMachine(string machineName)
@@ -247,13 +247,11 @@ namespace Signum.Engine.Disconnected
         void Saving(IdentifiableEntity ident);
 
         ICustomImporter Importer { get; set; }
-
-        void CreateDefaultImporter();
     }
 
     public class DisconnectedStrategy<T> : IDisconnectedStrategy where T : IdentifiableEntity
     {
-        public DisconnectedStrategy(Download download, Expression<Func<T, bool>> downloadSubset, Upload upload, Expression<Func<T, bool>> uploadSubset)
+        internal DisconnectedStrategy(Download download, Expression<Func<T, bool>> downloadSubset, Upload upload, Expression<Func<T, bool>> uploadSubset, BasicImporter<T> importer)
         {
             if (download == Download.Subset && downloadSubset == null)
                 throw new InvalidOperationException("In order to use Download.Subset, use an overload that takes a downloadSubset expression");
@@ -274,6 +272,8 @@ namespace Signum.Engine.Disconnected
             }
             this.Upload = upload;
             this.UploadSubset = uploadSubset;
+
+            this.Importer = importer;
         }
 
         public Download Download { get; private set; }
@@ -288,10 +288,10 @@ namespace Signum.Engine.Disconnected
             {
                 switch (Upload)
                 {
-                    case Upload.None: throw new InvalidOperationException(Resources.NotAllowedToSave0WhileOffline.Formato(ident.GetType().NicePluralName()));
+                    case Upload.None: throw new ApplicationException(Resources.NotAllowedToSave0WhileOffline.Formato(ident.GetType().NicePluralName()));
                     case Upload.New:
                         if (!ident.IsNew)
-                            throw new InvalidOperationException(Resources.NotAllowedToModifyExisting0WhileOffline.Formato(ident.GetType().NicePluralName()));
+                            throw new ApplicationException(Resources.NotAllowedToModifyExisting0WhileOffline.Formato(ident.GetType().NicePluralName()));
                         break;
                     case Upload.Subset:
 
@@ -301,8 +301,9 @@ namespace Signum.Engine.Disconnected
                         if (DownloadSubset == UploadSubset)
                             return;
 
-                        if (((IDisconnectedEntity)ident).DisconnectedMachine != null)
-                            throw new InvalidOperationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ((IDisconnectedEntity)ident).DisconnectedMachine));
+                        var de = (IDisconnectedEntity)ident;
+                        if (de.DisconnectedMachine != null && de.DisconnectedMachine.ToString() != Environment.MachineName)
+                            throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
                         break;
                     default: break;
                 }
@@ -315,7 +316,7 @@ namespace Signum.Engine.Disconnected
                     case Upload.New: break;
                     case Upload.Subset:
                         if (((IDisconnectedEntity)ident).DisconnectedMachine != null)
-                            throw new InvalidOperationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ((IDisconnectedEntity)ident).DisconnectedMachine));
+                            throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
                         break;
                     default: break;
                 }
@@ -330,11 +331,5 @@ namespace Signum.Engine.Disconnected
         public bool? DisableForeignKeys { get; set; }
 
         public ICustomImporter Importer { get; set; }
-
-        public void CreateDefaultImporter()
-        {
-            if (Importer == null)
-                Importer = new BasicImporter<T>();
-        }
     }
 }

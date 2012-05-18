@@ -56,12 +56,7 @@ namespace Signum.Engine.Disconnected
                 if (strategy.DisableForeignKeys == null)
                     strategy.DisableForeignKeys = true;
             }
-
-            foreach (var item in dic.Values)
-            {
-                item.Strategy.CreateDefaultImporter();
-            }
-
+           
             foreach (var item in dic.Values.Where(a => a.Strategy.DisableForeignKeys == null))
                 item.Strategy.DisableForeignKeys = false;
 
@@ -105,7 +100,7 @@ namespace Signum.Engine.Disconnected
 
             var token = cancelationSource.Token;
 
-            var task = Task.Factory.StartNew(()=>
+            var task = Task.Factory.StartNew(() =>
             {
                 Statics.ImportThreadContext(threadContext);
 
@@ -113,18 +108,18 @@ namespace Signum.Engine.Disconnected
                 {
                     string connectionString;
 
-                    using (Time(token, l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { RestoreDatabase = l })))
+                    using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { RestoreDatabase = l })))
                     {
                         DropDatabaseIfExists(machine);
                         connectionString = RestoreDatabase(machine, import);
                     }
 
                     var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current);
-                    
-                    using (Time(token, l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { SynchronizeSchema = l })))
+
+                    using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { SynchronizeSchema = l })))
                     using (Connector.Override(newDatabase))
                     {
-                        var script =  Administrator.TotalSynchronizeScript();
+                        var script = Administrator.TotalSynchronizeScript(interactive: false);
 
                         if (script != null)
                         {
@@ -136,7 +131,7 @@ namespace Signum.Engine.Disconnected
 
                     try
                     {
-                        using (Time(token, l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { DisableForeignKeys = l })))
+                        using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { DisableForeignKeys = l })))
                             foreach (var item in uploadTables.Where(u => u.Strategy.DisableForeignKeys.Value))
                             {
                                 DisableForeignKeys(item.Table);
@@ -145,33 +140,43 @@ namespace Signum.Engine.Disconnected
                         foreach (var tuple in uploadTables)
                         {
                             ImportResult result = null;
-                            using (Time(token, l => UpdateExportTable(import, tuple.Type.ToTypeDN(), () => new DisconnectedImportTableDN
+                            using (token.MeasureTime(l =>
                             {
-                                CopyTable = l,
-                                DisableForeignKeys = tuple.Strategy.DisableForeignKeys,
-                                Inserted = result.Inserted,
-                                Updated = result.Updated,
-                            })))
+                                if (result != null)
+                                    UpdateExportTable(import, tuple.Type.ToTypeDN(), () => new DisconnectedImportTableDN
+                                    {
+                                        CopyTable = l,
+                                        DisableForeignKeys = tuple.Strategy.DisableForeignKeys,
+                                        InsertedRows = result.Inserted,
+                                        UpdatedRows = result.Updated,
+                                    });
+                            }))
                             {
                                 result = tuple.Strategy.Importer.Import(machine, tuple.Table, tuple.Strategy, newDatabase);
                             }
                         }
+
+                        using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { EnableForeignKeys = l })))
+                            DisconnectedLogic.UnsafeUnlock(machine.ToLite());
                     }
                     finally
                     {
-                        using (Time(token, l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { EnableForeignKeys = l })))
+                        using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { EnableForeignKeys = l })))
                             foreach (var item in uploadTables.Where(u => u.Strategy.DisableForeignKeys.Value))
                             {
                                 EnableForeignKeys(item.Table);
                             }
                     }
 
-                    using (Time(token, l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { DropDatabase = l })))
+                    using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { DropDatabase = l })))
                         DropDatabase(newDatabase);
 
                     token.ThrowIfCancellationRequested();
 
                     import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { State = DisconnectedImportState.Completed, Total = s.CalculateTotal() });
+
+                    machine.IsOffline = false;
+                    machine.Save();
                 }
                 catch (Exception e)
                 {
@@ -193,48 +198,28 @@ namespace Signum.Engine.Disconnected
 
         private void DropDatabaseIfExists(DisconnectedMachineDN machine)
         {
-            DisconnectedSql.DropIfExists(DatabaseName(machine));
+            DisconnectedTools.DropIfExists(DatabaseName(machine));
         }
 
         private void DropDatabase(SqlConnector newDatabase)
         {
-            DisconnectedSql.DropDatabase(newDatabase.DatabaseName());
+            DisconnectedTools.DropDatabase(newDatabase.DatabaseName());
         }
-
         
         protected virtual void EnableForeignKeys(Table table)
         {
-            DisconnectedSql.EnableForeignKeys(table);
+            DisconnectedTools.EnableForeignKeys(table);
 
             foreach (var rt in table.RelationalTables())
-                DisconnectedSql.EnableForeignKeys(rt);
+                DisconnectedTools.EnableForeignKeys(rt);
         }
 
         protected virtual void DisableForeignKeys(Table table)
         {
-            DisconnectedSql.DisableForeignKeys(table);
+            DisconnectedTools.DisableForeignKeys(table);
 
             foreach (var rt in table.RelationalTables())
-                DisconnectedSql.DisableForeignKeys(rt);
-        }
-       
-        protected virtual string BackupFileName(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> statistics)
-        {
-            return "{0}.{1}.Import.{2}.bak".Formato(Connector.Current.DatabaseName(), machine.MachineName.ToString(), statistics.Id);
-        }
-
-        static IDisposable Time(CancellationToken token, Action<long> action)
-        {
-            token.ThrowIfCancellationRequested();
-
-            var t = PerfCounter.Ticks;
-
-            return new Disposable(() =>
-            {
-                var elapsed = (PerfCounter.Ticks - t) / PerfCounter.FrequencyMilliseconds;
-
-                action(elapsed);
-            });
+                DisconnectedTools.DisableForeignKeys(rt);
         }
 
         private string RestoreDatabase(DisconnectedMachineDN machine, Lite<DisconnectedImportDN> import)
@@ -243,7 +228,7 @@ namespace Signum.Engine.Disconnected
 
             string databaseName = DatabaseName(machine);
 
-            DisconnectedSql.RestoreDatabase(databaseName,
+            DisconnectedTools.RestoreDatabase(databaseName,
                 backupFileName,
                 DatabaseFileName(machine),
                 DatabaseLogFileName(machine));
@@ -294,8 +279,6 @@ namespace Signum.Engine.Disconnected
         {
             int inserts = Insert(machine, table, strategy, newDatabase);
 
-            int update = strategy.Upload == Upload.Subset ? Update(machine, table, strategy, newDatabase) : 0;
-
             return new ImportResult { Inserted = inserts, Updated = 0 };
         }
 
@@ -306,156 +289,190 @@ namespace Signum.Engine.Disconnected
             if (interval == null)
                 return 0;
 
-            string prefix = "{0}.dbo.".Formato(newDatabase.DatabaseName().SqlScape());
-            ParameterBuilder pb = Connector.Current.ParameterBuilder;
-
-            string where = "\r\nWHERE @min <= [table].Id AND [table].Id < @max";
-
-            int result;
-            using (DisableIdentityRestoreSeed(table))
-            {
-                string command = @"INSERT INTO {0} ({1})
-SELECT {2}
-FROM {3} as [table]".Formato(
-table.Name.SqlScape(),
-table.Columns.Keys.ToString(a => a.SqlScape(), ", "),
-table.Columns.Keys.ToString(a => "[table]." + a.SqlScape(), ", "),
-prefix + table.Name.SqlScape());
-
-                result = Executor.ExecuteNonQuery(command + where, new List<DbParameter>()
-                {
-                    pb.CreateParameter("@min", interval.Value.Min, typeof(int)),
-                    pb.CreateParameter("@max", interval.Value.Max, typeof(int)),
-                });
-            }
-
-            foreach (var rt in table.RelationalTables())
-            {
-                using (DisableIdentityRestoreSeed(rt))
-                {
-                    string command = @"INSERT INTO {0} ({1})
-SELECT {2}
-FROM {3} as [relationalTable]
-JOIN {4} [table] on [relationalTable].{5} = [table].Id".Formato(
-    rt.Name.SqlScape(),
-    rt.Columns.Keys.ToString(a => a.SqlScape(), ", "),
-    rt.Columns.Keys.ToString(a => "[relationalTable]." + a.SqlScape(), ", "),
-    prefix + rt.Name.SqlScape(),
-    prefix + table.Name.SqlScape(),
-    rt.BackReference.Name.SqlScape());
-
-                    Executor.ExecuteNonQuery(command + where, new List<DbParameter>()
-                    {
-                        pb.CreateParameter("@min", interval.Value.Min, typeof(int)),
-                        pb.CreateParameter("@max", interval.Value.Max, typeof(int)),
-                    });
-                }
-            }
-
-            return result;
-        }
-
-        public static IDisposable DisableIdentityRestoreSeed(ITable table)
-        {
-            int currentSeed = DisconnectedSql.GetSeed(table);
-            Executor.ExecuteNonQuery("SET IDENTITY_INSERT {0} ON\r\n".Formato(table.Name));
-
-            return new Disposable(() =>
-            {
-                Executor.ExecuteNonQuery("SET IDENTITY_INSERT {0} OFF\r\n".Formato(table.Name));
-                DisconnectedSql.SetSeed(table, currentSeed);
-            });
-        }
-
-        public static Interval<int>? GetNewIdsInterval(Table table, DisconnectedMachineDN machine, SqlConnector newDatabase)
-        {
-            int? maxOther;
-            using (Connector.Override(newDatabase))
-                maxOther = DisconnectedSql.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
-
-            if (maxOther == null)
-                return null;
-
-            int? max = DisconnectedSql.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
-            if (max != null && max == maxOther)
-                return null;
-
-            return new Interval<int>(max.Value + 1, machine.SeedMax);
-        }
-
-        protected virtual int Update(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
-        {
-            int result = UpdateTable(table, newDatabase, machine);
-
-
-
-            return result;
-        }
-
-        static PropertyInfo piDisconnectedMachine = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.DisconnectedMachine);
-        static PropertyInfo piTicks = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.Ticks);
-        static PropertyInfo piLastOnlineTicks = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.LastOnlineTicks);
-
-        protected virtual int UpdateTable(Table table, SqlConnector newDatabase, DisconnectedMachineDN machine)
-        {
-            string prefix = "{0}.dbo.".Formato(newDatabase.DatabaseName().SqlScape());
-
-            string tableName = table.Name.SqlScape();
-
-            var where = "\r\nWHERE [table].{0} = @machineId AND [table].{1} != [table].{2}".Formato(
-                ((FieldReference)table.GetField(piDisconnectedMachine)).Name.SqlScape(),
-                ((FieldValue)table.GetField(piTicks)).Name.SqlScape(),
-                ((FieldValue)table.GetField(piLastOnlineTicks)).Name.SqlScape());
-
-            ParameterBuilder pb = Connector.Current.ParameterBuilder;
-
             using (Transaction tr = new Transaction())
             {
-                string command =
- @"UPDATE {0} SET
-{2}
-FROM {0}
-INNER JOIN {1} as [table] ON {0}.id = [table].id
-".Formato(
-     table.Name.SqlScape(),
-     prefix + table.Name.SqlScape(),
-     table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0}.{1} = [table].{1}".Formato(tableName, c.Name), ",\r\n")) + where;
+                int result;
 
-                int result = Executor.ExecuteNonQuery(command, new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
+                using (DisconnectedTools.DisableIdentityRestoreSeed(table))
+                {
+                    SqlPreCommandSimple sql = InsertTableScript(table, newDatabase, interval);
+
+                    result = Executor.ExecuteNonQuery(sql);
+                }
 
                 foreach (var rt in table.RelationalTables())
                 {
-                    using (DisableIdentityRestoreSeed(rt))
-                    {
-                        var delete = @"DELETE {0}
-FROM {0}
-INNER JOIN {1} as [table] ON {0}.{2} = [table].id".Formato(
-                            rt.Name.SqlScape(),
-                            prefix + table.Name.SqlScape(),
-                            rt.BackReference.Name.SqlScape());
+                    SqlPreCommandSimple sql = InsertRelationalTableScript(table, newDatabase, interval, rt);
 
-                        Executor.ExecuteNonQuery(delete + where, new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
-
-                        var insert = @"INSERT INTO {0} ({1})
-SELECT {2}
-FROM {3} as [relationalTable]
-INNER JOIN {4} as [table] ON [relationalTable].{5} = [table].id".Formato(
-                        rt.Name.SqlScape(),
-                        rt.Columns.Keys.ToString(c => c.SqlScape(), ", "),
-                        rt.Columns.Keys.ToString(a => "[relationalTable]." + a.SqlScape(), ", "),
-                        prefix + rt.Name.SqlScape(),
-                        prefix + table.Name.SqlScape(),
-                        rt.BackReference.Name.SqlScape());
-
-                        Executor.ExecuteNonQuery(insert + where, new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
-                    }
+                    Executor.ExecuteNonQuery(sql);
                 }
 
                 return tr.Commit(result);
             }
         }
+
+        protected virtual SqlPreCommandSimple InsertRelationalTableScript(Table table, SqlConnector newDatabase, Interval<int>? interval, RelationalTable rt)
+        {
+            ParameterBuilder pb = Connector.Current.ParameterBuilder;
+            var columns = rt.Columns.Values.Where(c => !c.Identity);
+
+            string command = @"INSERT INTO {0} ({1})
+SELECT {2}
+FROM {3} as [relationalTable]
+JOIN {4} [table] on [relationalTable].{5} = [table].Id
+WHERE @min <= [table].Id AND [table].Id < @max".Formato(
+rt.Name.SqlScape(),
+columns.ToString(c => c.Name.SqlScape(), ", "),
+columns.ToString(c => "[relationalTable]." + c.Name.SqlScape(), ", "),
+Prefix(newDatabase) + rt.Name.SqlScape(),
+Prefix(newDatabase) + table.Name.SqlScape(),
+rt.BackReference.Name.SqlScape());
+
+            var sql = new SqlPreCommandSimple(command, new List<DbParameter>()
+            {
+                pb.CreateParameter("@min", interval.Value.Min, typeof(int)),
+                pb.CreateParameter("@max", interval.Value.Max, typeof(int)),
+            });
+            return sql;
+        }
+
+        protected virtual SqlPreCommandSimple InsertTableScript(Table table, SqlConnector newDatabase, Interval<int>? interval)
+        {
+            ParameterBuilder pb = Connector.Current.ParameterBuilder;
+            string command = @"INSERT INTO {0} ({1})
+SELECT {2}
+FROM {3} as [table]
+WHERE @min <= [table].Id AND [table].Id < @max".Formato(
+table.Name.SqlScape(),
+table.Columns.Keys.ToString(a => a.SqlScape(), ", "),
+table.Columns.Keys.ToString(a => "[table]." + a.SqlScape(), ", "),
+Prefix(newDatabase) + table.Name.SqlScape());
+
+            var sql = new SqlPreCommandSimple(command, new List<DbParameter>()
+            {
+                pb.CreateParameter("@min", interval.Value.Min, typeof(int)),
+                pb.CreateParameter("@max", interval.Value.Max, typeof(int)),
+            });
+            return sql;
+        }
+
+        protected virtual string Prefix(SqlConnector newDatabase)
+        {
+            return newDatabase.DatabaseName().SqlScape() + ".dbo.".Formato();
+        }
+
+        protected virtual Interval<int>? GetNewIdsInterval(Table table, DisconnectedMachineDN machine, SqlConnector newDatabase)
+        {
+            int? maxOther;
+            using (Connector.Override(newDatabase))
+                maxOther = DisconnectedTools.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
+
+            if (maxOther == null)
+                return null;
+
+            int? max = DisconnectedTools.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
+            if (max != null && max == maxOther)
+                return null;
+
+            return new Interval<int>((max + 1) ?? machine.SeedMin, machine.SeedMax);
+        }
     }
 
+    public class UpdateImporter<T> : BasicImporter<T> where T : IdentifiableEntity, IDisconnectedEntity
+    {
+        public virtual ImportResult Import(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
+        {
+            int inserts = Insert(machine, table, strategy, newDatabase);
+
+            int update = strategy.Upload == Upload.Subset ? Update(machine, table, strategy, newDatabase) : 0;
+
+            return new ImportResult { Inserted = inserts, Updated = update };
+        }
+
+        protected virtual int Update(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
+        {
+            using (Transaction tr = new Transaction())
+            {
+                SqlPreCommandSimple command = UpdateTableScript(machine, table, newDatabase);
+
+                int result = Executor.ExecuteNonQuery(command);
+
+                foreach (var rt in table.RelationalTables())
+                {
+                    SqlPreCommandSimple delete = DeleteUpdatedRelationalTableScript(machine, table, rt, newDatabase);
+
+                    Executor.ExecuteNonQuery(delete);
+
+                    SqlPreCommandSimple insert = InsertUpdatedRelationalTableScript(rt, machine, table, newDatabase);
+
+                    Executor.ExecuteNonQuery(insert);
+                }
+
+                return tr.Commit(result);
+            }
+        }
+
+        protected virtual SqlPreCommandSimple InsertUpdatedRelationalTableScript(RelationalTable rt, DisconnectedMachineDN machine, Table table, SqlConnector newDatabase)
+        {
+            string prefix = Prefix(newDatabase);
+            ParameterBuilder pb = Connector.Current.ParameterBuilder;
+            var columns = rt.Columns.Values.Where(c => !c.Identity);
+
+            var insert = new SqlPreCommandSimple(@"INSERT INTO {0} ({1})
+SELECT {2}
+FROM {3} as [relationalTable]
+INNER JOIN {4} as [table] ON [relationalTable].{5} = [table].id".Formato(
+            rt.Name.SqlScape(),
+            columns.ToString(c => c.Name.SqlScape(), ", "),
+            columns.ToString(c => "[relationalTable]." + c.Name.SqlScape(), ", "),
+            prefix + rt.Name.SqlScape(),
+            prefix + table.Name.SqlScape(),
+            rt.BackReference.Name.SqlScape()) + GetUpdateWhere(table), new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
+            return insert;
+        }
+
+        protected virtual SqlPreCommandSimple DeleteUpdatedRelationalTableScript(DisconnectedMachineDN machine, Table table, RelationalTable rt, SqlConnector newDatabase)
+        {
+            ParameterBuilder pb = Connector.Current.ParameterBuilder;
+
+            var delete = new SqlPreCommandSimple(@"DELETE {0}
+FROM {0}
+INNER JOIN {1} as [table] ON {0}.{2} = [table].id".Formato(
+                rt.Name.SqlScape(),
+                Prefix(newDatabase) + table.Name.SqlScape(),
+                rt.BackReference.Name.SqlScape()) + GetUpdateWhere(table), new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
+            return delete;
+        }
+
+        protected virtual SqlPreCommandSimple UpdateTableScript(DisconnectedMachineDN machine, Table table, SqlConnector newDatabase)
+        {
+            ParameterBuilder pb = Connector.Current.ParameterBuilder;
+
+            var command = new SqlPreCommandSimple(@"UPDATE {0} SET
+{2}
+FROM {0}
+INNER JOIN {1} as [table] ON {0}.id = [table].id
+".Formato(
+ table.Name.SqlScape(),
+ Prefix(newDatabase) + table.Name.SqlScape(),
+ table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0}.{1} = [table].{1}".Formato(table.Name.SqlScape(), c.Name), ",\r\n")) + GetUpdateWhere(table),
+ new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
+            return command;
+        }
+
+        protected virtual string GetUpdateWhere(Table table)
+        {
+            var where = "\r\nWHERE [table].{0} = @machineId AND [table].{1} != [table].{2}".Formato(
+                ((FieldReference)table.GetField(piDisconnectedMachine)).Name.SqlScape(),
+                ((FieldValue)table.GetField(piTicks)).Name.SqlScape(),
+                ((FieldValue)table.GetField(piLastOnlineTicks)).Name.SqlScape());
+            return where;
+        }
+
+        static PropertyInfo piDisconnectedMachine = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.DisconnectedMachine);
+        static PropertyInfo piTicks = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.Ticks);
+        static PropertyInfo piLastOnlineTicks = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.LastOnlineTicks);
+    }
 
     public class ImportResult
     {

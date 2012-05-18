@@ -30,12 +30,12 @@ namespace Signum.Engine.Disconnected
 
         protected virtual void DropIfExists(string databaseName)
         {
-            DisconnectedSql.DropIfExists(databaseName);
+            DisconnectedTools.DropIfExists(databaseName);
         }
 
         protected virtual void RestoreDatabase(string databaseName, string backupFile, string databaseFile, string databaseLogFile)
         {
-            DisconnectedSql.RestoreDatabase(databaseName, 
+            DisconnectedTools.RestoreDatabase(databaseName, 
                 Absolutize(backupFile), 
                 Absolutize(databaseFile), 
                 Absolutize(databaseLogFile));
@@ -43,7 +43,7 @@ namespace Signum.Engine.Disconnected
 
         public virtual void BackupDatabase(string databaseName, string backupFile)
         {
-            DisconnectedSql.BackupDatabase(databaseName, Absolutize(backupFile));
+            DisconnectedTools.BackupDatabase(databaseName, Absolutize(backupFile));
         }
 
         protected virtual string Absolutize(string backupFile)
@@ -56,7 +56,7 @@ namespace Signum.Engine.Disconnected
 
         public void DropDatabase(string databaseName)
         {
-            DisconnectedSql.DropDatabase(databaseName);
+            DisconnectedTools.DropDatabase(databaseName);
         }
     }
 }
