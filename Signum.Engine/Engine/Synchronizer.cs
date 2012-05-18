@@ -142,10 +142,13 @@ namespace Signum.Engine
             List<string> oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
             List<string> newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
 
-            StringDistance sd = new StringDistance();
-            var distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b => sd.LongestCommonSubsequence(a, b)));
+            if (oldOnly.Count == 0 || newOnly.Count == 0)
+                return;
 
-            Solution bestSolution = Solution.Empty; 
+            StringDistance sd = new StringDistance();
+            var distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b => Math.Max(a.Length, b.Length) - sd.LongestCommonSubsequence(a, b)));
+
+            Solution bestSolution = new Solution(null, int.MaxValue); 
             Action<int, Solution> findMinimumPermutation = null;
 
 
@@ -182,20 +185,34 @@ namespace Signum.Engine
          
             Dictionary<string, string> replacements = new Dictionary<string, string>();
 
-            while (oldOnly.Count > 0 && newOnly.Count > 0)
+            if (Interactive)
             {
-                Selection selection = bestSolution.Selections.Last(a=>a.NewValue != null);
-
-                if (Interactive)
+                while (oldOnly.Count > 0 && newOnly.Count > 0)
                 {
-                    List<string> sms = newOnly.OrderByDescending(n => distances[selection.OldValue][n]).ToList();
-            
-                    selection = SelectInteractive(sms, selection, replacementsKey);
-                }
+                    Selection defaultSelection = bestSolution.Selections.Last(a => a.NewValue != null);
 
-                replacements.Add(selection.OldValue, selection.NewValue);
-                oldOnly.RemoveAt(0);
-                newOnly.Remove(selection.NewValue);
+                    List<string> sms = newOnly.OrderBy(n => distances[defaultSelection.OldValue][n]).ToList();
+
+                    Selection selection = SelectInteractive(sms, defaultSelection, replacementsKey);
+
+                    if (selection.NewValue != null)
+                    {
+                        replacements.Add(selection.OldValue, selection.NewValue);
+                        oldOnly.RemoveAt(0);
+                        newOnly.Remove(selection.NewValue);
+                    }
+                    else
+                    {
+                        oldOnly.RemoveAt(0);
+                    }
+
+                    bestSolution = new Solution(null, int.MaxValue);
+                    findMinimumPermutation(0, Solution.Empty);
+                }
+            }
+            else
+            {
+                replacements.AddRange(bestSolution.Selections.Where(a => a.NewValue != null).Select(a => KVP.Create(a.OldValue, a.NewValue)));
             }
 
             if (replacements.Count != 0)
@@ -237,7 +254,7 @@ namespace Signum.Engine
             public readonly ImmutableStack<Selection> Selections;
             public readonly int Sum;
 
-            public static readonly Solution Empty = new Solution(ImmutableStack<Selection>.Empty, int.MaxValue);
+            public static readonly Solution Empty = new Solution(ImmutableStack<Selection>.Empty, 0);
         }
 
         public struct Selection
