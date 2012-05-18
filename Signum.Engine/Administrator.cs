@@ -80,7 +80,7 @@ namespace Signum.Engine
         }
 
 
-        public static T SetId<T>(this T ident, int id)
+        public static T SetId<T>(this T ident, int? id)
             where T : IdentifiableEntity
         {
             ident.id = id;
@@ -111,7 +111,7 @@ namespace Signum.Engine
             }
         }
 
-        public static T SetNew<T>(T ident)
+        public static T SetNew<T>(this T ident)
             where T : IdentifiableEntity
         {
             ident.IsNew = true;
