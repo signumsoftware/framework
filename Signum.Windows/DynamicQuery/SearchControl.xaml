@@ -1,0 +1,176 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:m="clr-namespace:Signum.Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+	x:Class="Signum.Windows.SearchControl"
+	x:Name="me">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="..\Resources.xaml"/>
+                <ResourceDictionary Source="..\BlueMenu.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <ContextMenu x:Key="contextMenu">
+                <MenuItem Header="{m:Loc NewFilter}"  Click="filter_Click"/>
+                <Separator/>
+                <MenuItem Header="{m:Loc Rename}" Click="renameMenu_Click"/>
+                <MenuItem Header="{m:Loc Remove}" Click="removeMenu_Click"/>
+            </ContextMenu>
+            <Style x:Key="FilterButtonStyle" TargetType="{x:Type ToggleButton}">
+                <Style.BasedOn>
+                    <Style TargetType="{x:Type ButtonBase}">
+                        <Setter Property="FocusVisualStyle">
+                            <Setter.Value>
+                                <Style>
+                                    <Setter Property="Control.Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <Rectangle Stroke="Black" StrokeDashArray="1 2" StrokeThickness="1" Margin="2" SnapsToDevicePixels="True"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="BorderBrush" Value="#FF707070"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        <Setter Property="Padding" Value="1"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ButtonBase}">
+                                    <Border x:Name="border" CornerRadius="0,0,5,0">
+                                        <ContentPresenter x:Name="contentPresenter" 
+                                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                                          Margin="{TemplateBinding Padding}" 
+                                                          Content="{TemplateBinding Content}" 
+                                                          ContentStringFormat="{TemplateBinding ContentStringFormat}" 
+                                                          ContentTemplate="{TemplateBinding ContentTemplate}" 
+                                                          RecognizesAccessKey="True"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsKeyboardFocused" Value="True"/>
+                                        <Trigger Property="ToggleButton.IsChecked" Value="True">
+                                            <Setter Property="Background" TargetName="border" Value="#FFC9E4FF"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Foreground" Value="#FFADADAD"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" TargetName="border" Value="#FFA6D3FF"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Style.BasedOn>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" x:Name="rowFilters"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="100"/>
+            <RowDefinition Height="32"  />
+        </Grid.RowDefinitions>
+        <ContentControl Content="{Binding Path=SimpleFilterBuilder, ElementName=me}" Focusable="False"
+                        x:Name="simpleFilterBuilderContentControl" 
+                        HorizontalContentAlignment="Stretch"/>
+        <Grid Background="#FFC9E4FF" Grid.Row="1">
+            <Grid.Visibility>
+                <MultiBinding Converter="{x:Static m:Converters.AndToVisibility}">
+                    <Binding Path="ShowHeader" ElementName="me"/>
+                    <Binding Path="ShowFilters" ElementName="me"/>
+                </MultiBinding>
+            </Grid.Visibility>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="nuevoFiltro">
+                <m:QueryTokenBuilder x:Name="tokenBuilder" />
+                <m:ImageButton Image="..\Images\newFilter.png" Content="{m:Loc NewFilter}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
+                <m:ImageButton Image="..\Images\newColumn.png" Content="{m:Loc NewColumn}" x:Name="btCreateColumn" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateColumn_Click" ToolTipService.ShowOnDisabled="True"
+                                   Visibility="{Binding AllowChangeColumns, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" />
+            </StackPanel>
+            <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
+        </Grid>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="30" Background="Transparent"
+                    Visibility="{Binding ShowHeader, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Grid.Row="2">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">
+                    <Setter Property="Width" Value="24"/>
+                    <Setter Property="Height" Value="24"/>
+                    <Setter Property="Margin" Value="3"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+            </StackPanel.Resources>
+            <ToggleButton x:Name="btFilters" 
+                          Unchecked="btFilters_Unchecked"
+                              IsChecked="{Binding ShowFilters, ElementName=me}"
+                              Visibility="{Binding ShowFilterButton, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Margin="0,0,5,0" Style="{DynamicResource FilterButtonStyle}" Padding="5,1" >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{m:Loc Filters}" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                </StackPanel>
+            </ToggleButton>
+            <Button x:Name="btFind" Click="FilterBuilder_SearchClicked"  ToolTip="{m:Loc Find}" Style="{DynamicResource RoundBigButton}" Margin="0,2" Padding="2,0" >
+                <StackPanel Orientation="Horizontal">
+                    <Border Child="{StaticResource Find}" Width="20" Height="20"/>
+                    <TextBlock Text="{m:Loc Find}" TextWrapping="Wrap" Margin="2,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="btCreate" Content="{DynamicResource Create}" Click="btCreate_Click" ToolTip="{m:Loc CreateNew}" Style="{StaticResource big}"/>
+            <Button x:Name="btView" Content="{DynamicResource View}" Click="btView_Click" ToolTip="{m:Loc ViewSelected}" Style="{StaticResource big}"/>
+            <Button x:Name="btRemove" Content="{DynamicResource Remove}" Click="btRemove_Click" ToolTip="{m:Loc Remove}" Style="{StaticResource big}"/>
+            <Menu IsMainMenu="False" x:Name="menu" VerticalAlignment="Center" Background="Transparent"/>
+        </StackPanel>
+        <Border x:Name="brMultiplications" BorderBrush="#fbdd73" Background="#fff59d" BorderThickness="1" CornerRadius="2" Margin="1" Padding="2" HorizontalAlignment="Stretch" Visibility="Collapsed" Grid.Row="3">
+            <TextBlock x:Name="tbMultiplications"/>
+        </Border>
+        <ListView x:Name="lvResult"
+                Grid.Row="4" 
+                MinHeight="100"
+                  IsSynchronizedWithCurrentItem="True" 
+                  Background="WhiteSmoke"
+                  SelectionChanged="lvResult_SelectionChanged" 
+			      SelectionMode="{Binding MultiSelection, Converter={x:Static m:Converters.BoolToSelectionMode}, ElementName=me}"
+			      VirtualizingStackPanel.IsVirtualizing="True"
+                  AllowDrop="{Binding AllowChangeColumns, ElementName=me}"
+                  DragOver="lvResult_DragOver"
+                  Drop="lvResult_Drop">
+            <ListView.View>
+                <GridView x:Name="gvResults" AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="{x:Type GridViewColumnHeader}">                           
+                            <EventSetter Event="Click" Handler="GridViewColumnHeader_Click"/>
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                </GridView>
+            </ListView.View>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="AutomationProperties.ItemStatus" Value="{Binding Converter={x:Static m:Converters.EntityKey}}"/>
+                    <EventSetter Event="Control.MouseDoubleClick" Handler="lvResult_MouseDoubleClick"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+        <Grid Grid.Row="5" Background="#FFC9E4FF"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
+            <DockPanel Height="24"   Margin="3,3,15,3" >
+                <m:ElementsInPageLabel x:Name="elementsInPageLabel" VerticalAlignment="Center"  MinWidth="150" Visibility="Hidden"  DockPanel.Dock="Left" />
+                <m:PageSizeSelector x:Name="pageSizeSelector" VerticalAlignment="Center" PageSize="{Binding ElementsPerPage, ElementName=me}" DockPanel.Dock="Left"/>
+                <m:PageSelector x:Name="pageSelector" VerticalAlignment="Center" Visibility="Hidden"  PageChanged="pageSelector_Changed" CurrentPage="{Binding CurrentPage, ElementName=me}" DockPanel.Dock="Right" HorizontalAlignment="Right" />
+            </DockPanel>
+        </Grid>
+    </Grid>
+</UserControl>

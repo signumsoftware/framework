@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="Signum.Windows.QueryTokenBuilder"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    x:Name="me" Margin="2,2,2,2" AllowDrop="True" DragDrop.DragOver="sp_DragOver" DragDrop.Drop="sp_Drop">
+    <StackPanel Orientation="Horizontal" x:Name="sp">
+        <StackPanel.Resources>
+            <Style TargetType="ComboBox" x:Key="{x:Type ComboBox}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="1,0,0,1"/>
+            </Style>
+            <Style TargetType="ComboBoxItem" x:Key="{x:Type ComboBoxItem}">
+                <Setter Property="AutomationProperties.ItemStatus" Value="{Binding Key}"/>
+                <EventSetter Event="Loaded" Handler="cbi_Loaded"/>
+            </Style>
+        </StackPanel.Resources>
+    </StackPanel>
+</UserControl>

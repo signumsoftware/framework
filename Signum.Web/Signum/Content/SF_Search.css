@@ -1,0 +1,255 @@
+﻿.sf-entity-ctxmenu-error
+{
+    border: 1px solid red;
+}
+.sf-entity-ctxmenu-success a
+{
+    color: green;
+}
+.sf-filters
+{
+    clear: both;
+}
+.sf-filter-field-header
+{
+    min-width: 140px;    
+}
+.sf-filters-body
+{
+    padding: 5px;
+    border-bottom-width: 0px;
+}
+.sf-filters-body label
+{
+    float: left;
+    padding: 6px 5px;
+}
+.sf-filters-body select
+{
+    padding: 3px 4px;
+    margin-top: 1px;
+}
+.sf-filters-header
+{
+    display: block;
+    float: right;
+    cursor: pointer;
+}
+.sf-filters-list
+{
+    padding: 10px;
+    clear: both;
+}
+.sf-filters-list .sf-field
+{
+    padding: 0;
+}
+.sf-filters-list th
+{
+    text-align: left;
+    padding: 4px;
+}
+.sf-filters-list td
+{
+    vertical-align: middle;
+    padding: 0 3px;
+}
+.sf-filter-token
+{
+    padding: 2px 5px;    
+}
+.sf-subtokens-expander 
+{
+    cursor:pointer;
+    margin: 0 5px;
+}
+.sf-search-ctxmenu
+{
+    border: 1px solid #aaa;
+    position: absolute;
+    background: #fff;
+}
+.sf-search-ctxitem
+{
+    min-width: 100px;
+    display: block;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: normal;
+    border-top: 1px solid #aaa;
+}
+.sf-search-ctxitem:first-child
+{
+    border-top: 0;
+}
+.sf-search-ctxitem-header
+{
+    font-weight: bold;
+    cursor: default;    
+}
+.sf-search-ctxitem-no-results
+{
+    font-style: italic;    
+}
+.sf-search-ctxmenu-overlay
+{
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    min-height: 800px;
+    min-width: 1024px;
+    z-index: 100;
+}
+.sf-search-results td.sf-search-footer-pagination
+{
+     padding: 0 7px;   
+}
+.sf-search-footer span
+{
+    padding: 5px 2px 0 2px;
+    font-weight:normal;
+}
+.sf-search-footer span.sf-pagination-strong
+{
+    font-weight: bold;
+}
+.sf-search-footer div
+{
+    float: left;
+    width: 33%;
+}
+.sf-pagination-left span
+{
+    display: block;
+    float: left;
+}
+.sf-pagination-center
+{
+    text-align: center;   
+}
+.sf-pagination-right
+{
+    text-align: right;
+}
+.sf-pagination-size
+{
+    padding: 1px 2px;
+    margin: 1px;    
+}
+.sf-search-results
+{
+    width:100%;
+}
+.sf-search-footer input[type=button]
+{
+    cursor: pointer;
+}
+.sf-search-results a[title=Navigate]
+{
+    font-weight: bold;
+}
+.sf-search-results input[type=checkbox]
+{
+    float: none;
+    margin-top: inherit;
+}
+.sf-search-results td
+{
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    word-wrap: break-word;
+}
+.sf-search-results td:first-child
+{
+    border-left:1px solid #eee !important;    
+}
+.sf-search-results td, .sf-search-results th
+{
+    vertical-align: top;
+    padding: 7px;
+}
+.sf-search-results th
+{
+    line-height: 1.3em;
+    text-align: left;
+    cursor: pointer;
+}
+.sf-search-results th:last-child
+{
+    border-right:width:0 !important;    
+}
+.sf-search-results th.sf-header-sort-down
+{
+    background: url(../images/asc.gif) no-repeat scroll left 11px;
+    text-indent: 10px;
+}
+.sf-search-results th.sf-header-sort-up
+{
+    background: url(../images/desc.gif) no-repeat scroll left 11px;
+    text-indent: 10px;
+}
+.sf-search-results tbody tr:hover
+{
+    background-color: #efefef;
+}
+.sf-search-results tr:last-child td
+{
+    border-bottom: 0;
+}
+.sf-search-results-container
+{
+	overflow-x:auto;
+}
+.sf-search-control
+{
+    min-width:400px;    
+}
+.sf-search-control .sf-td-multiply
+{
+    font-style: italic;    
+}
+
+/* slider - track | scrollbar replacement */
+.sf-search-track 
+{
+	position:relative;
+	height:10px;
+	background-color:#ddd;
+	margin-bottom:3px;
+	margin-top: 3px;
+	border-radius:3px;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	cursor:pointer;
+}
+.sf-search-track:hover 
+{
+	background-color:#ccc;	
+}
+.sf-search-slider 
+{
+	position:absolute;
+	width:7px;
+	height:10px;
+	background-color:#bbb;	
+	border-radius:3px;
+ 	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	cursor:pointer;
+}
+.sf-search-slider:hover 
+{
+	background-color:#999;	
+}
+
+span.count-with-results
+{
+    font-weight:bold;
+}
+
+span.count-no-results
+{
+    font-weight:normal;
+}

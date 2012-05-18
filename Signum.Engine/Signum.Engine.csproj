@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7F2DB6FE-C109-4057-B207-C62A767F905D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Signum.Engine</RootNamespace>
+    <AssemblyName>Signum.Engine</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>
+    </StartupObject>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
+    <OutputPath>bin\Partial\</OutputPath>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.Types.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Signum.Utilities\Properties\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
+    <Compile Include="Administrator.cs" />
+    <Compile Include="Connection\Connector.cs" />
+    <Compile Include="Connection\Executor.cs" />
+    <Compile Include="Connection\FieldReader.cs" />
+    <Compile Include="Connection\SqlCeConnector.cs" />
+    <Compile Include="Connection\SqlConnector.cs" />
+    <Compile Include="Connection\Transaction.cs" />
+    <Compile Include="Connection\UserConnections.cs" />
+    <Compile Include="DynamicQuery\AutoDynamicQuery.cs" />
+    <Compile Include="DynamicQuery\DynamicQuery.cs" />
+    <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
+    <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
+    <Compile Include="Engine\SqlUtils.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="Database.cs" />
+    <Compile Include="DynamicQuery\DynamicQueryManager.cs" />
+    <Compile Include="DynamicQuery\AutoCompleteUtils.cs" />
+    <Compile Include="Engine\SchemaInfoTables.cs" />
+    <Compile Include="Engine\Synchronizer.cs" />
+    <Compile Include="ExecutionContext.cs" />
+    <Compile Include="GlobalLazy.cs" />
+    <Compile Include="Linq\DbExpressions.Sql.cs" />
+    <Compile Include="Linq\DbQueryProvider.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbQueryUtils.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AliasReplacer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
+    <Compile Include="Linq\ExpressionVisitor\ConditionsRewriter.cs" />
+    <Compile Include="Linq\ExpressionVisitor\ChildProjectionFlattener.cs" />
+    <Compile Include="Linq\ExpressionVisitor\OrderByRewriter.cs" />
+    <Compile Include="Linq\ExpressionVisitor\GroupEntityCleaner.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AggregateFinder.cs" />
+    <Compile Include="Linq\ExpressionVisitor\RowNumberFiller.cs" />
+    <Compile Include="Linq\ExpressionVisitor\QueryFilterer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\QueryRebinder.cs" />
+    <Compile Include="Linq\ExpressionVisitor\OverloadingSimplifier.cs" />
+    <Compile Include="Linq\ExpressionVisitor\EntityCompleter.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbExpressionVisitor.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbExpressionNominator.cs" />
+    <Compile Include="Linq\ExpressionVisitor\QueryBinder.cs" />
+    <Compile Include="Linq\ExpressionVisitor\QueryFormatter.cs" />
+    <Compile Include="Linq\ExpressionVisitor\RedundantSubqueryRemover.cs" />
+    <Compile Include="Linq\ExpressionVisitor\Replacer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\SmartEqualizer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\SubqueryRemover.cs" />
+    <Compile Include="Linq\ExpressionVisitor\TranslatorBuilder.cs" />
+    <Compile Include="Linq\ExpressionVisitor\UnusedColumnRemover.cs" />
+    <Compile Include="Linq\DbExpressions.Signum.cs" />
+    <Compile Include="Linq\Meta\MetaEvaluator.cs" />
+    <Compile Include="Linq\Meta\MetaExpression.cs" />
+    <Compile Include="Linq\ProjectionReader.cs" />
+    <Compile Include="Linq\Meta\MetadataVisitor.cs" />
+    <Compile Include="Linq\TranslateResult.cs" />
+    <Compile Include="Engine\Saver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\SqlPreCommand.cs" />
+    <Compile Include="Linq\ViewAttributes.cs" />
+    <Compile Include="Engine\SchemaComparer.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Include="Retriever.cs" />
+    <Compile Include="Schema\Schema.cs" />
+    <Compile Include="Schema\Schema.Delete.cs" />
+    <Compile Include="Schema\Schema.Expressions.cs" />
+    <Compile Include="Schema\Schema.Basics.cs" />
+    <Compile Include="Schema\Schema.Save.cs" />
+    <Compile Include="Schema\SchemaBuilder\SchemaBuilder.cs" />
+    <Compile Include="Schema\SchemaBuilder\SchemaBuilderSettings.cs" />
+    <Compile Include="Schema\SchemaBuilder\NameSequence.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EntityCache.cs" />
+    <Compile Include="Engine\SqlBuilder.cs" />
+    <Compile Include="Schema\UniqueIndex.cs" />
+    <Compile Include="ServerBasic.cs" />
+    <Compile Include="TypesLogic.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Schema\Schema.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
+      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Name>Signum.Entities</Name>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
+      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Name>Signum.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.es.resx" />
+    <EmbeddedResource Include="Properties\Resources.fr.resx" />
+    <EmbeddedResource Include="Properties\Resources.it.resx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.pt.resx" />
+    <EmbeddedResource Include="Properties\Resources.de.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

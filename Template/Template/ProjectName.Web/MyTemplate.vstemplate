@@ -1,0 +1,86 @@
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>ProjectName.Web</Name>
+    <Description>ASP.Net MVC &amp; WCF Server</Description>
+    <ProjectType>CSharp</ProjectType>
+    <ProjectSubType>
+    </ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>ProjectName.Web</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <Icon>__TemplateIcon.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="$custommessage$.Web.csproj" File="Capri.Web.csproj" ReplaceParameters="true">
+      <Folder Name="App_Data" TargetFolderName="App_Data" />
+      <Folder Name="Code" TargetFolderName="Code">
+        <ProjectItem ReplaceParameters="true" TargetFileName="$custommessage$Client.cs">CapriClient.cs</ProjectItem>
+      </Folder>
+      <Folder Name="Content" TargetFolderName="Content">
+        <ProjectItem ReplaceParameters="false" TargetFileName="site.css">site.css</ProjectItem>
+        <Folder Name="smoothness" TargetFolderName="smoothness">
+          <ProjectItem ReplaceParameters="false" TargetFileName="jquery-ui-1.8.14.css">jquery-ui-1.8.14.css</ProjectItem>
+          <Folder Name="images" TargetFolderName="images">
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_flat_0_aaaaaa_40x100.png">ui-bg_flat_0_aaaaaa_40x100.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_flat_75_ffffff_40x100.png">ui-bg_flat_75_ffffff_40x100.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_glass_55_fbf9ee_1x400.png">ui-bg_glass_55_fbf9ee_1x400.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_glass_65_ffffff_1x400.png">ui-bg_glass_65_ffffff_1x400.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_glass_75_dadada_1x400.png">ui-bg_glass_75_dadada_1x400.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_glass_75_e6e6e6_1x400.png">ui-bg_glass_75_e6e6e6_1x400.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_glass_95_fef1ec_1x400.png">ui-bg_glass_95_fef1ec_1x400.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_highlight-soft_75_cccccc_1x100.png">ui-bg_highlight-soft_75_cccccc_1x100.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-icons_222222_256x240.png">ui-icons_222222_256x240.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-icons_2e83ff_256x240.png">ui-icons_2e83ff_256x240.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-icons_454545_256x240.png">ui-icons_454545_256x240.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-icons_888888_256x240.png">ui-icons_888888_256x240.png</ProjectItem>
+            <ProjectItem ReplaceParameters="false" TargetFileName="ui-icons_cd0a0a_256x240.png">ui-icons_cd0a0a_256x240.png</ProjectItem>
+          </Folder>
+        </Folder>
+      </Folder>
+      <Folder Name="Scripts" TargetFolderName="Scripts">
+        <ProjectItem ReplaceParameters="false" TargetFileName="jquery-1.6.2.min.js">jquery-1.6.2.min.js</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="jquery-ui-1.8.14.min.js">jquery-ui-1.8.14.min.js</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="newcontent.js">newcontent.js</ProjectItem>
+      </Folder>
+      <ProjectItem ReplaceParameters="false" TargetFileName="favicon.ico">favicon.ico</ProjectItem>
+      <Folder Name="Controllers" TargetFolderName="Controllers">
+        <ProjectItem ReplaceParameters="true" TargetFileName="HomeController.cs">HomeController.cs</ProjectItem>
+      </Folder>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Global.asax">Global.asax</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Global.asax.cs">Global.asax.cs</ProjectItem>
+      <Folder Name="Models" TargetFolderName="Models" />
+      <Folder Name="Properties" TargetFolderName="Properties">
+        <ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+        <ProjectItem ReplaceParameters="true" TargetFileName="Settings.settings">Settings.settings</ProjectItem>
+        <ProjectItem ReplaceParameters="true" TargetFileName="Settings.Designer.cs">Settings.Designer.cs</ProjectItem>
+      </Folder>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc">ServerCapri.svc</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc.cs">ServerCapri.svc.cs</ProjectItem>
+      <Folder Name="Views" TargetFolderName="Views">
+        <Folder Name="Capri" TargetFolderName="$custommessage$">
+          <ProjectItem ReplaceParameters="true" TargetFileName="MyEntity.cshtml">MyEntity.cshtml</ProjectItem>
+        </Folder>
+        <Folder Name="Home" TargetFolderName="Home">
+          <ProjectItem ReplaceParameters="true" TargetFileName="Index.cshtml">Index.cshtml</ProjectItem>
+        </Folder>
+        <Folder Name="Shared" TargetFolderName="Shared">
+          <ProjectItem ReplaceParameters="true" TargetFileName="Error.cshtml">Error.cshtml</ProjectItem>
+          <ProjectItem ReplaceParameters="true" TargetFileName="Menu.cshtml">Menu.cshtml</ProjectItem>
+          <ProjectItem ReplaceParameters="true" TargetFileName="_Layout.cshtml">_Layout.cshtml</ProjectItem>
+        </Folder>
+        <ProjectItem ReplaceParameters="true" TargetFileName="Web.config">Web.config</ProjectItem>
+        <ProjectItem ReplaceParameters="true" TargetFileName="_ViewStart.cshtml">_ViewStart.cshtml</ProjectItem>
+      </Folder>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Web.config">Web.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Web.Debug.config">Web.Debug.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Web.Release.config">Web.Release.config</ProjectItem>
+    </Project>
+  </TemplateContent>
+  <WizardExtension>
+    <Assembly>WizardProjectName, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b6f529cd3458096d</Assembly>
+    <FullClassName>WizardProjectName.Wizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>
