@@ -138,7 +138,7 @@ namespace Signum.Engine.DynamicQuery
             if (dic == null)
                 return Enumerable.Empty<QueryToken>();
 
-            return dic.Values.Select(v => v.CreateToken(parent));
+            return dic.Values.Where(a => a.Inherit || a.Type == type).Select(v => v.CreateToken(parent));
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
@@ -180,8 +180,6 @@ namespace Signum.Engine.DynamicQuery
             }
             else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.NiceToString()));
         }
-
-     
 
         private static void AssertExtensionMethod(MethodInfo mi)
         {
@@ -269,11 +267,13 @@ namespace Signum.Engine.DynamicQuery
         public Implementations Implementations;
         public Func<bool> IsAllowed;
         public PropertyRoute PropertyRoute;
-       
+        public bool Inherit = true;
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
             return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
         }
+
+       
     }
 }

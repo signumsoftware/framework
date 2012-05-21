@@ -222,15 +222,15 @@ namespace Signum.Entities.DynamicQuery
                 foreach (var part in parts.Skip(1))
                 {
                     result = subTokens(result).Select(t => t.MatchPart(part)).NotNull().SingleEx(
-                          () => Resources.Token0NotCompatibleWith1.Formato(part, result),
-                          () => Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(part, result));
+                          () => "Token with key '{0}' not found on {1}".Formato(part, result),
+                          () => "More than one token with key '{0}' found on {1}".Formato(part, result));
                 }
 
                 return result;
             }
             catch (Exception e)
             {
-                throw new FormatException("Invalid query token: " + e.Message, e);
+                throw new FormatException(e.Message, e);
             }
         }
 
