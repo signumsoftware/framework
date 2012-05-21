@@ -152,6 +152,9 @@ namespace Signum.Engine.Disconnected
                     token.ThrowIfCancellationRequested();
 
                     export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
+
+                    machine.IsOffline = false;
+                    machine.Save();
                 }
                 catch (Exception e)
                 {
