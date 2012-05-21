@@ -120,25 +120,25 @@ namespace Signum.Engine.DynamicQuery
 
         static DynamicQueryManager()
         {
-            QueryToken.EntityExtensions = (type, parent) => DynamicQueryManager.Current.GetExtensions(type, parent);
-            ExtensionToken.BuildExtension = (type, key, expression) => DynamicQueryManager.Current.BuildExtension(type, key, expression);
+            QueryToken.EntityExtensions = (entityType, parent) => DynamicQueryManager.Current.GetExtensions(entityType, parent);
+            ExtensionToken.BuildExtension = (entityType, key, expression) => DynamicQueryManager.Current.BuildExtension(entityType, key, expression);
         }
 
-        private Expression BuildExtension(Type type, string key, Expression context)
+        private Expression BuildExtension(Type entityType, string key, Expression context)
         {
-            LambdaExpression lambda = registeredExtensions.GetValue(type)[key].Lambda;
+            LambdaExpression lambda = registeredExtensions.GetValue(entityType)[key].Lambda;
 
             return ExpressionReplacer.Replace(Expression.Invoke(lambda, context));
         }
 
-        public IEnumerable<QueryToken> GetExtensions(Type type, QueryToken parent)
+        public IEnumerable<QueryToken> GetExtensions(Type entityType, QueryToken parent)
         {
-            var dic = registeredExtensions.TryGetValue(type);
+            var dic = registeredExtensions.TryGetValue(entityType);
             
             if (dic == null)
                 return Enumerable.Empty<QueryToken>();
 
-            return dic.Values.Where(a => a.Inherit || a.Type == type).Select(v => v.CreateToken(parent));
+            return dic.Values.Where(a => a.Inherit || a.EntityType == entityType).Select(v => v.CreateToken(parent));
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
