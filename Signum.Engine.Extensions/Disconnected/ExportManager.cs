@@ -118,7 +118,11 @@ namespace Signum.Engine.Disconnected
                     {
                         token.ThrowIfCancellationRequested();
 
-                        using (token.MeasureTime(l => UpdateExportTable(export, tuple.Type.ToTypeDN(), () => new DisconnectedExportTableDN { CopyTable = l })))
+                        using (token.MeasureTime(l => ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e => 
+                            new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
+                            {
+                                Element = new DisconnectedExportTableDN { CopyTable = l }
+                            })))
                         {
                             CopyTable(tuple.Table, tuple.Strategy, newDatabase);
                         }
@@ -184,16 +188,19 @@ namespace Signum.Engine.Disconnected
                     "{0} locked in {1}".Formato(a.Id, a.DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
 
                 if (result.HasText())
-                    UpdateExportTable(stats, typeof(T).ToTypeDN(), () => new DisconnectedExportTableDN { Errors = result });
+                    ExportTableQuery(stats, typeof(T).ToTypeDN()).UnsafeUpdate(e =>
+                            new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
+                            {
+                                Element = new DisconnectedExportTableDN { Errors = result }
+                            });
 
                 return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T { DisconnectedMachine = machine, LastOnlineTicks = a.Ticks });
             }
         }
 
-        protected virtual int UpdateExportTable(Lite<DisconnectedExportDN> stats, TypeDN type, Expression<Func<DisconnectedExportTableDN>> updater)
+        private IQueryable<MListElement<DisconnectedExportDN, DisconnectedExportTableDN>> ExportTableQuery(Lite<DisconnectedExportDN> stats, TypeDN type)
         {
-            return Database.MListQuery((DisconnectedExportDN s) => s.Copies).Where(dst => dst.Parent.ToLite() == stats && dst.Element.Type.RefersTo(type))
-                          .UnsafeUpdate(s => new MListElement<DisconnectedExportDN, DisconnectedExportTableDN> { Element = updater.Evaluate() });
+            return Database.MListQuery((DisconnectedExportDN s) => s.Copies).Where(dst => dst.Parent.ToLite() == stats && dst.Element.Type.RefersTo(type));
         }
 
         public virtual void AbortExport(Lite<DisconnectedExportDN> stat)

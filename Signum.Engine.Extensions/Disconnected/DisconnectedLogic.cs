@@ -64,6 +64,17 @@ namespace Signum.Engine.Disconnected
                                                           dm.Exception,
                                                       }).ToDynamic();
 
+                dqm[typeof(DisconnectedImportDN)] = (from dm in Database.Query<DisconnectedImportDN>()
+                                                     select new
+                                                     {
+                                                         Entity = dm,
+                                                         dm.CreationDate,
+                                                         dm.Machine,
+                                                         dm.State,
+                                                         dm.Total,
+                                                         dm.Exception,
+                                                     }).ToDynamic();
+
                 new BasicExecute<DisconnectedMachineDN>(DisconnectedMachineOperations.Save)
                 {
                     AllowsNew = true,

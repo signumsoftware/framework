@@ -143,13 +143,17 @@ namespace Signum.Engine.Disconnected
                             using (token.MeasureTime(l =>
                             {
                                 if (result != null)
-                                    UpdateExportTable(import, tuple.Type.ToTypeDN(), () => new DisconnectedImportTableDN
-                                    {
-                                        CopyTable = l,
-                                        DisableForeignKeys = tuple.Strategy.DisableForeignKeys,
-                                        InsertedRows = result.Inserted,
-                                        UpdatedRows = result.Updated,
-                                    });
+                                    ImportTableQuery(import, tuple.Type.ToTypeDN()).UnsafeUpdate(s => 
+                                        new MListElement<DisconnectedImportDN, DisconnectedImportTableDN>
+                                        {
+                                            Element = new DisconnectedImportTableDN
+                                            {
+                                                CopyTable = l,
+                                                DisableForeignKeys = tuple.Strategy.DisableForeignKeys.Value,
+                                                InsertedRows = result.Inserted,
+                                                UpdatedRows = result.Updated,
+                                            }
+                                        });
                             }))
                             {
                                 result = tuple.Strategy.Importer.Import(machine, tuple.Table, tuple.Strategy, newDatabase);
@@ -261,10 +265,9 @@ namespace Signum.Engine.Disconnected
             return "{0}.{1}.Import.{2}.bak".Formato(Connector.Current.DatabaseName(), machine.MachineName.ToString(), import.Id);
         }
 
-        protected virtual int UpdateExportTable(Lite<DisconnectedImportDN> stats, TypeDN type, Expression<Func<DisconnectedImportTableDN>> updater)
+        private IQueryable<MListElement<DisconnectedImportDN, DisconnectedImportTableDN>> ImportTableQuery(Lite<DisconnectedImportDN> import, TypeDN type)
         {
-            return Database.MListQuery((DisconnectedImportDN s) => s.Copies).Where(dst => dst.Parent.ToLite() == stats && dst.Element.Type.RefersTo(type))
-                          .UnsafeUpdate(s => new MListElement<DisconnectedImportDN, DisconnectedImportTableDN> { Element = updater.Evaluate() });
+            return Database.MListQuery((DisconnectedImportDN s) => s.Copies).Where(dst => dst.Parent.ToLite() == import && dst.Element.Type.RefersTo(type));
         }
     }
 
@@ -380,7 +383,7 @@ Prefix(newDatabase) + table.Name.SqlScape());
 
     public class UpdateImporter<T> : BasicImporter<T> where T : IdentifiableEntity, IDisconnectedEntity
     {
-        public virtual ImportResult Import(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
+        public override ImportResult Import(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
         {
             int inserts = Insert(machine, table, strategy, newDatabase);
 
