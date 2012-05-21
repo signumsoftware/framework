@@ -36,6 +36,7 @@ namespace Signum.Web
         public const string Formatters = "sfFormatters";
         public const string TabId = "sfTabId";
         public const string PartialViewName = "sfPartialViewName";
+        public const string InPopup = "sfInPopup";
         
         public static string WindowPrefix(this HtmlHelper helper)
         {
