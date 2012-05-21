@@ -73,16 +73,16 @@ namespace Signum.Engine.SMS
 
         static Dictionary<Type, LambdaExpression> phoneNumberProviders = new Dictionary<Type, LambdaExpression>();
 
-        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> func) where T : IdentifiableEntity
+        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> exp) where T : IdentifiableEntity
         {
-            phoneNumberProviders[typeof(T)] = func;
+            phoneNumberProviders[typeof(T)] = exp;
 
             new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperations.SendSMSMessage)
             {
                 Construct = (providers, args) =>
                 {
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
-                        .Select(func).AsEnumerable().NotNull().Distinct().ToList();
+                        .Select(exp).AsEnumerable().NotNull().Distinct().ToList();
 
                     CreateMessageParams createParams = args.GetArg<CreateMessageParams>(0);
 
