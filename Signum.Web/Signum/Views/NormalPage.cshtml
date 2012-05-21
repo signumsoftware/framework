@@ -1,0 +1,29 @@
+﻿@using System.Configuration
+@using Signum.Web.Properties
+
+@model TypeContext
+           
+@section head
+{
+    @Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray())
+}
+
+@using (Html.BeginForm())
+{
+    var ident = Model.UntypedValue as IdentifiableEntity;
+    
+    <div id="divNormalControl" @Html.Raw(ident != null? "data-isnew=\""+ident.IsNew.ToString().ToLower() +  "\"" : "")>
+      @if(string.IsNullOrEmpty(ViewBag.Title))
+        {
+            ViewBag.Title = Model.UntypedValue.TryToString();
+        }
+     
+        @if(string.IsNullOrEmpty(ViewBag.Title))
+        {
+            ViewBag.Title = Model.UntypedValue.TryToString();
+        }
+        @{ Html.RenderPartial(Navigator.Manager.NormalControlView);}
+    </div>
+    
+    <div class="clearall"></div>   
+}

@@ -1,0 +1,14 @@
+﻿@using Signum.Entities.Reflection
+@model TypeContext
+<div id="@Model.Compose("panelPopup")" data-title="@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)">
+    <h2><span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString())</span></h2>
+    <div class="sf-button-bar">
+        <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
+                OK</button>                
+    </div>
+    @Html.ValidationSummaryAjax(Model)
+    @Html.PopupHeader()
+    <div id="@Model.Compose("divMainControl")" class="sf-main-control">
+        @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
+    </div>
+</div>

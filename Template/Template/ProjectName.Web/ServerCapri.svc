@@ -1,0 +1,1 @@
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="$custommessage$.Web.Server$custommessage$" CodeBehind="Server$custommessage$.svc.cs" %>
