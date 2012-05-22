@@ -17,7 +17,7 @@ namespace Signum.Web.Controllers
     {
         public override object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext) 
         {
-             Type cleanType = Reflector.ExtractLite(bindingContext.ModelType);
+            Type cleanType = Lite.Extract(bindingContext.ModelType);
              if (cleanType != null)
              {
                  string value = controllerContext.HttpContext.Request[bindingContext.ModelName];

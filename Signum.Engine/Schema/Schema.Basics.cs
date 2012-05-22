@@ -76,7 +76,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "[{0}] ({1})\r\n{2}".Formato(Name, Type.TypeName(), Fields.ToString(c => "{0} : {1}".Formato(c.Key, c.Value), "\r\n").Indent(2));
+            return Name;
         }
 
         public void GenerateColumns()
@@ -178,6 +178,11 @@ namespace Signum.Engine.Maps
         public IEnumerable<KeyValuePair<Table, bool>> DependentTables()
         {
             return Fields.Values.SelectMany(f => f.Field.GetTables());
+        }
+
+        public IEnumerable<RelationalTable> RelationalTables()
+        {
+            return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
         }
     }
 

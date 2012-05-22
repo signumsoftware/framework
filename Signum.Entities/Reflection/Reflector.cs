@@ -38,7 +38,7 @@ namespace Signum.Entities.Reflection
         static Reflector()
         {
             DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
-            DescriptionManager.CleanType = CleanType; //To allow Lite<T>
+            DescriptionManager.CleanType = LiteUtils.CleanType; //To allow Lite<T>
         }
 
         public static string CleanTypeName(Type t)
@@ -114,40 +114,6 @@ namespace Signum.Entities.Reflection
                 .ToArray();
 
             return result;
-        }
-
-        public static Type GenerateEnumProxy(Type enumType)
-        {
-            return typeof(EnumProxy<>).MakeGenericType(enumType);
-        }
-
-        public static Type ExtractEnumProxy(Type enumProxyType)
-        {
-            if (enumProxyType.IsGenericType && enumProxyType.GetGenericTypeDefinition() == typeof(EnumProxy<>))
-                return enumProxyType.GetGenericArguments()[0];
-            return null;
-        }
-
-        public static Type GenerateLite(Type identificableType)
-        {
-            return typeof(Lite<>).MakeGenericType(identificableType);
-        }
-
-        public static Type ExtractLite(Type liteType)
-        {
-            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
-                return liteType.GetGenericArguments()[0];
-            return null;
-        }
-
-        public static bool IsLite(this Type t)
-        {
-            return typeof(Lite).IsAssignableFrom(t);
-        }
-
-        public static Type CleanType(this Type t)
-        {
-            return ExtractLite(t) ?? t;
         }
 
         public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField)

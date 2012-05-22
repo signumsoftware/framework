@@ -40,7 +40,7 @@ namespace Signum.Web
             if (typeContext.Type.IsLite())
             {
                 Lite lite = typeContext.UntypedValue as Lite;
-                Type liteType = Reflector.ExtractLite(typeContext.Type);
+                Type liteType = Lite.Extract(typeContext.Type);
 
                 body = Expression.Call(miRetrieve.MakeGenericMethod(liteType), pe);
                 if (lite.RuntimeType != liteType)

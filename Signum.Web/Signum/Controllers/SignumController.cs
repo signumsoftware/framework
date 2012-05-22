@@ -30,7 +30,7 @@ namespace Signum.Web.Controllers
         {
             Type t = Navigator.ResolveType(webTypeName);
 
-            if (id.HasValue && id.Value > 0)
+            if (id.HasValue)
                 return Navigator.View(this, Database.Retrieve(t, id.Value)); 
 
             IdentifiableEntity entity = null;

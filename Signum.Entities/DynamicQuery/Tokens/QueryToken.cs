@@ -70,7 +70,7 @@ namespace Signum.Entities.DynamicQuery
                 return DateTimeProperties(this, DateTimePrecision.Milliseconds);
             }
 
-            Type cleanType = Reflector.ExtractLite(type) ?? type;
+            Type cleanType = type.CleanType();
             if (cleanType.IsIIdentifiable())
             {
                 if (implementations != null)

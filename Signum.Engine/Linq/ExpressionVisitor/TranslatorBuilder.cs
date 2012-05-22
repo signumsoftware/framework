@@ -370,7 +370,7 @@ namespace Signum.Engine.Linq
                 var id = Visit(NullifyColumn(lite.Id));
                 var toStr = Visit(lite.ToStr);
 
-                Type liteType = Reflector.ExtractLite(lite.Type);
+                Type liteType = Lite.Extract(lite.Type);
 
                 if (id == null)
                     return Expression.Constant(null, lite.Type);

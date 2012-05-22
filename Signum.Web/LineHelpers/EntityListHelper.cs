@@ -114,7 +114,7 @@ namespace Signum.Web
 
             EntityList el = new EntityList(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            EntityBaseHelper.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S));
+            EntityBaseHelper.ConfigureEntityBase(el, typeof(S).CleanType());
 
             Common.FireCommonTasks(el);
 

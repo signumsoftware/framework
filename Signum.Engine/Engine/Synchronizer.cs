@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine
 {
@@ -112,6 +113,8 @@ namespace Signum.Engine
             return "Columns:" + tableName;
         }
 
+        public bool Interactive = true; 
+
         public string Apply(string replacementsKey, string textToReplace)
         {
             Dictionary<string, string> repDic = this.TryGetC(replacementsKey);
@@ -136,45 +139,134 @@ namespace Signum.Engine
             where O : class
             where N : class
         {
-            var oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
-            var newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
+            List<string> oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
+            List<string> newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
+
+            if (oldOnly.Count == 0 || newOnly.Count == 0)
+                return;
 
             StringDistance sd = new StringDistance();
+            var distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b => Math.Max(a.Length, b.Length) - sd.LongestCommonSubsequence(a, b)));
 
-            Dictionary<string, string> replacements = new Dictionary<string, string>();
+            Solution bestSolution = new Solution(null, int.MaxValue); 
+            Action<int, Solution> findMinimumPermutation = null;
 
-            while (oldOnly.Count > 0 && newOnly.Count > 0)
+
+            findMinimumPermutation = (pos, current) =>
             {
-                string old = oldOnly[0];
-
-                List<string> sms = newOnly.OrderByDescending(n => sd.LongestCommonSubsequence(old, n)).ToList();
-            retry:
-                Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(old, replacementsKey));
-                sms.Select((s, i) => "-{0}{1}: {2} ".Formato(i == 0 ? ">" : " ", i, s)).ToConsole();
-                Console.WriteLine();
-                Console.WriteLine(Properties.Resources.NNone);
-
-                string answer = Console.ReadLine().ToLower();
-                int option = 0;
-                if (answer == "n")
+                if (pos == oldOnly.Count)
                 {
-                    oldOnly.RemoveAt(0);
-                }
-                else if (answer == "" || int.TryParse(answer, out option))
-                {
-                    replacements.Add(old, sms[option]);
-                    oldOnly.RemoveAt(0);
-                    newOnly.Remove(sms[option]);
+                    if (bestSolution.Sum > current.Sum)
+                        bestSolution = current;
+
+                    return;
                 }
                 else
                 {
-                    Console.WriteLine("Error");
-                    goto retry;
+                    if (bestSolution.Sum < current.Sum)
+                        return;
+
+                    string old = oldOnly[pos];
+                    var dist = distances[old]; 
+
+                    for (int i = 0; i < newOnly.Count; i++)
+                    {
+                        var @new = newOnly[i];
+                        if (!current.Selections.Any(a=>a.NewValue == @new))
+                            findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old,  @new)), current.Sum + dist[@new]));
+                    }
+
+                    if ((oldOnly.Count - pos) > (newOnly.Count - current.Selections.Take(pos).Count(a=>a.NewValue != null)))
+                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, (string)null)), current.Sum));
                 }
+            };
+
+            findMinimumPermutation(0, Solution.Empty);
+         
+            Dictionary<string, string> replacements = new Dictionary<string, string>();
+
+            if (Interactive)
+            {
+                while (oldOnly.Count > 0 && newOnly.Count > 0)
+                {
+                    Selection defaultSelection = bestSolution.Selections.Last(a => a.NewValue != null);
+
+                    List<string> sms = newOnly.OrderBy(n => distances[defaultSelection.OldValue][n]).ToList();
+
+                    Selection selection = SelectInteractive(sms, defaultSelection, replacementsKey);
+
+                    if (selection.NewValue != null)
+                    {
+                        replacements.Add(selection.OldValue, selection.NewValue);
+                        oldOnly.RemoveAt(0);
+                        newOnly.Remove(selection.NewValue);
+                    }
+                    else
+                    {
+                        oldOnly.RemoveAt(0);
+                    }
+
+                    bestSolution = new Solution(null, int.MaxValue);
+                    findMinimumPermutation(0, Solution.Empty);
+                }
+            }
+            else
+            {
+                replacements.AddRange(bestSolution.Selections.Where(a => a.NewValue != null).Select(a => KVP.Create(a.OldValue, a.NewValue)));
             }
 
             if (replacements.Count != 0)
                 this.Add(replacementsKey, replacements);
+        }
+
+        private static Selection SelectInteractive(List<string> sms, Selection selection, string replacementsKey)
+        {
+            Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(selection.OldValue, replacementsKey));
+            sms.Select((s, i) => "-{0}{1}: {2} ".Formato(s == selection.NewValue ? ">" : " ", i, s)).ToConsole();
+            Console.WriteLine();
+            Console.WriteLine(Properties.Resources.NNone);
+
+            while (true)
+            {
+                string answer = Console.ReadLine().ToLower();
+                int option = 0;
+                if (answer == "n")
+                    return new Selection(selection.OldValue, null);
+
+                if (answer == "")
+                    return selection;
+
+                if (int.TryParse(answer, out option))
+                    return new Selection(selection.OldValue, sms[option]);
+
+                Console.WriteLine("Error");
+            }
+        }
+
+        public struct Solution
+        {
+            public Solution(ImmutableStack<Selection> selections, int sum)
+            {
+                this.Selections = selections;
+                this.Sum = sum;
+            }
+
+            public readonly ImmutableStack<Selection> Selections;
+            public readonly int Sum;
+
+            public static readonly Solution Empty = new Solution(ImmutableStack<Selection>.Empty, 0);
+        }
+
+        public struct Selection
+        {
+            public Selection(string oldValue, string newValue)
+            {
+                this.OldValue = oldValue;
+                this.NewValue = newValue;
+            }
+
+            public readonly string OldValue;
+            public readonly string NewValue;
         }
     }
 }

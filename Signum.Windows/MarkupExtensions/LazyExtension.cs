@@ -24,7 +24,7 @@ namespace Signum.Windows
         {
             IXamlTypeResolver typeResolver = (IXamlTypeResolver)serviceProvider.GetService(typeof(IXamlTypeResolver));
 
-            return Reflector.GenerateLite(typeResolver.Resolve(typeName)); 
+            return Lite.Generate(typeResolver.Resolve(typeName)); 
         }
     }
 }

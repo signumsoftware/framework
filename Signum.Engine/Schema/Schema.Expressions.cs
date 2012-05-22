@@ -121,7 +121,7 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
-            Type cleanType = IsLite ? Reflector.ExtractLite(FieldType) : FieldType;
+            Type cleanType = IsLite ? Lite.Extract(FieldType) : FieldType;
 
             var result = new FieldInitExpression(cleanType, null,
                 new ColumnExpression(this.ReferenceType(), tableAlias, Name), token);
@@ -196,7 +196,7 @@ namespace Signum.Engine.Maps
                                                 new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), 
                                                 token))).ToReadOnly();
 
-            var result = new ImplementedByExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType, implementations);
+            var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, implementations);
 
             if (this.IsLite)
                 return binder.MakeLite(this.FieldType, result, null);
@@ -209,7 +209,7 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, QueryBinder binder)
         {
-            Expression result = new ImplementedByAllExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType,
+            Expression result = new ImplementedByAllExpression(IsLite ? Lite.Extract(FieldType) : FieldType,
                 new ColumnExpression(Column.ReferenceType(), tableAlias, Column.Name),
                 new TypeImplementedByAllExpression(new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name)), token);
 
