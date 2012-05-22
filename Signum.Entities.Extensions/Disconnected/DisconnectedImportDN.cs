@@ -196,11 +196,11 @@ namespace Signum.Entities.Disconnected
             set { Set(ref copyTable, value, () => CopyTable); }
         }
 
-        bool? foreignKeysDisabled;
+        bool? disableForeignKeys;
         public bool? DisableForeignKeys
         {
-            get { return foreignKeysDisabled; }
-            set { Set(ref foreignKeysDisabled, value, () => DisableForeignKeys); }
+            get { return disableForeignKeys; }
+            set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
         }
 
         int? insertedRows;

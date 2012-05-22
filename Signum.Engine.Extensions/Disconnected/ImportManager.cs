@@ -146,7 +146,7 @@ namespace Signum.Engine.Disconnected
                                     ImportTableQuery(import, tuple.Type.ToTypeDN()).UnsafeUpdate(s => 
                                         new MListElement<DisconnectedImportDN, DisconnectedImportTableDN>
                                         {
-                                            Element = new DisconnectedImportTableDN
+                                            Element =
                                             {
                                                 CopyTable = l,
                                                 DisableForeignKeys = tuple.Strategy.DisableForeignKeys.Value,

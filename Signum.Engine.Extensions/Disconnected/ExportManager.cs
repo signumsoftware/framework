@@ -121,7 +121,7 @@ namespace Signum.Engine.Disconnected
                         using (token.MeasureTime(l => ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e => 
                             new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
                             {
-                                Element = new DisconnectedExportTableDN { CopyTable = l }
+                                Element = { CopyTable = l }
                             })))
                         {
                             CopyTable(tuple.Table, tuple.Strategy, newDatabase);
@@ -191,7 +191,7 @@ namespace Signum.Engine.Disconnected
                     ExportTableQuery(stats, typeof(T).ToTypeDN()).UnsafeUpdate(e =>
                             new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
                             {
-                                Element = new DisconnectedExportTableDN { Errors = result }
+                                Element = { Errors = result }
                             });
 
                 return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T { DisconnectedMachine = machine, LastOnlineTicks = a.Ticks });
