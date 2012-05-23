@@ -627,7 +627,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitDelete(DeleteExpression delete)
         {
             sb.Append("DELETE ");
-            sb.Append(delete.Table.Name);
+            sb.Append(delete.Table.Name.SqlScape());
             this.AppendNewLine(Indentation.Same);
             sb.Append("FROM ");
             VisitSource(delete.Source);
@@ -643,7 +643,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitUpdate(UpdateExpression update)
         {
             sb.Append("UPDATE ");
-            sb.Append(update.Table.Name);
+            sb.Append(update.Table.Name.SqlScape());
             sb.Append(" SET");
             this.AppendNewLine(Indentation.Inner);
            
@@ -655,7 +655,7 @@ namespace Signum.Engine.Linq
                     sb.Append(",");
                     this.AppendNewLine(Indentation.Same);
                 }
-                sb.Append(assignment.Column);
+                sb.Append(assignment.Column.SqlScape());
                 sb.Append(" = ");
                 this.Visit(assignment.Expression);
             }

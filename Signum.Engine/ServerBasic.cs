@@ -24,7 +24,7 @@ namespace Signum.Services
             return Return(mi, null, function);
         }
 
-        protected virtual T Return<T>(MethodBase mi, string description, Func<T> function)
+        protected virtual T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
         {
             try
             {
@@ -49,9 +49,9 @@ namespace Signum.Services
             Return(mi, null, () => { action(); return true; });
         }
 
-        protected void Execute(MethodBase mi, string description, Action action)
+        protected void Execute(MethodBase mi, string description, Action action, bool checkLogin = true)
         {
-            Return(mi, description, () => { action(); return true; });
+            Return(mi, description, () => { action(); return true; }, checkLogin);
         }
 
         public static ExecutionContext GetDefaultExecutionContext(MethodBase mi, string desc)
@@ -190,10 +190,5 @@ namespace Signum.Services
         }
         #endregion
 
-
-
-
-
-       
     }
 }

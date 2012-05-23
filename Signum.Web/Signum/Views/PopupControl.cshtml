@@ -1,8 +1,23 @@
 ﻿@using Signum.Entities.Reflection
 @using Signum.Web.Properties
 @model TypeContext
-<div id="@Model.Compose("panelPopup")" data-title="@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)">
-    <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString())</span>
+<div id="@Model.Compose("panelPopup")">
+    <span class="sf-popup-title">
+    <span style="float:left; display:block">
+    @Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)
+    </span>
+      @{
+            var ident = Model.UntypedValue as IdentifiableEntity;
+
+            if (ident != null && !ident.IsNew && Navigator.IsViewable(ident, EntitySettingsContext.Admin))
+            {
+                <a href="@Navigator.ViewRoute(ident)" style="float:left; display:block; margin-left:5px">
+                <span class="ui-icon ui-icon-extlink">fullscreen</span>
+                </a>
+            }
+        }
+    </span>
+    <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString()) </span>
     <div class="sf-button-bar">
         @if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
         {  
@@ -15,16 +30,19 @@
                 @Resources.Save</button>                
         }
         @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
-        { 
-           Buttons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
-           ControllerContext = this.ViewContext,
-           PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
-           Prefix =  Model.ControlID
-        },  (ModifiableEntity)Model.UntypedValue).ToString(Html)
+        {
+            Buttons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
+            ControllerContext = this.ViewContext,
+            PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
+            Prefix = Model.ControlID
+        }, (ModifiableEntity)Model.UntypedValue).ToString(Html)
     </div>
     @Html.ValidationSummaryAjax(Model)
     @Html.PopupHeader()
     <div id="@Model.Compose("divMainControl")" class="sf-main-control" data-prefix="@Model.ControlID">
-        @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
+        @{ 
+            ViewData[ViewDataKeys.InPopup] = true;
+            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
+        }
     </div>
 </div>

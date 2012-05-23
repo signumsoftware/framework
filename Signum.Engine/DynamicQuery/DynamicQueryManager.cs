@@ -120,45 +120,65 @@ namespace Signum.Engine.DynamicQuery
 
         static DynamicQueryManager()
         {
-            QueryToken.EntityExtensions = (type, parent) => DynamicQueryManager.Current.GetExtensions(type, parent);
-            ExtensionToken.BuildExtension = (type, key, expression) => DynamicQueryManager.Current.BuildExtension(type, key, expression);
+            QueryToken.EntityExtensions = (entityType, parent) => DynamicQueryManager.Current.GetExtensions(entityType, parent);
+            ExtensionToken.BuildExtension = (entityType, key, expression) => DynamicQueryManager.Current.BuildExtension(entityType, key, expression);
         }
 
-        private Expression BuildExtension(Type type, string key, Expression context)
+        private Expression BuildExtension(Type entityType, string key, Expression context)
         {
-            LambdaExpression lambda = registeredExtensions.GetValue(type)[key].Lambda;
+            LambdaExpression lambda = registeredExtensions.GetValue(entityType)[key].Lambda;
 
             return ExpressionReplacer.Replace(Expression.Invoke(lambda, context));
         }
 
-        public IEnumerable<QueryToken> GetExtensions(Type type, QueryToken parent)
+        public IEnumerable<QueryToken> GetExtensions(Type entityType, QueryToken parent)
         {
-            var dic = registeredExtensions.TryGetValue(type);
+            var dic = registeredExtensions.TryGetValue(entityType);
             
             if (dic == null)
                 return Enumerable.Empty<QueryToken>();
 
-            return dic.Values.Select(v => v.CreateToken(parent));
+            return dic.Values.Where(a => a.Inherit || a.EntityType == entityType).Select(v => v.CreateToken(parent));
         }
 
-        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethod)
+        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
             where E : class, IIdentifiable
         {
-            MethodInfo mi = ReflectionTools.GetMethodInfo(lambdaToMethod);
+            if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
+            {
+                var mi = ReflectionTools.GetMethodInfo(lambdaToMethodOrProperty);
 
-            AssertExtensionMethod(mi);
+                AssertExtensionMethod(mi);
 
-            return RegisterExpression<E, S>(lambdaToMethod, () => mi.Name.NiceName(), mi.Name);
+                return RegisterExpression<E, S>(lambdaToMethodOrProperty, () => mi.Name.NiceName(), mi.Name);
+            }
+            else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
+            {
+                var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
+
+                return RegisterExpression<E, S>(lambdaToMethodOrProperty, () => pi.NiceName(), pi.Name);
+            }
+            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.NiceToString()));
         }
 
-        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethod, Func<string> niceName)
-            where E : class, IIdentifiable
+        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
+           where E : class, IIdentifiable
         {
-            MethodInfo mi = ReflectionTools.GetMethodInfo(lambdaToMethod);
+            if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
+            {
+                var mi = ReflectionTools.GetMethodInfo(lambdaToMethodOrProperty);
 
-            AssertExtensionMethod(mi);
+                AssertExtensionMethod(mi);
 
-            return RegisterExpression<E, S>(lambdaToMethod, niceName, mi.Name);
+                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName, mi.Name);
+            }
+            else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
+            {
+                var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
+
+                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName, pi.Name);
+            }
+            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.NiceToString()));
         }
 
         private static void AssertExtensionMethod(MethodInfo mi)
@@ -247,11 +267,13 @@ namespace Signum.Engine.DynamicQuery
         public Implementations Implementations;
         public Func<bool> IsAllowed;
         public PropertyRoute PropertyRoute;
-       
+        public bool Inherit = true;
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
             return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
         }
+
+       
     }
 }

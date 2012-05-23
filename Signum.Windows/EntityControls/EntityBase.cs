@@ -160,7 +160,7 @@ namespace Signum.Windows
             if (type.IsLite())
             {
                 CleanLite = true;
-                CleanType = Reflector.ExtractLite(type);
+                CleanType = Lite.Extract(type);
             }
             else
             {
@@ -200,7 +200,7 @@ namespace Signum.Windows
                 var type = Type;
 
                 if (this is EntityCombo && !type.IsLite()) //Allways going to be lite
-                    type = Reflector.GenerateLite(type);
+                    type = Lite.Generate(type);
 
                 EntityTemplate = Navigator.FindDataTemplate(this, type);
             }

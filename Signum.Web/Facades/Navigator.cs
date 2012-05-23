@@ -754,8 +754,8 @@ namespace Signum.Web
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             controller.ViewData[ViewDataKeys.QueryDescription] = qd;
-            
-            Type entitiesType = Reflector.ExtractLite(qd.Columns.SingleEx(a => a.IsEntity).Type);
+
+            Type entitiesType = Lite.Extract(qd.Columns.SingleEx(a => a.IsEntity).Type);
             string message = CollectionElementToken.MultipliedMessage(request.Multiplications, entitiesType);
             if (message.HasText())
                 controller.ViewData[ViewDataKeys.MultipliedMessage] = message;

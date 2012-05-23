@@ -77,7 +77,7 @@ namespace ASP
     FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+    Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations;
     bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
     bool? allowMultiple = findOptions.AllowMultiple;

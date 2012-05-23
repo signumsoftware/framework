@@ -54,7 +54,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void GroupEntityByTypeIb()
         {
-            var list = Database.Query<AwardNominationDN>().GroupBy(a => a.Award.GetType()).ToList();
+            var list = Database.Query<AwardNominationDN>().GroupBy(a => a.Award.RuntimeType).ToList();
         }
 
         [TestMethod]

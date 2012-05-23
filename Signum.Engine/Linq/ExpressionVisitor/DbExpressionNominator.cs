@@ -269,7 +269,7 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            if (Schema.Current.Settings.DBMS == DBMS.SqlServer2008)
+            if (Schema.Current.Settings.DBMS >= DBMS.SqlServer2008)
                 return Add(new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.CONVERT.ToString(), new[]
                 {
                     new SqlConstantExpression(SqlDbType.Date),
@@ -289,7 +289,7 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            if (Schema.Current.Settings.DBMS == DBMS.SqlServer2008)
+            if (Schema.Current.Settings.DBMS >= DBMS.SqlServer2008)
                 return Add(new SqlFunctionExpression(typeof(TimeSpan), null, SqlFunction.CONVERT.ToString(), new[]
                 {
                     new SqlConstantExpression(SqlDbType.Time),
@@ -337,10 +337,11 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(exprDate) || !Has(exprTime))
                 return null;
 
-            var cast = new SqlCastExpression(typeof(DateTime), exprDate, SqlDbType.DateTime); //Just in case is a Date
+            var castDate = new SqlCastExpression(typeof(DateTime), exprDate, SqlDbType.DateTime); //Just in case is a Date
+            var castTime = new SqlCastExpression(typeof(TimeSpan), exprTime, SqlDbType.DateTime); //Just in case is a Date
 
-            var result = add ? Expression.Add(cast, exprTime) :
-                Expression.Subtract(cast, exprTime);
+            var result = add ? Expression.Add(castDate, castTime) :
+                Expression.Subtract(castDate, castTime);
 
             return Add(result); 
         }
@@ -426,9 +427,10 @@ namespace Signum.Engine.Linq
                 if (candidates.Contains(left) && candidates.Contains(right) && IsFullNominateOrAggresive)
                 {
                     if ((b.NodeType == ExpressionType.Add || b.NodeType == ExpressionType.Subtract) && b.Left.Type.UnNullify() == typeof(DateTime) && b.Right.Type.UnNullify() == typeof(TimeSpan))
+                    {
                         result = TryAddSubstractDateTime(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? result;
-
-                    if (b.NodeType == ExpressionType.Add)
+                    }
+                    else if (b.NodeType == ExpressionType.Add)
                     {
                         result = ConvertToSqlAddition(b);
                     }

@@ -20,6 +20,8 @@ namespace Signum.Engine.Linq
 
         string CleanCommandText();
 
+        SqlPreCommandSimple MainPreCommand();
+
         object Execute();
     }
 
@@ -222,7 +224,7 @@ namespace Signum.Engine.Linq
             {
                 SqlPreCommand eager = EagerProjections == null ? null : EagerProjections.Select(cp => cp.PreCommand()).Combine(Spacing.Double);
 
-                SqlPreCommand main = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+                SqlPreCommand main = MainPreCommand();
 
                 SqlPreCommand lazy = LazyChildProjections  == null ? null : LazyChildProjections.Select(cp => cp.PreCommand()).Combine(Spacing.Double);
 
@@ -240,7 +242,11 @@ namespace Signum.Engine.Linq
                 return CommandText;
             }
         }
-        public object DynamiQuery { get; set; }
+
+        public SqlPreCommandSimple MainPreCommand()
+        {
+            return new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+        }
     }
 
     class CommandResult
