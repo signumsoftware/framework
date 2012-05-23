@@ -26,7 +26,8 @@
 	min-width:350px;
 }
 
-.sf-field:after, .sf-field-list:after{
+.sf-field:after, .sf-field-list:after, .sf-value-line-radiolbl:after
+{
     content: "";
     display: block;
     height: 0;
@@ -34,8 +35,9 @@
     visibility: hidden;
 }
 
-.sf-field input[type=radio] {
-    float:none;
+.sf-value-line-radiolbl
+{
+    display: block;
 }
 
 .sf-field .sf-field-list
