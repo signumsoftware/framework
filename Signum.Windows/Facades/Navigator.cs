@@ -192,12 +192,6 @@ namespace Signum.Windows
             return (T)Manager.View(entity, options);
         }
 
-
-        public static void Admin(AdminOptions adminOptions)
-        {
-            Manager.Admin(adminOptions);
-        }
-
         public static EntitySettings GetEntitySettings(Type type)
         {
             return Manager.GetEntitySettings(type);
@@ -309,7 +303,6 @@ namespace Signum.Windows
         public Dictionary<Type, EntitySettings> EntitySettings { get; set; }
         public Dictionary<object, QuerySettings> QuerySettings { get; set; }
 
-        public event Action<AdminWindow, Type> TaskAdminWindow;
         public event Action<NormalWindow, ModifiableEntity> TaskNormalWindow;
         public event Action<SearchWindow, object> TaskSearchWindow;
 
@@ -333,11 +326,9 @@ namespace Signum.Windows
 
                 CompleteQuerySettings();
 
-                TaskAdminWindow += TaskSetIconAdminWindow;
                 TaskNormalWindow += TaskSetIconNormalWindow;
                 TaskSearchWindow += TaskSetIconSearchWindow;
 
-                TaskAdminWindow += TaskSetLabelAdminWindow;
                 TaskNormalWindow += TaskSetLabelNormalWindow;    
 
                 if (Initializing != null)
@@ -387,20 +378,9 @@ namespace Signum.Windows
             nw.Icon = GetEntityIcon(entity.GetType(), true);
         }
 
-        void TaskSetIconAdminWindow(AdminWindow aw, Type type)
-        {
-            aw.Icon = GetEntityIcon(type, true);
-        }
-
-
         void TaskSetLabelNormalWindow(NormalWindow nw, ModifiableEntity entity)
         {
             ShortcutHelper.SetLabelShortcuts(nw);
-        }
-
-        void TaskSetLabelAdminWindow(AdminWindow aw, Type type)
-        {
-            ShortcutHelper.SetLabelShortcuts(aw);
         }
 
         public ImageSource GetEntityIcon(Type type, bool useDefault)
@@ -797,30 +777,6 @@ namespace Signum.Windows
 
             if (!es.OnIsFindable())
                 throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
-        }
-
-        public virtual void Admin(AdminOptions adminOptions)
-        {
-            Type type = adminOptions.Type;
-
-            EntitySettings es = EntitySettings.GetOrThrow(type, "No EntitySettings for type {0}");
-
-            AdminWindow nw = CreateAdminWindow(type, es);
-
-            nw.Show();
-        }
-
-        private AdminWindow CreateAdminWindow(Type type, EntitySettings es)
-        {
-            AdminWindow nw = new AdminWindow(type)
-            {
-                MainControl = es.CreateView(null, null),
-            };
-
-            if (TaskAdminWindow != null)
-                TaskAdminWindow(nw, type);
-
-            return nw;
         }
 
         public virtual Type SelectTypes(Window parent, Type[] implementations)

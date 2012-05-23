@@ -65,8 +65,6 @@ namespace Signum.Windows
 
                 if (o is FindOptionsBase)
                     menuItem.Header = QueryUtils.GetNiceName(((FindOptionsBase)o).QueryName);
-                else if (o is AdminOptions)
-                    menuItem.Header = ((AdminOptions)o).Type.NicePluralName();
                 else if (o is Type)
                     menuItem.Header = ((Type)o).NicePluralName();
                 else if (o is Enum)
@@ -86,8 +84,7 @@ namespace Signum.Windows
                     return;
 
                 ImageSource source = 
-                    o is FindOptionsBase ? Navigator.Manager.GetFindIcon(((FindOptionsBase)o).QueryName, false) :
-                    o is AdminOptions ? Navigator.Manager.GetAdminIcon(((AdminOptions)o).Type, false) : null;
+                    o is FindOptionsBase ? Navigator.Manager.GetFindIcon(((FindOptionsBase)o).QueryName, false) : null;
 
                 menuItem.Icon = new Image { Source = source, Stretch = Stretch.None }; 
             }
@@ -115,8 +112,6 @@ namespace Signum.Windows
 
             if (o is ExploreOptions)
                 Navigator.Explore((ExploreOptions)o);
-            else if (o is AdminOptions)
-                Navigator.Admin(((AdminOptions)o));
         }
 
         static void ProcessMenuItem(MenuItem menuItem)
