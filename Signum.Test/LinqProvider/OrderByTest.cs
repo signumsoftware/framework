@@ -107,8 +107,5 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).GroupBy(a => a.Sex, (s, gr) => new { Sex = s, Count = gr.Count() }).ToList();
         }
-
-
-
     }
 }

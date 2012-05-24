@@ -15,14 +15,22 @@ using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
+    public class LookupToken
+    {
+        public override string ToString()
+        {
+            return this.GetHashCode().ToString();
+        }
+    }
+
     internal interface IProjectionRow
     {
         FieldReader Reader { get; }
 
         IRetriever Retriever { get; }
 
-        IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key);
-        MList<S> LookupRequest<K, S>(ProjectionToken token, K key, MList<S> field);
+        IEnumerable<S> Lookup<K, S>(LookupToken token, K key);
+        MList<S> LookupRequest<K, S>(LookupToken token, K key, MList<S> field);
     }
 
     internal class ProjectionRowEnumerator<T> : IProjectionRow, IEnumerator<T>
@@ -38,9 +46,9 @@ namespace Signum.Engine.Linq
         Func<IProjectionRow, T> projector; 
         Expression<Func<IProjectionRow, T>> projectorExpression;
 
-        Dictionary<ProjectionToken, IEnumerable> lookups;
+        Dictionary<LookupToken, IEnumerable> lookups;
 
-        internal ProjectionRowEnumerator(DbDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
+        internal ProjectionRowEnumerator(DbDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
             this.dataReader = dataReader;
             this.Reader = new FieldReader(dataReader);
@@ -82,7 +90,7 @@ namespace Signum.Engine.Linq
         {
         }
 
-        public IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key)
+        public IEnumerable<S> Lookup<K, S>(LookupToken token, K key)
         {
             Lookup<K, S> lookup = (Lookup<K, S>)lookups[token];
 
@@ -92,7 +100,7 @@ namespace Signum.Engine.Linq
                 return lookup[key];
         }
 
-        public MList<S> LookupRequest<K, S>(ProjectionToken token, K key, MList<S> field)
+        public MList<S> LookupRequest<K, S>(LookupToken token, K key, MList<S> field)
         {
             Dictionary<K, MList<S>> dictionary = (Dictionary<K, MList<S>>)lookups.GetOrCreate(token, () => (IEnumerable)new Dictionary<K, MList<S>>());
 

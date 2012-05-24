@@ -210,7 +210,7 @@ namespace Signum.Engine.Maps
                 }
             }
 
-            if (type.IsIdentifiableEntity() && !ExpressionCleaner.HasExpansions(type, FieldInitExpression.ToStringMethod))
+            if (type.IsIdentifiableEntity() && !ExpressionCleaner.HasExpansions(type, EntityExpression.ToStringMethod))
             {
                 PropertyRoute route = root.Add(fiToStr);
 
@@ -482,7 +482,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.Reference:
                     return "id" + CleanType(type).Name;
                 default:
-                    throw new NotImplementedException("No field name for type {0} defined".Formato(type));
+                    throw new InvalidOperationException("No field name for type {0} defined".Formato(type));
             }
         }
 
@@ -501,7 +501,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.Enum:
                     return "id" + name;
                 default:
-                    throw new NotImplementedException("No name for {0} defined".Formato(route.FieldInfo.Name));
+                    throw new InvalidOperationException("No name for {0} defined".Formato(route.FieldInfo.Name));
             }
         }
 

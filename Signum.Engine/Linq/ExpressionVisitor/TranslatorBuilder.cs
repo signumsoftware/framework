@@ -96,7 +96,7 @@ namespace Signum.Engine.Linq
             if (childProj.IsLazyMList)
                 return new LazyChildProjection<K, V>
                 {
-                    Name = proj.Token,
+                    Token = childProj.Token,
 
                     CommandText = sql,
                     ProjectorExpression = lambda,
@@ -107,7 +107,7 @@ namespace Signum.Engine.Linq
             else
                 return new EagerChildProjection<K, V>
                 {
-                    Name = proj.Token,
+                    Token = childProj.Token,
 
                     CommandText = sql,
                     ProjectorExpression = lambda,
@@ -249,7 +249,7 @@ namespace Signum.Engine.Linq
                 Expression outer = Visit(child.OuterKey);
 
                 if (outer != child.OuterKey)
-                    child = new ChildProjectionExpression(child.Projection, outer, child.IsLazyMList, child.Type); 
+                    child = new ChildProjectionExpression(child.Projection, outer, child.IsLazyMList, child.Type, child.Token); 
 
                 return scope.LookupEager(row, child);
             }
@@ -259,7 +259,7 @@ namespace Signum.Engine.Linq
                 Expression outer = Visit(child.OuterKey);
 
                 if (outer != child.OuterKey)
-                    child = new ChildProjectionExpression(child.Projection, outer, child.IsLazyMList, child.Type);
+                    child = new ChildProjectionExpression(child.Projection, outer, child.IsLazyMList, child.Type, child.Token);
 
                 return scope.LookupMList(row, child, field);
             }
@@ -270,7 +270,7 @@ namespace Signum.Engine.Linq
             }
 
 
-            protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
+            protected override Expression VisitEntity(EntityExpression fieldInit)
             {
                 Expression id = Visit(NullifyColumn(fieldInit.ExternalId));
 
@@ -281,7 +281,7 @@ namespace Signum.Engine.Linq
 
                 var block = Expression.Block(
                     fieldInit.Bindings
-                    .Where(a => !ReflectionTools.FieldEquals(FieldInitExpression.IdField, a.FieldInfo))
+                    .Where(a => !ReflectionTools.FieldEquals(EntityExpression.IdField, a.FieldInfo))
                     .Select(b =>
                         {
                             var field = Expression.Field(e, b.FieldInfo);
@@ -311,22 +311,22 @@ namespace Signum.Engine.Linq
 
             static MemberBinding resetModified = Expression.Bind(piModified, Expression.Constant(null, typeof(bool?)));
 
-            protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
+            protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
             {
-                Expression ctor = Expression.MemberInit(Expression.New(efie.Type),
-                       efie.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding))).And(resetModified));
+                Expression ctor = Expression.MemberInit(Expression.New(eee.Type),
+                       eee.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding))).And(resetModified));
 
-                var entity = Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(efie.Type), ctor);
+                var entity = Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), ctor);
 
-                if (efie.HasValue == null)
+                if (eee.HasValue == null)
                     return entity;
 
-                return Expression.Condition(Expression.Equal(Visit(efie.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))), entity, Expression.Constant(null, ctor.Type));
+                return Expression.Condition(Expression.Equal(Visit(eee.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))), entity, Expression.Constant(null, ctor.Type));
             }
 
             protected override Expression VisitImplementedBy(ImplementedByExpression rb)
             {
-                return rb.Implementations.Select(fie => new When(Visit(fie.Field.ExternalId).NotEqualsNulll(), Visit(fie.Field))).ToCondition(rb.Type);
+                return rb.Implementations.Select(ee => new When(Visit(ee.Reference.ExternalId).NotEqualsNulll(), Visit(ee.Reference))).ToCondition(rb.Type);
             }
 
             protected override Expression VisitImplementedByAll(ImplementedByAllExpression rba)
@@ -339,7 +339,7 @@ namespace Signum.Engine.Linq
             static readonly ConstantExpression NullType = Expression.Constant(null, typeof(Type));
             static readonly ConstantExpression NullId = Expression.Constant(null, typeof(int?));
 
-            protected override Expression VisitTypeFieldInit(TypeFieldInitExpression typeFie)
+            protected override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
             {
                 return Expression.Condition(
                     Expression.NotEqual(Visit(NullifyColumn(typeFie.ExternalId)), NullId),
@@ -365,7 +365,7 @@ namespace Signum.Engine.Linq
                     NullType);
             }
 
-            protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+            protected override Expression VisitLite(LiteExpression lite)
             {
                 var id = Visit(NullifyColumn(lite.Id));
                 var toStr = Visit(lite.ToStr);
@@ -462,7 +462,7 @@ namespace Signum.Engine.Linq
 
             MethodInfo mi = miLookup.MakeGenericMethod(cProj.OuterKey.Type, type);
 
-            Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey);
+            Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Token), cProj.OuterKey);
 
             if (cProj.Projection.UniqueFunction == null)
                 return call;
@@ -484,7 +484,7 @@ namespace Signum.Engine.Linq
 
             MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
 
-            return Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey, field);
+            return Expression.Call(row, mi, Expression.Constant(cProj.Token), cProj.OuterKey, field);
         }
 
         static MethodInfo miSingle = ReflectionTools.GetMethodInfo(() => EnumerableUniqueExtensions.SingleEx<int>(null)).GetGenericMethodDefinition();

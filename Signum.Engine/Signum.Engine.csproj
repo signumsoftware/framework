@@ -115,6 +115,7 @@
     <Compile Include="GlobalLazy.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbExpressionComparer.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbQueryUtils.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
@@ -123,6 +124,7 @@
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
     <Compile Include="Linq\ExpressionVisitor\ConditionsRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\ChildProjectionFlattener.cs" />
+    <Compile Include="Linq\ExpressionVisitor\EntityCompletedReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\OrderByRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\GroupEntityCleaner.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateFinder.cs" />

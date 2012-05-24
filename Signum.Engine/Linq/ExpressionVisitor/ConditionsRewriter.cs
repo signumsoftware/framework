@@ -250,14 +250,32 @@ namespace Signum.Engine.Linq
             Expression top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From);
             Expression where = MakeSqlCondition(this.Visit(select.Where));
-            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(c => MakeSqlValue(Visit(c.Expression)).Map(e => e == c.Expression ? c : new ColumnDeclaration(c.Name, e)));
-            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(o => MakeSqlValue(Visit(o.Expression)).Map(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e)));
+            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration);
+            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
             ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(e => MakeSqlValue(Visit(e)));
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
                 return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy);
 
             return select;
+        }
+
+        protected override ColumnDeclaration VisitColumnDeclaration(ColumnDeclaration c)
+        {
+            var e = MakeSqlValue(Visit(c.Expression));
+            if (e == c.Expression)
+                return c;
+
+            return new ColumnDeclaration(c.Name, e);
+        }
+
+        protected override OrderExpression VisitOrderBy(OrderExpression o)
+        {
+            var e = MakeSqlValue(Visit(o.Expression));
+            if (e == o.Expression)
+                return o;
+
+            return new OrderExpression(o.OrderType, e);
         }
 
         protected override Expression VisitUpdate(UpdateExpression update)
@@ -296,11 +314,10 @@ namespace Signum.Engine.Linq
                 source = (SelectExpression)this.Visit(proj.Select);
             }
             Expression projector = this.Visit(proj.Projector);
-            ProjectionToken token = VisitProjectionToken(proj.Token);
 
-            if (source != proj.Select || projector != proj.Projector || token != proj.Token)
+            if (source != proj.Select || projector != proj.Projector)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, proj.Type);
             }
             return proj;
         }

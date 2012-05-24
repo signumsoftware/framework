@@ -716,9 +716,9 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(c);
         }
 
-        protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
+        protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
         {
-            throw InvalidSqlExpression(efie);
+            throw InvalidSqlExpression(eee);
         }
 
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)
@@ -731,9 +731,9 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(reference);
         }
 
-        protected override Expression VisitFieldInit(FieldInitExpression fie)
+        protected override Expression VisitEntity(EntityExpression ee)
         {
-            throw InvalidSqlExpression(fie);
+            throw InvalidSqlExpression(ee);
         }
 
         protected override Expression VisitLambda(LambdaExpression lambda)
@@ -746,7 +746,7 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(init);
         }
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        protected override Expression VisitLite(LiteExpression lite)
         {
             throw InvalidSqlExpression(lite);
         }
@@ -798,7 +798,7 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(p);
         }
 
-        protected override Expression VisitTypeFieldInit(TypeFieldInitExpression typeFie)
+        protected override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
         {
             throw InvalidSqlExpression(typeFie);
         }

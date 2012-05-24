@@ -261,7 +261,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereOutsideIs()
         {
-            var albums = Database.Query<BandDN>().Where(a => a.LastAward is PersonalAwardDN).ToList();
+            var albums = Database.Query<BandDN>().Where(a =>  a.LastAward is PersonalAwardDN).ToList();
         }
 
         [TestMethod]

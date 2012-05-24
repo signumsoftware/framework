@@ -49,7 +49,7 @@ namespace Signum.Engine.Linq
                     return ex == c.Expression ? c : new ColumnDeclaration(c.Name, ex);
                 });
 
-            ReadOnlyCollection<OrderExpression> orderbys = this.VisitOrderBy(select.OrderBy);
+            ReadOnlyCollection<OrderExpression> orderbys = select.OrderBy.NewIfChange(VisitOrderBy);
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<Expression> groupbys = select.GroupBy.NewIfChange(e => IsConstant(e) ? null : Visit(e));
 
@@ -70,16 +70,16 @@ namespace Signum.Engine.Linq
                 subquery.Select != null)
             {
                 if (subquery.Select.Columns.Count != 1)
-                    System.Diagnostics.Debug.Fail("Subquery with {0} columns".Formato(subquery.Select.Columns.Count));
+                    throw new InvalidOperationException("Subquery with {0} columns".Formato(subquery.Select.Columns.Count));
                 allColumnsUsed.GetOrCreate(subquery.Select.Alias).Add(subquery.Select.Columns[0].Name);
             }
             return base.VisitSubquery(subquery);
         }
 
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        protected override Expression VisitLite(LiteExpression lite)
         {   
-            return base.VisitLiteReference(lite);
+            return base.VisitLite(lite);
         }
 
         protected override Expression VisitProjection(ProjectionExpression projection)
@@ -89,7 +89,7 @@ namespace Signum.Engine.Linq
             SelectExpression source = (SelectExpression)this.Visit(projection.Select);
             if (projector != projection.Projector || source != projection.Select)
             {
-                return new ProjectionExpression(source, projector, projection.UniqueFunction, projection.Token, projection.Type);
+                return new ProjectionExpression(source, projector, projection.UniqueFunction, projection.Type);
             }
             return projection;
         }
@@ -129,7 +129,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitUpdate(UpdateExpression update)
         {
             var where = Visit(update.Where);
-            var assigments = VisitColumnAssigments(update.Assigments);
+            var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
             var source = Visit(update.Source);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
                 return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
@@ -151,7 +151,7 @@ namespace Signum.Engine.Linq
          
             if (proj != child.Projection || key != child.OuterKey)
             {
-                return new ChildProjectionExpression(proj, key, child.IsLazyMList, child.Type);
+                return new ChildProjectionExpression(proj, key, child.IsLazyMList, child.Type, child.Token);
             }
             return child;
         }

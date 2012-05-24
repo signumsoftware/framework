@@ -28,14 +28,14 @@ namespace Signum.Engine.Linq
             Expression where = this.Visit(select.Where);
 
             SourceExpression last = innerSource;
-            innerSource = from; 
+            innerSource = from;
 
-            ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
+            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration);
 
             innerSource = last;
 
-            ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
-            ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
+            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
                 return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy);

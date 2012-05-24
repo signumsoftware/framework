@@ -969,7 +969,8 @@ namespace Signum.Utilities
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> collection)
         {
             return collection == null ? null :
-                collection as ReadOnlyCollection<T> ?? (collection as List<T> ?? collection.ToList()).AsReadOnly();
+                collection as ReadOnlyCollection<T> ??
+                (collection as List<T> ?? collection.ToList()).AsReadOnly();
         }
 
         public static IEnumerable<T> AsThreadSafe<T>(this IEnumerable<T> source)

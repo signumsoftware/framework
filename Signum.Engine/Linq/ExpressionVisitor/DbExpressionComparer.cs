@@ -1,0 +1,500 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.DataStructures;
+using System.Linq.Expressions;
+using System.Collections.ObjectModel;
+using Signum.Utilities.Reflection;
+
+namespace Signum.Engine.Linq
+{    /// <summary>
+    /// An extended expression comparer including custom DbExpression nodes
+    /// </summary>
+    internal class DbExpressionComparer : ExpressionComparer
+    {
+        ScopedDictionary<Alias, Alias> aliasScope;
+
+        protected DbExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, ScopedDictionary<Alias, Alias> aliasScope)
+            : base(parameterScope)
+        {
+            this.aliasScope = aliasScope;
+        }
+
+        public new static bool AreEqual(Expression a, Expression b)
+        {
+            return AreEqual(null, null, a, b);
+        }
+
+        public static bool AreEqual(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, ScopedDictionary<Alias, Alias> aliasScope, Expression a, Expression b)
+        {
+            return new DbExpressionComparer(parameterScope, aliasScope).Compare(a, b);
+        }
+
+        protected override bool Compare(Expression a, Expression b)
+        {
+            if (a == b)
+                return true;
+            if (a == null || b == null)
+                return false;
+            if (a.NodeType != b.NodeType)
+                return false;
+            if (a.Type != b.Type)
+                return false;
+            switch ((DbExpressionType)a.NodeType)
+            {
+                case DbExpressionType.Table:
+                    return CompareTable((TableExpression)a, (TableExpression)b);
+                case DbExpressionType.Column:
+                    return CompareColumn((ColumnExpression)a, (ColumnExpression)b);
+                case DbExpressionType.Select:
+                    return CompareSelect((SelectExpression)a, (SelectExpression)b);
+                case DbExpressionType.Join:
+                    return CompareJoin((JoinExpression)a, (JoinExpression)b);
+                case DbExpressionType.Projection:
+                    return CompareProjection((ProjectionExpression)a, (ProjectionExpression)b);
+                case DbExpressionType.ChildProjection:
+                    return CompareChildProjection((ChildProjectionExpression)a, (ChildProjectionExpression)b);
+                case DbExpressionType.Aggregate:
+                    return CompareAggregate((AggregateExpression)a, (AggregateExpression)b);
+                case DbExpressionType.AggregateSubquery:
+                    return CompareAggregateSubquery((AggregateSubqueryExpression)a, (AggregateSubqueryExpression)b);
+                case DbExpressionType.SqlCast:
+                    return CompareSqlCast((SqlCastExpression)a, (SqlCastExpression)b);
+                case DbExpressionType.SqlFunction:
+                    return CompareSqlFunction((SqlFunctionExpression)a, (SqlFunctionExpression)b);
+                case DbExpressionType.SqlConstant:
+                    return CompareSqlConstant((SqlConstantExpression)a, (SqlConstantExpression)b);
+                case DbExpressionType.Case:
+                    return CompareCase((CaseExpression)a, (CaseExpression)b);
+                case DbExpressionType.RowNumber:
+                    return CompareRowNumber((RowNumberExpression)a, (RowNumberExpression)b);
+                case DbExpressionType.Like:
+                    return CompareLike((LikeExpression)a, (LikeExpression)b);
+                case DbExpressionType.Scalar:
+                case DbExpressionType.Exists:
+                case DbExpressionType.In:
+                    return CompareSubquery((SubqueryExpression)a, (SubqueryExpression)b);
+                case DbExpressionType.IsNull:
+                    return CompareIsNull((IsNullExpression)a, (IsNullExpression)b);
+                case DbExpressionType.IsNotNull:
+                    return CompareIsNotNull((IsNotNullExpression)a, (IsNotNullExpression)b);
+                case DbExpressionType.Delete:
+                    return CompareDelete((DeleteExpression)a, (DeleteExpression)b);
+                case DbExpressionType.Update:
+                    return CompareUpdate((UpdateExpression)a, (UpdateExpression)b);
+                case DbExpressionType.CommandAggregate:
+                    return CompareCommandAggregate((CommandAggregateExpression)a, (CommandAggregateExpression)b);
+                case DbExpressionType.SelectRowCount:
+                    return CompareSelectRowCount((SelectRowCountExpression)a, (SelectRowCountExpression)b);
+                case DbExpressionType.Entity:
+                    return CompareEntityInit((EntityExpression)a, (EntityExpression)b);
+                case DbExpressionType.EmbeddedInit:
+                    return CompareEmbeddedFieldInit((EmbeddedEntityExpression)a, (EmbeddedEntityExpression)b);
+                case DbExpressionType.ImplementedBy:
+                    return CompareImplementedBy((ImplementedByExpression)a, (ImplementedByExpression)b);
+                case DbExpressionType.ImplementedByAll:
+                    return CompareImplementedByAll((ImplementedByAllExpression)a, (ImplementedByAllExpression)b);
+                case DbExpressionType.Lite:
+                    return CompareLiteReference((LiteExpression)a, (LiteExpression)b);
+                case DbExpressionType.TypeEntity:
+                    return CompareTypeFieldInit((TypeEntityExpression)a, (TypeEntityExpression)b);
+                case DbExpressionType.TypeImplementedBy:
+                    return CompareTypeImplementedBy((TypeImplementedByExpression)a, (TypeImplementedByExpression)b);
+                case DbExpressionType.TypeImplementedByAll:
+                    return CompareTypeImplementedByAll((TypeImplementedByAllExpression)a, (TypeImplementedByAllExpression)b);
+                case DbExpressionType.MList:
+                    return CompareMList((MListExpression)a, (MListExpression)b);
+                case DbExpressionType.MListElement:
+                    return CompareMListElement((MListElementExpression)a, (MListElementExpression)b);
+                default:
+                    return base.Compare(a, b);
+            }
+        }
+
+        protected virtual bool CompareTable(TableExpression a, TableExpression b)
+        {
+            return a.Name == b.Name;
+        }
+
+        protected virtual bool CompareColumn(ColumnExpression a, ColumnExpression b)
+        {
+            return CompareAlias(a.Alias, b.Alias) && a.Name == b.Name;
+        }
+
+        protected virtual bool CompareAlias(Alias a, Alias b)
+        {
+            if (aliasScope != null)
+            {
+                Alias mapped;
+                if (aliasScope.TryGetValue(a, out mapped))
+                    return mapped == b;
+            }
+            return a == b;
+        }
+
+        protected virtual bool CompareSelect(SelectExpression a, SelectExpression b)
+        {
+            var save = aliasScope;
+            try
+            {
+                if (!Compare(a.From, b.From))
+                    return false;
+
+                aliasScope = new ScopedDictionary<Alias, Alias>(save);
+                MapAliases(a.From, b.From);
+
+                return Compare(a.Where, b.Where)
+                    && CompareList(a.OrderBy, b.OrderBy, CompareOrder)
+                    && CompareList(a.GroupBy, b.GroupBy, Compare)
+                    && a.IsDistinct == b.IsDistinct
+                    && CompareColumnDeclarations(a.Columns, b.Columns);
+            }
+            finally
+            {
+                aliasScope = save;
+            }
+        }
+
+        protected virtual void MapAliases(Expression a, Expression b)
+        {
+            Alias[] prodA = AliasGatherer.Gather(a).ToArray();
+            Alias[] prodB = AliasGatherer.Gather(b).ToArray();
+            for (int i = 0, n = prodA.Length; i < n; i++)
+            {
+                aliasScope.Add(prodA[i], prodB[i]);
+            }
+        }
+
+        protected virtual bool CompareOrder(OrderExpression a, OrderExpression b)
+        {
+            return a.OrderType == b.OrderType && Compare(a.Expression, b.Expression);
+        }
+
+        protected virtual bool CompareColumnDeclarations(ReadOnlyCollection<ColumnDeclaration> a, ReadOnlyCollection<ColumnDeclaration> b)
+        {
+            if (a == b)
+                return true;
+            if (a == null || b == null)
+                return false;
+            if (a.Count != b.Count)
+                return false;
+            for (int i = 0, n = a.Count; i < n; i++)
+            {
+                if (!CompareColumnDeclaration(a[i], b[i]))
+                    return false;
+            }
+            return true;
+        }
+
+        protected virtual bool CompareColumnDeclaration(ColumnDeclaration a, ColumnDeclaration b)
+        {
+            return a.Name == b.Name && Compare(a.Expression, b.Expression);
+        }
+
+        protected virtual bool CompareJoin(JoinExpression a, JoinExpression b)
+        {
+            if (a.JoinType != b.JoinType)
+                return false;
+
+            if(!Compare(a.Left, b.Left))
+                return false;
+
+            if (a.JoinType == JoinType.CrossApply || a.JoinType == JoinType.OuterApply)
+            {
+                var save = aliasScope;
+                try
+                {
+                    aliasScope = new ScopedDictionary<Alias, Alias>(aliasScope);
+                    MapAliases(a.Left, b.Left);
+
+                    return Compare(a.Right, b.Right)
+                        && Compare(a.Condition, b.Condition);
+                }
+                finally
+                {
+                    aliasScope = save;
+                }
+            }
+            else
+            {
+                return Compare(a.Right, b.Right)
+                    && Compare(a.Condition, b.Condition);
+            }
+        }
+
+        protected virtual bool CompareProjection(ProjectionExpression a, ProjectionExpression b)
+        {
+            if (!Compare(a.Select, b.Select))
+                return false;
+
+            var save = aliasScope;
+            try
+            {
+                aliasScope = new ScopedDictionary<Alias, Alias>(aliasScope);
+                aliasScope.Add(a.Select.Alias, b.Select.Alias);
+
+                return Compare(a.Projector, b.Projector);
+            }
+            finally
+            {
+                aliasScope = save;
+            }
+        }
+
+        private bool CompareChildProjection(ChildProjectionExpression a, ChildProjectionExpression b)
+        {
+            return Compare(a.Projection, b.Projection) 
+                && Compare(a.OuterKey, b.OuterKey) 
+                && a.IsLazyMList == b.IsLazyMList;
+        }
+
+        protected virtual bool CompareAggregate(AggregateExpression a, AggregateExpression b)
+        {
+            return a.AggregateFunction == b.AggregateFunction && Compare(a.Source, b.Source);
+        }
+
+        protected virtual bool CompareAggregateSubquery(AggregateSubqueryExpression a, AggregateSubqueryExpression b)
+        {
+            return Compare(a.Subquery, b.Subquery)
+                && Compare(a.Aggregate, b.Aggregate)
+                && a.GroupByAlias == b.GroupByAlias;
+        }
+
+        protected virtual bool CompareSqlCast(SqlCastExpression a, SqlCastExpression b)
+        {
+            return a.SqlDbType == b.SqlDbType
+                && Compare(a.Expression, b.Expression);
+        }
+
+        protected virtual bool CompareSqlFunction(SqlFunctionExpression a, SqlFunctionExpression b)
+        {
+            return a.SqlFunction == b.SqlFunction
+                && Compare(a.Object, b.Object)
+                && CompareList(a.Arguments, b.Arguments, Compare);
+        }
+
+        protected virtual bool CompareSqlConstant(SqlConstantExpression a, SqlConstantExpression b)
+        {
+            return object.Equals(a.Value, b.Value);
+        }
+
+
+        protected virtual bool CompareCase(CaseExpression a, CaseExpression b)
+        {
+            return CompareList(a.Whens, b.Whens, CompareWhen)
+                && Compare(a.DefaultValue, b.DefaultValue);
+        }
+
+        protected virtual bool CompareWhen(When a, When b)
+        {
+            return Compare(a.Condition, b.Condition)
+                && Compare(a.Value, b.Value); 
+        }
+
+        protected virtual bool CompareRowNumber(RowNumberExpression a, RowNumberExpression b)
+        {
+            return CompareList(a.OrderBy, b.OrderBy, CompareOrder);
+        }
+
+        protected virtual bool CompareLike(LikeExpression a, LikeExpression b)
+        {
+            return Compare(a.Expression, b.Expression)
+                && Compare(a.Pattern, b.Pattern); 
+        }
+
+        protected virtual bool CompareSubquery(SubqueryExpression a, SubqueryExpression b)
+        {
+            if (a.NodeType != b.NodeType)
+                return false;
+            switch ((DbExpressionType)a.NodeType)
+            {
+                case DbExpressionType.Scalar:
+                    return CompareScalar((ScalarExpression)a, (ScalarExpression)b);
+                case DbExpressionType.Exists:
+                    return CompareExists((ExistsExpression)a, (ExistsExpression)b);
+                case DbExpressionType.In:
+                    return CompareIn((InExpression)a, (InExpression)b);
+            }
+            return false;
+        }
+
+        protected virtual bool CompareScalar(ScalarExpression a, ScalarExpression b)
+        {
+            return Compare(a.Select, b.Select);
+        }
+
+        protected virtual bool CompareExists(ExistsExpression a, ExistsExpression b)
+        {
+            return Compare(a.Select, b.Select);
+        }
+
+        protected virtual bool CompareIn(InExpression a, InExpression b)
+        {
+            return Compare(a.Expression, b.Expression)
+                && Compare(a.Select, b.Select)
+                && CompareValues(a.Values , b.Values); 
+        }
+
+        protected virtual bool CompareValues(object[] a, object[] b)
+        {
+            if (a == b)
+                return true;
+
+            if (a == null || b == null)
+                return false;
+
+            return a.SequenceEqual(b); 
+        }
+
+        protected virtual bool CompareIsNull(IsNullExpression a, IsNullExpression b)
+        {
+            return Compare(a.Expression, b.Expression);
+        }
+
+        protected virtual bool CompareIsNotNull(IsNotNullExpression a, IsNotNullExpression b)
+        {
+            return Compare(a.Expression, b.Expression);
+        }
+
+        protected virtual bool CompareDelete(DeleteExpression a, DeleteExpression b)
+        {
+            return a.Table == b.Table
+                && Compare(a.Source, b.Source)
+                && Compare(a.Where, b.Where);
+        }
+
+        protected virtual bool CompareUpdate(UpdateExpression a, UpdateExpression b)
+        {
+            return a.Table == b.Table
+                && CompareList(a.Assigments, b.Assigments, CompareAssigment)
+                && Compare(a.Source, b.Source)
+                && Compare(a.Where, b.Where);
+        }
+
+        protected virtual bool CompareAssigment(ColumnAssignment a, ColumnAssignment b)
+        {
+            return a.Column == b.Column && Compare(a.Expression, b.Expression);
+        }
+
+        protected virtual bool CompareCommandAggregate(CommandAggregateExpression a, CommandAggregateExpression b)
+        {
+            return CompareList(a.Commands, b.Commands, Compare);
+        }
+
+        protected virtual bool CompareSelectRowCount(SelectRowCountExpression a, SelectRowCountExpression b)
+        {
+            return true;
+        }
+
+        protected virtual bool CompareEntityInit(EntityExpression a, EntityExpression b)
+        {
+            return a.Table == b.Table
+                && CompareAlias(a.TableAlias, b.TableAlias)
+                && Compare(a.ExternalId, b.ExternalId)
+                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding);
+        }
+
+        protected virtual bool CompareEmbeddedFieldInit(EmbeddedEntityExpression a, EmbeddedEntityExpression b)
+        {
+            return Compare(a.HasValue, b.HasValue)
+                && a.FieldEmbedded == b.FieldEmbedded
+                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding); 
+        }
+
+        protected virtual bool CompareFieldBinding(FieldBinding a, FieldBinding b)
+        {
+            return ReflectionTools.FieldEquals(a.FieldInfo, b.FieldInfo) && Compare(a.Binding, b.Binding);
+        }
+
+        protected virtual bool CompareImplementedBy(ImplementedByExpression a, ImplementedByExpression b)
+        {
+            return CompareList(a.Implementations, b.Implementations, CompareImplementationColumn);
+        }
+
+        protected virtual bool CompareImplementationColumn(ImplementationColumn a, ImplementationColumn b)
+        {
+            return a.Type == b.Type && Compare(a.Reference, b.Reference);
+        }
+
+        protected virtual bool CompareImplementedByAll(ImplementedByAllExpression a, ImplementedByAllExpression b)
+        {
+            return Compare(a.TypeId, b.TypeId)
+                && Compare(a.Id, b.Id);
+        }
+
+        protected virtual bool CompareLiteReference(LiteExpression a, LiteExpression b)
+        {
+            return a.CustomToString == b.CustomToString
+               && Compare(a.Id, b.Id)
+               && Compare(a.ToStr, b.ToStr)
+               && Compare(a.TypeId, b.TypeId)
+               && Compare(a.Reference, b.Reference);
+        }
+
+        protected virtual bool CompareTypeFieldInit(TypeEntityExpression a, TypeEntityExpression b)
+        {
+            return a.TypeValue == b.TypeValue
+               && Compare(a.ExternalId, b.ExternalId);
+        }
+
+        protected virtual bool CompareTypeImplementedBy(TypeImplementedByExpression a, TypeImplementedByExpression b)
+        {
+            return CompareList(a.TypeImplementations, b.TypeImplementations, CompareTypeImplementationColumn);
+        }
+
+        protected virtual bool CompareTypeImplementationColumn(TypeImplementationColumnExpression a, TypeImplementationColumnExpression b)
+        {
+            return a.Type == b.Type && Compare(a.ExternalId, b.ExternalId);
+        }
+
+        protected virtual bool CompareTypeImplementedByAll(TypeImplementedByAllExpression a, TypeImplementedByAllExpression b)
+        {
+            return Compare(a.TypeColumn, b.TypeColumn);
+        }
+
+        protected virtual bool CompareMList(MListExpression a, MListExpression b)
+        {
+            return a.RelationalTable == b.RelationalTable
+                && Compare(a.BackID, b.BackID);
+        }
+
+        protected virtual bool CompareMListElement(MListElementExpression a, MListElementExpression b)
+        {
+            return a.Table == b.Table
+                && Compare(a.RowId, b.RowId)
+                && Compare(a.Element, b.Element)
+                && Compare(a.Parent, b.Parent);
+        }
+
+        public static new  IEqualityComparer<E> GetComparer<E>() where E : Expression
+        {
+            return new DbExpressionsComparer<E>();
+        }
+
+        class DbExpressionsComparer<E> : IEqualityComparer<E> where E : Expression
+        {
+            public bool Equals(E x, E y)
+            {
+                return ExpressionComparer.AreEqual(x, y);
+            }
+
+            public int GetHashCode(E obj)
+            {
+                return obj.Type.GetHashCode() ^ obj.NodeType.GetHashCode() ^ SpacialHash(obj);
+            }
+
+            private int SpacialHash(Expression obj)
+            {
+                if (obj is MethodCallExpression)
+                    return ((MethodCallExpression)obj).Method.Name.GetHashCode();
+
+                if (obj is MemberExpression)
+                    return ((MemberExpression)obj).Member.Name.GetHashCode();
+
+                return 0;
+            }
+        }
+    }
+}

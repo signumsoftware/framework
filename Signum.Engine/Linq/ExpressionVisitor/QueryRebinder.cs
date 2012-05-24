@@ -37,11 +37,9 @@ namespace Signum.Engine.Linq
             SelectExpression source = (SelectExpression)this.Visit(proj.Select);
             Expression projector = this.Visit(proj.Projector);
 
-            ProjectionToken token = VisitProjectionToken(proj.Token);
-
-            if (source != proj.Select || projector != proj.Projector || token != proj.Token)
+            if (source != proj.Select || projector != proj.Projector)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, proj.Type);
             }
             return proj;
         }
@@ -87,12 +85,12 @@ namespace Signum.Engine.Linq
         protected override Expression VisitUpdate(UpdateExpression update)
         {
             Visit(update.Where);
-            VisitColumnAssigments(update.Assigments);
+            update.Assigments.NewIfChange(VisitColumnAssigment);
 
             var source = Visit(update.Source);
 
             var where = Visit(update.Where);
-            var assigments = VisitColumnAssigments(update.Assigments);
+            var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
                 return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
             return update;
@@ -110,18 +108,17 @@ namespace Signum.Engine.Linq
 
             this.Visit(select.Top);
             this.Visit(select.Where);
-            this.VisitColumnDeclarations(select.Columns);
-            this.VisitOrderBy(select.OrderBy);
-            this.VisitGroupBy(select.GroupBy);
-
+            select.Columns.NewIfChange(VisitColumnDeclaration);
+            select.OrderBy.NewIfChange(VisitOrderBy);
+            select.GroupBy.NewIfChange(Visit);
 
             SourceExpression from = this.VisitSource(select.From);
 
             Expression top = this.Visit(select.Top);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
-            ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
-            ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
+            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
+            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration); ;
 
             columns = AnswerAndExpand(columns, select.Alias, askedColumns);
 

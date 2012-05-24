@@ -184,6 +184,7 @@ namespace Signum.Engine.Maps
         {
             return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
         }
+
     }
 
     public class EntityField
@@ -226,7 +227,7 @@ namespace Signum.Engine.Maps
                 case IndexType.Unique: return new[] { new UniqueIndex(table, this) };
                 case IndexType.UniqueMultipleNulls: return new[] { new UniqueIndex(table, this).WhereNotNull(this) };
             }
-            throw new NotImplementedException();
+            throw new InvalidOperationException("IndexType {0} not expected".Formato(IndexType));
         }
 
         internal abstract IEnumerable<KeyValuePair<Table, bool>> GetTables(); 

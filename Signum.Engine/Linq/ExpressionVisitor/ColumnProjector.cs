@@ -16,13 +16,11 @@ namespace Signum.Engine.Linq
     {
         public readonly Expression Projector;
         public readonly ReadOnlyCollection<ColumnDeclaration> Columns;
-        public readonly ProjectionToken Token;
 
-        internal ProjectedColumns(Expression projector, ReadOnlyCollection<ColumnDeclaration> columns, ProjectionToken token)
+        internal ProjectedColumns(Expression projector, ReadOnlyCollection<ColumnDeclaration> columns)
         {
             this.Projector = projector;
             this.Columns = columns;
-            this.Token = token;
         }
     }
 
@@ -37,10 +35,9 @@ namespace Signum.Engine.Linq
 
         Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
         HashSet<Expression> candidates;
-        ProjectionToken[] tokens;
-        ProjectionToken newToken;
         Alias[] knownAliases;
         Alias newAlias;
+        bool selectTrivialColumns;
 
 
         private ColumnProjector() { }
@@ -50,51 +47,27 @@ namespace Signum.Engine.Linq
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(ProjectionExpression projector, Alias newAlias)
+        static internal ProjectedColumns ProjectColumns(ProjectionExpression projection, Alias newAlias)
         {
-            return ProjectColumns(projector.Projector, newAlias, projector.Select.KnownAliases, new[] { projector.Token });
+            return ProjectColumns(projection.Projector, newAlias, projection.Select.KnownAliases);
         }
 
-        static internal ProjectedColumns ProjectColumnsGroupBy(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
+        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, bool aggresiveNomination = false, bool selectTrivialColumns = false)
         {
-            ProjectionToken newToken = new ProjectionToken();
-
             Expression newProj;
-            var candidates = DbExpressionNominator.NominateGroupBy(projector, knownAliases, out newProj);
+            var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj, isAggressive : aggresiveNomination);
 
             ColumnProjector cp = new ColumnProjector
             {
-                tokens = tokens,
-                newToken = newToken,
                 newAlias = newAlias,
                 knownAliases = knownAliases,
-                candidates = candidates
+                candidates = candidates,
+                selectTrivialColumns = selectTrivialColumns
             };
 
             Expression e = cp.Visit(newProj);
 
-            return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken);
-        }
-
-        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
-        {
-            ProjectionToken newToken = new ProjectionToken();
-
-            Expression newProj;
-            var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj);
-
-            ColumnProjector cp = new ColumnProjector
-            {
-                tokens = tokens,
-                newToken = newToken,
-                newAlias = newAlias,
-                knownAliases = knownAliases,
-                candidates = candidates
-            };
-
-            Expression e = cp.Visit(newProj);
-
-            return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly(), newToken);
+            return new ProjectedColumns(e, cp.generator.Columns.ToReadOnly());
         }
 
 
@@ -104,6 +77,9 @@ namespace Signum.Engine.Linq
             {
                 if (expression.NodeType == (ExpressionType)DbExpressionType.Column)
                 {
+                    if (!selectTrivialColumns)
+                        return expression;
+
                     ColumnExpression column = (ColumnExpression)expression;
                     ColumnExpression mapped;
                     if (this.map.TryGetValue(column, out mapped))
@@ -128,34 +104,6 @@ namespace Signum.Engine.Linq
             {
                 return base.Visit(expression);
             }
-        }
-
-
-        protected override ProjectionToken VisitProjectionToken(ProjectionToken token)
-        {
-            if (token != null && tokens.Contains(token))
-                return newToken;
-
-            return token;
-        }
-
-        Dictionary<ImplementedByAllExpression, Expression> ibas = new Dictionary<ImplementedByAllExpression, Expression>();
-        protected override Expression VisitImplementedByAll(ImplementedByAllExpression iba)
-        {
-            return ibas.GetOrCreate(iba, () => base.VisitImplementedByAll(iba));
-        }
-
-        Dictionary<ImplementedByExpression, Expression> ibs = new Dictionary<ImplementedByExpression, Expression>();
-        protected override Expression VisitImplementedBy(ImplementedByExpression ib)
-        {
-            return ibs.GetOrCreate(ib, () => base.VisitImplementedBy(ib));
-        }
-
-
-        Dictionary<FieldInitExpression, Expression> fies = new Dictionary<FieldInitExpression, Expression>();
-        protected override Expression VisitFieldInit(FieldInitExpression fie)
-        {
-            return fies.GetOrCreate(fie, () => base.VisitFieldInit(fie));
         }
     }
 

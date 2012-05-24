@@ -85,16 +85,16 @@ namespace Signum.Engine.Linq
         {
             log.Switch("AggRew");
             Expression rewrited = AggregateRewriter.Rewrite(binded);
+            log.Switch("AlPrRe");
+            Expression replaced = AliasProjectionReplacer.Replace(rewrited);
             log.Switch("EnCom");
-            Expression completed = EntityCompleter.Complete(rewrited, binder);
+            Expression completed = EntityCompleter.Complete(replaced, binder);
             log.Switch("OrBtRw");
             Expression orderRewrited = OrderByRewriter.Rewrite(completed);
             log.Switch("QuRb");
             Expression rebinded = QueryRebinder.Rebind(orderRewrited);
-            log.Switch("AlPrRe");
-            Expression replaced = AliasProjectionReplacer.Replace(rebinded);
             log.Switch("UnClRmv");
-            Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
+            Expression columnCleaned = UnusedColumnRemover.Remove(rebinded);
             log.Switch("RwNmbFlr");
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             log.Switch("RdnSqRm");
