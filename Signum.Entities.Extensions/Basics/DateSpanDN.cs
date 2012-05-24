@@ -58,6 +58,13 @@ namespace Signum.Entities.Basics
             return AddExpression.Evaluate(this, date);
         }
 
+        static Expression<Func<DateSpanDN, DateTime, DateTime>> SubtractExpression =
+           (ds, dt) => dt.AddYears(-ds.Years).AddMonths(-ds.Months).AddDays(-ds.Days);
+        public DateTime Subtract(DateTime date)
+        {
+            return SubtractExpression.Evaluate(this, date);
+        }
+
         public DateSpan ToDateSpan()
         {
             return new DateSpan(years, months, days);
