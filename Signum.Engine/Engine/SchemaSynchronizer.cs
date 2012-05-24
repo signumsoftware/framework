@@ -56,12 +56,12 @@ namespace Signum.Engine
 
             SqlPreCommand dropForeignKeys =
                  Synchronizer.SynchronizeScript(database, model, 
-                 (tn, dif) => dif.Colums.Values.Select(c => c.ForeingKeyName != null ? SqlBuilder.AlterTableDropConstraint(dif.Name, c.ForeingKeyName) : null).Combine(Spacing.Simple),
+                 (tn, dif) => dif.Colums.Values.Select(c => c.ForeingKey != null ? SqlBuilder.AlterTableDropConstraint(dif.Name, c.ForeingKey.Name) : null).Combine(Spacing.Simple),
                  null,
                  (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
-                     (cn, col) => col.ForeingKeyName != null ? SqlBuilder.AlterTableDropConstraint(tn, col.ForeingKeyName) : null,
+                     (cn, col) => col.ForeingKey != null ? SqlBuilder.AlterTableDropConstraint(tn, col.ForeingKey.Name) : null,
                      null,
-                     (cn, coldb, colModel) => coldb.EqualForeignKey(tn, colModel) || coldb.ForeingKeyName == null ? null : SqlBuilder.AlterTableDropConstraint(tn, coldb.ForeingKeyName),
+                     (cn, coldb, colModel) => coldb.ForeingKey == null || coldb.ForeingKey.EqualForeignKey(tn, colModel) ? null : SqlBuilder.AlterTableDropConstraint(tn, coldb.ForeingKey.Name),
                      Spacing.Simple),
                  Spacing.Double);
 
@@ -98,7 +98,7 @@ namespace Signum.Engine
                  (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
                      null,
                      (cn, colModel) => colModel.ReferenceTable != null ? SqlBuilder.AlterTableAddConstraintForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name) : null,
-                     (cn, coldb, colModel) => coldb.EqualForeignKey(tn, colModel) || colModel.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name),
+                     (cn, coldb, colModel) => colModel.ReferenceTable != null && (coldb.ForeingKey == null || !coldb.ForeingKey.EqualForeignKey(tn, colModel)) ? SqlBuilder.AlterTableAddConstraintForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name): null,
                      Spacing.Simple),
                  Spacing.Double);
 
@@ -139,8 +139,8 @@ namespace Signum.Engine
                                           select new DiffColumn
                                           {
                                               Name = c.name,
-                                              SqlDbType = udttypes.Contains(type.name) ? SqlDbType.Udt: ToSqlDbType(type.name),
-                                              UdtTypeName = udttypes.Contains(type.name) ? type.name: null,
+                                              SqlDbType = udttypes.Contains(type.name) ? SqlDbType.Udt : ToSqlDbType(type.name),
+                                              UdtTypeName = udttypes.Contains(type.name) ? type.name : null,
                                               Nullable = c.is_nullable,
                                               Length = c.max_length,
                                               Precission = c.precision,
@@ -152,10 +152,11 @@ namespace Signum.Engine
                                                             join ic in Database.View<SysIndexColumn>() on new { i.object_id, i.index_id } equals new { ic.object_id, ic.index_id }
                                                             where ic.column_id == c.column_id
                                                             select i.name).Any(),
-                                              ForeingKeyName = (from fkc in Database.View<SysForeignKeyColumns>()
-                                                                where fkc.parent_object_id == c.object_id && fkc.parent_column_id == c.column_id
-                                                                join fk in Database.View<SysForeignKeys>().DefaultIfEmpty() on fkc.constraint_object_id equals fk.object_id
-                                                                select fk.name).SingleOrDefaultEx(),
+                                              ForeingKey = (from fkc in Database.View<SysForeignKeyColumns>()
+                                                            where fkc.parent_object_id == c.object_id && fkc.parent_column_id == c.column_id
+                                                            join fk in Database.View<SysForeignKeys>().DefaultIfEmpty() on fkc.constraint_object_id equals fk.object_id
+                                                            join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
+                                                            select new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).SingleOrDefaultEx(),
                                           }).ToDictionary(a => a.Name),
 
                                 Indices = (from i in Database.View<SysIndexes>()
@@ -290,7 +291,7 @@ namespace Signum.Engine
         public bool Identity;
         public bool PrimaryKey;
 
-        public string ForeingKeyName; 
+        public DiffForeignKey ForeingKey; 
 
         public string DefaultConstraintName;
 
@@ -308,9 +309,23 @@ namespace Signum.Engine
             return result;
         }
  
+       
+    }
+
+    public class DiffForeignKey
+    {
+        public string Name;
+        public string TargetTable;
+
         internal bool EqualForeignKey(string tableName, IColumn colModel)
         {
-            return ForeingKeyName == colModel.ReferenceTable.TryCC(rt => SqlBuilder.ForeignKeyName(tableName, colModel.Name));  
+            if(colModel.ReferenceTable == null)
+                return false;
+
+            if (TargetTable != colModel.ReferenceTable.Name)
+                return false;
+
+            return Name == SqlBuilder.ForeignKeyName(tableName, colModel.Name);
         }
     }
 }
