@@ -108,7 +108,9 @@
 }
 .sf-button-bar, .sf-query-button-bar 
 {
-	list-style:none;	
+	list-style:none;
+	margin: 2px 0;
+	line-height: 1em;	
 }
 .sf-button-bar
 {
@@ -120,6 +122,11 @@
 }
 .sf-entity-button.sf-disabled {
     color:#aaa;
+}
+.sf-query-button-bar > .sf-query-button
+{
+    vertical-align: top;   
+    margin: 0; /*-webkit-appearance:button fix*/
 }
 
 /*--------------
