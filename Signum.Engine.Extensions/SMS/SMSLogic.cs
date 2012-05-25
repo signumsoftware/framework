@@ -82,7 +82,7 @@ namespace Signum.Engine.SMS
                 Construct = (providers, args) =>
                 {
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
-                        .Select(exp).AsEnumerable().NotNull().Distinct().ToList();
+                        .Select(pr => new { Exp = exp.Evaluate(pr), Referred = pr.ToLite<IdentifiableEntity>() }).AsEnumerable().NotNull().Distinct().ToList();
 
                     CreateMessageParams createParams = args.GetArg<CreateMessageParams>(0);
 
@@ -97,7 +97,7 @@ namespace Signum.Engine.SMS
                     var packLite = package.ToLite();
 
                     using (OperationLogic.AllowSave<SMSMessageDN>())
-                        numbers.Select(n => createParams.CreateStaticSMSMessage(n, packLite)).SaveList();
+                        numbers.Select(n => createParams.CreateStaticSMSMessage(n.Exp, packLite, n.Referred)).SaveList();
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
@@ -114,7 +114,7 @@ namespace Signum.Engine.SMS
             public string Message;
             public string From;
 
-            public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite)
+            public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred)
             {
                 return new SMSMessageDN
                 {
@@ -122,7 +122,8 @@ namespace Signum.Engine.SMS
                     From = this.From,
                     State = SMSMessageState.Created,
                     DestinationNumber = destinationNumber,
-                    SendPackage = packLite
+                    SendPackage = packLite,
+                    Referred = referred
                 };
             }
         }
@@ -175,7 +176,8 @@ namespace Signum.Engine.SMS
                           .Select(p => new
                           {
                               Phone = phoneFunc.Evaluate(p),
-                              Data = func.Evaluate(p)
+                              Data = func.Evaluate(p),
+                              Referred = p.ToLite<IdentifiableEntity>()
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
                     SMSSendPackageDN package = new SMSSendPackageDN { NumLines = numbers.Count, }.Save();
@@ -189,6 +191,7 @@ namespace Signum.Engine.SMS
                         DestinationNumber = n.Phone,
                         SendPackage = packLite,
                         State = SMSMessageState.Created,
+                        Referred = n.Referred
                     }).SaveList();
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
@@ -219,6 +222,7 @@ namespace Signum.Engine.SMS
                         From = template.From,
                         DestinationNumber = GetPhoneNumber(provider),
                         State = SMSMessageState.Created,
+                        Referred = provider.ToLite<IdentifiableEntity>()
                     };
                 }
             }.Register();
@@ -409,7 +413,6 @@ namespace Signum.Engine.SMS
         {
             message.MessageID = sendAndGetTicket(message);
             message.SendDate = DateTime.Now.TrimToSeconds();
-            //message.SendState = SendState.Sent;
             message.State = SMSMessageState.Sent;
             message.Save();
         }

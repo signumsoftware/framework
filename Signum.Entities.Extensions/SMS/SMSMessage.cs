@@ -22,15 +22,6 @@ namespace Signum.Entities.SMS
         Failed,
     }
 
-    //public enum SendState
-    //{
-    //    None,
-    //    Queued,
-    //    Sent,
-    //    Delivered,
-    //    Failed,
-    //}
-
     public enum SMSMessageOperations
     {
         CreateSMS,
@@ -133,6 +124,14 @@ namespace Signum.Entities.SMS
         {
             get { return updatePackage; }
             set { Set(ref updatePackage, value, () => UpdatePackage); }
+        }
+
+        [ImplementedBy()]
+        Lite<IdentifiableEntity> referred;
+        public Lite<IdentifiableEntity> Referred
+        {
+            get { return referred; }
+            set { Set(ref referred, value, () => Referred); }
         }
 
         static readonly Expression<Func<SMSMessageDN, string>> ToStringExpression = e => "SMS " + e.MessageID;
