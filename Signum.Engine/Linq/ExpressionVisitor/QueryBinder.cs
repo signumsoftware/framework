@@ -19,11 +19,6 @@ using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq
 {
-    internal class TableCondition
-    {
-        public TableExpression Table;
-        public EntityExpression CompleteEntity;
-    }
     /// <summary>
     /// QueryBinder is a visitor that converts method calls to LINQ operations into 
     /// custom DbExpression nodes and references to class members into references to columns
@@ -100,13 +95,13 @@ namespace Signum.Engine.Linq
                     case "Single":
                     case "SingleOrDefault":
                         return BindUniqueRow(m.Type, m.Method.Name.ToEnum<UniqueFunction>(),
-                            m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes());
+                            m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m == root);
 
                     case "FirstEx":
                     case "SingleEx":
                     case "SingleOrDefaultEx":
                         return BindUniqueRow(m.Type, m.Method.Name.RemoveRight(2).ToEnum<UniqueFunction>(),
-                           m.GetArgument("collection"), m.TryGetArgument("predicate").StripQuotes());
+                           m.GetArgument("collection"), m.TryGetArgument("predicate").StripQuotes(), m == root);
                     case "Distinct":
                         return BindDistinct(m.Type, m.GetArgument("source"));
                     case "Reverse":
@@ -158,12 +153,10 @@ namespace Signum.Engine.Linq
         private Expression MapAndVisitExpand(LambdaExpression lambda, ref ProjectionExpression p)
         {
             map.Add(lambda.Parameters[0], p.Projector);
-
             Expression result = Visit(lambda.Body);
+            map.Remove(lambda.Parameters[0]);
 
             p = ApplyExpansions(p);
-
-            map.Remove(lambda.Parameters[0]);
 
             return result;
         }
@@ -244,7 +237,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate)
+        private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate, bool isRoot)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
             Expression where = null;
@@ -254,12 +247,31 @@ namespace Signum.Engine.Linq
             Alias alias = NextSelectAlias();
             Expression top = function == UniqueFunction.First || function == UniqueFunction.FirstOrDefault ? Expression.Constant(1) : null;
 
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection , alias);
-            return new ProjectionExpression(
-                new SelectExpression(alias, false, false, top,  pc.Columns, projection.Select, where, null, null),
-                pc.Projector, function, resultType);
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection, alias);
+
+            var newProjector = new ProjectionExpression(
+                    new SelectExpression(alias, false, false, top, pc.Columns, projection.Select, where, null, null),
+                    pc.Projector, function, resultType);
+
+            if (isRoot)
+                return newProjector;
+
+            var proj = uniqueFunctionReplacements.GetOrCreate(newProjector, () =>
+            {
+                requests.Add(new UniqueRequest
+                {
+                    Select = newProjector.Select,
+                    OuterApply = function == UniqueFunction.SingleOrDefault || function == UniqueFunction.FirstOrDefault,
+                    ExternalAliases = ExternalAliasGatherer.Externals(newProjector.Select, AliasGatherer.Gather(source))
+                });
+
+                return newProjector.Projector;
+            });
+
+            return proj;
         }
 
+     
         private Expression BindDistinct(Type resultType, Expression source)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
@@ -289,13 +301,15 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
             Expression exp =
                 aggregateFunction == AggregateFunction.Count ? null :
-                selector != null ? MapAndVisitExpand(selector, ref projection):
+                selector != null ? MapAndVisitExpand(selector, ref projection) :
                 DbExpressionNominator.FullNominate(projection.Projector);
+
+            projection = ApplyExpansions(projection);
 
             if (coalesceTrick)
                 exp = Expression.Convert(exp, resultType.Nullify());
 
-            if(exp != null)
+            if (exp != null)
                 exp = DbExpressionNominator.FullNominate(exp);
 
             Alias alias = NextSelectAlias();
@@ -326,14 +340,14 @@ namespace Signum.Engine.Linq
 
             return subquery;
         }
-           
+
 
         private Expression BindAnyAll(Type resultType, Expression source, LambdaExpression predicate, MethodInfo method, bool isRoot)
         {
             bool isAll = method.Name == "All";
 
             if (source is ParameterExpression)
-                source = VisitParameter((ParameterExpression)source); 
+                source = VisitParameter((ParameterExpression)source);
 
             ConstantExpression constSource = source as ConstantExpression;
             if (constSource != null && !typeof(IQueryable).IsAssignableFrom(constSource.Type))
@@ -350,7 +364,7 @@ namespace Signum.Engine.Linq
             {
                 if (isAll)
                     predicate = Expression.Lambda(Expression.Not(predicate.Body), predicate.Parameters.ToArray());
-                
+
                 if (predicate != null)
                     source = Expression.Call(typeof(Enumerable), "Where", method.GetGenericArguments(), source, predicate);
 
@@ -371,14 +385,14 @@ namespace Signum.Engine.Linq
             Expression newItem = Visit(item);
 
             if (source is ParameterExpression)
-                source = VisitParameter((ParameterExpression)source); 
+                source = VisitParameter((ParameterExpression)source);
 
             if (source.NodeType == ExpressionType.Constant && !typeof(IQueryable).IsAssignableFrom(source.Type)) //!isRoot
             {
                 ConstantExpression ce = (ConstantExpression)source;
                 IEnumerable col = (IEnumerable)ce.Value;
 
-                if(newItem.Type == typeof(Type))
+                if (newItem.Type == typeof(Type))
                     return SmartEqualizer.TypeIn(newItem, col == null ? Enumerable.Empty<Type>() : col.Cast<Type>().ToList());
 
                 switch ((DbExpressionType)newItem.NodeType)
@@ -396,7 +410,7 @@ namespace Signum.Engine.Linq
                 ProjectionExpression projection = this.VisitCastProjection(source);
 
                 Alias alias = NextSelectAlias();
-                var pc = ColumnProjector.ProjectColumns(projection, alias);
+                var pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases, aggresiveNomination: false, selectTrivialColumns: true);
 
                 SubqueryExpression se = null;
                 if (pc.Columns.Count == 1 && !newItem.Type.IsIIdentifiable())
@@ -457,43 +471,52 @@ namespace Signum.Engine.Linq
         protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector, LambdaExpression resultSelector)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
-
             bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionSelector);
-            Expression collectionExpression = collectionSelector.Parameters.Count == 1 ?
-                MapAndVisitExpand(collectionSelector, ref projection) :
-                MapAndVisitExpandWithIndex(collectionSelector, ref projection); 
-
-            ProjectionExpression collectionProjection = AsProjection(collectionExpression);
-
-            ProjectedColumns pc;
-            Alias alias = NextSelectAlias();
-            if (resultSelector == null)
-            {
-                pc = ColumnProjector.ProjectColumns(collectionProjection.Projector, alias,
-                    projection.Select.KnownAliases.Concat(collectionProjection.Select.KnownAliases).ToArray());
-            }
-            else
-            {
-                map.SetRange(resultSelector.Parameters, new[] { projection.Projector, collectionProjection.Projector });
-                Expression resultProjector = Visit(resultSelector.Body);
-                map.RemoveRange(resultSelector.Parameters);
-
-                projection = ApplyExpansions(projection);
-                collectionProjection = ApplyExpansions(collectionProjection);
-
-                pc = ColumnProjector.ProjectColumns(resultProjector, alias,
-                    projection.Select.KnownAliases.Concat(collectionProjection.Select.KnownAliases).ToArray());
-            }
 
             JoinType joinType = IsTable(collectionSelector.Body) ? JoinType.CrossJoin :
                                 outer ? JoinType.OuterApply :
                                 JoinType.CrossApply;
 
-            JoinExpression join = new JoinExpression(joinType, projection.Select, collectionProjection.Select, null);
+            Expression collectionExpression = collectionSelector.Parameters.Count == 1 ?
+                MapAndVisitExpand(collectionSelector, ref projection) :
+                MapAndVisitExpandWithIndex(collectionSelector, ref projection);
 
-            return new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, pc.Columns, join, null, null, null),
-                pc.Projector, null, resultType);
+            ProjectionExpression collectionProjection = AsProjection(collectionExpression);
+
+            Alias alias = NextSelectAlias();
+            if (resultSelector == null)
+            {
+                ProjectedColumns pc = ColumnProjector.ProjectColumns(collectionProjection.Projector, alias,
+                    projection.Select.KnownAliases.Concat(collectionProjection.Select.KnownAliases).ToArray());
+
+                JoinExpression join = new JoinExpression(joinType, projection.Select, collectionProjection.Select, null);
+
+                var result = new ProjectionExpression(
+                    new SelectExpression(alias, false, false, null, pc.Columns, join, null, null, null),
+                    pc.Projector, null, resultType);
+
+                return result;
+            }
+            else
+            {
+
+                map.SetRange(resultSelector.Parameters, new[] { projection.Projector, collectionProjection.Projector });
+                Expression resultProjector = Visit(resultSelector.Body);
+                map.RemoveRange(resultSelector.Parameters);
+
+                ProjectedColumns pc = ColumnProjector.ProjectColumns(resultProjector, alias,
+                    projection.Select.KnownAliases.Concat(collectionProjection.Select.KnownAliases).ToArray());
+
+                JoinExpression join = new JoinExpression(joinType, projection.Select, collectionProjection.Select, null);
+
+                var result = new ProjectionExpression(
+                    new SelectExpression(alias, false, false, null, pc.Columns, join, null, null, null),
+                    pc.Projector, null, resultType);
+
+                result = ApplyExpansions(result);
+
+                return result;
+            }
         }
 
         protected virtual Expression BindJoin(Type resultType, Expression outerSource, Expression innerSource, LambdaExpression outerKey, LambdaExpression innerKey, LambdaExpression resultSelector)
@@ -504,14 +527,8 @@ namespace Signum.Engine.Linq
             ProjectionExpression outerProj = VisitCastProjection(outerSource);
             ProjectionExpression innerProj = VisitCastProjection(innerSource);
 
-
-            map.Add(outerKey.Parameters[0], outerProj.Projector);
-            Expression outerKeyExpr = Visit(outerKey.Body);
-            map.Remove(outerKey.Parameters[0]);
-
-            map.Add(innerKey.Parameters[0], innerProj.Projector);
-            Expression innerKeyExpr = Visit(innerKey.Body);
-            map.Remove(innerKey.Parameters[0]);
+            Expression outerKeyExpr = MapAndVisitExpand(outerKey, ref outerProj);
+            Expression innerKeyExpr = MapAndVisitExpand(innerKey, ref innerProj);
 
             Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr));
 
@@ -521,22 +538,22 @@ namespace Signum.Engine.Linq
                           JoinType.InnerJoin;
 
             Alias alias = NextSelectAlias();
-            
-            map.SetRange(resultSelector.Parameters,new []{outerProj.Projector, innerProj.Projector});
+
+            map.SetRange(resultSelector.Parameters, new[] { outerProj.Projector, innerProj.Projector });
             Expression resultExpr = Visit(resultSelector.Body);
             map.RemoveRange(resultSelector.Parameters);
-
-            outerProj = ApplyExpansions(outerProj);
-            innerProj = ApplyExpansions(innerProj);
 
             JoinExpression join = new JoinExpression(jt, outerProj.Select, innerProj.Select, condition);
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(resultExpr, alias,
                 outerProj.Select.KnownAliases.Concat(innerProj.Select.KnownAliases).ToArray());
+
             ProjectionExpression result = new ProjectionExpression(
                 new SelectExpression(alias, false, false, null, pc.Columns, join, null, null, null),
                 pc.Projector, null, resultType);
-            return result; 
+
+            result = ApplyExpansions(result);
+            return result;
         }
 
         private Expression BindGroupBy(Type resultType, Expression source, LambdaExpression keySelector, LambdaExpression elementSelector)
@@ -615,13 +632,13 @@ namespace Signum.Engine.Linq
         private Expression GetOrderExpression(LambdaExpression lambda, ref ProjectionExpression projection)
         {
             map.Add(lambda.Parameters[0], projection.Projector);
-
             Expression expr = Visit(lambda.Body);
+            map.Remove(lambda.Parameters[0]);
 
             if (expr is LiteExpression)
             {
                 LiteExpression lite = (LiteExpression)expr;
-                expr = lite.Reference is ImplementedByAllExpression ? ((LiteExpression)expr).Id : 
+                expr = lite.Reference is ImplementedByAllExpression ? ((LiteExpression)expr).Id :
                       BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
             }
             else if (expr is EntityExpression || expr is ImplementedByExpression)
@@ -634,16 +651,14 @@ namespace Signum.Engine.Linq
             }
             else if (expr is MethodCallExpression && ReflectionTools.MethodEqual(((MethodCallExpression)expr).Method, miToUserInterface))
             {
-                expr = ((MethodCallExpression)expr).Arguments[0]; 
+                expr = ((MethodCallExpression)expr).Arguments[0];
             }
             else if (expr.Type == typeof(Type))
             {
-                expr = ExtractTypeId(expr); 
+                expr = ExtractTypeId(expr);
             }
 
             projection = ApplyExpansions(projection);
-
-            map.Remove(lambda.Parameters[0]);
 
             return DbExpressionNominator.FullNominate(expr);
         }
@@ -832,9 +847,11 @@ namespace Signum.Engine.Linq
                 }
                 else if (source.NodeType == (ExpressionType)DbExpressionType.Lite)
                 {
-                    LiteExpression le = (LiteExpression)source;
+                    LiteExpression lite = (LiteExpression)source;
 
-                    return Completed(le).ToStr;
+                    var toStr = BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+
+                    return toStr;
                 }
             }
 
@@ -986,19 +1003,13 @@ namespace Signum.Engine.Linq
                 case (ExpressionType)DbExpressionType.ImplementedBy:
                 {
                     ImplementedByExpression ib = (ImplementedByExpression)source;
+                    List<When> whens = ib.Implementations.Select(imp => new When(
+                        imp.Reference.ExternalId.NotEqualsNulll(),
+                        BindMemberAccess(Expression.MakeMemberAccess(imp.Reference, m.Member)))).ToList();
 
-                    PropertyInfo pi = (PropertyInfo)m.Member;
+                    var result = CombineWhens(whens, m.Member.ReturningType());
 
-                    return cachedIbMember.GetOrCreate(m, () =>
-                    {
-                        List<When> whens = ib.Implementations.Select(imp => new When(
-                            imp.Reference.ExternalId.NotEqualsNulll(),
-                            BindMemberAccess(Expression.MakeMemberAccess(imp.Reference, m.Member)))).ToList();
-
-                        var result = CombineWhens(whens, m.Member.ReturningType());
-
-                        return result;
-                    });
+                    return result;
                 }
                 case (ExpressionType)DbExpressionType.ImplementedByAll:
                 {
@@ -1259,11 +1270,8 @@ namespace Signum.Engine.Linq
                 if (uType.IsAssignableFrom(iba.Type))
                     return new ImplementedByAllExpression(uType, iba.Id, iba.TypeId);
 
-                return this.cachedIbaCasts.GetOrCreate(Expression.Convert(operand, uType), () =>
-                {
-                    var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id, NullId);
-                    return new EntityExpression(uType, conditionalId, null, null);
-                }); 
+                var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id, NullId);
+                return new EntityExpression(uType, conditionalId, null, null);
             }
             
             return null;
@@ -1350,9 +1358,7 @@ namespace Signum.Engine.Linq
             List<ColumnAssignment> assignments = new List<ColumnAssignment>();
 
             map.Add(param, pr.Projector);
-
             FillColumnAssigments(assignments, param, set.Body);
-
             map.Remove(param);
 
             pr = ApplyExpansions(pr);
@@ -1378,8 +1384,8 @@ namespace Signum.Engine.Linq
                 condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
                 table = mlee.Table;
             }
-            else 
-                throw new InvalidOperationException("Update not supported for {0}".Formato(pr.Projector.GetType().TypeName())); 
+            else
+                throw new InvalidOperationException("Update not supported for {0}".Formato(pr.Projector.GetType().TypeName()));
 
             return new CommandAggregateExpression(new CommandExpression[]
             { 
@@ -1637,105 +1643,85 @@ namespace Signum.Engine.Linq
         }
 
 
-        #region BinderTools 
+        #region BinderTools
 
-        Dictionary<MemberExpression, Expression> cachedIbMember = new Dictionary<MemberExpression, Expression>(DbExpressionComparer.GetComparer<MemberExpression>());
-        Dictionary<MethodCallExpression, Expression> cachedUniqueFunctions = new Dictionary<MethodCallExpression, Expression>(DbExpressionComparer.GetComparer<MethodCallExpression>());
-        Dictionary<UnaryExpression, Expression> cachedIbaCasts = new Dictionary<UnaryExpression, Expression>(DbExpressionComparer.GetComparer<UnaryExpression>());
-
-
-        Dictionary<LiteExpression, LiteExpression> liteReplacements = new Dictionary<LiteExpression, LiteExpression>();
-        public LiteExpression Completed(LiteExpression lite)
-        {
-            if (lite.ToStr != null)
-                return lite;
-
-            var completed = liteReplacements.GetOrCreate(lite, () =>
-            {
-                var toStr = BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
-
-                if (toStr == null)
-                    throw new InvalidOperationException("ToString can not ");
-
-                return new LiteExpression(lite.Type, lite.Reference, lite.Id, toStr, lite.TypeId, lite.CustomToString); 
-            });
-
-            return completed;
-        }
+        public Dictionary<ProjectionExpression, Expression> uniqueFunctionReplacements = new Dictionary<ProjectionExpression, Expression>(DbExpressionComparer.GetComparer<ProjectionExpression>());
+        public Dictionary<EntityExpression, EntityExpression> entityReplacements = new Dictionary<EntityExpression, EntityExpression>(DbExpressionComparer.GetComparer<EntityExpression>());
 
 
-        Dictionary<EntityExpression, EntityExpression> entityReplacements = new Dictionary<EntityExpression, EntityExpression>();
+        public List<ExpansionRequest> requests = new List<ExpansionRequest>();
+
+
         public EntityExpression Completed(EntityExpression entity)
         {
             if (entity.TableAlias != null)
                 return entity;
 
-            var completed = entityReplacements.GetOrCreate(entity, () =>
+            EntityExpression completed = entityReplacements.GetOrCreate(entity, () =>
             {
                 var table = entity.Table;
-
                 var newAlias = NextTableAlias(table.Name);
                 var bindings = table.Bindings(newAlias, this);
 
-                var completedEntity = new EntityExpression(entity.Type, entity.ExternalId, newAlias, bindings);
+                var result = new EntityExpression(entity.Type, entity.ExternalId, newAlias, bindings);
 
-                AddRequest(entity.GetAlias(), new TableCondition
+                requests.Add(new TableRequest
                 {
-                    CompleteEntity = completedEntity,
-                    Table = new TableExpression(newAlias, table.Name)
+                    CompleteEntity = result,
+                    Table = new TableExpression(newAlias, table.Name),
+                    ExternalAliases = ExternalAliasGatherer.Externals(result.ExternalId, new HashSet<Alias>()),
                 });
 
-                return completedEntity;
+                return result;
             });
 
             return completed;
         }
-
-        Dictionary<Alias, HashSet<TableCondition>> requests = new Dictionary<Alias, HashSet<TableCondition>>();
-        public void AddRequest(Alias tableAlias, TableCondition tableCondition)
-        {
-            requests.GetOrCreate(tableAlias).Add(tableCondition);
-        }
+        
 
         public ProjectionExpression ApplyExpansions(ProjectionExpression projection)
         {
-            var tableConditions = ExtractTableConditions(projection.Select.KnownAliases.And(Alias.Unknown));
+            if (requests.IsEmpty())
+                return projection;
 
-            if (tableConditions.IsEmpty())
+            SourceExpression source = projection.Select;
+
+            for (int i = 0; i < requests.Count; i++)
+            {
+                var r = requests[i];
+
+                if (r.ExternalAliases.Any() && !source.KnownAliases.Intersect(r.ExternalAliases).Any())
+                    continue;
+
+                if (r is TableRequest)
+                {
+                    TableRequest tr = r as TableRequest;
+
+                    var externalID = DbExpressionNominator.FullNominate(tr.CompleteEntity.ExternalId);
+
+                    Expression equal = SmartEqualizer.EqualNullable(externalID, tr.CompleteEntity.GetBinding(EntityExpression.IdField));
+                    source = new JoinExpression(JoinType.SingleRowLeftOuterJoin, source, tr.Table, equal);
+                }
+                else
+                {
+                    UniqueRequest ur = (UniqueRequest)r;
+
+                    source = new JoinExpression(ur.OuterApply ? JoinType.OuterApply : JoinType.CrossApply, source, ur.Select, null);
+                }
+
+                requests.RemoveAt(i);
+                i--;
+            }
+
+            if (source == projection.Select)
                 return projection;
 
             Alias newAlias = Alias.NextSelectAlias();
-            Alias[] oldAliases = tableConditions.Select(p => p.Table.Alias).Concat(projection.Select.KnownAliases).ToArray();
-
-            Expression projector = EntityCompletedReplacer.Replace(projection.Projector, entityReplacements, liteReplacements);
-
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, oldAliases); //Do not replace tokens
-
-            JoinExpression source = (JoinExpression)tableConditions.Aggregate((SourceExpression)projection.Select, (e, p) =>
-            {
-                var externalID = DbExpressionNominator.FullNominate(p.CompleteEntity.ExternalId);
-
-                Expression equal = SmartEqualizer.EqualNullable(externalID, p.CompleteEntity.GetBinding(EntityExpression.IdField));
-                return new JoinExpression(JoinType.SingleRowLeftOuterJoin, e, p.Table, equal);
-            });
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, source.KnownAliases); //Do not replace tokens
 
             return new ProjectionExpression(
                     new SelectExpression(newAlias, false, false, null, pc.Columns, source, null, null, null),
                     pc.Projector, projection.UniqueFunction, projection.Type);
-        }
-
-        private List<TableCondition> ExtractTableConditions(IEnumerable<Alias> alias)
-        {
-            List<TableCondition> result = alias.Where(ka => requests.ContainsKey(ka)).SelectMany(ka => requests.Extract(ka)).ToList();
-
-            if (result.Any())
-            {
-                List<TableCondition> recursive = ExtractTableConditions(result.Select(a => a.Table.Alias));
-
-                result.AddRange(recursive);
-            }
-
-            return result;
         }
 
         internal static SqlConstantExpression NullId = new SqlConstantExpression(null, typeof(int?));
@@ -1852,19 +1838,17 @@ namespace Signum.Engine.Linq
         {
             RelationalTable tr = mle.RelationalTable;
 
-            Alias tableAlias = NextSelectAlias();
+            Alias tableAlias = NextTableAlias(mle.RelationalTable.Name);
             TableExpression tableExpression = new TableExpression(tableAlias, tr.Name);
 
-            Expression expr = tr.FieldExpression(tableAlias, this);
+            Expression projector = tr.FieldExpression(tableAlias, this);
 
-            Alias selectAlias = NextSelectAlias();
+            Alias sourceAlias = NextSelectAlias();
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, sourceAlias, tableExpression.KnownAliases); // no Token
 
-            ColumnExpression ce = tr.BackColumnExpression(tableAlias);
-
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(expr, selectAlias, tableExpression.KnownAliases); // no Token
-
+            var where = SmartEqualizer.EqualNullable(mle.BackID, tr.BackColumnExpression(tableAlias));
             var proj = new ProjectionExpression(
-                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, SmartEqualizer.EqualNullable(mle.BackID, ce), null, null),
+                new SelectExpression(sourceAlias, false, false, null, pc.Columns, tableExpression, where, null, null),
                  pc.Projector, null, mle.Type);
 
             return proj;
@@ -1881,5 +1865,40 @@ namespace Signum.Engine.Linq
         }
         
         #endregion
+    }
+
+
+
+
+    class ExpansionRequest
+    {
+        public HashSet<Alias> ExternalAliases;
+
+        public override string ToString()
+        {
+            return "(for {0}) ".Formato(ExternalAliases.ToString(", "));
+        }
+    }
+
+    class UniqueRequest : ExpansionRequest
+    {
+        public bool OuterApply;
+        public SelectExpression Select;
+
+        public override string ToString()
+        {
+            return base.ToString() + (OuterApply ? " OUTER APPLY" : " CROSS APPLY") + " with " + Select.NiceToString();
+        }
+    }
+
+    class TableRequest : ExpansionRequest
+    {
+        public TableExpression Table;
+        public EntityExpression CompleteEntity;
+
+        public override string ToString()
+        {
+            return base.ToString() + " LEFT OUTER JOIN with " + Table.NiceToString();
+        }
     }
 }

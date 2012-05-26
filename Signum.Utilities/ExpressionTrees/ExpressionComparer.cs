@@ -12,11 +12,18 @@ namespace Signum.Utilities.ExpressionTrees
 {
     public class ExpressionComparer
     {
-        internal ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope;
+        internal ScopedDictionary<ParameterExpression, ParameterExpression> parameterMap;
+
+        protected IDisposable ParameterScope()
+        {
+            var saved = parameterMap;
+            parameterMap = new ScopedDictionary<ParameterExpression, ParameterExpression>(parameterMap);
+            return new Disposable(() => parameterMap = saved);
+        }
 
         protected ExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope)
         {
-            this.parameterScope = parameterScope;
+            this.parameterMap = parameterScope;
         }
 
         public static bool AreEqual(Expression a, Expression b)
@@ -145,10 +152,10 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareParameter(ParameterExpression a, ParameterExpression b)
         {
-            if (parameterScope != null)
+            if (parameterMap != null)
             {
                 ParameterExpression mapped;
-                if (parameterScope.TryGetValue(a, out mapped))
+                if (parameterMap.TryGetValue(a, out mapped))
                     return mapped == b;
             }
             return a == b;
@@ -178,19 +185,13 @@ namespace Signum.Utilities.ExpressionTrees
                 if (a.Parameters[i].Type != b.Parameters[i].Type)
                     return false;
             }
-            var save = parameterScope;
-            parameterScope = new ScopedDictionary<ParameterExpression, ParameterExpression>(parameterScope);
-            try
+
+            using (ParameterScope())
             {
                 for (int i = 0; i < n; i++)
-                {
-                    parameterScope.Add(a.Parameters[i], b.Parameters[i]);
-                }
+                    parameterMap.Add(a.Parameters[i], b.Parameters[i]);
+
                 return Compare(a.Body, b.Body);
-            }
-            finally
-            {
-                parameterScope = save;
             }
         }
 

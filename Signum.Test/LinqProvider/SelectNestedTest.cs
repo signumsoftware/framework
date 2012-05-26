@@ -233,20 +233,6 @@ namespace Signum.Test.LinqProvider
                                            select "{0} - {1} - {2}".Formato(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
         }
 
-        [TestMethod]
-        public void SelecteNestedFirstOrDefault()
-        {
-            var neasted = ((from b in Database.Query<BandDN>()
-                            select b.Members.Select(a => a.Sex).FirstOrDefault())).ToList();  
-        }
-
-
-        [TestMethod]
-        public void SelecteNestedFirstOrDefaultNullify()
-        {
-            var neasted = ((from b in Database.Query<BandDN>()
-                            select b.Members.Where(a=>a.Name.StartsWith("a")).Select(a => (Sex?)a.Sex).FirstOrDefault())).ToList();
-        }
 
         //[TestMethod]
         //public void SelecteNestedAsQueryable()

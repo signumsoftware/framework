@@ -7,6 +7,7 @@ using Signum.Utilities.DataStructures;
 using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {    /// <summary>
@@ -14,12 +15,19 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class DbExpressionComparer : ExpressionComparer
     {
-        ScopedDictionary<Alias, Alias> aliasScope;
+        ScopedDictionary<Alias, Alias> aliasMap;
+
+        protected IDisposable AliasScope()
+        {
+            var saved = aliasMap;
+            aliasMap = new ScopedDictionary<Alias, Alias>(aliasMap);
+            return new Disposable(() => aliasMap = saved);
+        }
 
         protected DbExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope, ScopedDictionary<Alias, Alias> aliasScope)
             : base(parameterScope)
         {
-            this.aliasScope = aliasScope;
+            this.aliasMap = aliasScope;
         }
 
         public new static bool AreEqual(Expression a, Expression b)
@@ -33,6 +41,16 @@ namespace Signum.Engine.Linq
         }
 
         protected override bool Compare(Expression a, Expression b)
+        {
+            bool result = ComparePrivate(a, b);
+
+            if (result == false)
+                result = !!result;
+
+            return result;
+        }
+
+        private bool ComparePrivate(Expression a, Expression b)
         {
             if (a == b)
                 return true;
@@ -125,10 +143,16 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareAlias(Alias a, Alias b)
         {
-            if (aliasScope != null)
+            if (a == null && b == null)
+                return true;
+
+            if (a == null || b == null)
+                return false;
+
+            if (aliasMap != null)
             {
                 Alias mapped;
-                if (aliasScope.TryGetValue(a, out mapped))
+                if (aliasMap.TryGetValue(a, out mapped))
                     return mapped == b;
             }
             return a == b;
@@ -136,13 +160,11 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareSelect(SelectExpression a, SelectExpression b)
         {
-            var save = aliasScope;
-            try
-            {
-                if (!Compare(a.From, b.From))
-                    return false;
+            if (!Compare(a.From, b.From))
+                return false;
 
-                aliasScope = new ScopedDictionary<Alias, Alias>(save);
+            using (AliasScope())
+            {
                 MapAliases(a.From, b.From);
 
                 return Compare(a.Where, b.Where)
@@ -151,19 +173,13 @@ namespace Signum.Engine.Linq
                     && a.IsDistinct == b.IsDistinct
                     && CompareColumnDeclarations(a.Columns, b.Columns);
             }
-            finally
-            {
-                aliasScope = save;
-            }
         }
 
-        protected virtual void MapAliases(Expression a, Expression b)
+        protected virtual void MapAliases(SourceExpression sourceA, SourceExpression sourceB)
         {
-            Alias[] prodA = AliasGatherer.Gather(a).ToArray();
-            Alias[] prodB = AliasGatherer.Gather(b).ToArray();
-            for (int i = 0, n = prodA.Length; i < n; i++)
+            for (int i = 0, n = sourceA.KnownAliases.Length; i < n; i++)
             {
-                aliasScope.Add(prodA[i], prodB[i]);
+                aliasMap.Add(sourceA.KnownAliases[i], sourceB.KnownAliases[i]);
             }
         }
 
@@ -198,23 +214,17 @@ namespace Signum.Engine.Linq
             if (a.JoinType != b.JoinType)
                 return false;
 
-            if(!Compare(a.Left, b.Left))
+            if (!Compare(a.Left, b.Left))
                 return false;
 
             if (a.JoinType == JoinType.CrossApply || a.JoinType == JoinType.OuterApply)
             {
-                var save = aliasScope;
-                try
+                using (AliasScope())
                 {
-                    aliasScope = new ScopedDictionary<Alias, Alias>(aliasScope);
                     MapAliases(a.Left, b.Left);
 
                     return Compare(a.Right, b.Right)
                         && Compare(a.Condition, b.Condition);
-                }
-                finally
-                {
-                    aliasScope = save;
                 }
             }
             else
@@ -226,20 +236,17 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareProjection(ProjectionExpression a, ProjectionExpression b)
         {
+            if (a.UniqueFunction != b.UniqueFunction)
+                return false; 
+
             if (!Compare(a.Select, b.Select))
                 return false;
 
-            var save = aliasScope;
-            try
+            using (AliasScope())
             {
-                aliasScope = new ScopedDictionary<Alias, Alias>(aliasScope);
-                aliasScope.Add(a.Select.Alias, b.Select.Alias);
+                MapAliases(a.Select, b.Select);
 
                 return Compare(a.Projector, b.Projector);
-            }
-            finally
-            {
-                aliasScope = save;
             }
         }
 
@@ -477,7 +484,7 @@ namespace Signum.Engine.Linq
         {
             public bool Equals(E x, E y)
             {
-                return ExpressionComparer.AreEqual(x, y);
+                return DbExpressionComparer.AreEqual(x, y);
             }
 
             public int GetHashCode(E obj)

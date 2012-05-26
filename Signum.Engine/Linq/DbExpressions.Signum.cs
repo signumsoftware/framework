@@ -61,46 +61,6 @@ namespace Signum.Engine.Linq
             return constructor + "\r\n{\r\n " + Bindings.ToString(",\r\n ").Indent(4) + "\r\n}";
         }
 
-        //public void Complete(QueryBinder binder)
-        //{
-        //    AssertTable(binder);
-
-        //    foreach (EntityField field in Table.Fields.Values.Where(f =>
-        //        !ReflectionTools.Equals(f.FieldInfo, IdField)))
-        //    {
-        //        Expression exp = GetOrCreateFieldBinding(field.FieldInfo, binder);
-
-        //        if (exp is MListExpression)
-        //        {
-        //            Expression proj = binder.MListProjection((MListExpression)exp);
-        //            ReplaceBinding(field.FieldInfo, proj); 
-        //        }  
-        //    }
-        //}
-
-        public Alias GetAlias()
-        {
-            var result =  GetAlias(ExternalId);
-
-            if (result == null)
-                return Alias.Unknown;
-
-            return result;
-
-        }
-
-        static Alias GetAlias(Expression exp)
-        {
-            if (exp is ColumnExpression)
-                return ((ColumnExpression)exp).Alias;
-
-            var ce = exp as ConditionalExpression;
-            if (ce != null)
-                return GetAlias(ce.Test) ?? GetAlias(ce.IfTrue) ?? GetAlias(ce.IfFalse);
-
-            return null;
-        }
-
         public Expression GetBinding(FieldInfo fi)
         {
             if (Bindings == null)

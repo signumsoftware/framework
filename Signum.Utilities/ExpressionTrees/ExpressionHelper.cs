@@ -199,5 +199,15 @@ namespace Signum.Utilities.ExpressionTrees
             ConstantExpression ce = query.Expression as ConstantExpression;
             return ce != null && ce.Value == query; 
         }
+
+        public static string QueryText<T>(this IQueryable<T> query)
+        {
+            var q = query as Query<T>;
+
+            if (q == null)
+                throw new ArgumentException("query is not an instance of {0}".Formato(typeof(Query<T>).NicePluralName()));
+
+            return q.QueryText;
+        }
     }
 }

@@ -9,20 +9,19 @@ namespace Signum.Utilities.DataStructures
     {
         ScopedDictionary<TKey, TValue> previous;
         Dictionary<TKey, TValue> map;
+        public IEqualityComparer<TKey> Comparer { get { return map.Comparer; } } 
 
         public ScopedDictionary(ScopedDictionary<TKey, TValue> previous)
+            :this(previous, EqualityComparer<TKey>.Default)
         {
             this.previous = previous;
             this.map = new Dictionary<TKey, TValue>();
         }
 
-        public ScopedDictionary(ScopedDictionary<TKey, TValue> previous, IEnumerable<KeyValuePair<TKey, TValue>> pairs)
-            : this(previous)
+        public ScopedDictionary(ScopedDictionary<TKey, TValue> previous, IEqualityComparer<TKey> comparer)
         {
-            foreach (var p in pairs)
-            {
-                this.map.Add(p.Key, p.Value);
-            }
+            this.previous = previous;
+            this.map = new Dictionary<TKey, TValue>(comparer);
         }
 
         public void Add(TKey key, TValue value)
@@ -49,6 +48,37 @@ namespace Signum.Utilities.DataStructures
                     return true;
             }
             return false;
+        }
+
+        public string ToString()
+        {
+            var str = map.ToString(kvp => kvp.Key.ToString() + " -> " + kvp.Value.ToString(), "\r\n");
+
+            if (this.previous == null)
+                return str;
+
+            return str + "\r\n-----------------------\r\n" + previous.ToString();
+        }
+
+        public string ToString(Func<TKey, string> keyRenderer, Func<TValue, string> valueRenderer)
+        {
+            var str = map.ToString(kvp => keyRenderer(kvp.Key) + " -> " + valueRenderer(kvp.Value), "\r\n");
+
+            if (this.previous == null)
+                return str;
+
+            return str + "\r\n-----------------------\r\n" + previous.ToString(keyRenderer, valueRenderer);
+        }
+
+        public TValue GetOrCreate(TKey key, Func<TValue> valueFactory)
+        {
+            TValue result;
+            if (!TryGetValue(key, out result))
+            {
+                result = valueFactory();
+                Add(key, result);
+            }
+            return result;
         }
     }
 }

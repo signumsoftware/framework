@@ -97,7 +97,7 @@ namespace Signum.Engine.Linq
         {
             var proj = binder.MListProjection(ml);
 
-            var newProj = (ProjectionExpression)base.Visit(proj);
+            var newProj = (ProjectionExpression)this.Visit(proj);
 
             return new MListProjectionExpression(ml.Type, newProj);
         }

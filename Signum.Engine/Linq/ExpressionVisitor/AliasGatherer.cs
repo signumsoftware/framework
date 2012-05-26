@@ -34,4 +34,33 @@ namespace Signum.Engine.Linq
             return base.VisitTable(table);
         }
     }
+
+    internal class ExternalAliasGatherer : DbExpressionVisitor
+    {
+        HashSet<Alias> internals;
+
+        HashSet<Alias> externals = new HashSet<Alias>();
+
+        private ExternalAliasGatherer() { }
+
+        public static HashSet<Alias> Externals(Expression source, HashSet<Alias> internals)
+        {
+            ExternalAliasGatherer ap = new ExternalAliasGatherer()
+            {
+                internals = internals
+            };
+
+            ap.Visit(source);
+
+            return ap.externals;
+        }
+
+        protected override Expression VisitColumn(ColumnExpression column)
+        {
+            if (!internals.Contains(column.Alias))
+                externals.Add(column.Alias);
+
+            return base.VisitColumn(column);
+        }
+    }
 }

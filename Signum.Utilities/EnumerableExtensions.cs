@@ -25,18 +25,18 @@ namespace Signum.Utilities
     {
         class UniqueExExpander : IMethodExpander
         {
-            static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where<int>(null, a => false));
-            static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, a => false));
+            static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where<int>(null, a => false)).GetGenericMethodDefinition();
+            static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, a => false)).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 bool query = mi.GetParameters()[0].ParameterType.IsInstantiationOf(typeof(IQueryable<>));
 
-                var whereMi = (query ? miWhereE : miWhereQ).MakeGenericMethod(mi.GetGenericArguments());
+                var whereMi = (query ? miWhereQ : miWhereE).MakeGenericMethod(mi.GetGenericArguments());
 
-                var whereExpr = Expression.Call(mi, arguments[0]);
+                var whereExpr = Expression.Call(whereMi, arguments[0], arguments[1]);
 
-                var uniqueMi = mi.DeclaringType.GetMethods().SingleEx(m => m.Name == mi.Name && m.IsGenericMethod && m.GetParameters().Length < mi.GetParameters().Length);
+                var uniqueMi = mi.DeclaringType.GetMethods().SingleEx(m => m.Name == mi.Name && m.IsGenericMethod && m.GetParameters().Length == (mi.GetParameters().Length - 1));
 
                 return Expression.Call(uniqueMi.MakeGenericMethod(mi.GetGenericArguments()), whereExpr);
             }
@@ -74,6 +74,7 @@ namespace Signum.Utilities
         [MethodExpander(typeof(UniqueExExpander))]
         public static T SingleEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
+
             return query.Where(predicate).SingleEx();
         }
 

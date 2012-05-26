@@ -464,11 +464,10 @@ namespace Signum.Engine.Linq
 
             Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Token), cProj.OuterKey);
 
-            if (cProj.Projection.UniqueFunction == null)
-                return call;
+            if (cProj.Projection.UniqueFunction != null)
+                throw new InvalidOperationException("Eager ChildProyection with UniqueFunction '{0}' not expected at this stage".Formato(cProj.Projection.UniqueFunction));
 
-            MethodInfo miUnique = UniqueMethod(cProj.Projection.UniqueFunction.Value);
-            return Expression.Call(miUnique.MakeGenericMethod(type), call);
+            return call;
         }
 
         public Expression LookupMList(Expression row, ChildProjectionExpression cProj, MemberExpression field)
@@ -485,24 +484,6 @@ namespace Signum.Engine.Linq
             MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
 
             return Expression.Call(row, mi, Expression.Constant(cProj.Token), cProj.OuterKey, field);
-        }
-
-        static MethodInfo miSingle = ReflectionTools.GetMethodInfo(() => EnumerableUniqueExtensions.SingleEx<int>(null)).GetGenericMethodDefinition();
-        static MethodInfo miSingleOrDefault = ReflectionTools.GetMethodInfo(() => EnumerableUniqueExtensions.SingleOrDefaultEx<int>(null)).GetGenericMethodDefinition();
-        static MethodInfo miFirst = ReflectionTools.GetMethodInfo(() => EnumerableUniqueExtensions.FirstEx<int>(null)).GetGenericMethodDefinition();
-        static MethodInfo miFirstOrDefault = ReflectionTools.GetMethodInfo(() => Enumerable.FirstOrDefault<int>(null)).GetGenericMethodDefinition();
-
-        internal MethodInfo UniqueMethod(UniqueFunction uniqueFunction)
-        {
-            switch (uniqueFunction)
-            {
-                case UniqueFunction.First: return miFirst;
-                case UniqueFunction.FirstOrDefault: return miFirstOrDefault;
-                case UniqueFunction.Single: return miSingle;
-                case UniqueFunction.SingleOrDefault: return miSingleOrDefault;
-                default:
-                    throw new InvalidOperationException();
-            }
         }
     }
 }
