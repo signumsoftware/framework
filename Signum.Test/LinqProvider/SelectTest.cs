@@ -680,6 +680,17 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectMListEmbeddedToList()
+        {
+            var lists = (from a in Database.Query<AlbumDN>()
+                         select new
+                         {
+                             a.Name,
+                             Songs = a.Songs.ToList(),
+                         }).ToList();
+        }
+
+        [TestMethod]
         public void SelectToStrField()
         {
             var list = Database.Query<NoteWithDateDN>().Select(a => a.ToStringProperty).ToList();

@@ -50,7 +50,7 @@ namespace Signum.Utilities.DataStructures
             return false;
         }
 
-        public string ToString()
+        public override string ToString()
         {
             var str = map.ToString(kvp => kvp.Key.ToString() + " -> " + kvp.Value.ToString(), "\r\n");
 

@@ -203,9 +203,6 @@ namespace Signum.Engine.Linq
             if (expression is ProjectionExpression)
                 return (ProjectionExpression)expression;
 
-            if(expression is MListExpression)
-                 return MListProjection((MListExpression)expression);
-
             expression = RemoveGroupByConvert(expression);
 
             if (expression.NodeType == ExpressionType.New && expression.Type.IsInstantiationOf(typeof(Grouping<,>)))
@@ -262,7 +259,7 @@ namespace Signum.Engine.Linq
                 {
                     Select = newProjector.Select,
                     OuterApply = function == UniqueFunction.SingleOrDefault || function == UniqueFunction.FirstOrDefault,
-                    ExternalAliases = ExternalAliasGatherer.Externals(newProjector.Select, AliasGatherer.Gather(source))
+                    ExternalAliases = ExternalAliasGatherer.Externals(newProjector.Select, AliasGatherer.Gather(newProjector.Select))
                 });
 
                 return newProjector.Projector;
@@ -413,7 +410,7 @@ namespace Signum.Engine.Linq
                 var pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases, aggresiveNomination: false, selectTrivialColumns: true);
 
                 SubqueryExpression se = null;
-                if (pc.Columns.Count == 1 && !newItem.Type.IsIIdentifiable())
+                if (Schema.Current.Settings.IsDbType(pc.Projector.Type))
                     se = new InExpression(newItem, projection.Select);
                 else
                 {
@@ -963,6 +960,9 @@ namespace Signum.Engine.Linq
                         return ee.ExternalId.UnNullify();
 
                     Expression result = Completed(ee).GetBinding(fi);
+
+                    if (result is MListExpression)
+                        return MListProjection((MListExpression)result);
                     
                     return result;
                 }
