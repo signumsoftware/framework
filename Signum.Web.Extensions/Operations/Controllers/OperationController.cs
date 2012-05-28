@@ -28,11 +28,7 @@ namespace Signum.Web.Operations
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(oldPrefix, EntityBaseKeys.RuntimeInfo)]);
-                if (!runtimeInfo.IdOrNull.HasValue)
-                    throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(operationFullKey));
-
-                Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(oldPrefix);
                 entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
             }
             else
@@ -49,29 +45,9 @@ namespace Signum.Web.Operations
                 entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
             }
 
-            if (prefix.HasText())
-            {
-                ViewData[ViewDataKeys.WriteSFInfo] = true;
-                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                return this.PopupOpen(new ViewSaveOptions(tc));
-            }
-            else //NormalWindow
-            {
-                if (Request.IsAjaxRequest())
-                {
-                    if (entity.IsNew)
-                        return Navigator.NormalControl(this, entity);
-
-                    string newUrl = Navigator.ViewRoute(entity.GetType(), entity.Id);
-                    if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                        return Navigator.NormalControl(this, entity);
-                    else
-                        return JsonAction.Redirect(newUrl);
-                }
-                else
-                    return Navigator.View(this, entity);
-            }
+           return OperationsClient.DefaultExecuteResult(this, entity, prefix);
         }
+
 
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ContextualExecute(string operationFullKey, string oldPrefix)
@@ -108,12 +84,7 @@ namespace Signum.Web.Operations
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(oldPrefix ?? "", EntityBaseKeys.RuntimeInfo)]);
-
-                if (!runtimeInfo.IdOrNull.HasValue)
-                    throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(operationFullKey));
-
-                Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(oldPrefix);
                 entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
             }
             else
@@ -130,29 +101,7 @@ namespace Signum.Web.Operations
                 entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
             }
 
-            if (prefix.HasText())
-            {
-                ViewData[ViewDataKeys.WriteSFInfo] = true;
-                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                return this.PopupOpen(new ViewSaveOptions(tc));
-            }
-            else //NormalWindow
-            {
-                if (Request.IsAjaxRequest())
-                {
-                    if (entity.IsNew)
-                        return Navigator.NormalControl(this, entity);
-                    else
-                        return JsonAction.Redirect(Navigator.ViewRoute(entity));
-                }
-                else
-                {
-                    if (entity.IsNew)
-                        return Navigator.View(this, entity);
-                    else
-                        return Redirect(Navigator.ViewRoute(entity));
-                }
-            }
+            return OperationsClient.DefaultConstructResult(this, entity, prefix);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -167,29 +116,7 @@ namespace Signum.Web.Operations
             
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, EnumLogic<OperationDN>.ToEnum(operationFullKey));
 
-            if (prefix.HasText())
-            {
-                ViewData[ViewDataKeys.WriteSFInfo] = true;
-                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                return this.PopupOpen(new ViewSaveOptions(tc));
-            }
-            else
-            {
-                if (Request.IsAjaxRequest())
-                {
-                    if (entity.IsNew)
-                        return Navigator.NormalControl(this, entity);
-                    else
-                        return JsonAction.Redirect(Navigator.ViewRoute(entity));
-                }
-                else
-                {
-                    if (entity.IsNew)
-                        return Navigator.View(this, entity);
-                    else 
-                        return Redirect(Navigator.ViewRoute(entity));
-                }
-            }
+            return OperationsClient.DefaultConstructResult(this, entity, prefix);
         }
     }
 }
