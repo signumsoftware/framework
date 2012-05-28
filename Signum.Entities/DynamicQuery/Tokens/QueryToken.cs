@@ -53,14 +53,11 @@ namespace Signum.Entities.DynamicQuery
             return new ColumnToken(column);
         }
 
-
-        public static Func<QueryToken, bool> AllowSubToken = qt => true;
-        
         public List<QueryToken> SubTokens()
         {
             var result = this.SubTokensInternal();
 
-            if (result.IsEmpty() || !AllowSubToken(this))
+            if (result.IsEmpty())
                 return new List<QueryToken>();
 
             return result.Where(t => t.IsAllowed()).ToList();

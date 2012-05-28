@@ -121,10 +121,7 @@ namespace Signum.Utilities
             }
         }
 
-        public void Clean()
-        {
-            Value = default(T);
-        }
+        public abstract void Clean();
     }
 
     public class ThreadVariable<T> : Variable<T>
@@ -137,6 +134,11 @@ namespace Signum.Utilities
         {
             get { return store.Value; }
             set { store.Value = value; }
+        }
+
+        public override void Clean()
+        {
+            Value = default(T);
         }
     }
 
@@ -201,6 +203,11 @@ namespace Signum.Utilities
                 }
                 set { singletonSession[Name] = value; }
             }
+
+            public override void Clean()
+            {
+                singletonSession.Remove(Name); 
+            }
         }
     }
 
@@ -208,7 +215,7 @@ namespace Signum.Utilities
     {
         public ISessionFactory Factory;
 
-        static readonly Variable<Dictionary<string, object>> overridenSession = Statics.ThreadVariable<Dictionary<string, object>>("overridenSession");
+        static readonly ThreadVariable<Dictionary<string, object>> overridenSession = Statics.ThreadVariable<Dictionary<string, object>>("overridenSession");
 
         public ScopeSessionFactory(ISessionFactory factory)
         {
@@ -276,6 +283,16 @@ namespace Signum.Utilities
                     else
                         variable.Value = value;
                 }
+            }
+
+            public override void Clean()
+            {
+                var dic = overridenSession.Value;
+
+                if (dic != null)
+                    dic.Remove(Name);
+                else
+                    variable.Clean();
             }
         }
     }

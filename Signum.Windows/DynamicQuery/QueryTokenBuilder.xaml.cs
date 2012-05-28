@@ -34,6 +34,7 @@ namespace Signum.Windows
             set { SetValue(TokenProperty, value); }
         }
 
+        
 
         List<QueryToken> tokens = new List<QueryToken>(); 
         private void UpdateTokenList(QueryToken queryToken)
@@ -54,13 +55,17 @@ namespace Signum.Windows
         }
 
         public event Func<QueryToken, List<QueryToken>> SubTokensEvent;
+        public static Func<QueryToken, bool> AllowSubTokens = null; 
 
         List<QueryToken> OnSubTokens(QueryToken token)
         {
-            if (SubTokensEvent != null)
-                return SubTokensEvent(token);
+            if (SubTokensEvent == null)
+                throw new InvalidOperationException("SubTokensEvent not set");
 
-            throw new InvalidOperationException("SubTokensEvent not set"); 
+            if (token != null && AllowSubTokens != null && !AllowSubTokens(token))
+                return new List<QueryToken>();
+
+            return SubTokensEvent(token);
         }
 
         // StaticColumns.Select(c => QueryToken.NewColumn(c)).ToArray()
@@ -73,7 +78,6 @@ namespace Signum.Windows
         //    get { return (IEnumerable<StaticColumn>)GetValue(StaticColumnsProperty); }
         //    set { SetValue(StaticColumnsProperty, value); }
         //}
-
 
         void UpdateCombo()
         {
@@ -96,7 +100,6 @@ namespace Signum.Windows
                 sp.Children.Add(cb);
             }
         }
-
 
         void cb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

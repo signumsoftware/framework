@@ -56,6 +56,12 @@ namespace Signum.Web
                 }
                 set { (overrideAspNetSessionVariable.Value ?? HttpContext.Current.Session)[Name] = value; }
             }
+
+            public override void Clean()
+            {
+                var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current.TryCC(c => c.Session);
+                session.Remove(Name);
+            }
         }
     }
 }

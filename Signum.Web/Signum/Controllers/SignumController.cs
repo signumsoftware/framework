@@ -307,12 +307,19 @@ namespace Signum.Web.Controllers
             return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
         }
 
+        public static Func<QueryToken, bool> AllowSubTokens = null;
+
         [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            List<QueryToken> subtokens = QueryUtils.Parse(tokenName, t => QueryUtils.SubTokens(t, qd.Columns)).SubTokens();
+            var token = QueryUtils.Parse(tokenName, t => QueryUtils.SubTokens(t, qd.Columns));
+
+            if (AllowSubTokens != null && !AllowSubTokens(token))
+                return Content("");
+
+            List<QueryToken> subtokens = token.SubTokens();
             if (subtokens.IsEmpty())
                 return Content("");
 

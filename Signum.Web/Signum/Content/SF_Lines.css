@@ -7,13 +7,11 @@
     text-align:right;
     font-weight:bold;
 }
-
 .sf-label-detail-line, .sf-label-repeater-line
 {
     display: inline-block;
     margin-right: 1px; /*IE8 fix for inline-block*/
 }
-
 .sf-unit-line {
     float:left;
     margin-right:10px;
@@ -25,8 +23,8 @@
 {
 	min-width:350px;
 }
-
-.sf-field:after, .sf-field-list:after{
+.sf-field:after, .sf-field-list:after, .sf-value-line-radiolbl:after
+{
     content: "";
     display: block;
     height: 0;
@@ -34,8 +32,9 @@
     visibility: hidden;
 }
 
-.sf-field input[type=radio] {
-    float:none;
+.sf-value-line-radiolbl
+{
+    display: block;
 }
 
 .sf-field .sf-field-list
@@ -49,15 +48,22 @@
 .sf-entity-list 
 {
     min-width:150px;
+    min-height: 72px;
 }
 
 .sf-entity-list option {
     padding:3px;
 }
 
-.sf-field-list ul
+.sf-field-list > ul
 {
     float:left;    
+}
+.sf-field-list > ul > li > .sf-line-button
+{
+    display: block;    
+    line-height: 1em;
+    height: 18px;
 }
 
 .sf-value-container
