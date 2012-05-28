@@ -295,8 +295,9 @@ SF.Chart.ChartBase.prototype = {
             };
 
             var serializeData = function ($shape) {
-                var data = $shape.closest(".sf-chart-control").find(":input").serialize();
-                data += "&filters=" + new SF.FindNavigator().serializeFilters();
+                var $chartControl = $shape.closest(".sf-chart-control");
+                var data = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
+                data += "&filters=" + new SF.FindNavigator({prefix: $chartControl.attr("data-prefix")}).serializeFilters();
                 data += extractAttribute($shape, "d1");
                 data += extractAttribute($shape, "d2");
                 data += extractAttribute($shape, "v1");
