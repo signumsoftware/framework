@@ -235,7 +235,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static Dictionary<K, V3> OuterJoinDictionaryCC<K, V1, V2, V3>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2, V3> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCC<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2, R> mixer)
             where V1 : class
             where V2 : class
         {
@@ -246,7 +246,7 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetC(k), dic2.TryGetC(k)));
         }
 
-        public static Dictionary<K, V3> OuterJoinDictionarySC<K, V1, V2, V3>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1?, V2, V3> mixer)
+        public static Dictionary<K, R> OuterJoinDictionarySC<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1?, V2, R> mixer)
             where V1 : struct
             where V2 : class
         {
@@ -268,7 +268,7 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetC(k)));
         }
 
-        public static Dictionary<K, V3> OuterJoinDictionaryCS<K, V1, V2, V3>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2?, V3> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2?, R> mixer)
             where V1 : class
             where V2 : struct
         {
@@ -279,7 +279,7 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetC(k), dic2.TryGetS(k)));
         }
 
-        public static Dictionary<K, V3> OuterJoinDictionaryCS<K, V1, V2, V3>(this IDictionary<K, V1> dic1, IDictionary<K, V2?> dic2, Func<K, V1, V2?, V3> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2?> dic2, Func<K, V1, V2?, R> mixer)
             where V1 : class
             where V2 : struct
         {
@@ -290,7 +290,7 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetC(k), dic2.TryGetS(k)));
         }
 
-        public static Dictionary<K, V3> OuterJoinDictionarySS<K, V1, V2, V3>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1?, V2?, V3> mixer)
+        public static Dictionary<K, R> OuterJoinDictionarySS<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1?, V2?, R> mixer)
             where V1 : struct
             where V2 : struct
         {
@@ -301,7 +301,7 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetS(k)));
         }
 
-        public static Dictionary<K, V3> OuterJoinDictionarySS<K, V1, V2, V3>(this IDictionary<K, V1?> dic1, IDictionary<K, V2?> dic2, Func<K, V1?, V2?, V3> mixer)
+        public static Dictionary<K, R> OuterJoinDictionarySS<K, V1, V2, R>(this IDictionary<K, V1?> dic1, IDictionary<K, V2?> dic2, Func<K, V1?, V2?, R> mixer)
             where V1 : struct
             where V2 : struct
         {
