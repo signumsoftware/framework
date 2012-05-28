@@ -16,7 +16,7 @@
 @{ 
     UserChartDN uc = ((UserChartPartDN)Model.Content).UserChart;
     ChartRequest request = UserChartDN.ToRequest(uc);
- 
+
     using (var ucTc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
     {
         ResultTable resultTable = ChartLogic.ExecuteChart(request);
@@ -29,9 +29,18 @@
                 @Html.HiddenRuntimeInfo(ucTc, cr => cr.Chart)
                 @Html.Hidden(ucTc.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(request.QueryName))
         
+                @Html.Hidden(ucTc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
+                    (request.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
+
+                @{
+                    ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+                    ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
+                }
+
+                @Html.Partial(Navigator.Manager.FilterBuilderView, ucTc)
+
                 @using (var chart = ucTc.SubContext(cr => cr.Chart))
                 {
-                    ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
                     Html.RenderPartial(ChartClient.ChartBuilderView, chart);
                 }
             </div>
