@@ -33,11 +33,9 @@ namespace Signum.Entities
             return new TimeSpan(hour, minute, 0);
         }
 
-        static Expression<Func<HourMinuteDN, string>> ToStringExpression =
-            h => "{0:00}:{1:00}".Formato(h.Hour, h.Minute); 
         public override string ToString()
         {
-            return ToStringExpression.Evaluate(this);
+            return "{0:00}:{1:00}".Formato(Hour, Minute);
         }
     }
 }

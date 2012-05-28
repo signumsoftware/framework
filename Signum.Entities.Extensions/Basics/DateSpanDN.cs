@@ -43,14 +43,6 @@ namespace Signum.Entities.Basics
             return years == 0 && months == 0 && days == 0;
         }
 
-        //static Expression<Func<DateSpanDN, DateTime>> MethodExpression =
-        //     (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
-        //public DateTime Add(DateTime date)
-        //{
-        //    return date.AddYears(years).AddMonths(months).AddDays(days);
-        //}
-
-
         static Expression<Func<DateSpanDN, DateTime, DateTime>> AddExpression =
              (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
         public DateTime Add(DateTime date)
