@@ -156,7 +156,7 @@ namespace Signum.Engine
                                                             where fkc.parent_object_id == c.object_id && fkc.parent_column_id == c.column_id
                                                             join fk in Database.View<SysForeignKeys>().DefaultIfEmpty() on fkc.constraint_object_id equals fk.object_id
                                                             join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
-                                                            select new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).SingleOrDefaultEx(),
+                                                            select fk.name == null ? null: new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).SingleOrDefaultEx(),
                                           }).ToDictionary(a => a.Name),
 
                                 Indices = (from i in Database.View<SysIndexes>()
