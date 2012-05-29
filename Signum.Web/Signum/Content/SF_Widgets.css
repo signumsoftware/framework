@@ -18,6 +18,7 @@
 {
     vertical-align: top;    
     line-height: 18px;
+    text-align: left !important;
 }
 .sf-widget-toggler:hover,.sf-widget-toggler:hover
 {
