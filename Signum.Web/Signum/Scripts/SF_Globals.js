@@ -332,9 +332,10 @@ SF.registerModule("Globals", function () {
             else {
                 $(".sf-dropdown").removeClass(clss);
                 var $content = $elem.find(".sf-menu-button");
+                var left = $elem.width() - $content.width(); 
                 $content.css({
                     top: $elem.outerHeight(),
-                    left: $elem.width() - $content.width()
+                    left: ($elem.position().left - $elem.parents("div").first().position().left) < Math.abs(left) ? 0 : left
                 });
                 $elem.addClass(clss);
             }
