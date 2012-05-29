@@ -160,7 +160,12 @@ SF.registerModule("FindNavigator", function () {
 
             $(this.pf("sfElems")).live('change', function () {
                 SF.log("page size changed");
-                self.search();
+                if ($(this).find("option:selected").val() == -1) {
+                    self.clearResults();
+                }
+                else {
+                    self.search();
+                }
             });
         },
 
@@ -582,16 +587,16 @@ SF.registerModule("FindNavigator", function () {
             else {
                 throw "No direction was given to FindNavigator moveColumn";
             }
-            var $tbody = $(this.pf("tblResults tbody"));
-            $tbody.find("tr:not('.sf-search-footer')").remove();
-            $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
+            this.clearResults();
         },
 
         removeColumn: function ($th) {
             SF.log("FindNavigator removeColumn");
-
             $th.remove();
+            this.clearResults();
+        },
 
+        clearResults: function () {
             var $tbody = $(this.pf("tblResults tbody"));
             $tbody.find("tr:not('.sf-search-footer')").remove();
             $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
