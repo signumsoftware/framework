@@ -5,17 +5,7 @@ SF.Widgets = (function () {
 
     $(".sf-widget").live("mouseover mouseout", function (evt) {
         var $this = $(this);
-        if (evt.type == "mouseover") {
-            SF.Dropdowns.toggle(evt, this);
-            var $content = $this.find(".sf-widget-content");
-            $content.css({
-                top: $this.outerHeight(),
-                left: ($this.width() - $content.width())
-            });
-        }
-        else {
-            SF.Dropdowns.toggle(evt, this);
-        }
+        SF.Dropdowns.toggle(evt, this);
     });
 
     $(".sf-widget").live("click", function (evt) {
