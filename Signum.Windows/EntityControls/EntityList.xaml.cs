@@ -35,6 +35,11 @@ namespace Signum.Windows
             set { SetValue(SelectionModeProperty, value); }
         }
 
+        public IList SelectedEntities
+        {
+            get { return (IList)listBox.SelectedItems; }
+        }
+
         public static readonly DependencyProperty MoveProperty =
             DependencyProperty.Register("Move", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(false, (d, e) => ((EntityList)d).UpdateVisibility()));
         public bool Move

@@ -22,7 +22,6 @@ namespace Signum.Windows
 
         public static readonly DependencyProperty EntitiesTypeProperty =
           DependencyProperty.Register("EntitiesType", typeof(Type), typeof(EntityListBase), new UIPropertyMetadata(null, (d, e) => ((EntityListBase)d).EntitiesTypeChanged((Type)e.NewValue)));
-
         public Type EntitiesType
         {
             get { return (Type)GetValue(EntitiesTypeProperty); }
