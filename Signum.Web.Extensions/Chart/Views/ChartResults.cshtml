@@ -22,15 +22,12 @@
 else
 {
     <div class="sf-tabs">
-        <ul>
-            <li><a href="@("#" + Model.Compose("sfChartContainer"))">Chart</a></li>
-            <li><a href="@("#" + Model.Compose("sfChartData"))">Data</a></li>
-            <li><a href="@("#" + Model.Compose("sfChartCode"))">Code</a></li>
-        </ul>
-        <div id="@Model.Compose("sfChartContainer")">
+        <fieldset id="@Model.Compose("sfChartContainer")">
+            <legend>Chart</legend>
             <div class="sf-chart-container" data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)))"></div>
-        </div>
-        <div id="@Model.Compose("sfChartData")">
+        </fieldset>
+        <fieldset id="@Model.Compose("sfChartData")">
+            <legend>Data</legend>
             <table id="@Model.Compose("tblResults")" class="sf-search-results">
                 <thead class="ui-widget-header ui-corner-top">
                     <tr>
@@ -103,8 +100,9 @@ else
                 <tfoot>
                 </tfoot>
             </table>
-        </div>
-        <div id="@Model.Compose("sfChartCode")" class="sf-chart-code">
+        </fieldset>
+        <fieldset id="@Model.Compose("sfChartCode")" class="sf-chart-code">
+            <legend>Code</legend>
             <div class="sf-chart-code-container">
                 <textarea rows="60"></textarea>
             </div>
@@ -113,7 +111,7 @@ else
                 SF.Chart.Builder.initOrders('@Model.ControlID');
 
                 var $chartContainer = $('@divSelector');
-                $chartContainer.closest('.sf-tabs').bind( "tabsshow", function(event, ui) {
+                $chartContainer.closest('.sf-tabs').bind("tabsshow", function(event, ui) {
                     if (ui.panel.id == '@(Model.Compose("sfChartContainer"))') {
                         var data = @Html.Json(ChartClient.DataJson(Model.Value, queryResult));
                         $chartContainer.data("data", data);
@@ -121,7 +119,7 @@ else
                     }
                 });
             </script>
-        </div>
+        </fieldset>
     </div>
 }
 
