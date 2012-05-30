@@ -49,17 +49,18 @@
 {
     min-width:150px;
     min-height: 72px;
+    margin-right: 5px;
 }
 
 .sf-entity-list option {
     padding:3px;
 }
 
-.sf-field-list > ul
+.sf-field-list-table td
 {
-    float:left;    
+    vertical-align: top;
 }
-.sf-field-list > ul > li > .sf-line-button
+.sf-field-list-table ul .sf-line-button
 {
     display: block;    
     line-height: 1em;
@@ -78,7 +79,10 @@
     display:block;
 }
 
-.sf-value-line, .sf-entity-list{float:left;}
+.sf-value-line, .sf-field-list
+{
+    float:left;
+}
 
 a.sf-value-line, span.sf-value-line{
     padding:5px 0;
