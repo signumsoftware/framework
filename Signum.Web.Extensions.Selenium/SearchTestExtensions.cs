@@ -553,7 +553,7 @@ namespace Signum.Web.Selenium
         public static string QueryMenuOptionLocator(string menuId, string optionId)
         {
             //check of menu and item classes is redundant but it must be in the html, so good for testing
-            return "jq=#{0}.sf-query-button.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-query-button#{1}".Formato(menuId, optionId); 
+            return "jq=#{0}.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-query-button#{1}".Formato(menuId, optionId); 
         }
 
         public static string QueryMenuOptionLocatorByAttr(string menuId, string optionLocator)
