@@ -1,0 +1,19 @@
+<VSTemplate Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Item">
+  <TemplateData>
+    <Name>Signum Entity Control</Name>
+    <Description>User Control for an entity using Sigum Windows</Description>
+    <ProjectType>CSharp</ProjectType>
+    <DefaultName>Entity</DefaultName>
+    <SortOrder>10</SortOrder>
+    <Icon>__TemplateIcon.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <References />
+    <ProjectItem SubType="Designer" TargetFileName="$newname$.xaml" ReplaceParameters="true">MyEntity.xaml</ProjectItem>
+    <ProjectItem SubType="Code" TargetFileName="$newname$.xaml.cs" ReplaceParameters="true">MyEntity.xaml.cs</ProjectItem>
+  </TemplateContent>
+  <WizardExtension>
+    <Assembly>WizardProjectName, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b6f529cd3458096d</Assembly>
+    <FullClassName>WizardProjectName.ControlWizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>

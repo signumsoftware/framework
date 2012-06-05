@@ -1,0 +1,16 @@
+﻿@section head
+{
+    @Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray())
+}
+@using (Html.BeginForm())
+{
+    <div id="divNormalControl">
+        <h2>
+            <span class="sf-entity-title">@(ViewBag.Title)</span>
+        </h2>
+        @Html.ValidationSummaryAjax()
+        @Html.Partial(ViewData[ViewDataKeys.PartialViewName].ToString())
+        @Html.AntiForgeryToken()
+    </div>
+    <div class="clearall"></div>   
+}

@@ -1,0 +1,29 @@
+<VSTemplate Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>ProjectName.Entities</Name>
+    <Description>Proyect to model the entities</Description>
+    <ProjectType>CSharp</ProjectType>
+    <ProjectSubType>
+    </ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>ProjectName.Entities</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <Icon>__TemplateIcon.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="$custommessage$.Entities.csproj" File="ProjectName.Entities.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="Entities.cs">Entities.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="IServer$custommessage$.cs">IServer.cs</ProjectItem>
+      <Folder Name="Properties" TargetFolderName="Properties">
+        <ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+      </Folder>
+    </Project>
+  </TemplateContent>
+  <WizardExtension>
+    <Assembly>WizardProjectName, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b6f529cd3458096d</Assembly>
+    <FullClassName>WizardProjectName.Wizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>

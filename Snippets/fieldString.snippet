@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>Field of type String</Title>
+			<Shortcut>fieldString</Shortcut>
+			<Description>New field of type string with max size</Description>
+			<Author>Signum Software</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+          <Namespace>Signum.Utilities</Namespace>
+        </Import>
+      </Imports>
+			<Declarations>
+				<Literal>
+					<ID>field</ID>
+					<ToolTip>Field</ToolTip>
+					<Default>bar</Default>
+					<Function></Function>
+				</Literal>
+				<Literal>
+					<ID>property</ID>
+					<ToolTip>Property</ToolTip>
+					<Default>Bar</Default>
+					<Function></Function>
+				</Literal>
+        <Literal>
+          <ID>size</ID>
+          <ToolTip>String Size</ToolTip>
+          <Default>100</Default>
+          <Function></Function>
+        </Literal>
+			</Declarations>
+			<Code Language="csharp">
+				<![CDATA[[NotNullable, SqlDbType( Size = $size$)]
+        string $field$;
+        [StringLengthValidator(AllowNulls=false, Min = 3, Max = $size$)]
+        public string $property$
+        {
+            get { return $field$; }
+            set { Set(ref $field$, value, () => $property$); }
+        }$end$]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
