@@ -425,6 +425,7 @@
     <Compile Include="Fluent\FrameworkFactoryGenerator.cs" />
     <Compile Include="Fluent\TreeExtensions.cs" />
     <Compile Include="Fluent\WhereExtensions.cs" />
+    <Compile Include="MarkupExtensions\NavigatorExtensions.cs" />
     <Compile Include="SelectorWindow.xaml.cs">
       <DependentUpon>SelectorWindow.xaml</DependentUpon>
     </Compile>

@@ -318,13 +318,16 @@ namespace Signum.Windows
                 return;
             }
 
-            if (!Navigator.IsFindable(s.NewValue))
+            if(!Navigator.IsFindable(s.NewValue))
             {
-                HideSeachControl(this);
+                 Common.VoteCollapsed(this);
+                return;
             }
 
-            Settings = Navigator.GetQuerySettings(s.NewValue);
+            Common.VoteVisible(this);
 
+
+            Settings = Navigator.GetQuerySettings(s.NewValue);
 
             Description = Navigator.Manager.GetQueryDescription(s.NewValue);
 
@@ -341,12 +344,8 @@ namespace Signum.Windows
                 throw new InvalidOperationException("Entity Column not found");
         }
 
-        public static Action<SearchControl> HideSeachControl = sc =>
-        {
-            var emptyParent = (FrameworkElement)sc.VisualParents().Where(a => a is SearchControl || a is GroupBox || a is TabControl || a is Panel && ((Panel)a).Children.Count == 0).Last();
-            emptyParent.Visibility = Visibility.Collapsed;
-        };
 
+      
         ColumnDescription entityColumn;
 
         ResultTable resultTable;
@@ -366,13 +365,15 @@ namespace Signum.Windows
         {
             this.Loaded -= SearchControl_Loaded;
 
-            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
+            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null || !Navigator.IsFindable(QueryName))
             {
                 tokenBuilder.Token = null;
                 tokenBuilder.SubTokensEvent += q => new List<QueryToken>();
+
                 return;
             }
 
+            Common.VoteVisible(this);
           
             if (FilterColumn.HasText())
             {

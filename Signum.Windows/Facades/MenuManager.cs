@@ -42,16 +42,20 @@ namespace Signum.Windows
 
         static void TaskCleanSeparators(MenuItem menuItem)
         {
-            menuItem.Items.Cast<Control>().Where(a => a.Visibility == Visibility.Visible).BiSelect((first, second) =>
+            var visibles = menuItem.Items.Cast<Control>().Where(a => a.Visibility == Visibility.Visible).ToList();
+
+            int i, j;
+            for (i = 0; i < visibles.Count && visibles[i] is Separator; i++)
+                visibles[i].Visibility = Visibility.Collapsed;
+
+            for (j = visibles.Count - 1; j >= i && visibles[j] is Separator; j--)
+                visibles[j].Visibility = Visibility.Collapsed;
+
+            for (int z = i; z <= j; z++)
             {
-                if (second is Separator && first is Separator)
-                    return (Separator)second;
-                if (second is Separator && first == null)
-                    return (Separator)second;
-                if (first is Separator && second == null)
-                    return (Separator)first;
-                return null;
-            }, BiSelectOptions.InitialAndFinal).NotNull().ToList().ForEach(a => a.Visibility = Visibility.Collapsed);
+                if (visibles[z] is Separator && z > 0 && visibles[z - 1] is Separator)
+                    visibles[z].Visibility = Visibility.Collapsed;
+            }
         }
 
         public static void TaskSetHeader(MenuItem menuItem)

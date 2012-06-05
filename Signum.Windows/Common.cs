@@ -24,8 +24,61 @@ using System.Windows.Automation;
 
 namespace Signum.Windows
 {
+    public enum AutoHide
+    {
+        Undefined, 
+        Collapsed,
+        Visible, 
+    }
+
     public static class Common
     {
+        public static readonly DependencyProperty AutoHideProperty =
+           DependencyProperty.RegisterAttached("AutoHide", typeof(AutoHide), typeof(Common), new UIPropertyMetadata(AutoHide.Undefined, AutoHidePropertyChanged));
+        public static AutoHide GetAutoHide(DependencyObject obj)
+        {
+            return (AutoHide)obj.GetValue(AutoHideProperty);
+        }
+
+        public static void SetAutoHide(DependencyObject obj, AutoHide value)
+        {
+            obj.SetValue(AutoHideProperty, value);
+        }
+
+        public static void AutoHidePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var fe = d as FrameworkElement;
+
+            if(fe != null && e.NewValue is AutoHide)
+                fe.Loaded+=new RoutedEventHandler(Common_Loaded);
+        }
+
+        static void Common_Loaded(object sender, RoutedEventArgs e)
+        {
+            var fe = (FrameworkElement)sender; 
+
+            fe.Loaded -= Common_Loaded; 
+
+            if(Common.GetAutoHide(fe) == AutoHide.Collapsed)
+                fe.Visibility =  Visibility.Collapsed;
+        }
+
+        public static void VoteVisible(FrameworkElement fe)
+        {
+            foreach (var item in fe.LogicalParents().TakeWhile(a=>GetAutoHide(a) != AutoHide.Visible))
+            {
+                SetAutoHide(item, AutoHide.Visible);
+            }
+        }
+
+        public static void VoteCollapsed(FrameworkElement fe)
+        {
+            foreach (var item in fe.LogicalParents().TakeWhile(a=>GetAutoHide(a) == AutoHide.Undefined))
+            {
+                SetAutoHide(item, AutoHide.Collapsed);
+            }
+        }
+
         public static readonly DependencyProperty MinLabelWidthProperty =
            DependencyProperty.RegisterAttached("MinLabelWidth", typeof(double), typeof(Common), new FrameworkPropertyMetadata(120.0, FrameworkPropertyMetadataOptions.Inherits));
         public static double GetMinLabelWidth(DependencyObject obj)
@@ -267,8 +320,10 @@ namespace Signum.Windows
             RouteTask += TaskSetCollaspeIfNull;
             RouteTask += TaskSetNotNullItemsSource;
             RouteTask += TaskSetAutomationItemStatus;
-
+            RouteTask += TaskSetVoteAutoHide;
+            
             LabelOnlyRouteTask += TaskSetLabelText;
+            LabelOnlyRouteTask += TaskSetVoteAutoHide;
 
             ColumnRouteTask += TaskColumnSetValueProperty;
             ColumnRouteTask += TaskColumnSetLabelText;
@@ -276,7 +331,22 @@ namespace Signum.Windows
             ColumnLabelOnlyRouteTask += TaskColumnSetLabelText;
         }
 
+        static void TaskSetVoteAutoHide(FrameworkElement fe, string route, PropertyRoute context)
+        {
+            if (context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
+            {
+                if(context.IsAllowed())
+                {
+                    VoteVisible(fe);
+                }
+                else
+                {
+                    VoteCollapsed(fe);
+                }
+            }
+        }
 
+        
         static void TaskColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
         {
             bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
@@ -499,6 +569,7 @@ namespace Signum.Windows
             Mouse.OverrideCursor = cursor;
             return new Disposable(() => Mouse.OverrideCursor = null);
         }
+
     }
 
     public delegate void ChangeDataContextHandler(object sender, ChangeDataContextEventArgs e);
