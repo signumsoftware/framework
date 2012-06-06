@@ -157,7 +157,7 @@ namespace Signum.Engine.Disconnected
 
                     export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
 
-                    machine.IsOffline = false;
+                    machine.IsOffline = true;
                     machine.Save();
                 }
                 catch (Exception e)
