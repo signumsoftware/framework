@@ -695,6 +695,11 @@ namespace Signum.Entities
 
             S state = getState(entity);
 
+            return GetMessage(entity, state, showState, index);
+        }
+
+        private string GetMessage(E entity, S state, bool showState, int index)
+        {
             bool? necessary = Necessary(state, index);
 
             if (necessary == null)
@@ -732,6 +737,13 @@ namespace Signum.Entities
         public IEnumerator GetEnumerator() //just to use object initializer
         {
             throw new NotImplementedException();
+        }
+
+        public string PreviewErrors(E entity, S targetState, bool showState)
+        {
+            string result = propertyNames.Select((pn, i) => GetMessage(entity, targetState, showState, i)).NotNull().ToString("\r\n");
+
+            return string.IsNullOrEmpty(result) ? null : result;
         }
     }
 
