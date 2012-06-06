@@ -292,25 +292,24 @@ namespace Signum.Engine.Disconnected
             if (interval == null)
                 return 0;
 
-            using (Transaction tr = new Transaction())
+            using (DisconnectedTools.DisableIdentityRestoreSeed(table))
             {
-                int result;
-
-                using (DisconnectedTools.DisableIdentityRestoreSeed(table))
+                using (Transaction tr = new Transaction())
                 {
                     SqlPreCommandSimple sql = InsertTableScript(table, newDatabase, interval);
 
-                    result = Executor.ExecuteNonQuery(sql);
+                    int result = Executor.ExecuteNonQuery(sql);
+
+
+                    foreach (var rt in table.RelationalTables())
+                    {
+                        SqlPreCommandSimple rsql = InsertRelationalTableScript(table, newDatabase, interval, rt);
+
+                        Executor.ExecuteNonQuery(rsql);
+                    }
+
+                    return tr.Commit(result);
                 }
-
-                foreach (var rt in table.RelationalTables())
-                {
-                    SqlPreCommandSimple sql = InsertRelationalTableScript(table, newDatabase, interval, rt);
-
-                    Executor.ExecuteNonQuery(sql);
-                }
-
-                return tr.Commit(result);
             }
         }
 
