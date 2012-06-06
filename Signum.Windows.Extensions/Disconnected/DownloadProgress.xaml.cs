@@ -114,7 +114,7 @@ namespace Signum.Windows.Disconnected
                     ps.CopyTo(fs);
             }
 
-            MessageBox.Show(Window.GetWindow(this), "You have sucesfully downloaded a local database. \r\nThe application will turn off now.\r\nNext time you start it up, choose LocalDB.", "Download complete", MessageBoxButton.OK);
+            MessageBox.Show(Window.GetWindow(this), "You have successfully downloaded a local database. \r\nThe application will turn off now.\r\nNext time you start it up, choose LocalDB.", "Download complete", MessageBoxButton.OK);
 
             Environment.Exit(0);
         }

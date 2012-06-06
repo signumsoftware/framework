@@ -133,8 +133,7 @@ namespace Signum.Windows.Disconnected
                 }
                 else
                 {
-                    fi.Delete();
-                    MessageBox.Show(Window.GetWindow(this), "You have sucesfully uploaded your local database, you can continue working.", "Upload complete", MessageBoxButton.OK);
+                    MessageBox.Show(Window.GetWindow(this), "You have successfully uploaded your local database, you can continue working.", "Upload complete", MessageBoxButton.OK);
                     Completed = true;
                     pbImporting.Value = 1; 
                     DialogResult = true;
