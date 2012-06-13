@@ -71,7 +71,7 @@ namespace Signum.Entities.Omnibox
 
     public abstract class OmniboxProvider
     {
-        public void AddResults(List<OmniboxResult> results, string rawQuery, List<OmniboxToken> tokens); 
+        public abstract void AddResults(List<OmniboxResult> results, string rawQuery, List<OmniboxToken> tokens); 
     }
 
     public struct OmniboxToken
