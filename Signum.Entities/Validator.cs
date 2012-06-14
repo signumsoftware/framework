@@ -129,6 +129,12 @@ namespace Signum.Entities
 
             return null;
         }
+
+        public void ReplaceValidators(params ValidatorAttribute[] validators)
+        {
+            Validators.Clear();
+            Validators.AddRange(validators); 
+        }
     }
 
     public delegate string PropertyValidationEventHandler(ModifiableEntity sender, PropertyInfo pi);
