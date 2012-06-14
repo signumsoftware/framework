@@ -152,14 +152,12 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
             });
         }
 
-        public static IDisposable DisableIdentityRestoreSeed(Table table)
+        public static IDisposable SaveAndRestoreNextId(Table table)
         {
             int nextId = DisconnectedTools.GetNextId(table);
-            Executor.ExecuteNonQuery("SET IDENTITY_INSERT {0} ON\r\n".Formato(table.Name));
 
             return new Disposable(() =>
             {
-                Executor.ExecuteNonQuery("SET IDENTITY_INSERT {0} OFF\r\n".Formato(table.Name));
                 DisconnectedTools.SetNextId(table, nextId);
             });
         }

@@ -21,6 +21,7 @@ using Signum.Entities.Exceptions;
 using Signum.Engine.Authorization;
 using System.Threading;
 using System.Reflection;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Disconnected
 {
@@ -158,7 +159,8 @@ namespace Signum.Engine.Disconnected
                     export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
 
                     machine.IsOffline = true;
-                    machine.Save();
+                    using (OperationLogic.AllowSave<DisconnectedMachineDN>())
+                        machine.Save();
                 }
                 catch (Exception e)
                 {

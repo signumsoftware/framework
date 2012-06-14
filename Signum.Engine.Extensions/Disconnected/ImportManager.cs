@@ -22,6 +22,7 @@ using Signum.Engine.Authorization;
 using System.Threading;
 using System.Reflection;
 using Signum.Utilities.DataStructures;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Disconnected
 {
@@ -180,7 +181,8 @@ namespace Signum.Engine.Disconnected
                     import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { State = DisconnectedImportState.Completed, Total = s.CalculateTotal() });
 
                     machine.IsOffline = false;
-                    machine.Save();
+                    using (OperationLogic.AllowSave<DisconnectedMachineDN>())
+                        machine.Save();
                 }
                 catch (Exception e)
                 {
@@ -292,23 +294,25 @@ namespace Signum.Engine.Disconnected
             if (interval == null)
                 return 0;
 
-            using (DisconnectedTools.DisableIdentityRestoreSeed(table))
+            using (DisconnectedTools.SaveAndRestoreNextId(table))
             {
                 using (Transaction tr = new Transaction())
                 {
-                    SqlPreCommandSimple sql = InsertTableScript(table, newDatabase, interval);
-
-                    int result = Executor.ExecuteNonQuery(sql);
-
-
-                    foreach (var rt in table.RelationalTables())
+                    using (Administrator.DisableIdentity(table.Name))
                     {
-                        SqlPreCommandSimple rsql = InsertRelationalTableScript(table, newDatabase, interval, rt);
+                        SqlPreCommandSimple sql = InsertTableScript(table, newDatabase, interval);
 
-                        Executor.ExecuteNonQuery(rsql);
+                        int result = Executor.ExecuteNonQuery(sql);
+
+                        foreach (var rt in table.RelationalTables())
+                        {
+                            SqlPreCommandSimple rsql = InsertRelationalTableScript(table, newDatabase, interval, rt);
+
+                            Executor.ExecuteNonQuery(rsql);
+                        }
+
+                        return tr.Commit(result);
                     }
-
-                    return tr.Commit(result);
                 }
             }
         }
