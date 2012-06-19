@@ -22,9 +22,6 @@ namespace Signum.Entities.Omnibox
             return true;
         }
 
-
-
-
         public static OmniboxMatch SubsequencePascal(object value, string identifier, string pattern)
         {
             int[] indices = null;

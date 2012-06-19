@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Entities.Omnibox;
 using Signum.Utilities;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Windows.Omnibox
 {
@@ -48,45 +49,46 @@ namespace Signum.Windows.Omnibox
             {
                 lines.Add(" ");
 
-                bool first = true;
+                QueryToken last = null;
                 if (item.QueryTokenPacks != null)
                 {
                     foreach (var tokenPack in item.QueryTokenPacks)
                     {
-                        if (first)
-                            first = false;
-                        else
+                        if (last != null)
                             lines.Add(".");
 
                         lines.AddRange(OmniboxClient.PackInlines(tokenPack));
+
+                        last = (QueryToken)tokenPack.Value;
                     }
                 }
 
-                if (item.SuggestedQueryToken != null)
+                if (item.QueryToken != last)
                 {
-                    if(!first)
+                    if (last != null)
                         lines.Add(".");
 
-                    lines.Add(new Run(item.SuggestedQueryToken.ToString()) { Foreground = Brushes.Gray });
+                    lines.Add(new Run(item.QueryToken.Key) { Foreground = Brushes.Gray });
                 }
-                else
+
+                if (item.CanFilter.HasText())
                 {
+                    lines.Add(new Run(item.CanFilter) { Foreground = Brushes.Red });
+                }
+                else if (item.Operation != null)
+                {
+                    lines.Add(new Bold(new Run(DynamicQueryOmniboxProvider.ToStringOperation(item.Operation.Value))));
 
-                    if (item.CanFilter.HasText())
-                    {
-                        lines.Add(new Run(item.CanFilter) { Foreground = Brushes.Red });
-                    }
-                    else if (item.Operation != null)
-                    {
-                        lines.Add(DynamicQueryOmniboxProvider.ToStringOperation(item.Operation.Value));
+                    if (item.Value == DynamicQueryOmniboxProvider.UnknownValue)
+                        lines.Add(new Run(Signum.Windows.Extensions.Properties.Resources.Unknown) { Foreground = Brushes.Red });
+                    else if (item.ValuePack != null)
+                        lines.AddRange(OmniboxClient.PackInlines(item.ValuePack));
+                    else if (item.Syntax != null && item.Syntax.Completion == FilterSyntaxCompletion.Complete)
+                        lines.Add(new Bold(new Run(DynamicQueryOmniboxProvider.ToStringValue(item.Value))));
+                    else
+                        lines.Add(new Run(DynamicQueryOmniboxProvider.ToStringValue(item.Value)) { Foreground = Brushes.Gray });
 
-                        if (item.Value == DynamicQueryOmniboxProvider.UnknownValue)
-                            lines.Add(new Run(Signum.Windows.Extensions.Properties.Resources.Unknown) { Foreground = Brushes.Red });
-                        else if (item.ValuePack != null)
-                            lines.AddRange(OmniboxClient.PackInlines(item.ValuePack));
-                        else
-                            lines.Add(DynamicQueryOmniboxProvider.ToStringValue(item.Value));
-                    }
+
                 }
             }
         }

@@ -74,7 +74,7 @@ namespace Signum.Entities.Omnibox
                                         QueryName = match.Value,
                                         QueryNameMatch = match,
                                         Distance = match.Distance,
-                                        Filters = new List<FilterQuery> { new FilterQuery { SuggestedQueryToken = qt} },
+                                        Filters = new List<FilterQuery> { new FilterQuery(0, null, qt, null) },
                                     });
                                 }
                             }
@@ -105,7 +105,9 @@ namespace Signum.Entities.Omnibox
 
             foreach (Tuple<QueryToken, ImmutableStack<OmniboxMatch>> pair in ambiguousTokens)
             {
-                var distance = pair.Item2.Sum(a=>a.Distance);
+                var distance = pair.Item2.Sum(a => a.Distance);
+                var tokenMatches = pair.Item2.Reverse().ToArray();
+                var token = pair.Item1;
 
                 if (syntax.Completion == FilterSyntaxCompletion.Token)
                 {
@@ -113,25 +115,12 @@ namespace Signum.Entities.Omnibox
                     {
                         foreach (var qt in QueryUtils.SubTokens(pair.Item1, queryDescription.Columns))
                         {
-                            result.Add(new FilterQuery
-                            {
-                                Distance = distance,
-                                Syntax = syntax,
-                                QueryToken = pair.Item1,
-                                QueryTokenPacks = pair.Item2.Reverse().ToArray(),
-                                SuggestedQueryToken = qt,
-                            });
+                            result.Add(new FilterQuery(distance, syntax, qt, tokenMatches));
                         }
                     }
                     else
                     {
-                        result.Add(new FilterQuery
-                        {
-                            Distance = distance,
-                            Syntax = syntax,
-                            QueryToken = pair.Item1,
-                            QueryTokenPacks = pair.Item2.Reverse().ToArray()
-                        });
+                        result.Add(new FilterQuery(distance, syntax, token, tokenMatches));
                     }
                 }
                 else
@@ -140,12 +129,8 @@ namespace Signum.Entities.Omnibox
 
                     if (canFilter.HasText())
                     {
-                        result.Add(new FilterQuery
+                        result.Add(new FilterQuery(distance, syntax, token, tokenMatches)
                         {
-                            Distance = distance,
-                            Syntax = syntax,
-                            QueryToken = pair.Item1,
-                            QueryTokenPacks = pair.Item2.Reverse().ToArray(),
                             CanFilter = canFilter,
                         });
                     }
@@ -156,34 +141,40 @@ namespace Signum.Entities.Omnibox
 
                         if (syntax.Completion == FilterSyntaxCompletion.Operation)
                         {
-                            result.Add(new FilterQuery
+                            var suggested = SugestedValues(pair.Item1);
+
+                            if (suggested == null)
                             {
-                                Distance = distance,
-                                Syntax = syntax,
-                                QueryToken = pair.Item1,
-                                QueryTokenPacks = pair.Item2.Reverse().ToArray(),
-                                Operation = operation,
-                            });
+                                result.Add(new FilterQuery(distance, syntax, token, tokenMatches)
+                                {
+                                    Operation = operation,
+                                });
+                            }
+                            else
+                            {
+                                foreach (var item in suggested)
+                                {
+                                    result.Add(new FilterQuery(distance, syntax, token, tokenMatches)
+                                    {
+                                        Operation = operation,
+                                        Value = item.Value
+                                    });
+                                }
+                            }
                         }
                         else
                         {
-                         
                             var values = GetValues(pair.Item1, tokens[operatorIndex + 1]);
 
                             foreach (var value in values)
                             {
-                                result.Add(new FilterQuery
+                                result.Add(new FilterQuery(distance, syntax, token, tokenMatches)
                                 {
-                                    Distance = distance,
-                                    Syntax = syntax,
-                                    QueryToken = pair.Item1,
-                                    QueryTokenPacks = pair.Item2.Reverse().ToArray(),
                                     Operation = operation,
                                     Value = value.Value,
                                     ValuePack = value.Match,
                                 });
                             }
-
                         }
                     }
                 }
@@ -198,6 +189,25 @@ namespace Signum.Entities.Omnibox
         {
             public object Value;
             public OmniboxMatch Match;
+        }
+
+        protected virtual ValueTuple[] SugestedValues(QueryToken queryToken)
+        {
+            var ft = QueryUtils.GetFilterType(queryToken.Type);
+            switch (ft)
+            {
+                case FilterType.Number:
+                case FilterType.DecimalNumber: return new[] { new ValueTuple { Value = 0, Match = null } };
+                case FilterType.String: return new[] { new ValueTuple { Value = "", Match = null } };
+                case FilterType.DateTime: return new[] { new ValueTuple { Value = DateTime.Today, Match = null } };
+                case FilterType.Lite:
+                case FilterType.Embedded: break;
+                case FilterType.Boolean: return new[] { new ValueTuple { Value = true, Match = null }, new ValueTuple { Value = false, Match = null } };
+                case FilterType.Enum: return EnumProxy.GetValues(queryToken.Type.UnNullify()).Select(e => new ValueTuple { Value = e, Match = null }).ToArray();
+                case FilterType.Guid: break;
+            }
+
+            return null;
         }
 
         protected virtual ValueTuple[] GetValues(QueryToken queryToken, OmniboxToken omniboxToken)
@@ -461,6 +471,14 @@ namespace Signum.Entities.Omnibox
 
     public class FilterQuery
     {
+        public FilterQuery(float distance, FilterSyntax syntax, DynamicQuery.QueryToken queryToken, OmniboxMatch[] omniboxMatch)
+        {
+            this.Distance = distance;
+            this.Syntax = syntax;
+            this.QueryToken = queryToken;
+            this.QueryTokenPacks = omniboxMatch;
+        }
+
         public float Distance { get; set; }
         public FilterSyntax Syntax  {get; set;}
 
@@ -474,20 +492,18 @@ namespace Signum.Entities.Omnibox
 
         public override string ToString()
         {
-            string token = ".".Combine(QueryToken.TryCC(q => q.FullKey()), SuggestedQueryToken.TryCC(a => a.Key));
+            string token = QueryToken.TryCC(q => q.FullKey());
 
             if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token)
                 return token;
 
             string oper = DynamicQueryOmniboxProvider.ToStringOperation(Operation.Value);
 
-            if (Syntax.Completion == FilterSyntaxCompletion.Operation)
+            if (Syntax.Completion == FilterSyntaxCompletion.Operation && Value == null)
                 return token + oper;
 
             return token + oper + DynamicQueryOmniboxProvider.ToStringValue(Value);
         }
-
-        public DynamicQuery.QueryToken SuggestedQueryToken { get; set; }
     }
 
     public class FilterSyntax
