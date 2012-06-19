@@ -105,6 +105,8 @@ namespace Signum.Engine.Disconnected
             {
                 Statics.ImportThreadContext(threadContext);
 
+                StartImporting(machine);
+
                 try
                 {
                     string connectionString;
@@ -193,6 +195,8 @@ namespace Signum.Engine.Disconnected
                 finally
                 {
                     runningExports.Remove(import);
+
+                    EndImporting();
                 }
             });
 
@@ -200,6 +204,16 @@ namespace Signum.Engine.Disconnected
             runningExports.Add(import, new RunningImports { Task = task, CancelationSource = cancelationSource });
 
             return import;
+        }
+
+        protected virtual void StartImporting(DisconnectedMachineDN machine)
+        {
+            DisconnectedMachineDN.Current = machine.ToLite();
+        }
+
+        protected virtual void EndImporting()
+        {
+            DisconnectedMachineDN.Current = null;
         }
 
         private void DropDatabaseIfExists(DisconnectedMachineDN machine)

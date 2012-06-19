@@ -24,19 +24,6 @@ namespace Signum.Windows.Disconnected
     {
         public static Func<IDisconnectedTransferServer> GetTransferServer;
 
-        public static Lite<DisconnectedMachineDN> CurrentDisconnectedMachine
-        {
-            get
-            {
-                if (GetCurrentDisconnectedMachine == null)
-                    throw new InvalidOperationException("DisconnectedClient.GetCurrentDisconnectedMachine is not set");
-
-                return GetCurrentDisconnectedMachine();
-            }
-        }
-
-        public static Func<Lite<DisconnectedMachineDN>> GetCurrentDisconnectedMachine;
-
         public static string DownloadBackupFile = "LocalDB.Download.bak";
         public static string UploadBackupFile = "LocalDB.Upload.bak";
         public static string DatabaseFile = "LocalDB.mdf";
@@ -71,7 +58,7 @@ namespace Signum.Windows.Disconnected
 
                 Lite<DisconnectedMachineDN> current = null; 
 
-                GetCurrentDisconnectedMachine = () =>
+                DisconnectedMachineDN.CurrentVariable.ValueFactory = () =>
                 {
                     if (current != null)
                         return current;
@@ -113,7 +100,7 @@ namespace Signum.Windows.Disconnected
                         return !entity.IsNew;
 
                     //Upload.Subset
-                    return !entity.IsNew && !((IDisconnectedEntity)entity).DisconnectedMachine.Is(CurrentDisconnectedMachine);
+                    return !entity.IsNew && !((IDisconnectedEntity)entity).DisconnectedMachine.Is(DisconnectedMachineDN.Current);
                 }
                 else
                 {

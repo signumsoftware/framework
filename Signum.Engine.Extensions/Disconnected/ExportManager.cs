@@ -78,6 +78,8 @@ namespace Signum.Engine.Disconnected
             {
                 Statics.ImportThreadContext(threadContext);
 
+                StartExporting(machine);
+
                 try
                 {
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Lock = l })))
@@ -171,6 +173,8 @@ namespace Signum.Engine.Disconnected
                 finally
                 {
                     runningExports.Remove(export);
+
+                    EndExporting();
                 }
             });
 
@@ -180,6 +184,16 @@ namespace Signum.Engine.Disconnected
             return export;
         }
 
+
+        protected virtual void StartExporting(DisconnectedMachineDN machine)
+        {
+            DisconnectedMachineDN.Current = machine.ToLite();
+        }
+
+        protected virtual void EndExporting()
+        {
+            DisconnectedMachineDN.Current = null;
+        }
 
         readonly MethodInfo miUnsafeLock;
         protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : IdentifiableEntity, IDisconnectedEntity, new()

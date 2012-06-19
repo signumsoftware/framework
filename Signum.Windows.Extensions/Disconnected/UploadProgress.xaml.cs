@@ -34,7 +34,7 @@ namespace Signum.Windows.Disconnected
             this.Loaded += new RoutedEventHandler(DownloadDatabase_Loaded);
             this.Closing += new System.ComponentModel.CancelEventHandler(UploadProgress_Closing);
 
-            this.machine = DisconnectedClient.CurrentDisconnectedMachine;
+            var a = DisconnectedMachineDN.Current;
         }
 
         void UploadProgress_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -53,8 +53,6 @@ namespace Signum.Windows.Disconnected
 
         Lite<DisconnectedImportDN> currentLite;
 
-        Lite<DisconnectedMachineDN> machine;
-
         IDisconnectedTransferServer transferServer = DisconnectedClient.GetTransferServer();
 
         DispatcherTimer timer = new DispatcherTimer();
@@ -63,7 +61,7 @@ namespace Signum.Windows.Disconnected
 
         void DownloadDatabase_Loaded(object sender, RoutedEventArgs e)
         {
-            estimation = Server.Return((IDisconnectedServer ds) => ds.GetUploadEstimation(machine));
+            estimation = Server.Return((IDisconnectedServer ds) => ds.GetUploadEstimation(DisconnectedMachineDN.Current));
 
             UploadDatabase().ContinueWith(cl =>
             {
@@ -100,7 +98,7 @@ namespace Signum.Windows.Disconnected
                         FileName = fi.Name,
                         Length = fi.Length,
                         Stream = ps,
-                        Machine = DisconnectedClient.CurrentDisconnectedMachine,
+                        Machine = DisconnectedMachineDN.Current,
                         User = UserDN.Current.ToLite(),
                     });
 

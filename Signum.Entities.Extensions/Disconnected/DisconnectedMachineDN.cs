@@ -53,6 +53,14 @@ namespace Signum.Entities.Disconnected
         {
             return ToStringExpression.Evaluate(this);
         }
+
+        public static readonly SessionVariable<Lite<DisconnectedMachineDN>> CurrentVariable = 
+            Statics.SessionVariable<Lite<DisconnectedMachineDN>>("disconectedMachine");
+        public static Lite<DisconnectedMachineDN> Current
+        {
+            get { return CurrentVariable.Value; }
+            set { CurrentVariable.Value = value; }
+        }
     }
 
     public enum DisconnectedMachineOperations
