@@ -212,6 +212,16 @@
       <DependentUpon>SMTPConfiguration.xaml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\SMTPConfigurationClient.cs" />
+    <Compile Include="Omnibox\DynamicQueryOmniboxTemplate.xaml.cs">
+      <DependentUpon>DynamicQueryOmniboxTemplate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Omnibox\EntityOmniboxTemplate.xaml.cs">
+      <DependentUpon>EntityOmniboxTemplate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Omnibox\OmniboxAutocomplete.xaml.cs">
+      <DependentUpon>OmniboxAutocomplete.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Omnibox\OmniboxClient.cs" />
     <Compile Include="Operations\ConstructFromMenuItem.cs" />
     <Compile Include="Operations\OperationServer.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
@@ -508,6 +518,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Mailing\SMTPConfiguration.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Omnibox\DynamicQueryOmniboxTemplate.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Omnibox\EntityOmniboxTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Omnibox\OmniboxAutocomplete.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
