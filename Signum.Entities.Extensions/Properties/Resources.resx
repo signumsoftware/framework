@@ -312,4 +312,13 @@
   <data name="ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero" xml:space="preserve">
     <value>{0} should be -1 (all), empty (default), or a number greater than zero</value>
   </data>
+  <data name="Yes" xml:space="preserve">
+    <value>yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>[Not found]</value>
+  </data>
 </root>

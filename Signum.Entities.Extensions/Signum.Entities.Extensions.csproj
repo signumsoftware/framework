@@ -126,6 +126,10 @@
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />
     <Compile Include="Mailing\SMTPConfiguration.cs" />
+    <Compile Include="Omnibox\DynamicQueryOmniboxProvider.cs" />
+    <Compile Include="Omnibox\EntityOmniboxProvider.cs" />
+    <Compile Include="Omnibox\OmniboxParser.cs" />
+    <Compile Include="Omnibox\OmniboxUtils.cs" />
     <Compile Include="Operations\IOperationServer.cs" />
     <Compile Include="Operations\OperationDN.cs" />
     <Compile Include="Operations\OperationLogDN.cs" />
