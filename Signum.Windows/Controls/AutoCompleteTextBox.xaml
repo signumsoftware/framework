@@ -11,11 +11,13 @@
              PreviewKeyDown="txtBox_PreviewKeyDown"
              PreviewKeyUp="txtBox_PreviewKeyUp"/>
         <Popup x:Name="pop" 
-               PlacementTarget="{Binding ElementName = txtBox}" 
+               PlacementTarget="{Binding ElementName=txtBox}" 
                Placement="Bottom" 
-               Width="{Binding ActualWidth, ElementName=txtBox}"
+               MinWidth="{Binding ActualWidth, ElementName=txtBox}"
                PopupAnimation="Fade">
-            <ListBox x:Name="lstBox" SelectionMode="Single" SelectionChanged="lstBox_SelectionChanged"/>
+            <ListBox x:Name="lstBox" SelectionMode="Single" SelectionChanged="lstBox_SelectionChanged" 
+                     ItemTemplate="{Binding ItemTemplate, ElementName=me}" 
+                     ItemTemplateSelector="{Binding ItemTemplateSelector, ElementName=me}"  />
         </Popup>
     </StackPanel>
 </UserControl>

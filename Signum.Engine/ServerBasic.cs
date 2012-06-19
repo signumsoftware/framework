@@ -111,6 +111,13 @@ namespace Signum.Services
         }
 
         [SuggestUserInterface]
+        public bool Exists(Type type, int id)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                  () => Database.Exists(type, id));
+        }
+
+        [SuggestUserInterface]
         public virtual Dictionary<Type, TypeDN> ServerTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -122,13 +129,6 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => TimeZoneManager.Now);
-        }
-
-        [SuggestUserInterface]
-        public virtual List<Lite<TypeDN>> TypesAssignableFrom(Type type)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () => TypeLogic.TypesAssignableFrom(type));
         }
 
         [SuggestUserInterface]
@@ -189,6 +189,6 @@ namespace Signum.Services
              () => DynamicQueryManager.Current.BatchExecute(requests));
         }
         #endregion
-
+       
     }
 }

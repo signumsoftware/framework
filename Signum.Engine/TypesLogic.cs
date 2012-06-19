@@ -63,8 +63,7 @@ namespace Signum.Engine
             current.TypeToDN = dict;
             current.DnToType = dict.Inverse();
 
-            QueryUtils.ResolveType = TypeLogic.TryGetType;
-            QueryUtils.TypeCleanName = TypeLogic.GetCleanName;
+            Lite.SetTypeNameAndResolveType(TypeLogic.GetCleanName, TypeLogic.GetType);
 
             //current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
             //current.NameToType = current.TypeToName.Inverse("CleanTypeNames");
@@ -122,34 +121,6 @@ namespace Signum.Engine
             return lista;
         }
 
-        public static List<Lite<TypeDN>> TypesAssignableFrom(Type type)
-        {
-            return Schema.Current.TypeToDN.Where(a => type.IsAssignableFrom(a.Key)).Select(a => a.Value.ToLite()).ToList();
-        }
-
-        public static Lite ParseLite(Type staticType, string liteKey)
-        {
-            return Lite.ParseLite(staticType, liteKey, TryGetType);
-        }
-
-        public static Lite<T> ParseLite<T>(string liteKey) where T : class, IIdentifiable
-        {
-            return (Lite<T>)Lite.ParseLite(typeof(T), liteKey, TryGetType);
-        }
-
-        public static string TryParseLite(Type staticType, string liteKey, out Lite lite)
-        {
-            return Lite.TryParseLite(staticType, liteKey, TryGetType, out lite);
-        }
-
-        public static string TryParseLite<T>(Type staticType, string liteKey, out Lite<T> lite) where T : class, IIdentifiable
-        {
-            Lite untypedLite;
-            var result = Lite.TryParseLite(staticType, liteKey, TryGetType, out untypedLite);
-            lite = (Lite<T>)untypedLite;
-            return result;
-        }
-
         public static Type GetType(string cleanName)
         {
             return Schema.Current.NameToType.GetOrThrow(cleanName, "Type {0} not found in the schema");
@@ -168,22 +139,6 @@ namespace Signum.Engine
         public static string TryGetCleanName(Type type)
         {
             return Schema.Current.TypeToName.TryGetC(type);
-        }
-
-        public static string Key(this Lite lite)
-        {
-            if (lite == null)
-                return null;
-
-            return lite.Key(rt => TypeToName.GetOrThrow(rt, "The type {0} is not registered in the Schema"));
-        }
-
-        public static string KeyLong(this Lite lite)
-        {
-            if (lite == null)
-                return null;
-
-            return lite.KeyLong(rt => TypeToName.GetOrThrow(rt, "The type {0} is not registered in the Schema"));
         }
     }
 }

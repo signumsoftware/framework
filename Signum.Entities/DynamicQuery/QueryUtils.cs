@@ -14,9 +14,6 @@ namespace Signum.Entities.DynamicQuery
 {
     public static class QueryUtils
     {
-        public static Func<string, Type> ResolveType;
-        public static Func<Type, string> TypeCleanName; 
-
         public static string GetQueryUniqueKey(object queryKey)
         {
             return

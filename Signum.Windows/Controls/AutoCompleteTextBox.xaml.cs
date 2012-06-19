@@ -55,6 +55,22 @@ namespace Signum.Windows
             set { SetValue(AllowFreeTextProperty, value); }
         }
 
+        public static readonly DependencyProperty ItemTemplateProperty =
+            DependencyProperty.Register("ItemTemplate", typeof(DataTemplate), typeof(AutoCompleteTextBox), new UIPropertyMetadata(null));
+        public DataTemplate ItemTemplate
+        {
+            get { return (DataTemplate)GetValue(ItemTemplateProperty); }
+            set { SetValue(ItemTemplateProperty, value); }
+        }
+
+        public static readonly DependencyProperty ItemTemplateSelectorProperty =
+           DependencyProperty.Register("ItemTemplateSelector", typeof(DataTemplateSelector), typeof(AutoCompleteTextBox), new UIPropertyMetadata(null));
+        public DataTemplateSelector ItemTemplateSelector
+        {
+            get { return (DataTemplateSelector)GetValue(ItemTemplateSelectorProperty); }
+            set { SetValue(ItemTemplateSelectorProperty, value); }
+        }
+
         DispatcherTimer delayTimer = new DispatcherTimer(DispatcherPriority.Normal);
 
         public TimeSpan Delay
@@ -71,7 +87,7 @@ namespace Signum.Windows
             delayTimer.Tick += new EventHandler(delayTimer_Tick);
         }
 
-        public void delayTimer_Tick(object sender, EventArgs e)
+        internal void delayTimer_Tick(object sender, EventArgs e)
         {
             delayTimer.Stop();
 
@@ -165,19 +181,25 @@ namespace Signum.Windows
 
         bool IsTextChangingKey(Key key)
         {
-            if (key == Key.Back || key == Key.Delete)
+            if (key == Key.Space || key == Key.Delete || key == Key.Back)
                 return true;
-            else
+
+            if (Key.A <= key && key <= Key.Z)
+                return true;
+
+            if (Key.D0 <= key && key <= Key.D9)
+                return true;
             
-            {
-                if (Key.NumPad0 <= key && key <= Key.NumPad9)
-                    key += ((int)Key.D0 - (int)Key.NumPad0);
+            if (Key.NumPad0 <= key && key <= Key.NumPad9)
+                return true;
 
-                KeyConverter conv = new KeyConverter();
-                string keyString = (string)conv.ConvertTo(key, typeof(string));
+            if (Key.Multiply <= key && key <= Key.Divide)
+                return true;
 
-                return keyString.Length == 1;
-            }
+            if (Key.OemSemicolon <= key && key <= Key.Oem102)
+                return true;
+
+            return false;
         }
 
         public void Close(CloseReason reason)
@@ -251,6 +273,12 @@ namespace Signum.Windows
             txtBox.SelectAll();
             txtBox.Focus();
             Mouse.Capture(this, CaptureMode.SubTree); 
+        }
+
+        public void SelectEnd()
+        {
+            txtBox.Focus();
+            txtBox.Select(txtBox.Text.Length, 0);
         }
 
         public string Text

@@ -319,16 +319,6 @@ namespace Signum.Windows
             return ServerTypes[type].CleanName;
         }
 
-        public static Lite ParseLite(Type liteType, string liteKey)
-        {
-            return Lite.ParseLite(liteType, liteKey, TryGetType);
-        }
-
-        public static string TryParseLite(Type liteType, string liteKey, out Lite result)
-        {
-            return Lite.TryParseLite(liteType, liteKey, TryGetType, out result);
-        }
-
         public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
             lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id)));
