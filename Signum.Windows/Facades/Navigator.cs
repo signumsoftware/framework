@@ -230,7 +230,7 @@ namespace Signum.Windows
             return Manager.SelectTypes(parent, implementations);
         }
 
-        internal static bool IsFindable(object queryName)
+        public static bool IsFindable(object queryName)
         {
             return Manager.IsFindable(queryName);
         }
@@ -296,6 +296,7 @@ namespace Signum.Windows
         {
             return (EmbeddedEntitySettings<T>)Manager.EntitySettings[typeof(T)];
         }
+
     }
 
     public class NavigationManager
@@ -310,6 +311,8 @@ namespace Signum.Windows
         {
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
+
+            Lite.SetTypeNameAndResolveType(Server.GetCleanName, Server.TryGetType);
         }
 
         public event Action Initializing;
@@ -544,7 +547,8 @@ namespace Signum.Windows
 
             foreach (var f in filters)
             {
-                f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
+                if (f.Token == null && f.Path.HasText())
+                    f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
                 f.RefreshRealValue();
             }
         }

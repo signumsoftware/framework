@@ -257,21 +257,22 @@ namespace Signum.Entities
 
         static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
 
-        public static Lite ParseLite(Type staticType, string liteKey, Func<string, Type> resolveType)
+        public static Lite ParseLite(Type staticType, string liteKey)
         {
             Lite result;
-            string error = TryParseLite(staticType, liteKey, resolveType, out result);
+            string error = TryParseLite(staticType, liteKey, out result);
             if (error == null)
-            {
                 return result;
-            }
             else
-            {
                 throw new FormatException(error);
-            }
         }
 
-        public static string TryParseLite(Type staticType, string liteKey, Func<string, Type> resolveType, out Lite result)
+        public static Lite<T> ParseLite<T>(string liteKey) where T : class, IIdentifiable
+        {
+            return (Lite<T>)Lite.ParseLite(typeof(T), liteKey);
+        }
+
+        public static string TryParseLite(Type staticType, string liteKey, out Lite result)
         {
             result = null;
             if (string.IsNullOrEmpty(liteKey))
@@ -281,7 +282,7 @@ namespace Signum.Entities
             if (!match.Success)
                 return Resources.InvalidFormat;
 
-            Type type = resolveType(match.Groups["type"].Value);
+            Type type = ResolveType(match.Groups["type"].Value);
             if (type == null)
                 return Resources.TypeNotFound;
 
@@ -295,14 +296,31 @@ namespace Signum.Entities
             return null;
         }
 
-        public string Key(Func<Type, string> typeName)
+        public static string TryParseLite<T>(Type staticType, string liteKey, out Lite<T> lite) where T : class, IIdentifiable
         {
-            return "{0};{1}".Formato(typeName(this.RuntimeType), this.Id);
+            Lite untypedLite;
+            var result = Lite.TryParseLite(staticType, liteKey, out untypedLite);
+            lite = (Lite<T>)untypedLite;
+            return result;
         }
 
-        public string KeyLong(Func<Type, string> typeName)
+        public static Func<Type, string> UniqueTypeName { get; private set; }
+        public static Func<string, Type> ResolveType { get; private set; }
+
+        public static void SetTypeNameAndResolveType(Func<Type, string> uniqueTypeName, Func<string, Type> resolveType)
         {
-            return "{0};{1};{2}".Formato(typeName(this.RuntimeType), this.Id, this.ToString());
+            Lite.UniqueTypeName = uniqueTypeName;
+            Lite.ResolveType = resolveType;
+        }
+
+        public string Key()
+        {
+            return "{0};{1}".Formato(UniqueTypeName(this.RuntimeType), this.Id);
+        }
+
+        public string KeyLong()
+        {
+            return "{0};{1};{2}".Formato(UniqueTypeName(this.RuntimeType), this.Id, this.ToString());
         }
 
         public int CompareTo(Lite other)
