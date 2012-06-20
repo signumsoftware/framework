@@ -194,7 +194,7 @@ namespace Signum.Web.Chart
                 var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
                 Type entitiesType = Lite.Extract(entityColumn.Type);
 
-                Lite lite = Lite.ParseLite(entitiesType, entity);
+                Lite lite = Lite.Parse(entitiesType, entity);
                 return Redirect(Navigator.ViewRoute(lite));
             }
         }
