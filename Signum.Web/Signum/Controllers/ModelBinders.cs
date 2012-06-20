@@ -35,7 +35,7 @@ namespace Signum.Web.Controllers
                  if (int.TryParse(value, out id))
                      return Lite.Create(cleanType, id);
 
-                 return Lite.ParseLite(cleanType, value);
+                 return Lite.Parse(cleanType, value);
              }
              return base.BindModel(controllerContext, bindingContext);
         }

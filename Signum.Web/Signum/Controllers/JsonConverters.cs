@@ -25,7 +25,7 @@ namespace Signum.Web
             if (type == typeof(Lite))
             {
                 string liteKey = (string)dictionary["Key"];
-                return Lite.ParseLite(typeof(IdentifiableEntity), liteKey);
+                return Lite.Parse(typeof(IdentifiableEntity), liteKey);
             }
 
             return null;

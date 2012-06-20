@@ -257,7 +257,7 @@ namespace Signum.Entities
 
         static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
 
-        public static Lite ParseLite(Type staticType, string liteKey)
+        public static Lite Parse(Type staticType, string liteKey)
         {
             Lite result;
             string error = TryParseLite(staticType, liteKey, out result);
@@ -267,9 +267,9 @@ namespace Signum.Entities
                 throw new FormatException(error);
         }
 
-        public static Lite<T> ParseLite<T>(string liteKey) where T : class, IIdentifiable
+        public static Lite<T> Parse<T>(string liteKey) where T : class, IIdentifiable
         {
-            return (Lite<T>)Lite.ParseLite(typeof(T), liteKey);
+            return (Lite<T>)Lite.Parse(typeof(T), liteKey);
         }
 
         public static string TryParseLite(Type staticType, string liteKey, out Lite result)
@@ -296,7 +296,7 @@ namespace Signum.Entities
             return null;
         }
 
-        public static string TryParseLite<T>(Type staticType, string liteKey, out Lite<T> lite) where T : class, IIdentifiable
+        public static string TryParse<T>(Type staticType, string liteKey, out Lite<T> lite) where T : class, IIdentifiable
         {
             Lite untypedLite;
             var result = Lite.TryParseLite(staticType, liteKey, out untypedLite);
