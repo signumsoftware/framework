@@ -21,7 +21,7 @@ namespace Signum.Windows
             public Action Finally;
         }
 
-        static  List<RequestTuple> tuples = new List<RequestTuple>(); 
+        static List<RequestTuple> tuples = new List<RequestTuple>(); 
 
         public static void Enqueue(BaseQueryRequest request, Action<object> onResult, Action @finally)
         {
