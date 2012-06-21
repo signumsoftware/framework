@@ -240,4 +240,7 @@
   <data name="Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
+  <data name="Chart" xml:space="preserve">
+    <value>Chart</value>
+  </data>
 </root>

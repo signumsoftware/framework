@@ -20,7 +20,7 @@ namespace Signum.Windows
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                queryNames = Server.Return((IDynamicQueryServer s) => s.GetQueryNames().ToDictionary(a => QueryUtils.GetQueryUniqueKey(a)));
+                queryNames = Server.Return((IDynamicQueryServer s) => s.GetQueryNames()).ToDictionary(a => QueryUtils.GetQueryUniqueKey(a));
             }
         }
 

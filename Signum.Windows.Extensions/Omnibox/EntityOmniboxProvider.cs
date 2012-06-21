@@ -2,47 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Signum.Entities.Omnibox;
+using System.Windows.Documents;
+using System.Windows.Media;
 using Signum.Utilities;
 
 namespace Signum.Windows.Omnibox
 {
-    /// <summary>
-    /// Interaction logic for EntityOmniboxTemplate.xaml
-    /// </summary>
-    public partial class EntityOmniboxTemplate : UserControl
+    public class EntityOmniboxProvider : OmniboxProvider<EntityOmniboxResult>
     {
-        public EntityOmniboxTemplate()
+        public override OmniboxResultGenerator<EntityOmniboxResult> CreateGenerator()
         {
-            InitializeComponent();
-
-            this.DataContextChanged += new DependencyPropertyChangedEventHandler(EntityOmniboxTemplate_DataContextChanged);
+            return new EntityOmniboxResultGenenerator(Server.ServerTypes.Keys);
         }
 
-        void EntityOmniboxTemplate_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        public override void RenderLines(EntityOmniboxResult result, InlineCollection lines)
         {
-            var result = e.NewValue as EntityOmniboxResult;
-
-            var lines = textBlock.Inlines;
-
-            lines.Clear();
-
-            if (result == null)
-                return;
-
-
-            lines.Add("({0:0.0})".Formato(result.Distance));
-
-            lines.AddRange(OmniboxClient.PackInlines(result.TypeMatch));
+            lines.AddMatch(result.TypeMatch);
 
             lines.Add(" ");
 
@@ -78,10 +54,18 @@ namespace Signum.Windows.Omnibox
                     {
                         lines.Add(result.Lite.Id.ToString());
                         lines.Add(": ");
-                        lines.AddRange(OmniboxClient.PackInlines(result.ToStrMatch));
+                        lines.AddMatch(result.ToStrMatch);
                     }
                 }
             }
+
+            lines.Add(new Run(" ({0})".Formato(Extensions.Properties.Resources.View)) { Foreground = Brushes.DodgerBlue });
+        }
+
+        public override void OnSelected(EntityOmniboxResult result)
+        {
+            if (result.Lite != null)
+                Navigator.NavigateUntyped(result.Lite);
         }
     }
 }

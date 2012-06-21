@@ -26,11 +26,8 @@ namespace Signum.Windows.Omnibox
         {
             InitializeComponent();
 
-            var tdts = new TypeDataTemplateSelector();
-            tdts.Templates.AddRange(OmniboxClient.Templates);
-            this.autoCompleteTb.ItemTemplateSelector = tdts;
+            this.autoCompleteTb.ItemTemplate = Fluent.GetDataTemplate(()=>new OmniboxTemplate());
             this.autoCompleteTb.Delay = TimeSpan.FromMilliseconds(100);
-            
         }
 
         private IEnumerable AutoCompleteTextBox_AutoCompleting(string arg)

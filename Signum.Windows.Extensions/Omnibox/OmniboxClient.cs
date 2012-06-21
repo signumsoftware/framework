@@ -15,137 +15,76 @@ using Signum.Utilities;
 
 namespace Signum.Windows.Omnibox
 {
-    public class OmniboxClient
+    public static class OmniboxClient
     {
         public static Polymorphic<Action<OmniboxResult>> OnResultSelected = new Polymorphic<Action<OmniboxResult>>();
+        public static Polymorphic<Action<OmniboxResult, InlineCollection>> RenderLines = new Polymorphic<Action<OmniboxResult, InlineCollection>>();
 
-        public static List<DataTemplate> Templates = new List<DataTemplate>();
-
-        public static void Start(bool entities, bool dynamicQueries, params OmniboxProvider[] providers)
+        public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (entities)
-                {
-                    OmniboxParser.Providers.Add(new WindowEntityOmniboxProvider());
-                    RegisterTemplate(typeof(EntityOmniboxResult), () => new EntityOmniboxTemplate());
-                    OnResultSelected.Register((EntityOmniboxResult r) =>
-                    {
-                        if (r.Lite != null)
-                            Navigator.NavigateUntyped(r.Lite);
-                    });
-                }
-
-                if (dynamicQueries)
-                {
-                    OmniboxParser.Providers.Add(new WindowDynamicQueryOmniboxProvider());
-                    RegisterTemplate(typeof(DynamicQueryOmniboxResult), () => new DynamicQueryOmniboxTemplate());
-                    OnResultSelected.Register((DynamicQueryOmniboxResult r) =>
-                    {
-                        Navigator.Explore(new ExploreOptions(r.QueryNameMatch.Value)
-                        {
-                            FilterOptions = r.Filters.Select(f => 
-                            {
-                                FilterType ft = QueryUtils.GetFilterType(f.QueryToken.Type);
-
-                                var operation = f.Operation;
-                                if (operation != null && !QueryUtils.GetFilterOperations(ft).Contains(f.Operation.Value))
-                                {
-                                    MessageBox.Show("Operation {0} not compatible with {1}".Formato(operation, f.QueryToken.ToString()));
-                                    operation = FilterOperation.EqualTo;
-                                }
-
-                                object value = f.Value;
-                                if (value == WindowDynamicQueryOmniboxProvider.UnknownValue)
-                                {
-                                    MessageBox.Show("Unknown value for {0}".Formato(f.QueryToken.ToString()));
-                                    value = null;
-                                }
-                                else
-                                {
-                                    if(value is Lite)
-                                        Server.FillToStr((Lite)value);
-                                }
-
-                                return new FilterOption
-                                {
-                                    Token = f.QueryToken,
-                                    Operation = operation ?? FilterOperation.EqualTo,
-                                    Value = value,
-                                };
-                            }).ToList(),
-                            SearchOnLoad = true,
-                        });
-                    });
-                }
-
-                OmniboxParser.Providers.AddRange(providers);
+                OmniboxParser.Manager = new WindowsOmniboxManager();
             }
         }
 
-        internal static IEnumerable<Inline> PackInlines(OmniboxMatch distancePack)
+        public static void Register<T>(this OmniboxProvider<T> provider) where T : OmniboxResult
         {
-            return distancePack.BoldSpans().Select(t =>
-                t.Item2 ? (Inline)new Bold(new Run(t.Item1)) : new Run(t.Item1));
+            OmniboxParser.Generators.Add(provider.CreateGenerator());
+            OnResultSelected.Register(new Action<T>(provider.OnSelected));
+            RenderLines.Register(new Action<T,InlineCollection>(provider.RenderLines));
         }
 
-        public static void RegisterTemplate(Type dataType, Expression<Func<FrameworkElement>> controlFactory)
+        public static void AddMatch(this InlineCollection lines, OmniboxMatch match)
         {
-            DataTemplate dt = Fluent.GetDataTemplate(controlFactory);
-            dt.DataType = dataType;
-            Templates.Add(dt);
-        }
+            foreach (var item in match.BoldSpans())
+            {
+                var run = new Run(item.Item1);
 
-    }
-
-    public class WindowDynamicQueryOmniboxProvider : DynamicQueryOmniboxProvider
-    {
-        public WindowDynamicQueryOmniboxProvider()
-            : base(QueryClient.queryNames.Values)
-        {
-        }
-
-        protected override bool Allowed(object queryName)
-        {
-            return Navigator.IsFindable(queryName);
-        }
-
-        protected override QueryDescription GetDescription(object queryName)
-        {
-            return Navigator.Manager.GetQueryDescription(queryName); 
-        }
-
-        protected override List<Lite> AutoComplete(Type cleanType, Implementations implementations, string subString)
-        {
-            return Server.Return((IBaseServer bs) => bs.FindLiteLike(cleanType, implementations, subString, 5));
+                lines.Add(item.Item2 ? (Inline)new Bold(run) : run);
+            }
         }
     }
 
-    public class WindowEntityOmniboxProvider : EntityOmniboxProvider
+    public abstract class OmniboxProvider<T> where T : OmniboxResult
     {
-        public WindowEntityOmniboxProvider()
-            : base(Server.ServerTypes.Keys)
-        {
-        }
+        public abstract OmniboxResultGenerator<T> CreateGenerator();
 
-        protected override bool Allowed(Type type)
+        public abstract void RenderLines(T result, InlineCollection lines);
+
+        public abstract void OnSelected(T result);
+    }
+
+    public class WindowsOmniboxManager : OmniboxManager
+    {
+        public override bool AllowedType(Type type)
         {
             return Navigator.IsViewable(type, true);
         }
 
-        protected override Lite RetrieveLite(Type type, int id)
+        public override Lite RetrieveLite(Type type, int id)
         {
             if (!Server.Return((IBaseServer bs) => bs.Exists(type, id)))
                 return null;
             return Server.FillToStr(Lite.Create(type, id));
         }
 
-        protected override List<Lite> AutoComplete(Type type, string subString)
+        public override bool AllowedQuery(object queryName)
+        {
+            return Navigator.IsFindable(queryName);
+        }
+
+        public override QueryDescription GetDescription(object queryName)
+        {
+            return Navigator.Manager.GetQueryDescription(queryName);
+        }
+
+        public override List<Lite> AutoComplete(Type cleanType, Implementations implementations, string subString, int count)
         {
             if (string.IsNullOrEmpty(subString))
                 return new List<Lite>();
 
-            return Server.Return((IBaseServer bs) => bs.FindLiteLike(type, null, subString, 5));
+            return Server.Return((IBaseServer bs) => bs.FindLiteLike(cleanType, implementations, subString, 5));
         }
     }
 }

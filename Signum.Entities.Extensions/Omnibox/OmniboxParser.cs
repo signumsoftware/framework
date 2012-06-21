@@ -4,18 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities.Reflection;
 
 namespace Signum.Entities.Omnibox
 {
     public static class OmniboxParser
     {
-        public static List<OmniboxProvider> Providers = new List<OmniboxProvider>();
+        static OmniboxManager manager;
+
+        public static OmniboxManager Manager
+        {
+            get
+            {
+                if (manager == null) 
+                    throw new InvalidOperationException("OmniboxParse.Manager is not set");
+                return manager;
+            }
+
+            set { manager = value; }
+        }
+
+        public static List<IOmniboxResultGenerator> Generators = new List<IOmniboxResultGenerator>();
 
         static readonly Regex tokenizer = new Regex(
 @"(?<space>\s+)|
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
 (?<number>[+-]?\d+(\.\d+)?)|
-(?<string>("".*?""|\'.*?\'))|
+(?<string>("".*?(""|$)|\'.*?(\'|$)))|
 (?<dot>\.)|
 (?<semicolon>;)|
 (?<comparer>(==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=))", 
@@ -39,10 +55,12 @@ namespace Signum.Entities.Omnibox
 
             tokens.Sort(a => a.Index);
 
+            var tokenPattern = new string(tokens.Select(t => Char(t.Type)).ToArray());
+
             List<OmniboxResult> result = new List<OmniboxResult>();
-            foreach (var provider in Providers)
+            foreach (var generator in Generators)
             {
-                provider.AddResults(result, omniboxQuery, tokens);
+                result.AddRange(generator.GetResults(omniboxQuery, tokens, tokenPattern));
             }
 
             result.Sort(a => a.Distance);
@@ -59,6 +77,39 @@ namespace Signum.Entities.Omnibox
                 tokens.Add(new OmniboxToken(type, group.Index, group.Value));
             }
         }
+
+        static char Char(OmniboxTokenType omniboxTokenType)
+        {
+            switch (omniboxTokenType)
+            {
+                case OmniboxTokenType.Identifier: return 'I';
+                case OmniboxTokenType.Dot: return '.';
+                case OmniboxTokenType.Semicolon: return ';';
+                case OmniboxTokenType.Comparer: return '=';
+                case OmniboxTokenType.Number: return 'N';
+                case OmniboxTokenType.String: return 'S';
+                default: return '?';
+            }
+        }
+
+
+    }
+
+    public abstract class OmniboxManager
+    {
+        public abstract bool AllowedType(Type type);
+
+        public abstract bool AllowedQuery(object queryName);
+        public abstract QueryDescription GetDescription(object queryName);
+
+        public abstract Lite RetrieveLite(Type type, int id);
+
+        public abstract List<Lite> AutoComplete(Type cleanType, Implementations implementations, string subString, int count);
+
+        internal string CleanQueryName(object queryName)
+        {
+            return (queryName is Type ? Reflector.CleanTypeName((Type)queryName) : queryName.ToString());
+        }
     }
 
     public abstract class OmniboxResult
@@ -67,9 +118,19 @@ namespace Signum.Entities.Omnibox
 
     }
 
-    public abstract class OmniboxProvider
+    public interface IOmniboxResultGenerator
     {
-        public abstract void AddResults(List<OmniboxResult> results, string rawQuery, List<OmniboxToken> tokens); 
+        IEnumerable<OmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern); 
+    }
+
+    public abstract class OmniboxResultGenerator<T> : IOmniboxResultGenerator where T : OmniboxResult
+    {
+        public abstract IEnumerable<T> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern);
+
+        IEnumerable<OmniboxResult> IOmniboxResultGenerator.GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
+        {
+            return GetResults(rawQuery, tokens, tokenPattern);
+        }
     }
 
     public struct OmniboxToken

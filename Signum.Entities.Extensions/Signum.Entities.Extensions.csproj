@@ -103,6 +103,9 @@
     <Compile Include="Cache\CachePermissions.cs" />
     <Compile Include="Chart\AggregateToken.cs" />
     <Compile Include="Chart\ChartColor.cs" />
+    <Compile Include="Chart\ChartOmniboxResultGenerator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Chart\ChartPermissions.cs" />
     <Compile Include="Chart\ChartToken.cs" />
     <Compile Include="Chart\ChartRequest.cs" />
@@ -126,8 +129,10 @@
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />
     <Compile Include="Mailing\SMTPConfiguration.cs" />
-    <Compile Include="Omnibox\DynamicQueryOmniboxProvider.cs" />
-    <Compile Include="Omnibox\EntityOmniboxProvider.cs" />
+    <Compile Include="Chart\UserChartOmniboxResultGenerator.cs" />
+    <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
+    <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />
+    <Compile Include="Omnibox\EntityOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\OmniboxParser.cs" />
     <Compile Include="Omnibox\OmniboxUtils.cs" />
     <Compile Include="Operations\IOperationServer.cs" />

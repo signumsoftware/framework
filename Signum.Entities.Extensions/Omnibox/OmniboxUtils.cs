@@ -113,7 +113,7 @@ namespace Signum.Entities.Omnibox
 
         public static string CleanCommas(string str)
         {
-            return str.Substring(1, str.Length - 2);
+            return str.Trim('\'', '"');;
         }
     }
 
