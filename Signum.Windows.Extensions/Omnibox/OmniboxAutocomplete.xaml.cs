@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Entities.Omnibox;
 using System.Collections;
 using Signum.Utilities;
+using System.Threading;
 
 namespace Signum.Windows.Omnibox
 {
@@ -30,9 +31,9 @@ namespace Signum.Windows.Omnibox
             this.autoCompleteTb.Delay = TimeSpan.FromMilliseconds(100);
         }
 
-        private IEnumerable AutoCompleteTextBox_AutoCompleting(string arg)
+        private IEnumerable AutoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
         {
-            return OmniboxParser.Results(arg);
+            return OmniboxParser.Results(arg, ct);
         }
 
         private void autoCompleteTb_Closed(object sender, CloseEventArgs e)

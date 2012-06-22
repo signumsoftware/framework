@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
+using System.Threading;
 
 namespace Signum.Entities.Omnibox
 {
@@ -38,12 +39,17 @@ namespace Signum.Entities.Omnibox
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace);
 
 
-        public static List<OmniboxResult> Results(string omniboxQuery)
+        public static List<OmniboxResult> Results(string omniboxQuery, CancellationToken ct)
         {
+            List<OmniboxResult> result = new List<OmniboxResult>();
+
             List<OmniboxToken> tokens = new List<OmniboxToken>();
 
             foreach (Match m in tokenizer.Matches(omniboxQuery))
             {
+                if (ct.IsCancellationRequested)
+                    return result;
+
                 AddTokens(tokens, m, "ident", OmniboxTokenType.Identifier);
                 AddTokens(tokens, m, "dot", OmniboxTokenType.Dot);
                 AddTokens(tokens, m, "semicolon", OmniboxTokenType.Semicolon);
@@ -57,9 +63,11 @@ namespace Signum.Entities.Omnibox
 
             var tokenPattern = new string(tokens.Select(t => Char(t.Type)).ToArray());
 
-            List<OmniboxResult> result = new List<OmniboxResult>();
             foreach (var generator in Generators)
             {
+                if (ct.IsCancellationRequested)
+                    return result;
+
                 result.AddRange(generator.GetResults(omniboxQuery, tokens, tokenPattern));
             }
 
