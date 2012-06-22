@@ -14,6 +14,7 @@ using Signum.Utilities;
 using System.Windows.Automation.Peers;
 using System.Collections.Generic;
 using System.Windows.Automation.Provider;
+using System.Threading.Tasks;
 
 namespace Signum.Windows
 {
@@ -28,7 +29,7 @@ namespace Signum.Windows
             remove { RemoveHandler(ClosedEvent, value); }
         }
 
-        public event Func<string, IEnumerable> AutoCompleting;
+        public event Func<string, CancellationToken, IEnumerable> AutoCompleting;
 
         public static readonly DependencyProperty SelectedItemProperty =
             DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (s, o) => ((AutoCompleteTextBox)s).txtBox.Text = o.NewValue.TryToString()));
@@ -87,6 +88,8 @@ namespace Signum.Windows
             delayTimer.Tick += new EventHandler(delayTimer_Tick);
         }
 
+        CancellationTokenSource source;
+
         internal void delayTimer_Tick(object sender, EventArgs e)
         {
             delayTimer.Stop();
@@ -94,18 +97,24 @@ namespace Signum.Windows
             if (AutoCompleting == null) 
                 throw new NullReferenceException("SeachMethod cannot be null.");
 
-            IEnumerable res = AutoCompleting(txtBox.Text);
+            string text = txtBox.Text;
 
-            lstBox.ItemsSource = res;
-            if (lstBox.Items.Count > 0)
+            source = new CancellationTokenSource();
+
+            var task = Task.Factory.StartNew<IEnumerable>(()=>AutoCompleting(text, source.Token), source.Token);
+            task.ContinueWith(res =>
             {
-                lstBox.SelectedIndex = -1;
-                pop.IsOpen = true;
-            }
-            else
-            {
-                pop.IsOpen = false;
-            }
+                lstBox.ItemsSource = res.Result;
+                if (lstBox.Items.Count > 0)
+                {
+                    lstBox.SelectedIndex = -1;
+                    pop.IsOpen = true;
+                }
+                else
+                {
+                    pop.IsOpen = false;
+                }
+            }, source.Token, TaskContinuationOptions.NotOnCanceled, TaskScheduler.FromCurrentSynchronizationContext()); 
         }
 
         void MoveDown()
@@ -255,6 +264,11 @@ namespace Signum.Windows
                 lstBox.ItemsSource = null;
                 return;
             }
+
+            var s = source;
+
+            if (s != null)
+                s.Cancel();
 
             delayTimer.Start(); 
         }
