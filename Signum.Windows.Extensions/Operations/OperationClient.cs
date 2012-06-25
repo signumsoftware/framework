@@ -340,8 +340,12 @@ namespace Signum.Windows.Operations
             }
             else
             {
-                if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), k => OperationClient.GetImage(k), k => OperationClient.GetText(k),
-                    out selected, Resources.ConstructorSelector, Resources.PleaseSelectAConstructor, win))
+                if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), out selected,
+                    elementIcon: k => OperationClient.GetImage(k),
+                    elementText: k => OperationClient.GetText(k),
+                    title: Resources.ConstructorSelector,
+                    message: Resources.PleaseSelectAConstructor,
+                    owner: win))
                     return null;
             }
 

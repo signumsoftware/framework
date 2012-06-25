@@ -84,7 +84,7 @@ namespace Signum.Engine.Exceptions
             }
             catch { }
 
-            ex.Version = Schema.Current.MainAssembly.TryCC(a => a.GetName().Version.ToString()); 
+            ex.Version = Schema.Current.Version.ToString(); 
 
             using (Schema.Current.GlobalMode())
             using (Transaction tr = Transaction.ForceNew())

@@ -118,7 +118,7 @@ namespace Signum.Entities.SMS
         }
 
         static Expression<Func<SMSTemplateDN, bool>> IsActiveNowExpression =
-            (mt) => mt.active && DateTime.Now.IsInInterval(mt.StartDate, mt.EndDate);
+            (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
         { 
             return IsActiveNowExpression.Evaluate(this);

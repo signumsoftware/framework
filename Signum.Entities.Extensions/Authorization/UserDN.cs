@@ -18,11 +18,6 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class UserDN : Entity, IEmailOwnerDN
     {
-        public UserDN()
-        {
-            PasswordHash = Guid.NewGuid().ToString();
-        }
-
         public static Func<string, string> ValidatePassword = p =>
         {
             if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)

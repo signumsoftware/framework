@@ -132,6 +132,9 @@ namespace Signum.Windows.Chart
                 Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
+
+            if (autoSet!= null)
+                SetCurrent(autoSet);
         }
 
         static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
@@ -146,14 +149,21 @@ namespace Signum.Windows.Chart
                 MenuItem b = (MenuItem)e.OriginalSource;
                 Lite<UserChartDN> userChart = (Lite<UserChartDN>)b.Tag;
 
-                CurrentUserChart = userChart.Retrieve();
+                var uc = userChart.Retrieve();
 
-                this.ChartRequest = UserChartDN.ToRequest(CurrentUserChart);
-
-                this.ChartWindow.UpdateFiltersOrdersUserInterface(); 
-
-                this.ChartWindow.GenerateChart();
+                SetCurrent(uc);
             }
+        }
+
+        private void SetCurrent(UserChartDN uc)
+        {
+            CurrentUserChart = uc;
+
+            this.ChartRequest = UserChartDN.ToRequest(CurrentUserChart);
+
+            this.ChartWindow.UpdateFiltersOrdersUserInterface();
+
+            this.ChartWindow.GenerateChart();
         }
 
         private void New_Clicked(object sender, RoutedEventArgs e)
@@ -202,6 +212,16 @@ namespace Signum.Windows.Chart
 
                 Initialize();
             }
+        }
+
+
+        [ThreadStatic]
+        static UserChartDN autoSet;
+        internal static IDisposable AutoSet(UserChartDN uc)
+        {
+            var old = autoSet;
+            autoSet = uc;
+            return new Disposable(() => autoSet = old);
         }
     }
 }

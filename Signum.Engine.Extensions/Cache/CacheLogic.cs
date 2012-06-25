@@ -565,7 +565,7 @@ namespace Signum.Engine.Cache
 
         static Color GetColor(Type type, Func<Type, bool> cacheHint)
         {
-            if (Reflector.ExtractEnumProxy(type) != null)
+            if (type.IsEnumProxy())
                 return Color.Red;
 
             var ct = CacheLogic.GetCacheType(type);

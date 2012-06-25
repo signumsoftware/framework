@@ -109,6 +109,9 @@ namespace Signum.Windows.UserQueries
                 Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", notNullAndEditable));
+
+            if (autoSet != null)
+                SetUserQuery(autoSet);
         }
 
         static IValueConverter notNullAndEditable = ConverterFactory.New((UserQueryDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
@@ -124,12 +127,17 @@ namespace Signum.Windows.UserQueries
 
                 var uq = userQuery.Retrieve();
 
-                UserQueryClient.ToSearchControl(uq, SearchControl);
-
-                CurrentUserQuery = uq;
-
-                SearchControl.Search();
+                SetUserQuery(uq);
             }
+        }
+
+        private void SetUserQuery(UserQueryDN uq)
+        {
+            UserQueryClient.ToSearchControl(uq, SearchControl);
+
+            CurrentUserQuery = uq;
+
+            SearchControl.Search();
         }
 
         private void New_Clicked(object sender, RoutedEventArgs e)
@@ -178,6 +186,16 @@ namespace Signum.Windows.UserQueries
 
                 Initialize();
             }
+        }
+
+
+        [ThreadStatic]
+        static UserQueryDN autoSet;
+        internal static IDisposable AutoSet(UserQueryDN uq)
+        {
+            var old = autoSet;
+            autoSet = uq;
+            return new Disposable(() => autoSet = old); 
         }
     }
 }

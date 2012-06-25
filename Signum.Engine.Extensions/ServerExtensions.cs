@@ -38,14 +38,15 @@ namespace Signum.Services
         ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
-        protected override T Return<T>(MethodBase mi, string description, Func<T> function)
+        protected override T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
         {
             try
             {
                 using (ScopeSessionFactory.OverrideSession(session))
                 using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
                 {
-                    FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
+                    if (checkLogin)
+                        FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
 
                     return function();
                 }
@@ -57,7 +58,7 @@ namespace Signum.Services
                     el.ControllerName = GetType().Name;
                     el.ActionName = mi.Name;
                     el.QueryString = description;
-                    el.Version = Schema.Current.MainAssembly.GetName().Version.ToString();
+                    el.Version = Schema.Current.Version.ToString();
                 });
                 throw new FaultException(e.Message);
             }
@@ -70,42 +71,27 @@ namespace Signum.Services
         #region ILoginServer Members
         public virtual void Login(string username, string passwordHash)
         {
-            try
+            Execute(MethodInfo.GetCurrentMethod(), null, () =>
             {
-                using (ScopeSessionFactory.OverrideSession(session))
-                {
-                    UserDN.Current = AuthLogic.Login(username, passwordHash);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
-            }
+                UserDN.Current = AuthLogic.Login(username, passwordHash);
+            }, checkLogin: false);
         }
 
-
-        public virtual void ChagePassword(string username, string passwordHash, string newPasswordHash)
+        public virtual void ChagePassword(Lite<UserDN> user, string passwordHash, string newPasswordHash)
         {
             Execute(MethodInfo.GetCurrentMethod(), () =>
             {
-                AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
+                AuthLogic.ChangePassword(user, passwordHash, newPasswordHash);
             });
         }
 
 
         public virtual void LoginChagePassword(string username, string passwordHash, string newPasswordHash)
         {
-            try
+            Execute(MethodInfo.GetCurrentMethod(), null, () =>
             {
-                using (ScopeSessionFactory.OverrideSession(session))
-                {
-                    UserDN.Current = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
-            }
+                UserDN.Current = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
+            }, checkLogin: false);
         }
 
         public virtual void Logout()
@@ -449,6 +435,5 @@ namespace Signum.Services
                 ProfilerLogic.ProfilerEntries(entries)); 
         }
         #endregion
-
     }
 }

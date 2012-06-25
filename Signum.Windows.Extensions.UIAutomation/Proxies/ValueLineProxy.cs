@@ -159,7 +159,9 @@ namespace Signum.Windows.UIAutomation
 
         public Lite LiteValue
         {
-            get { return string.IsNullOrEmpty(Element.Current.HelpText) ? null : TypeLogic.ParseLite(Route == null ? typeof(IdentifiableEntity) : Reflector.ExtractLite(Route.Type), Element.Current.HelpText); }
+            get { return 
+                string.IsNullOrEmpty(Element.Current.HelpText) ? null : 
+                Lite.Parse(Route == null ? typeof(IdentifiableEntity) : Lite.Extract(Route.Type), Element.Current.HelpText); }
             set
             {
                 if (!FastSelect(value))

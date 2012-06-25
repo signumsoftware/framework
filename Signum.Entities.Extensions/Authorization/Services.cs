@@ -19,7 +19,7 @@ namespace Signum.Services
         void LoginChagePassword(string username, string passwordHash, string newPasswordHash);
 
         [OperationContract, NetDataContract]
-        void ChagePassword(string username, string passwordHash, string newPasswordHash);
+        void ChagePassword(Lite<UserDN> user, string passwordHash, string newPasswordHash);
 
         [OperationContract(IsTerminating = true), NetDataContract]
         void Logout();

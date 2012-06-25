@@ -10,6 +10,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Windows.Authorization;
 using Signum.Entities.Authorization;
+using Signum.Windows.Omnibox;
 
 namespace Signum.Windows.UserQueries
 {
@@ -20,9 +21,8 @@ namespace Signum.Windows.UserQueries
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryClient.Start();
-                Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Default));
+                Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Default) { View = _ => new UserQuery() });
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
-                    
             }
         }
 

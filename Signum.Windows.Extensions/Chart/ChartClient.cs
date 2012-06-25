@@ -57,7 +57,7 @@ namespace Signum.Windows.Chart
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            Header = "Chart";
+            Header = Signum.Windows.Extensions.Properties.Resources.Chart;
             Icon = ExtensionsImageLoader.GetImageSortName("charts/chartIcon.png").ToSmallImage();
         }
 

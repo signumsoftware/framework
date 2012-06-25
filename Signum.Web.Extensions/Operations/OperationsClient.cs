@@ -50,6 +50,66 @@ namespace Signum.Web.Operations
         {
             Manager.Settings.AddRange(settings, s => s.Key, s => s, "EntitySettings");
         }
+
+
+        public static ActionResult DefaultExecuteResult(ControllerBase controller, IdentifiableEntity entity, string prefix)
+        {
+            if (prefix.HasText())
+            {
+                controller.ViewData[ViewDataKeys.WriteSFInfo] = true;
+                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
+                return controller.PopupOpen(new ViewSaveOptions(tc));
+            }
+            else
+            {
+                var request = controller.ControllerContext.RequestContext.HttpContext.Request;
+
+                string newUrl = Navigator.ViewRoute(entity);
+                if (request.IsAjaxRequest())
+                {
+                    if (request.UrlReferrer.AbsolutePath.Contains(newUrl))
+                        return Navigator.NormalControl(controller, entity);
+                    else
+                        return JsonAction.Redirect(newUrl);
+                }
+                else
+                {
+                    if (request.UrlReferrer.AbsolutePath.Contains(newUrl))
+                        return Navigator.View(controller, entity);
+                    else
+                        return new RedirectResult(newUrl);
+                }
+            }
+        }
+
+        public static ActionResult DefaultConstructResult(ControllerBase controller, IdentifiableEntity entity, string prefix)
+        {
+            if (prefix.HasText())
+            {
+                controller.ViewData[ViewDataKeys.WriteSFInfo] = true;
+                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
+                return controller.PopupOpen(new ViewSaveOptions(tc));
+            }
+            else //NormalWindow
+            {
+                var request = controller.ControllerContext.RequestContext.HttpContext.Request;
+
+                if (request.IsAjaxRequest())
+                {
+                    if (entity.IsNew)
+                        return Navigator.NormalControl(controller, entity);
+                    else
+                        return JsonAction.Redirect(Navigator.ViewRoute(entity));
+                }
+                else
+                {
+                    if (entity.IsNew)
+                        return Navigator.View(controller, entity);
+                    else
+                        return new RedirectResult(Navigator.ViewRoute(entity));
+                }
+            }
+        }
     }
 
     public class OperationManager

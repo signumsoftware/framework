@@ -51,7 +51,7 @@ namespace Signum.Engine.Authorization
                     new SessionLogDN
                     {
                         User = user.ToLite(),
-                        SessionStart = DateTime.Now.TrimToSeconds(),
+                        SessionStart = TimeZoneManager.Now.TrimToSeconds(),
                         UserHostAddress = userHostAddress,
                         UserAgent = userAgent
                     }.Save();
@@ -73,7 +73,7 @@ namespace Signum.Engine.Authorization
 
                 if (log != null && log.SessionEnd == null)
                 {
-                    log.SessionEnd = timeOut.HasValue ? DateTime.Now.Subtract(timeOut.Value).TrimToSeconds() : DateTime.Now.TrimToSeconds();
+                    log.SessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
                     log.SessionTimeOut = timeOut.HasValue;
                     log.Save();
                 }

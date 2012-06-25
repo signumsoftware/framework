@@ -280,4 +280,13 @@
   <data name="TheTextForTheSMSMessageExceedsTheLengthLimit" xml:space="preserve">
     <value>The text for the SMS message exceeds the length limit</value>
   </data>
+  <data name="NotAllowedToSave0WhileOffline" xml:space="preserve">
+    <value>Not allowed to save {0} while offline</value>
+  </data>
+  <data name="NotAllowedToModifyExisting0WhileOffline" xml:space="preserve">
+    <value>Not allowed to modify existing {0} while offline</value>
+  </data>
+  <data name="The0WithId12IsLockedBy3" xml:space="preserve">
+    <value>The {0} with Id {1} ({2}) is locked by {3}</value>
+  </data>
 </root>

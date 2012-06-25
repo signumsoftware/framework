@@ -41,7 +41,7 @@ namespace Signum.Web.Chart
             var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
             var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+            Type entitiesType = Lite.Extract(entityColumn.Type);
             Implementations implementations = entityColumn.Implementations;
             
             return OpenChartRequest(request, 
@@ -133,7 +133,7 @@ namespace Signum.Web.Chart
             var querySettings = Navigator.QuerySettings(request.QueryName);
 
             var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+            Type entitiesType = Lite.Extract(entityColumn.Type);
             Implementations implementations = entityColumn.Implementations;
 
             ViewData[ViewDataKeys.Results] = resultTable;
@@ -192,9 +192,9 @@ namespace Signum.Web.Chart
                 var querySettings = Navigator.QuerySettings(chartRequest.QueryName);
 
                 var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-                Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+                Type entitiesType = Lite.Extract(entityColumn.Type);
 
-                Lite lite = TypeLogic.ParseLite(entitiesType, entity);
+                Lite lite = Lite.Parse(entitiesType, entity);
                 return Redirect(Navigator.ViewRoute(lite));
             }
         }
@@ -272,7 +272,7 @@ namespace Signum.Web.Chart
             var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
             var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+            Type entitiesType = Lite.Extract(entityColumn.Type);
             Implementations implementations = entityColumn.Implementations;
 
             return OpenChartRequest(request,

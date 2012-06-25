@@ -187,7 +187,9 @@ namespace Signum.Web.Auth
                 user = context.Value;
             }
 
-            AuthLogic.ChangePassword(user.UserName,Security.EncodePassword( form[UserMapping.OldPasswordKey]), Security.EncodePassword(form[UserMapping.NewPasswordKey]));
+            AuthLogic.ChangePassword(user.ToLite(),
+                Security.EncodePassword(form[UserMapping.OldPasswordKey]), 
+                Security.EncodePassword(form[UserMapping.NewPasswordKey]));
             Login(user.UserName, form[UserMapping.NewPasswordKey], false, null);
 
             return RedirectToAction("ChangePasswordSuccess");
@@ -407,7 +409,7 @@ namespace Signum.Web.Auth
 
                 HttpCookie cookie = new HttpCookie(AuthClient.CookieName, ticketText)
                 {
-                    Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
+                    Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
                 };
 
                 System.Web.HttpContext.Current.Response.Cookies.Add(cookie);
@@ -475,7 +477,7 @@ namespace Signum.Web.Auth
 
                     System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(AuthClient.CookieName, ticketText)
                     {
-                        Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
+                        Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
                     });
 
                     AddUserSession(user);
@@ -486,7 +488,7 @@ namespace Signum.Web.Auth
                     //Remove cookie
                     HttpCookie cookie = new HttpCookie(AuthClient.CookieName)
                     {
-                        Expires = DateTime.Now.AddDays(-10) // or any other time in the past
+                        Expires = DateTime.UtcNow.AddDays(-10) // or any other time in the past
                     };
                     System.Web.HttpContext.Current.Response.Cookies.Set(cookie);
 
@@ -536,7 +538,7 @@ namespace Signum.Web.Auth
 
             var authCookie = httpContext.Request.Cookies[AuthClient.CookieName];
             if (authCookie != null && authCookie.Value.HasText())
-                httpContext.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+                httpContext.Response.Cookies[AuthClient.CookieName].Expires = DateTime.UtcNow.AddDays(-10);
 
             httpContext.Session.Abandon();
         }

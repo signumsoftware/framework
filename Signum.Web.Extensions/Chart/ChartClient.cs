@@ -467,7 +467,7 @@ namespace Signum.Web.Chart
             }
             else if (type.IsEnum)
             {
-                var dic = ChartColorLogic.Colors.Value.TryGetC(Reflector.GenerateEnumProxy(type));
+                var dic = ChartColorLogic.Colors.Value.TryGetC(EnumProxy.Generate(type));
 
                 if (color)
                     return p =>

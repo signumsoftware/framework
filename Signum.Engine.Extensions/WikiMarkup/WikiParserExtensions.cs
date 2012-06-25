@@ -70,7 +70,7 @@ namespace Signum.Engine.WikiMarkup
 
         private static string WriteCodeRegions(string result, Dictionary<string, string> codeRegions, WikiSettings settings)
         {
-            result = Regex.Replace(result, @"%%%CODE%(?<guid>.+)%%%", m =>
+            result = Regex.Replace(result, @"%%%CODE%(?<guid>.+?)%%%", m =>
             {
                 var value = codeRegions[m.Groups["guid"].Value];
                 return settings.CodeRegion ?
@@ -84,7 +84,7 @@ namespace Signum.Engine.WikiMarkup
         {
             var regions =  new Dictionary<string, string>();
 
-            var result =  Regex.Replace(content, @"\< *code( lang\ *= *\""(?<lang>.*)\"")? *\>(?<code>.*)\</ *code *\>", m =>
+            var result = Regex.Replace(content, @"< *code( lang *= *""(?<lang>.*?)"")? *\>(?<code>.*?)</ *code *>", m =>
             {
                 var guid = Guid.NewGuid();
                 regions.Add(guid.ToString(), m.Groups["code"].Value);

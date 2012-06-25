@@ -141,8 +141,12 @@ namespace Signum.Windows.Authorization
             Enum value;
             if (SelectorWindow.ShowDialog<Enum>(
                 rules.AvailableConditions.Except(rules.Conditions.Select(a => a.ConditionName)).ToArray(), 
-                null, v => v.NiceToString(), out value, 
-                "New condition", "Select the condition for {0} to add specific authorization rules".Formato(rules.Resource.CleanName), this))
+                out value, 
+                elementIcon: null,
+                elementText: v => v.NiceToString(),
+                title: "New condition", 
+                message: "Select the condition for {0} to add specific authorization rules".Formato(rules.Resource.CleanName), 
+                owner: this))
             {
                 rules.Conditions.Add(new TypeConditionRuleBuilder(value, rules.Allowed.None ? TypeAllowed.Create : TypeAllowed.None)); 
             }

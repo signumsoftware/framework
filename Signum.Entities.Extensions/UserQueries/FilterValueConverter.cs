@@ -330,7 +330,7 @@ namespace Signum.Entities.UserQueries
                 return FilterValueConverter.Continue;
             }
 
-            result = ((Lite)value).Key(QueryUtils.TypeCleanName);
+            result = ((Lite)value).Key();
             return null;
         }
 
@@ -343,7 +343,7 @@ namespace Signum.Entities.UserQueries
             }
 
             Lite lResult;
-            string error = Lite.TryParseLite(Reflector.ExtractLite(type), value, QueryUtils.ResolveType, out lResult);
+            string error = Lite.TryParseLite(Lite.Extract(type), value, out lResult);
 
             if (error == null)
             {
