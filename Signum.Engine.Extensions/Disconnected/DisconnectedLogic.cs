@@ -225,6 +225,12 @@ namespace Signum.Engine.Disconnected
                 set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
             }
 
+            public ICustomExporter Exporter
+            {
+                get { return null; }
+                set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
+            }
+
             public void CreateDefaultImporter()
             {
                 throw new NotImplementedException();
@@ -258,6 +264,7 @@ namespace Signum.Engine.Disconnected
         void Saving(IdentifiableEntity ident);
 
         ICustomImporter Importer { get; set; }
+        ICustomExporter Exporter { get; set; }
     }
 
     public class DisconnectedStrategy<T> : IDisconnectedStrategy where T : IdentifiableEntity
@@ -285,6 +292,8 @@ namespace Signum.Engine.Disconnected
             this.UploadSubset = uploadSubset;
 
             this.Importer = importer;
+
+            this.Exporter = download == Entities.Disconnected.Download.Replace ? new DeleteAndCopyExporter<T>() : new BasicExporter<T>();
         }
 
         public Download Download { get; private set; }
@@ -342,5 +351,6 @@ namespace Signum.Engine.Disconnected
         public bool? DisableForeignKeys { get; set; }
 
         public ICustomImporter Importer { get; set; }
+        public ICustomExporter Exporter { get; set; }
     }
 }

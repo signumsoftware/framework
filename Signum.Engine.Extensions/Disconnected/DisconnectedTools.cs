@@ -74,7 +74,13 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
             Executor.ExecuteNonQuery("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT all".Formato(table.Name.SqlScape()));
         }
 
-        // TSQL Seed madness pseudo code. 
+
+        public static void DeleteTable(string fullTableName)
+        {
+            Executor.ExecuteNonQuery("DELETE FROM {0}".Formato(fullTableName));
+        }
+
+        // TSQL Seed madness pseudo-code. 
         // 
         //int seed = 1; 
         //

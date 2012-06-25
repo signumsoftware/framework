@@ -88,7 +88,8 @@ namespace Signum.Entities.Disconnected
     {
         None,
         All,
-        Subset
+        Subset,
+        Replace,
     }
 
     public enum Upload

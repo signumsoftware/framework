@@ -127,7 +127,7 @@ namespace Signum.Engine.Disconnected
                                 Element = { CopyTable = l }
                             })))
                         {
-                            CopyTable(tuple.Table, tuple.Strategy, newDatabase);
+                            tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabase, machine); 
                         }
                     }
 
@@ -299,16 +299,30 @@ namespace Signum.Engine.Disconnected
             return "{0}.{1}.Export.{2}.bak".Formato(Connector.Current.DatabaseName(), machine.MachineName.ToString(), export.Id);
         }
 
+    }
+
+
+    public interface ICustomExporter
+    {
+        void Export(Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase, DisconnectedMachineDN machine);
+    }
+
+    public class BasicExporter<T> : ICustomExporter where T : IdentifiableEntity
+    {
+        public virtual void Export(Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase, DisconnectedMachineDN machine)
+        {
+            this.CopyTable(table, strategy, newDatabase);
+        }
+
         protected virtual void CopyTable(Table table, IDisconnectedStrategy strategy, Connector newDatabase)
         {
-            var filter = strategy.Download == Download.All ? null : giGetWhere.GetInvoker(strategy.Type)(this, strategy);
+            var filter = strategy.Download == Download.Subset ? GetWhere((DisconnectedStrategy<T>)strategy) : null;
 
             CopyTableBasic(table, newDatabase, filter);
 
             foreach (var rt in table.RelationalTables())
-                CopyTableBasic(rt, newDatabase, filter == null? null: (SqlPreCommandSimple)filter.Clone());
+                CopyTableBasic(rt, newDatabase, filter == null ? null : (SqlPreCommandSimple)filter.Clone());
         }
-
 
         protected virtual int CopyTableBasic(ITable table, Connector newDatabase, SqlPreCommandSimple filter)
         {
@@ -332,7 +346,7 @@ FROM {1} as [table]".Formato(
                 else
                 {
                     RelationalTable rt = (RelationalTable)table;
-                    command += 
+                    command +=
                         "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".Formato(rt.BackReference.ReferenceTable.Name.SqlScape(), rt.BackReference.Name.SqlScape()) +
                         "\r\nWHERE [masterTable].Id in ({0})".Formato(filter.Sql);
                 }
@@ -346,15 +360,28 @@ FROM {1} as [table]".Formato(
             return Executor.ExecuteNonQuery(fullCommand, filter.TryCC(a => a.Parameters));
         }
 
-        static readonly GenericInvoker<Func<ExportManager, IDisconnectedStrategy, SqlPreCommandSimple>> giGetWhere =
-            new GenericInvoker<Func<ExportManager, IDisconnectedStrategy, SqlPreCommandSimple>>((em, ds) =>
-                em.GetWhere<IdentifiableEntity>((DisconnectedStrategy<IdentifiableEntity>)ds));
-
-        protected virtual SqlPreCommandSimple GetWhere<T>(DisconnectedStrategy<T> pair) where T : IdentifiableEntity
+        protected virtual SqlPreCommandSimple GetWhere(DisconnectedStrategy<T> pair)
         {
-            var query = Database.Query<T>().Where(pair.DownloadSubset).Select(a=>a.Id);
+            var query = Database.Query<T>().Where(pair.DownloadSubset).Select(a => a.Id);
 
             return ((DbQueryProvider)query.Provider).GetMainPreCommand(query.Expression);
         }
+    }
+
+    public class DeleteAndCopyExporter<T> : BasicExporter<T> where T : IdentifiableEntity
+    {
+        public override void Export(Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase, DisconnectedMachineDN machine)
+        {
+            this.DeleteTable(table, newDatabase);
+
+            this.CopyTable(table, strategy, newDatabase);
+        }
+
+        private void DeleteTable(Table table, SqlConnector newDatabase)
+        {
+            string fullOuterName = "{0}.dbo.{1}".Formato(newDatabase.DatabaseName().SqlScape(), table.Name.SqlScape());
+
+            DisconnectedTools.DeleteTable(fullOuterName); 
+        } 
     }
 }
