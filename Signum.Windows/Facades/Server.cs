@@ -102,7 +102,7 @@ namespace Signum.Windows
 
             try
             {
-                using (HeavyProfiler.Log("WCFClient", "{0} --> {1}".Formato(typeof(S).TypeName(), typeof(R).TypeName())))
+                using (HeavyProfiler.Log("WCFClient", () => "Return(({0} server)=>{1})".Formato(typeof(S).TypeName(), typeof(R).TypeName())))
                 {
                     return function(server);
                 }
@@ -118,11 +118,14 @@ namespace Signum.Windows
         public static void ExecuteNoRetryOnSessionExpired<S>(Action<S> action)
             where S : class
         {
+            if (current == null)
+                return;
+
             S server = current as S;
             if (server == null)
                 throw new InvalidOperationException("Server {0} does not implement {1}".Formato(server.GetType(), typeof(S)));
 
-            using (HeavyProfiler.Log("WCFClient", "{0}".Formato(typeof(S).TypeName())))
+            using (HeavyProfiler.Log("WCFClient", () => typeof(S).TypeName()))
             {
                 action(server);
             }
@@ -251,7 +254,7 @@ namespace Signum.Windows
             
             if (type.IsLite())
             {
-                Type liteType = Reflector.ExtractLite(type); 
+                Type liteType = Lite.Extract(type); 
                 
                 if(objType.IsLite())
                 {
@@ -290,7 +293,7 @@ namespace Signum.Windows
             }
 
             Type liteType;
-            if (type.IsLite() && (liteType = Reflector.ExtractLite(type)).IsAssignableFrom(objType))
+            if (type.IsLite() && (liteType = Lite.Extract(type)).IsAssignableFrom(objType))
             {
                 return true;
             }
@@ -314,16 +317,6 @@ namespace Signum.Windows
         public static string GetCleanName(Type type)
         {
             return ServerTypes[type].CleanName;
-        }
-
-        public static Lite ParseLite(Type liteType, string liteKey)
-        {
-            return Lite.ParseLite(liteType, liteKey, TryGetType);
-        }
-
-        public static string TryParseLite(Type liteType, string liteKey, out Lite result)
-        {
-            return Lite.TryParseLite(liteType, liteKey, TryGetType, out result);
         }
 
         public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable

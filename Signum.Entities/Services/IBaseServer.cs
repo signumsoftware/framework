@@ -46,10 +46,10 @@ namespace Signum.Services
         DateTime ServerNow();
 
         [OperationContract, NetDataContract]
-        List<Lite<TypeDN>> TypesAssignableFrom(Type type);
+        string GetToStr(Type type, int id);
 
         [OperationContract, NetDataContract]
-        string GetToStr(Type type, int id);
+        bool Exists(Type type, int id);
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]

@@ -17,14 +17,14 @@ namespace Signum.Engine.Linq
         SelectExpression currentSource;
         private ChildProjectionFlattener(){}
 
-        public bool inEntity = false;
+        public bool inMList = false;
 
-        protected override Expression VisitFieldInit(FieldInitExpression fie)
+        protected override Expression VisitMListProjection(MListProjectionExpression mlp)
         {
-            var oldInEntity = inEntity;
-            inEntity = true;
-            var result = base.VisitFieldInit(fie);
-            inEntity = oldInEntity;
+            var oldInEntity = inMList;
+            inMList = true;
+            var result = VisitProjection(mlp.Projection);
+            inMList = oldInEntity;
             return result;
         }
 
@@ -49,7 +49,7 @@ namespace Signum.Engine.Linq
                 Expression projector = this.Visit(proj.Projector);
 
                 if (projector != proj.Projector)
-                    proj = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Token, proj.Type);
+                    proj = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
 
                 currentSource = null;
                 return proj;
@@ -66,9 +66,12 @@ namespace Signum.Engine.Linq
                     Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
                     ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
                     Type projType = proj.UniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(kvpType) : kvpType;
-                    return new ChildProjectionExpression(new ProjectionExpression(
-                            proj.Select, Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, projType),
-                        Expression.Constant(0), inEntity, proj.Type);
+
+                    var childProj = new ProjectionExpression(proj.Select, 
+                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, projType);
+
+                    return new ChildProjectionExpression(childProj,
+                        Expression.Constant(0), inMList, proj.Type, new LookupToken());
 
                 }
                 else
@@ -129,10 +132,12 @@ namespace Signum.Engine.Linq
                     Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
                     ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
                     Type projType = proj.UniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(kvpType) : kvpType;
-                    return new ChildProjectionExpression(new ProjectionExpression(
-                        selectMany,
-                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, projType),
-                        TupleReflection.TupleChainConstructor(columns.Select(a => a.Nullify())), inEntity, proj.Type);
+
+                    var childProj = new ProjectionExpression(selectMany,
+                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, projType);
+
+                    return new ChildProjectionExpression(childProj,
+                        TupleReflection.TupleChainConstructor(columns.Select(a => a.Nullify())), inMList, proj.Type, new LookupToken());
                 }
             }
         }

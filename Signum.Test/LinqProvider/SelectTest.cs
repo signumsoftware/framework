@@ -133,6 +133,32 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectLiteIBDouble()
+        {
+            var query = Database.Query<AlbumDN>()
+                .Select(a => new
+                {
+                    ToStr1 = a.Author.ToLite(),
+                    ToStr2 = a.Author.ToLite()
+                });
+
+            Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
+            query.ToList(); 
+        }
+
+
+        [TestMethod]
+        public void SelectLiteIBDoubleWhere()
+        {
+            var query = Database.Query<AlbumDN>()
+                .Where(a => a.Author.ToLite().ToString().Length > 0)
+                .Select(a => a.Author.ToLite());
+
+            Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
+            query.ToList();
+        }
+
+        [TestMethod]
         public void SelectTypeIBA()
         {
             var list = Database.Query<NoteWithDateDN>()
@@ -241,7 +267,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEntity()
         {
-            var list = Database.Query<AlbumDN>().ToList();
+            var list3 = Database.Query<AlbumDN>().ToList();
         }
 
         [TestMethod]
@@ -341,16 +367,41 @@ namespace Signum.Test.LinqProvider
         {
             var list = (from a in Database.Query<AlbumDN>()
                         select (a.Author is ArtistDN ? ((ArtistDN)a.Author).Name :
-                                                        ((BandDN)a.Author).Name)).ToList(); //Just to full-nominate
+                                                        ((BandDN)a.Author).Name)).ToList();
         }
 
         [TestMethod]
         public void SelectCastIsIBA()
         {
             var list = (from n in Database.Query<NoteWithDateDN>()
-                        select n.Target is ArtistDN ?
-                        ((ArtistDN)n.Target).Name :
-                        ((BandDN)n.Target).Name).ToList(); //Just to full-nominate
+                        select n.Target is ArtistDN ?((ArtistDN)n.Target).Name : ((BandDN)n.Target).Name).ToList(); 
+        }
+
+        [TestMethod]
+        public void SelectCastIsIBADouble()
+        {
+            var query = (from n in Database.Query<NoteWithDateDN>()
+                        select new
+                        {
+                            Name = n.Target is ArtistDN ? ((ArtistDN)n.Target).Name : ((BandDN)n.Target).Name,
+                            FullName = n.Target is ArtistDN ? ((ArtistDN)n.Target).FullName : ((BandDN)n.Target).FullName
+                        });
+
+            Assert.AreEqual(1, query.QueryText().CountRepetitions("ArtistDN"));
+
+            query.ToList();
+        }
+
+        [TestMethod]
+        public void SelectCastIsIBADoubleWhere()
+        {
+            var query = (from n in Database.Query<NoteWithDateDN>()
+                         where (n.Target is ArtistDN ? ((ArtistDN)n.Target).Name : ((BandDN)n.Target).Name).Length > 0
+                         select n.Target is ArtistDN ? ((ArtistDN)n.Target).FullName : ((BandDN)n.Target).FullName);
+
+            Assert.AreEqual(1, query.QueryText().CountRepetitions("ArtistDN"));
+
+            query.ToList();
         }
 
         [TestMethod]
@@ -572,24 +623,6 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectSingleCellWhere()
-        {
-            var list = Database.Query<BandDN>().Where(b => b.Members.OrderBy(a => a.Sex).Select(a => a.Sex).FirstEx() == Sex.Male).Select(a => a.Name).ToList();
-        }
-
-        [TestMethod]
-        public void SelectSingleCellSingle()
-        {
-            var list = Database.Query<BandDN>().Select(b => new
-            {
-                FirstName = b.Members.Select(m => m.Name).FirstEx(),
-                FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
-                SingleName = b.Members.Take(1).Select(m => m.Name).SingleEx(),
-                SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefaultEx(),
-            }).ToList();
-        }
-
-        [TestMethod]
         public void SelectMemoryEntity()
         {
             var artist = Database.Query<ArtistDN>().FirstEx();
@@ -644,6 +677,17 @@ namespace Signum.Test.LinqProvider
         {
             var lists = (from mle in Database.MListQuery((AlbumDN a) => a.Songs)
                          select mle).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListEmbeddedToList()
+        {
+            var lists = (from a in Database.Query<AlbumDN>()
+                         select new
+                         {
+                             a.Name,
+                             Songs = a.Songs.ToList(),
+                         }).ToList();
         }
 
         [TestMethod]

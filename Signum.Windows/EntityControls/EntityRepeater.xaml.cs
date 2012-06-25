@@ -14,6 +14,7 @@ using System.Collections;
 using Signum.Entities;
 using System.Windows.Automation.Peers;
 using Signum.Utilities;
+using System.Linq;
 
 namespace Signum.Windows
 {
@@ -22,6 +23,22 @@ namespace Signum.Windows
     /// </summary>
     public partial class EntityRepeater : EntityListBase
     {
+        public static readonly DependencyProperty VerticalScrollBarVisiblityProperty =
+           DependencyProperty.Register("VerticalScrollBarVisiblity", typeof(ScrollBarVisibility), typeof(EntityRepeater), new UIPropertyMetadata(ScrollBarVisibility.Disabled));
+        public ScrollBarVisibility VerticalScrollBarVisiblity
+        {
+            get { return (ScrollBarVisibility)GetValue(VerticalScrollBarVisiblityProperty); }
+            set { SetValue(VerticalScrollBarVisiblityProperty, value); }
+        }
+
+        public static readonly DependencyProperty HorizontalScrollBarVisibilityProperty =
+            DependencyProperty.Register("HorizontalScrollBarVisibility", typeof(ScrollBarVisibility), typeof(EntityRepeater), new UIPropertyMetadata(ScrollBarVisibility.Disabled));
+        public ScrollBarVisibility HorizontalScrollBarVisibility
+        {
+            get { return (ScrollBarVisibility)GetValue(HorizontalScrollBarVisibilityProperty); }
+            set { SetValue(HorizontalScrollBarVisibilityProperty, value); }
+        }
+
         public static readonly DependencyProperty IconProperty =
             DependencyProperty.Register("Icon", typeof(ImageSource), typeof(EntityRepeater), new UIPropertyMetadata(null));
         public ImageSource Icon
@@ -94,6 +111,12 @@ namespace Signum.Windows
         {
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
+            var list = this.itemsControl.Children<Button>().Where(a => a.Name == "btCreate").ToList();
+
+            var vis = this.CanRemove().ToVisibility();
+
+            foreach (var item in list)
+                item.Visibility = vis;
         }
 
         protected override bool CanRemove()
@@ -101,14 +124,10 @@ namespace Signum.Windows
             return Remove && !Common.GetIsReadOnly(this);
         }
 
-        //private void Grid_Initialized(object sender, EventArgs e)
-        //{
-        //    Grid grid = (Grid)sender;
-
-        //    PropertyRoute tc = Common.GetTypeContext(grid);
-
-        //    Common.SetTypeContext(grid, tc.Add("Item"));
-        //}
+        private void btRemove_Loaded(object sender, RoutedEventArgs e)
+        {
+            ((Button)sender).Visibility = this.CanRemove().ToVisibility();
+        }
     }
 
     [StyleTypedPropertyAttribute(Property = "ItemContainerStyle", StyleTargetType = typeof(ContentControl))]

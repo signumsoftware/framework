@@ -39,6 +39,27 @@ namespace Signum.Utilities
                    select new Tuple<T, Match>(s, m);
         }
 
+        public static bool Contains(this Capture larger, Capture smaller)
+        {
+            return
+                larger.Index <= smaller.Index &&
+               (smaller.Index + smaller.Length) <= (larger.Index + larger.Length);
+        }
+
+        public static IEnumerable<Capture> Captures(this Match match)
+        {
+            return match.Captures.Cast<Capture>();
+        }
+
+        public static IEnumerable<Capture> Captures(this Group match)
+        {
+            return match.Captures.Cast<Capture>();
+        }
+
+        public static IEnumerable<Group> Groups(this Match match)
+        {
+            return match.Groups.Cast<Group>();
+        }
 
         public static T MostSimilar<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string pattern)
         {

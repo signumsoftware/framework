@@ -20,14 +20,16 @@ namespace Signum.Engine.Linq
 
         string CleanCommandText();
 
+        SqlPreCommandSimple MainPreCommand();
+
         object Execute();
     }
 
     interface IChildProjection
     {
-        ProjectionToken Name { get; }
+        LookupToken Token { get; }
 
-        void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever);
+        void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever);
 
         SqlPreCommandSimple PreCommand();
 
@@ -37,14 +39,14 @@ namespace Signum.Engine.Linq
     
     class EagerChildProjection<K, V>: IChildProjection
     {
-        public ProjectionToken Name { get; set; }
+        public LookupToken Token { get; set; }
 
         public string CommandText { get; set; }
         internal Expression<Func<DbParameter[]>> GetParametersExpression;
         internal Func<DbParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
 
-        public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
+        public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
             using (HeavyProfiler.Log("SQL", command.Sql))
@@ -58,7 +60,7 @@ namespace Signum.Engine.Linq
                 {
                     var lookUp = enumerabe.ToLookup(a => a.Key, a => a.Value);
 
-                    lookups.Add(Name, lookUp);
+                    lookups.Add(Token, lookUp);
                 }
                 catch (SqlTypeException ex)
                 {
@@ -85,16 +87,16 @@ namespace Signum.Engine.Linq
 
     class LazyChildProjection<K, V> : IChildProjection
     {
-        public ProjectionToken Name { get; set; }
+        public LookupToken Token { get; set; }
 
         public string CommandText { get; set; }
         internal Expression<Func<DbParameter[]>> GetParametersExpression;
         internal Func<DbParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
 
-        public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
+        public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
-            Dictionary<K, MList<V>> requests = (Dictionary<K, MList<V>>)lookups.TryGetC(Name);
+            Dictionary<K, MList<V>> requests = (Dictionary<K, MList<V>>)lookups.TryGetC(Token);
 
             if (requests == null)
                 return;
@@ -147,7 +149,7 @@ namespace Signum.Engine.Linq
         internal List<IChildProjection> EagerProjections { get; set; }
         internal List<IChildProjection> LazyChildProjections { get; set; }
 
-        Dictionary<ProjectionToken, IEnumerable> lookups;
+        Dictionary<LookupToken, IEnumerable> lookups;
 
         public string CommandText { get; set; }
         internal Expression<Func<DbParameter[]>> GetParametersExpression;
@@ -163,7 +165,7 @@ namespace Signum.Engine.Linq
                 using (IRetriever retriever = EntityCache.NewRetriever())
                 {
                     if (EagerProjections.Any() || LazyChildProjections.Any())
-                        lookups = new Dictionary<ProjectionToken, IEnumerable>();
+                        lookups = new Dictionary<LookupToken, IEnumerable>();
 
                     foreach (var chils in EagerProjections)
                         chils.Fill(lookups, retriever);
@@ -222,7 +224,7 @@ namespace Signum.Engine.Linq
             {
                 SqlPreCommand eager = EagerProjections == null ? null : EagerProjections.Select(cp => cp.PreCommand()).Combine(Spacing.Double);
 
-                SqlPreCommand main = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+                SqlPreCommand main = MainPreCommand();
 
                 SqlPreCommand lazy = LazyChildProjections  == null ? null : LazyChildProjections.Select(cp => cp.PreCommand()).Combine(Spacing.Double);
 
@@ -240,7 +242,11 @@ namespace Signum.Engine.Linq
                 return CommandText;
             }
         }
-        public object DynamiQuery { get; set; }
+
+        public SqlPreCommandSimple MainPreCommand()
+        {
+            return new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+        }
     }
 
     class CommandResult

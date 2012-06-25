@@ -18,14 +18,17 @@
 {
     padding: 5px;
     border-bottom-width: 0px;
+    line-height: 1em;
 }
-.sf-filters-body label
+/*.sf-filters-body > span
 {
-    float: left;
+    vertical-align:top;
+    //float: left;
     padding: 6px 5px;
-}
+}*/
 .sf-filters-body select
 {
+    vertical-align:top;
     padding: 3px 4px;
     margin-top: 1px;
 }
@@ -61,7 +64,9 @@
 .sf-subtokens-expander 
 {
     cursor:pointer;
-    margin: 0 5px;
+    display: inline-block;
+    margin: .5em 5px 0;
+    vertical-align: top;
 }
 .sf-search-ctxmenu
 {

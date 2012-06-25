@@ -101,6 +101,10 @@ namespace Signum.Engine
                         cmd.CommandText = selecctInsertedId;
 
                         object result = cmd.ExecuteScalar();
+
+                        if (result == null || result == DBNull.Value)
+                            return null;
+
                         return result;
                     }
                     else if (cmd.CommandText.EndsWith(selectRowCount))
@@ -112,11 +116,18 @@ namespace Signum.Engine
                         cmd.CommandText = selectRowCount;
 
                         object result = cmd.ExecuteScalar();
+
+                        if (result == null || result == DBNull.Value)
+                            return null;
+
                         return result;
                     }
                     else
                     {
                         object result = cmd.ExecuteScalar();
+
+                        if (result == null || result == DBNull.Value)
+                            return null;
                         return result;
                     }
                 }

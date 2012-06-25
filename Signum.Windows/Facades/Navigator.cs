@@ -230,7 +230,7 @@ namespace Signum.Windows
             return Manager.SelectTypes(parent, implementations);
         }
 
-        internal static bool IsFindable(object queryName)
+        public static bool IsFindable(object queryName)
         {
             return Manager.IsFindable(queryName);
         }
@@ -296,6 +296,7 @@ namespace Signum.Windows
         {
             return (EmbeddedEntitySettings<T>)Manager.EntitySettings[typeof(T)];
         }
+
     }
 
     public class NavigationManager
@@ -310,6 +311,8 @@ namespace Signum.Windows
         {
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
+
+            Lite.SetTypeNameAndResolveType(Server.GetCleanName, Server.TryGetType);
         }
 
         public event Action Initializing;
@@ -544,7 +547,8 @@ namespace Signum.Windows
 
             foreach (var f in filters)
             {
-                f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
+                if (f.Token == null && f.Path.HasText())
+                    f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
                 f.RefreshRealValue();
             }
         }
@@ -639,7 +643,7 @@ namespace Signum.Windows
             Type liteType = null;
             if (entity == null)
             {
-                liteType = Reflector.ExtractLite(entityOrLite.GetType());
+                liteType = Lite.Extract(entityOrLite.GetType());
                 entity = Server.Retrieve((Lite)entityOrLite);
             }
 
@@ -788,8 +792,12 @@ namespace Signum.Windows
                 return implementations[0];
 
             Type sel;
-            if (SelectorWindow.ShowDialog(implementations, t => Navigator.Manager.GetEntityIcon(t, true), 
-                t => t.NiceName(), out sel, Properties.Resources.TypeSelector, Properties.Resources.PleaseSelectAType, parent))
+            if (SelectorWindow.ShowDialog(implementations, out sel,
+                elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
+                elementText: t => t.NiceName(),
+                title: Properties.Resources.TypeSelector,
+                message: Properties.Resources.PleaseSelectAType,
+                owner: parent))
                 return sel;
             return null;
         }

@@ -14,6 +14,7 @@ using Signum.Utilities;
 using System.Windows.Automation.Peers;
 using System.Collections.Generic;
 using System.Windows.Automation.Provider;
+using System.Threading.Tasks;
 
 namespace Signum.Windows
 {
@@ -28,7 +29,7 @@ namespace Signum.Windows
             remove { RemoveHandler(ClosedEvent, value); }
         }
 
-        public event Func<string, IEnumerable> AutoCompleting;
+        public event Func<string, CancellationToken, IEnumerable> AutoCompleting;
 
         public static readonly DependencyProperty SelectedItemProperty =
             DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutoCompleteTextBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (s, o) => ((AutoCompleteTextBox)s).txtBox.Text = o.NewValue.TryToString()));
@@ -55,6 +56,22 @@ namespace Signum.Windows
             set { SetValue(AllowFreeTextProperty, value); }
         }
 
+        public static readonly DependencyProperty ItemTemplateProperty =
+            DependencyProperty.Register("ItemTemplate", typeof(DataTemplate), typeof(AutoCompleteTextBox), new UIPropertyMetadata(null));
+        public DataTemplate ItemTemplate
+        {
+            get { return (DataTemplate)GetValue(ItemTemplateProperty); }
+            set { SetValue(ItemTemplateProperty, value); }
+        }
+
+        public static readonly DependencyProperty ItemTemplateSelectorProperty =
+           DependencyProperty.Register("ItemTemplateSelector", typeof(DataTemplateSelector), typeof(AutoCompleteTextBox), new UIPropertyMetadata(null));
+        public DataTemplateSelector ItemTemplateSelector
+        {
+            get { return (DataTemplateSelector)GetValue(ItemTemplateSelectorProperty); }
+            set { SetValue(ItemTemplateSelectorProperty, value); }
+        }
+
         DispatcherTimer delayTimer = new DispatcherTimer(DispatcherPriority.Normal);
 
         public TimeSpan Delay
@@ -71,25 +88,33 @@ namespace Signum.Windows
             delayTimer.Tick += new EventHandler(delayTimer_Tick);
         }
 
-        public void delayTimer_Tick(object sender, EventArgs e)
+        CancellationTokenSource source;
+
+        internal void delayTimer_Tick(object sender, EventArgs e)
         {
             delayTimer.Stop();
 
             if (AutoCompleting == null) 
                 throw new NullReferenceException("SeachMethod cannot be null.");
 
-            IEnumerable res = AutoCompleting(txtBox.Text);
+            string text = txtBox.Text;
 
-            lstBox.ItemsSource = res;
-            if (lstBox.Items.Count > 0)
+            source = new CancellationTokenSource();
+
+            var task = Task.Factory.StartNew<IEnumerable>(()=>AutoCompleting(text, source.Token), source.Token);
+            task.ContinueWith(res =>
             {
-                lstBox.SelectedIndex = -1;
-                pop.IsOpen = true;
-            }
-            else
-            {
-                pop.IsOpen = false;
-            }
+                lstBox.ItemsSource = res.Result;
+                if (lstBox.Items.Count > 0)
+                {
+                    lstBox.SelectedIndex = -1;
+                    pop.IsOpen = true;
+                }
+                else
+                {
+                    pop.IsOpen = false;
+                }
+            }, source.Token, TaskContinuationOptions.NotOnCanceled, TaskScheduler.FromCurrentSynchronizationContext()); 
         }
 
         void MoveDown()
@@ -165,19 +190,25 @@ namespace Signum.Windows
 
         bool IsTextChangingKey(Key key)
         {
-            if (key == Key.Back || key == Key.Delete)
+            if (key == Key.Space || key == Key.Delete || key == Key.Back)
                 return true;
-            else
+
+            if (Key.A <= key && key <= Key.Z)
+                return true;
+
+            if (Key.D0 <= key && key <= Key.D9)
+                return true;
             
-            {
-                if (Key.NumPad0 <= key && key <= Key.NumPad9)
-                    key += ((int)Key.D0 - (int)Key.NumPad0);
+            if (Key.NumPad0 <= key && key <= Key.NumPad9)
+                return true;
 
-                KeyConverter conv = new KeyConverter();
-                string keyString = (string)conv.ConvertTo(key, typeof(string));
+            if (Key.Multiply <= key && key <= Key.Divide)
+                return true;
 
-                return keyString.Length == 1;
-            }
+            if (Key.OemSemicolon <= key && key <= Key.Oem102)
+                return true;
+
+            return false;
         }
 
         public void Close(CloseReason reason)
@@ -234,6 +265,11 @@ namespace Signum.Windows
                 return;
             }
 
+            var s = source;
+
+            if (s != null)
+                s.Cancel();
+
             delayTimer.Start(); 
         }
 
@@ -251,6 +287,12 @@ namespace Signum.Windows
             txtBox.SelectAll();
             txtBox.Focus();
             Mouse.Capture(this, CaptureMode.SubTree); 
+        }
+
+        public void SelectEnd()
+        {
+            txtBox.Focus();
+            txtBox.Select(txtBox.Text.Length, 0);
         }
 
         public string Text

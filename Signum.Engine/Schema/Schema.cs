@@ -31,7 +31,18 @@ namespace Signum.Engine.Maps
 
         public TimeZoneMode TimeZoneMode { get; set; }
 
-        public Assembly MainAssembly { get; set; }
+        Version version;
+        public Version Version
+        {
+            get
+            {
+                if (version == null)
+                    throw new InvalidOperationException("Schema.Version is not set");
+
+                return version; 
+            }
+            set { this.version = value; }
+        }
 
         public SchemaSettings Settings { get; private set; }
 
@@ -227,14 +238,14 @@ namespace Signum.Engine.Maps
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
-        internal SqlPreCommand SynchronizationScript(string schemaName)
+        internal SqlPreCommand SynchronizationScript(string schemaName, bool interactive = true)
         {
             if (Synchronizing == null)
                 return null;
 
             using (Sync.ChangeBothCultures(ForceCultureInfo))
             {
-                Replacements replacements = new Replacements();
+                Replacements replacements = new Replacements() { Interactive = interactive };
                 SqlPreCommand command = Synchronizing
                     .GetInvocationList()
                     .Cast<Func<Replacements, SqlPreCommand>>()
@@ -254,8 +265,13 @@ namespace Signum.Engine.Maps
                 if (command == null)
                     return null;
 
+                var replacementsComment = replacements.Interactive ? null: replacements.Select(r =>
+                    SqlPreCommandConcat.Combine(Spacing.Double, new SqlPreCommandSimple("-- Replacements on {0}".Formato(r.Key)),
+                        r.Value.Select(a => new SqlPreCommandSimple("--   {0} -> {1}".Formato(a.Key, a.Value))).Combine(Spacing.Simple))); 
+
                 return SqlPreCommand.Combine(Spacing.Double,
                     new SqlPreCommandSimple(Resources.StartOfSyncScriptGeneratedOn0.Formato(DateTime.Now)),
+                   
                     new SqlPreCommandSimple("use {0}".Formato(schemaName)),
                     command,
                     new SqlPreCommandSimple(Resources.EndOfSyncScript));
@@ -280,13 +296,13 @@ namespace Signum.Engine.Maps
 
         public class InitEventDictionary
         {
-            Dictionary<InitLevel, InitEventHandler> dict = new Dictionary<InitLevel, InitEventHandler>();
+            Dictionary<InitLevel, Action> dict = new Dictionary<InitLevel, Action>();
 
             Dictionary<MethodInfo, long> times = new Dictionary<MethodInfo, long>();
 
             InitLevel? initLevel;
 
-            public InitEventHandler this[InitLevel level]
+            public Action this[InitLevel level]
             {
                 get { return dict.TryGetC(level); }
                 set
@@ -312,13 +328,13 @@ namespace Signum.Engine.Maps
 
             void InitializeJust(InitLevel currentLevel)
             {
-                InitEventHandler h = dict.TryGetC(currentLevel);
+                Action h = dict.TryGetC(currentLevel);
                 if (h == null)
                     return;
 
-                var handlers = h.GetInvocationList().Cast<InitEventHandler>();
+                var handlers = h.GetInvocationList().Cast<Action>();
 
-                foreach (InitEventHandler handler in handlers)
+                foreach (Action handler in handlers)
                 {
                     Stopwatch sw = Stopwatch.StartNew();
                     handler();
@@ -361,13 +377,13 @@ namespace Signum.Engine.Maps
         {
             this.Settings = settings;
 
-            Generating += Administrator.CreateTablesScript;
-            Generating += Administrator.InsertEnumValuesScript;
+            Generating += SchemaGenerator.CreateTablesScript;
+            Generating += SchemaGenerator.InsertEnumValuesScript;
             Generating += TypeLogic.Schema_Generating;
 
 
-            Synchronizing += Administrator.SynchronizeSchemaScript;
-            Synchronizing += Administrator.SynchronizeEnumsScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeSchemaScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeEnumsScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
@@ -473,8 +489,8 @@ namespace Signum.Engine.Maps
 
         internal Dictionary<string, ITable> GetDatabaseTables()
         {
-            return Schema.Current.Tables.Values.SelectMany(t =>
-                t.Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd(t))
+            return Schema.Current.Tables.Values
+                .SelectMany(t => t.RelationalTables().Cast<ITable>().PreAnd(t))
                 .ToDictionary(a => a.Name);
         }
 
@@ -620,10 +636,6 @@ namespace Signum.Engine.Maps
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
     public delegate void QueryHandler<T>(IQueryable<T> query);
-
-    public delegate void InitEventHandler();
-    public delegate void SyncEventHandler();
-    public delegate void GenSchemaEventHandler();
 
     public class SavedEventArgs
     {

@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
             if (proj != root)
-                return (ProjectionExpression)AliasReplacer.Replace(base.VisitProjection(proj));
+                return AliasReplacer.Replace(base.VisitProjection(proj));
             else
                 return (ProjectionExpression)base.VisitProjection(proj);
         }

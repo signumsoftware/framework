@@ -14,9 +14,6 @@ namespace Signum.Entities.DynamicQuery
 {
     public static class QueryUtils
     {
-        public static Func<string, Type> ResolveType;
-        public static Func<Type, string> TypeCleanName; 
-
         public static string GetQueryUniqueKey(object queryKey)
         {
             return
@@ -83,7 +80,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.String:
                     return FilterType.String;
                 case TypeCode.Object:
-                    if (Reflector.ExtractLite(type) != null)
+                    if (type.IsLite())
                         return FilterType.Lite;
 
                     if (type.IsIIdentifiable())
@@ -222,15 +219,15 @@ namespace Signum.Entities.DynamicQuery
                 foreach (var part in parts.Skip(1))
                 {
                     result = subTokens(result).Select(t => t.MatchPart(part)).NotNull().SingleEx(
-                          () => Resources.Token0NotCompatibleWith1.Formato(part, result),
-                          () => Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(part, result));
+                          () => "Token with key '{0}' not found on {1}".Formato(part, result),
+                          () => "More than one token with key '{0}' found on {1}".Formato(part, result));
                 }
 
                 return result;
             }
             catch (Exception e)
             {
-                throw new FormatException("Invalid query token: " + e.Message, e);
+                throw new FormatException(e.Message, e);
             }
         }
 
@@ -277,7 +274,7 @@ namespace Signum.Entities.DynamicQuery
         static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity ident) => ident.ToLite()).GetGenericMethodDefinition();
         internal static Expression ExtractEntity(this Expression expression, bool idAndToStr)
         {
-            if (Reflector.ExtractLite(expression.Type) != null)
+            if (expression.Type.IsLite())
             {
                 MethodCallExpression mce = expression as MethodCallExpression;
                 if (mce != null && mce.Method.IsInstantiationOf(miToLite))
@@ -300,7 +297,7 @@ namespace Signum.Entities.DynamicQuery
         internal static Type BuildLite(this Type type)
         {
             if (Reflector.IsIIdentifiable(type))
-                return Reflector.GenerateLite(type);
+                return Lite.Generate(type);
 
             return type;
         }

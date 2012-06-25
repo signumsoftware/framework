@@ -233,7 +233,7 @@ namespace Signum.Web
                 return (Mapping<T>)giForAutoEntity.GetInvoker(typeof(T))(); ;
 
             if (typeof(T).IsLite())
-                return (Mapping<T>)giForLite.GetInvoker(Reflector.ExtractLite(typeof(T)))();
+                return (Mapping<T>)giForLite.GetInvoker(Lite.Extract(typeof(T)))();
 
             if (Reflector.IsMList(typeof(T)))
                 return (Mapping<T>)giForMList.GetInvoker(typeof(T).ElementType())();

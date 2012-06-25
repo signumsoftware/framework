@@ -417,7 +417,7 @@ SF.NewContentProcessor = {
     defaultButtons: function ($newContent) {
         $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
             var $txt = $(val);
-            if (!$txt.hasClass("ui-button")) {
+            if (!$txt.hasClass("ui-button") && !$txt.closest(".sf-menu-button").length > 0) {
                 var data = $txt.data();
                 $txt.button({
                     text: (!("text" in data) || SF.isTrue(data.text)),

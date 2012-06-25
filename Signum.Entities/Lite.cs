@@ -197,17 +197,17 @@ namespace Signum.Entities
     
         public static Lite Create(Type type, int id)
         {
-            return (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), type, id);
+            return (Lite)Activator.CreateInstance(Generate(type), type, id);
         }
 
         public static Lite Create(Type type, int id, Type runtimeType)
         {
-            return (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), runtimeType, id);
+            return (Lite)Activator.CreateInstance(Generate(type), runtimeType, id);
         }
 
         public static Lite Create(Type type, int id, Type runtimeType, string toStr)
         {
-            Lite result = (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), runtimeType, id, toStr);
+            Lite result = (Lite)Activator.CreateInstance(Generate(type), runtimeType, id, toStr);
             return result;
         }
 
@@ -218,7 +218,7 @@ namespace Signum.Entities
 
             BindingFlags bf = BindingFlags.Default | BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic;
 
-            ConstructorInfo ci = Reflector.GenerateLite(type).GetConstructor(bf, null, new[] { type }, null);
+            ConstructorInfo ci = Generate(type).GetConstructor(bf, null, new[] { type }, null);
 
             Lite result = (Lite)ci.Invoke(new[] { entidad });
             return result;
@@ -257,21 +257,22 @@ namespace Signum.Entities
 
         static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
 
-        public static Lite ParseLite(Type staticType, string liteKey, Func<string, Type> resolveType)
+        public static Lite Parse(Type staticType, string liteKey)
         {
             Lite result;
-            string error = TryParseLite(staticType, liteKey, resolveType, out result);
+            string error = TryParseLite(staticType, liteKey, out result);
             if (error == null)
-            {
                 return result;
-            }
             else
-            {
                 throw new FormatException(error);
-            }
         }
 
-        public static string TryParseLite(Type staticType, string liteKey, Func<string, Type> resolveType, out Lite result)
+        public static Lite<T> Parse<T>(string liteKey) where T : class, IIdentifiable
+        {
+            return (Lite<T>)Lite.Parse(typeof(T), liteKey);
+        }
+
+        public static string TryParseLite(Type staticType, string liteKey, out Lite result)
         {
             result = null;
             if (string.IsNullOrEmpty(liteKey))
@@ -281,7 +282,7 @@ namespace Signum.Entities
             if (!match.Success)
                 return Resources.InvalidFormat;
 
-            Type type = resolveType(match.Groups["type"].Value);
+            Type type = ResolveType(match.Groups["type"].Value);
             if (type == null)
                 return Resources.TypeNotFound;
 
@@ -295,14 +296,31 @@ namespace Signum.Entities
             return null;
         }
 
-        public string Key(Func<Type, string> typeName)
+        public static string TryParse<T>(Type staticType, string liteKey, out Lite<T> lite) where T : class, IIdentifiable
         {
-            return "{0};{1}".Formato(typeName(this.RuntimeType), this.Id);
+            Lite untypedLite;
+            var result = Lite.TryParseLite(staticType, liteKey, out untypedLite);
+            lite = (Lite<T>)untypedLite;
+            return result;
         }
 
-        public string KeyLong(Func<Type, string> typeName)
+        public static Func<Type, string> UniqueTypeName { get; private set; }
+        public static Func<string, Type> ResolveType { get; private set; }
+
+        public static void SetTypeNameAndResolveType(Func<Type, string> uniqueTypeName, Func<string, Type> resolveType)
         {
-            return "{0};{1};{2}".Formato(typeName(this.RuntimeType), this.Id, this.ToString());
+            Lite.UniqueTypeName = uniqueTypeName;
+            Lite.ResolveType = resolveType;
+        }
+
+        public string Key()
+        {
+            return "{0};{1}".Formato(UniqueTypeName(this.RuntimeType), this.Id);
+        }
+
+        public string KeyLong()
+        {
+            return "{0};{1};{2}".Formato(UniqueTypeName(this.RuntimeType), this.Id, this.ToString());
         }
 
         public int CompareTo(Lite other)
@@ -321,6 +339,18 @@ namespace Signum.Entities
         public void SetToString(string toStr)
         {
             this.toStr = toStr;
+        }
+
+        public static Type Generate(Type identificableType)
+        {
+            return typeof(Lite<>).MakeGenericType(identificableType);
+        }
+
+        public static Type Extract(Type liteType)
+        {
+            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
+                return liteType.GetGenericArguments()[0];
+            return null;
         }
     }
 
@@ -489,6 +519,17 @@ namespace Signum.Entities
         public static XDocument EntityDGML(this IdentifiableEntity entity)
         {
             return GraphExplorer.FromRoot(entity).EntityDGML(); 
+        }
+
+
+        public static bool IsLite(this Type t)
+        {
+            return typeof(Lite).IsAssignableFrom(t);
+        }
+
+        public static Type CleanType(this Type t)
+        {
+            return Lite.Extract(t) ?? t;
         }
     }
 }

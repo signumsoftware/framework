@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -294,8 +295,9 @@ namespace Signum.Engine.Linq
             {
                 // only consider aggregates in these locations
                 this.Visit(select.Where);
-                this.VisitOrderBy(select.OrderBy);
-                this.VisitColumnDeclarations(select.Columns);
+
+                select.OrderBy.NewIfChange(VisitOrderBy);
+                select.Columns.NewIfChange(VisitColumnDeclaration);
                 return select;
             }
 

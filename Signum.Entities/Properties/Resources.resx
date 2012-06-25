@@ -276,9 +276,6 @@
   <data name="MoreThanOneColumnNamed0" xml:space="preserve">
     <value>More than one column named {0}</value>
   </data>
-  <data name="MoreThanOneTokenWithKey0FoundOn1" xml:space="preserve">
-    <value>More than one token with key {0} found on {1}</value>
-  </data>
   <data name="New" xml:space="preserve">
     <value>New</value>
   </data>
@@ -305,9 +302,6 @@
   </data>
   <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
     <value>The number of elements of {{0}} has to be {0} {1}</value>
-  </data>
-  <data name="Token0NotCompatibleWith1" xml:space="preserve">
-    <value>Token {0} not compatible with {1}</value>
   </data>
   <data name="TypeNotFound" xml:space="preserve">
     <value>Type not found</value>

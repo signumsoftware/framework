@@ -22,6 +22,7 @@ using System.Collections;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Threading;
+using System.Threading;
 
 namespace Signum.Windows
 {
@@ -77,7 +78,7 @@ namespace Signum.Windows
         }
 
 
-        private IEnumerable autoCompleteTextBox_AutoCompleting(string arg)
+        private IEnumerable autoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
         {
             IEnumerable value;
             if (AutoCompleting != null)

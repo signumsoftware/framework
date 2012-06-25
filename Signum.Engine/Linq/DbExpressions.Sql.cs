@@ -49,20 +49,23 @@ namespace Signum.Engine.Linq
         Delete,
         CommandAggregate,
         SelectRowCount,
-        FieldInit = 2000,
-        EmbeddedFieldInit,
+        Entity = 2000,
+        EmbeddedInit,
         ImplementedBy,
         ImplementedByAll,
-        LiteReference,
-        TypeFieldInit,
+        Lite,
+        TypeEntity,
         TypeImplementedBy,
         TypeImplementedByAll,
         MList,
+        MListProjection,
         MListElement,
     }
 
     class Alias
     {
+        public static readonly Alias Unknown = new Alias("Unknown"); 
+
         public readonly string Name;  
 
         Alias(string name)
@@ -885,19 +888,19 @@ namespace Signum.Engine.Linq
     internal class AggregateSubqueryExpression : DbExpression
     {
         public readonly Alias GroupByAlias;
-        public readonly Expression AggregateInGroupSelect;
-        public readonly ScalarExpression AggregateAsSubquery;
-        public AggregateSubqueryExpression(Alias groupByAlias, Expression aggregateInGroupSelect, ScalarExpression aggregateAsSubquery)
-            : base(DbExpressionType.AggregateSubquery, aggregateAsSubquery.Type)
+        public readonly AggregateExpression Aggregate;
+        public readonly ScalarExpression Subquery;
+        public AggregateSubqueryExpression(Alias groupByAlias, AggregateExpression aggregate, ScalarExpression subquery)
+            : base(DbExpressionType.AggregateSubquery, subquery.Type)
         {
-            this.AggregateInGroupSelect = aggregateInGroupSelect;
+            this.Aggregate = aggregate;
             this.GroupByAlias = groupByAlias;
-            this.AggregateAsSubquery = aggregateAsSubquery;
+            this.Subquery = subquery;
         }
 
         public override string ToString()
         {
-            return "AGGREGATE OF {0}({1}) OR\r\n {2}".Formato(GroupByAlias, AggregateInGroupSelect, AggregateAsSubquery);
+            return "AGGREGATE OF {0}({1}) OR\r\n {2}".Formato(GroupByAlias, Aggregate, Subquery);
         }
     }
 
@@ -925,24 +928,6 @@ namespace Signum.Engine.Linq
         SingleOrDefault,
     }
 
-    public class ProjectionToken 
-    {
-        class ExternalToken : ProjectionToken
-        {
-            public override string ToString()
-            {
-                return "External";
-            }
-        }
-
-        public static readonly ProjectionToken External = new ExternalToken(); 
-
-        public override string ToString()
-        {
-            return GetHashCode().ToString();
-        }
-    }
-
     /// <summary>
     /// A custom expression representing the construction of one or more result objects from a 
     /// SQL select expression
@@ -951,10 +936,9 @@ namespace Signum.Engine.Linq
     {
         public readonly SelectExpression Select;
         public readonly Expression Projector;
-        public readonly UniqueFunction?  UniqueFunction;
-        public readonly ProjectionToken Token; 
+        public readonly UniqueFunction? UniqueFunction;
 
-        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, ProjectionToken token, Type resultType)
+        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, Type resultType)
             : base(DbExpressionType.Projection, resultType)
         {
             if (source == null)
@@ -963,9 +947,6 @@ namespace Signum.Engine.Linq
             if (projector == null)
                 throw new ArgumentNullException("projector");
 
-            if (token == null)
-                throw new ArgumentNullException("token");
-
             Type shouldImplement = uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) : projector.Type;
             if (!shouldImplement.IsAssignableFrom(resultType))
                 throw new InvalidOperationException("ProjectionType is {0} but should implement {1}".Formato(resultType.TypeName(), shouldImplement.TypeName()));  
@@ -973,13 +954,12 @@ namespace Signum.Engine.Linq
             this.Select = source;
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
-            this.Token = token;
         }
     
-        internal bool IsOneCell
-        {
-            get { return this.UniqueFunction.HasValue && Select.Columns.Count == 1; }
-        }
+        //internal bool IsOneCell
+        //{
+        //    get { return this.UniqueFunction.HasValue && Select.Columns.Count == 1; }
+        //}
 
         public override string ToString()
         {
@@ -991,14 +971,16 @@ namespace Signum.Engine.Linq
     {
         public readonly ProjectionExpression Projection;
         public readonly Expression OuterKey;
-        public readonly bool IsLazyMList; 
+        public readonly bool IsLazyMList;
+        public readonly LookupToken Token; 
 
-        internal ChildProjectionExpression(ProjectionExpression projection, Expression outerKey, bool isLazyMList, Type type)
+        internal ChildProjectionExpression(ProjectionExpression projection, Expression outerKey, bool isLazyMList, Type type, LookupToken token)
             : base(DbExpressionType.ChildProjection, type)
         {
             this.Projection = projection;
             this.OuterKey = outerKey;
-            this.IsLazyMList = isLazyMList; 
+            this.IsLazyMList = isLazyMList;
+            this.Token = token;
         }
 
         public override string ToString()

@@ -26,11 +26,6 @@ namespace Signum.Engine.Maps
             get { return schema.Settings; }
         }
 
-        public SchemaBuilder() : this(DBMS.SqlServer2005)
-        {
-
-        }
-
         public SchemaBuilder(DBMS dbms)
         {
             schema = new Schema(new SchemaSettings(dbms));
@@ -152,7 +147,7 @@ namespace Signum.Engine.Maps
 
                 schema.Tables.Add(type, result);
 
-                string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(Reflector.ExtractEnumProxy(type) ?? type);
+                string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumProxy.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
                     throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName)); 
@@ -168,7 +163,7 @@ namespace Signum.Engine.Maps
         void Complete(Table table)
         {
             Type type = table.Type;
-            table.Identity = Reflector.ExtractEnumProxy(type) == null;
+            table.Identity = EnumProxy.Extract(type) == null;
             table.Name = GenerateTableName(type);
             table.CleanTypeName = GenerateCleanTypeName(type);
             table.Fields = GenerateFields(PropertyRoute.Root(type), Contexts.Normal, table, NameSequence.Void, false);
@@ -215,7 +210,7 @@ namespace Signum.Engine.Maps
                 }
             }
 
-            if (type.IsIdentifiableEntity() && !ExpressionCleaner.HasExpansions(type, FieldInitExpression.ToStringMethod))
+            if (type.IsIdentifiableEntity() && !ExpressionCleaner.HasExpansions(type, EntityExpression.ToStringMethod))
             {
                 PropertyRoute route = root.Add(fiToStr);
 
@@ -252,7 +247,7 @@ namespace Signum.Engine.Maps
             if (context == Contexts.Normal || context == Contexts.Embedded || context == Contexts.View)
                 name = name.Add(GenerateFieldName(route, kof));
             else if (context == Contexts.MList && (kof == KindOfField.Enum || kof == KindOfField.Reference))
-                name = name.Add(GenerateFieldName(Reflector.ExtractLite(route.Type) ?? route.Type, kof));
+                name = name.Add(GenerateFieldName(Lite.Extract(route.Type) ?? route.Type, kof));
 
             switch (kof)
             {
@@ -302,7 +297,7 @@ namespace Signum.Engine.Maps
             if (route.Type.UnNullify().IsEnum)
                 return KindOfField.Enum;
 
-            if (Reflector.IsIIdentifiable(Reflector.ExtractLite(route.Type) ?? route.Type))
+            if (Reflector.IsIIdentifiable(Lite.Extract(route.Type) ?? route.Type))
                 return KindOfField.Reference;
 
             if (Reflector.IsEmbeddedEntity(route.Type))
@@ -339,7 +334,7 @@ namespace Signum.Engine.Maps
         {
             Type cleanEnum = route.Type.UnNullify();
 
-            var table = Include(Reflector.GenerateEnumProxy(cleanEnum), route);
+            var table = Include(EnumProxy.Generate(cleanEnum), route);
 
             return new FieldEnum(route.Type)
             {
@@ -359,13 +354,13 @@ namespace Signum.Engine.Maps
                 IndexType = Settings.GetIndexType(route),
                 Nullable = Settings.IsNullable(route, forceNull),
                 IsLite  = route.Type.IsLite(),
-                ReferenceTable = Include(Reflector.ExtractLite(route.Type) ?? route.Type, route),
+                ReferenceTable = Include(Lite.Extract(route.Type) ?? route.Type, route),
             };
         }
 
         protected virtual Field GenerateFieldImplmentedBy(PropertyRoute route, NameSequence name, bool forceNull, ImplementedByAttribute ib)
         {
-            Type cleanType = Reflector.ExtractLite(route.Type) ?? route.Type;
+            Type cleanType = Lite.Extract(route.Type) ?? route.Type;
             string erroneos = ib.ImplementedTypes.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
             if (erroneos.Length != 0)
                 throw new InvalidOperationException("Type {0} do not implement {1}".Formato(erroneos, cleanType));
@@ -466,8 +461,8 @@ namespace Signum.Engine.Maps
 
         protected static Type CleanType(Type type)
         {
-            type = Reflector.ExtractLite(type) ?? type;
-            type = Reflector.ExtractEnumProxy(type) ?? type;
+            type = Lite.Extract(type) ?? type;
+            type = EnumProxy.Extract(type) ?? type;
             return type;
         }
 
@@ -487,7 +482,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.Reference:
                     return "id" + CleanType(type).Name;
                 default:
-                    throw new NotImplementedException("No field name for type {0} defined".Formato(type));
+                    throw new InvalidOperationException("No field name for type {0} defined".Formato(type));
             }
         }
 
@@ -506,7 +501,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.Enum:
                     return "id" + name;
                 default:
-                    throw new NotImplementedException("No name for {0} defined".Formato(route.FieldInfo.Name));
+                    throw new InvalidOperationException("No name for {0} defined".Formato(route.FieldInfo.Name));
             }
         }
 

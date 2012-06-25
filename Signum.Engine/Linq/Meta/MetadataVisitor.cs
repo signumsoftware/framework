@@ -403,8 +403,8 @@ namespace Signum.Engine.Linq
 
                     return new MetaExpression(memberType, new CleanMeta(routes));
                 }
-                            
-                if (typeof(IRootEntity).IsAssignableFrom(source.Type)) //Works for simple entities and also for interface casting
+
+                if (typeof(IdentifiableEntity).IsAssignableFrom(source.Type) && !source.Type.IsAbstract) //Works for simple entities and also for interface casting
                     return new MetaExpression(memberType, new CleanMeta(new[]{ PropertyRoute.Root(source.Type).Add(pi)}));
             }
 

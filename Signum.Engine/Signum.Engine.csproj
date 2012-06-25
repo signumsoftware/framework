@@ -103,6 +103,7 @@
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
     <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
+    <Compile Include="Engine\SchemaGenerator.cs" />
     <Compile Include="Engine\SqlUtils.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Database.cs" />
@@ -114,9 +115,10 @@
     <Compile Include="GlobalLazy.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbExpressionComparer.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbQueryUtils.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
-    <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
@@ -151,7 +153,7 @@
     </Compile>
     <Compile Include="Engine\SqlPreCommand.cs" />
     <Compile Include="Linq\ViewAttributes.cs" />
-    <Compile Include="Engine\SchemaComparer.cs" />
+    <Compile Include="Engine\SchemaSynchronizer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>

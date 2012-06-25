@@ -12,11 +12,18 @@ namespace Signum.Utilities.ExpressionTrees
 {
     public class ExpressionComparer
     {
-        ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope;
+        internal ScopedDictionary<ParameterExpression, ParameterExpression> parameterMap;
+
+        protected IDisposable ParameterScope()
+        {
+            var saved = parameterMap;
+            parameterMap = new ScopedDictionary<ParameterExpression, ParameterExpression>(parameterMap);
+            return new Disposable(() => parameterMap = saved);
+        }
 
         protected ExpressionComparer(ScopedDictionary<ParameterExpression, ParameterExpression> parameterScope)
         {
-            this.parameterScope = parameterScope;
+            this.parameterMap = parameterScope;
         }
 
         public static bool AreEqual(Expression a, Expression b)
@@ -50,7 +57,7 @@ namespace Signum.Utilities.ExpressionTrees
                 case ExpressionType.Quote:
                 case ExpressionType.TypeAs:
                 case ExpressionType.UnaryPlus:
-                    return this.CompareUnary((UnaryExpression)a, (UnaryExpression)b);
+                    return CompareUnary((UnaryExpression)a, (UnaryExpression)b);
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                 case ExpressionType.Subtract:
@@ -75,32 +82,32 @@ namespace Signum.Utilities.ExpressionTrees
                 case ExpressionType.LeftShift:
                 case ExpressionType.ExclusiveOr:
                 case ExpressionType.Power:
-                    return this.CompareBinary((BinaryExpression)a, (BinaryExpression)b);
+                    return CompareBinary((BinaryExpression)a, (BinaryExpression)b);
                 case ExpressionType.TypeIs:
-                    return this.CompareTypeIs((TypeBinaryExpression)a, (TypeBinaryExpression)b);
+                    return CompareTypeIs((TypeBinaryExpression)a, (TypeBinaryExpression)b);
                 case ExpressionType.Conditional:
-                    return this.CompareConditional((ConditionalExpression)a, (ConditionalExpression)b);
+                    return CompareConditional((ConditionalExpression)a, (ConditionalExpression)b);
                 case ExpressionType.Constant:
-                    return this.CompareConstant((ConstantExpression)a, (ConstantExpression)b);
+                    return CompareConstant((ConstantExpression)a, (ConstantExpression)b);
                 case ExpressionType.Parameter:
-                    return this.CompareParameter((ParameterExpression)a, (ParameterExpression)b);
+                    return CompareParameter((ParameterExpression)a, (ParameterExpression)b);
                 case ExpressionType.MemberAccess:
-                    return this.CompareMemberAccess((MemberExpression)a, (MemberExpression)b);
+                    return CompareMemberAccess((MemberExpression)a, (MemberExpression)b);
                 case ExpressionType.Call:
-                    return this.CompareMethodCall((MethodCallExpression)a, (MethodCallExpression)b);
+                    return CompareMethodCall((MethodCallExpression)a, (MethodCallExpression)b);
                 case ExpressionType.Lambda:
-                    return this.CompareLambda((LambdaExpression)a, (LambdaExpression)b);
+                    return CompareLambda((LambdaExpression)a, (LambdaExpression)b);
                 case ExpressionType.New:
-                    return this.CompareNew((NewExpression)a, (NewExpression)b);
+                    return CompareNew((NewExpression)a, (NewExpression)b);
                 case ExpressionType.NewArrayInit:
                 case ExpressionType.NewArrayBounds:
-                    return this.CompareNewArray((NewArrayExpression)a, (NewArrayExpression)b);
+                    return CompareNewArray((NewArrayExpression)a, (NewArrayExpression)b);
                 case ExpressionType.Invoke:
-                    return this.CompareInvocation((InvocationExpression)a, (InvocationExpression)b);
+                    return CompareInvocation((InvocationExpression)a, (InvocationExpression)b);
                 case ExpressionType.MemberInit:
-                    return this.CompareMemberInit((MemberInitExpression)a, (MemberInitExpression)b);
+                    return CompareMemberInit((MemberInitExpression)a, (MemberInitExpression)b);
                 case ExpressionType.ListInit:
-                    return this.CompareListInit((ListInitExpression)a, (ListInitExpression)b);
+                    return CompareListInit((ListInitExpression)a, (ListInitExpression)b);
                 default:
                     throw new Exception(string.Format("Unhandled expression type: '{0}'", a.NodeType));
             }
@@ -112,7 +119,7 @@ namespace Signum.Utilities.ExpressionTrees
                 && ReflectionTools.MethodEqual(a.Method, b.Method)
                 && a.IsLifted == b.IsLifted
                 && a.IsLiftedToNull == b.IsLiftedToNull
-                && this.Compare(a.Operand, b.Operand);
+                && Compare(a.Operand, b.Operand);
         }
 
         protected virtual bool CompareBinary(BinaryExpression a, BinaryExpression b)
@@ -121,21 +128,21 @@ namespace Signum.Utilities.ExpressionTrees
                 && ReflectionTools.MethodEqual(a.Method, b.Method)
                 && a.IsLifted == b.IsLifted
                 && a.IsLiftedToNull == b.IsLiftedToNull
-                && this.Compare(a.Left, b.Left)
-                && this.Compare(a.Right, b.Right);
+                && Compare(a.Left, b.Left)
+                && Compare(a.Right, b.Right);
         }
 
         protected virtual bool CompareTypeIs(TypeBinaryExpression a, TypeBinaryExpression b)
         {
             return a.TypeOperand == b.TypeOperand
-                && this.Compare(a.Expression, b.Expression);
+                && Compare(a.Expression, b.Expression);
         }
 
         protected virtual bool CompareConditional(ConditionalExpression a, ConditionalExpression b)
         {
-            return this.Compare(a.Test, b.Test)
-                && this.Compare(a.IfTrue, b.IfTrue)
-                && this.Compare(a.IfFalse, b.IfFalse);
+            return Compare(a.Test, b.Test)
+                && Compare(a.IfTrue, b.IfTrue)
+                && Compare(a.IfFalse, b.IfFalse);
         }
 
         protected virtual bool CompareConstant(ConstantExpression a, ConstantExpression b)
@@ -145,10 +152,10 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareParameter(ParameterExpression a, ParameterExpression b)
         {
-            if (this.parameterScope != null)
+            if (parameterMap != null)
             {
                 ParameterExpression mapped;
-                if (this.parameterScope.TryGetValue(a, out mapped))
+                if (parameterMap.TryGetValue(a, out mapped))
                     return mapped == b;
             }
             return a == b;
@@ -157,14 +164,14 @@ namespace Signum.Utilities.ExpressionTrees
         protected virtual bool CompareMemberAccess(MemberExpression a, MemberExpression b)
         {
             return ReflectionTools.MemeberEquals(a.Member, b.Member)
-                && this.Compare(a.Expression, b.Expression);
+                && Compare(a.Expression, b.Expression);
         }
 
         protected virtual bool CompareMethodCall(MethodCallExpression a, MethodCallExpression b)
         {
             return ReflectionTools.MethodEqual(a.Method, b.Method)
-                && this.Compare(a.Object, b.Object)
-                && this.CompareExpressionList(a.Arguments, b.Arguments);
+                && Compare(a.Object, b.Object)
+                && CompareList(a.Arguments, b.Arguments, Compare);
         }
 
         protected virtual bool CompareLambda(LambdaExpression a, LambdaExpression b)
@@ -178,92 +185,38 @@ namespace Signum.Utilities.ExpressionTrees
                 if (a.Parameters[i].Type != b.Parameters[i].Type)
                     return false;
             }
-            var save = this.parameterScope;
-            this.parameterScope = new ScopedDictionary<ParameterExpression, ParameterExpression>(this.parameterScope);
-            try
+
+            using (ParameterScope())
             {
                 for (int i = 0; i < n; i++)
-                {
-                    this.parameterScope.Add(a.Parameters[i], b.Parameters[i]);
-                }
-                return this.Compare(a.Body, b.Body);
-            }
-            finally
-            {
-                this.parameterScope = save;
+                    parameterMap.Add(a.Parameters[i], b.Parameters[i]);
+
+                return Compare(a.Body, b.Body);
             }
         }
 
         protected virtual bool CompareNew(NewExpression a, NewExpression b)
         {
             return ReflectionTools.MemeberEquals(a.Constructor, b.Constructor)
-                && this.CompareExpressionList(a.Arguments, b.Arguments)
-                && this.CompareMemberList(a.Members, b.Members);
-        }
-
-        protected virtual bool CompareExpressionList(ReadOnlyCollection<Expression> a, ReadOnlyCollection<Expression> b)
-        {
-            if (a == b)
-                return true;
-            if (a == null || b == null)
-                return false;
-            if (a.Count != b.Count)
-                return false;
-            for (int i = 0, n = a.Count; i < n; i++)
-            {
-                if (!this.Compare(a[i], b[i]))
-                    return false;
-            }
-            return true;
-        }
-
-        protected virtual bool CompareMemberList(ReadOnlyCollection<MemberInfo> a, ReadOnlyCollection<MemberInfo> b)
-        {
-            if (a == b)
-                return true;
-            if (a == null || b == null)
-                return false;
-            if (a.Count != b.Count)
-                return false;
-            for (int i = 0, n = a.Count; i < n; i++)
-            {
-                if (ReflectionTools.MemeberEquals(a[i], b[i]))
-                    return false;
-            }
-            return true;
+                && CompareList(a.Arguments, b.Arguments, Compare)
+                && CompareList(a.Members, b.Members, ReflectionTools.MemeberEquals);
         }
 
         protected virtual bool CompareNewArray(NewArrayExpression a, NewArrayExpression b)
         {
-            return this.CompareExpressionList(a.Expressions, b.Expressions);
+            return CompareList(a.Expressions, b.Expressions, Compare);
         }
 
         protected virtual bool CompareInvocation(InvocationExpression a, InvocationExpression b)
         {
-            return this.Compare(a.Expression, b.Expression)
-                && this.CompareExpressionList(a.Arguments, b.Arguments);
+            return Compare(a.Expression, b.Expression)
+                && CompareList(a.Arguments, b.Arguments, Compare);
         }
 
         protected virtual bool CompareMemberInit(MemberInitExpression a, MemberInitExpression b)
         {
-            return this.Compare(a.NewExpression, b.NewExpression)
-                && this.CompareBindingList(a.Bindings, b.Bindings);
-        }
-
-        protected virtual bool CompareBindingList(ReadOnlyCollection<MemberBinding> a, ReadOnlyCollection<MemberBinding> b)
-        {
-            if (a == b)
-                return true;
-            if (a == null || b == null)
-                return false;
-            if (a.Count != b.Count)
-                return false;
-            for (int i = 0, n = a.Count; i < n; i++)
-            {
-                if (!this.CompareBinding(a[i], b[i]))
-                    return false;
-            }
-            return true;
+            return Compare(a.NewExpression, b.NewExpression)
+                && CompareList(a.Bindings, b.Bindings, CompareBinding);
         }
 
         protected virtual bool CompareBinding(MemberBinding a, MemberBinding b)
@@ -279,11 +232,11 @@ namespace Signum.Utilities.ExpressionTrees
             switch (a.BindingType)
             {
                 case MemberBindingType.Assignment:
-                    return this.CompareMemberAssignment((MemberAssignment)a, (MemberAssignment)b);
+                    return CompareMemberAssignment((MemberAssignment)a, (MemberAssignment)b);
                 case MemberBindingType.ListBinding:
-                    return this.CompareMemberListBinding((MemberListBinding)a, (MemberListBinding)b);
+                    return CompareMemberListBinding((MemberListBinding)a, (MemberListBinding)b);
                 case MemberBindingType.MemberBinding:
-                    return this.CompareMemberMemberBinding((MemberMemberBinding)a, (MemberMemberBinding)b);
+                    return CompareMemberMemberBinding((MemberMemberBinding)a, (MemberMemberBinding)b);
                 default:
                     throw new Exception(string.Format("Unhandled binding type: '{0}'", a.BindingType));
             }
@@ -292,28 +245,28 @@ namespace Signum.Utilities.ExpressionTrees
         protected virtual bool CompareMemberAssignment(MemberAssignment a, MemberAssignment b)
         {
             return ReflectionTools.MemeberEquals(a.Member, b.Member)
-                && this.Compare(a.Expression, b.Expression);
+                && Compare(a.Expression, b.Expression);
         }
 
         protected virtual bool CompareMemberListBinding(MemberListBinding a, MemberListBinding b)
         {
             return ReflectionTools.MemeberEquals(a.Member, b.Member)
-                && this.CompareElementInitList(a.Initializers, b.Initializers);
+                && CompareList(a.Initializers, b.Initializers, CompareElementInit);
         }
 
         protected virtual bool CompareMemberMemberBinding(MemberMemberBinding a, MemberMemberBinding b)
         {
             return ReflectionTools.MemeberEquals(a.Member, b.Member)
-                && this.CompareBindingList(a.Bindings, b.Bindings);
+                 && CompareList(a.Bindings, b.Bindings, CompareBinding);
         }
 
         protected virtual bool CompareListInit(ListInitExpression a, ListInitExpression b)
         {
-            return this.Compare(a.NewExpression, b.NewExpression)
-                && this.CompareElementInitList(a.Initializers, b.Initializers);
+            return Compare(a.NewExpression, b.NewExpression)
+                && CompareList(a.Initializers, b.Initializers, CompareElementInit);
         }
 
-        protected virtual bool CompareElementInitList(ReadOnlyCollection<ElementInit> a, ReadOnlyCollection<ElementInit> b)
+        protected static bool CompareList<T>(ReadOnlyCollection<T> a, ReadOnlyCollection<T> b, Func<T, T, bool> comparer)
         {
             if (a == b)
                 return true;
@@ -323,7 +276,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return false;
             for (int i = 0, n = a.Count; i < n; i++)
             {
-                if (!this.CompareElementInit(a[i], b[i]))
+                if (!comparer(a[i], b[i]))
                     return false;
             }
             return true;
@@ -332,7 +285,7 @@ namespace Signum.Utilities.ExpressionTrees
         protected virtual bool CompareElementInit(ElementInit a, ElementInit b)
         {
             return  ReflectionTools.MethodEqual(a.AddMethod, b.AddMethod)
-                && this.CompareExpressionList(a.Arguments, b.Arguments);
+                && CompareList(a.Arguments, b.Arguments, Compare);
         }
 
         public static IEqualityComparer<E> GetComparer<E>() where E:Expression

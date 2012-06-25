@@ -165,7 +165,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescription BuildColumnDescription()
         {
-            return new ColumnDescription(Name, Reflector.IsIIdentifiable(Type) ? Reflector.GenerateLite(Type) : Type)
+            return new ColumnDescription(Name, Reflector.IsIIdentifiable(Type) ? Lite.Generate(Type) : Type)
             {
                 PropertyRoutes = propertyRoutes,
                 Implementations = Implementations,

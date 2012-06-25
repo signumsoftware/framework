@@ -249,12 +249,12 @@ namespace Signum.Web
             sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.ControlID, true, value == true, valueLine.ValueHtmlProps).ToHtmlString()
                 .Replace("id=\"" + valueLine.ControlID + "\"", "id=\"" + valueLine.ControlID + "_True\"")));
 
-            sb.AddLine(helper.Span("", valueLine.RadioButtonLabelTrue, "lblRadioTrue"));
+            sb.AddLine(helper.Span(valueLine.Compose("lblRadioTrue"), valueLine.RadioButtonLabelTrue, "sf-value-line-radiolbl"));
 
             sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.ControlID, false, value == false, valueLine.ValueHtmlProps).ToHtmlString()
               .Replace("id=\"" + valueLine.ControlID + "\"", "id=\"" + valueLine.ControlID + "_False\"")));
 
-            sb.AddLine(helper.Span("", valueLine.RadioButtonLabelFalse, "lblRadioFalse"));
+            sb.AddLine(helper.Span(valueLine.Compose("lblRadioFalse"), valueLine.RadioButtonLabelFalse, "sf-value-line-radiolbl"));
 
             return sb.ToHtml();
         }

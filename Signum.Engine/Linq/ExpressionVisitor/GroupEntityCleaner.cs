@@ -27,7 +27,7 @@ namespace Signum.Engine.Linq
                 return base.Visit(exp);
         }
 
-        protected override Expression VisitTypeFieldInit(TypeFieldInitExpression typeFie)
+        protected override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
         {
             return base.VisitTypeFieldInit(typeFie);
         }
@@ -40,26 +40,26 @@ namespace Signum.Engine.Linq
             return new TypeImplementedByAllExpression(QueryBinder.ExtractTypeId(exp));
         }
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        protected override Expression VisitLite(LiteExpression lite)
         {
             var newId = Visit(lite.Id);
             var newTypeId = Visit(lite.TypeId);
             var reference = Visit(lite.Reference);
             var toStr = Visit(lite.ToStr);
-            return new LiteReferenceExpression(lite.Type, reference, newId, toStr, newTypeId, lite.CustomToString);
+            return new LiteExpression(lite.Type, reference, newId, toStr, newTypeId, lite.CustomToString);
         }
 
-        protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
+        protected override Expression VisitEntity(EntityExpression fieldInit)
         {
             Expression newID = Visit(fieldInit.ExternalId);
 
-            return new FieldInitExpression(fieldInit.Type, null, newID, fieldInit.Token); // eliminamos los bindings
+            return new EntityExpression(fieldInit.Type, newID, null, null); // remove bindings
         }
 
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)
         {
             var implementations = reference.Implementations
-                .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
+                .NewIfChange(ri => Visit(ri.Reference).Map(r => r == ri.Reference ? ri : new ImplementationColumn(ri.Type, (EntityExpression)r)));
 
             return new ImplementedByExpression(reference.Type, implementations);
         }
@@ -69,7 +69,7 @@ namespace Signum.Engine.Linq
             var id = (ColumnExpression)Visit(reference.Id);
             var typeId = (TypeImplementedByAllExpression)Visit(reference.TypeId);
 
-            return new ImplementedByAllExpression(reference.Type, id, typeId, reference.Token);
+            return new ImplementedByAllExpression(reference.Type, id, typeId);
         }
     }
 }
