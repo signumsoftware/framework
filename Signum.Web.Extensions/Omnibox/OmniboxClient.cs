@@ -50,6 +50,11 @@ namespace Signum.Web.Omnibox
         {
             public abstract OmniboxResultGenerator<T> CreateGenerator();
             public abstract MvcHtmlString RenderHtml(T result);
+
+            public MvcHtmlString ColoredSpan(string text, string colorName)
+            { 
+                return new HtmlTag("span").InnerHtml(new MvcHtmlString(text)).Attr("style", "color:{0}".Formato(colorName)).ToHtml(); 
+            }
         }
 
         public class WebOmniboxManager : OmniboxManager

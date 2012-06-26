@@ -26,7 +26,7 @@ namespace Signum.Web.Chart
             if (result.QueryNameMatch != null)
                 html = html.Concat(" {0}".FormatHtml(result.QueryNameMatch.ToHtml()));
 
-            html = html.Concat(new HtmlTag("span").SetInnerText(" ({0})".Formato(Resources.Chart_Chart)).Attr("style", "color:violet").ToHtml());
+            html = html.Concat(ColoredSpan(" ({0})".Formato(Resources.Chart_Chart), "violet"));
             
             if (result.QueryNameMatch != null)
                 html = new HtmlTag("a")

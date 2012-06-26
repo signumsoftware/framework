@@ -482,7 +482,8 @@ namespace Signum.Entities.Omnibox
 
             string oper = DynamicQueryOmniboxResultGenerator.ToStringOperation(Operation.Value);
 
-            if (Syntax.Completion == FilterSyntaxCompletion.Operation && Value == null)
+            if ((Syntax.Completion == FilterSyntaxCompletion.Operation && Value == null) ||
+                Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
                 return token + oper;
 
             return token + oper + DynamicQueryOmniboxResultGenerator.ToStringValue(Value);
