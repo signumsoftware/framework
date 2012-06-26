@@ -170,7 +170,14 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
+    <Compile Include="ControlPanels\ControlPanelClient.cs" />
+    <Compile Include="ControlPanels\Admin\PanelPartEdit.xaml.cs">
+      <DependentUpon>PanelPartEdit.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Converters.cs" />
+    <Compile Include="ControlPanels\Admin\ControlPanelEdit.xaml.cs">
+      <DependentUpon>ControlPanelEdit.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Deployment\DeploymentClient.cs" />
     <Compile Include="Disconnected\UploadProgress.xaml.cs">
       <DependentUpon>UploadProgress.xaml</DependentUpon>
@@ -466,6 +473,14 @@
     <Page Include="Chart\ChartWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\Admin\ControlPanelEdit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\Admin\PanelPartEdit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
