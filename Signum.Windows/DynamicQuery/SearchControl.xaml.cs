@@ -290,17 +290,13 @@ namespace Signum.Windows
 
         public SearchControl()
         {
-            //ColumnDragController = new DragController(col => CreateFilter((GridViewColumnHeader)col), DragDropEffects.Copy);
-
             this.InitializeComponent();
 
             FilterOptions = new FreezableCollection<FilterOption>();
             OrderOptions = new ObservableCollection<OrderOption>();
             ColumnOptions = new ObservableCollection<ColumnOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(100);
-            timer.Tick += new EventHandler(timer_Tick);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(SearchControl_DataContextChanged);
         }
 
         public static readonly DependencyProperty HideIfNotFindableProperty =
@@ -400,11 +396,6 @@ namespace Signum.Windows
 
             Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
 
-            foreach (var fo in FilterOptions)
-            {
-                fo.ValueChanged += new EventHandler(fo_ValueChanged);
-            }
-
             filterBuilder.Filters = FilterOptions;
             ((INotifyCollectionChanged)FilterOptions).CollectionChanged += FilterOptions_CollectionChanged;
 
@@ -452,21 +443,14 @@ namespace Signum.Windows
             filterBuilder.AddFilter(tokenBuilder.Token);
         }
 
-        DispatcherTimer timer;
-        void fo_ValueChanged(object sender, EventArgs e)
-        {
-            timer.Start();
-        }
-
-        void timer_Tick(object sender, EventArgs e)
+        void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (resultTable != null)
             {
                 Search();
             }
-
-            timer.Stop();
         }
+
 
         void SearchControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
