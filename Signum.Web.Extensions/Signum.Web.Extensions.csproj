@@ -256,6 +256,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
+    <Compile Include="Chart\ChartOmniboxProvider.cs" />
     <Compile Include="Chart\Controllers\ChartController.cs" />
     <Compile Include="Chart\Views\ChartBuilder.cs">
       <AutoGen>True</AutoGen>
@@ -395,6 +396,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Omnibox\Controllers\OmniboxController.cs" />
+    <Compile Include="Omnibox\OmniboxClient.cs" />
     <Compile Include="Processes\Views\ProcessPanel.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -854,6 +857,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Omnibox\Scripts\SF_Omnibox.js" />
     <Content Include="Operations\Scripts\SF_Operations.js" />
     <Content Include="Processes\Scripts\SF_Process.js" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
