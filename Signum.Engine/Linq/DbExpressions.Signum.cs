@@ -18,7 +18,7 @@ using System.Diagnostics;
 
 namespace Signum.Engine.Linq
 {
-    internal class FieldInitExpression : DbExpression
+    internal class EntityExpression : DbExpression
     {
         public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo((IdentifiableEntity ei) =>ei.id);
         public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((IdentifiableEntity ie) =>ie.toStr);
@@ -26,14 +26,13 @@ namespace Signum.Engine.Linq
 
         public readonly Table Table;
         public readonly Expression ExternalId;
-        public readonly ProjectionToken Token;
 
+        //Optional
+        public readonly Alias TableAlias;
+        public readonly ReadOnlyCollection<FieldBinding> Bindings;
 
-        public Alias TableAlias; //Changed on expansion 
-        public List<FieldBinding> Bindings = new List<FieldBinding>();// not readonly!!!
-
-        public FieldInitExpression(Type type, Alias tableAlias, Expression externalId, ProjectionToken token)
-            : base(DbExpressionType.FieldInit, type)
+        public EntityExpression(Type type, Expression externalId, Alias tableAlias, IEnumerable<FieldBinding> bindings)
+            : base(DbExpressionType.Entity, type)
         {
             if (type == null) 
                 throw new ArgumentNullException("type");
@@ -45,90 +44,36 @@ namespace Signum.Engine.Linq
                 throw new ArgumentNullException("externalId");
             
             this.Table = Schema.Current.Table(type);
-            this.Token = token;
-            this.TableAlias = tableAlias;
             this.ExternalId = externalId;
+
+            this.TableAlias = tableAlias;
+            this.Bindings = bindings.ToReadOnly();
         }
-
-        public Expression GetOrCreateFieldBinding(FieldInfo fi, QueryBinder binder)
-        {
-            FieldBinding binding = Bindings.SingleOrDefaultEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
-            if (binding != null)
-                return binding.Binding;
-
-            AssertTable(binder);
-
-            Expression ex = Table.CreateBinding(Token, TableAlias, fi, binder);
-
-            if (ex is MListExpression)
-            {
-                MListExpression mle = (MListExpression)ex;
-
-                mle.BackID = GetOrCreateFieldBinding(FieldInitExpression.IdField, binder);
-            }
-
-            Bindings.Add(new FieldBinding(fi, ex));
-
-            return ex; 
-        }
-        public void ReplaceBinding(FieldInfo fi, Expression expression)
-        {
-            Bindings.RemoveAll(a=>ReflectionTools.FieldEquals(a.FieldInfo, fi));
-            Bindings.Add(new FieldBinding(fi, expression)); 
-        }
-
-        public Expression GetFieldBinding(FieldInfo fi)
-        {
-            FieldBinding binding = Bindings.SingleEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
-
-            return binding.Binding;
-        }
-
+     
         public override string ToString()
         {
-            string constructor = "new {0}({1})".Formato(Type.TypeName(), ExternalId.NiceToString());
-            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
+            var constructor = "new {0}({1})".Formato(Type.TypeName(),
+                ExternalId.NiceToString());
 
-            return bindings.HasText() ?
-                constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
-                constructor;
+            if (Bindings == null)
+                return constructor;
+
+            return constructor + "\r\n{\r\n " + Bindings.ToString(",\r\n ").Indent(4) + "\r\n}";
         }
 
-        public void Complete(QueryBinder binder)
+        public Expression GetBinding(FieldInfo fi)
         {
-            AssertTable(binder);
+            if (Bindings == null)
+                throw new InvalidOperationException("EntityInitiExpression not completed");
 
-            foreach (EntityField field in Table.Fields.Values.Where(f =>
-                !ReflectionTools.Equals(f.FieldInfo, IdField)))
-            {
-                Expression exp = GetOrCreateFieldBinding(field.FieldInfo, binder);
-
-                if (exp is MListExpression)
-                {
-                    Expression proj = binder.MListProjection((MListExpression)exp);
-                    ReplaceBinding(field.FieldInfo, proj); 
-                }  
-            }
-        }
-
-        void AssertTable(QueryBinder binder)
-        {
-            if (TableAlias == null)
-            {
-                TableAlias = binder.NextTableAlias(Table.Name);
-                if (!Table.IsView)
-                    GetOrCreateFieldBinding(FieldInitExpression.IdField, binder);
-                binder.AddRequest(Token, new TableCondition
-                {
-                    FieldInit = this,
-                    Table = new TableExpression(TableAlias, Table.Name)
-                });
-            }
+            FieldBinding binding = Bindings.SingleEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
+            
+            return binding.Binding;
         }
     }
 
   
-    internal class EmbeddedFieldInitExpression : DbExpression
+    internal class EmbeddedEntityExpression : DbExpression
     {
         public readonly Expression HasValue; 
 
@@ -136,8 +81,8 @@ namespace Signum.Engine.Linq
 
         public readonly FieldEmbedded FieldEmbedded; //used for updates
 
-        public EmbeddedFieldInitExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded fieldEmbedded)
-            : base(DbExpressionType.EmbeddedFieldInit, type)
+        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded fieldEmbedded)
+            : base(DbExpressionType.EmbeddedInit, type)
         {
             if (bindings == null)
                 throw new ArgumentNullException("bindings");
@@ -191,98 +136,66 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class PropertyBinding
-    {
-        public readonly PropertyInfo PropertyInfo;
-        public readonly Expression Binding;
-
-        public PropertyBinding(PropertyInfo propertyInfo, Expression binding)
-        {
-            if (!propertyInfo.PropertyType.UnNullify().IsAssignableFrom(binding.Type.UnNullify()))
-                throw new ArgumentException("Type of expression is {0} but type of field is {1}".Formato(binding.Type.TypeName(), propertyInfo.PropertyType.TypeName()));
-
-            //if (Reflector.FindFieldInfo(propertyInfo.DeclaringType, (PropertyInfo)propertyInfo, false) != null)
-            //    throw new ArgumentException("{0} is a PropertyInfo, when a FieldInfo is available".Formato(propertyInfo.Name));
-
-            this.PropertyInfo = propertyInfo;
-            this.Binding = binding;
-        }
-
-        public override string ToString()
-        {
-            return "{0} = {1}".Formato(PropertyInfo.Name, Binding.NiceToString());
-        }
-    }
-
     internal class ImplementedByExpression : DbExpression//, IPropertyInitExpression
     {
-        public readonly ReadOnlyCollection<ImplementationColumnExpression> Implementations;
-        public List<PropertyBinding> PropertyBindings = new List<PropertyBinding>(); //For interface Access
+        public readonly ReadOnlyCollection<ImplementationColumn> Implementations;
   
-        public ImplementedByExpression(Type type, ReadOnlyCollection<ImplementationColumnExpression> implementations)
+        public ImplementedByExpression(Type type, ReadOnlyCollection<ImplementationColumn> implementations)
             : base(DbExpressionType.ImplementedBy, type)
         {
             this.Implementations = implementations.ToReadOnly();
         }
 
-        public Expression TryGetPropertyBinding(PropertyInfo pi)
-        {
-            PropertyBinding binding = PropertyBindings.SingleOrDefaultEx(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
+        //public Expression TryGetPropertyBinding(PropertyInfo pi)
+        //{
+        //    PropertyBinding binding = PropertyBindings.SingleOrDefaultEx(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
 
-            if (binding == null) 
-                return null;
+        //    if (binding == null) 
+        //        return null;
 
-            return binding.Binding;
-        }
+        //    return binding.Binding;
+        //}
 
-        public void AddPropertyBinding(PropertyInfo pi, Expression binding)
-        {
-            PropertyBindings.Add(new PropertyBinding(pi, binding));
-        }
+        //public void AddPropertyBinding(PropertyInfo pi, Expression binding)
+        //{
+        //    PropertyBindings.Add(new PropertyBinding(pi, binding));
+        //}
 
         public override string ToString()
-        {
-            string bindings = PropertyBindings.TryCC(b => b.ToString(",\r\n "));
-
-            string bindings2 = bindings.HasText() ? "Bindings = {{\r\n{0}\r\n}}".Formato(bindings.Indent(4)) : null;
- 
+        { 
             return "ImplementedBy{{\r\n{0}\r\n}}".Formato(
-                Implementations.ToString(",\r\n").Add(",\r\n", bindings2).Indent(4)
+                Implementations.ToString(",\r\n").Indent(4)
                 );
         }
     }
 
-    internal class ImplementationColumnExpression
+    internal class ImplementationColumn
     {
-        public readonly FieldInitExpression Field;
+        public readonly EntityExpression Reference; //EntityReference or EntityInit
         public readonly Type Type;
 
-        public ImplementationColumnExpression(Type type, FieldInitExpression field)
+        public ImplementationColumn(Type type, EntityExpression reference)
         {
             this.Type = type;
-            this.Field = field;
+            this.Reference = reference;
         }
 
         public override string ToString()
         {
-            return "{0} -> {1}".Formato(Type.TypeName(), Field.NiceToString());
+            return "{0} -> {1}".Formato(Type.TypeName(), Reference.NiceToString());
         }
     }
 
     internal class ImplementedByAllExpression : DbExpression
     {
-        public List<ImplementationColumnExpression> Implementations = new List<ImplementationColumnExpression>();
-
         public readonly Expression Id;
         public readonly TypeImplementedByAllExpression TypeId;
-        public readonly ProjectionToken Token;
 
-        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, ProjectionToken token)
+        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId)
             : base(DbExpressionType.ImplementedByAll, type)
         {
             this.Id = id;
             this.TypeId = typeId;
-            this.Token = token;
         }
 
         public override string ToString()
@@ -291,21 +204,21 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class LiteReferenceExpression : DbExpression
+    internal class LiteExpression : DbExpression
     {
         public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
 
         public readonly Expression Id;
-        public readonly Expression ToStr;
+        public readonly Expression ToStr; //Not readonly
         public readonly Expression TypeId;
         public readonly bool CustomToString;
 
-        public LiteReferenceExpression(Type type, Expression reference, Expression id, Expression toStr, Expression typeId, bool customToString) :
-            base(DbExpressionType.LiteReference, type)
+        public LiteExpression(Type type, Expression reference, Expression id, Expression toStr, Expression typeId, bool customToString) :
+            base(DbExpressionType.Lite, type)
         {
             if (reference != null)
             {
-                Type cleanType = Reflector.ExtractLite(type);
+                Type cleanType = Lite.Extract(type);
 
                 if (cleanType != reference.Type)
                     throw new ArgumentException("The type {0} is not the Lite version of {1}".Formato(type.TypeName(), reference.Type.TypeName()));
@@ -324,13 +237,13 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class TypeFieldInitExpression : DbExpression
+    internal class TypeEntityExpression : DbExpression
     {
         public readonly Expression ExternalId;
         public readonly Type TypeValue;
 
-        public TypeFieldInitExpression(Expression externalId, Type typeValue)
-            : base(DbExpressionType.TypeFieldInit, typeof(Type))
+        public TypeEntityExpression(Expression externalId, Type typeValue)
+            : base(DbExpressionType.TypeEntity, typeof(Type))
         {
             if (externalId == null || externalId.Type.UnNullify() != typeof(int))
                 throw new ArgumentException("typeId");
@@ -405,7 +318,7 @@ namespace Signum.Engine.Linq
 
     internal class MListExpression : DbExpression
     {
-        public Expression BackID; // not readonly
+        public readonly Expression BackID; // not readonly
         public readonly RelationalTable RelationalTable;
 
         public MListExpression(Type type, Expression backID, RelationalTable tr)
@@ -417,19 +330,35 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "MList({0},{1})".Formato(RelationalTable.Name, BackID); 
+            return "new MList({0},{1})".Formato(RelationalTable.Name, BackID);
+        }
+    }
+
+    internal class MListProjectionExpression : DbExpression
+    {
+        public readonly ProjectionExpression Projection;
+
+        public MListProjectionExpression(Type type, ProjectionExpression projection)
+            : base(DbExpressionType.MListProjection, type)
+        {
+            this.Projection = projection;
+        }
+
+        public override string ToString()
+        {
+            return "new MList({0})".Formato(Projection.NiceToString());
         }
     }
 
     internal class MListElementExpression : DbExpression
     {
         public readonly Expression RowId;
-        public readonly FieldInitExpression Parent;
+        public readonly EntityExpression Parent;
         public readonly Expression Element;
 
         public readonly RelationalTable Table;
 
-        public MListElementExpression(Expression rowId, FieldInitExpression parent, Expression element, RelationalTable table)
+        public MListElementExpression(Expression rowId, EntityExpression parent, Expression element, RelationalTable table)
             : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
         {
             this.RowId = rowId;

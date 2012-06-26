@@ -95,7 +95,7 @@ namespace Signum.Engine.Exceptions
                                     .Select(p => p.Key)
                                     .SingleOrDefaultEx();
 
-                    ReferedTableType = Reflector.ExtractEnumProxy(ReferedTableType) ?? ReferedTableType; 
+                    ReferedTableType = EnumProxy.Extract(ReferedTableType) ?? ReferedTableType; 
                 }
             }
         }

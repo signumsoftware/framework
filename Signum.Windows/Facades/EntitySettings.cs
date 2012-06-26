@@ -56,10 +56,12 @@ namespace Signum.Windows
             switch (entityType)
             {
                 case EntityType.Default:
-                    ShowSave = true;
+                case EntityType.DefaultNotSaving:
+                    ShowSave = entityType == EntityType.Default;
                     break;
                 case EntityType.Admin:
-                    ShowSave = true;
+                case EntityType.AdminNotSaving:
+                    ShowSave = entityType == EntityType.Admin;
                     IsReadOnly = (_, admin) => !admin;
                     IsCreable = admin => admin;
                     IsViewable = (_, admin) => admin;
@@ -73,9 +75,6 @@ namespace Signum.Windows
                         else
                             cv.SortDescriptions.Add(new SortDescription("IdOrNull", ListSortDirection.Ascending));
                     };
-                    break;
-                case EntityType.NotSaving:
-                    ShowSave = false; 
                     break;
                 case EntityType.ServerOnly:
                     ShowSave = false;
@@ -148,7 +147,8 @@ namespace Signum.Windows
     {
         Admin,
         Default,
-        NotSaving,
+        AdminNotSaving,
+        DefaultNotSaving,
         ServerOnly,
         Content,
     }

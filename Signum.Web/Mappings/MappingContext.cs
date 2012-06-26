@@ -451,7 +451,7 @@ namespace Signum.Web
 
         public bool Remove(string key)
         {
-            return global.Remove(ControlID);
+            return global.Remove(ControlID + key);
         }
 
         public bool TryGetValue(string key, out V value)

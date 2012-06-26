@@ -389,7 +389,6 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="AdminBase.cs" />
     <Compile Include="Async.cs" />
     <Compile Include="Basics\Alert.xaml.cs">
       <DependentUpon>Alert.xaml</DependentUpon>

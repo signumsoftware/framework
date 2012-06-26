@@ -37,7 +37,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "({0})".Formato(QueryUtils.TypeCleanName(entityType)); }
+            get { return "({0})".Formato(Lite.UniqueTypeName(entityType)); }
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)

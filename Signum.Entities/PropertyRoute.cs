@@ -96,7 +96,7 @@ namespace Signum.Entities
                 PropertyInfo = (PropertyInfo)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.MListItems;
             }
-            else if (fieldOrProperty is PropertyInfo && Reflector.IsLite(parent.Type))
+            else if (fieldOrProperty is PropertyInfo && parent.Type.IsLite())
             {
                 if (fieldOrProperty.Name != "Entity" && fieldOrProperty.Name != "EntityOrNull")
                     throw new NotSupportedException("PropertyInfo {0} is not supported".Formato(fieldOrProperty.Name));

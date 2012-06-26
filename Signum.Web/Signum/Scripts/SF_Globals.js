@@ -319,16 +319,24 @@ SF.registerModule("Globals", function () {
     {
         toggle: function (event, elem) {
             var $elem = $(elem),
-            clss = "sf-open",
-            opened = $elem.hasClass(clss);
+                clss = "sf-open";
 
-            //SF.dropdowns.closeOpened();     //close opened
+            if (!$elem.hasClass("sf-dropdown")) {
+                $elem = $elem.closest(".sf-dropdown");
+            }
 
-            if (opened) {      //was opened, close
+            var opened = $elem.hasClass(clss);
+            if (opened) {      
                 $elem.removeClass(clss);
             }
             else {
                 $(".sf-dropdown").removeClass(clss);
+                var $content = $elem.find(".sf-menu-button");
+                var left = $elem.width() - $content.width(); 
+                $content.css({
+                    top: $elem.outerHeight(),
+                    left: ($elem.position().left - $elem.parents("div").first().position().left) < Math.abs(left) ? 0 : left
+                });
                 $elem.addClass(clss);
             }
             SF.stopPropagation(event);

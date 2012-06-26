@@ -7,6 +7,11 @@
 /*--------------
 --dropdowns-----
 --------------*/
+.sf-dropdown
+{
+    position: relative;
+    display: inline-block;    
+}
 .sf-dropdown.sf-query-button .sf-menu-button, .sf-dropdown.sf-entity-button .sf-menu-button 
 {
     position:absolute;
@@ -24,10 +29,6 @@
 	-webkit-border-shadow: 0 2px 8px #ddd;
 	border-shadow: 0 2px 8px #ddd;	
 }
-.sf-dropdown.sf-query-button .sf-menu-button, .sf-dropdown.sf-entity-button .sf-menu-button 
-{
-    position: fixed;    
-}
 .sf-dropdown.sf-open .sf-menu-button:hover
 {
 	background-color:#ffffee;
@@ -37,13 +38,14 @@
     white-space: nowrap;
     text-overflow:ellipsis;
     max-width:200px;
-    text-align:left;
+    text-align:right;
+    font-weight:bold;
 }
-.sf-dropdown .sf-menu-button
+/*.sf-dropdown .sf-menu-button
 {
     margin-left: -1em;
     margin-top: 0.4em;
-}
+}*/
 .sf-dropdown .sf-menu-button > li
 {
 	margin-left:0px !important;
@@ -108,7 +110,9 @@
 }
 .sf-button-bar, .sf-query-button-bar 
 {
-	list-style:none;	
+	list-style:none;
+	margin: 2px 0;
+	line-height: 1em;	
 }
 .sf-button-bar
 {
@@ -120,6 +124,11 @@
 }
 .sf-entity-button.sf-disabled {
     color:#aaa;
+}
+.sf-query-button-bar > .sf-query-button
+{
+    vertical-align: top;   
+    margin: 0; /*-webkit-appearance:button fix*/
 }
 
 /*--------------

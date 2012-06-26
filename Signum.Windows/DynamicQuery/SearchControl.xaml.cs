@@ -261,7 +261,7 @@ namespace Signum.Windows
 
         public Type EntityType
         {
-            get { return entityColumn == null ? null : Reflector.ExtractLite(entityColumn.Type); }
+            get { return entityColumn == null ? null : Lite.Extract(entityColumn.Type); }
         }
 
         public Implementations Implementations

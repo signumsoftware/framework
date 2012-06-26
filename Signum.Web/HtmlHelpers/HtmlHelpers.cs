@@ -258,16 +258,20 @@ namespace Signum.Web
             return new UrlHelper(html.ViewContext.RequestContext);
         }
 
-        public static HtmlString FormatHtml(this HtmlHelper html, string text, params object[] values)
+        public static MvcHtmlString FormatHtml(this HtmlHelper html, string text, params object[] values)
         {
             return text.FormatHtml(values);
         }
 
         public static MvcHtmlString FormatHtml(this string text, params object[] values)
         {
-            return new MvcHtmlString(string.Format(HttpUtility.HtmlEncode(text), values.Select(a =>
-                 a is IHtmlString ? ((IHtmlString)a).ToHtmlString() :
-                 HttpUtility.HtmlEncode(a)).ToArray()));
+            var encoded = HttpUtility.HtmlEncode(text);
+
+            if(values == null)
+                return new MvcHtmlString(encoded);
+
+            return new MvcHtmlString(string.Format(encoded,
+                values.Select(a => a is IHtmlString ? ((IHtmlString)a).ToHtmlString() : HttpUtility.HtmlEncode(a)).ToArray()));
         }
 
         public static MvcHtmlString Json(this HtmlHelper html, object value)

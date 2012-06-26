@@ -12,11 +12,10 @@ namespace Signum.Engine.Linq
     internal class AggregateRewriter : DbExpressionVisitor
     {
         ILookup<Alias, AggregateSubqueryExpression> lookup;
-        Dictionary<AggregateSubqueryExpression, Expression> map;
+        Dictionary<AggregateSubqueryExpression, Expression> map = new Dictionary<AggregateSubqueryExpression, Expression>();
 
         private AggregateRewriter(Expression expr)
         {
-            this.map = new Dictionary<AggregateSubqueryExpression, Expression>();
             this.lookup = AggregateGatherer.Gather(expr).ToLookup(a => a.GroupByAlias);
         }
 
@@ -33,7 +32,7 @@ namespace Signum.Engine.Linq
                 List<ColumnDeclaration> aggColumns = new List<ColumnDeclaration>(select.Columns);
                 foreach (AggregateSubqueryExpression ae in lookup[select.Alias])
                 {
-                    ColumnDeclaration cd = new ColumnDeclaration("agg" + aggColumns.Count, ae.AggregateInGroupSelect);
+                    ColumnDeclaration cd = new ColumnDeclaration("agg" + aggColumns.Count, ae.Aggregate);
                     this.map.Add(ae, cd.GetReference(ae.GroupByAlias));
                     aggColumns.Add(cd);
                 }
@@ -49,7 +48,7 @@ namespace Signum.Engine.Linq
             {
                 return mapped;
             }
-            return this.Visit(aggregate.AggregateAsSubquery);
+            return this.Visit(aggregate.Subquery);
         }
 
         class AggregateGatherer : DbExpressionVisitor

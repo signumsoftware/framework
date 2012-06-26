@@ -16,14 +16,17 @@ namespace Signum.Engine
 {
     internal static class Saver
     {
-        public static void SaveAll(IdentifiableEntity[] idents)
+        public static void SaveAll(IdentifiableEntity[] entities)
         {
-            Save(() => GraphExplorer.FromRoots(idents));
+            if (entities == null || entities.Any(e => e == null))
+                throw new ArgumentNullException("entity");
+
+            Save(() => GraphExplorer.FromRoots(entities));
         }
 
-        public static void Save(IdentifiableEntity ident)
+        public static void Save(IdentifiableEntity entity)
         {
-            Save(() => GraphExplorer.FromRoot(ident));
+            Save(() => GraphExplorer.FromRoot(entity));
         }
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];

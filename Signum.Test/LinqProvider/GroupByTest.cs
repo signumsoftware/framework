@@ -308,22 +308,6 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectGroupLast()
-        {
-            var result = (from lab in Database.Query<LabelDN>()
-                          join al in Database.Query<AlbumDN>().DefaultIfEmpty() on lab equals al.Label into g
-                          select new
-                          {
-                              lab.Id,
-                              lab.Name,
-                              NumExecutions = (int?)g.Count(),
-                              LastExecution = (from al2 in Database.Query<AlbumDN>()
-                                               where al2.Id == g.Max(a => (int?)a.Id)
-                                               select al2.ToLite()).FirstOrDefault()
-                          }).ToList();
-        }
-
-        [TestMethod]
         public void GroupBySelectMany()
         {
             var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex).SelectMany(a => a).ToList();

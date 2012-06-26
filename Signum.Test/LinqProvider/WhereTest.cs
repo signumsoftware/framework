@@ -261,7 +261,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereOutsideIs()
         {
-            var albums = Database.Query<BandDN>().Where(a => a.LastAward is PersonalAwardDN).ToList();
+            var albums = Database.Query<BandDN>().Where(a =>  a.LastAward is PersonalAwardDN).ToList();
         }
 
         [TestMethod]
@@ -278,5 +278,36 @@ namespace Signum.Test.LinqProvider
             var albums = Database.Query<BandDN>().Where(a => a.LastAward == pa).ToList();
         }
 
+        [TestMethod]
+        public void WhereMListContains()
+        {
+            var female = Database.Query<ArtistDN>().Single(a => a.Sex == Sex.Female);
+
+            var albums = Database.Query<BandDN>().Where(a => a.Members.Contains(female)).Select(a => a.ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void WhereMListLiteContains()
+        {
+            var female = Database.Query<ArtistDN>().Select(a => a.ToLite()).Single(a => a.Entity.Sex == Sex.Female);
+
+            var albums = Database.Query<ArtistDN>().Where(a => a.Friends.Contains(female)).Select(a => a.ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void WhereMListContainsSingle()
+        {
+            var albums = Database.Query<BandDN>().Where(a => a.Members.Contains(
+                Database.Query<ArtistDN>().Single(a2 => a2.Sex == Sex.Female)
+                )).Select(a => a.ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void WhereMListLiteContainsSingle()
+        {
+            var albums = Database.Query<ArtistDN>().Where(a => 
+                a.Friends.Contains(Database.Query<ArtistDN>().Single(a2 => a2.Sex == Sex.Female).ToLite())
+                ).Select(a => a.ToLite()).ToList();
+        }
     }
 }

@@ -148,21 +148,19 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
         static CSharpCodeProvider provider = new CSharpCodeProvider();
-        static CodeGeneratorOptions options = new CodeGeneratorOptions(); 
-        
-        public static string Value(object valor, Type type, string[] importedNamespaces)
+        static CodeGeneratorOptions options = new CodeGeneratorOptions();
+
+        public static string Value(object value, Type type, string[] importedNamespaces)
         {
-             StringBuilder sb = new StringBuilder();
-             using (StringWriter w = new StringWriter(sb))
-             {
-                 var expr = GetRightExpressionForValue(valor, type, importedNamespaces);
-                 if(expr != null)
-                     provider.GenerateCodeFromExpression(expr, w, options);
+            var expr = GetRightExpressionForValue(value, type, importedNamespaces);
+            if (expr == null)
+                return value.ToString();
 
-                 w.Write(valor.ToString());
+            StringBuilder sb = new StringBuilder();
+            using (StringWriter sw = new StringWriter(sb))
+                provider.GenerateCodeFromExpression(expr, sw, options);
 
-                 return w.ToString();
-             }
+            return sb.ToString();
         }
 
         public static CodeExpression GetRightExpressionForValue(object value, Type type, string[] importedNamespaces)

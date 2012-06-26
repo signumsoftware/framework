@@ -160,7 +160,7 @@ namespace Signum.Windows
             if (type.IsLite())
             {
                 CleanLite = true;
-                CleanType = Reflector.ExtractLite(type);
+                CleanType = Lite.Extract(type);
             }
             else
             {
@@ -200,7 +200,7 @@ namespace Signum.Windows
                 var type = Type;
 
                 if (this is EntityCombo && !type.IsLite()) //Allways going to be lite
-                    type = Reflector.GenerateLite(type);
+                    type = Lite.Generate(type);
 
                 EntityTemplate = Navigator.FindDataTemplate(this, type);
             }
@@ -323,7 +323,7 @@ namespace Signum.Windows
                 if (ident.IsNew)
                     return "{0};New".Formato(Server.ServerTypes[ident.GetType()].CleanName);
 
-                return ident.ToLite().Key(t => Server.ServerTypes[t].CleanName);
+                return ident.ToLite().Key();
             }
 
             var lite = newValue as Lite;
@@ -332,7 +332,7 @@ namespace Signum.Windows
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
                     return "{0};New".Formato(Server.ServerTypes[lite.RuntimeType].CleanName);
 
-                return lite.Key(t => Server.ServerTypes[t].CleanName);
+                return lite.Key();
             }
 
             throw new InvalidOperationException("Unexpected entity of type {0}".Formato(newValue.GetType()));

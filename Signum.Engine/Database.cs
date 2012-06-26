@@ -25,9 +25,6 @@ namespace Signum.Engine
         public static void SaveList<T>(this IEnumerable<T> entities)
             where T : class, IIdentifiable
         {
-            if (entities == null || entities.Any(e => e == null))
-                throw new ArgumentNullException("entity");
-
             using (new EntityCache())
             using (HeavyProfiler.Log("DB"))
             using (Transaction tr = new Transaction())
@@ -40,9 +37,6 @@ namespace Signum.Engine
 
         public static void SaveParams(params IIdentifiable[] entities)
         {
-            if (entities == null || entities.Any(e => e == null))
-                throw new ArgumentNullException("entity");
-
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {

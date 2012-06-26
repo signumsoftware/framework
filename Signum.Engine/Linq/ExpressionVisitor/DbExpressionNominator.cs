@@ -33,9 +33,9 @@ namespace Signum.Engine.Linq
 
         bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
 
-        bool IsFullNominateOrAggresive { get { return IsFullNominate || isAggresive; } }
+        bool IsFullNominateOrAggresive { get { return IsFullNominate || isAggressive; } }
 
-        bool isAggresive = false;
+        bool isAggressive = false;
 
         bool innerProjection = false; 
 
@@ -54,16 +54,9 @@ namespace Signum.Engine.Linq
 
         private DbExpressionNominator() { }
 
-        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression)
+        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression, bool isAggressive = false)
         {
-            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases };
-            newExpression = n.Visit(expression);
-            return n.candidates;
-        }
-
-        static internal HashSet<Expression> NominateGroupBy(Expression expression, Alias[] existingAliases, out Expression newExpression)
-        {
-            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isAggresive = true };
+            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isAggressive = isAggressive };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
@@ -103,13 +96,13 @@ namespace Signum.Engine.Linq
             return false; 
         }
 
-        Dictionary<ColumnExpression, ScalarExpression> replacements; 
+        //Dictionary<ColumnExpression, ScalarExpression> replacements; 
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            ScalarExpression scalar;
-            if (replacements != null && replacements.TryGetValue(column, out scalar))
-                return Visit(scalar);
+            //ScalarExpression scalar;
+            //if (replacements != null && replacements.TryGetValue(column, out scalar))
+            //    return Visit(scalar);
 
             if ((IsFullNominateOrAggresive && !innerProjection) ||
                 existingAliases.Contains(column.Alias))
@@ -269,7 +262,7 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            if (Schema.Current.Settings.DBMS == DBMS.SqlServer2008)
+            if (Schema.Current.Settings.DBMS >= DBMS.SqlServer2008)
                 return Add(new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.CONVERT.ToString(), new[]
                 {
                     new SqlConstantExpression(SqlDbType.Date),
@@ -289,7 +282,7 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            if (Schema.Current.Settings.DBMS == DBMS.SqlServer2008)
+            if (Schema.Current.Settings.DBMS >= DBMS.SqlServer2008)
                 return Add(new SqlFunctionExpression(typeof(TimeSpan), null, SqlFunction.CONVERT.ToString(), new[]
                 {
                     new SqlConstantExpression(SqlDbType.Time),
@@ -337,10 +330,11 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(exprDate) || !Has(exprTime))
                 return null;
 
-            var cast = new SqlCastExpression(typeof(DateTime), exprDate, SqlDbType.DateTime); //Just in case is a Date
+            var castDate = new SqlCastExpression(typeof(DateTime), exprDate, SqlDbType.DateTime); //Just in case is a Date
+            var castTime = new SqlCastExpression(typeof(TimeSpan), exprTime, SqlDbType.DateTime); //Just in case is a Date
 
-            var result = add ? Expression.Add(cast, exprTime) :
-                Expression.Subtract(cast, exprTime);
+            var result = add ? Expression.Add(castDate, castTime) :
+                Expression.Subtract(castDate, castTime);
 
             return Add(result); 
         }
@@ -426,9 +420,10 @@ namespace Signum.Engine.Linq
                 if (candidates.Contains(left) && candidates.Contains(right) && IsFullNominateOrAggresive)
                 {
                     if ((b.NodeType == ExpressionType.Add || b.NodeType == ExpressionType.Subtract) && b.Left.Type.UnNullify() == typeof(DateTime) && b.Right.Type.UnNullify() == typeof(TimeSpan))
+                    {
                         result = TryAddSubstractDateTime(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? result;
-
-                    if (b.NodeType == ExpressionType.Add)
+                    }
+                    else if (b.NodeType == ExpressionType.Add)
                     {
                         result = ConvertToSqlAddition(b);
                     }
@@ -640,7 +635,7 @@ namespace Signum.Engine.Linq
                        (untu == typeof(int) || untu == typeof(long)))
                         return Add(new SqlCastExpression(u.Type, u.Operand));
 
-                    if (IsFullNominate || isAggresive && u.Operand.Type.UnNullify() == u.Type.UnNullify())
+                    if (IsFullNominate || isAggressive && u.Operand.Type.UnNullify() == u.Type.UnNullify())
                         return Add(result);
 
                     if ("Sql" + u.Type.UnNullify().Name == u.Operand.Type.UnNullify().Name)
@@ -651,36 +646,36 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        
+
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
-            if (proj.IsOneCell)
-            {
-                var column = proj.Select.Columns.SingleEx();
+            //if (proj.IsOneCell)
+            //{
+            //    var column = proj.Select.Columns.SingleEx();
 
-                var select = (SelectExpression)base.Visit(proj.Select);
-                var scalar = new ScalarExpression(column.Expression.Type, select);
+            //    var select = (SelectExpression)base.Visit(proj.Select);
+            //    var scalar = new ScalarExpression(column.Expression.Type, select);
 
-                var reference = column.GetReference(proj.Select.Alias);
-                
-                if (replacements == null)
-                    replacements = new Dictionary<ColumnExpression, ScalarExpression>(); 
+            //    var reference = column.GetReference(proj.Select.Alias);
 
-                replacements.Add(reference, scalar);
-                var result = Visit(proj.Projector);
-                replacements.Remove(reference);
+            //    if (replacements == null)
+            //        replacements = new Dictionary<ColumnExpression, ScalarExpression>(); 
 
-                return result;
-            }
-            else
-            {
-                bool oldInnerProjection = this.innerProjection;
-                innerProjection = true;
-                var result = base.VisitProjection(proj);
-                innerProjection = oldInnerProjection;
-                return result;
-            }
+            //    replacements.Add(reference, scalar);
+            //    var result = Visit(proj.Projector);
+            //    replacements.Remove(reference);
+
+            //    return result;
+            //}
+            //else
+            //{
+            bool oldInnerProjection = this.innerProjection;
+            innerProjection = true;
+            var result = base.VisitProjection(proj);
+            innerProjection = oldInnerProjection;
+            return result;
+            //}
         }
 
         protected override Expression VisitIn(InExpression inExp)
@@ -736,9 +731,9 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
         {
-            var subquery = (ScalarExpression)this.Visit(aggregate.AggregateAsSubquery);
-            if (subquery != aggregate.AggregateAsSubquery)
-                aggregate = new AggregateSubqueryExpression(aggregate.GroupByAlias, aggregate.AggregateInGroupSelect, subquery);
+            var subquery = (ScalarExpression)this.Visit(aggregate.Subquery);
+            if (subquery != aggregate.Subquery)
+                aggregate = new AggregateSubqueryExpression(aggregate.GroupByAlias, aggregate.Aggregate, subquery);
 
             if (!innerProjection)
                 return Add(aggregate);

@@ -24,19 +24,35 @@ namespace Signum.Engine.Linq
             return pc.Visit(source);
         }
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        protected override Expression VisitLite(LiteExpression lite)
         {
             var newId = Visit(lite.Id);
             var newTypeId = Visit(lite.TypeId);
+            var toStr = LiteToString(lite);
 
-            var newToStr = !lite.CustomToString && IsCacheable(newTypeId) ? null : Visit(lite.ToStr);
+            return new LiteExpression(lite.Type, null, newId, toStr, newTypeId, lite.CustomToString);
+        }
 
-            return new LiteReferenceExpression(lite.Type, null, newId, newToStr, newTypeId, lite.CustomToString);
+        private Expression LiteToString(LiteExpression lite)
+        {
+            if (lite.CustomToString)
+                return Visit(lite.ToStr);
+
+            if (lite.Reference is ImplementedByAllExpression)
+                return null;
+
+            if (IsCacheable(lite.TypeId))
+                return null;
+
+            if (lite.ToStr == null)
+                return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+
+            return Visit(lite.ToStr);
         }
 
         private bool IsCacheable(Expression newTypeId)
         {
-            TypeFieldInitExpression tfie= newTypeId as TypeFieldInitExpression;
+            TypeEntityExpression tfie= newTypeId as TypeEntityExpression;
 
             if (tfie != null)
                 return IsCompletlyCached(tfie.TypeValue);
@@ -49,27 +65,22 @@ namespace Signum.Engine.Linq
             return false;
         }
 
-        protected override Expression VisitFieldInit(FieldInitExpression fie)
+        protected override Expression VisitEntity(EntityExpression ee)
         {
-            fie = new FieldInitExpression(fie.Type, fie.TableAlias, fie.ExternalId, fie.Token) { Bindings = fie.Bindings.ToList() };
-
-            if (previousTypes.Contains(fie.Type) || IsCompletlyCached(fie.Type))
+            if (previousTypes.Contains(ee.Type) || IsCompletlyCached(ee.Type))
             {
-                fie.Bindings.Clear();
-                fie.TableAlias = null;
+                ee = new EntityExpression(ee.Type, ee.ExternalId, null, null);
             }
             else
-                fie.Complete(binder);
+                ee = binder.Completed(ee);
 
-            previousTypes = previousTypes.Push(fie.Type);
+            previousTypes = previousTypes.Push(ee.Type);
 
-            var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
+            var bindings = ee.Bindings.NewIfChange(VisitFieldBinding);
 
-            var id = Visit(fie.ExternalId);
+            var id = Visit(ee.ExternalId);
 
-            var token = VisitProjectionToken(fie.Token);
-
-            var result = new FieldInitExpression(fie.Type, fie.TableAlias, id, token) { Bindings = bindings };
+            var result = new EntityExpression(ee.Type, id, ee.TableAlias, bindings);
 
             previousTypes = previousTypes.Pop();
 
@@ -82,37 +93,20 @@ namespace Signum.Engine.Linq
             return cc != null && cc.Enabled && cc.IsComplete; /*just to force cache before executing the query*/
         }
 
-        protected override Expression VisitImplementedBy(ImplementedByExpression reference)
+        protected override Expression VisitMList(MListExpression ml)
         {
-            var implementations = reference.Implementations
-                .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
+            var proj = binder.MListProjection(ml);
 
-            if (implementations != reference.Implementations)
-                return new ImplementedByExpression(reference.Type, implementations);
+            var newProj = (ProjectionExpression)this.Visit(proj);
 
-            reference.PropertyBindings = null;
-            return reference;
-        }
-
-        protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
-        {
-            var id = (ColumnExpression)Visit(reference.Id);
-            var typeId = (TypeImplementedByAllExpression)Visit(reference.TypeId);
-
-            if (id != reference.Id || typeId != reference.TypeId)
-            {
-                return new ImplementedByAllExpression(reference.Type, id, typeId, null);
-            }
-            
-            reference.Implementations = null;
-            return reference;
+            return new MListProjectionExpression(ml.Type, newProj);
         }
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
             Expression projector = this.Visit(proj.Projector);
 
-            var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Token, proj.Type);
+            var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
 
             var expanded = binder.ApplyExpansions(result);
 

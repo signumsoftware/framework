@@ -94,6 +94,10 @@ namespace Signum.Engine
                 try
                 {
                     object result = cmd.ExecuteScalar();
+
+                    if (result == null || result == DBNull.Value)
+                        return null;
+
                     return result;
                 }
                 catch (SqlTypeException ex)

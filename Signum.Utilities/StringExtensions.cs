@@ -410,5 +410,20 @@ namespace Signum.Utilities
 
             return sb;
         }
+
+        public static int CountRepetitions(this string text, string part)
+        {
+            int result = 0;
+            int index = 0;
+            while (true)
+            {
+                index = text.IndexOf(part, index);
+                if (index == -1)
+                    return result;
+
+                index += part.Length;
+                result++;
+            }
+        }
     }
 }

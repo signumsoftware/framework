@@ -24,8 +24,10 @@ SF.registerModule("Popup", function () {
                         $this.dialog('destroy');
                 }
                 else {
+                    var titles = $this.find("span.sf-popup-title");
+
                     var o = {
-                        title: $this.attr("data-title") || $this.children().attr("data-title"), //title causes that it is shown when mouseovering popup
+                        title: titles.length > 0? titles [0] : $this.attr("data-title") || $this.children().attr("data-title"), //title causes that it is shown when mouseovering popup
                         modal: options.modal,
                         width: 'auto',
                         close: options.onCancel,

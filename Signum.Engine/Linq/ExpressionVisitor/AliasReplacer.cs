@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Collections.ObjectModel;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -43,9 +44,9 @@ namespace Signum.Engine.Linq
             Expression top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
-            ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
-            ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
+            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(VisitColumnDeclaration);
+            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(VisitOrderBy);
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
             Alias newAlias = aliasMap.TryGetC(select.Alias) ?? select.Alias;
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy || newAlias != select.Alias)

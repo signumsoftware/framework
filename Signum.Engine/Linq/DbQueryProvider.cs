@@ -36,6 +36,11 @@ namespace Signum.Engine.Linq
         {
             return this.Translate(expression, tr => tr.CleanCommandText());
         }
+
+        public SqlPreCommandSimple GetMainPreCommand(Expression expression)
+        {
+            return this.Translate(expression, tr => tr.MainPreCommand());
+        }
         
         public override object Execute(Expression expression)
         {
@@ -82,14 +87,14 @@ namespace Signum.Engine.Linq
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             log.Switch("EnCom");
             Expression completed = EntityCompleter.Complete(rewrited, binder);
+            log.Switch("AlPrRe");
+            Expression replaced = AliasProjectionReplacer.Replace(completed);
             log.Switch("OrBtRw");
-            Expression orderRewrited = OrderByRewriter.Rewrite(completed);
+            Expression orderRewrited = OrderByRewriter.Rewrite(replaced);
             log.Switch("QuRb");
             Expression rebinded = QueryRebinder.Rebind(orderRewrited);
-            log.Switch("AlPrRe");
-            Expression replaced = AliasProjectionReplacer.Replace(rebinded);
             log.Switch("UnClRmv");
-            Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
+            Expression columnCleaned = UnusedColumnRemover.Remove(rebinded);
             log.Switch("RwNmbFlr");
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             log.Switch("RdnSqRm");

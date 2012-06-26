@@ -53,13 +53,21 @@ namespace Signum.Web
                     }
                 }
 
-                sb.Add(sbSelect.ToHtml());
-
-                using (sb.Surround(new HtmlTag("ul")))
+                using (sb.Surround(new HtmlTag("table").Class("sf-field-list-table")))
+                using (sb.Surround(new HtmlTag("tr")))
                 {
-                    sb.AddLine(ListBaseHelper.CreateButton(helper, listDetail, null).Surround("li"));
-                    sb.AddLine(ListBaseHelper.FindButton(helper, listDetail).Surround("li"));
-                    sb.AddLine(ListBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
+                    using (sb.Surround(new HtmlTag("td")))
+                    {
+                        sb.Add(sbSelect.ToHtml());
+                    }
+
+                    using (sb.Surround(new HtmlTag("td")))
+                    using (sb.Surround(new HtmlTag("ul")))
+                    {
+                        sb.AddLine(ListBaseHelper.CreateButton(helper, listDetail, null).Surround("li"));
+                        sb.AddLine(ListBaseHelper.FindButton(helper, listDetail).Surround("li"));
+                        sb.AddLine(ListBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
+                    }
                 }
             }
 
@@ -127,7 +135,7 @@ namespace Signum.Web
 
             EntityListDetail el = new EntityListDetail(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            EntityBaseHelper.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S));
+            EntityBaseHelper.ConfigureEntityBase(el, Lite.Extract(typeof(S)) ?? typeof(S));
 
             Common.FireCommonTasks(el);
 

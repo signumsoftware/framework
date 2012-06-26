@@ -160,28 +160,28 @@ namespace Signum.Engine.Linq
             if (exp1.NodeType == ExpressionType.Constant)
             {
                 if (exp2.NodeType == ExpressionType.Constant) return TypeConstantConstantEquals((ConstantExpression)exp1, (ConstantExpression)exp2);
-                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeFieldInit) return TypeConstantFieEquals((ConstantExpression)exp1, (TypeFieldInitExpression)exp2);
+                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeEntity) return TypeConstantFieEquals((ConstantExpression)exp1, (TypeEntityExpression)exp2);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy) return TypeConstantIbEquals((ConstantExpression)exp1, (TypeImplementedByExpression)exp2);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll) return TypeConstantIbaEquals((ConstantExpression)exp1, (TypeImplementedByAllExpression)exp2);
             }
-            else if (exp1.NodeType == (ExpressionType)DbExpressionType.TypeFieldInit)
+            else if (exp1.NodeType == (ExpressionType)DbExpressionType.TypeEntity)
             {
-                if (exp2.NodeType == ExpressionType.Constant) return TypeConstantFieEquals((ConstantExpression)exp2, (TypeFieldInitExpression)exp1);
-                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeFieldInit) return TypeFieFieEquals((TypeFieldInitExpression)exp1, (TypeFieldInitExpression)exp2);
-                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy) return TypeFieIbEquals((TypeFieldInitExpression)exp1, (TypeImplementedByExpression)exp2);
-                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll) return TypeFieIbaEquals((TypeFieldInitExpression)exp1, (TypeImplementedByAllExpression)exp2);
+                if (exp2.NodeType == ExpressionType.Constant) return TypeConstantFieEquals((ConstantExpression)exp2, (TypeEntityExpression)exp1);
+                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeEntity) return TypeFieFieEquals((TypeEntityExpression)exp1, (TypeEntityExpression)exp2);
+                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy) return TypeFieIbEquals((TypeEntityExpression)exp1, (TypeImplementedByExpression)exp2);
+                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll) return TypeFieIbaEquals((TypeEntityExpression)exp1, (TypeImplementedByAllExpression)exp2);
             }
             else if (exp1.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
             {
                 if (exp2.NodeType == ExpressionType.Constant) return TypeConstantIbEquals((ConstantExpression)exp2, (TypeImplementedByExpression)exp1);
-                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeFieldInit) return TypeFieIbEquals((TypeFieldInitExpression)exp2, (TypeImplementedByExpression)exp1);
+                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeEntity) return TypeFieIbEquals((TypeEntityExpression)exp2, (TypeImplementedByExpression)exp1);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy) return TypeIbIbEquals((TypeImplementedByExpression)exp1, (TypeImplementedByExpression)exp2);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll) return TypeIbIbaEquals((TypeImplementedByExpression)exp1, (TypeImplementedByAllExpression)exp2);
             }
             else if (exp1.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
             {
                 if (exp2.NodeType == ExpressionType.Constant) return TypeConstantIbaEquals((ConstantExpression)exp2, (TypeImplementedByAllExpression)exp1);
-                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeFieldInit) return TypeFieIbaEquals((TypeFieldInitExpression)exp2, (TypeImplementedByAllExpression)exp1);
+                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeEntity) return TypeFieIbaEquals((TypeEntityExpression)exp2, (TypeImplementedByAllExpression)exp1);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy) return TypeIbIbaEquals((TypeImplementedByExpression)exp2, (TypeImplementedByAllExpression)exp1);
                 else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll) return TypeIbaIbaEquals((TypeImplementedByAllExpression)exp1, (TypeImplementedByAllExpression)exp2);
             }
@@ -189,7 +189,7 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException("Impossible to resolve '{0}' equals '{1}'".Formato(exp1.NiceToString(), exp2.NiceToString()));
         }
 
-        private static Expression TypeConstantFieEquals(ConstantExpression ce, TypeFieldInitExpression typeFie)
+        private static Expression TypeConstantFieEquals(ConstantExpression ce, TypeEntityExpression typeFie)
         {
             if (ce.IsNull())
                 return EqualsToNull(typeFie.ExternalId);
@@ -241,7 +241,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        private static Expression TypeFieFieEquals(TypeFieldInitExpression typeFie1, TypeFieldInitExpression typeFie2)
+        private static Expression TypeFieFieEquals(TypeEntityExpression typeFie1, TypeEntityExpression typeFie2)
         {
             if (typeFie1.TypeValue != typeFie2.TypeValue)
                 return False;
@@ -249,7 +249,7 @@ namespace Signum.Engine.Linq
             return Expression.And(new IsNotNullExpression(typeFie1.ExternalId), new IsNotNullExpression(typeFie2.ExternalId));
         }
 
-        private static Expression TypeFieIbEquals(TypeFieldInitExpression typeFie, TypeImplementedByExpression typeIb)
+        private static Expression TypeFieIbEquals(TypeEntityExpression typeFie, TypeImplementedByExpression typeIb)
         {
             var typeImp = typeIb.TypeImplementations.SingleOrDefaultEx(imp => imp.Type == typeFie.TypeValue);
 
@@ -259,7 +259,7 @@ namespace Signum.Engine.Linq
             return Expression.And(new IsNotNullExpression(typeFie.ExternalId), new IsNotNullExpression(typeImp.ExternalId));
         }
 
-        private static Expression TypeFieIbaEquals(TypeFieldInitExpression typeFie, TypeImplementedByAllExpression typeIba)
+        private static Expression TypeFieIbaEquals(TypeEntityExpression typeFie, TypeImplementedByAllExpression typeIba)
         {
             return Expression.And(new IsNotNullExpression(typeFie.ExternalId), EqualNullable(typeIba.TypeColumn, QueryBinder.TypeConstant(typeFie.TypeValue)));
         }
@@ -300,9 +300,9 @@ namespace Signum.Engine.Linq
                 return collection.Contains(type) ? True : False;
             }
 
-            if (typeExpr.NodeType == (ExpressionType)DbExpressionType.TypeFieldInit)
+            if (typeExpr.NodeType == (ExpressionType)DbExpressionType.TypeEntity)
             {
-                var typeFie = (TypeFieldInitExpression)typeExpr;
+                var typeFie = (TypeEntityExpression)typeExpr;
 
                 return collection.Contains(typeFie.TypeValue) ? new IsNotNullExpression(typeFie.ExternalId) : (Expression)False;
             }
@@ -345,7 +345,7 @@ namespace Signum.Engine.Linq
             return EntityIn(newItem, entityIDs);
         }
 
-        internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite> collection)
+        internal static Expression EntityIn(LiteExpression liteReference, IEnumerable<Lite> collection)
         {
             if (collection.IsEmpty())
                 return False;
@@ -357,13 +357,13 @@ namespace Signum.Engine.Linq
 
         static Expression EntityIn(Expression newItem, Dictionary<Type, object[]> entityIDs)
         {
-            FieldInitExpression fie = newItem as FieldInitExpression;
-            if (fie != null)
-                return InExpression.FromValues(fie.ExternalId, entityIDs.TryGetC(fie.Type) ?? new object[0]);
+            EntityExpression ee = newItem as EntityExpression;
+            if (ee != null)
+                return InExpression.FromValues(ee.ExternalId, entityIDs.TryGetC(ee.Type) ?? new object[0]);
 
             ImplementedByExpression ib = newItem as ImplementedByExpression;
             if (ib != null)
-                return ib.Implementations.ToDictionary(a => a.Type, a => a.Field).JoinDictionary(entityIDs,
+                return ib.Implementations.ToDictionary(a => a.Type, a => a.Reference).JoinDictionary(entityIDs,
                     (t, f, values) => Expression.And(new IsNotNullExpression(f.ExternalId), InExpression.FromValues(f.ExternalId, values)))
                     .Values.AggregateOr();
 
@@ -378,13 +378,13 @@ namespace Signum.Engine.Linq
 
         public static Expression LiteEquals(Expression e1, Expression e2)
         {
-            if (e1 is LiteReferenceExpression || e2 is LiteReferenceExpression)
+            if (e1 is LiteExpression || e2 is LiteExpression)
             {
                 e1 = ConstantToLite(e1) ?? e1;
                 e2 = ConstantToLite(e2) ?? e2;
 
-                e1 = e1.IsNull() ? e1 : ((LiteReferenceExpression)e1).Reference;
-                e2 = e2.IsNull() ? e2 : ((LiteReferenceExpression)e2).Reference;
+                e1 = e1.IsNull() ? e1 : ((LiteExpression)e1).Reference;
+                e2 = e2.IsNull() ? e2 : ((LiteExpression)e2).Reference;
 
                 return PolymorphicEqual(e1, e2); //Conditional and Coalesce could be inside
             }
@@ -400,32 +400,32 @@ namespace Signum.Engine.Linq
             var tE1 = (DbExpressionType)e1.NodeType;
             var tE2 = (DbExpressionType)e2.NodeType;
 
-            if (tE1 == DbExpressionType.EmbeddedFieldInit && e2.IsNull())
-                return EmbeddedNullEquals((EmbeddedFieldInitExpression)e1);
-            if (tE2 == DbExpressionType.EmbeddedFieldInit && e1.IsNull())
-                return EmbeddedNullEquals((EmbeddedFieldInitExpression)e2);
+            if (tE1 == DbExpressionType.EmbeddedInit && e2.IsNull())
+                return EmbeddedNullEquals((EmbeddedEntityExpression)e1);
+            if (tE2 == DbExpressionType.EmbeddedInit && e1.IsNull())
+                return EmbeddedNullEquals((EmbeddedEntityExpression)e2);
 
-            if (tE1 == DbExpressionType.FieldInit)
-                if (tE2 == DbExpressionType.FieldInit) return FieFieEquals((FieldInitExpression)e1, (FieldInitExpression)e2);
-                else if (tE2 == DbExpressionType.ImplementedBy) return FieIbEquals((FieldInitExpression)e1, (ImplementedByExpression)e2);
-                else if (tE2 == DbExpressionType.ImplementedByAll) return FieIbaEquals((FieldInitExpression)e1, (ImplementedByAllExpression)e2);
-                else if (e2.IsNull()) return EqualsToNull(((FieldInitExpression)e1).ExternalId);
+            if (tE1 == DbExpressionType.Entity)
+                if (tE2 == DbExpressionType.Entity) return FieFieEquals((EntityExpression)e1, (EntityExpression)e2);
+                else if (tE2 == DbExpressionType.ImplementedBy) return FieIbEquals((EntityExpression)e1, (ImplementedByExpression)e2);
+                else if (tE2 == DbExpressionType.ImplementedByAll) return FieIbaEquals((EntityExpression)e1, (ImplementedByAllExpression)e2);
+                else if (e2.IsNull()) return EqualsToNull(((EntityExpression)e1).ExternalId);
                 else return null;
             else if (tE1 == DbExpressionType.ImplementedBy)
-                if (tE2 == DbExpressionType.FieldInit) return FieIbEquals((FieldInitExpression)e2, (ImplementedByExpression)e1);
+                if (tE2 == DbExpressionType.Entity) return FieIbEquals((EntityExpression)e2, (ImplementedByExpression)e1);
                 else if (tE2 == DbExpressionType.ImplementedBy) return IbIbEquals((ImplementedByExpression)e1, (ImplementedByExpression)e2);
                 else if (tE2 == DbExpressionType.ImplementedByAll) return IbIbaEquals((ImplementedByExpression)e1, (ImplementedByAllExpression)e2);
-                else if (e2.IsNull()) return ((ImplementedByExpression)e1).Implementations.Select(a => EqualsToNull(a.Field.ExternalId)).AggregateAnd();
+                else if (e2.IsNull()) return ((ImplementedByExpression)e1).Implementations.Select(a => EqualsToNull(a.Reference.ExternalId)).AggregateAnd();
                 else return null;
             else if (tE1 == DbExpressionType.ImplementedByAll)
-                if (tE2 == DbExpressionType.FieldInit) return FieIbaEquals((FieldInitExpression)e2, (ImplementedByAllExpression)e1);
+                if (tE2 == DbExpressionType.Entity) return FieIbaEquals((EntityExpression)e2, (ImplementedByAllExpression)e1);
                 else if (tE2 == DbExpressionType.ImplementedBy) return IbIbaEquals((ImplementedByExpression)e2, (ImplementedByAllExpression)e1);
                 else if (tE2 == DbExpressionType.ImplementedByAll) return IbaIbaEquals((ImplementedByAllExpression)e1, (ImplementedByAllExpression)e2);
                 else if (e2.IsNull()) return EqualsToNull(((ImplementedByAllExpression)e1).Id);
                 else return null;
             else if (e1.IsNull())
-                if (tE2 == DbExpressionType.FieldInit) return EqualsToNull(((FieldInitExpression)e2).ExternalId);
-                else if (tE2 == DbExpressionType.ImplementedBy) return ((ImplementedByExpression)e2).Implementations.Select(a => EqualsToNull(a.Field.ExternalId)).AggregateAnd();
+                if (tE2 == DbExpressionType.Entity) return EqualsToNull(((EntityExpression)e2).ExternalId);
+                else if (tE2 == DbExpressionType.ImplementedBy) return ((ImplementedByExpression)e2).Implementations.Select(a => EqualsToNull(a.Reference.ExternalId)).AggregateAnd();
                 else if (tE2 == DbExpressionType.ImplementedByAll) return EqualsToNull(((ImplementedByAllExpression)e2).Id);
                 else if (e2.IsNull()) return True;
                 else return null;
@@ -433,15 +433,15 @@ namespace Signum.Engine.Linq
             else return null;
         }
 
-        static Expression EmbeddedNullEquals(EmbeddedFieldInitExpression efie)
+        static Expression EmbeddedNullEquals(EmbeddedEntityExpression eee)
         {
-            if (efie.HasValue == null)
+            if (eee.HasValue == null)
                 return False; 
 
-            return Expression.Not(efie.HasValue);
+            return Expression.Not(eee.HasValue);
         }
 
-        static Expression FieFieEquals(FieldInitExpression fie1, FieldInitExpression fie2)
+        static Expression FieFieEquals(EntityExpression fie1, EntityExpression fie2)
         {
             if (fie1.Type == fie2.Type)
                 return EqualNullable(fie1.ExternalId, fie2.ExternalId);
@@ -449,23 +449,23 @@ namespace Signum.Engine.Linq
                 return False;
         }
 
-        static Expression FieIbEquals(FieldInitExpression fie, ImplementedByExpression ib)
+        static Expression FieIbEquals(EntityExpression ee, ImplementedByExpression ib)
         {
-            var imp = ib.Implementations.SingleOrDefaultEx(i => i.Type == fie.Type);
+            var imp = ib.Implementations.SingleOrDefaultEx(i => i.Type == ee.Type);
             if (imp == null)
                 return False;
 
-            return EqualNullable(imp.Field.ExternalId, fie.ExternalId); 
+            return EqualNullable(imp.Reference.ExternalId, ee.ExternalId); 
         }
 
-        static Expression FieIbaEquals(FieldInitExpression fie, ImplementedByAllExpression iba)
+        static Expression FieIbaEquals(EntityExpression ee, ImplementedByAllExpression iba)
         {
-            return Expression.And(EqualNullable(fie.ExternalId, iba.Id), EqualNullable(QueryBinder.TypeConstant(fie.Type), iba.TypeId.TypeColumn));
+            return Expression.And(EqualNullable(ee.ExternalId, iba.Id), EqualNullable(QueryBinder.TypeConstant(ee.Type), iba.TypeId.TypeColumn));
         }
 
         static Expression IbIbEquals(ImplementedByExpression ib, ImplementedByExpression ib2)
         {
-            var list = ib.Implementations.Join(ib2.Implementations, i => i.Type, j => j.Type, (i, j) => EqualNullable(i.Field.ExternalId, j.Field.ExternalId)).ToList();
+            var list = ib.Implementations.Join(ib2.Implementations, i => i.Type, j => j.Type, (i, j) => EqualNullable(i.Reference.ExternalId, j.Reference.ExternalId)).ToList();
 
             return list.AggregateOr();
         }
@@ -473,8 +473,8 @@ namespace Signum.Engine.Linq
         static Expression IbIbaEquals(ImplementedByExpression ib, ImplementedByAllExpression iba)
         {
             var list = ib.Implementations.Select(i => Expression.And(
-                EqualNullable(iba.Id, i.Field.ExternalId),
-                EqualNullable(iba.TypeId.TypeColumn, QueryBinder.TypeConstant(i.Field.Type)))).ToList();
+                EqualNullable(iba.Id, i.Reference.ExternalId),
+                EqualNullable(iba.TypeId.TypeColumn, QueryBinder.TypeConstant(i.Reference.Type)))).ToList();
 
             return list.AggregateOr();
         }
@@ -487,7 +487,7 @@ namespace Signum.Engine.Linq
 
         static Expression EqualsToNull(Expression exp)
         {
-            return new IsNullExpression(exp);
+            return EqualNullable(exp, QueryBinder.NullId);
         }
 
         public static Expression ConstantToEntity(Expression expression)
@@ -503,11 +503,9 @@ namespace Signum.Engine.Linq
             {
                 var ei = (IdentifiableEntity)c.Value; 
 
-                return new FieldInitExpression(
+                return new EntityExpression(
                     ei.GetType(),
-                    null,
-                    Expression.Constant(ei.IdOrNull ?? int.MinValue),
-                    ProjectionToken.External);
+                    Expression.Constant(ei.IdOrNull ?? int.MinValue), null, null);
             }
             
             return null;
@@ -530,14 +528,14 @@ namespace Signum.Engine.Linq
 
                 Type liteType = lite.GetType();
 
-                FieldInitExpression fie = new FieldInitExpression(lite.RuntimeType, null, id, ProjectionToken.External);
+                EntityExpression ere = new EntityExpression(lite.RuntimeType, id, null, null);
 
-                Type staticType = Reflector.ExtractLite(liteType);
-                Expression reference = staticType == fie.Type ? (Expression)fie :
+                Type staticType = Lite.Extract(liteType);
+                Expression reference = staticType == ere.Type ? (Expression)ere :
                     new ImplementedByExpression(staticType,
-                        new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
+                        new[] { new ImplementationColumn(ere.Type, ere) }.ToReadOnly());
 
-                return new LiteReferenceExpression(liteType,
+                return new LiteExpression(liteType,
                     reference, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.RuntimeType), false);
             }
 

@@ -17,7 +17,7 @@ namespace Signum.Web.Controllers
     {
         public override object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext) 
         {
-             Type cleanType = Reflector.ExtractLite(bindingContext.ModelType);
+            Type cleanType = Lite.Extract(bindingContext.ModelType);
              if (cleanType != null)
              {
                  string value = controllerContext.HttpContext.Request[bindingContext.ModelName];
@@ -35,7 +35,7 @@ namespace Signum.Web.Controllers
                  if (int.TryParse(value, out id))
                      return Lite.Create(cleanType, id);
 
-                 return TypeLogic.ParseLite(cleanType, value);
+                 return Lite.Parse(cleanType, value);
              }
              return base.BindModel(controllerContext, bindingContext);
         }

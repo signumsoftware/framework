@@ -24,7 +24,7 @@ namespace Signum.Services
             return Return(mi, null, function);
         }
 
-        protected virtual T Return<T>(MethodBase mi, string description, Func<T> function)
+        protected virtual T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
         {
             try
             {
@@ -49,9 +49,9 @@ namespace Signum.Services
             Return(mi, null, () => { action(); return true; });
         }
 
-        protected void Execute(MethodBase mi, string description, Action action)
+        protected void Execute(MethodBase mi, string description, Action action, bool checkLogin = true)
         {
-            Return(mi, description, () => { action(); return true; });
+            Return(mi, description, () => { action(); return true; }, checkLogin);
         }
 
         public static ExecutionContext GetDefaultExecutionContext(MethodBase mi, string desc)
@@ -111,6 +111,13 @@ namespace Signum.Services
         }
 
         [SuggestUserInterface]
+        public bool Exists(Type type, int id)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                  () => Database.Exists(type, id));
+        }
+
+        [SuggestUserInterface]
         public virtual Dictionary<Type, TypeDN> ServerTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -122,13 +129,6 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => TimeZoneManager.Now);
-        }
-
-        [SuggestUserInterface]
-        public virtual List<Lite<TypeDN>> TypesAssignableFrom(Type type)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () => TypeLogic.TypesAssignableFrom(type));
         }
 
         [SuggestUserInterface]
@@ -189,11 +189,6 @@ namespace Signum.Services
              () => DynamicQueryManager.Current.BatchExecute(requests));
         }
         #endregion
-
-
-
-
-
        
     }
 }

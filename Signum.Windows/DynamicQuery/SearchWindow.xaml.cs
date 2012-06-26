@@ -253,6 +253,8 @@ namespace Signum.Windows
             OkAndClose();
             
         }
+
+        public SearchControl SearchControl { get { return searchControl; } }
     }
 
     public enum SearchMode

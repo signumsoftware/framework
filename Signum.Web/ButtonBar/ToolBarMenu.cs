@@ -27,8 +27,11 @@ namespace Signum.Web
             HtmlProps["onclick"] = "SF.Dropdowns.toggle(event, this);";
             HtmlProps["data-icon-secondary"] = "ui-icon-triangle-1-s";
 
-            return helper.Div(Id,
-                Text.EncodeHtml().Concat(sb.ToHtml()), DivCssClass + " sf-dropdown", HtmlProps);
+            var title = new HtmlTag("div").InnerHtml(Text.EncodeHtml()).Class(DivCssClass)
+                .Attr("onclick", "SF.Dropdowns.toggle(event, this);")
+                .Attr("data-icon-secondary", "ui-icon-triangle-1-s").ToHtml();
+
+            return helper.Div(Id, title.Concat(sb.ToHtml()), "sf-dropdown");
         }
     }
 

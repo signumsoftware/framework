@@ -754,8 +754,8 @@ namespace Signum.Web
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             controller.ViewData[ViewDataKeys.QueryDescription] = qd;
-            
-            Type entitiesType = Reflector.ExtractLite(qd.Columns.SingleEx(a => a.IsEntity).Type);
+
+            Type entitiesType = Lite.Extract(qd.Columns.SingleEx(a => a.IsEntity).Type);
             string message = CollectionElementToken.MultipliedMessage(request.Multiplications, entitiesType);
             if (message.HasText())
                 controller.ViewData[ViewDataKeys.MultipliedMessage] = message;
@@ -831,25 +831,6 @@ namespace Signum.Web
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
             
-            //if (form[ViewDataKeys.Reactive] != null && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("New")))
-            //{
-            //    controller.ViewData[ViewDataKeys.Reactive] = true;
-            //    ModifiableEntity mod = (ModifiableEntity)controller.ControllerContext.HttpContext.Session[controller.TabID()];
-            //    if (mod == null)
-            //        throw new InvalidOperationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
-
-            //    RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[EntityBaseKeys.RuntimeInfo]);
-            //    if (mod.GetType() == parentRuntimeInfo.RuntimeType &&
-            //        (mod.GetType().IsEmbeddedEntity() || ((IIdentifiable)mod).IdOrNull == parentRuntimeInfo.IdOrNull))
-            //    {
-            //        //if (clone == null || clone.Value) 
-            //        //    return (ModifiableEntity)((ICloneable)mod).Clone();
-            //        return mod;
-            //    }
-            //    else
-            //        throw new InvalidOperationException(Resources.IncorrectEntityInSessionYouMustReloadThePageToContinue);
-            //}
-
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             if (runtimeInfo.IdOrNull != null)
                 return Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
@@ -862,6 +843,10 @@ namespace Signum.Web
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
+
+            if (!runtimeInfo.IdOrNull.HasValue)
+                throw new ArgumentException("Could not create a Lite without an Id");
+
             return new Lite<T>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
         }
 
