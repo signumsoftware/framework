@@ -55,7 +55,7 @@ namespace Signum.Entities.Authorization
 
         public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min)
         {
-            runtimeRules = GlobalLazy.Create(this.NewCache).InvalidateWith(typeof(RT));
+            runtimeRules = GlobalLazy.Create(this.NewCache).InvalidateWith(typeof(RT), typeof(RoleDN));
 
             this.ToKey = toKey;
             this.ToEntity = toEntity;
