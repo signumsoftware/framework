@@ -13,7 +13,8 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ContentControl}">
-                            <m:EntityRepeaterLineBorder BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1" m:Common.TypeContext="{m:ContinueRoute /}">
+                            <m:EntityRepeaterLineBorder BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1" 
+                                                        m:Common.TypeContext="{m:ContinueRoute /}">
                                 <Grid Loaded="Grid_Loaded" >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition  Width="*"/>
@@ -63,6 +64,7 @@
 			ItemsSource="{Binding Entities, ElementName=me, Mode=Default}" 
 			ItemTemplate="{Binding EntityTemplate, ElementName=me, Mode=Default}" 
 			ItemContainerStyle="{DynamicResource RepeaterItemStyle}"
+            ItemsPanel="{Binding ItemsTemplate, ElementName=me, Mode=Default}"
             HorizontalContentAlignment="Stretch"
 			HorizontalAlignment="Stretch" 
             VerticalAlignment="Stretch" />

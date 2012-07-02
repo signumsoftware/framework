@@ -39,6 +39,14 @@ namespace Signum.Windows
             set { SetValue(HorizontalScrollBarVisibilityProperty, value); }
         }
 
+        public static readonly DependencyProperty ItemsPanelProperty =
+            DependencyProperty.Register("ItemsPanel", typeof(ItemsPanelTemplate), typeof(EntityRepeater), new UIPropertyMetadata(null));
+        public ItemsPanelTemplate ItemsPanel
+        {
+            get { return (ItemsPanelTemplate)GetValue(ItemsPanelProperty); }
+            set { SetValue(ItemsPanelProperty, value); }
+        }
+
         public static readonly DependencyProperty IconProperty =
             DependencyProperty.Register("Icon", typeof(ImageSource), typeof(EntityRepeater), new UIPropertyMetadata(null));
         public ImageSource Icon
