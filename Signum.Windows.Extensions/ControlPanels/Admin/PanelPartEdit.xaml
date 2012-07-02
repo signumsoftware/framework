@@ -5,10 +5,20 @@
     xmlns:cp="clr-namespace:Signum.Entities.ControlPanel;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="cp:PanelPartEdit"
     MinWidth="600">
-    <StackPanel>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
         <m:ValueLine m:Common.Route="Title"/>
-        <m:ValueLine m:Common.Route="Row"/>
-        <m:ValueLine m:Common.Route="Column"/>
-        <m:EntityDetail m:Common.Route="Content"/>
-    </StackPanel>
-</UserControl>
+        <m:ValueLine m:Common.Route="Row" Grid.Row="1" Grid.Column="0"/>
+        <m:ValueLine m:Common.Route="Column" Grid.Row="1" Grid.Column="1"/>
+        <m:DataBorder m:Common.Route="Content" AutoChild="True" Grid.Row="2" Grid.ColumnSpan="2"/>
+
+    </Grid>
+    </UserControl>

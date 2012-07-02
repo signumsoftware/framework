@@ -13,25 +13,18 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
-using Signum.Entities.Exceptions;
+using Signum.Entities.ControlPanel;
 
-namespace Signum.Windows.ControlPanels
+namespace Signum.Windows.ControlPanels.Admin
 {
     /// <summary>
-    /// Interaction logic for ControlPanel.xaml
+    /// Interaction logic for LinkListPart.xaml
     /// </summary>
-    public partial class PanelPartEdit : UserControl
+    public partial class LinkListPart : UserControl
     {
-        public PanelPartEdit()
+        public LinkListPart()
         {
             InitializeComponent();
-        }
-
-        public PanelPartEdit(PropertyRoute pr)
-        {
-            InitializeComponent();
-
-            Common.SetTypeContext(this, pr);
         }
     }
 }

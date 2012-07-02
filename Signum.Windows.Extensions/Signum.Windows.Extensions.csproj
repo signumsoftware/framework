@@ -170,10 +170,23 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
+    <Compile Include="ControlPanels\Admin\CountSearchControlPart.xaml.cs">
+      <DependentUpon>CountSearchControlPart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\LinkListPart.xaml.cs">
+      <DependentUpon>LinkListPart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\UserChartPart.xaml.cs">
+      <DependentUpon>UserChartPart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\UserQueryPart.xaml.cs">
+      <DependentUpon>UserQueryPart.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ControlPanels\ControlPanelClient.cs" />
     <Compile Include="ControlPanels\Admin\PanelPartEdit.xaml.cs">
       <DependentUpon>PanelPartEdit.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ControlPanels\StackColumnPanel.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="ControlPanels\Admin\ControlPanelEdit.xaml.cs">
       <DependentUpon>ControlPanelEdit.xaml</DependentUpon>
@@ -480,9 +493,25 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="ControlPanels\Admin\CountSearchControlPart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\Admin\LinkListPart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ControlPanels\Admin\PanelPartEdit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\Admin\UserChartPart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\Admin\UserQueryPart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Disconnected\UploadProgress.xaml">
       <Generator>MSBuild:Compile</Generator>
