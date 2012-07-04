@@ -364,7 +364,7 @@ FROM {1} as [table]".Formato(
         {
             var query = Database.Query<T>().Where(pair.DownloadSubset).Select(a => a.Id);
 
-            return ((DbQueryProvider)query.Provider).GetMainPreCommand(query.Expression);
+            return Administrator.QueryPreCommand(query);
         }
     }
 
