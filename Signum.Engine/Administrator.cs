@@ -15,11 +15,12 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 using System.Collections.Concurrent;
+using Signum.Engine.Linq;
 
 namespace Signum.Engine
 {
     public static class Administrator
-    {      
+    {
         public static void TotalGeneration()
         {
             Connector.Current.CleanDatabase();
@@ -27,12 +28,12 @@ namespace Signum.Engine
             SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt();
             foreach (SqlPreCommand command in totalScript.Commands)
             {
-                command.ExecuteLeaves(); 
+                command.ExecuteLeaves();
             }
         }
 
         public static bool ExistTable<T>()
-            where T: IdentifiableEntity
+            where T : IdentifiableEntity
         {
             Table table = Schema.Current.Table<T>();
             return ExistTable(table.Name);
@@ -76,7 +77,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand TotalSynchronizeScript(bool interactive = true)
         {
-            return Schema.Current.SynchronizationScript(Connector.Current.DatabaseName(), interactive); 
+            return Schema.Current.SynchronizationScript(Connector.Current.DatabaseName(), interactive);
         }
 
 
@@ -163,14 +164,14 @@ namespace Signum.Engine
         }
 
         public static void SaveListDisableIdentity<T>(IEnumerable<T> entities)
-            where T:IdentifiableEntity
+            where T : IdentifiableEntity
         {
-              using (Transaction tr = new Transaction())
-              using (Administrator.DisableIdentity<T>())
-              {
-                  Database.SaveList(entities); 
-                  tr.Commit(); 
-              }
+            using (Transaction tr = new Transaction())
+            using (Administrator.DisableIdentity<T>())
+            {
+                Database.SaveList(entities);
+                tr.Commit();
+            }
         }
 
         public static void SetSnapshotIsolation(bool value)
@@ -195,6 +196,45 @@ namespace Signum.Engine
                     join f2 in Database.Query<T>() on key.Evaluate(f1) equals key.Evaluate(f2)
                     where f1.Id > f2.Id
                     select f1).UnsafeDelete();
+        }
+
+        public static SqlPreCommandSimple QueryPreCommand<T>(IQueryable<T> query)
+        {
+            var prov = ((DbQueryProvider)query.Provider);
+
+            return prov.Translate(query.Expression, tr => tr.MainPreCommand());
+        }
+
+        public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query) 
+            where T : IdentifiableEntity
+        {
+            var prov = ((DbQueryProvider)query.Provider);
+
+            return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+        }
+
+        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(this IQueryable<MListElement<E, V>> query) 
+            where E : IdentifiableEntity
+        {
+            var prov = ((DbQueryProvider)query.Provider);
+
+            return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+        }
+
+        public static SqlPreCommandSimple UnsafeUpdatePreCommand<T>(this IQueryable<T> query, Expression<Func<T, T>> updateConstructor)
+            where T : IdentifiableEntity
+        {
+            var prov = ((DbQueryProvider)query.Provider);
+
+            return prov.Update(query, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount:true);
+        }
+
+        public static SqlPreCommandSimple UnsafeUpdatePreCommand<E, V>(this IQueryable<MListElement<E, V>> query, Expression<Func<MListElement<E, V>, MListElement<E, V>>> updateConstructor)
+            where E : IdentifiableEntity
+        {
+            var prov = ((DbQueryProvider)query.Provider);
+
+            return prov.Update(query, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
         }
     }
 }
