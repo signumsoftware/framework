@@ -67,7 +67,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        Lazy<InsertCache> inserter;
+        ResetLazy<InsertCache> inserter;
 
         InsertCache InitializeInsert()
         {
@@ -276,7 +276,7 @@ namespace Signum.Engine.Maps
             public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update16; 
         }
 
-        Lazy<UpdateCache> updater;
+        ResetLazy<UpdateCache> updater;
 
         UpdateCache InitializeUpdate()
         {
@@ -445,7 +445,7 @@ namespace Signum.Engine.Maps
             public Action<IdentifiableEntity, Forbidden, bool> SaveCollections;
         }
 
-        Lazy<CollectionsCache> saveCollections;
+        ResetLazy<CollectionsCache> saveCollections;
 
         static GenericInvoker<Func<RelationalTable, RelationalTable.IInsertCache>> giCreateCache = new GenericInvoker<Func<RelationalTable, RelationalTable.IInsertCache>>(
             (RelationalTable rt)=>rt.CreateCache<int>());
