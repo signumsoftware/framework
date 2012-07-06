@@ -38,7 +38,7 @@ namespace Signum.Entities.Authorization
 
     class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions> 
     {
-        readonly Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules;
+        readonly ResetLazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules;
 
         DefaultBehaviour<TypeAllowedAndConditions> Min;
         DefaultBehaviour<TypeAllowedAndConditions> Max;

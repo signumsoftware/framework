@@ -229,12 +229,12 @@ namespace Signum.Engine.Cache
             public List<T> List { get { return pack.Value.List; } }
             public Dictionary<int, T> Dictionary { get { return pack.Value.Dictionary; } }
          
-            Lazy<Pack> pack;
+            ResetLazy<Pack> pack;
             
 
             public CacheLogicController(Schema schema)
             {
-                pack = new Lazy<Pack>(() =>
+                pack = new ResetLazy<Pack>(() =>
                 {
                     using (new EntityCache(true))
                     using (Schema.Current.GlobalMode())
@@ -261,7 +261,7 @@ namespace Signum.Engine.Cache
 
                         return tr.Commit(new Pack(result));
                     }
-                }, LazyThreadSafetyMode.PublicationOnly);
+                });
 
                 var ee = schema.EntityEvents<T>();
 
@@ -339,7 +339,7 @@ namespace Signum.Engine.Cache
 
             public void Invalidate(bool isClean)
             {
-                pack.ResetPublicationOnly();
+                pack.Reset();
                 if (Invalidation != null)
                     Invalidation();
 
