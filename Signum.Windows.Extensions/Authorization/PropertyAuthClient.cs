@@ -51,9 +51,7 @@ namespace Signum.Windows.Authorization
             {
                 switch (GetPropertyAllowed(context))
                 {
-                    case PropertyAllowed.None: fe.Visibility = Visibility.Collapsed; break;
                     case PropertyAllowed.Read: Common.SetIsReadOnly(fe, true); break;
-                    case PropertyAllowed.Modify: break;
                 }
             }
         }

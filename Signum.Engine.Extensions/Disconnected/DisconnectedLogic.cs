@@ -92,8 +92,21 @@ namespace Signum.Engine.Disconnected
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertDisconnectedStrategies;
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<IdentifiableEntity>(EntityEventsGlobal_Saving);
+
+                sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
             }
         }
+
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            TypeDN type = (TypeDN)arg;
+
+            var ce = Administrator.UnsafeDeletePreCommand(Database.MListQuery((DisconnectedExportDN de) => de.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
+            var ci = Administrator.UnsafeDeletePreCommand(Database.MListQuery((DisconnectedImportDN di) => di.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
+
+            return SqlPreCommand.Combine(Spacing.Simple, ce, ci);
+        }    
+  
 
         public static void UnsafeUnlock(Lite<DisconnectedMachineDN> machine)
         {

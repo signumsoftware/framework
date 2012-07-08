@@ -128,7 +128,7 @@ namespace Signum.Entities.Omnibox
 
             this.Distance = remaining;
 
-            if (BoldIndices[0] == 0)
+            if (boldIndices.Length > 0 && BoldIndices[0] == 0)
                 this.Distance /= 2f;
         }
 

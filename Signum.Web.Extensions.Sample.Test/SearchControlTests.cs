@@ -358,7 +358,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(2)); //Entity with id 1 of each type
 
             selenium.DeleteFilter(0);
-            selenium.FilterSelectToken(0, "label=IAuthor", true);
+            selenium.FilterSelectToken(0, "value=Entity", true);
             selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "value=(Artist)", true);
             selenium.ExpandTokens(2);
@@ -370,7 +370,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Create implemented type
             selenium.SearchCreateWithImpl("Artist");
-            Assert.IsTrue(selenium.IsElementPresent("jq=#Dead")); //there's an artist valueline
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Dead")); //there's an artist valueline
         }
 
         [TestMethod]

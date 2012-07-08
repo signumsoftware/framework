@@ -256,7 +256,9 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
+    <Compile Include="Chart\ChartOmniboxProvider.cs" />
     <Compile Include="Chart\Controllers\ChartController.cs" />
+    <Compile Include="Chart\UserChartOmniboxProvider.cs" />
     <Compile Include="Chart\Views\ChartBuilder.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -395,6 +397,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Omnibox\Controllers\OmniboxController.cs" />
+    <Compile Include="Omnibox\DynamicQueryOmniboxProvider.cs" />
+    <Compile Include="Omnibox\EntityOmniboxProvider.cs" />
+    <Compile Include="Omnibox\OmniboxClient.cs" />
     <Compile Include="Processes\Views\ProcessPanel.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -656,6 +662,7 @@
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
+    <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
     <Compile Include="UserQueries\UserQueriesHelper.cs" />
     <Compile Include="UserQueries\Views\QueryColumn.cs">
@@ -854,6 +861,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Omnibox\Scripts\SF_Omnibox.js" />
     <Content Include="Operations\Scripts\SF_Operations.js" />
     <Content Include="Processes\Scripts\SF_Process.js" />
     <Content Include="Processes\Views\_ViewStart.cshtml">

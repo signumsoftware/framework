@@ -23,8 +23,10 @@ namespace Signum.Web.Selenium
 
         public static void Search(this ISelenium selenium, string prefix)
         {
-            selenium.Click(SearchSelector(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RowSelector(selenium, 1, prefix)));
+            string searchButton = SearchSelector(prefix);
+            selenium.Click(searchButton);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) && 
+                !selenium.IsElementPresent("{0}.sf-searching".Formato(searchButton)));
         }
 
         public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage)

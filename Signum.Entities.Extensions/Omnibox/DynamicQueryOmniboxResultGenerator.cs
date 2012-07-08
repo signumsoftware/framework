@@ -477,12 +477,13 @@ namespace Signum.Entities.Omnibox
         {
             string token = QueryToken.TryCC(q => q.FullKey());
 
-            if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token)
+            if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token || CanFilter.HasText())
                 return token;
 
             string oper = DynamicQueryOmniboxResultGenerator.ToStringOperation(Operation.Value);
 
-            if (Syntax.Completion == FilterSyntaxCompletion.Operation && Value == null)
+            if ((Syntax.Completion == FilterSyntaxCompletion.Operation && Value == null) ||
+                Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
                 return token + oper;
 
             return token + oper + DynamicQueryOmniboxResultGenerator.ToStringValue(Value);

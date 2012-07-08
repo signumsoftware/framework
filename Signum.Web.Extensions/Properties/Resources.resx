@@ -477,4 +477,7 @@
   <data name="ViewPalette" xml:space="preserve">
     <value>View palette</value>
   </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
 </root>
