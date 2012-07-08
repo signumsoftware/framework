@@ -687,7 +687,6 @@ namespace Signum.Engine.Linq
                 {
                     sb.Append(";"); 
                     this.AppendNewLine(Indentation.Same);
-                    this.AppendNewLine(Indentation.Same);
                 }
                 this.Visit(command);
             }

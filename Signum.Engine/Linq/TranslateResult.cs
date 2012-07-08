@@ -255,11 +255,17 @@ namespace Signum.Engine.Linq
         internal Expression<Func<DbParameter[]>> GetParametersExpression;
         internal Func<DbParameter[]> GetParameters;
 
-        public int Execute()
+        public int ExecuteScalar()
         {
-            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            SqlPreCommandSimple command = ToPreCommand();
 
             return (int)Executor.ExecuteScalar(command);
+        }
+
+        public SqlPreCommandSimple ToPreCommand()
+        {
+            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            return command;
         }
     }
 }

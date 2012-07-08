@@ -143,6 +143,7 @@
     <Compile Include="Linq\ExpressionVisitor\TranslatorBuilder.cs" />
     <Compile Include="Linq\ExpressionVisitor\UnusedColumnRemover.cs" />
     <Compile Include="Linq\DbExpressions.Signum.cs" />
+    <Compile Include="Linq\ExpressionVisitor\UpdateDeleteSimplifier.cs" />
     <Compile Include="Linq\Meta\MetaEvaluator.cs" />
     <Compile Include="Linq\Meta\MetaExpression.cs" />
     <Compile Include="Linq\ProjectionReader.cs" />

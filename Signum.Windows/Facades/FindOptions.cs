@@ -218,13 +218,18 @@ namespace Signum.Windows
             set { SetValue(RealValueProperty, value); }
         }
 
-        public event EventHandler ValueChanged;
+        //public event EventHandler ValueChanged;
 
         public void RefreshRealValue()
         {
-            RealValue = Token != null ? Server.Convert(Value, Token.Type) : Value;
-            if (ValueChanged != null)
-                ValueChanged(this, EventArgs.Empty);
+            var newRealValue =Token != null ? Server.Convert(Value, Token.Type) : Value;
+
+            if(!object.Equals(newRealValue, RealValue))
+            {
+                RealValue = newRealValue; 
+                //if (ValueChanged != null)
+                //    ValueChanged(this, EventArgs.Empty);
+            }
         }
 
         public Filter ToFilter()

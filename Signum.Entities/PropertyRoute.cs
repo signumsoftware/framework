@@ -49,7 +49,7 @@ namespace Signum.Entities
                             (MemberInfo)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (mi == null)
-                throw new InvalidOperationException("{0} of {1} does not exist".Formato(fieldOrProperty, this));
+                throw new InvalidOperationException("{0}.{1} does not exist".Formato(this, fieldOrProperty));
 
             return Add(mi);
         }

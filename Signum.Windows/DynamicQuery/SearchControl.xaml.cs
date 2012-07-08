@@ -290,17 +290,13 @@ namespace Signum.Windows
 
         public SearchControl()
         {
-            //ColumnDragController = new DragController(col => CreateFilter((GridViewColumnHeader)col), DragDropEffects.Copy);
-
             this.InitializeComponent();
 
             FilterOptions = new FreezableCollection<FilterOption>();
             OrderOptions = new ObservableCollection<OrderOption>();
             ColumnOptions = new ObservableCollection<ColumnOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(100);
-            timer.Tick += new EventHandler(timer_Tick);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(SearchControl_DataContextChanged);
         }
 
         public static readonly DependencyProperty HideIfNotFindableProperty =
@@ -318,13 +314,16 @@ namespace Signum.Windows
                 return;
             }
 
-            if (!Navigator.IsFindable(s.NewValue))
+            if(!Navigator.IsFindable(s.NewValue))
             {
-                HideSeachControl(this);
+                 Common.VoteCollapsed(this);
+                return;
             }
 
-            Settings = Navigator.GetQuerySettings(s.NewValue);
+            Common.VoteVisible(this);
 
+
+            Settings = Navigator.GetQuerySettings(s.NewValue);
 
             Description = Navigator.Manager.GetQueryDescription(s.NewValue);
 
@@ -341,12 +340,8 @@ namespace Signum.Windows
                 throw new InvalidOperationException("Entity Column not found");
         }
 
-        public static Action<SearchControl> HideSeachControl = sc =>
-        {
-            var emptyParent = (FrameworkElement)sc.VisualParents().Where(a => a is SearchControl || a is GroupBox || a is TabControl || a is Panel && ((Panel)a).Children.Count == 0).Last();
-            emptyParent.Visibility = Visibility.Collapsed;
-        };
 
+      
         ColumnDescription entityColumn;
 
         ResultTable resultTable;
@@ -366,13 +361,15 @@ namespace Signum.Windows
         {
             this.Loaded -= SearchControl_Loaded;
 
-            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
+            if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null || !Navigator.IsFindable(QueryName))
             {
                 tokenBuilder.Token = null;
                 tokenBuilder.SubTokensEvent += q => new List<QueryToken>();
+
                 return;
             }
 
+            Common.VoteVisible(this);
           
             if (FilterColumn.HasText())
             {
@@ -398,11 +395,6 @@ namespace Signum.Windows
             GenerateListViewColumns();
 
             Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
-
-            foreach (var fo in FilterOptions)
-            {
-                fo.ValueChanged += new EventHandler(fo_ValueChanged);
-            }
 
             filterBuilder.Filters = FilterOptions;
             ((INotifyCollectionChanged)FilterOptions).CollectionChanged += FilterOptions_CollectionChanged;
@@ -451,21 +443,14 @@ namespace Signum.Windows
             filterBuilder.AddFilter(tokenBuilder.Token);
         }
 
-        DispatcherTimer timer;
-        void fo_ValueChanged(object sender, EventArgs e)
-        {
-            timer.Start();
-        }
-
-        void timer_Tick(object sender, EventArgs e)
+        void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (resultTable != null)
             {
                 Search();
             }
-
-            timer.Stop();
         }
+
 
         void SearchControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

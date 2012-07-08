@@ -263,9 +263,9 @@ namespace Signum.Engine
             {
                 if (PostRealCommit != null)
                 {
-                    foreach (Action item in PostRealCommit.GetInvocationList())
+                    foreach (Action<Dictionary<string, object>> item in PostRealCommit.GetInvocationList())
                     {
-                        item();
+                        item(this.UserData);
                     }
                 }
             }
@@ -327,9 +327,9 @@ namespace Signum.Engine
             {
                 if (PostRealCommit != null)
                 {
-                    foreach (Action item in PostRealCommit.GetInvocationList())
+                    foreach (Action<Dictionary<string, object>> item in PostRealCommit.GetInvocationList())
                     {
-                        item();
+                        item(this.UserData);
                     }
                 }
             }
