@@ -299,13 +299,16 @@ SF.registerModule("FindNavigator", function () {
         },
 
         search: function () {
+            var $searchButton = $(this.pf("qbSearch"));
+            $searchButton.addClass("sf-searching");
             var self = this;
             $.ajax({
                 url: (SF.isEmpty(this.findOptions.searchControllerUrl) ? this.control().attr("data-search-url") : this.findOptions.searchControllerUrl),
                 data: this.requestDataForSearch(),
                 async: this.findOptions.async,
                 success: function (r) {
-                    var idBtnSearch = $(self.pf("qbSearch")).attr('id');
+                    $searchButton.removeClass("sf-searching");
+                    var idBtnSearch = $searchButton.attr('id');
                     if (SF.FindNavigator.asyncSearchFinished[idBtnSearch])
                         SF.FindNavigator.asyncSearchFinished[idBtnSearch] = false;
 
