@@ -903,4 +903,33 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type m:EntityRepeaterContentControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type m:EntityRepeaterContentControl}">
+                    <Border BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1" 
+                                    m:Common.TypeContext="{m:ContinueRoute /}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition  Width="*"/>
+                                <ColumnDefinition  Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter 
+						                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+						                HorizontalAlignment="Stretch"  />
+                            <Button x:Name="PART_RemoveButton"
+                                        Style="{StaticResource RoundButton}" 
+                                        Content="{StaticResource Remove}" 
+                                        ToolTip="{m:Loc Remove}"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Visibility="{Binding RemoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}"
+                                        Grid.Column="1"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
