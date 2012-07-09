@@ -28,6 +28,14 @@ namespace Signum.Windows
             set { SetValue(EntitiesTypeProperty, value); }
         }
 
+        public static readonly DependencyProperty MoveProperty =
+            DependencyProperty.Register("Move", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(false, (d, e) => ((EntityList)d).UpdateVisibility()));
+        public bool Move
+        {
+            get { return (bool)GetValue(MoveProperty); }
+            set { SetValue(MoveProperty, value); }
+        }
+
         private void EntitiesTypeChanged(Type type)
         {
  	        Type = type.ElementType().ThrowIfNullC("EntitiesType must be a collection type");
