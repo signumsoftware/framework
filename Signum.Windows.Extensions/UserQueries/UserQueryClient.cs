@@ -11,6 +11,8 @@ using Signum.Entities.UserQueries;
 using Signum.Windows.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Windows.Omnibox;
+using System.Windows;
+using Signum.Utilities;
 
 namespace Signum.Windows.UserQueries
 {
@@ -21,7 +23,15 @@ namespace Signum.Windows.UserQueries
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryClient.Start();
-                Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Default) { View = _ => new UserQuery() });
+                Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Default) { View = _ => new UserQuery(), IsCreable = a => a });
+                Constructor.Register<UserQueryDN>(win =>
+                {
+                    MessageBox.Show(win,
+                        Signum.Windows.Extensions.Properties.Resources._0CanOnlyBeCreatedFromTheSearchWindow.Formato(typeof(UserQueryDN).NicePluralName()),
+                        Signum.Windows.Extensions.Properties.Resources.Create,
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return null;
+                }); 
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
             }
         }

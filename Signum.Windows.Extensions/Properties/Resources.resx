@@ -243,4 +243,10 @@
   <data name="Chart" xml:space="preserve">
     <value>Chart</value>
   </data>
+  <data name="_0CanOnlyBeCreatedFromTheChartWindow" xml:space="preserve">
+    <value>{0} can only be created from the chart window</value>
+  </data>
+  <data name="_0CanOnlyBeCreatedFromTheSearchWindow" xml:space="preserve">
+    <value>{0} can only be created from the search window</value>
+  </data>
 </root>

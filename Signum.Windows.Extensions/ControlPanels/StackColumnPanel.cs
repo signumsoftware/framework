@@ -37,6 +37,11 @@ namespace Signum.Windows.ControlPanels
 
         protected override Size MeasureOverride(Size availableSize)
         {
+            foreach (UIElement item in this.InternalChildren)
+            {
+                item.Measure(availableSize);
+            }
+
             Size maxSize = this.InternalChildren.Cast<UIElement>()
                 .GroupBy(a => GetColumn(a))
                 .Select(gr => new Size(gr.Max(a => a.DesiredSize.Width), gr.Sum(a => a.DesiredSize.Height)))
@@ -57,7 +62,7 @@ namespace Signum.Windows.ControlPanels
             {
                 double yPos = 0;
 
-                foreach (var item in gr)
+                foreach (var item in gr.OrderBy(a=>GetRow(a)))
                 {
                     item.Arrange(new Rect(new Point(xPos, yPos), new Size(colWidh, item.DesiredSize.Height)));
 

@@ -9,6 +9,9 @@ using System.Reflection;
 using Signum.Entities.Reports;
 using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
+using System.Windows;
+using Signum.Utilities;
+using Signum.Windows.Properties;
 
 namespace Signum.Windows.Chart
 {
@@ -26,8 +29,16 @@ namespace Signum.Windows.Chart
                 RendererConstructor = rendererConstructor; 
 
                 QueryClient.Start();
-
-                Navigator.AddSetting(new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart() });
+                
+                Navigator.AddSetting(new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart(), IsCreable = a => a });
+                Constructor.Register<UserChartDN>(win =>
+                {
+                    MessageBox.Show(win, 
+                        Signum.Windows.Extensions.Properties.Resources._0CanOnlyBeCreatedFromTheChartWindow.Formato(typeof(UserChartDN).NicePluralName()),
+                        Signum.Windows.Extensions.Properties.Resources.Create,
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return null;
+                }); 
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
 
                 UserChartDN.SetConverters(query => QueryClient.GetQueryName(query.Key), queryname => QueryClient.GetQuery(queryname));

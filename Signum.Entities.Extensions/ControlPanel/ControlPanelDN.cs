@@ -68,7 +68,7 @@ namespace Signum.Entities.ControlPanel
 
                 if (pi.Is(() => part.Column))
                 {
-                    if (part.Column > NumberOfColumns)
+                    if (part.Column >= NumberOfColumns)
                         return Resources.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.Formato(part.Title, part.Column, NumberOfColumns);
 
                     if (parts.Any(p => p != part && p.Row == part.Row && p.Column == part.Column))
@@ -85,7 +85,7 @@ namespace Signum.Entities.ControlPanel
             {
                 var rows = Parts.Select(p => p.Row).Distinct().ToList();
                 int maxRow = rows.Max();
-                var numbers = 1.To(maxRow + 1);
+                var numbers = 0.To(maxRow + 1);
                 if (maxRow != rows.Count)
                     return Resources.ControlPanelDN_Rows0DontHaveAnyParts.Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
             }

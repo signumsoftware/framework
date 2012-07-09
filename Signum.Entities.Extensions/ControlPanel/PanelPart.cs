@@ -22,16 +22,14 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref title, value, () => Title); }
         }
 
-        int row = 1;
-        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        int row;
         public int Row
         {
             get { return row; }
             set { Set(ref row, value, () => Row); }
         }
 
-        int column = 1;
-        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        int column;
         public int Column
         {
             get { return column; }
