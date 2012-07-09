@@ -183,9 +183,6 @@
       <DependentUpon>UserQueryPart.xaml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanels\ControlPanelClient.cs" />
-    <Compile Include="ControlPanels\Admin\PanelPartEdit.xaml.cs">
-      <DependentUpon>PanelPartEdit.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ControlPanels\StackColumnPanel.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="ControlPanels\Admin\ControlPanelEdit.xaml.cs">
@@ -500,10 +497,6 @@
     <Page Include="ControlPanels\Admin\LinkListPart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ControlPanels\Admin\PanelPartEdit.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="ControlPanels\Admin\UserChartPart.xaml">
       <SubType>Designer</SubType>

@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.Exceptions;
+using Signum.Entities.ControlPanel;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -22,9 +23,36 @@ namespace Signum.Windows.ControlPanels
     /// </summary>
     public partial class ControlPanelEdit : UserControl
     {
+        public ControlPanelDN Panel
+        {
+            get { return (ControlPanelDN)DataContext; }
+        }
+
         public ControlPanelEdit()
         {
             InitializeComponent();
+        }
+
+        private object EntityRepeater_Creating()
+        {
+            var win = Window.GetWindow(this);
+
+            var imp = (ImplementedByAttribute)PropertyRoute.Construct<ControlPanelDN>(cp => cp.Parts.First().Content).GetImplementations();
+
+            var type = Navigator.SelectType(win, imp.ImplementedTypes);
+
+            if (type == null)
+                return null;
+
+            var lastColumn = Panel.NumberOfColumns - 1;
+
+            return new PanelPart
+            {
+                Column = lastColumn,
+                Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row) ?? 0) + 1,
+                Content = (IIdentifiable)Constructor.Construct(type, win),
+                Title = null,
+            };
         }
     }
 }

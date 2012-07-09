@@ -11,18 +11,40 @@
         <m:ValueLine m:Common.Route="HomePage"/>
         <m:ValueLine m:Common.Route="DisplayName"/>
         <m:ValueLine m:Common.Route="NumberOfColumns"/>
-        <m:EntityRepeater m:Common.Route="Parts">
-            <m:EntityRepeater.Resources>
-                <Style x:Key="RepeaterItemStyle" TargetType="{x:Type ContentControl}">
+        <m:EntityRepeater m:Common.Route="Parts" Creating="EntityRepeater_Creating" ViewOnCreate="False">
+            <!--<m:EntityRepeater.Resources>
+                <Style TargetType="{x:Type ContentControl}">
                     <Setter Property="swcp:StackColumnPanel.Column" Value="{Binding Column}"/>
                     <Setter Property="swcp:StackColumnPanel.Row" Value="{Binding Row}"/>
                 </Style>
-            </m:EntityRepeater.Resources>
+            </m:EntityRepeater.Resources>-->
             <m:EntityRepeater.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <swcp:StackColumnPanel/>
+                    <StackPanel/>
+                    <!--<swcp:StackColumnPanel/>-->
                 </ItemsPanelTemplate>
             </m:EntityRepeater.ItemsPanel>
+            <m:EntityRepeater.EntityTemplate>
+                <DataTemplate DataType="{x:Type d:PanelPart}">
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <m:ValueLine m:Common.Route="Title"/>
+                        <m:ValueLine m:Common.Route="Row" Grid.Row="1" Grid.Column="0"/>
+                        <m:ValueLine m:Common.Route="Column" Grid.Row="1" Grid.Column="1"/>
+                        <m:DataBorder m:Common.Route="Content" AutoChild="True" Grid.Row="2" Grid.ColumnSpan="2"/>
+
+                    </Grid>
+
+                </DataTemplate>
+                </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
     </StackPanel>
 </UserControl>

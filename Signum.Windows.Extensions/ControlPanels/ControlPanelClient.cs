@@ -17,7 +17,6 @@ namespace Signum.Windows.ControlPanels
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
                     new EntitySettings<ControlPanelDN>(EntityType.Admin) { View = e => new ControlPanelEdit() },
-                    new EmbeddedEntitySettings<PanelPart> { View = (e, t) => new PanelPartEdit() },
 
                     new EntitySettings<CountSearchControlPartDN>(EntityType.Content) { View = e => new CountSearchControlPart() },
                     new EntitySettings<LinkListPartDN>(EntityType.Content) { View = e => new LinkListPart() },
