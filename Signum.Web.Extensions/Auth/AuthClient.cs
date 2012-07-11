@@ -151,7 +151,7 @@ namespace Signum.Web.Auth
                     new EntityOperationSettings(UserOperation.SaveNew) 
                     { 
                         OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveNewUser","Auth"))
-                            .validateAndAjax()
+                            .ajax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
                     },
 
                     new EntityOperationSettings(UserOperation.Save) 
