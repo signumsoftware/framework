@@ -224,6 +224,9 @@ namespace Signum.Web.Chart
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
+            if (ctx.Prefix.HasText())
+                return null;
+
             if (!ChartPermissions.ViewCharting.IsAuthorized())
                 return null;
 
