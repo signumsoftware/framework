@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>Logic</Title>
+			<Shortcut>logic</Shortcut>
+			<Description>New logic static class</Description>
+			<Author>Signum Software</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Engine</Namespace>
+          <Namespace>Signum.Entities</Namespace>
+          <Namespace>Signum.Utilities</Namespace>
+        </Import>
+      </Imports>
+			<Declarations>
+        <Literal>
+          <ID>entityName</ID>
+          <ToolTip>Name of the main entity</ToolTip>
+          <Default>Foo</Default>
+        </Literal>
+        <Literal>
+          <ID>methodName</ID>
+          <ToolTip>Name of one extension method</ToolTip>
+          <Default>Bla</Default>
+        </Literal>
+			</Declarations>
+			<Code Language="csharp">
+				<![CDATA[public static class $entityName$Logic
+    {
+        static Expression<Func<$entityName$DN, int>> $methodName$Expression = 
+            entity => $end$; 
+        public static int $methodName$(this $entityName$DN entity)
+        {
+            return $methodName$Expression.Evaluate(entity);
+        }
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                sb.Include<$entityName$DN>();
+
+                dqm[typeof($entityName$DN)] = (from a in Database.Query<$entityName$DN>()
+                                               select new
+                                               {
+                                                   Entity = a,
+                                                   a.Id
+                                                   //More fields
+                                               }).ToDynamic();
+
+                dqm.RegisterExpression(($entityName$DN a) => a.$methodName$());
+            }
+        }
+    }]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
