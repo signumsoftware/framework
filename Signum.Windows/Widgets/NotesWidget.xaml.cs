@@ -31,18 +31,20 @@ namespace Signum.Windows
 
         public static object NotesQuery { get; set; }
         public static string NotesQueryColumn { get; set; }
+        public static string NotesQueryOrder { get; set; }
+        public static OrderType? NotesQueryOrderType { get; set; }
 
         public NotesWidget()
         {
             InitializeComponent();
 
-           // lvNotas.AddHandler(Button.ClickEvent, new RoutedEventHandler(Note_MouseDown));
+            // lvNotas.AddHandler(Button.ClickEvent, new RoutedEventHandler(Note_MouseDown));
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(NotesWidget_DataContextChanged);
         }
 
         void NotesWidget_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            ReloadNotes(); 
+            ReloadNotes();
         }
 
         private void Note_MouseDown(object sender, RoutedEventArgs e)
@@ -75,9 +77,15 @@ namespace Signum.Windows
                 ShowFilters = false,
                 SearchOnLoad = true,
                 FilterOptions = { new FilterOption(NotesQueryColumn, DataContext) { Frozen = true } },
-                ColumnOptions  = { new ColumnOption(NotesQueryColumn) },
+                ColumnOptions = { new ColumnOption(NotesQueryColumn) },
                 ColumnOptionsMode = ColumnOptionsMode.Remove,
-                Closed = (_, __) => ReloadNotes() 
+                OrderOptions = NotesQueryOrder.HasText() 
+                    ? new List<OrderOption> 
+                    { 
+                        new OrderOption(NotesQueryOrder, NotesQueryOrderType.HasValue ? NotesQueryOrderType.Value : OrderType.Ascending) 
+                    } 
+                    : null,
+                Closed = (_, __) => ReloadNotes()
             });
         }
 
