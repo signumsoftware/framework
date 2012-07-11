@@ -454,6 +454,9 @@ namespace Signum.Engine.Maps
 
         public Implementations FindImplementations(PropertyRoute route)
         {
+            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                route = route.Parent;
+
             Type type = route.RootType;
 
             if (!Tables.ContainsKey(type))

@@ -284,14 +284,13 @@ namespace Signum.Entities.Reflection
 
         public static string FormatString(PropertyRoute route)
         {
-            if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
-                throw new InvalidOperationException("PropertyRoute of type Property expected");
+            var simpleRoute = route.SimplifyNoRoot();
 
-            FormatAttribute format = route.PropertyInfo.SingleAttribute<FormatAttribute>();
+            FormatAttribute format = simpleRoute.PropertyInfo.SingleAttribute<FormatAttribute>();
             if (format != null)
                 return format.Format;
 
-            var pp = Validator.GetOrCreatePropertyPack(route);
+            var pp = Validator.GetOrCreatePropertyPack(simpleRoute);
             if (pp != null)
             {
                 DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
