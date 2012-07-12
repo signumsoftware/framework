@@ -14,10 +14,14 @@ namespace Signum.Engine.Linq
     {
         internal static bool IsNull(this Expression e)
         {
-            ConstantExpression ce = e as ConstantExpression;
-            SqlConstantExpression sce = e as SqlConstantExpression;
-            return ce != null && ce.Value == null || 
-                sce != null && sce.Value == null;
+            switch (e.NodeType)
+            {
+                case ExpressionType.Convert: return ((UnaryExpression)e).Operand.IsNull();
+                case ExpressionType.Constant: return ((ConstantExpression)e).Value == null;
+                case (ExpressionType)DbExpressionType.SqlConstant: return ((SqlConstantExpression)e).Value == null;
+            }
+
+            return false;
         }
     }
 }
