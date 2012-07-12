@@ -155,6 +155,7 @@ namespace Signum.Web
                 string token = orderType == OrderType.Ascending ? tokenCapture : tokenCapture.Substring(1, tokenCapture.Length - 1);
                 return new OrderOption
                 {
+                    ColumnName = token,
                     Token = QueryUtils.Parse(token, subTokens),
                     OrderType = orderType
                 };
