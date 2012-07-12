@@ -237,6 +237,12 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
+        public ContentResult FindFullScreen(FindOptions findOptions)
+        {
+            return Content(findOptions.ToString());
+        }
+
+        [HttpPost]
         public PartialViewResult Search(QueryRequest queryRequest, bool? allowMultiple, bool view, FilterMode filterMode, string prefix)
         {
             return Navigator.Search(this, queryRequest, allowMultiple, view, filterMode, prefix);

@@ -167,6 +167,11 @@ SF.registerModule("FindNavigator", function () {
                     self.search();
                 }
             });
+
+            $(this.pf("sfFullScreen")).on("mousedown", function (e) {
+                e.preventDefault();
+                new SF.FindNavigator({ prefix: self.findOptions.prefix }).fullScreen(e);
+            });
         },
 
         createCtxMenu: function ($rightClickTarget) {
@@ -230,6 +235,22 @@ SF.registerModule("FindNavigator", function () {
             $td.append($menu);
 
             return false;
+        },
+
+        fullScreen: function (evt) {
+            SF.log("FindNavigator fullScreen");
+            $.ajax({
+                url: this.control().attr("data-find-fullscreen-url"),
+                data: this.requestDataForSearch(),
+                success: function (url) {
+                    if (evt.ctrlKey || evt.which == 2) {
+                        window.open(url);
+                    }
+                    else if (evt.which == 1) {
+                        window.location.href = url;
+                    }
+                }
+            });
         },
 
         openFinder: function () {

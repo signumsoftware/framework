@@ -68,6 +68,10 @@
     margin: .5em 5px 0;
     vertical-align: top;
 }
+.sf-query-fullscreen
+{
+    float: right;    
+}
 .sf-search-ctxmenu
 {
     border: 1px solid #aaa;
