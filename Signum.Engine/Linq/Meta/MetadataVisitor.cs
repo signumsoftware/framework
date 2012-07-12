@@ -408,6 +408,18 @@ namespace Signum.Engine.Linq
                     return new MetaExpression(memberType, new CleanMeta(new[]{ PropertyRoute.Root(source.Type).Add(pi)}));
             }
 
+            if (source.Type.IsLite() && member.Name == "Entity")
+            {
+                MetaExpression meta = (MetaExpression)source;
+
+                if (meta.Meta is CleanMeta)
+                {
+                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.Select(pr=>pr.Add("Entity")).ToArray();
+
+                    return new MetaExpression(memberType, new CleanMeta(routes));
+                }
+            }
+
             return MakeDirtyMeta(memberType, source);
         }
 

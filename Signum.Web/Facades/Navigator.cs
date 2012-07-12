@@ -406,6 +406,16 @@ namespace Signum.Web
         {
             Manager.Initialize();
         }
+
+        public static List<Lite<T>> ParseLiteKeys<T>(string commaSeparatedLites) where T : class, IIdentifiable
+        {
+            return commaSeparatedLites.Split(',').Select(Lite.Parse<T>).ToList();
+        }
+
+        public static List<Lite<T>> ParseLiteIds<T>(string commaSeparatedLites) where T : IdentifiableEntity
+        {
+            return commaSeparatedLites.Split(',').Select(str => new Lite<T>(int.Parse(str))).ToList();
+        }
     }
     
     public class NavigationManager

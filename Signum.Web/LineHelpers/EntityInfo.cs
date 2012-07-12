@@ -133,7 +133,7 @@ namespace Signum.Web
             RuntimeType = entity.GetType();
         }
 
-        public RuntimeInfo(IdentifiableEntity entity)
+        public RuntimeInfo(IIdentifiable entity)
         {
             if (entity == null)
             {

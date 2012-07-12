@@ -35,15 +35,22 @@ namespace Signum.Engine.DynamicQuery
                 propertyRoutes = value;
                 if (propertyRoutes != null)
                 {
+                    var pr = propertyRoutes.First();
+
+                    if (pr.PropertyRouteType == PropertyRouteType.Root)
+                        throw new InvalidOperationException("PropertyRoute can not be of RouteType Root");
+
+                    Format = GetFormat(propertyRoutes);
+                    Unit = GetUnit(propertyRoutes);
+                    Implementations = AggregateImplementations(propertyRoutes, Type.CleanType());
+
                     switch (propertyRoutes[0].PropertyRouteType)
                     {
                         case PropertyRouteType.LiteEntity:
                         case PropertyRouteType.Root:
-                            throw new InvalidOperationException("PropertyRoute can not be of RouteType Root");
+                           
                         case PropertyRouteType.FieldOrProperty:
-                            Format = GetFormat(propertyRoutes);
-                            Unit = GetUnit(propertyRoutes);
-                            Implementations = AggregateImplementations(PropertyRoutes, Type.CleanType());
+                          
                             return;
                         case PropertyRouteType.MListItems:
                             Format = Reflector.FormatString(propertyRoutes[0].Type);
@@ -55,7 +62,7 @@ namespace Signum.Engine.DynamicQuery
 
         internal static string GetUnit(PropertyRoute[] value)
         {
-            return value.Select(pr => pr.PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
+            return value.Select(pr => pr.SimplifyNoRoot().PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
         }
 
         internal static string GetFormat(PropertyRoute[] value)

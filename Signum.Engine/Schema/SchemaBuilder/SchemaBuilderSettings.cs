@@ -133,7 +133,10 @@ namespace Signum.Engine.Maps
 
         public Attribute[] Attributes(PropertyRoute route)
         {
-            var overriden = OverridenAttributes.TryGetC(route) ; 
+            if(route.PropertyRouteType == PropertyRouteType.Root || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(route.PropertyRouteType));
+
+            var overriden = OverridenAttributes.TryGetC(route); 
 
             if(overriden!= null)
                 return overriden; 
@@ -144,7 +147,6 @@ namespace Signum.Engine.Maps
                     return route.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
                 case PropertyRouteType.MListItems: 
                     return route.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray();
-
                 default:
                     throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(route.PropertyRouteType));
 	        }

@@ -85,6 +85,10 @@ namespace Signum.Engine.Linq
         static MethodInfo miOfTypeQ = ReflectionTools.GetMethodInfo(() => Queryable.OfType<int>((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miOfTypeE = ReflectionTools.GetMethodInfo(() => Enumerable.OfType<int>((IEnumerable<string>)null)).GetGenericMethodDefinition();
 
+        static MethodInfo miToString = ReflectionTools.GetMethodInfo(() => ((object)null).ToString());
+        static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
+        
+
         static int i = 0; 
 
         public static Expression Simplify(Expression expression)
@@ -399,6 +403,25 @@ namespace Signum.Engine.Linq
             }
 
             return base.VisitMemberAccess(m);
+        }
+
+        protected override Expression VisitBinary(BinaryExpression b)
+        {
+            var r = (BinaryExpression)base.VisitBinary(b);
+
+            if (r.NodeType == ExpressionType.Add &&
+                (r.Left.Type == typeof(string)) != (r.Right.Type == typeof(string)))
+                return Expression.Add(CallToString(r.Left), CallToString(r.Right), miStringConcat);
+
+            return r;
+        }
+
+        private Expression CallToString(Expression expression)
+        {
+            if (expression.Type == typeof(string))
+                return expression;
+
+            return Expression.Call(expression, miToString); 
         }
 
         public static bool ExtractDefaultIfEmpty(ref Expression expression)
