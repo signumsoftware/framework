@@ -22,7 +22,7 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Polymorphic<Action<ITaskDN>> ExecuteTask = new Polymorphic<Action<ITaskDN>>(); 
+        public static Polymorphic<Action<ITaskDN>> ExecuteTask = new Polymorphic<Action<ITaskDN>>();
 
         public static event Action<string, Exception> Error;
 
@@ -66,7 +66,7 @@ namespace Signum.Engine.Scheduler
                           st.Name,
                           Holidays = st.Holidays.Count,
                       }).ToDynamic();
-                
+
 
                 dqm[typeof(ScheduledTaskDN)] =
                     (from st in Database.Query<ScheduledTaskDN>()
@@ -101,8 +101,21 @@ namespace Signum.Engine.Scheduler
             ReloadPlan();
         }
 
+        static bool enabled = false;
+        public static bool Enabled
+        {
+            get { return enabled; }
+            set
+            {
+                enabled = value; if (enabled) ReloadPlan();
+            }
+        }
+
         public static void ReloadPlan()
         {
+            if (!enabled)
+                return;
+
             using (new EntityCache(true))
             using (AuthLogic.Disable())
                 lock (priorityQueue)
