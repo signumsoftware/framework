@@ -224,22 +224,28 @@ namespace Signum.Web.Chart
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
+            if (ctx.Prefix.HasText())
+                return null;
+
+            return new[] { ChartQueryButton(ctx.Prefix) };
+        }
+
+        public static ToolBarButton ChartQueryButton(string prefix)
+        {
             if (!ChartPermissions.ViewCharting.IsAuthorized())
                 return null;
 
             string chartNewText = Resources.Chart_Chart;
 
-            return new[]
-            {
+            return
                 new ToolBarButton
                 {
-                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
+                    Id = TypeContextUtilities.Compose(prefix, "qbChartNew"),
                     AltText = chartNewText,
                     Text = chartNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(ctx.Prefix).requestData()).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
-                }
-            };
+                };
         }
 
         public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
