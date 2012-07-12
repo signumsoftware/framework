@@ -324,6 +324,19 @@ namespace Signum.Entities
 
             return Equals(other);
         }
+
+        internal PropertyRoute SimplifyNoRoot()
+        {
+            switch (PropertyRouteType)
+            {
+                case PropertyRouteType.FieldOrProperty: return this;
+                case PropertyRouteType.LiteEntity: return this.Parent;
+                case PropertyRouteType.MListItems: return this.Parent;
+
+                default:
+                    throw new InvalidOperationException("PropertyRoute of type Root not expected");
+            }
+        }
     }
 
     public interface IImplementationsFinder

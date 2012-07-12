@@ -74,7 +74,7 @@ namespace Signum.Web
             List<ToolBarButton> elements = new List<ToolBarButton>();
 
             if (ctx.ManualQueryButtons != null)
-                elements.AddRange(ctx.ManualQueryButtons);
+                elements.AddRange(ctx.ManualQueryButtons.NotNull());
 
             var querySpecific = queryButtons.TryGetC(ctx.QueryName);
             if (querySpecific != null)
