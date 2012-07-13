@@ -232,6 +232,8 @@ SF.registerModule("Operations", function () {
                 return false;
             }
 
+            $('.sf-search-ctxmenu-overlay').remove();
+
             this.ajax(null, SF.opMarkCellOnSuccess);
         };
     };
@@ -282,6 +284,8 @@ SF.registerModule("Operations", function () {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
+
+            $('.sf-search-ctxmenu-overlay').remove();
 
             this.ajax(this.newPrefix(), SF.opContextualOnSuccess);
         };
