@@ -170,12 +170,25 @@ SF.Chart.Builder = (function () {
         });
     };
 
+    var fullScreen = function (evt, prefix) {
+        evt.preventDefault();
+        var url = $("#" + SF.compose(prefix, "sfChartContainer .sf-chart-container")).attr("data-fullscreen-url")
+                + "&" + this.requestData(prefix);
+        if (evt.ctrlKey || evt.which == 2) {
+            window.open(url);
+        }
+        else if (evt.which == 1) {
+            window.location.href = url;
+        }
+    };
+
     return {
         initOrders: initOrders,
         requestProcessedData: requestProcessedData,
         requestData: requestData,
         reDraw: reDraw,
-        exportData: exportData
+        exportData: exportData,
+        fullScreen: fullScreen
     };
 })();
 

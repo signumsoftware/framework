@@ -49,6 +49,20 @@ namespace Signum.Web.Chart
                 findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
         }
 
+        public ViewResult FullScreen(string prefix)
+        {
+            var request = ExtractChartRequestCtx(prefix, null).Value;
+
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+            Type entitiesType = Lite.Extract(entityColumn.Type);
+            Implementations implementations = entityColumn.Implementations;
+
+            return OpenChartRequest(request,
+                request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
+                (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
+        }
+
         ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool view)
         { 
             var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
