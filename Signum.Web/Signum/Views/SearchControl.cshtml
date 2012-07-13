@@ -26,7 +26,7 @@
      data-search-url="@Url.SignumAction("Search")"
      data-popup-save-url="@Url.SignumAction("TrySavePartial")"
      data-add-filter-url="@Url.Action("AddFilter", "Signum")" 
-     data-find-fullscreen-url="@Url.Action("FindFullScreen", "Signum")" 
+     data-find-url="@Navigator.FindRoute(findOptions.QueryName)" 
      @(findOptions.EntityContextMenu ? " data-entity-ctx-menu-url=" + Url.SignumAction("GetContextualPanel") : "")
      >
 

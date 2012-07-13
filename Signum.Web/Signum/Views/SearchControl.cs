@@ -117,10 +117,10 @@ WriteLiteral("\"\r\n     data-add-filter-url=\"");
 
                      Write(Url.Action("AddFilter", "Signum"));
 
-WriteLiteral("\" \r\n     data-find-fullscreen-url=\"");
+WriteLiteral("\" \r\n     data-find-url=\"");
 
 
-                          Write(Url.Action("FindFullScreen", "Signum"));
+               Write(Navigator.FindRoute(findOptions.QueryName));
 
 WriteLiteral("\" \r\n     ");
 

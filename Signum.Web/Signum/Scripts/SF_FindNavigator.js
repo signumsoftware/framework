@@ -220,18 +220,13 @@ SF.registerModule("FindNavigator", function () {
 
         fullScreen: function (evt) {
             SF.log("FindNavigator fullScreen");
-            $.ajax({
-                url: this.control().attr("data-find-fullscreen-url"),
-                data: this.requestDataForSearch(),
-                success: function (url) {
-                    if (evt.ctrlKey || evt.which == 2) {
-                        window.open(url);
-                    }
-                    else if (evt.which == 1) {
-                        window.location.href = url;
-                    }
-                }
-            });
+            var url = this.control().attr("data-find-url") + this.requestDataForSearchInUrl();
+            if (evt.ctrlKey || evt.which == 2) {
+                window.open(url);
+            }
+            else if (evt.which == 1) {
+                window.location.href = url;
+            }
         },
 
         openFinder: function () {
@@ -346,6 +341,22 @@ SF.registerModule("FindNavigator", function () {
             requestData["columnMode"] = 'Replace';
 
             requestData["prefix"] = this.findOptions.prefix;
+            return requestData;
+        },
+
+        requestDataForSearchInUrl: function () {
+            var requestData = "?elems=" + $(this.pf(this.elems)).val() +
+                "&page=" + $(this.pf(this.page)).val() +
+                "&allowMultiple=" + $(this.pf(this.allowMultiple)).val() +
+                "&filters=" + this.serializeFilters() +
+                "&filterMode=Visible" +
+                "&orders=" + this.serializeOrders() +
+                "&columns=" + this.serializeColumns() +
+                "&columnMode=" + "Replace";
+
+            var canView = $(this.pf(this.view)).val();
+            requestData += "&view=" + (SF.isEmpty(canView) ? true : canView);
+
             return requestData;
         },
 
