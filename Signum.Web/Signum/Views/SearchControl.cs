@@ -430,17 +430,20 @@ WriteLiteral("                        <th class=\"ui-state-default ");
 
                                                 Write((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"));
 
-WriteLiteral("\">\r\n                            <input type=\"hidden\" value=\"");
+WriteLiteral("\">\r\n                            <div class=\"sf-header-droppable sf-header-droppab" +
+"le-right\"></div>\r\n                            <div class=\"sf-header-droppable sf" +
+"-header-droppable-left\"></div>\r\n                            <input type=\"hidden\"" +
+" value=\"");
 
 
                                                    Write(col.Name);
 
-WriteLiteral("\" />\r\n                            ");
+WriteLiteral("\" />\r\n                            <span>");
 
 
-                       Write(col.DisplayName);
+                             Write(col.DisplayName);
 
-WriteLiteral("\r\n                        </th>\r\n");
+WriteLiteral("</span>\r\n                        </th>\r\n");
 
 
                     }

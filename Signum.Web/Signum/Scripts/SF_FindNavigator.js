@@ -53,7 +53,7 @@ SF.registerModule("FindNavigator", function () {
             var self = this;
 
             var closeMyOpenedCtxMenu = function (target) {
-                if ($(target).hasClass("sf-search-ctxmenu-overlay") || $(target).parents().hasClass("sf-search-ctxmenu-overlay")) {
+                if (self.control().find(".sf-search-ctxmenu-overlay").length > 0) {
                     $('.sf-search-ctxmenu-overlay').remove();
                     return false;
                 }
@@ -75,11 +75,6 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 }
                 self.headerContextMenu(e);
-                return false;
-            });
-
-            $tblResults.on("mousedown", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
-                this.onselectstart = function () { return false };
                 return false;
             });
 
@@ -143,15 +138,6 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("tblResults") + " .move-column-left," + this.pf("tblResults") + " .move-column-right").live('click', function (e) {
-                SF.log("contextmenu item click");
-                var $elem = $(this).closest("th");
-                $('.sf-search-ctxmenu-overlay').remove();
-
-                self.moveColumn($elem, e);
-                return false;
-            });
-
             $(this.pf("tblResults") + " .sf-pagination-button").live('click', function () {
                 SF.log("pagination button click");
                 $(self.pf(self.page)).val($(this).attr("data-page"));
@@ -172,13 +158,18 @@ SF.registerModule("FindNavigator", function () {
                 e.preventDefault();
                 new SF.FindNavigator({ prefix: self.findOptions.prefix }).fullScreen(e);
             });
+
+            this.createMoveColumnDragDrop();
         },
 
         createCtxMenu: function ($rightClickTarget) {
+            var left = $rightClickTarget.position().left + ($rightClickTarget.outerWidth() / 2);
+            var top = $rightClickTarget.position().top + ($rightClickTarget.outerHeight() / 2);
+            
             var $cmenu = $("<div class='sf-search-ctxmenu'></div>");
             $cmenu.css({
-                left: $rightClickTarget.position().left + ($rightClickTarget.outerWidth() / 2),
-                top: $rightClickTarget.position().top + ($rightClickTarget.outerHeight() / 2),
+                left: left,
+                top: top,
                 zIndex: '101'
             });
 
@@ -206,16 +197,6 @@ SF.registerModule("FindNavigator", function () {
             if (SF.isTrue($(this.pf(this.allowChangeColumns)).val())) {
                 $itemContainer.append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
                     .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
-
-                var thIndex = $th.index();
-                var extraCols = this.control().find(".th-col-entity,.th-col-selection");
-
-                if (thIndex > extraCols.length) {
-                    $itemContainer.append("<div class='sf-search-ctxitem move-column-left'>" + lang.signum.reorderColumn_MoveLeft + "</div>")
-                }
-                if (thIndex < $th.parent().children("th").length - 1) {
-                    $itemContainer.append("<div class='sf-search-ctxitem move-column-right'>" + lang.signum.reorderColumn_MoveRight + "</div>");
-                }
             }
 
             $th.append($menu);
@@ -564,7 +545,13 @@ SF.registerModule("FindNavigator", function () {
                 data: { "webQueryName": webQueryName, "tokenName": tokenName },
                 async: false,
                 success: function (columnNiceName) {
-                    $tblHeaders.append("<th class='ui-state-default'><input type=\"hidden\" value=\"" + tokenName + "\" />" + columnNiceName + "</th>");
+                    $tblHeaders.append("<th class='ui-state-default'>" +
+                        "<div class='sf-header-droppable sf-header-droppable-right'></div>" +
+                        "<div class='sf-header-droppable sf-header-droppable-left'></div>" +
+                        "<input type=\"hidden\" value=\"" + tokenName + "\" />" + 
+                        "<span>" + columnNiceName + "</span></th>");
+                    var $newTh = $tblHeaders.find("th:last");
+                    self.createMoveColumnDragDrop($newTh, $newTh.find(".sf-header-droppable"));
                 }
             });
         },
@@ -572,7 +559,6 @@ SF.registerModule("FindNavigator", function () {
         editColumn: function ($th) {
             SF.log("FindNavigator editColumn");
 
-            var $colTokenHidden = $th.find("input:hidden");
             var colName = $th.text().trim();
 
             var popupPrefix = SF.compose(this.findOptions.prefix, "newName");
@@ -588,30 +574,54 @@ SF.registerModule("FindNavigator", function () {
             var $tempContainer = $("<div></div>").append($div);
 
             new SF.ViewNavigator({
-                onOk: function () { $th.html($("#columnNewName > input:text").val()).append($colTokenHidden); },
+                onOk: function () { $th.find("span").html($("#columnNewName > input:text").val()); },
                 prefix: popupPrefix
             }).showViewOk($tempContainer.html());
         },
 
-        moveColumn: function ($th, e) {
+        moveColumn: function ($source, $target, before) {
             SF.log("FindNavigator moveColumn");
-            var $target = $(e.target);
-            var thIndex = $th.index();
-            var $ths = $th.parent().children("th");
-            if ($target.hasClass("move-column-left")) {
-                var $prevTh = $($ths[thIndex - 1]);
-                $th.detach();
-                $prevTh.before($th);
-            }
-            else if ($target.hasClass("move-column-right")) {
-                var $nextTh = $($ths[thIndex + 1]);
-                $th.detach();
-                $nextTh.after($th);
+            if (before) {
+                $target.before($source);
             }
             else {
-                throw "No direction was given to FindNavigator moveColumn";
+                $target.after($source);
             }
+
+            $source.removeAttr("style"); //remove absolute positioning
+            //$source.css({ position: "relative", left: 0, top: 0 });
+
             this.clearResults();
+            this.createMoveColumnDragDrop();
+        },
+
+        createMoveColumnDragDrop: function ($draggables, $droppables) {
+            $draggables = $draggables || $(this.pf("tblResults") + " th:not(.th-col-entity):not(.th-col-selection)");
+            $droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
+
+            $draggables.draggable({
+                revert: "invalid",
+                axis: "x",
+                opacity: 0.5,
+                distance: 8,
+                cursor: "move"
+            });
+            $draggables.removeAttr("style"); //remove relative positioning
+
+            var self = this;
+            $droppables.droppable({
+                hoverClass: "sf-header-droppable-active",
+                tolerance: "pointer",
+                drop: function (event, ui) {
+                    var $dragged = ui.draggable;
+
+                    var $targetPlaceholder = $(this); //droppable
+                    var $targetCol = $targetPlaceholder.closest("th");
+
+                    self.moveColumn($dragged, $targetCol, $targetPlaceholder.hasClass("sf-header-droppable-left"));
+                    //self.createMoveColumnDragDrop();
+                }
+            });
         },
 
         removeColumn: function ($th) {
