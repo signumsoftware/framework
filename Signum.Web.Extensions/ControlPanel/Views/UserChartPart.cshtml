@@ -45,7 +45,10 @@
                 }
             </div>
             <div id="@ucTc.Compose("sfChartContainer")">
-                <div class="sf-chart-container" data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)))"></div>
+                <div class="sf-chart-container" 
+                    data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)))" 
+                    data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(ucTc.ControlID)))">
+                </div>
             </div>
         </div>
         MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
@@ -63,6 +66,10 @@
                 var myChart = SF.Chart.Factory.getGraphType('@ucTc.Value.Chart.ChartType.ToString()');
                 
                 eval(myChart.createChartSVG('@divSelector') + myChart.paintChart('@divSelector'));
+
+                $("#" + SF.compose("@ucTc.ControlID", "sfFullScreen")).on("mousedown", function(e){
+                    SF.Chart.Builder.fullScreen(e, "@ucTc.ControlID");
+                });
             });
         </script>
     

@@ -160,12 +160,18 @@ WriteLiteral("            </div>\r\n            <div id=\"");
 
                 Write(ucTc.Compose("sfChartContainer"));
 
-WriteLiteral("\">\r\n                <div class=\"sf-chart-container\" data-open-url=\"");
+WriteLiteral("\">\r\n                <div class=\"sf-chart-container\" \r\n                    data-op" +
+"en-url=\"");
 
 
-                                                           Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)));
+                               Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)));
 
-WriteLiteral("\"></div>\r\n            </div>\r\n        </div>\r\n");
+WriteLiteral("\" \r\n                    data-fullscreen-url=\"");
+
+
+                                     Write(Url.Action<ChartController>(cc => cc.FullScreen(ucTc.ControlID)));
+
+WriteLiteral("\">\r\n                </div>\r\n            </div>\r\n        </div>\r\n");
 
 
         MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
@@ -198,7 +204,18 @@ WriteLiteral("\') + myChart.paintChart(\'");
 
                                                                              Write(divSelector);
 
-WriteLiteral("\'));\r\n            });\r\n        </script>\r\n");
+WriteLiteral("\'));\r\n\r\n                $(\"#\" + SF.compose(\"");
+
+
+                               Write(ucTc.ControlID);
+
+WriteLiteral("\", \"sfFullScreen\")).on(\"mousedown\", function(e){\r\n                    SF.Chart.Bu" +
+"ilder.fullScreen(e, \"");
+
+
+                                               Write(ucTc.ControlID);
+
+WriteLiteral("\");\r\n                });\r\n            });\r\n        </script>\r\n");
 
 
     
