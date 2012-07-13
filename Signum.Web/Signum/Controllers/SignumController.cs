@@ -239,6 +239,7 @@ namespace Signum.Web.Controllers
         [HttpPost]
         public ContentResult FindFullScreen(FindOptions findOptions)
         {
+            findOptions.FilterMode = FilterMode.Visible;
             return Content(findOptions.ToString());
         }
 
