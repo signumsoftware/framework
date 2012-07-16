@@ -29,7 +29,7 @@ namespace Signum.Web.Files
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (fileLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (sb.Surround(new HtmlTag("div").Id(fileLine.ControlID).Class("sf-field")))
             using (fileLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 sb.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/SF_Files.css") }).ToHtmlSelf());
