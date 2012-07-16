@@ -211,7 +211,7 @@ namespace Signum.Entities.Omnibox
             switch (ft)
             {
                 case FilterType.Number:
-                case FilterType.DecimalNumber: return new[] { new ValueTuple { Value = 0, Match = null } };
+                case FilterType.DecimalNumber: return new[] { new ValueTuple { Value = Activator.CreateInstance(queryToken.Type.UnNullify()), Match = null } };
                 case FilterType.String: return new[] { new ValueTuple { Value = "", Match = null } };
                 case FilterType.DateTime: return new[] { new ValueTuple { Value = DateTime.Today, Match = null } };
                 case FilterType.Lite:
