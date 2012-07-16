@@ -133,8 +133,10 @@ namespace Signum.Windows.Chart
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
 
-            if (autoSet!= null)
-                SetCurrent(autoSet);
+            var cuc = ChartClient.GetUserChart(ChartWindow);
+
+            if (cuc != null)
+                SetCurrent(cuc );
         }
 
         static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
@@ -212,16 +214,6 @@ namespace Signum.Windows.Chart
 
                 Initialize();
             }
-        }
-
-
-        [ThreadStatic]
-        static UserChartDN autoSet;
-        internal static IDisposable AutoSet(UserChartDN uc)
-        {
-            var old = autoSet;
-            autoSet = uc;
-            return new Disposable(() => autoSet = old);
         }
     }
 }

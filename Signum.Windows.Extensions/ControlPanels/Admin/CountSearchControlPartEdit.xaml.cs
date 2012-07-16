@@ -20,9 +20,9 @@ namespace Signum.Windows.ControlPanels.Admin
     /// <summary>
     /// Interaction logic for CountSearchControlPart.xaml
     /// </summary>
-    public partial class CountSearchControlPart : UserControl
+    public partial class CountSearchControlPartEdit : UserControl
     {
-        public CountSearchControlPart()
+        public CountSearchControlPartEdit()
         {
             InitializeComponent();
         }

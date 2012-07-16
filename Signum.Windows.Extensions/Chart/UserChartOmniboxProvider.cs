@@ -30,19 +30,18 @@ namespace Signum.Windows.Chart
 
         public override void OnSelected(UserChartOmniboxResult result)
         {
-            UserChartDN uq = result.UserChart.RetrieveAndForget();
+            UserChartDN uc = result.UserChart.RetrieveAndForget();
 
-            var query = QueryClient.queryNames[uq.Query.Key];
+            var query = QueryClient.queryNames[uc.Query.Key];
 
-            using (UserChartMenuItem.AutoSet(uq))
+            ChartWindow window = new ChartWindow()
             {
-                ChartWindow window = new ChartWindow()
-                {
-                    DataContext = new ChartRequest(query)
-                };
+                DataContext = new ChartRequest(query)
+            };
 
-                window.Show();
-            }
+            ChartClient.SetUserChart(window, uc);
+
+            window.Show();
         }
     }
 }

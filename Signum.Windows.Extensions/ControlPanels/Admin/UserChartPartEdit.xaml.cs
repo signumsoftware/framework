@@ -18,11 +18,11 @@ using Signum.Entities.ControlPanel;
 namespace Signum.Windows.ControlPanels.Admin
 {
     /// <summary>
-    /// Interaction logic for LinkListPart.xaml
+    /// Interaction logic for UserChartPart.xaml
     /// </summary>
-    public partial class LinkListPart : UserControl
+    public partial class UserChartPartEdit : UserControl
     {
-        public LinkListPart()
+        public UserChartPartEdit()
         {
             InitializeComponent();
         }

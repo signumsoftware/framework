@@ -11,7 +11,7 @@
     {
         @Html.EntityLine(tc, cp => cp.Related, el => el.Create = false)
         @Html.ValueLine(tc, cp => cp.DisplayName)
-        @Html.ValueLine(tc, cp => cp.HomePage)
+        @Html.ValueLine(tc, cp => cp.HomePagePriority)
         @Html.ValueLine(tc, cp => cp.NumberOfColumns)
     
         Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);

@@ -18,6 +18,41 @@ namespace Signum.Windows.UserQueries
 {
     public class UserQueryClient
     {
+        public static readonly DependencyProperty UserQueryProperty =
+            DependencyProperty.RegisterAttached("UserQuery", typeof(UserQueryDN), typeof(UserQueryClient), new FrameworkPropertyMetadata((s, e)=>OnUserQueryChanged(s, (UserQueryDN)e.NewValue)));
+        public static UserQueryDN GetUserQuery(DependencyObject obj)
+        {
+            return (UserQueryDN)obj.GetValue(UserQueryProperty);
+        }
+
+        public static void SetUserQuery(DependencyObject obj, UserQueryDN value)
+        {
+            obj.SetValue(UserQueryProperty, value);
+        }
+
+        private static void OnUserQueryChanged(DependencyObject s, UserQueryDN uc)
+        {
+            var csc = s as CountSearchControl;
+            if (csc != null)
+            {
+                csc.QueryName = QueryClient.queryNames[uc.Query.Key];
+                UserQueryClient.ToCountSearchControl(uc, csc);
+                csc.Search();
+                return;
+            }
+
+            var sc = s as SearchControl;
+            if (sc != null && sc.ShowHeader == false)
+            {
+                sc.QueryName = QueryClient.queryNames[uc.Query.Key];
+                UserQueryClient.ToSearchControl(uc, sc);
+                sc.Search();
+                return;
+            }
+
+            return;
+        }
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -71,13 +106,39 @@ namespace Signum.Windows.UserQueries
                 Path = of.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
-
-            Navigator.Manager.SetFilterTokens(searchControl.QueryName, filters);
-            Navigator.Manager.SetOrderTokens(searchControl.QueryName, orders); 
-                     
+         
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
 
             searchControl.ElementsPerPage = uq.ElementsPerPage ?? FindOptions.DefaultElementsPerPage;
         }
+
+        internal static void ToCountSearchControl(UserQueryDN uq, CountSearchControl countSearchControl)
+        {
+            var filters = uq.Filters.Select(qf => new FilterOption
+            {
+                Path = qf.Token.FullKey(),
+                Operation = qf.Operation,
+                Value = qf.Value
+            }).ToList();
+
+            var columns = uq.Columns.Select(qc => new ColumnOption
+            {
+            
+                Path = qc.Token.FullKey(),
+                DisplayName = qc.DisplayName
+            }).ToList();
+
+            var orders = uq.Orders.Select(of => new OrderOption
+            {
+                Path = of.Token.FullKey(),
+                OrderType = of.OrderType,
+            }).ToList();
+
+            Navigator.Manager.SetFilterTokens(countSearchControl.QueryName, filters);
+            Navigator.Manager.SetOrderTokens(countSearchControl.QueryName, orders);
+
+            countSearchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
+        }
+        
     }
 }

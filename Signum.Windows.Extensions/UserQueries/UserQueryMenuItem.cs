@@ -110,8 +110,10 @@ namespace Signum.Windows.UserQueries
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", notNullAndEditable));
 
-            if (autoSet != null)
-                SetUserQuery(autoSet);
+            var uq = UserQueryClient.GetUserQuery(SearchControl);
+
+            if (uq != null)
+                SetUserQuery(uq);
         }
 
         static IValueConverter notNullAndEditable = ConverterFactory.New((UserQueryDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
@@ -186,16 +188,6 @@ namespace Signum.Windows.UserQueries
 
                 Initialize();
             }
-        }
-
-
-        [ThreadStatic]
-        static UserQueryDN autoSet;
-        internal static IDisposable AutoSet(UserQueryDN uq)
-        {
-            var old = autoSet;
-            autoSet = uq;
-            return new Disposable(() => autoSet = old); 
         }
     }
 }

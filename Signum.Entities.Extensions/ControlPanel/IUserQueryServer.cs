@@ -6,16 +6,14 @@ using System.ServiceModel;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
+using Signum.Entities.ControlPanel;
 
 namespace Signum.Services
 {
     [ServiceContract]
-    public interface IUserQueryServer
+    public interface IControlPanelServer
     {
         [OperationContract, NetDataContract]
-        List<Lite<UserQueryDN>> GetUserQueries(object queryName);
-
-        [OperationContract, NetDataContract]
-        void RemoveUserQuery(Lite<UserQueryDN> lite);
+        ControlPanelDN GetHomePageControlPanel();
     }
 }

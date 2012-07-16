@@ -20,11 +20,11 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref related, value, () => Related); }
         }
 
-        bool homePage;
-        public bool HomePage
+        int? homePagePriority;
+        public int? HomePagePriority
         {
-            get { return homePage; }
-            set { Set(ref homePage, value, () => HomePage); }
+            get { return homePagePriority; }
+            set { Set(ref homePagePriority, value, () => HomePagePriority); }
         }
 
         string displayName;

@@ -29,13 +29,16 @@ using Signum.Engine.Exceptions;
 using System.IO;
 using System.Xml;
 using Signum.Engine.Profiler;
+using Signum.Entities.ControlPanel;
+using Signum.Engine.ControlPanel;
 
 
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, 
-        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, 
-        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
+        IChartServer, IExcelReportServer, IUserQueryServer, IControlPanelServer,
+        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, 
+        ISmsServer,
         IProfilerServer
     {
         protected override T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
@@ -435,5 +438,11 @@ namespace Signum.Services
                 ProfilerLogic.ProfilerEntries(entries)); 
         }
         #endregion
+
+        public ControlPanelDN GetHomePageControlPanel()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ControlPanelLogic.GetHomePageControlPanel());
+        }
     }
 }

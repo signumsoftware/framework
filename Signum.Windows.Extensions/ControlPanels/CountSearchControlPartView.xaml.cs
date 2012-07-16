@@ -15,14 +15,14 @@ using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.ControlPanel;
 
-namespace Signum.Windows.ControlPanels.Admin
+namespace Signum.Windows.ControlPanels
 {
     /// <summary>
     /// Interaction logic for UserQueryPart.xaml
     /// </summary>
-    public partial class UserQueryPart : UserControl
+    public partial class CountSearchControlPartView : UserControl
     {
-        public UserQueryPart()
+        public CountSearchControlPartView()
         {
             InitializeComponent();
         }

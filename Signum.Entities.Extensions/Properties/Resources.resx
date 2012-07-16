@@ -294,9 +294,6 @@
   <data name="_0IsNotMultiple1" xml:space="preserve">
     <value>{0} is not multiple of {1}</value>
   </data>
-  <data name="ControlPanelDN_PartTitleMustBeSpecifiedForListParts" xml:space="preserve">
-    <value>Part title must be specified for list parts</value>
-  </data>
   <data name="ExpressionCanNotBeAnAggregate" xml:space="preserve">
     <value>Expression can not be an aggregate</value>
   </data>
@@ -323,5 +320,8 @@
   </data>
   <data name="Chart" xml:space="preserve">
     <value>Chart</value>
+  </data>
+  <data name="ControlPanelDN_TitleMustBeSpecifiedFor0" xml:space="preserve">
+    <value>Title must be specified for {0}</value>
   </data>
 </root>

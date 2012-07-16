@@ -32,10 +32,10 @@ namespace Signum.Windows.UserQueries
 
             var query = QueryClient.queryNames[uq.Query.Key];
 
-            using (UserQueryMenuItem.AutoSet(uq))
+            Navigator.Explore(new ExploreOptions(query)
             {
-                Navigator.Explore(new ExploreOptions(query));
-            }
+                InitializeSearchControl = sc => UserQueryClient.SetUserQuery(sc, uq)
+            });
         }
     }
 }

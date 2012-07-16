@@ -37,8 +37,8 @@ namespace Signum.Entities.ControlPanel
         }
 
         [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
-        IIdentifiable content;
-        public IIdentifiable Content
+        IPanelPartContent content;
+        public IPanelPartContent Content
         {
             get { return content; }
             set { Set(ref content, value, () => Content); }
@@ -53,16 +53,21 @@ namespace Signum.Entities.ControlPanel
         {
             if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
             {
-                if (content != null && (content.GetType() == typeof(CountSearchControlPartDN) || content.GetType() == typeof(LinkListPartDN)))
-                    return Resources.ControlPanelDN_PartTitleMustBeSpecifiedForListParts;
+                if (content != null && content.RequiresTitle)
+                    return  Resources.ControlPanelDN_TitleMustBeSpecifiedFor0.Formato(content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);
         }
     }
 
+    public interface IPanelPartContent : IIdentifiable
+    {
+        bool RequiresTitle { get; }
+    }
+
     [Serializable]
-    public class UserQueryPartDN : Entity
+    public class UserQueryPartDN : Entity, IPanelPartContent
     {
         UserQueryDN userQuery;
         [NotNullValidator]
@@ -77,10 +82,15 @@ namespace Signum.Entities.ControlPanel
         {
             return userQuery == null ? null : ToStringExpression.Evaluate(this);
         }
+
+        public bool RequiresTitle
+        {
+            get { return false; }
+        }
     }
 
     [Serializable]
-    public class UserChartPartDN : Entity
+    public class UserChartPartDN : Entity, IPanelPartContent
     {
         UserChartDN userChart;
         [NotNullValidator]
@@ -95,10 +105,15 @@ namespace Signum.Entities.ControlPanel
         {
             return userChart == null ? null : ToStringExpression.Evaluate(this);
         }
+
+        public bool RequiresTitle
+        {
+            get { return false; }
+        }
     }
 
     [Serializable]
-    public class CountSearchControlPartDN : Entity
+    public class CountSearchControlPartDN : Entity, IPanelPartContent
     {
         MList<CountUserQueryElement> userQueries = new MList<CountUserQueryElement>();
         public MList<CountUserQueryElement> UserQueries
@@ -110,6 +125,11 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return "{0} {1}".Formato(userQueries.Count, typeof(UserQueryDN).NicePluralName());
+        }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
         }
     }
 
@@ -133,7 +153,7 @@ namespace Signum.Entities.ControlPanel
     }
 
     [Serializable]
-    public class LinkListPartDN : Entity
+    public class LinkListPartDN : Entity, IPanelPartContent
     {
         MList<LinkElement> links = new MList<LinkElement>();
         public MList<LinkElement> Links
@@ -145,6 +165,11 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
+        }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
         }
     }
 

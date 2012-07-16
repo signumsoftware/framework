@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Signum.Windows.ControlPanels.ControlPanelEdit"
+﻿<UserControl x:Class="Signum.Windows.ControlPanels.Admin.ControlPanelEdit"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
@@ -8,7 +8,7 @@
     MinWidth="600">
     <StackPanel>
         <m:EntityLine m:Common.Route="Related"/>
-        <m:ValueLine m:Common.Route="HomePage"/>
+        <m:ValueLine m:Common.Route="HomePagePriority"/>
         <m:ValueLine m:Common.Route="DisplayName"/>
         <m:ValueLine m:Common.Route="NumberOfColumns"/>
         <m:EntityRepeater m:Common.Route="Parts" Creating="EntityRepeater_Creating" ViewOnCreate="False">

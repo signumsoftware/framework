@@ -13,8 +13,6 @@ using Signum.Entities;
 using Signum.Entities.Reports;
 using Signum.Web.Extensions.Properties;
 using Signum.Web.Controllers;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Chart;
 
 namespace Signum.Web.ControlPanel
 {
@@ -39,8 +37,8 @@ namespace Signum.Web.ControlPanel
 
         public static Dictionary<Type, PartViews> PanelPartViews = new Dictionary<Type, PartViews>()
         {
-            { typeof(UserChartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) },
-            { typeof(UserQueryDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) },
+            { typeof(UserChartPartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) },
+            { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) },
             { typeof(CountSearchControlPartDN), new PartViews(ViewPrefix.Formato("CountSearchControlPart"), AdminViewPrefix.Formato("CountSearchControlPart")) },
             { typeof(LinkListPartDN), new PartViews(ViewPrefix.Formato("LinkListPart"), AdminViewPrefix.Formato("LinkListPart")) },
         };

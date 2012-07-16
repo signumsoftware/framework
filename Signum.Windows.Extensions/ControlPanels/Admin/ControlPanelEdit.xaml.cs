@@ -16,7 +16,7 @@ using Signum.Entities;
 using Signum.Entities.Exceptions;
 using Signum.Entities.ControlPanel;
 
-namespace Signum.Windows.ControlPanels
+namespace Signum.Windows.ControlPanels.Admin
 {
     /// <summary>
     /// Interaction logic for ControlPanelEdit.xaml
@@ -50,7 +50,7 @@ namespace Signum.Windows.ControlPanels
             {
                 Column = lastColumn,
                 Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row) ?? 0) + 1,
-                Content = (IIdentifiable)Constructor.Construct(type, win),
+                Content = (IPanelPartContent)Constructor.Construct(type, win),
                 Title = null,
             };
         }

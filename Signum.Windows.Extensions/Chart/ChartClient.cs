@@ -17,6 +17,17 @@ namespace Signum.Windows.Chart
 {
     public static class ChartClient
     {
+        public static readonly DependencyProperty UserChartProperty =
+            DependencyProperty.RegisterAttached("UserChart", typeof(UserChartDN), typeof(ChartClient), new UIPropertyMetadata(null));
+        public static UserChartDN GetUserChart(DependencyObject obj)
+        {
+            return (UserChartDN)obj.GetValue(UserChartProperty);
+        }
+        public static void SetUserChart(DependencyObject obj, UserChartDN value)
+        {
+            obj.SetValue(UserChartProperty, value);
+        }
+
         static Func<ChartRendererBase> RendererConstructor; 
 
         public static void Start(Func<ChartRendererBase> rendererConstructor)

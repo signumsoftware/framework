@@ -32,7 +32,7 @@ namespace Signum.Web.ControlPanel
                 Row = higherRowFirstColumn + 1,
                 Column = 1,
                 Title = "",
-                Content = (IIdentifiable)Activator.CreateInstance(Navigator.ResolveType(partType))
+                Content = (IPanelPartContent)Activator.CreateInstance(Navigator.ResolveType(partType))
             };
 
             cp.Parts.Add(newPart);
