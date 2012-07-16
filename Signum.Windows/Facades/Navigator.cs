@@ -587,6 +587,9 @@ namespace Signum.Windows
                 Title = options.WindowTitle ?? SearchTitle(options.QueryName)
             };
 
+            if (options.InitializeSearchControl != null)
+                options.InitializeSearchControl(sw.SearchControl);
+
             if (TaskSearchWindow != null)
                 TaskSearchWindow(sw, options.QueryName);
 
