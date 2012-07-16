@@ -75,16 +75,25 @@ namespace Signum.Web
 
         protected virtual JsOptionsBuilder OptionsJSInternal()
         {
-            return new JsOptionsBuilder(false)
+            var options = new JsOptionsBuilder(false)
             {
-                {"prefix", ControlID.SingleQuote()},
-                {"onEntityChanged", "function(){ " + OnEntityChanged + " }"}, 
+                {"prefix", ControlID.SingleQuote()}
             };
+
+            if (OnEntityChanged.HasText())
+                options.Add("onEntityChanged", "function(){ " + OnEntityChanged + " }");
+            
+            return options;
         }
 
         public virtual JsViewOptions DefaultJsViewOptions()
         {
-            return new JsViewOptions { PartialViewName = this.PartialViewName };
+            var options = new JsViewOptions();
+
+            if (PartialViewName.HasText())
+                options.PartialViewName = this.PartialViewName;
+            
+            return options;
         }
 
         public JsFindOptions DefaultJsfindOptions()
