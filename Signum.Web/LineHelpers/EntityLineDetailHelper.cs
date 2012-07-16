@@ -25,7 +25,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Class("sf-line-detail-field")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(entityDetail.ControlID).Class("sf-line-detail-field")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {

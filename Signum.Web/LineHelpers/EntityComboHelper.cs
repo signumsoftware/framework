@@ -31,7 +31,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("sf-field")): null)
+            using (sb.Surround(new HtmlTag("div").Id(entityCombo.ControlID).Class("sf-field")))
             using (entityCombo.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityCombo.ValueFirst)

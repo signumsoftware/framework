@@ -24,7 +24,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (sb.Surround(new HtmlTag("div").Id(entityList.ControlID).Class("sf-field")))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
 
@@ -38,7 +38,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList)));
                 }
 
-                using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field-list")) : null)
+                using (sb.Surround(new HtmlTag("div").Class("sf-field-list")))
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
                     

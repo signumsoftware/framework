@@ -26,7 +26,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Class("sf-repeater-field")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(entityRepeater.ControlID).Class("sf-repeater-field")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {

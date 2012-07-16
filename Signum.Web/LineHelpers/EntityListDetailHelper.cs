@@ -41,7 +41,7 @@ namespace Signum.Web
                 sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, listDetail)));
             }
 
-            using (listDetail.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field-list")) : null)
+            using (sb.Surround(new HtmlTag("div").Id(listDetail.ControlID).Class("sf-field-list")))
             {
                 HtmlStringBuilder sbSelect = new HtmlStringBuilder();
                 using (sbSelect.Surround(new HtmlTag("select").IdName(listDetail.ControlID).Attr("multiple", "multiple").Attr("ondblclick", listDetail.GetViewing()).Class("sf-entity-list")))
