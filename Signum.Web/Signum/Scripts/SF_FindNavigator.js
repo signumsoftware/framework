@@ -61,11 +61,11 @@ SF.registerModule("FindNavigator", function () {
             };
 
             var $tblResults = $(this.pf("tblResults"));
-            $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
+            $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection),th:not(.th-col-entity):not(.th-col-selection) span,th:not(.th-col-entity):not(.th-col-selection) div", function (e) {
                 if (e.target != this) {
                     return;
                 }
-                self.newSortOrder($(e.target), e.shiftKey);
+                self.newSortOrder($(e.target).closest("th"), e.shiftKey);
                 self.search();
                 return false;
             });
@@ -160,6 +160,11 @@ SF.registerModule("FindNavigator", function () {
             });
 
             this.createMoveColumnDragDrop();
+
+            $tblResults.on("selectstart", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
+                //this.onselectstart = function () { return false };
+                return false;
+            });
         },
 
         createCtxMenu: function ($rightClickTarget) {
