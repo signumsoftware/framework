@@ -284,7 +284,7 @@ namespace Signum.Engine.Authorization
             var userEntity = RetrieveUser(username, passwordHash);
             userEntity.PasswordHash = newPasswordHash;
             using (AuthLogic.Disable())
-                userEntity.Save();
+                userEntity.Execute(UserOperation.Save);
 
             return Login(username, newPasswordHash);
         }
@@ -294,7 +294,7 @@ namespace Signum.Engine.Authorization
             var userEntity = user.RetrieveAndForget();
             userEntity.PasswordHash = newPasswordHash;
             using (AuthLogic.Disable())
-                userEntity.Save();
+                userEntity.Execute(UserOperation.Save);
         }
 
         public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] serviceInterfaces)
