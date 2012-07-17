@@ -61,7 +61,7 @@ SF.registerModule("FindNavigator", function () {
             };
 
             var $tblResults = $(this.pf("tblResults"));
-            $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection),th:not(.th-col-entity):not(.th-col-selection) span,th:not(.th-col-entity):not(.th-col-selection) div", function (e) {
+            $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection),th:not(.th-col-entity):not(.th-col-selection) span,th:not(.th-col-entity):not(.th-col-selection) .sf-header-droppable", function (e) {
                 if (e.target != this) {
                     return;
                 }
