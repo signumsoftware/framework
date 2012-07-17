@@ -18,6 +18,11 @@ using System.Web.Routing;
 
 namespace Signum.Web
 {
+    public static class EntityComboKeys
+    {
+        public const string Combo = "sfCombo";
+    }
+
     public class EntityCombo : EntityBase
     {
         public readonly RouteValueDictionary ComboHtmlProperties = new RouteValueDictionary();

@@ -42,7 +42,7 @@ namespace Signum.Web
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
                     
-                    var sbSelectContainer = new HtmlTag("select").IdName(entityList.ControlID).Class("sf-entity-list").Attr("multiple", "multiple");
+                    var sbSelectContainer = new HtmlTag("select").IdName(entityList.Compose(EntityListBaseKeys.List)).Class("sf-entity-list").Attr("multiple", "multiple");
                     
                     using (sbSelect.Surround(sbSelectContainer))
                     {
@@ -72,6 +72,10 @@ namespace Signum.Web
                     }
                 }
             }
+
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityList({1})".Formato(entityList.ControlID, entityList.OptionsJS())))
+                .ToHtml());
 
             return sb.ToHtml();
         }
