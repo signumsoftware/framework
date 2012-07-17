@@ -27,7 +27,6 @@ SF.registerModule("Lines", function () {
             },
 
             checkValidation: function (validatorOptions) {
-                SF.log("EBaseLine checkValidation");
                 if (typeof validatorOptions == "undefined" || typeof validatorOptions.type == "undefined") {
                     throw "validatorOptions.type must be supplied to checkValidation";
                 }
@@ -48,19 +47,17 @@ SF.registerModule("Lines", function () {
             },
 
             updateLinks: function (newToStr, newLink) {
-                SF.log("EBaseLine updateLinks");
                 //Abstract function
             },
 
             fireOnEntityChanged: function (hasEntity) {
-                SF.log("EBaseLine fireOnEntityChanged");
                 this.updateButtonsDisplay(hasEntity);
-                if (!SF.isEmpty(this.options.onEntityChanged))
+                if (!SF.isEmpty(this.options.onEntityChanged)) {
                     this.options.onEntityChanged();
+                }
             },
 
             remove: function () {
-                SF.log("EBaseLine remove");
                 $(this.pf(SF.Keys.toStr)).val("").removeClass(SF.Validator.inputErrorClass);
                 $(this.pf(SF.Keys.link)).val("").html("").removeClass(SF.Validator.inputErrorClass);
                 this.runtimeInfo().removeEntity();
@@ -70,16 +67,15 @@ SF.registerModule("Lines", function () {
             },
 
             getRuntimeType: function (_onTypeFound) {
-                SF.log("EBaseLine getRuntimeType");
                 var types = this.staticInfo().types().split(",");
-                if (types.length == 1)
+                if (types.length == 1) {
                     return _onTypeFound(types[0]);
+                }
 
                 SF.openTypeChooser(this.options.prefix, _onTypeFound);
             },
 
             create: function (_viewOptions) {
-                SF.log("EBaseLine create");
                 var _self = this;
                 var type = this.getRuntimeType(function (type) {
                     _self.typedCreate($.extend({ type: type }, _viewOptions));
@@ -87,7 +83,6 @@ SF.registerModule("Lines", function () {
             },
 
             typedCreate: function (_viewOptions) {
-                SF.log("EBaseline typedCreate");
                 if (SF.isEmpty(_viewOptions.type)) {
                     throw "ViewOptions type parameter must not be null in EBaseline typedCreate. Call create instead";
                 }
@@ -107,7 +102,6 @@ SF.registerModule("Lines", function () {
             },
 
             find: function (_findOptions) {
-                SF.log("EBaseLine find");
                 var _self = this;
                 var type = this.getRuntimeType(function (type) {
                     _self.typedFind($.extend({ webQueryName: type }, _findOptions));
@@ -115,7 +109,6 @@ SF.registerModule("Lines", function () {
             },
 
             typedFind: function (_findOptions) {
-                SF.log("EBaseline typedFind");
                 if (SF.isEmpty(_findOptions.webQueryName)) {
                     throw "FindOptions webQueryName parameter must not be null in EBaseline typedFind. Call find instead";
                 }
@@ -124,7 +117,6 @@ SF.registerModule("Lines", function () {
             },
 
             extraJsonParams: function (_prefix) {
-                SF.log("EBaseLine extraJsonParams");
                 var extraParams = {};
 
                 var staticInfo = this.staticInfo();
@@ -146,7 +138,6 @@ SF.registerModule("Lines", function () {
             },
 
             updateButtonsDisplay: function (hasEntity) {
-                SF.log("EBaseLine updateButtonsDisplay");
                 var btnCreate = $(this.pf("btnCreate"));
                 var btnRemove = $(this.pf("btnRemove"));
                 var btnFind = $(this.pf("btnFind"));
@@ -184,7 +175,6 @@ SF.registerModule("Lines", function () {
             options: {},
 
             updateLinks: function (newToStr, newLink) {
-                SF.log("ELine updateLinks");
                 var link = $(this.pf(SF.Keys.link));
                 link.html(newToStr);
                 if (link.filter('a').length !== 0)
@@ -193,13 +183,11 @@ SF.registerModule("Lines", function () {
             },
 
             view: function (_viewOptions) {
-                SF.log("ELine view");
                 var viewOptions = this.viewOptionsForViewing(_viewOptions);
                 new SF.ViewNavigator(viewOptions).viewOk();
             },
 
             viewOptionsForViewing: function (_viewOptions) {
-                SF.log("ELine viewOptionsForViewing");
                 var self = this;
                 var info = this.runtimeInfo();
                 return $.extend({
@@ -214,7 +202,6 @@ SF.registerModule("Lines", function () {
             },
 
             onViewingOk: function (validatorOptions) {
-                SF.log("ELine onViewingOk");
                 var valOptions = $.extend(validatorOptions || {}, {
                     type: this.runtimeInfo().runtimeType()
                 });
@@ -223,7 +210,6 @@ SF.registerModule("Lines", function () {
             },
 
             viewOptionsForCreating: function (_viewOptions) {
-                SF.log("ELine viewOptionsForCreating");
                 var self = this;
                 return $.extend({
                     onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions, _viewOptions.type); },
@@ -241,7 +227,6 @@ SF.registerModule("Lines", function () {
             },
 
             onCreatingOk: function (clonedElements, validatorOptions, runtimeType) {
-                SF.log("ELine onCreatingOk");
                 var valOptions = $.extend(validatorOptions || {}, {
                     type: runtimeType
                 });
@@ -253,7 +238,6 @@ SF.registerModule("Lines", function () {
             },
 
             createFindOptions: function (_findOptions) {
-                SF.log("ELine createFindOptions");
                 var self = this;
                 return $.extend({
                     prefix: this.options.prefix,
@@ -264,9 +248,9 @@ SF.registerModule("Lines", function () {
             },
 
             onFindingOk: function (selectedItems) {
-                SF.log("ELine onFindingOk");
-                if (selectedItems == null || selectedItems.length != 1)
+                if (selectedItems == null || selectedItems.length != 1) {
                     throw "No item or more than one item was returned from Find Window";
+                }
                 var info = this.runtimeInfo();
                 info.setEntity(selectedItems[0].type, selectedItems[0].id);
                 if ($(this.pf(this.keys.entity)).length == 0)
@@ -277,7 +261,6 @@ SF.registerModule("Lines", function () {
             },
 
             onAutocompleteSelected: function (controlId, data) {
-                SF.log("ELine onAutocompleteSelected");
                 var selectedItems = [{
                     id: data.id,
                     type: data.type,
@@ -322,7 +305,6 @@ SF.registerModule("Lines", function () {
             },
 
             removeSpecific: function () {
-                SF.log("ELine removeSpecific");
                 $(this.pf(this.keys.entity)).remove();
             }
         });
@@ -332,12 +314,10 @@ SF.registerModule("Lines", function () {
             options: {},
 
             updateLinks: function (newToStr, newLink) {
-                SF.log("ECombo updateLinks");
                 $("#" + this.options.prefix + " option:selected").html(newToStr);
             },
 
             selectedValue: function () {
-                SF.log("ECombo selectedValue");
                 var selected = $(this.pf("combo") + " > option:selected");
                 if (selected.length === 0) {
                     return null;
@@ -357,8 +337,6 @@ SF.registerModule("Lines", function () {
             },
 
             setSelected: function () {
-                SF.log("ECombo setSelected");
-
                 var newValue = this.selectedValue(),
                     newRuntimeType = "",
                     newId = "",
@@ -375,7 +353,6 @@ SF.registerModule("Lines", function () {
             },
 
             view: function (_viewOptions) {
-                SF.log("ELine view");
                 var viewOptions = this.viewOptionsForViewing(_viewOptions);
                 if (viewOptions.navigate) {
                     var runtimeInfo = this.runtimeInfo();
@@ -386,6 +363,88 @@ SF.registerModule("Lines", function () {
                 else {
                     new SF.ViewNavigator(viewOptions).viewOk();
                 }
+            }
+        });
+
+        $.widget("SF.entityLineDetail", $.SF.baseLine, {
+
+            options: {}, //baseLine Options + detailDiv
+
+            typedCreate: function (_viewOptions) {
+                if (SF.isEmpty(_viewOptions.type)) {
+                    throw "ViewOptions type parameter must not be null in entityLineDetail typedCreate. Call create instead";
+                }
+                var viewOptions = this.viewOptionsForCreating(_viewOptions);
+                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                if (!SF.isEmpty(template)) { //Template pre-loaded: EmbeddedEntity
+                    $('#' + viewOptions.containerDiv).html(template);
+                    SF.triggerNewContent($('#' + viewOptions.containerDiv));
+                }
+                else {
+                    new SF.ViewNavigator(viewOptions).viewEmbedded();
+                    SF.triggerNewContent($("#" + this.options.detailDiv));
+                }
+                this.onCreated(viewOptions.type);
+            },
+
+            viewOptionsForCreating: function (_viewOptions) {
+                return $.extend({
+                    containerDiv: this.options.detailDiv,
+                    prefix: this.options.prefix,
+                    requestExtraJsonData: this.extraJsonParams()
+                }, _viewOptions);
+            },
+
+            newEntity: function (runtimeType) {
+                this.runtimeInfo().setEntity(runtimeType, '');
+            },
+
+            onCreated: function (runtimeType) {
+                this.newEntity(runtimeType);
+                this.fireOnEntityChanged(true);
+            },
+
+            find: function (_findOptions, _viewOptions) {
+                var _self = this;
+                var type = this.getRuntimeType(function (type) {
+                    _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
+                });
+            },
+
+            typedFind: function (_findOptions, _viewOptions) {
+                if (SF.isEmpty(_findOptions.webQueryName)) {
+                    throw "FindOptions webQueryName parameter must not be null in entityLineDetail typedFind. Call find instead";
+                }
+                var findOptions = this.createFindOptions(_findOptions, _viewOptions);
+                new SF.FindNavigator(findOptions).openFinder();
+            },
+
+            createFindOptions: function (_findOptions, _viewOptions) {
+                var self = this;
+                return $.extend({
+                    prefix: this.options.prefix,
+                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
+                    onOkClosed: function () { self.fireOnEntityChanged(true); },
+                    allowMultiple: false
+                }, _findOptions);
+            },
+
+            onFindingOk: function (selectedItems, _viewOptions) {
+                if (selectedItems == null || selectedItems.length != 1) {
+                    throw "No item or more than one item was returned from Find Window";
+                }
+                this.runtimeInfo().setEntity(selectedItems[0].type, selectedItems[0].id);
+
+                //View result in the detailDiv
+                var viewOptions = this.viewOptionsForCreating($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }));
+                new SF.ViewNavigator(viewOptions).viewEmbedded();
+                SF.triggerNewContent($("#" + this.options.detailDiv));
+
+                return true;
+            },
+
+            removeSpecific: function () {
+                $("#" + this.options.detailDiv).html("");
             }
         });
 

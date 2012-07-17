@@ -159,16 +159,17 @@ namespace Signum.Web
         {
             return RegisterUrls(html, new Dictionary<string, string>
             {
-                { "popupView", url.Action("PopupView", "Signum") },
-                { "validate", url.Action("Validate", "Signum") },
-                { "validatePartial", url.Action("ValidatePartial", "Signum") },
-                { "trySave", url.Action("TrySave", "Signum") },
-                { "trySavePartial", url.Action("TrySavePartial", "Signum") },
-                { "find", url.Action("Find", "Signum") },
-                { "partialFind", url.Action("PartialFind", "Signum") },
-                { "search", url.Action("Search", "Signum") },
-                { "typeChooser", url.Action("GetTypeChooser", "Signum") },
-                { "autocomplete", url.Action("Autocomplete", "Signum") }
+                { "popupView", url.SignumAction("PopupView") },
+                { "partialView", url.SignumAction("PartialView") },
+                { "validate", url.SignumAction("Validate") },
+                { "validatePartial", url.SignumAction("ValidatePartial") },
+                { "trySave", url.SignumAction("TrySave") },
+                { "trySavePartial", url.SignumAction("TrySavePartial") },
+                { "find", url.SignumAction("Find") },
+                { "partialFind", url.SignumAction("PartialFind") },
+                { "search", url.SignumAction("Search") },
+                { "typeChooser", url.SignumAction("GetTypeChooser") },
+                { "autocomplete", url.SignumAction("Autocomplete") }
             });
         }
 

@@ -56,8 +56,11 @@ namespace Signum.Web
                             "$('#" + entityDetail.DetailDiv + "').html(" + controlHtml + ");\n" +
                             "});\n" +
                             "</script>"));
-
             }
+
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityLineDetail({1})".Formato(entityDetail.ControlID, entityDetail.OptionsJS())))
+                .ToHtml());
 
             return sb.ToHtml();
         }
