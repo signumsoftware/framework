@@ -43,8 +43,10 @@ namespace Signum.Windows
             if (Child == null)
                 return new Size();
 
-            ((FrameworkElement)Child).Width = finalSize.Width; //HACK máximo!
-            ((FrameworkElement)Child).Height = finalSize.Height;
+            if (Horizontal)
+                ((FrameworkElement)Child).Width = finalSize.Width; //HACK máximo!
+            if (Vertical)
+                ((FrameworkElement)Child).Height = finalSize.Height;
             Child.Arrange(new Rect(finalSize));
             return finalSize;
         }
