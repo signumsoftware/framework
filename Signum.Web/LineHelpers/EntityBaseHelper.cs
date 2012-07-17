@@ -99,7 +99,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", entityBase.GetViewing() },
+                { "onclick", new MvcHtmlString(entityBase.GetViewing()) },
                 { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-arrow-e" : "ui-icon-arrowthick-1-e" },
                 { "data-text", false}
             };

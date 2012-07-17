@@ -27,7 +27,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (entityLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (sb.Surround(new HtmlTag("div").Id(entityLine.ControlID).Class("sf-field")))
             using (entityLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityLine.ValueFirst)
@@ -36,7 +36,7 @@ namespace Signum.Web
                 using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                 {
                     sb.AddLine(helper.HiddenEntityInfo(entityLine));
-
+                    
                     if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
                     {
                         if (EntityBaseHelper.RequiresLoadAll(helper, entityLine))
@@ -58,7 +58,6 @@ namespace Signum.Web
                         {
                             htmlAttr.AddRange(new Dictionary<string, object>
                             {
-                                { "data-url", helper.UrlHelper().Action("Autocomplete", "Signum") },
                                 { "data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(t => Navigator.ResolveWebTypeName(t), ",") }
                             });
                         }
@@ -108,12 +107,15 @@ namespace Signum.Web
                     {
                         sb.AddLine(helper.ValidationMessage(entityLine.ControlID));
                     }
-
                 }
 
                 if (entityLine.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
             }
+
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityLine({1})".Formato(entityLine.ControlID, entityLine.OptionsJS())))
+                .ToHtml());
 
             return sb.ToHtml();
         }
