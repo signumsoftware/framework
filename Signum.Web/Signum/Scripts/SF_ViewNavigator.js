@@ -98,7 +98,7 @@ SF.registerModule("ViewNavigator", function () {
             if (SF.isEmpty(this.viewOptions.type))
                 throw "Type must be specified to Navigator on Navigate mode";
             var self = this;
-            this.callServer(function (url) { /*$.ajaxPrefilter will handle the redirect*/ }); 
+            this.callServer(function (url) { /*$.ajaxPrefilter will handle the redirect*/ });
         },
 
         isLoaded: function () {
@@ -202,7 +202,7 @@ SF.registerModule("ViewNavigator", function () {
         callServer: function (onSuccess) {
             SF.log("ViewNavigator callServer");
             $.ajax({
-                url: this.viewOptions.controllerUrl,
+                url: this.viewOptions.controllerUrl || SF.Urls.popupView,
                 data: this.constructRequestData(),
                 async: false,
                 success: function (newHtml) {
@@ -282,9 +282,10 @@ SF.registerModule("ViewNavigator", function () {
     /* chooserOptions: controllerUrl & types*/
     SF.openTypeChooser = function (prefix, onTypeChosen, chooserOptions) {
         SF.log("openTypeChooser");
+        chooserOptions = chooserOptions || {};
         var tempDivId = SF.compose(prefix, "Temp");
         $.ajax({
-            url: chooserOptions.controllerUrl,
+            url: chooserOptions.controllerUrl || SF.Urls.typeChooser,
             data: { prefix: tempDivId, types: (SF.isEmpty(chooserOptions.types) ? SF.StaticInfo(prefix).types() : chooserOptions.types) },
             async: false,
             success: function (chooserHTML) {

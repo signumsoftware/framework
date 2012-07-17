@@ -53,7 +53,7 @@ SF.registerModule("Validator", function () {
             var returnValue = false;
             var self = this;
             $.ajax({
-                url: this.valOptions.controllerUrl,
+                url: this.valOptions.controllerUrl || SF.Urls.trySave,
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
@@ -87,7 +87,7 @@ SF.registerModule("Validator", function () {
             var returnValue = false;
             var self = this;
             $.ajax({
-                url: this.valOptions.controllerUrl,
+                url: this.valOptions.controllerUrl || SF.Urls.validate,
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
@@ -260,7 +260,7 @@ SF.registerModule("Validator", function () {
             var validatorResult = null;
             var self = this;
             $.ajax({
-                url: this.valOptions.controllerUrl,
+                url: this.valOptions.controllerUrl || SF.Urls.trySavePartial,
                 async: false,
                 data: this.constructRequestDataForSaving(),
                 success: function (result) {
@@ -342,7 +342,7 @@ SF.registerModule("Validator", function () {
             var validatorResult = null;
             var self = this;
             $.ajax({
-                url: this.valOptions.controllerUrl,
+                url: this.valOptions.controllerUrl || SF.Urls.validatePartial,
                 async: false,
                 data: this.constructRequestDataForValidating(),
                 success: function (result) {

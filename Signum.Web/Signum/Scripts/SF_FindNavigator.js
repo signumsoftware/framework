@@ -17,7 +17,7 @@ SF.registerModule("FindNavigator", function () {
             columns: null, //List of column names "token1,displayName1;token2,displayName2"
             columnMode: null,
             allowChangeColumns: true,
-            navigatorControllerUrl: null,
+            findControllerUrl: null,
             searchControllerUrl: null,
             onOk: null,
             onCancelled: null,
@@ -238,7 +238,7 @@ SF.registerModule("FindNavigator", function () {
             SF.log("FindNavigator openFinder");
             var self = this;
             $.ajax({
-                url: this.findOptions.navigatorControllerUrl,
+                url: this.findOptions.findControllerUrl || (SF.isEmpty(this.findOptions.prefix) ? SF.Urls.find : SF.Urls.partialFind),
                 data: this.requestDataForOpenFinder(),
                 async: false,
                 success: function (popupHtml) {

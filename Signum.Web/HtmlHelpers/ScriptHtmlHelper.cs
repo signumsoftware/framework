@@ -145,7 +145,6 @@ namespace Signum.Web
                 HttpContext.Current.Items[resourceKey] = resources;
                 return resources;
             }
-
         }
 
         internal static string[] FilterAndInclude(string[] urls)
@@ -154,6 +153,35 @@ namespace Signum.Web
             var toInclude = urls.Except(loaded).ToArray();
             loaded.AddRange(toInclude);
             return toInclude;
+        }
+
+        public static MvcHtmlString RegisterSFUrls(this HtmlHelper html, UrlHelper url)
+        {
+            return RegisterUrls(html, new Dictionary<string, string>
+            {
+                { "popupView", url.Action("PopupView", "Signum") },
+                { "validate", url.Action("Validate", "Signum") },
+                { "validatePartial", url.Action("ValidatePartial", "Signum") },
+                { "trySave", url.Action("TrySave", "Signum") },
+                { "trySavePartial", url.Action("TrySavePartial", "Signum") },
+                { "find", url.Action("Find", "Signum") },
+                { "partialFind", url.Action("PartialFind", "Signum") },
+                { "search", url.Action("Search", "Signum") },
+                { "typeChooser", url.Action("GetTypeChooser", "Signum") },
+                { "autocomplete", url.Action("Autocomplete", "Signum") }
+            });
+        }
+
+        public static MvcHtmlString RegisterUrls(this HtmlHelper html, Dictionary<string, string> namedUrls)
+        { 
+            return new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString(
+                    "var SF = SF || {}; SF.Urls = SF.Urls || {}; " +
+                    "$.extend(SF.Urls, { " + 
+                    namedUrls.ToString(kvp => "{0}:'{1}'".Formato(kvp.Key, kvp.Value), ", ") + 
+                    "});"
+                    ))
+                .ToHtml();
         }
     }
 

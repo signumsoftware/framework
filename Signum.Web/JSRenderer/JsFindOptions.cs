@@ -15,7 +15,7 @@ namespace Signum.Web
         /// <summary>
         /// To be called to open a Find window
         /// </summary>
-        public JsValue<string> NavigatorControllerUrl { get; set; }
+        public JsValue<string> FindControllerUrl { get; set; }
         /// <summary>
         /// To be called when clicking the search button
         /// </summary>
@@ -35,8 +35,8 @@ namespace Signum.Web
                 {
                     {"prefix", Prefix.TryCC(t=>t.ToJS())},
                     {"elems", ElementsPerPage.TryCC(t=>t.ToJS()) },
-                    {"navigatorControllerUrl", NavigatorControllerUrl.TryCC(t=>t.ToJS()) ?? RouteHelper.New().SignumAction("PartialFind").SingleQuote() },
-                    {"searchControllerUrl",SearchControllerUrl.TryCC(t=>t.ToJS()) ?? RouteHelper.New().SignumAction("Search").SingleQuote() },
+                    {"findControllerUrl", FindControllerUrl.TryCC(t=>t.ToJS()) },
+                    {"searchControllerUrl",SearchControllerUrl.TryCC(t=>t.ToJS()) },
                     {"onOk",OnOk.TryCC(t=>t.ToJS())},
                     {"onCancelled", OnCancelled.TryCC(t=>t.ToJS())},
                     {"async", Async.TryCC(t=>t.ToJS())},
