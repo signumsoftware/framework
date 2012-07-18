@@ -84,7 +84,7 @@ SF.registerModule("Lines", function () {
 
             typedCreate: function (_viewOptions) {
                 if (SF.isEmpty(_viewOptions.type)) {
-                    throw "ViewOptions type parameter must not be null in EBaseline typedCreate. Call create instead";
+                    throw "ViewOptions type parameter must not be null in baseLine typedCreate. Call create instead";
                 }
                 if (_viewOptions.navigate) {
                     window.open(_viewOptions.controllerUrl.substring(0, _viewOptions.controllerUrl.lastIndexOf("/") + 1) + _viewOptions.type, "_blank");
@@ -460,7 +460,7 @@ SF.registerModule("Lines", function () {
             keys: {
                 entity: "sfEntity",
                 index: "sfIndex",
-                list: "sfList",
+                list: "sfList"
             },
 
             updateLinks: function (newToStr, newLink, itemPrefix) {
@@ -720,7 +720,7 @@ SF.registerModule("Lines", function () {
             restoreCurrent: function () {
                 var itemPrefix = this.getVisibleItemPrefix();
                 if (!SF.isEmpty(itemPrefix)) {
-                    $('#' + SF.compose(itemPrefix, this.entity))
+                    $('#' + SF.compose(itemPrefix, this.keys.entity))
                         .html('')
                         .append(SF.cloneContents(this.options.detailDiv));
                 }
@@ -769,15 +769,15 @@ SF.registerModule("Lines", function () {
             },
 
             isLoaded: function (selectedItemPrefix) {
-                return !SF.isEmpty($('#' + SF.compose(selectedItemPrefix, this.entity)).html());
+                return !SF.isEmpty($('#' + SF.compose(selectedItemPrefix, this.keys.entity)).html());
             },
 
             cloneAndShow: function (selectedItemPrefix) {
                 $('#' + this.options.detailDiv)
                     .html('')
-                    .append(SF.cloneContents(SF.compose(selectedItemPrefix, this.entity)));
+                    .append(SF.cloneContents(SF.compose(selectedItemPrefix, this.keys.entity)));
 
-                $('#' + SF.compose(selectedItemPrefix, this.entity))
+                $('#' + SF.compose(selectedItemPrefix, this.keys.entity))
                     .html('');
             },
 
@@ -843,6 +843,178 @@ SF.registerModule("Lines", function () {
                 if (!SF.isEmpty(currentVisible) && currentVisible == itemPrefix)
                     $('#' + this.options.detailDiv).html('');
                 this.removeInIndex(itemPrefix);
+            }
+        });
+
+        $.widget("SF.entityRepeater", $.SF.entityList, {
+
+            options: {}, //baseLine Options + maxElements + removeItemLinkText
+
+            keys: {
+                entity: "sfEntity",
+                index: "sfIndex",
+                itemsContainer: "sfItemsContainer",
+                repeaterItem: "sfRepeaterItem",
+                repeaterItemClass: "sf-repeater-element"
+            },
+
+            canAddItems: function () {
+                if (!SF.isEmpty(this.options.maxElements)) {
+                    if ($(this.pf(this.keys.itemsContainer) + " > ." + this.keys.repeaterItemClass).length >= +this.options.maxElements) {
+                        return false;
+                    }
+                }
+                return true;
+            },
+
+            getLastIndex: function () {
+                var lastElement = $(this.pf(this.keys.itemsContainer) + " > ." + this.keys.repeaterItemClass + ":last");
+                var lastIndex = -1;
+                if (lastElement.length !== 0) {
+                    var nameSelected = lastElement[0].id;
+                    lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(this.keys.repeaterItem) - 1);
+                }
+                return lastIndex;
+            },
+
+            typedCreate: function (_viewOptions) {
+                if (SF.isEmpty(_viewOptions.type)) {
+                    throw "ViewOptions type parameter must not be null in entityRepeater typedCreate. Call create instead";
+                }
+                if (!this.canAddItems()) {
+                    return;
+                }
+
+                var viewOptions = this.viewOptionsForCreating(_viewOptions);
+                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
+                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+                    this.onItemCreated(template, viewOptions);
+                }
+                else {
+                    var self = this;
+                    new SF.ViewNavigator(viewOptions).createEmbedded(function (newHtml) {
+                        self.onItemCreated(newHtml, viewOptions);
+                    });
+                }
+            },
+
+            viewOptionsForCreating: function (_viewOptions) {
+                var newIndex = +this.getLastIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                return $.extend({
+                    containerDiv: "",
+                    prefix: itemPrefix,
+                    requestExtraJsonData: this.extraJsonParams(itemPrefix)
+                }, _viewOptions);
+            },
+
+            onItemCreated: function (newHtml, viewOptions) {
+                if (SF.isEmpty(viewOptions.type)) {
+                    throw "ViewOptions type parameter must not be null in entityRepeater onItemCreated";
+                }
+
+                var itemPrefix = viewOptions.prefix;
+                this.newRepItem(newHtml, viewOptions.type, itemPrefix);
+                this.fireOnEntityChanged();
+            },
+
+            newRepItem: function (newHtml, runtimeType, itemPrefix) {
+                var listInfo = this.staticInfo();
+                var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n');
+
+                var $div = $("<fieldset id='" + SF.compose(itemPrefix, this.keys.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.keys.repeaterItem) + "' class='" + this.keys.repeaterItemClass + "'>" +
+                    "<legend>" +
+                    "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' onclick=\"$('#" + this.options.prefix + "').data('entityRepeater').remove('" + itemPrefix + "');\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + this.options.removeItemLinkText + "</a>" +
+                    "</legend>" +
+                    SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) +
+                    "<div id='" + SF.compose(itemPrefix, this.keys.entity) + "' name='" + SF.compose(itemPrefix, this.keys.entity) + "' class='sf-line-entity'>" +
+                    "</div>" + //sfEntity
+                    "</fieldset>"
+                    );
+
+                $(this.pf(this.keys.itemsContainer)).append($div);
+                $("#" + SF.compose(itemPrefix, this.keys.entity)).html(newHtml);
+                SF.triggerNewContent($("#" + SF.compose(itemPrefix, this.keys.repeaterItem)));
+            },
+
+            viewOptionsForViewing: function (_viewOptions, itemPrefix) { //Used in onFindingOk
+                return $.extend({
+                    containerDiv: SF.compose(itemPrefix, this.keys.entity),
+                    prefix: itemPrefix,
+                    requestExtraJsonData: this.extraJsonParams(itemPrefix)
+                }, _viewOptions);
+            },
+
+            find: function (_findOptions, _viewOptions) {
+                var _self = this;
+                var type = this.getRuntimeType(function (type) {
+                    _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
+                });
+            },
+
+            typedFind: function (_findOptions, _viewOptions) {
+                if (SF.isEmpty(_findOptions.webQueryName)) {
+                    throw "FindOptions webQueryName parameter must not be null in ERep typedFind. Call find instead";
+                }
+                if (!this.canAddItems()) { 
+                    return;
+                }
+
+                var findOptions = this.createFindOptions(_findOptions, _viewOptions);
+                new SF.FindNavigator(findOptions).openFinder();
+            },
+
+            createFindOptions: function (_findOptions, _viewOptions) {
+                var newIndex = +this.getLastIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                var self = this;
+                return $.extend({
+                    prefix: itemPrefix,
+                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
+                    onOkClosed: function () { self.fireOnEntityChanged(); },
+                    allowMultiple: true
+                }, _findOptions);
+            },
+
+            onFindingOk: function (selectedItems, _viewOptions) {
+                if (selectedItems == null || selectedItems.length == 0) {
+                    throw "No item was returned from Find Window";
+                }
+                var lastIndex = +this.getLastIndex();
+                for (var i = 0, l = selectedItems.length; i < l; i++) {
+                    if (!this.canAddItems()) {
+                        return;
+                    }
+
+                    var item = selectedItems[i];
+                    lastIndex++;
+                    var itemPrefix = SF.compose(this.options.prefix, lastIndex.toString());
+
+                    this.newRepItem('', item.type, itemPrefix);
+                    this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
+
+                    //View results in the repeater
+                    var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
+                    new SF.ViewNavigator(viewOptions).viewEmbedded();
+                    SF.triggerNewContent($(SF.compose(itemPrefix, this.keys.entity)));
+                }
+                return true;
+            },
+
+            remove: function (itemPrefix) {
+                $('#' + SF.compose(itemPrefix, this.keys.repeaterItem)).remove();
+                this.fireOnEntityChanged();
+            },
+
+            updateButtonsDisplay: function () {
+                var $buttons = $(this.pf("btnFind"), this.pf("btnFind"));
+                if (this.canAddItems()) {
+                    $buttons.show();
+                }
+                else {
+                    $buttons.hide();
+                }
             }
         });
 

@@ -41,7 +41,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "new SF.ERep(" + this.OptionsJS() + ")";
+            return "$('#{0}').data('entityRepeater')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
@@ -60,37 +60,28 @@ namespace Signum.Web
 
         protected override string DefaultCreate()
         {
-            return EntityRepeater.JsCreate(this, DefaultJsViewOptions()).ToJS();
+            return JsCreate(DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsCreate(EntityRepeater erep, JsViewOptions viewOptions)
+        public JsInstruction JsCreate(JsViewOptions viewOptions)
         {
-            if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
-
-            string createParams = ",".Combine(
-                viewOptions.TryCC(v => v.ToJS()),
-                erep.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
-
-            return new JsInstruction(() => "{0}.create({1})".Formato(erep.ToJS(), createParams));
+            return new JsInstruction(() => "{0}.create({1})".Formato(
+                this.ToJS(),
+                viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultFind()
         {
-            return EntityRepeater.JsFind(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
+            return JsFind(DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsFind(EntityRepeater erep, JsFindOptions findOptions, JsViewOptions viewOptions)
+        public JsInstruction JsFind(JsFindOptions findOptions, JsViewOptions viewOptions)
         {
-            if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
-
             string findParams = ",".Combine(
                 findOptions.TryCC(v => v.ToJS()),
-                viewOptions.TryCC(v => v.ToJS()),
-                erep.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+                viewOptions.TryCC(v => v.ToJS()));
 
-            return new JsInstruction(() => "{0}.find({1})".Formato(erep.ToJS(), findParams));
+            return new JsInstruction(() => "{0}.find({1})".Formato(this.ToJS(), findParams));
         }
 
         protected override string DefaultRemove()
