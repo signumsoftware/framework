@@ -60,10 +60,12 @@ namespace Signum.Web.Files
             bool shouldSaveFilePath = !RuntimeInfo.FromFormValue((string)Request["fileParentRuntimeInfo"]).IsNew;
 
             FilePathDN fp = null;
-            string formFieldId = "";
+            string prefix = "";
             foreach (string file in Request.Files)
             {
-                RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContextUtilities.Compose(file, EntityBaseKeys.RuntimeInfo)]);
+                prefix = file.Substring(0, file.IndexOf(FileLineKeys.File) - 1);
+
+                RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
                 if (info.RuntimeType != typeof(FilePathDN))
                     continue;
 
@@ -74,11 +76,9 @@ namespace Signum.Web.Files
                 if (string.IsNullOrEmpty(hpf.FileName))
                     continue; //It will have been uploaded by drag-drop
 
-                string fileType = (string)Request.Form[TypeContextUtilities.Compose(file, FileLineKeys.FileType)];
+                string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
                 if (!fileType.HasText())
                     throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(file));
-
-                formFieldId = file; //This is the uploaded file
 
                 fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
                 {
@@ -89,10 +89,10 @@ namespace Signum.Web.Files
                 if (shouldSaveFilePath)
                     fp = fp.Save();
                 else 
-                    Session[Request.Form[ViewDataKeys.TabId] + formFieldId] = fp;
+                    Session[Request.Form[ViewDataKeys.TabId] + prefix] = fp;
             }
 
-            return UploadResult(formFieldId, fp, shouldSaveFilePath);
+            return UploadResult(prefix, fp, shouldSaveFilePath);
         }
 
         public ContentResult UploadDropped()
