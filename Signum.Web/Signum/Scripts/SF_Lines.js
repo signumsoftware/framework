@@ -925,7 +925,7 @@ SF.registerModule("Lines", function () {
 
                 var $div = $("<fieldset id='" + SF.compose(itemPrefix, this.keys.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.keys.repeaterItem) + "' class='" + this.keys.repeaterItemClass + "'>" +
                     "<legend>" +
-                    "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' onclick=\"$('#" + this.options.prefix + "').data('entityRepeater').remove('" + itemPrefix + "');\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + this.options.removeItemLinkText + "</a>" +
+                    "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + this.options.removeItemLinkText + "</a>" +
                     "</legend>" +
                     SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) +
                     "<div id='" + SF.compose(itemPrefix, this.keys.entity) + "' name='" + SF.compose(itemPrefix, this.keys.entity) + "' class='sf-line-entity'>" +
@@ -936,6 +936,10 @@ SF.registerModule("Lines", function () {
                 $(this.pf(this.keys.itemsContainer)).append($div);
                 $("#" + SF.compose(itemPrefix, this.keys.entity)).html(newHtml);
                 SF.triggerNewContent($("#" + SF.compose(itemPrefix, this.keys.repeaterItem)));
+            },
+
+            _getRemoving: function (itemPrefix) {
+                return "$('#" + this.options.prefix + "').data('entityRepeater').remove('" + itemPrefix + "');";
             },
 
             viewOptionsForViewing: function (_viewOptions, itemPrefix) { //Used in onFindingOk
@@ -957,7 +961,7 @@ SF.registerModule("Lines", function () {
                 if (SF.isEmpty(_findOptions.webQueryName)) {
                     throw "FindOptions webQueryName parameter must not be null in ERep typedFind. Call find instead";
                 }
-                if (!this.canAddItems()) { 
+                if (!this.canAddItems()) {
                     return;
                 }
 
