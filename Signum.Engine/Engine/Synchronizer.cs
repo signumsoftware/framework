@@ -146,11 +146,21 @@ namespace Signum.Engine
                 return;
 
             StringDistance sd = new StringDistance();
-            var distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b => Math.Max(a.Length, b.Length) - sd.LongestCommonSubsequence(a, b)));
+
+            var distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b => 
+            {
+                int lcs = sd.LongestCommonSubsequence(a, b);
+
+                int max = Math.Max(a.Length, b.Length);
+
+                return max / (lcs +0.1f);
+                
+            }));
+
+            var minOlds = distances.SelectDictionary(a => a, dic => dic.Values.Min());
 
             Solution bestSolution = new Solution(null, int.MaxValue); 
             Action<int, Solution> findMinimumPermutation = null;
-
 
             findMinimumPermutation = (pos, current) =>
             {
@@ -167,21 +177,29 @@ namespace Signum.Engine
                         return;
 
                     string old = oldOnly[pos];
-                    var dist = distances[old]; 
+                    var dist = distances[old];
 
-                    for (int i = 0; i < newOnly.Count; i++)
+                    var list = (from n in newOnly
+                                where !current.Selections.Any(a => a.NewValue == n)
+                                let d = dist[n]
+                                orderby d
+                                select new { n, d }).ToList();
+
+                    float sum = current.Sum - minOlds[old];
+
+                    foreach (var item in list)
                     {
-                        var @new = newOnly[i];
-                        if (!current.Selections.Any(a=>a.NewValue == @new))
-                            findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old,  @new)), current.Sum + dist[@new]));
+                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, item.n)), sum + item.d));
                     }
 
-                    if ((oldOnly.Count - pos) > (newOnly.Count - current.Selections.Take(pos).Count(a=>a.NewValue != null)))
-                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, (string)null)), current.Sum));
+                    if ((oldOnly.Count - pos) > (newOnly.Count - current.Selections.Take(pos).Count(a => a.NewValue != null)))
+                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, (string)null)), sum));
                 }
             };
 
-            findMinimumPermutation(0, Solution.Empty);
+            var min = new Solution(ImmutableStack<Selection>.Empty, minOlds.Values.Sum());
+
+            findMinimumPermutation(0, min);
          
             Dictionary<string, string> replacements = new Dictionary<string, string>();
 
@@ -207,7 +225,7 @@ namespace Signum.Engine
                     }
 
                     bestSolution = new Solution(null, int.MaxValue);
-                    findMinimumPermutation(0, Solution.Empty);
+                    findMinimumPermutation(0, min);
                 }
             }
             else
@@ -245,16 +263,14 @@ namespace Signum.Engine
 
         public struct Solution
         {
-            public Solution(ImmutableStack<Selection> selections, int sum)
+            public Solution(ImmutableStack<Selection> selections, float sum)
             {
                 this.Selections = selections;
                 this.Sum = sum;
             }
 
             public readonly ImmutableStack<Selection> Selections;
-            public readonly int Sum;
-
-            public static readonly Solution Empty = new Solution(ImmutableStack<Selection>.Empty, 0);
+            public readonly float Sum;
         }
 
         public struct Selection
