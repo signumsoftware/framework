@@ -25,7 +25,8 @@
      data-quickfilter-url="@Url.SignumAction("QuickFilter")"
      data-search-url="@Url.SignumAction("Search")"
      data-popup-save-url="@Url.SignumAction("TrySavePartial")"
-     data-add-filter-url="@Url.Action("AddFilter", "Signum")"
+     data-add-filter-url="@Url.Action("AddFilter", "Signum")" 
+     data-find-url="@Navigator.FindRoute(findOptions.QueryName)" 
      @(findOptions.EntityContextMenu ? " data-entity-ctx-menu-url=" + Url.SignumAction("GetContextualPanel") : "")
      >
 
@@ -101,12 +102,25 @@
                 (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
                 "",
                 (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
-                "sf-query-button" + " sf-filters-header" + (filtersVisible ? "" : " close"),
+                "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
                     { "onclick", "new SF.FindNavigator({{prefix: '{0}'}}).toggleFilters(this)".Formato(Model.ControlID) },
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 })
+    }
+    @if (Model.ControlID.HasText() && findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
+    { 
+        @Html.Href(Model.Compose("sfFullScreen"),
+            "Full Screen",
+            "",
+            "Full Screen",
+            "sf-query-button sf-query-fullscreen", 
+            new Dictionary<string, object> 
+            { 
+                { "data-icon", "ui-icon-extlink" },
+                { "data-text", false }
+            })
     }
     
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
@@ -116,19 +130,19 @@
             bool hasManyImplementations = implementations != null && !implementations.IsByAll && ((ImplementedByAttribute)implementations).ImplementedTypes.Length > 1;
             string creating = findOptions.Creating.HasText() ? findOptions.Creating :
                 "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}},'{2}');return false;".Formato(
-                    Model.ControlID, 
+                    Model.ControlID,
                     Url.SignumAction(string.IsNullOrEmpty(Model.ControlID) ? "Create" : "PopupCreate"),
                     hasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser") : "");
             <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@Resources.Search_Create</a>
         }
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
-        {
-            ControllerContext = this.ViewContext,
-            QueryName = findOptions.QueryName,
-            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
-            EntityType = entitiesType,
-            Prefix = Model.ControlID
-        }).ToString(Html)
+   {
+       ControllerContext = this.ViewContext,
+       QueryName = findOptions.QueryName,
+       ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
+       EntityType = entitiesType,
+       Prefix = Model.ControlID
+   }).ToString(Html)
     </div>
     @if (findOptions.FilterMode != FilterMode.OnlyResults)
     {
@@ -163,8 +177,10 @@
                             orderType = order.OrderType;
                         }
                         <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
+                            <div class="sf-header-droppable sf-header-droppable-right"></div>
+                            <div class="sf-header-droppable sf-header-droppable-left"></div>
                             <input type="hidden" value="@col.Name" />
-                            @col.DisplayName
+                            <span>@col.DisplayName</span>
                         </th>
                     }
                 </tr>
