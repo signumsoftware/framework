@@ -673,6 +673,179 @@ SF.registerModule("Lines", function () {
             }
         });
 
+        $.widget("SF.entityListDetail", $.SF.entityList, {
+
+            options: {}, //baseLine Options + detailDiv
+
+            typedCreate: function (_viewOptions) {
+                if (SF.isEmpty(_viewOptions.type)) {
+                    throw "ViewOptions type parameter must not be null in entityListDetail typedCreate. Call create instead";
+                }
+                this.restoreCurrent();
+                var viewOptions = this.viewOptionsForCreating(_viewOptions);
+                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
+                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+                    $('#' + viewOptions.containerDiv).html(template);
+                    SF.triggerNewContent($('#' + viewOptions.containerDiv));
+                }
+                else {
+                    new SF.ViewNavigator(viewOptions).viewEmbedded();
+                    SF.triggerNewContent($('#' + viewOptions.containerDiv));
+                }
+                this.onItemCreated(viewOptions);
+            },
+
+            viewOptionsForCreating: function (_viewOptions) {
+                var newIndex = +this.getLastIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                return $.extend({
+                    containerDiv: this.options.detailDiv,
+                    prefix: itemPrefix,
+                    requestExtraJsonData: this.extraJsonParams(itemPrefix)
+                }, _viewOptions);
+            },
+
+            getVisibleItemPrefix: function () {
+                var detail = $('#' + this.options.detailDiv);
+                var firstId = detail.find(":input[id^=" + this.options.prefix + "]:first");
+                if (firstId.length === 0) {
+                    return null;
+                }
+                var id = firstId[0].id;
+                var nextSeparator = id.indexOf("_", this.options.prefix.length + 1);
+                return id.substring(0, nextSeparator);
+            },
+
+            restoreCurrent: function () {
+                var itemPrefix = this.getVisibleItemPrefix();
+                if (!SF.isEmpty(itemPrefix)) {
+                    $('#' + SF.compose(itemPrefix, this.entity))
+                        .html('')
+                        .append(SF.cloneContents(this.options.detailDiv));
+                }
+            },
+
+            onItemCreated: function (viewOptions) {
+                if (SF.isEmpty(viewOptions.type)) {
+                    throw "ViewOptions type parameter must not be null in entityListDetail onItemCreated. Call create instead";
+                }
+
+                var itemPrefix = viewOptions.prefix;
+                this.newListItem('', viewOptions.type, itemPrefix);
+                this.fireOnEntityChanged();
+            },
+
+            view: function (_viewOptions) {
+                var selectedItemPrefix = this.selectedItemPrefix();
+                if (SF.isEmpty(selectedItemPrefix)) {
+                    return;
+                }
+                this.viewInIndex(_viewOptions, selectedItemPrefix);
+            },
+
+            viewInIndex: function (_viewOptions, selectedItemPrefix) {
+                this.restoreCurrent();
+                if (this.isLoaded(selectedItemPrefix)) {
+                    this.cloneAndShow(selectedItemPrefix);
+                }
+                else {
+                    var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
+                    new SF.ViewNavigator(viewOptions).viewEmbedded();
+                    SF.triggerNewContent($('#' + viewOptions.containerDiv));
+                }
+            },
+
+            viewOptionsForViewing: function (_viewOptions, itemPrefix) {
+                var self = this;
+                var info = this.itemRuntimeInfo(itemPrefix);
+                return $.extend({
+                    containerDiv: this.options.detailDiv,
+                    type: info.runtimeType(),
+                    id: info.id(),
+                    prefix: itemPrefix,
+                    requestExtraJsonData: this.extraJsonParams(itemPrefix)
+                }, _viewOptions);
+            },
+
+            isLoaded: function (selectedItemPrefix) {
+                return !SF.isEmpty($('#' + SF.compose(selectedItemPrefix, this.entity)).html());
+            },
+
+            cloneAndShow: function (selectedItemPrefix) {
+                $('#' + this.options.detailDiv)
+                    .html('')
+                    .append(SF.cloneContents(SF.compose(selectedItemPrefix, this.entity)));
+
+                $('#' + SF.compose(selectedItemPrefix, this.entity))
+                    .html('');
+            },
+
+            find: function (_findOptions, _viewOptions) {
+                var _self = this;
+                var type = this.getRuntimeType(function (type) {
+                    _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
+                });
+            },
+
+            typedFind: function (_findOptions, _viewOptions) {
+                if (SF.isEmpty(_findOptions.webQueryName)) {
+                    throw "FindOptions webQueryName parameter must not be null in entityListDetail typedFind. Call find instead";
+                }
+
+                this.restoreCurrent();
+                var findOptions = this.createFindOptions(_findOptions, _viewOptions);
+                new SF.FindNavigator(findOptions).openFinder();
+            },
+
+            createFindOptions: function (_findOptions, _viewOptions) {
+                var newIndex = +this.getLastIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                var self = this;
+                return $.extend({
+                    prefix: itemPrefix,
+                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
+                    onOkClosed: function () { self.fireOnEntityChanged(); },
+                    allowMultiple: true
+                }, _findOptions);
+            },
+
+            onFindingOk: function (selectedItems, _viewOptions) {
+                if (selectedItems == null || selectedItems.length == 0) {
+                    throw "No item was returned from Find Window";
+                }
+                var lastIndex = +this.getLastIndex();
+                for (var i = 0, l = selectedItems.length; i < l; i++) {
+                    var item = selectedItems[i];
+                    lastIndex++;
+                    var itemPrefix = SF.compose(this.options.prefix, lastIndex.toString());
+
+                    this.newListItem('', item.type, itemPrefix, item.toStr);
+                    this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
+                    $('#' + SF.compose(itemPrefix, SF.Keys.toStr)).html(item.toStr);
+
+                    //View result in the detailDiv
+                    $(this.pf(this.keys.list)).dblclick();
+                }
+                return true;
+            },
+
+            remove: function () {
+                var selectedItemPrefix = this.selectedItemPrefix();
+                if (SF.isEmpty(selectedItemPrefix)) {
+                    return;
+                }
+                this.edlineRemoveInIndex(selectedItemPrefix);
+            },
+
+            edlineRemoveInIndex: function (itemPrefix) {
+                var currentVisible = this.getVisibleItemPrefix();
+                if (!SF.isEmpty(currentVisible) && currentVisible == itemPrefix)
+                    $('#' + this.options.detailDiv).html('');
+                this.removeInIndex(itemPrefix);
+            }
+        });
+
     })(jQuery);
 
     SF.fullPathNodesSelector = function (prefix) {
