@@ -147,19 +147,27 @@ namespace Signum.Engine
 
             StringDistance sd = new StringDistance();
 
-            var distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b => 
+            Dictionary<string, Dictionary<string, float>> distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b =>
             {
                 int lcs = sd.LongestCommonSubsequence(a, b);
 
                 int max = Math.Max(a.Length, b.Length);
 
-                return max / (lcs +0.1f);
-                
+                return max / (lcs + 0.1f);
             }));
 
-            var minOlds = distances.SelectDictionary(a => a, dic => dic.Values.Min());
+            Dictionary<string, float> minDistances = distances.SelectDictionary(a => a, dic => dic.Values.Min());
+            {
+                int extra = oldOnly.Count - newOnly.Count;
 
-            Solution bestSolution = new Solution(null, int.MaxValue); 
+                if (extra > 0)
+                {
+                    var toRemove = minDistances.OrderByDescending(a => a.Value).Take(extra).Select(a => a.Key).ToList();
+                    minDistances.SetRange(toRemove, a => a, a => 0);
+                }
+            }
+
+            Solution bestSolution = new Solution(null, int.MaxValue);
             Action<int, Solution> findMinimumPermutation = null;
 
             findMinimumPermutation = (pos, current) =>
@@ -185,7 +193,7 @@ namespace Signum.Engine
                                 orderby d
                                 select new { n, d }).ToList();
 
-                    float sum = current.Sum - minOlds[old];
+                    float sum = current.Sum - minDistances[old];
 
                     foreach (var item in list)
                     {
@@ -197,10 +205,10 @@ namespace Signum.Engine
                 }
             };
 
-            var min = new Solution(ImmutableStack<Selection>.Empty, minOlds.Values.Sum());
+            var min = new Solution(ImmutableStack<Selection>.Empty, minDistances.Values.Sum());
 
             findMinimumPermutation(0, min);
-         
+
             Dictionary<string, string> replacements = new Dictionary<string, string>();
 
             if (Interactive)
