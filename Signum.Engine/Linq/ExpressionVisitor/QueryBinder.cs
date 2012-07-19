@@ -518,8 +518,8 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression BindJoin(Type resultType, Expression outerSource, Expression innerSource, LambdaExpression outerKey, LambdaExpression innerKey, LambdaExpression resultSelector)
         {
-            bool leftOuter = OverloadingSimplifier.ExtractDefaultIfEmpty(ref outerSource);
-            bool rightOuter = OverloadingSimplifier.ExtractDefaultIfEmpty(ref innerSource);
+            bool rightOuter = OverloadingSimplifier.ExtractDefaultIfEmpty(ref outerSource);
+            bool leftOuter = OverloadingSimplifier.ExtractDefaultIfEmpty(ref innerSource);
 
             ProjectionExpression outerProj = VisitCastProjection(outerSource);
             ProjectionExpression innerProj = VisitCastProjection(innerSource);
@@ -529,9 +529,9 @@ namespace Signum.Engine.Linq
 
             Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr));
 
-            JoinType jt = leftOuter && rightOuter ? JoinType.FullOuterJoin :
-                          leftOuter ? JoinType.LeftOuterJoin :
+            JoinType jt = rightOuter && leftOuter ? JoinType.FullOuterJoin :
                           rightOuter ? JoinType.RightOuterJoin :
+                          leftOuter ? JoinType.LeftOuterJoin :
                           JoinType.InnerJoin;
 
             Alias alias = NextSelectAlias();
