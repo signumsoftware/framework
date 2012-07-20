@@ -58,8 +58,8 @@ namespace Signum.Web.Files
                                 string fileType = ctx.Inputs[FileLineKeys.FileType];
                                 var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
 
-                                //string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+                                string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
+                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
                                 if (hpf != null)
                                 {
                                     fp.FileName = Path.GetFileName(hpf.FileName);
@@ -99,8 +99,8 @@ namespace Signum.Web.Files
                             {
                                 var result = new EmbeddedFileDN();
 
-                                //string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+                                string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
+                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
 
                                 if (hpf.ContentLength != 0)
                                 {
