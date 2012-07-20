@@ -243,7 +243,7 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbChartNew"),
                     AltText = chartNewText,
                     Text = chartNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(prefix).requestData()).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), JsFindNavigator.GetFor(prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 };
         }

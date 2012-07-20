@@ -122,28 +122,28 @@ SF.Chart.Builder = (function () {
         });
     };
 
-    var originalNewSubtokensCombo = SF.FindNavigator.prototype.newSubTokensCombo;
-    SF.FindNavigator.prototype.newSubTokensCombo = function (index, url) {
-        var $selectedCombo = $(this.pf("ddlTokens_") + index);
+    var originalNewSubtokensCombo = SF.FindNavigator.newSubTokensCombo;
+    SF.FindNavigator.newSubTokensCombo = function (webQueryName, prefix, index, url) {
+        var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
         var $chartControl = $selectedCombo.closest(".sf-chart-control");
         if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
             if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
                 url = $chartControl.attr("data-subtokens-url");
-                originalNewSubtokensCombo.call(this, index, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
+                originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
             }
             else {
-                originalNewSubtokensCombo.call(this, index, url);
+                originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
             }
         }
         else {
-            this.clearChildSubtokenCombos($selectedCombo, index);
+            this.clearChildSubtokenCombos($selectedCombo, prefix, index);
             $("#" + SF.compose($chartControl.attr("data-prefix"), "sfOrders")).val('');
             $chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
         }
     };
 
-    var originalAddFilter = SF.FindNavigator.prototype.addFilter;
-    SF.FindNavigator.prototype.addFilter = function () {
+    var originalAddFilter = $.SF.FindNavigator.prototype.addFilter;
+    $.SF.FindNavigator.prototype.addFilter = function () {
         var $addFilter = $(this.pf("btnAddFilter"));
         if ($addFilter.closest(".sf-chart-builder").length == 0) {
             var $chartControl = $addFilter.closest(".sf-chart-control");
