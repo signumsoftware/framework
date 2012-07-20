@@ -61,11 +61,11 @@ namespace Signum.Web.SMS
         [HttpPost]
         public PartialViewResult CreateSMSMessageFromTemplate(string prefix)
         {
-            ViewData[ViewDataKeys.OnOk] = new JsFindNavigator(prefix).hasSelectedItems(
-                  new JsFunction() 
+            var jsFindNavigator = JsFindNavigator.GetFor(prefix);
+            ViewData[ViewDataKeys.OnOk] = jsFindNavigator.hasSelectedItems(new JsFunction() 
                 {
                        Js.Submit(RouteHelper.New().Action("CreateMessageFromTemplate", "SMS"),
-                        "function() {{ return {{ smsTemplateID: {0} }} }}".Formato(new JsFindNavigator(prefix).splitSelectedIds().ToJS()))
+                        "function() {{ return {{ smsTemplateID: {0} }} }}".Formato(jsFindNavigator.splitSelectedIds().ToJS()))
                 }).ToJS();
 
             var ie = this.ExtractEntity<IdentifiableEntity>(null);
@@ -99,14 +99,13 @@ namespace Signum.Web.SMS
             Type entitiesType = Lite.Extract(queryDescription.Columns.SingleEx(a => a.IsEntity).Type);
             var webTypeName = Navigator.ResolveWebTypeName(entitiesType);
 
-            //TODO: Anto ConstructorFromMany no pasa prefijo nuevo
             prefix = Js.NewPrefix(prefix);
-            ViewData[ViewDataKeys.OnOk] = new JsFindNavigator(prefix).hasSelectedItems(
-                  new JsFunction() 
+            var jsFindNavigator = JsFindNavigator.GetFor(prefix);
+            ViewData[ViewDataKeys.OnOk] = jsFindNavigator.hasSelectedItems(new JsFunction() 
                 {
                        Js.Submit(RouteHelper.New().Action("SendMultipleMessagesFromTemplate", "SMS"),
                         "function() {{ return {{ smsTemplateID: {0}, idProviders: '{1}', webTypeName: '{2}' }} }}"
-                        .Formato(new JsFindNavigator(prefix).splitSelectedIds().ToJS(), ids.ToString(","), webTypeName))
+                        .Formato(jsFindNavigator.splitSelectedIds().ToJS(), ids.ToString(","), webTypeName))
                 }).ToJS();
 
             ViewData[ViewDataKeys.Title] = "Select the template";
