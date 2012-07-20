@@ -75,7 +75,7 @@ namespace Signum.Web
                 {
                     content.AddLine(new HtmlTag("a")
                         .Class("sf-note-view")
-                        .Attr("onclick", new JsFindNavigator(foptions).openFinder().ToJS())
+                        .Attr("onclick", JsFindNavigator.openFinder(foptions).ToJS())
                         .InnerHtml(Resources.ViewNotes.EncodeHtml())
                         .ToHtml());
                 }

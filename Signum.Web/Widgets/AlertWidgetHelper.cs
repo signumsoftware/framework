@@ -67,7 +67,7 @@ namespace Signum.Web
                     {
                         content.AddLine(new HtmlTag("a")
                             .Class("sf-alert-view")
-                            .Attr("onclick", new JsFindNavigator(GetJsFindOptions(identifiable, a.Query, prefix)).openFinder().ToJS())
+                            .Attr("onclick", JsFindNavigator.openFinder(GetJsFindOptions(identifiable, a.Query, prefix)).ToJS())
                             .InnerHtml(
                             new HtmlTag("span").Class("sf-alert-count-label").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).InnerHtml((a.Title + ": ").EncodeHtml()),
                             new HtmlTag("span").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).SetInnerText(a.Count.ToString()))

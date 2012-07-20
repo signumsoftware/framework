@@ -190,11 +190,11 @@ namespace Signum.Web
 
         public override MvcHtmlString Execute()
         {
-            string onclick = new JsFindNavigator(new JsFindOptions
+            string onclick = JsFindNavigator.openFinder(new JsFindOptions
             {
                 FindOptions = FindOptions,
                 Prefix = Js.NewPrefix(Prefix ?? "")
-            }).openFinder().ToJS();
+            }).ToJS();
 
             return new HtmlTag("a").Attr("onclick", onclick).SetInnerText(Text);
         }

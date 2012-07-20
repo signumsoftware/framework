@@ -58,13 +58,6 @@ namespace Signum.Web
             if (parameters.AllKeys.Contains("allowChangeColumns"))
                 fo.AllowChangeColumns = bool.Parse(parameters["allowChangeColumns"]);
 
-            if (parameters.AllKeys.Contains("async"))
-            {
-                bool aux;
-                if (bool.TryParse(parameters["async"], out aux))
-                    fo.Async = aux;
-            }
-
             if (parameters.AllKeys.Contains("filterMode"))
             {
                 FilterMode mode = parameters["filterMode"].ToEnum<FilterMode>();

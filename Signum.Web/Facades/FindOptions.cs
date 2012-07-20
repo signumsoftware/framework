@@ -131,8 +131,6 @@ namespace Signum.Web
             set { view = value; }
         }
 
-        public bool Async { get; set; }
-
         bool entityContextMenu = ContextualItemsHelper.EntityCtxMenuInSearchPage;
         public bool EntityContextMenu
         {
@@ -150,14 +148,14 @@ namespace Signum.Web
                 SearchOnLoad ? "searchOnLoad=true" : null,
                 !Create ? "create=false": null, 
                 !View ? "view=false": null, 
-                Async ? "async=true": null, 
                 AllowMultiple.HasValue ? "allowMultiple=" + AllowMultiple.ToString() : null,
                 !AllowChangeColumns ? "allowChangeColumns=false" : null,
                 FilterMode != FilterMode.Visible ? "filterMode=" + FilterMode.ToString() : null,
                 (FilterOptions != null && FilterOptions.Count > 0) ? ("filters=" + FilterOptions.ToString(";") + ";") : null,
                 (OrderOptions != null && OrderOptions.Count > 0) ? ("orders=" + OrderOptions.ToString(";") + ";") : null,
                 (ColumnOptions != null && ColumnOptions.Count > 0) ? ("columns=" + ColumnOptions.ToString(";") + ";") : null, 
-                (ColumnOptionsMode != ColumnOptionsMode.Add ? ("columnMode=" + ColumnOptionsMode.ToString()) : null)
+                (ColumnOptionsMode != ColumnOptionsMode.Add ? ("columnMode=" + ColumnOptionsMode.ToString()) : null),
+                !EntityContextMenu ? "entityContextMenu=false" : null 
             }.NotNull().ToString("&");
 
             if (options.HasText())
@@ -175,9 +173,10 @@ namespace Signum.Web
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
             op.Add("create", !Create ? "false" : null);
             op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
+            op.Add("entityContextMenu", !EntityContextMenu ? "false" : null);
             op.Add("allowChangeColumns", !AllowChangeColumns ? "false" : null);
             op.Add("filters", filterOptions.IsEmpty() ? null : (filterOptions.ToString(";") + ";").SingleQuote());
-            op.Add("orders", OrderOptions.IsEmpty() ? null : (OrderOptions.ToString(";") + ";").SingleQuote());
+            op.Add("orders", OrderOptions.IsEmpty() ? null : ("[" + OrderOptions.ToString(oo => oo.ToString().SingleQuote(), ",") + "]"));
             op.Add("columns", ColumnOptions.IsEmpty() ? null : (ColumnOptions.ToString(";") + ";").SingleQuote()); 
             op.Add("columnMode", ColumnOptionsMode != ColumnOptionsMode.Add ? ColumnOptionsMode.ToString().SingleQuote() : null);
         }

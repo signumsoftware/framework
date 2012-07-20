@@ -113,7 +113,7 @@ SF.registerModule("Lines", function () {
                     throw "FindOptions webQueryName parameter must not be null in EBaseline typedFind. Call find instead";
                 }
                 var findOptions = this.createFindOptions(_findOptions);
-                new SF.FindNavigator(findOptions).openFinder();
+                SF.FindNavigator.openFinder(findOptions);
             },
 
             extraJsonParams: function (_prefix) {
@@ -421,7 +421,7 @@ SF.registerModule("Lines", function () {
                     throw "FindOptions webQueryName parameter must not be null in entityLineDetail typedFind. Call find instead";
                 }
                 var findOptions = this.createFindOptions(_findOptions, _viewOptions);
-                new SF.FindNavigator(findOptions).openFinder();
+                SF.FindNavigator.openFinder(findOptions);
             },
 
             createFindOptions: function (_findOptions, _viewOptions) {
@@ -795,7 +795,7 @@ SF.registerModule("Lines", function () {
 
                 this.restoreCurrent();
                 var findOptions = this.createFindOptions(_findOptions, _viewOptions);
-                new SF.FindNavigator(findOptions).openFinder();
+                SF.FindNavigator.openFinder(findOptions);
             },
 
             createFindOptions: function (_findOptions, _viewOptions) {
@@ -966,7 +966,7 @@ SF.registerModule("Lines", function () {
                 }
 
                 var findOptions = this.createFindOptions(_findOptions, _viewOptions);
-                new SF.FindNavigator(findOptions).openFinder();
+                SF.FindNavigator.openFinder(findOptions);
             },
 
             createFindOptions: function (_findOptions, _viewOptions) {

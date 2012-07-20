@@ -90,7 +90,7 @@ SF.registerModule("ViewNavigator", function () {
             }
         },
 
-        createSave: function (saveUrl) {
+        createSave: function () {
             if (!SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "ContainerDiv cannot be specified to Navigator on createSave mode";
             }
@@ -99,7 +99,7 @@ SF.registerModule("ViewNavigator", function () {
             }
             this.viewOptions.prefix = SF.compose("New", this.viewOptions.prefix);
             var self = this;
-            this.callServer(function (controlHtml) { self.showCreateSave(controlHtml, saveUrl); });
+            this.callServer(function (controlHtml) { self.showCreateSave(controlHtml); });
         },
 
         navigate: function () {
@@ -169,7 +169,7 @@ SF.registerModule("ViewNavigator", function () {
             }
         },
 
-        showCreateSave: function (newHtml, saveUrl) {
+        showCreateSave: function (newHtml) {
             var tempDivId = this.tempDivId();
 
             if (!SF.isEmpty(newHtml)) {
@@ -180,7 +180,7 @@ SF.registerModule("ViewNavigator", function () {
 
             var self = this;
             $("#" + tempDivId).data("viewOptions", this.viewOptions).popup({
-                onSave: function () { self.onCreateSave(saveUrl) },
+                onSave: function () { self.onCreateSave() },
                 onCancel: function () { self.onCreateCancel() }
             });
 
@@ -252,10 +252,10 @@ SF.registerModule("ViewNavigator", function () {
             }
         },
 
-        onCreateSave: function (saveUrl) {
+        onCreateSave: function () {
             var doDefault = (this.viewOptions.onSave != null) ? this.viewOptions.onSave(this.tempDivId()) : true;
             if (doDefault != false) {
-                var validatorResult = new SF.PartialValidator({ prefix: this.viewOptions.prefix, type: this.viewOptions.type, controllerUrl: saveUrl }).trySave();
+                var validatorResult = new SF.PartialValidator({ prefix: this.viewOptions.prefix, type: this.viewOptions.type }).trySave();
                 if (!validatorResult.isValid) {
                     window.alert(lang.signum.popupErrorsStop);
                     return;
