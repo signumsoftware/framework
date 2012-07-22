@@ -42,6 +42,7 @@ namespace Signum.Engine.DynamicQuery
             }
             set
             {
+                value.QueryName = queryName;
                 queries[queryName] = value;
             }
         }

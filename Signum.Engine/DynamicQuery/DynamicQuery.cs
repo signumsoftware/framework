@@ -21,6 +21,8 @@ namespace Signum.Engine.DynamicQuery
 {
     public interface IDynamicQuery
     {
+        object QueryName { get; set; } 
+
         ColumnDescriptionFactory EntityColumn();
         QueryDescription GetDescription(object queryName);
         ResultTable ExecuteQuery(QueryRequest request);
@@ -32,6 +34,34 @@ namespace Signum.Engine.DynamicQuery
 
     public abstract class DynamicQuery<T> : IDynamicQuery
     {
+        object queryName; 
+        public object QueryName
+        {
+            get { return queryName; }
+            set
+            {
+                if (queryName != null)
+                    throw new InvalidOperationException("The query {0} has already been registered with quey {1}".Formato(
+                        QueryUtils.GetQueryUniqueKey(queryName), QueryUtils.GetQueryUniqueKey(value)));
+
+                queryName = value;
+
+                if (StaticColumns.IsValueCreated)
+                    AssertColumns(StaticColumns.Value);
+            }
+        }
+
+        private void AssertColumns(ColumnDescriptionFactory[] columns)
+        {
+            columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found");
+
+            var errors =  columns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable() && sc.Type.IsAbstract).ToString(a=>a.Name, ", ");
+
+            if (errors.HasText())
+                throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".Formato(errors, QueryUtils.GetQueryUniqueKey(QueryName)));
+             
+        }
+
         public Lazy<ColumnDescriptionFactory[]> StaticColumns { get; private set; } 
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
@@ -44,7 +74,10 @@ namespace Signum.Engine.DynamicQuery
                 {
                     using (HeavyProfiler.Log("InitColums"))
                     {
-                        return InitializeColumns();
+                        var result = InitializeColumns();
+                        if (QueryName != null)
+                            AssertColumns(result);
+                        return result;
                     }
                 });
         }
@@ -53,8 +86,6 @@ namespace Signum.Engine.DynamicQuery
         {
             var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, null)).ToArray();
-
-            result.Where(a => a.IsEntity).SingleEx(() => "Entity column not found");
 
             return result;
         }
@@ -91,6 +122,8 @@ namespace Signum.Engine.DynamicQuery
         {
             get { return null; }
         }
+
+      
     }
 
     public interface IDynamicInfo
