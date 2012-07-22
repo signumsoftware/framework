@@ -75,7 +75,7 @@ namespace Signum.Entities.Omnibox
 
                 foreach (var match in matches)
                 {
-                    var autoComplete = OmniboxParser.Manager.AutoComplete((Type)match.Value, null, pattern, AutoCompleteLimit);
+                    var autoComplete = OmniboxParser.Manager.AutoComplete((Type)match.Value, pattern, AutoCompleteLimit);
 
                     if (autoComplete.Any())
                     {

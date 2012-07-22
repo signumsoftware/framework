@@ -38,29 +38,30 @@ namespace Signum.Web.Chart
                 Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList()
             };
 
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-
-            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Lite.Extract(entityColumn.Type);
-            Implementations implementations = entityColumn.Implementations;
-            
-            return OpenChartRequest(request, 
+            return OpenChartRequest(request,
                 findOptions.FilterOptions,
-                findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
+                findOptions.View && IsViewableEntity(request.QueryName));
         }
 
         public ViewResult FullScreen(string prefix)
         {
             var request = ExtractChartRequestCtx(prefix, null).Value;
 
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Lite.Extract(entityColumn.Type);
-            Implementations implementations = entityColumn.Implementations;
-
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
+                IsViewableEntity(request.QueryName));
+        }
+
+        public bool IsViewableEntity(object queryName)
+        {
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+
+            Type entitiesType = Lite.Extract(entityColumn.Type);
+            Implementations implementations = entityColumn.Implementations.Value;
+
+            return implementations.IsByAll || implementations.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin));
         }
 
         ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool view)
@@ -143,16 +144,11 @@ namespace Signum.Web.Chart
 
             var resultTable = ChartLogic.ExecuteChart(request);
 
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             var querySettings = Navigator.QuerySettings(request.QueryName);
-
-            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Lite.Extract(entityColumn.Type);
-            Implementations implementations = entityColumn.Implementations;
 
             ViewData[ViewDataKeys.Results] = resultTable;
 
-            ViewData[ViewDataKeys.View] = implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin);
+            ViewData[ViewDataKeys.View] = IsViewableEntity(request.QueryName);
             ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => querySettings.GetFormatter(c.c.Column));
 
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
@@ -283,15 +279,9 @@ namespace Signum.Web.Chart
 
             ChartRequest request = UserChartDN.ToRequest(uc);
 
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-
-            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Lite.Extract(entityColumn.Type);
-            Implementations implementations = entityColumn.Implementations;
-
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
+                IsViewableEntity(request.QueryName));
         }
 
         public ActionResult DeleteUserChart(Lite<UserChartDN> lite)

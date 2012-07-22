@@ -60,32 +60,31 @@
                 @Html.ValueLine(tc, ct => ct.DisplayName)
                 if (tc.Value.Token != null && tc.Value.IsColor && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
-                    var imp = tc.Value.Token.Implementations();
+                    var type = tc.Value.Token.Type.CleanType();
 
-                    if (imp == null)
+                    if (type.IsEnum)
                     {
-                        var type = tc.Value.Token.Type.CleanType();
-
-                        if (type.IsEnum || type.IsIdentifiableEntity())
-                        {
                 @ColorLink(type);
-                        }
                     }
-                    else if (!imp.IsByAll)
+                    else
                     {
-                        var ib = ((ImplementedByAttribute)imp);
+                        var imp = tc.Value.Token.GetImplementations();
 
-                        for (int i = 0; i < ib.ImplementedTypes.Length; i++)
+                        if (imp != null && !imp.Value.IsByAll)
                         {
-                            if (i != 0)
+                            foreach (var item in imp.Value.Types.Iterate())
                             {
-                <text> | </text>
+                                if (!item.IsFirst)
+                                {
+                                    <text> | </text>
+                                }
+                                
+                                 @ColorLink(item.Value);
                             }
-                @ColorLink(ib.ImplementedTypes[0]);
                         }
                     }
                 }
             }
-        </td>
-    </tr>
+                </td>
+            </tr>
 }
