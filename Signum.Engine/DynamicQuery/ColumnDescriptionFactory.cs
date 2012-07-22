@@ -33,7 +33,7 @@ namespace Signum.Engine.DynamicQuery
             set
             {
                 propertyRoutes = value;
-                if (propertyRoutes != null)
+                if (propertyRoutes != null && propertyRoutes.Any() /*Out of IB casting*/)
                 {
                     var cleanType = Type.CleanType();
                     var only = propertyRoutes.Only();
