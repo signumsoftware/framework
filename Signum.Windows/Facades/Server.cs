@@ -234,7 +234,7 @@ namespace Signum.Windows
                 return Server.Return((IBaseServer s) => s.FindAllImplementations(propertyRoute.RootType));
             });
 
-            return dic.TryGetC(propertyRoute);
+            return dic.GetOrThrow(propertyRoute, "{0} is not a IIdentifiable");
         }
 
         public static object Convert(object obj, Type type)

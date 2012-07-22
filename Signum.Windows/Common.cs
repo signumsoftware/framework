@@ -504,7 +504,7 @@ namespace Signum.Windows
             {
                 PropertyRoute entityContext = eb.GetEntityTypeContext();
 
-                if (entityContext != null)
+                if (entityContext != null && entityContext.Type.CleanType().IsIIdentifiable())
                 {
                     eb.Implementations = entityContext.GetImplementations();
                 }

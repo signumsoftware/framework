@@ -449,7 +449,7 @@ namespace Signum.Engine.Maps
 
             var table = Table(root);
 
-            return PropertyRoute.GenerateRoutes(root).Select(r=> KVP.Create(r, FindImplementations(r))).Where(r=>r.Value != null).ToDictionary();
+            return PropertyRoute.GenerateRoutes(root).Where(a=>a.Type.CleanType().IsIIdentifiable()).ToDictionary(r=>r, r => FindImplementations(r)).ToDictionary();
         }
 
         public Implementations FindImplementations(PropertyRoute route)
@@ -460,19 +460,23 @@ namespace Signum.Engine.Maps
             Type type = route.RootType;
 
             if (!Tables.ContainsKey(type))
-                return null;
+                return Implementations.By(route.Type.CleanType());
 
             Field field = TryFindField(Table(type), route.Members);
 
+            FieldReference refField = field as FieldReference;
+            if (refField != null)
+                return Implementations.By(refField.FieldType.CleanType());
+            
             FieldImplementedBy ibField = field as FieldImplementedBy;
             if (ibField != null)
-                return new ImplementedByAttribute(ibField.ImplementationColumns.Keys.ToArray());
+                return Implementations.By(ibField.ImplementationColumns.Keys.ToArray());
 
             FieldImplementedByAll ibaField = field as FieldImplementedByAll;
             if (ibaField != null)
-                return new ImplementedByAllAttribute();
+                return Implementations.ByAll;
 
-            return null;
+            throw new InvalidOperationException("{0} is not a {1}".Formato(route, typeof(IIdentifiable).Name));
         }
 
         /// <summary>

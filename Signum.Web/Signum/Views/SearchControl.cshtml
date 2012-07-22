@@ -11,8 +11,8 @@
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);
-    Implementations implementations = entityColumn.Implementations;
-    bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
+    Implementations implementations = entityColumn.Implementations.Value;
+    bool viewable = findOptions.View && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin)));
     bool? allowMultiple = findOptions.AllowMultiple;
     if (allowMultiple == null && findOptions.FilterMode != FilterMode.OnlyResults)
     {
@@ -38,9 +38,8 @@
     @Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.IsEmpty() ? "" :
         (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
     @Html.Hidden(Model.Compose("sfEntityTypeNames"), 
-        implementations == null ? Navigator.ResolveWebTypeName(entitiesType) :
                                 implementations.IsByAll ? "[All]" :
-                                ((ImplementedByAttribute)implementations).ImplementedTypes.ToString(t => Navigator.ResolveWebTypeName(t), ","), 
+                                implementations.Types.ToString(t => Navigator.ResolveWebTypeName(t), ","), 
         new { disabled = "disabled" })
     
     @if(findOptions.SearchOnLoad)
@@ -125,9 +124,9 @@
     
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
         <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@("new SF.FindNavigator({{prefix:'{0}',searchControllerUrl:'{1}'}}).search();return false;".Formato(Model.ControlID, Url.SignumAction("Search")))">@Resources.Search</button>
-        @if (findOptions.Create && (implementations != null || Navigator.IsCreable(entitiesType, EntitySettingsContext.Admin)) && viewable)
+        @if (findOptions.Create && !implementations.IsByAll && implementations.Types.Any(t=> Navigator.IsCreable(t, EntitySettingsContext.Admin)) && viewable)
         {
-            bool hasManyImplementations = implementations != null && !implementations.IsByAll && ((ImplementedByAttribute)implementations).ImplementedTypes.Length > 1;
+            bool hasManyImplementations = implementations.Types.Count() > 1;
             string creating = findOptions.Creating.HasText() ? findOptions.Creating :
                 "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}},'{2}');return false;".Formato(
                     Model.ControlID,

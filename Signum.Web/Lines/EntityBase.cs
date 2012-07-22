@@ -38,11 +38,11 @@ namespace Signum.Web
         {
             get 
             {
-                return Implementations != null && !Implementations.IsByAll && ((ImplementedByAttribute)Implementations).ImplementedTypes.Length > 1;
+                return Implementations != null && !Implementations.Value.IsByAll && Implementations.Value.Types.Count() > 1;
             }
         }
 
-        public Implementations Implementations { get; set; }
+        public Implementations? Implementations { get; set; }
 
         public ViewMode ViewMode { get; set; } 
         

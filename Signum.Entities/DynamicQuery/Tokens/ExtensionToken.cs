@@ -13,7 +13,8 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ExtensionToken : QueryToken
     {
-        public ExtensionToken(QueryToken parent, string key, Type type, string unit, string format, Implementations implementations, bool isAllowed, PropertyRoute propertyRoute): base(parent)
+        public ExtensionToken(QueryToken parent, string key, Type type, string unit, string format, Implementations? implementations, bool isAllowed, PropertyRoute propertyRoute)
+            : base(parent)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(parent.Type.CleanType()))
                 throw new InvalidOperationException("Extensions only allowed over {0}".Formato(typeof(IIdentifiable).Name)); 
@@ -74,8 +75,8 @@ namespace Signum.Entities.DynamicQuery
             return propertyRoute;
         }
 
-        public Implementations implementations;
-        public override Implementations Implementations()
+        public Implementations? implementations;
+        public override Implementations? GetImplementations()
         {
             return implementations;
         }

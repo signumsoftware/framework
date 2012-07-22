@@ -37,12 +37,12 @@ namespace Signum.Windows
             }
         }
 
-        protected Implementations safeImplementations;
+        protected Implementations? safeImplementations;
         public static readonly DependencyProperty ImplementationsProperty =
-            DependencyProperty.Register("Implementations", typeof(Implementations), typeof(EntityBase), new UIPropertyMetadata((d, e) => ((EntityBase)d).safeImplementations = (Implementations)e.NewValue));
-        public Implementations Implementations
+            DependencyProperty.Register("Implementations", typeof(Implementations?), typeof(EntityBase), new UIPropertyMetadata(null, (d, e) => ((EntityBase)d).safeImplementations = (Implementations)e.NewValue));
+        public Implementations? Implementations
         {
-            get { return (Implementations)GetValue(ImplementationsProperty); }
+            get { return (Implementations?)GetValue(ImplementationsProperty); }
             set { SetValue(ImplementationsProperty, value); }
         }
 
@@ -167,6 +167,8 @@ namespace Signum.Windows
                 CleanLite = false;
                 CleanType = type;
             }
+
+            
         }
 
         protected internal Type CleanType { get; private set; }
@@ -205,19 +207,24 @@ namespace Signum.Windows
                 EntityTemplate = Navigator.FindDataTemplate(this, type);
             }
 
-            if (this.NotSet(EntityBase.CreateProperty) && Create && Implementations == null)
-                Create = Navigator.IsCreable(CleanType, false);
+            if (this.NotSet(EntityBase.ImplementationsProperty) && CleanType.IsIdentifiableEntity() && !CleanType.IsAbstract)
+                Implementations = Signum.Entities.Implementations.By(CleanType);
 
-            if (this.NotSet(EntityBase.ViewProperty) && View && Implementations == null)
-                View = Navigator.IsViewable(CleanType, false);
+            if (this.NotSet(EntityBase.CreateProperty) && Create)
+                Create = 
+                    CleanType.IsEmbeddedEntity() ? Navigator.IsCreable(CleanType, false) : 
+                    Implementations.Value.IsByAll ? false:
+                    Implementations.Value.Types.Any(t => Navigator.IsCreable(t, false));
+
+            if (this.NotSet(EntityBase.ViewProperty) && View)
+                View = CleanType.IsEmbeddedEntity() ? Navigator.IsViewable(CleanType, false) :
+                    Implementations.Value.IsByAll ? true :
+                    Implementations.Value.Types.Any(t => Navigator.IsViewable(t, false));
 
             if (this.NotSet(EntityBase.FindProperty) && Find)
-            {
-                if (Implementations == null)
-                    Find = Navigator.IsFindable(CleanType);
-                if (Implementations is ImplementedByAllAttribute)
-                    Find = false;
-            }
+                Find = CleanType.IsEmbeddedEntity() ? false:
+                    Implementations.Value.IsByAll ? false :
+                    Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
 
             if (this.NotSet(EntityBase.ViewOnCreateProperty) && ViewOnCreate && !View)
                 ViewOnCreate = false;
@@ -249,7 +256,7 @@ namespace Signum.Windows
             if (entity == null)
                 return false;
 
-            if (View && this.NotSet(ViewProperty) && Implementations != null)
+            if (View && this.NotSet(ViewProperty))
             {
                 Type runtimeType = CleanLite ? ((Lite)entity).RuntimeType : entity.GetType();
 
@@ -340,12 +347,13 @@ namespace Signum.Windows
 
         public Type SelectType()
         {
-            if (Implementations == null)
+            if (CleanType.IsEmbeddedEntity())
                 return CleanType;
-            else if (Implementations.IsByAll)
+
+            if (Implementations.Value.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
-            else
-                return Navigator.SelectType(Window.GetWindow(this), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+
+            return Navigator.SelectType(Window.GetWindow(this), Implementations.Value.Types);
         }
 
         protected object OnCreate()

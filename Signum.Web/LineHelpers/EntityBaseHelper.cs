@@ -196,24 +196,32 @@ namespace Signum.Web
                                 EntityBaseHelper.JsEscape(template.ToHtmlString())));
         }
 
-        public static void ConfigureEntityBase(EntityBase eb, Type entityType)
+        public static void ConfigureEntityBase(EntityBase eb, Type cleanType)
         {
             Common.TaskSetImplementations(eb);
 
-            ConfigureEntityButtons(eb, entityType);
+            ConfigureEntityButtons(eb, cleanType);
         }
 
-        public static void ConfigureEntityButtons(EntityBase eb, Type entityType)
+        public static void ConfigureEntityButtons(EntityBase eb, Type cleanType)
         {
-            if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
-            {
-                eb.Create = eb.Create && Navigator.IsCreable(entityType, eb.EntitySettingsContext);
-                eb.View = eb.View && Navigator.IsViewable(entityType, eb.EntitySettingsContext);
-                eb.Find = eb.Find && Navigator.IsFindable(entityType);
+            eb.Create &= 
+                cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, eb.EntitySettingsContext) :
+                eb.Implementations.Value.IsByAll ? false :
+                eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, eb.EntitySettingsContext));
+                
+            eb.View &=
+                cleanType.IsEmbeddedEntity() ? Navigator.IsViewable(cleanType, eb.EntitySettingsContext) :
+                eb.Implementations.Value.IsByAll ? true :
+                eb.Implementations.Value.Types.Any(t => Navigator.IsViewable(t, eb.EntitySettingsContext));
 
-                bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
-                eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
-            }
+            eb.Find &=
+                cleanType.IsEmbeddedEntity() ? false :
+                eb.Implementations.Value.IsByAll ? false :
+                eb.Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
+
+            bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
+            eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
         }
     }
 

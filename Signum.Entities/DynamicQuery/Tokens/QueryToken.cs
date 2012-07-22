@@ -36,7 +36,7 @@ namespace Signum.Entities.DynamicQuery
         protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
         public abstract PropertyRoute GetPropertyRoute();
-        public abstract Implementations Implementations();
+        public abstract Implementations? GetImplementations();
         public abstract bool IsAllowed();
 
         public abstract QueryToken Clone();
@@ -63,7 +63,7 @@ namespace Signum.Entities.DynamicQuery
             return result.Where(t => t.IsAllowed()).ToList();
         }
 
-        protected List<QueryToken> SubTokensBase(Type type, Implementations implementations)
+        protected List<QueryToken> SubTokensBase(Type type, Implementations? implementations)
         {
             if (type.UnNullify() == typeof(DateTime))
             {
@@ -73,20 +73,17 @@ namespace Signum.Entities.DynamicQuery
             Type cleanType = type.CleanType();
             if (cleanType.IsIIdentifiable())
             {
-                if (implementations != null)
-                {
-                    if (implementations.IsByAll)
-                        return new List<QueryToken>(); // new[] { EntityPropertyToken.IdProperty(this) };
+                if (implementations.Value.IsByAll)
+                    return new List<QueryToken>(); // new[] { EntityPropertyToken.IdProperty(this) };
 
-                    return ((ImplementedByAttribute)implementations).ImplementedTypes.Select(t => (QueryToken)new AsTypeToken(this, t))
-                        .Concat(OnEntityExtension(cleanType, this).OrderBy(a => a.ToString())).ToList();
+                var onlyType = implementations.Value.Types.Only();
 
-                    //return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
-                    //    .Concat(asPropesties).Concat(EntityProperties(cleanType)).ToArray();
-                }
+                if (onlyType != null)
+                    return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
+                        .Concat(EntityProperties(onlyType).Concat(OnEntityExtension(onlyType, this)).OrderBy(a => a.ToString())).ToList();
 
-                return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
-                    .Concat(EntityProperties(cleanType).Concat(OnEntityExtension(cleanType, this)).OrderBy(a => a.ToString())).ToList();
+                return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t))
+                    .Concat(OnEntityExtension(cleanType, this).OrderBy(a => a.ToString())).ToList();
             }
 
             if (type.IsEmbeddedEntity())

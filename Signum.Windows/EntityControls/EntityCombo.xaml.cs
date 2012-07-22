@@ -145,7 +145,7 @@ namespace Signum.Windows
             }
             else
             {
-                data = Server.RetrieveAllLite(CleanType, safeImplementations);
+                data = Server.RetrieveAllLite(CleanType, safeImplementations.Value);
             }
 
             if (SortElements)

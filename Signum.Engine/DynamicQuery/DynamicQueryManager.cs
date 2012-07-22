@@ -110,7 +110,7 @@ namespace Signum.Engine.DynamicQuery
 
         public Dictionary<object, IDynamicQuery> GetQueries(Type entityType)
         {
-            return queries.Where(kvp => kvp.Value.EntityColumn().CompatibleWith(entityType)).ToDictionary();
+            return queries.Where(kvp => kvp.Value.EntityColumn().Implementations.Value.Types.Contains(entityType)).ToDictionary();
         }
 
         public Dictionary<object, IDynamicQuery> GetQueries()
@@ -249,8 +249,8 @@ namespace Signum.Engine.DynamicQuery
             {
                 this.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                 this.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
-                this.Implementations = ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes, type.CleanType());
-                this.PropertyRoute = cm.PropertyRoutes.FirstOrDefault();
+                var cleanType = Type.CleanType();
+                this.Implementations = cleanType.IsIIdentifiable() ? (Implementations?)ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes.Select(pr => pr.GetImplementations())) : null;
             }
 
             IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
@@ -264,7 +264,7 @@ namespace Signum.Engine.DynamicQuery
         public Func<string> NiceName;
         public string Format;
         public string Unit;
-        public Implementations Implementations;
+        public Implementations? Implementations;
         public Func<bool> IsAllowed;
         public PropertyRoute PropertyRoute;
         public bool Inherit = true;

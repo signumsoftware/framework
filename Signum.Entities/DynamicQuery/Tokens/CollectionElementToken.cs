@@ -15,46 +15,52 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class CollectionElementToken : QueryToken
     {
-        public CollectionElementType ElementType { get; private set; }
+        public CollectionElementType CollectionElementType { get; private set; }
+        Type elementType;
 
         internal CollectionElementToken(QueryToken parent, CollectionElementType type)
             : base(parent)
         {
-            if (parent.Type.ElementType() == null)
+            elementType = parent.Type.ElementType();
+            if (elementType == null)
                 throw new InvalidOperationException("not a collection");
 
-            this.ElementType = type;
+            this.CollectionElementType = type;
         }
 
         public override Type Type
         {
-            get { return Parent.Type.ElementType().Nullify().BuildLite(); }
+            get { return elementType.Nullify().BuildLite(); }
         }
 
         public override string ToString()
         {
-            return ElementType.NiceToString();
+            return CollectionElementType.NiceToString();
         }
 
         public override string Key
         {
-            get { return ElementType.ToString(); }
+            get { return CollectionElementType.ToString(); }
         }
 
 
 
         protected override List<QueryToken> SubTokensInternal()
         {
-            return SubTokensBase(Type, Implementations());
+            return SubTokensBase(Type, GetImplementations());
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             var pr = GetPropertyRoute();
-            if (pr == null)
-                return null;
+            if (pr != null)
+                return pr.TryGetImplementations();
 
-            return pr.GetImplementations();
+            var t = elementType.CleanType();
+            if (t.IsIdentifiableEntity())
+                return Implementations.By(Parent.Type);
+
+            return null;
         }
 
         public override string Format
@@ -74,7 +80,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool HasAllOrAny()
         {
-            return ElementType == CollectionElementType.All || ElementType == CollectionElementType.Any;
+            return CollectionElementType == CollectionElementType.All || CollectionElementType == CollectionElementType.Any;
         }
 
         public override PropertyRoute GetPropertyRoute()
@@ -91,10 +97,10 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            if (ElementType != CollectionElementType.Element)
-                throw new InvalidOperationException("NiceName not supported for {0}".Formato(ElementType));
+            if (CollectionElementType != CollectionElementType.Element)
+                throw new InvalidOperationException("NiceName not supported for {0}".Formato(CollectionElementType));
 
-            Type parentElement = Parent.Type.ElementType().CleanType();
+            Type parentElement = elementType.CleanType();
 
             if (parentElement.IsModifiableEntity())
                 return parentElement.NiceName();
@@ -104,7 +110,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new CollectionElementToken(Parent.Clone(), ElementType);
+            return new CollectionElementToken(Parent.Clone(), CollectionElementType);
         }
 
         static MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
@@ -119,17 +125,17 @@ namespace Signum.Entities.DynamicQuery
 
         internal Expression BuildExpressionLambda(BuildExpressionContext context, LambdaExpression lambda)
         {
-            MethodInfo mi = typeof(IQueryable).IsAssignableFrom(Parent.Type) ? (ElementType == CollectionElementType.All ? miAllQ : miAnyQ) :
-                                                                               (ElementType == CollectionElementType.All ? miAllE : miAnyE);
+            MethodInfo mi = typeof(IQueryable).IsAssignableFrom(Parent.Type) ? (CollectionElementType == CollectionElementType.All ? miAllQ : miAnyQ) :
+                                                                               (CollectionElementType == CollectionElementType.All ? miAllE : miAnyE);
 
             var collection = Parent.BuildExpression(context);
             
-            return Expression.Call(mi.MakeGenericMethod(Parent.Type.ElementType()), collection, lambda);
+            return Expression.Call(mi.MakeGenericMethod(elementType), collection, lambda);
         }
 
         internal ParameterExpression CreateParameter()
         {
-            return Expression.Parameter(Parent.Type.ElementType());
+            return Expression.Parameter(elementType);
         }
 
         internal Expression CreateExpression(ParameterExpression parameter)
@@ -142,7 +148,7 @@ namespace Signum.Entities.DynamicQuery
             return allTokens
                 .SelectMany(t => t.FollowC(tt => tt.Parent))
                 .OfType<CollectionElementToken>()
-                .Where(a => a.ElementType == CollectionElementType.Element)
+                .Where(a => a.CollectionElementType == CollectionElementType.Element)
                 .Distinct()
                 .OrderBy(a => a.FullKey().Length)
                 .ToList();

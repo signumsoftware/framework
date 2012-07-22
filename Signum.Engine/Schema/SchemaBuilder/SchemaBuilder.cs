@@ -258,12 +258,12 @@ namespace Signum.Engine.Maps
                 case KindOfField.Reference:
                     {
                         Implementations at = Settings.GetImplementations(route);
-                        if (at == null)
+                        if(at.IsByAll)
+                            return GenerateFieldImplmentedByAll(route, name, forceNull);
+                        else if(at.Types.Only() == route.Type.CleanType())
                             return GenerateFieldReference(route, name, forceNull);
-                        else if (at is ImplementedByAttribute)
-                            return GenerateFieldImplmentedBy(route, name, forceNull, (ImplementedByAttribute)at);
                         else
-                            return GenerateFieldImplmentedByAll(route, name, forceNull, (ImplementedByAllAttribute)at);
+                            return GenerateFieldImplmentedBy(route, name, forceNull, at.Types);
                     }
                 case KindOfField.Enum:
                     return GenerateFieldEnum(route, name, forceNull);
@@ -358,19 +358,19 @@ namespace Signum.Engine.Maps
             };
         }
 
-        protected virtual Field GenerateFieldImplmentedBy(PropertyRoute route, NameSequence name, bool forceNull, ImplementedByAttribute ib)
+        protected virtual Field GenerateFieldImplmentedBy(PropertyRoute route, NameSequence name, bool forceNull, IEnumerable<Type> types)
         {
             Type cleanType = Lite.Extract(route.Type) ?? route.Type;
-            string erroneos = ib.ImplementedTypes.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
+            string erroneos = types.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
             if (erroneos.Length != 0)
                 throw new InvalidOperationException("Type {0} do not implement {1}".Formato(erroneos, cleanType));
 
-            bool nullable = Settings.IsNullable(route, forceNull) || ib.ImplementedTypes.Length > 1;
+            bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
             return new FieldImplementedBy(route.Type)
             {
                 IndexType = Settings.GetIndexType(route),
-                ImplementationColumns = ib.ImplementedTypes.ToDictionary(t => t, t => new ImplementationColumn
+                ImplementationColumns = types.ToDictionary(t => t, t => new ImplementationColumn
                 {
                     ReferenceTable = Include(t, route),
                     Name = name.Add(TypeLogic.GetCleanName(t)).ToString(),
@@ -380,7 +380,7 @@ namespace Signum.Engine.Maps
             };
         }
 
-        protected virtual Field GenerateFieldImplmentedByAll(PropertyRoute route, NameSequence preName, bool forceNull, ImplementedByAllAttribute iba)
+        protected virtual Field GenerateFieldImplmentedByAll(PropertyRoute route, NameSequence preName, bool forceNull)
         {
             bool nullable = Settings.IsNullable(route, forceNull);
 

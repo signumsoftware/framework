@@ -72,19 +72,22 @@ namespace Signum.Web
             {
                 PropertyRoute route = bl.PropertyRoute;
 
-                if (Reflector.IsMList(bl.Type))
+                if (bl.Type.IsMList())
                     route = route.Add("Item");
 
-                IImplementationsFinder finder = typeof(ModelEntity).IsAssignableFrom(route.RootType) ? 
-                    (IImplementationsFinder)Navigator.EntitySettings(route.RootType) : Schema.Current; 
-
-                eb.Implementations = finder.FindImplementations(route);
-
-                if (eb.Implementations != null && eb.Implementations.IsByAll)
+                if (route.Type.CleanType().IsIIdentifiable())
                 {
-                    EntityLine el = eb as EntityLine;
-                    if (el != null)
-                        el.Autocomplete = false;
+                    IImplementationsFinder finder = typeof(ModelEntity).IsAssignableFrom(route.RootType) ?
+                        (IImplementationsFinder)Navigator.EntitySettings(route.RootType) : Schema.Current;
+
+                    eb.Implementations = finder.FindImplementations(route);
+
+                    if (eb.Implementations.Value.IsByAll)
+                    {
+                        EntityLine el = eb as EntityLine;
+                        if (el != null)
+                            el.Autocomplete = false;
+                    }
                 }
             }
         }

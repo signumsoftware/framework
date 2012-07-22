@@ -24,7 +24,7 @@ namespace Signum.Engine.DynamicQuery
 
         public string Format { get; set; }
         public string Unit { get; set; }
-        public Implementations Implementations { get; set; }
+        public Implementations? Implementations { get; set; }
 
         PropertyRoute[] propertyRoutes;
         public PropertyRoute[] PropertyRoutes
@@ -35,22 +35,21 @@ namespace Signum.Engine.DynamicQuery
                 propertyRoutes = value;
                 if (propertyRoutes != null)
                 {
-                    var pr = propertyRoutes.First();
+                    var cleanType = Type.CleanType();
+                    var only = propertyRoutes.Only();
 
-                    if (pr.PropertyRouteType == PropertyRouteType.Root)
-                        throw new InvalidOperationException("PropertyRoute can not be of RouteType Root");
-
-                    Format = GetFormat(propertyRoutes);
-                    Unit = GetUnit(propertyRoutes);
-                    Implementations = AggregateImplementations(propertyRoutes, Type.CleanType());
+                    Implementations = !cleanType.IsIIdentifiable() ? null :
+                        only != null && only.PropertyRouteType == PropertyRouteType.Root ? Signum.Entities.Implementations.By(cleanType) :
+                        (Implementations?)AggregateImplementations(PropertyRoutes.Select(pr => pr.GetImplementations()));
 
                     switch (propertyRoutes[0].PropertyRouteType)
                     {
                         case PropertyRouteType.LiteEntity:
                         case PropertyRouteType.Root:
-                           
+                            return;
                         case PropertyRouteType.FieldOrProperty:
-                          
+                            Format = GetFormat(propertyRoutes);
+                            Unit = GetUnit(propertyRoutes);
                             return;
                         case PropertyRouteType.MListItems:
                             Format = Reflector.FormatString(propertyRoutes[0].Type);
@@ -83,49 +82,29 @@ namespace Signum.Engine.DynamicQuery
             if (IsEntity && !Type.CleanType().IsIIdentifiable())
                 throw new InvalidOperationException("Entity must be a Lite or an IIdentifiable");
 
-            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoutes.All(pr => pr.PropertyRouteType != PropertyRouteType.Root))
+            if (meta is CleanMeta)
             {
                 PropertyRoutes = ((CleanMeta)meta).PropertyRoutes;
             }
         }
 
-        internal static Implementations AggregateImplementations(PropertyRoute[] routes, Type cleanType)
+        public static Implementations AggregateImplementations(IEnumerable<Implementations> implementations)
         {
-            if (!cleanType.IsIIdentifiable())
-                return null;
+            if (implementations.IsEmpty())
+                throw new InvalidOperationException("implementations is Empty");
 
-            return AggregateImplementations(routes.Select(a => a.GetImplementations() ??
-                new ImplementedByAttribute(a.Type.CleanType())).NotNull(), cleanType);
-        }
+            if (implementations.Count() == 1)
+                return implementations.First();
 
-        private static Implementations AggregateImplementations(IEnumerable<Implementations> collection, Type cleanType)
-        {
-            if (collection.IsEmpty())
-                return null;
+            if (implementations.Any(a => a.IsByAll))
+                return Signum.Entities.Implementations.ByAll;
 
-            var only = collection.Only();
-            if (only != null)
-            {
-                ImplementedByAttribute ib = only as ImplementedByAttribute;
-                if (ib != null && ib.ImplementedTypes.Length == 1 && ib.ImplementedTypes[0] == cleanType)
-                    return null;
-
-                return only;
-            }
-            ImplementedByAttribute iba = (ImplementedByAttribute)collection.FirstOrDefault(a => a.IsByAll);
-            if (iba != null)
-                return iba;
-
-            var types = collection
-                .Cast<ImplementedByAttribute>()
-                .SelectMany(ib => ib.ImplementedTypes)
+            var types = implementations
+                .SelectMany(ib => ib.Types)
                 .Distinct()
                 .ToArray();
 
-            if (types.Length == 1 && types[0] == cleanType)
-                return null;
-         
-            return new ImplementedByAttribute(types);
+            return Signum.Entities.Implementations.By(types);
         }
 
         public string DisplayName()
@@ -181,28 +160,6 @@ namespace Signum.Engine.DynamicQuery
                 Format = Format,
                 Unit = Unit,
             };
-        }
-
-        public Type DefaultEntityType()
-        {
-            if (Implementations == null)
-                return this.Type.CleanType();
-
-            if (Implementations.IsByAll)
-                return null;
-
-            return ((ImplementedByAttribute)Implementations).ImplementedTypes.FirstOrDefault();
-        }
-
-        public bool CompatibleWith(Type entityType)
-        {
-            if (Implementations == null)
-                return Type.CleanType() == entityType;
-
-            if (Implementations.IsByAll)
-                return true;
-
-            return ((ImplementedByAttribute)Implementations).ImplementedTypes.Contains(entityType);
         }
     }
 }

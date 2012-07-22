@@ -82,12 +82,12 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
 
-            return SubTokensBase(PropertyInfo.PropertyType, Implementations());
+            return SubTokensBase(PropertyInfo.PropertyType, GetImplementations());
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
-            return GetPropertyRoute().GetImplementations();
+            return GetPropertyRoute().TryGetImplementations();
         }
 
         public override string Format

@@ -44,7 +44,7 @@ namespace Signum.Web
                         else if (entityLine.UntypedValue != null)
                             sb.AddLine(helper.Div(entityLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-                        if (entityLine.Autocomplete && entityLine.Implementations != null && entityLine.Implementations.IsByAll)
+                        if (entityLine.Autocomplete && entityLine.Implementations.Value.IsByAll)
                             throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
 
                         var htmlAttr = new Dictionary<string, object>
@@ -131,7 +131,7 @@ namespace Signum.Web
 
             EntityBaseHelper.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType());
 
-            if (el.Implementations.TryCS(i => i.IsByAll) == true)
+            if (el.Implementations == null || el.Implementations.Value.IsByAll)
                 el.Autocomplete = false;
 
             Common.FireCommonTasks(el);

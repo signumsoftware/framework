@@ -63,7 +63,7 @@ namespace Signum.Entities.DynamicQuery
             get { return null; }
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return null;
         }

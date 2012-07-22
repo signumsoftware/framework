@@ -313,6 +313,8 @@ namespace Signum.Web
 
         private static MvcHtmlString PrintValueField(HtmlHelper helper, Context parent, FilterOption filterOption)
         {
+            var implementations = filterOption.Token.GetImplementations(); 
+
             if (filterOption.Token.Type.IsLite())
             {
                 Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type);
@@ -320,11 +322,11 @@ namespace Signum.Web
                     Database.FillToString(lite);
 
                 Type cleanType = Lite.Extract(filterOption.Token.Type);
-                if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))
+                if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !implementations.Value.IsByAll)
                 {
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        Implementations = filterOption.Token.Implementations(),
+                        Implementations = implementations.Value,
                     };
                     EntityBaseHelper.ConfigureEntityButtons(ec, filterOption.Token.Type.CleanType());
                     ec.LabelVisible = false;
@@ -336,9 +338,10 @@ namespace Signum.Web
                 {
                     EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        Implementations = filterOption.Token.Implementations(),
+                        Implementations = implementations.Value,
                     };
-                    if (el.Implementations.TryCS(i => i.IsByAll) == true)
+
+                    if (el.Implementations.Value.IsByAll)
                         el.Autocomplete = false;
 
                     EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
@@ -354,7 +357,7 @@ namespace Signum.Web
                 EmbeddedEntity lite = (EmbeddedEntity)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                 {
-                    Implementations = filterOption.Token.Implementations(),
+                    Implementations = implementations.Value,
                 };
                 EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
                 el.LabelVisible = false;

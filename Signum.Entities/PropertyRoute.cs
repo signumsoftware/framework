@@ -60,17 +60,13 @@ namespace Signum.Entities
             {
                 Implementations imp = GetImplementations();
 
-                ImplementedByAttribute ib = imp as ImplementedByAttribute;
-                if (ib != null && ib.ImplementedTypes.Length == 1)
-                {
-                    return new PropertyRoute(Root(ib.ImplementedTypes.SingleEx()), fieldOrProperty); 
-                }
+                Type only;
+                if (imp.IsByAll || (only = imp.Types.Only()) == null)
+                    throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".Formato(imp));
 
-                if (imp != null)
-                    throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".Formato(imp.GetType()));
-
-                return new PropertyRoute(Root(this.Type), fieldOrProperty);
+                return new PropertyRoute(Root(only), fieldOrProperty);
             }
+
             return new PropertyRoute(this, fieldOrProperty);
         }
 
@@ -232,6 +228,14 @@ namespace Signum.Entities
         }
 
         static Func<PropertyRoute, Implementations> FindImplementations;
+
+        public Implementations? TryGetImplementations()
+        {
+            if (this.Type.CleanType().IsIIdentifiable() && PropertyRouteType != Entities.PropertyRouteType.Root)
+                return GetImplementations();
+
+            return null;
+        }
 
         public Implementations GetImplementations()
         {

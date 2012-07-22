@@ -338,7 +338,7 @@ namespace Signum.Engine.Linq
                 return null;
 
             Type t = value.GetType();
-            return t.IsInstantiationOf(typeof(Query<>)) ?
+            return typeof(IQueryable).IsAssignableFrom(t) ?
                 t.GetGenericArguments()[0] :
                 null;
         }
@@ -347,7 +347,7 @@ namespace Signum.Engine.Linq
         {
             Type type = TableType(c.Value);
             if (type != null)
-                return new MetaProjectorExpression(c.Type, new MetaExpression(type, null));
+                return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(new[] { PropertyRoute.Root(type) })));
 
             return MakeVoidMeta(c.Type);
         }
@@ -425,14 +425,15 @@ namespace Signum.Engine.Linq
 
         private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
         {
-            Implementations imp = route.GetImplementations();
+            Implementations? imp = route.TryGetImplementations();
 
             if (imp == null)
                 return new[] { route.Add(piName) };
-            else if (imp.IsByAll)
+
+            if (imp.Value.IsByAll)
                 throw new InvalidOperationException("Metas doesn't work on ImplementedByAll");
-            else
-                return ((ImplementedByAttribute)imp).ImplementedTypes.Where(t=>type.IsAssignableFrom(t)).Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
+
+            return imp.Value.Types.Where(t => type.IsAssignableFrom(t)).Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
         }
 
         protected override Expression VisitTypeIs(TypeBinaryExpression b)
