@@ -238,13 +238,13 @@ WriteLiteral("\'));\r\n\r\n                $(\"#\" + SF.compose(\"");
 
                                Write(ucTc.ControlID);
 
-WriteLiteral("\", \"sfFullScreen\")).on(\"mousedown\", function(e){\r\n                    SF.Chart.Bu" +
-"ilder.fullScreen(e, \"");
+WriteLiteral("\", \"sfFullScreen\")).on(\"mousedown\", function(e){\r\n                    SF.Chart.ge" +
+"tFor(\'");
 
 
-                                               Write(ucTc.ControlID);
+                                Write(ucTc.ControlID);
 
-WriteLiteral("\");\r\n                });\r\n            });\r\n        </script>\r\n");
+WriteLiteral("\').fullScreen(e);\r\n                });\r\n            });\r\n        </script>\r\n");
 
 
     

@@ -73,7 +73,7 @@
                 eval(myChart.createChartSVG('@divSelector') + myChart.paintChart('@divSelector'));
 
                 $("#" + SF.compose("@ucTc.ControlID", "sfFullScreen")).on("mousedown", function(e){
-                    SF.Chart.Builder.fullScreen(e, "@ucTc.ControlID");
+                    SF.Chart.getFor('@ucTc.ControlID').fullScreen(e);
                 });
             });
         </script>

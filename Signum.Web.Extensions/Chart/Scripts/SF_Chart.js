@@ -181,9 +181,9 @@ SF.Chart = (function () {
             });
         },
 
-        fullScreen: function (evt, prefix) {
+        fullScreen: function (evt) {
             evt.preventDefault();
-            var url = $("#" + SF.compose(prefix, "sfChartContainer .sf-chart-container")).attr("data-fullscreen-url")
+            var url = this.element.closest(".sf-chart-control").find(".sf-chart-container").attr("data-fullscreen-url")
                     + "&" + this.requestData();
             if (evt.ctrlKey || evt.which == 2) {
                 window.open(url);

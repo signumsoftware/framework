@@ -176,7 +176,7 @@ namespace Signum.Web.Chart
                     return ctx.None();
 
                 var qd = DynamicQueryManager.Current.QueryDescription(
-                    Navigator.ResolveQueryName(ctx.GlobalInputs["webQueryName"]));
+                    Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
                 var chartToken = (ChartTokenDN)ctx.Parent.UntypedValue;
                 var chart = (ChartBase)ctx.Parent.Parent.UntypedValue;
@@ -205,7 +205,7 @@ namespace Signum.Web.Chart
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
             {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.GlobalInputs["webQueryName"]));
+                Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
@@ -215,7 +215,7 @@ namespace Signum.Web.Chart
         static List<Order> ExtractChartOrders(MappingContext<List<Order>> ctx)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.GlobalInputs["webQueryName"]));
+                Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
             
