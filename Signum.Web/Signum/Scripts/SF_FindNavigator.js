@@ -144,8 +144,8 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo, index) {
-                    self.newSubTokensComboAdded($("#" + idSelectedCombo), index);
+                this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo) {
+                    self.newSubTokensComboAdded($("#" + idSelectedCombo));
                 });
 
                 if (this.options.searchOnLoad) {
@@ -617,19 +617,20 @@ SF.registerModule("FindNavigator", function () {
                 return parseInt(lastRowIndex) + 1;
             },
 
-            newSubTokensComboAdded: function ($selectedCombo, index) {
+            newSubTokensComboAdded: function ($selectedCombo) {
                 var $btnAddFilter = $(this.pf("btnAddFilter"));
                 var $btnAddColumn = $(this.pf("btnAddColumn"));
 
                 var self = this;
                 var $selectedOption = $selectedCombo.children("option:selected");
                 if ($selectedOption.val() == "") {
-                    if (index == 0) {
+                    var $prevSelect = $selectedCombo.prev("select");
+                    if ($prevSelect.length == 0) {
                         this.changeButtonState($btnAddFilter, lang.signum.selectToken);
                         this.changeButtonState($btnAddColumn, lang.signum.selectToken);
                     }
                     else {
-                        var $prevSelectedOption = $(this.pf("ddlTokens_" + (parseInt(index, 10) - 1))).find("option:selected");
+                        var $prevSelectedOption = $prevSelect.find("option:selected");
                         this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilter(); });
                         this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumn(); });
                     }
@@ -879,6 +880,16 @@ SF.registerModule("FindNavigator", function () {
 
             this.clearChildSubtokenCombos($selectedCombo, prefix, index);
 
+            var $container = $selectedCombo.closest(".sf-search-control");
+            if ($container != null) {
+                $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
+            }
+
+            var $selectedOption = $selectedCombo.children("option:selected");
+            if ($selectedOption.val() == "") {
+                return;
+            }
+
             var serializer = new SF.Serializer().add({
                 webQueryName: webQueryName,
                 tokenName: this.constructTokenName(prefix),
@@ -897,11 +908,6 @@ SF.registerModule("FindNavigator", function () {
                 success: function (newCombo) {
                     if (!SF.isEmpty(newCombo)) {
                         $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
-                    }
-
-                    var $container = $selectedCombo.closest(".sf-search-control");
-                    if ($container != null) {
-                        $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"), index);
                     }
                 }
             });
