@@ -205,11 +205,20 @@ namespace Signum.Windows
             return Return((IBaseServer s)=>s.RetrieveAllLite(liteType, implementations)); 
         }
 
+        public static List<Lite> RetrieveAllLite(Type type)
+        {
+            return RetrieveAllLite(type, Implementations.By(type));
+        }
+
         public static List<Lite<T>> RetrieveAllLite<T>(Implementations implementations) where T : class, IIdentifiable
         {
             return Return((IBaseServer s)=>s.RetrieveAllLite(typeof(T), implementations).Cast<Lite<T>>().ToList()); 
         }
 
+        public static List<Lite<T>> RetrieveAllLite<T>() where T : class, IIdentifiable
+        {
+            return RetrieveAllLite<T>(Implementations.By(typeof(T)));
+        }
 
         public static List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
