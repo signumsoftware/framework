@@ -156,7 +156,7 @@ namespace Signum.Web.Chart
 
         MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, ChartTokenName? lastTokenChanged)
         {
-            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
+            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params["webQueryName"]))
                     .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
 
             var chart = ctx.Value.Chart;

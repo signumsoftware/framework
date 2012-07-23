@@ -23,11 +23,10 @@
 
         var json = ChartClient.DataJson(ucTc.Value, resultTable);
 
-        <div id="@ucTc.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-prefix="@ucTc.ControlID">
+        <div id="@ucTc.Compose("sfChartControl")" class="sf-search-control sf-chart-control" data-prefix="@ucTc.ControlID">
             <div style="display:none">
                 @Html.HiddenRuntimeInfo(ucTc)
                 @Html.HiddenRuntimeInfo(ucTc, cr => cr.Chart)
-                @Html.Hidden(ucTc.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(request.QueryName))
         
                 @Html.Hidden(ucTc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
                     (request.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
@@ -41,7 +40,12 @@
 
                 @using (var chart = ucTc.SubContext(cr => cr.Chart))
                 {
-                    Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+                    <div id="@ucTc.Compose("sfChartBuilderContainer")">
+                        @Html.Partial(ChartClient.ChartBuilderView, chart)
+                    </div>
+                    <script type="text/javascript">
+                        $('#@ucTc.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@ucTc.ControlID'}, @MvcHtmlString.Create(uc.ToJS())));
+                    </script>
                 }
             </div>
             <div id="@ucTc.Compose("sfChartContainer")">
@@ -51,7 +55,8 @@
                 </div>
             </div>
         </div>
-        MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
+    
+                MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
         <script type="text/javascript">
             $(function() {
                 var $chartContainer = $('@divSelector');

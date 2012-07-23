@@ -25,44 +25,28 @@ namespace Signum.Web.Operations
         {
             Renderer = () =>
             {
-                bool emptyPrefix = false;
-                if (Prefix == null)
-                    emptyPrefix = true;
-                else
-                {
-                    string pf = Prefix.ToJS();
-                    if (string.IsNullOrEmpty(pf) || pf == "''")
-                        emptyPrefix = true;
-                }
-
-                JsValidatorOptions valOptions = ValidationOptions ?? new JsValidatorOptions();
-                bool emptyValOptionsController = valOptions.ControllerUrl == null;
-                if (!emptyValOptionsController)
-                {
-                    string valController = valOptions.ControllerUrl.ToJS();
-                    emptyValOptionsController = string.IsNullOrEmpty(valController) || valController == "''";
-                }
-                if (emptyValOptionsController)
-                    valOptions.ControllerUrl = RouteHelper.New().SignumAction(emptyPrefix ? "Validate" : "ValidatePartial");
-
                 if (IsLite == null && Operation != null)
-                {
                     IsLite = OperationLogic.IsLite(Operation);
-                }
 
                 var builder = new JsOptionsBuilder(false)
                 {
                     {"sender", "this"},
-                    {"prefix", Prefix.TryCC(a=>a.ToJS())},
                     {"parentDiv", ParentDiv.TryCC(a => a.ToJS())},
                     {"operationKey", Operation.TryCC(o => ((JsValue<string>)EnumDN.UniqueKey(o))).TryCC(a=>a.ToJS())},
-                    {"isLite", IsLite.TryCC(a=>a.ToJS())},
                     {"contextual", IsContextual.TryCC(a=>a.ToJS())},
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
                     {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
-                    {"validationOptions", valOptions.ToJS()}
+                    {"validationOptions", ValidationOptions.TryCC(vo => vo.ToJS())}
                 };
+
+                var liteString = IsLite.TryCC(il => il.ToJS());
+                if (liteString == "true")
+                    builder.Add("isLite", liteString);
+                
+                var prefixString = Prefix.TryCC(p => p.ToJS());
+                if (prefixString.HasText() && prefixString != "null" && prefixString != "''")
+                    builder.Add("prefix", prefixString);
 
                 return builder.ToJS();
             };

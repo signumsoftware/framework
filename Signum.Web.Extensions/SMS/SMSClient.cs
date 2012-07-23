@@ -51,14 +51,14 @@ namespace Signum.Web.SMS
 
                     new QueryOperationSettings(SMSProviderOperations.SendSMSMessagesFromTemplate)
                     {
-                        RequestExtraJsonData = "function(){ return { providerWebQueryName: $('#sfWebQueryName').val() }; }",
+                        RequestExtraJsonData = "function(){ return { providerWebQueryName: SF.FindNavigator.getFor('').options.webQueryName }; }",
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessagesFromTemplate","SMS"))
                                 .ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                     },
 
                     new QueryOperationSettings(SMSProviderOperations.SendSMSMessage)
                     {
-                        RequestExtraJsonData = "function(){ return { providerWebQueryName: $('#sfWebQueryName').val() }; }",
+                        RequestExtraJsonData = "function(){ return { providerWebQueryName: SF.FindNavigator.getFor('').options.webQueryName }; }",
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessages","SMS"))
                                 .ajaxSelected(ctx.Prefix, JsOpSuccess.DefaultDispatcher),
                     },

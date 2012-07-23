@@ -14,11 +14,10 @@
     <fieldset>
         <legend>Lines</legend>
         @Html.SearchControl(new FindOptions(typeof(DemoPackageLineDN), "Package", e.Value)
-   {
-       Create = false,
-       View = false,
-       Async = true
-   }, e)
+        {
+            Create = false,
+            View = false,
+        }, e)
     </fieldset>
     }
 }
