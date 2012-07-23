@@ -112,6 +112,11 @@ namespace Signum.Entities.Omnibox
 
         public abstract Lite RetrieveLite(Type type, int id);
 
+        public List<Lite> AutoComplete(Type type, string subString, int count)
+        {
+            return AutoComplete(type, Implementations.By(type), subString, count);
+        }
+
         public abstract List<Lite> AutoComplete(Type cleanType, Implementations implementations, string subString, int count);
 
         internal string CleanQueryName(object queryName)

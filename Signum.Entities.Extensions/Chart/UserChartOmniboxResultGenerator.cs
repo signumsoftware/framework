@@ -21,7 +21,7 @@ namespace Signum.Entities.Chart
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var userCharts = OmniboxParser.Manager.AutoComplete(typeof(UserChartDN), null, ident, AutoCompleteLimit);
+            var userCharts = OmniboxParser.Manager.AutoComplete(typeof(UserChartDN), ident, AutoCompleteLimit);
 
             foreach (var uq in userCharts)
             {

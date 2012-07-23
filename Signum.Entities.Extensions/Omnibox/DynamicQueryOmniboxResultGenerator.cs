@@ -261,7 +261,7 @@ namespace Signum.Entities.Omnibox
                     {
                         var patten = OmniboxUtils.CleanCommas(omniboxToken.Value);
 
-                        var result = OmniboxParser.Manager.AutoComplete(queryToken.Type.CleanType(), queryToken.Implementations(), patten, AutoCompleteLimit);
+                        var result = OmniboxParser.Manager.AutoComplete(queryToken.Type.CleanType(), queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
 
                         return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();  
                     }
@@ -270,15 +270,11 @@ namespace Signum.Entities.Omnibox
                         int id;
                         if (int.TryParse(omniboxToken.Value, out id))
                         {
-                            var imp = queryToken.Implementations();
-
-                            if(imp == null)
-                                return new []{ new ValueTuple { Value = CreateLite(queryToken.Type.CleanType(), id), Match = null}};
+                            var imp = queryToken.GetImplementations().Value;
 
                             if (!imp.IsByAll)
                             {
-                                return ((ImplementedByAttribute)imp).ImplementedTypes.Select(t=>
-                                    new ValueTuple { Value =  CreateLite(t, id) }).ToArray();
+                                return imp.Types.Select(t =>new ValueTuple { Value = CreateLite(t, id) }).ToArray();
                             }
                         }
                     }break;

@@ -21,7 +21,7 @@ namespace Signum.Entities.UserQueries
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var userQueries = OmniboxParser.Manager.AutoComplete(typeof(UserQueryDN), null, ident, AutoCompleteLimit);
+            var userQueries = OmniboxParser.Manager.AutoComplete(typeof(UserQueryDN), ident, AutoCompleteLimit);
 
             foreach (var uq in userQueries)
             {

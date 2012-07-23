@@ -58,7 +58,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             selenium.Type("DisplayName", "test");
-            selenium.Type("File", pathSampleReport);
+            selenium.Type("File_sfFile", pathSampleReport);
             selenium.EntityButtonClick(saveReportId);
             selenium.WaitForPageToLoad(SeleniumExtensions.PageLoadLongTimeout);
             selenium.MainEntityHasId();
@@ -94,7 +94,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.SearchCreate();
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.Type("DisplayName", "test 3");
-            selenium.Type("File", pathSampleReport);
+            selenium.Type("File_sfFile", pathSampleReport);
             selenium.EntityButtonClick(saveReportId);
             selenium.WaitForPageToLoad(PageLoadTimeout);
 

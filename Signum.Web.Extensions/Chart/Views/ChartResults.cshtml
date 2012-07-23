@@ -108,16 +108,19 @@ else
             </div>
             @{ MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); }
             <script type="text/javascript">
-                SF.Chart.Builder.initOrders('@Model.ControlID');
+                (function() {
+                    var $myChart = SF.Chart.getFor('@Model.ControlID');
+                    $myChart.initOrders();
 
-                var $chartContainer = $('@divSelector');
-                $chartContainer.closest('.sf-tabs').bind("tabsshow", function(event, ui) {
-                    if (ui.panel.id == '@(Model.Compose("sfChartContainer"))') {
-                        var data = @Html.Json(ChartClient.DataJson(Model.Value, queryResult));
-                        $chartContainer.data("data", data);
-                        SF.Chart.Builder.reDraw($chartContainer, false);
-                    }
-                });
+                    var $chartContainer = $('@divSelector');
+                    $chartContainer.closest('.sf-tabs').bind("tabsshow", function(event, ui) {
+                        if (ui.panel.id == '@(Model.Compose("sfChartContainer"))') {
+                            var data = @Html.Json(ChartClient.DataJson(Model.Value, queryResult));
+                            $chartContainer.data("data", data);
+                            $myChart.reDraw($chartContainer, false);
+                        }
+                    });
+                })();
             </script>
         </fieldset>
     </div>

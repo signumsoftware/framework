@@ -169,7 +169,7 @@ namespace Signum.Web.Selenium
 
         public static string ListLineSelector(string prefix)
         {
-            return "jq=#" + prefix;
+            return "jq=#{0}sfList".Formato(prefix);
         }
 
         public static string ListLineOptionId(string prefix, int itemIndexBase0)
@@ -180,9 +180,9 @@ namespace Signum.Web.Selenium
         public static void ListLineSelectElement(this ISelenium selenium, string prefix, int itemIndexBase0, bool multiSelect)
         {
             if (multiSelect)
-                selenium.AddSelection(ListLineSelector(prefix).RemoveRight(1), "id={0}".Formato(ListLineOptionId(prefix, itemIndexBase0)));
+                selenium.AddSelection(ListLineSelector(prefix), "id={0}".Formato(ListLineOptionId(prefix, itemIndexBase0)));
             else
-                selenium.Select(ListLineSelector(prefix).RemoveRight(1), "id={0}".Formato(ListLineOptionId(prefix, itemIndexBase0)));
+                selenium.Select(ListLineSelector(prefix), "id={0}".Formato(ListLineOptionId(prefix, itemIndexBase0)));
         }
 
         public static void ListLineViewElement(this ISelenium selenium, string prefix, int itemIndexBase0, bool opensEntity)

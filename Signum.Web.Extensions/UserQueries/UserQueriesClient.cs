@@ -155,7 +155,7 @@ namespace Signum.Web.UserQueries
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), new JsFindNavigator(ctx.Prefix).requestData()).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), JsFindNavigator.GetFor(ctx.Prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }

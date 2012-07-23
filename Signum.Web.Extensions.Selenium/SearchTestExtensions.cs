@@ -46,8 +46,8 @@ namespace Signum.Web.Selenium
 
         public static void ToggleFilters(this ISelenium selenium, bool show, string prefix)
         {
-            selenium.Click("jq=#{0}divSearchControl .sf-filters-header".Formato(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}divSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
+            selenium.Click("jq=#{0}sfSearchControl .sf-filters-header".Formato(prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
         }
 
         public static void FilterSelectToken(this ISelenium selenium, int tokenSelectorIndexBase0, string itemSelector, bool willExpand)

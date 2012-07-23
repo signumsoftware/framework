@@ -275,31 +275,39 @@ WriteLiteral("\" class=\"sf-chart-code\">\r\n            <legend>Code</legend>\r
 
                MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); 
 
-WriteLiteral("            <script type=\"text/javascript\">\r\n                SF.Chart.Builder.ini" +
-"tOrders(\'");
+WriteLiteral("            <script type=\"text/javascript\">\r\n                (function() {\r\n     " +
+"               var $myChart = SF.Chart.getFor(\'");
 
 
-                                        Write(Model.ControlID);
+                                               Write(Model.ControlID);
 
-WriteLiteral("\');\r\n\r\n                var $chartContainer = $(\'");
-
-
-                                    Write(divSelector);
-
-WriteLiteral("\');\r\n                $chartContainer.closest(\'.sf-tabs\').bind(\"tabsshow\", functio" +
-"n(event, ui) {\r\n                    if (ui.panel.id == \'");
+WriteLiteral("\');\r\n                    $myChart.initOrders();\r\n\r\n                    var $chart" +
+"Container = $(\'");
 
 
-                                    Write(Model.Compose("sfChartContainer"));
+                                        Write(divSelector);
 
-WriteLiteral("\') {\r\n                        var data = ");
+WriteLiteral("\');\r\n                    $chartContainer.closest(\'.sf-tabs\').bind(\"tabsshow\", fun" +
+"ction(event, ui) {\r\n                        if (ui.panel.id == \'");
 
 
-                              Write(Html.Json(ChartClient.DataJson(Model.Value, queryResult)));
+                                        Write(Model.Compose("sfChartContainer"));
 
-WriteLiteral(";\r\n                        $chartContainer.data(\"data\", data);\r\n                 " +
-"       SF.Chart.Builder.reDraw($chartContainer, false);\r\n                    }\r\n" +
-"                });\r\n            </script>\r\n        </fieldset>\r\n    </div>\r\n");
+WriteLiteral("\') {\r\n                            var data = ");
+
+
+                                  Write(Html.Json(ChartClient.DataJson(Model.Value, queryResult)));
+
+WriteLiteral(@";
+                            $chartContainer.data(""data"", data);
+                            $myChart.reDraw($chartContainer, false);
+                        }
+                    });
+                })();
+            </script>
+        </fieldset>
+    </div>
+");
 
 
 }
