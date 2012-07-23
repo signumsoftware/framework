@@ -13,6 +13,7 @@
     
     @Html.ScriptsJs("~/signum/scripts/SF_FindNavigator.js", 
                     "~/Processes/Scripts/SF_Process.js")
+    @Html.RegisterSFUrls(Url)
 
     @Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"))
     <script language="javascript">
