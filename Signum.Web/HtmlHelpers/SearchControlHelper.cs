@@ -157,7 +157,7 @@ namespace Signum.Web
                         {
                             { "data-icon", "ui-icon-close" },
                             { "data-text", false},
-                            { "onclick", "{0}.deleteFilter(this);".Formato(JsFindNavigator.GetFor(context.ControlID).ToJS()) },
+                            { "onclick", "SF.FindNavigator.deleteFilter(this)" },
                         };
                         sb.AddLine(helper.Href(
                             context.Compose("btnDelete", index.ToString()),

@@ -144,6 +144,10 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
+                this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo, index) {
+                    self.newSubTokensComboAdded($("#" + idSelectedCombo), index);
+                });
+
                 if (this.options.searchOnLoad) {
                     this.searchOnLoad();
                 }
@@ -705,20 +709,6 @@ SF.registerModule("FindNavigator", function () {
                 this.quickFilter("", $elem.find("input:hidden").val());
             },
 
-            deleteFilter: function (elem) {
-                var $tr = $(elem).closest("tr");
-                if ($tr.find("select[disabled]").length)
-                    return;
-
-                if ($tr.siblings().length == 0) {
-                    var $filterList = $tr.closest(".sf-filters-list");
-                    $filterList.find(".sf-explanation").show();
-                    $filterList.find("table").hide();
-                }
-
-                $tr.remove();
-            },
-
             create: function (viewOptions) {
                 var self = this;
                 var type = this.getRuntimeType(function (type) {
@@ -889,11 +879,6 @@ SF.registerModule("FindNavigator", function () {
 
             this.clearChildSubtokenCombos($selectedCombo, prefix, index);
 
-            var findNavigator = this.getFor(prefix);
-            if (typeof findNavigator != "undefined") {
-                findNavigator.newSubTokensComboAdded($selectedCombo, index);
-            }
-
             var serializer = new SF.Serializer().add({
                 webQueryName: webQueryName,
                 tokenName: this.constructTokenName(prefix),
@@ -904,11 +889,20 @@ SF.registerModule("FindNavigator", function () {
                 serializer.add(requestExtraJsonData);
             }
 
+            var self = this;
             $.ajax({
                 url: controllerUrl || SF.Urls.subTokensCombo,
                 data: serializer.serialize(),
+                dataType: "text",
                 success: function (newCombo) {
-                    $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
+                    if (!SF.isEmpty(newCombo)) {
+                        $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
+                    }
+
+                    var $container = $selectedCombo.closest(".sf-search-control");
+                    if ($container != null) {
+                        $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"), index);
+                    }
                 }
             });
         };
@@ -949,6 +943,21 @@ SF.registerModule("FindNavigator", function () {
             $this.remove();
         });
 
+        var deleteFilter = function (elem) {
+            var $tr = $(elem).closest("tr");
+            if ($tr.find("select[disabled]").length > 0) {
+                return;
+            }
+
+            if ($tr.siblings().length == 0) {
+                var $filterList = $tr.closest(".sf-filters-list");
+                $filterList.find(".sf-explanation").show();
+                $filterList.find("table").hide();
+            }
+
+            $tr.remove();
+        };
+
         return {
             getFor: getFor,
             openFinder: openFinder,
@@ -956,7 +965,8 @@ SF.registerModule("FindNavigator", function () {
             serializeOrders: serializeOrders,
             newSubTokensCombo: newSubTokensCombo,
             clearChildSubtokenCombos: clearChildSubtokenCombos,
-            constructTokenName: constructTokenName
+            constructTokenName: constructTokenName,
+            deleteFilter: deleteFilter
         }
     })();
 });
