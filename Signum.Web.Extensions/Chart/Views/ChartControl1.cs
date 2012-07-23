@@ -102,7 +102,7 @@ WriteLiteral("\r\n\r\n");
 WriteLiteral("\r\n<div id=\"");
 
 
-    Write(Model.Compose("divChartControl"));
+    Write(Model.Compose("sfChartControl"));
 
 WriteLiteral("\" \r\n    class=\"sf-search-control sf-chart-control\" \r\n    data-subtokens-url=\"");
 
@@ -128,11 +128,6 @@ WriteLiteral("\r\n    ");
 
 
 Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart));
-
-WriteLiteral("\r\n    ");
-
-
-Write(Html.Hidden(Model.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryDescription.QueryName)));
 
 WriteLiteral("\r\n\r\n    ");
 
@@ -174,7 +169,39 @@ WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n\r\n");
 
      using (var chart = Model.SubContext(cr => cr.Chart))
     {
-        Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+
+WriteLiteral("        <div id=\"");
+
+
+            Write(Model.Compose("sfChartBuilderContainer"));
+
+WriteLiteral("\">\r\n            ");
+
+
+       Write(Html.Partial(ChartClient.ChartBuilderView, chart));
+
+WriteLiteral("\r\n        </div>\r\n");
+
+
+
+WriteLiteral("        <script type=\"text/javascript\">\r\n            $(\'#");
+
+
+           Write(Model.Compose("sfChartBuilderContainer"));
+
+WriteLiteral("\').chartBuilder($.extend({ prefix: \'");
+
+
+                                                                                        Write(Model.ControlID);
+
+WriteLiteral("\' }, ");
+
+
+                                                                                                             Write(MvcHtmlString.Create(Model.Value.ToJS()));
+
+WriteLiteral("));\r\n        </script>\r\n");
+
+
     }
 
 WriteLiteral("    <div class=\"sf-query-button-bar\">\r\n        <button type=\"submit\" class=\"sf-qu" +
@@ -208,7 +235,7 @@ WriteLiteral("\" class=\"ui-widget ui-corner-all sf-search-results-container\">\
 
            Html.RenderPartial(ChartClient.ChartResultsView); 
 
-WriteLiteral("    </div>\r\n</div>");
+WriteLiteral("    </div>\r\n</div>\r\n");
 
 
         }

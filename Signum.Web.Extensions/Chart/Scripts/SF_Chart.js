@@ -1,196 +1,212 @@
 ﻿var SF = SF || {};
 
-SF.Chart = SF.Chart || {};
-
-SF.Chart.Builder = (function () {
-
-    var requestProcessedData = function (prefix) {
-        return {
-            filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters(),
-            orders: new SF.FindNavigator({ prefix: prefix }).serializeOrders()
-        };
-    };
-
-    var requestData = function (prefix) {
-        return $(".sf-chart-control[data-prefix='" + prefix + "']").find(":input").serialize() +
-            "&filters=" + new SF.FindNavigator({ prefix: prefix }).serializeFilters() +
-            "&orders=" + new SF.FindNavigator({ prefix: prefix }).serializeOrders();
-    }
-
-    var updateChartBuilder = function ($chartControl, tokenChanged) {
-        var $chartBuilder = $chartControl.find(".sf-chart-builder");
-        var data = requestData($chartControl.attr("data-prefix"));
-        if (!SF.isEmpty(tokenChanged)) {
-            data += "&lastTokenChanged=" + tokenChanged;
-        }
-        $.ajax({
-            url: $chartBuilder.attr("data-url"),
-            data: data,
-            success: function (result) {
-                $chartBuilder.replaceWith(result);
-                SF.triggerNewContent($chartControl.find(".sf-chart-builder"));
-            }
-        });
-    };
-
-    $(".sf-chart-img").live("click", function () {
-        var $this = $(this);
-        $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
-        var $chartControl = $this.closest(".sf-chart-control");
-        updateChartBuilder($chartControl);
-
-        var $resultsContainer = $chartControl.find(".sf-search-results-container");
-        if ($this.hasClass("sf-chart-img-equiv")) {
-            if ($resultsContainer.find("svg").length > 0) {
-                SF.Chart.Builder.reDraw($chartControl.find(".sf-chart-container"), true);
-            }
-        }
-        else {
-            $resultsContainer.html("");
-        }
-    });
-
-    $(".sf-chart-group-trigger").live("change", function () {
-        var $this = $(this);
-        $this.closest(".sf-chart-builder").find(".sf-chart-group-results").val($this.is(":checked"));
-        updateChartBuilder($this.closest(".sf-chart-control"));
-    });
-
-    $(".sf-chart-token-config-trigger").live("click", function () {
-        $(this).closest(".sf-chart-token").next().toggle();
-    });
-
-    $(".sf-query-token select").live("change", function () {
-        var $this = $(this);
-        updateChartBuilder($this.closest(".sf-chart-control"), $this.closest("tr").attr("data-token"));
-    });
-
-    $(".sf-chart-draw").live("click", function (e) {
-        e.preventDefault();
-        var $this = $(this);
-        var $chartControl = $this.closest(".sf-chart-control");
-        $.ajax({
-            url: $this.attr("data-url"),
-            data: requestData($chartControl.attr("data-prefix")),
-            success: function (result) {
-                if (typeof result === "object") {
-                    if (typeof result.ModelState != "undefined") {
-                        var modelState = result.ModelState;
-                        returnValue = new SF.Validator().showErrors(modelState, true);
-                        SF.Notify.error(lang.signum.error, 2000);
-                    }
-                }
-                else {
-                    new SF.Validator().showErrors(null);
-                    $chartControl.find(".sf-search-results-container").html(result);
-                    SF.triggerNewContent($chartControl.find(".sf-search-results-container"));
-                }
-            }
-        });
-    });
-
-    var reDraw = function ($chartContainer, force) {
-        $chartContainer.html("");
-
-        var data = $chartContainer.data("data");
-        var width = $chartContainer.width();
-        var height = $chartContainer.height();
-
-        var $chartControl = $chartContainer.closest(".sf-chart-control");
-        var myChart = SF.Chart.Factory.getGraphType($chartControl.find(".ui-widget-header .sf-chart-type-value").val());
-
-        var $codeArea = $chartControl.find('.sf-chart-code-container textarea');
-        if ($codeArea.val() == '' || force) {
-            var containerSelector = "#" + $chartControl.attr("id") + " .sf-chart-container";
-            $codeArea.val(myChart.createChartSVG(containerSelector) + myChart.paintChart(containerSelector));
-        }
-
-        eval($codeArea.val());
-    };
-
-    var exportData = function (prefix, validateUrl, exportUrl) {
-        var $chartControl = $(".sf-chart-control[data-prefix='" + prefix + "']");
-        var $inputs = $chartControl.find(":input").not(":button");
-
-        var data = requestProcessedData(prefix);
-        $inputs.each(function () {
-            data[this.id] = $(this).val();
-        });
-
-        SF.EntityIsValid({ prefix: prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
-            SF.submitOnly(exportUrl, data)
-        });
-    };
-
-    var originalNewSubtokensCombo = SF.FindNavigator.newSubTokensCombo;
-    SF.FindNavigator.newSubTokensCombo = function (webQueryName, prefix, index, url) {
-        var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
-        var $chartControl = $selectedCombo.closest(".sf-chart-control");
-        if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
-            if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
-                url = $chartControl.attr("data-subtokens-url");
-                originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
-            }
-            else {
-                originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
-            }
-        }
-        else {
-            this.clearChildSubtokenCombos($selectedCombo, prefix, index);
-            $("#" + SF.compose($chartControl.attr("data-prefix"), "sfOrders")).val('');
-            $chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
-        }
-    };
-
-    var originalAddFilter = $.SF.FindNavigator.prototype.addFilter;
-    $.SF.FindNavigator.prototype.addFilter = function () {
-        var $addFilter = $(this.pf("btnAddFilter"));
-        if ($addFilter.closest(".sf-chart-builder").length == 0) {
-            var $chartControl = $addFilter.closest(".sf-chart-control");
-            if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
-                url = $chartControl.attr("data-add-filter-url");
-                originalAddFilter.call(this, url, SF.Chart.Builder.requestData($chartControl.attr("data-prefix")));
-            }
-            else {
-                originalAddFilter.call(this);
-            }
-        }
-    };
-
-    var initOrders = function (prefix) {
-        $("#" + SF.compose(prefix, "tblResults") + " th")
-        .mousedown(function (e) {
-            this.onselectstart = function () { return false };
-            return false;
-        })
-        .click(function (e) {
-            new SF.FindNavigator({ prefix: prefix }).newSortOrder($(e.target), e.shiftKey);
-            $(".sf-chart-control[data-prefix='" + prefix + "'] .sf-chart-draw").click();
-            return false;
-        });
-    };
-
-    var fullScreen = function (evt, prefix) {
-        evt.preventDefault();
-        var url = $("#" + SF.compose(prefix, "sfChartContainer .sf-chart-container")).attr("data-fullscreen-url")
-                + "&" + this.requestData(prefix);
-        if (evt.ctrlKey || evt.which == 2) {
-            window.open(url);
-        }
-        else if (evt.which == 1) {
-            window.location.href = url;
-        }
+SF.Chart = (function () {
+    var getFor = function (prefix) {
+        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("chartBuilder");
     };
 
     return {
-        initOrders: initOrders,
-        requestProcessedData: requestProcessedData,
-        requestData: requestData,
-        reDraw: reDraw,
-        exportData: exportData,
-        fullScreen: fullScreen
+        getFor: getFor
     };
 })();
+
+(function ($) {
+
+    $.widget("SF.chartBuilder", $.SF.findNavigator, {
+
+        options: {},
+
+        _create: function() {
+            var self = this;
+
+            $(".sf-chart-img").live("click", function () {
+                var $this = $(this);
+                $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
+                self.updateChartBuilder();
+
+                var $chartControl = self.element.closest(".sf-chart-control");
+                var $resultsContainer = $chartControl.find(".sf-search-results-container");
+                if ($this.hasClass("sf-chart-img-equiv")) {
+                    if ($resultsContainer.find("svg").length > 0) {
+                        self.reDraw($chartControl.find(".sf-chart-container"), true);
+                    }
+                }
+                else {
+                    $resultsContainer.html("");
+                }
+            });
+
+            $(".sf-chart-group-trigger").live("change", function () {
+                self.element.find(".sf-chart-group-results").val($(this).is(":checked"));
+                self.updateChartBuilder();
+            });
+
+            $(".sf-chart-token-config-trigger").live("click", function () {
+                $(this).closest(".sf-chart-token").next().toggle();
+            });
+
+            $(".sf-query-token select").live("change", function () {
+                var $this = $(this);
+                self.updateChartBuilder($this.closest("tr").attr("data-token"));
+            });
+
+            $(".sf-chart-draw").live("click", function (e) {
+                e.preventDefault();
+                var $this = $(this);
+                $.ajax({
+                    url: $this.attr("data-url"),
+                    data: self.requestData(),
+                    success: function (result) {
+                        if (typeof result === "object") {
+                            if (typeof result.ModelState != "undefined") {
+                                var modelState = result.ModelState;
+                                returnValue = new SF.Validator().showErrors(modelState, true);
+                                SF.Notify.error(lang.signum.error, 2000);
+                            }
+                        }
+                        else {
+                            new SF.Validator().showErrors(null);
+                            var $chartControl = self.element.closest(".sf-chart-control");
+                            $chartControl.find(".sf-search-results-container").html(result);
+                            SF.triggerNewContent($chartControl.find(".sf-search-results-container"));
+                        }
+                    }
+                });
+            });
+
+            this.element.closest(".sf-chart-control").on("sf-new-subtokens-combo", function(event, idSelectedCombo, index) {
+                self.newSubTokensComboAdded($("#" + idSelectedCombo), index);
+            });
+
+            var originalNewSubtokensCombo = SF.FindNavigator.newSubTokensCombo;
+
+            SF.FindNavigator.newSubTokensCombo = function (webQueryName, prefix, index, url) {
+                var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
+                var $chartControl = self.element.closest(".sf-chart-control");
+                if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
+                    if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                        url = $chartControl.attr("data-subtokens-url");
+                        originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
+                    }
+                    else {
+                        originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
+                    }
+                }
+                else {
+                    SF.FindNavigator.clearChildSubtokenCombos($selectedCombo, prefix, index);
+                    $("#" + SF.compose($chartControl.attr("data-prefix"), "sfOrders")).val('');
+                    $chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
+                }
+            };
+        },
+
+        requestProcessedData: function () {
+            return {
+                webQueryName: this.options.webQueryName,
+                filters: this.serializeFilters(),
+                orders: this.serializeOrders(this.options.orders)
+            };
+        },
+
+        requestData: function () {
+            return this.element.closest(".sf-chart-control").find(":input:not(#webQueryName)").serialize() +
+                "&webQueryName=" + this.options.webQueryName +
+                "&filters=" + this.serializeFilters() +
+                "&orders=" + this.serializeOrders(this.options.orders);
+        },
+
+        updateChartBuilder: function (tokenChanged) {
+            var $chartControl = this.element.closest(".sf-chart-control");
+            var $chartBuilder = $chartControl.find(".sf-chart-builder");
+            var data = this.requestData();
+            if (!SF.isEmpty(tokenChanged)) {
+                data += "&lastTokenChanged=" + tokenChanged;
+            }
+            var self = this;
+            $.ajax({
+                url: $chartBuilder.attr("data-url"),
+                data: data,
+                success: function (result) {
+                    $chartBuilder.replaceWith(result);
+                    SF.triggerNewContent($chartControl.find(".sf-chart-builder"));
+                }
+            });
+        },    
+
+        originalAddFilter: $.SF.findNavigator.prototype.addFilter,
+
+        addFilter: function () {
+            var $addFilter = $(this.pf("btnAddFilter"));
+            if ($addFilter.closest(".sf-chart-builder").length == 0) {
+                var $chartControl = $addFilter.closest(".sf-chart-control");
+                if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                    url = $chartControl.attr("data-add-filter-url");
+                    this.originalAddFilter.call(this, url);
+                }
+                else {
+                    this.originalAddFilter.call(this);
+                }
+            }
+        },
+
+        reDraw: function ($chartContainer, force) {
+            $chartContainer.html("");
+
+            var data = $chartContainer.data("data");
+            var width = $chartContainer.width();
+            var height = $chartContainer.height();
+
+            var $chartControl = this.element.closest(".sf-chart-control");
+            var myChart = SF.Chart.Factory.getGraphType($chartControl.find(".ui-widget-header .sf-chart-type-value").val());
+
+            var $codeArea = $chartControl.find('.sf-chart-code-container textarea');
+            if ($codeArea.val() == '' || force) {
+                var containerSelector = "#" + $chartControl.attr("id") + " .sf-chart-container";
+                $codeArea.val(myChart.createChartSVG(containerSelector) + myChart.paintChart(containerSelector));
+            }
+
+            eval($codeArea.val());
+        },
+
+        exportData: function (validateUrl, exportUrl) {
+            var $inputs = this.element.closest(".sf-chart-control").find(":input").not(":button");
+
+            var data = this.requestProcessedData();
+            $inputs.each(function () {
+                data[this.id] = $(this).val();
+            });
+
+            SF.EntityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
+                SF.submitOnly(exportUrl, data)
+            });
+        },
+
+        fullScreen: function (evt, prefix) {
+            evt.preventDefault();
+            var url = $("#" + SF.compose(prefix, "sfChartContainer .sf-chart-container")).attr("data-fullscreen-url")
+                    + "&" + this.requestData();
+            if (evt.ctrlKey || evt.which == 2) {
+                window.open(url);
+            }
+            else if (evt.which == 1) {
+                window.location.href = url;
+            }
+        },
+
+        initOrders: function () {
+            var self = this;
+            $(this.pf("tblResults") + " th").mousedown(function (e) {
+                this.onselectstart = function () { return false };
+                return false;
+            })
+            .click(function (e) {
+                self.newSortOrder($(e.target), e.shiftKey);
+                self.element.closest(".sf-chart-control").find(".sf-chart-draw").click();
+                return false;
+            });
+        }
+    });
+})(jQuery);
 
 SF.Chart.Factory = (function () {
     var br = "\n",

@@ -125,9 +125,9 @@ WriteLiteral("\">\r\n\r\n");
         object queryName = QueryLogic.ToQueryName(uc.Value.Query.Key);
         ViewData[ViewDataKeys.QueryName] = queryName; //To be use inside Repeaters
         
-   Write(Html.Hidden(uc.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryName)));
+   Write(Html.Hidden("webQueryName", Navigator.ResolveWebQueryName(queryName)));
 
-                                                                                                  
+                                                                              
 
         using (var query = uc.SubContext(tc => tc.Query))
         {
@@ -179,11 +179,44 @@ WriteLiteral("            <div class=\"clearall\"></div>\r\n");
 
         using (var chart = uc.SubContext(tc => tc.Chart))
         {
-            
-       Write(Html.HiddenRuntimeInfo(chart));
 
-                                          
-            Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+WriteLiteral("            <div id=\"");
+
+
+                Write(uc.Compose("sfChartBuilderContainer"));
+
+WriteLiteral("\">\r\n                ");
+
+
+           Write(Html.HiddenRuntimeInfo(chart));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.Partial(ChartClient.ChartBuilderView, chart));
+
+WriteLiteral("\r\n            </div>\r\n");
+
+
+
+WriteLiteral("            <script type=\"text/javascript\">\r\n                $(\'#");
+
+
+               Write(uc.Compose("sfChartBuilderContainer"));
+
+WriteLiteral("\').chartBuilder($.extend({ prefix: \'");
+
+
+                                                                                         Write(uc.ControlID);
+
+WriteLiteral("\' }, ");
+
+
+                                                                                                           Write(MvcHtmlString.Create(uc.Value.ToJS()));
+
+WriteLiteral("));\r\n            </script>\r\n");
+
+
         }
     }
 
