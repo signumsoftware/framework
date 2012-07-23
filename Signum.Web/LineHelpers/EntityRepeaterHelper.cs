@@ -26,7 +26,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Class("sf-repeater-field")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(entityRepeater.ControlID).Class("sf-repeater-field")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {
@@ -56,6 +56,10 @@ namespace Signum.Web
                 }
             }
 
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityRepeater({1})".Formato(entityRepeater.ControlID, entityRepeater.OptionsJS())))
+                .ToHtml());
+
             return sb.ToHtml();
         }
 
@@ -71,10 +75,15 @@ namespace Signum.Web
                         sb.AddLine(
                             helper.Href(itemTC.Compose("btnRemove"),
                                     entityRepeater.RemoveElementLinkText,
-                                    "javascript:new SF.ERep({0}).remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
+                                    "",
                                     entityRepeater.RemoveElementLinkText,
                                     "sf-line-button sf-remove",
-                                    new Dictionary<string, object> { { "data-icon", "ui-icon-circle-close" }, { "data-text", false } }));
+                                    new Dictionary<string, object> 
+                                    {
+                                        { "onclick", "{0}.remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                        { "data-icon", "ui-icon-circle-close" }, 
+                                        { "data-text", false } 
+                                    }));
                 }
 
                 if (entityRepeater.ShouldWriteOldIndex(itemTC))

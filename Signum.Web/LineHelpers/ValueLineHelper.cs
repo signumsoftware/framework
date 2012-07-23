@@ -29,7 +29,7 @@ namespace Signum.Web
             }
             else
             {
-                using (valueLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+                using (sb.Surround(new HtmlTag("div").Class("sf-field")))
                 using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
                 {
                     if (!valueLine.ValueFirst)

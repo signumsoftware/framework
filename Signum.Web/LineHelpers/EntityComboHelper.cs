@@ -31,7 +31,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("sf-field")): null)
+            using (sb.Surround(new HtmlTag("div").Id(entityCombo.ControlID).Class("sf-field")))
             using (entityCombo.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityCombo.ValueFirst)
@@ -84,7 +84,7 @@ namespace Signum.Web
                         }
 
                         sb.AddLine(helper.DropDownList(
-                                entityCombo.ControlID,
+                                entityCombo.Compose(EntityComboKeys.Combo),
                                 items,
                                 entityCombo.ComboHtmlProperties));
                     }
@@ -102,6 +102,10 @@ namespace Signum.Web
                 if (entityCombo.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
             }
+
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityCombo({1})".Formato(entityCombo.ControlID, entityCombo.OptionsJS())))
+                .ToHtml());
 
             return sb.ToHtml();
         }

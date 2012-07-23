@@ -324,4 +324,7 @@
   <data name="Signum_loading" xml:space="preserve">
     <value>Loading...</value>
   </data>
+  <data name="Detail" xml:space="preserve">
+    <value>Detail</value>
+  </data>
 </root>

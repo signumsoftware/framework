@@ -167,7 +167,9 @@ namespace Signum.Web
         { 
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
+            EntityComboKeys.Combo,
             EntityListBaseKeys.Index,
+            EntityListBaseKeys.List
         };
 
         static GenericInvoker<Func<Delegate>> giForAutoEntity = new GenericInvoker<Func<Delegate>>(() => ForAutoEntity<IIdentifiable>());
@@ -290,7 +292,7 @@ namespace Signum.Web
         public static List<string> IndexPrefixes(this IDictionary<string, string> inputs)
         {
             return inputs.Keys
-                .Where(k => k != EntityListBaseKeys.ListPresent)
+                .Where(k => k != EntityListBaseKeys.ListPresent && k != EntityListBaseKeys.List)
                 .Select(str => str.Substring(0, str.IndexOf(TypeContext.Separator)))
                 .Distinct()
                 .OrderBy(a => int.Parse(a))

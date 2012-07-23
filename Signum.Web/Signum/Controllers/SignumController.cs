@@ -268,7 +268,7 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public ContentResult GetContextualPanel(string lite, string webQueryName, string prefix)
+        public ContentResult EntityContextMenu(string lite, string webQueryName, string prefix)
         {
             string[] liteParts = lite.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 

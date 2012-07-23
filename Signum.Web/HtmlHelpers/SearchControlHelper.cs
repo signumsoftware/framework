@@ -54,6 +54,7 @@ namespace Signum.Web
 
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
             Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
+            Navigator.SetViewableAndCreable(findOptions);
 
             var viewData = new ViewDataDictionary(context);
             viewData[ViewDataKeys.FindOptions] = findOptions;
@@ -114,7 +115,7 @@ namespace Signum.Web
             {
                 var htmlAttr = new Dictionary<string, object>
                     {
-                        { "onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()) },
+                        { "onclick", "SF.FindNavigator.openFinder({0});".Formato(foptions.ToJS()) },
                         { "data-icon", "ui-icon-circle-arrow-e" },
                         { "data-text", false}
                     };
@@ -156,7 +157,7 @@ namespace Signum.Web
                         {
                             { "data-icon", "ui-icon-close" },
                             { "data-text", false},
-                            { "onclick", "new SF.FindNavigator({{prefix:\"{0}\"}}).deleteFilter(this);".Formato(context.ControlID) },
+                            { "onclick", "SF.FindNavigator.deleteFilter(this)" },
                         };
                         sb.AddLine(helper.Href(
                             context.Compose("btnDelete", index.ToString()),
@@ -262,8 +263,7 @@ namespace Signum.Web
 
             HtmlTag dropdown = new HtmlTag("select").IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options)
-                .Attr("onchange", "new SF.FindNavigator({{prefix:'{0}',webQueryName:'{1}'}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) +
-                    ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');");
+                .Attr("onchange", "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2})".Formato(Navigator.ResolveWebQueryName(queryName), context.ControlID, index));
 
             if (writeExpander)
                 dropdown.Attr("style", "display:none");

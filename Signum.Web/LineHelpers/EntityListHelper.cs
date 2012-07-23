@@ -24,7 +24,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (sb.Surround(new HtmlTag("div").Id(entityList.ControlID).Class("sf-field")))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
 
@@ -38,11 +38,11 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList)));
                 }
 
-                using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field-list")) : null)
+                using (sb.Surround(new HtmlTag("div").Class("sf-field-list")))
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
                     
-                    var sbSelectContainer = new HtmlTag("select").IdName(entityList.ControlID).Class("sf-entity-list").Attr("multiple", "multiple");
+                    var sbSelectContainer = new HtmlTag("select").IdName(entityList.Compose(EntityListBaseKeys.List)).Class("sf-entity-list").Attr("multiple", "multiple");
                     
                     using (sbSelect.Surround(sbSelectContainer))
                     {
@@ -72,6 +72,10 @@ namespace Signum.Web
                     }
                 }
             }
+
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityList({1})".Formato(entityList.ControlID, entityList.OptionsJS())))
+                .ToHtml());
 
             return sb.ToHtml();
         }
