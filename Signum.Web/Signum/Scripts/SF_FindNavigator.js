@@ -598,7 +598,7 @@ SF.registerModule("FindNavigator", function () {
                     data: serializer.serialize(),
                     async: false,
                     success: function (filterHtml) {
-                        var $filterList = self.element.find(".sf-filters-list");
+                        var $filterList = self.element.closest(".sf-search-control").find(".sf-filters-list");
                         $filterList.find(".sf-explanation").hide();
                         $filterList.find("table").show();
 
