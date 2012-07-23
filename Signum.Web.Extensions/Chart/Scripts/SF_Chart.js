@@ -325,8 +325,12 @@ SF.Chart.ChartBase.prototype = {
 
             var serializeData = function ($shape) {
                 var $chartControl = $shape.closest(".sf-chart-control");
+                var findNavigator = SF.Chart.getFor($chartControl.attr("data-prefix"));
+
                 var data = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
-                data += "&filters=" + SF.Chart.getFor($chartControl.attr("data-prefix")).serializeFilters();
+                data += "&webQueryName=" + findNavigator.options.webQueryName;
+                data += "&orders=" + findNavigator.serializeOrders(findNavigator.options.orders);
+                data += "&filters=" + findNavigator.serializeFilters();
                 data += extractAttribute($shape, "d1");
                 data += extractAttribute($shape, "d2");
                 data += extractAttribute($shape, "v1");
