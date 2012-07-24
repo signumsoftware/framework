@@ -10,10 +10,9 @@
             <GradientStop Color="#336E8194" Offset="0.987"/>
         </LinearGradientBrush>
     </UserControl.Background>
-    <WrapPanel Orientation="Horizontal" Margin="0,0,0,4">
+    <WrapPanel Orientation="Horizontal" Margin="0,0,0,4" x:Name="wrapPanel">
         <m:ToolBarButton x:Name="btOk" Image="Images\ok.png"  Background="Green" Content="{m:Loc Ok}" MinWidth="50" IsDefault="true" Visibility="{Binding OkVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" />
         <m:ToolBarButton x:Name="btSave" Image="Images\save.png" Background="Blue" Content="{m:Loc Save}" MinWidth="50" Visibility="{Binding SaveVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
-        <StackPanel x:Name="stackPanel" Orientation="Horizontal"/>
         <m:ToolBarButton x:Name="btReload" Image="Images\reload.png" Background="RoyalBlue" Content="{m:Loc Reload}" Visibility="{Binding ReloadVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" MinWidth="50"/>
     </WrapPanel>
 </UserControl>
