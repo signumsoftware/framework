@@ -126,14 +126,14 @@ namespace Signum.Engine
         {
             var udttypes = Schema.Current.Settings.UdtSqlName.Values.ToHashSet(StringComparer.InvariantCultureIgnoreCase);
 
-            var database = (from t in Database.View<SysTables>()
-                            join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
-                            where !Database.View<SysExtendedProperties>().Any(a => a.major_id == t.object_id && a.name == "microsoft_database_tools_support")
+            var database = (from s in Database.View<SysSchemas>()
+                            from t in s.Tables()
+                            where !t.ExtendedProperties().Any(a=>a.name == "microsoft_database_tools_support")
                             select new DiffTable
                             {
                                 Name = t.name,
                                 Schema = s.name,
-                                Colums = (from c in Database.View<SysColumns>().Where(c => c.object_id == t.object_id)
+                                Colums = (from c in t.Columns()
                                           join type in Database.View<SysTypes>() on c.user_type_id equals type.user_type_id
                                           join ctr in Database.View<SysObjects>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
                                           select new DiffColumn
@@ -147,36 +147,30 @@ namespace Signum.Engine
                                               Scale = c.scale,
                                               Identity = c.is_identity,
                                               DefaultConstraintName = ctr.name,
-                                              PrimaryKey = (from i in Database.View<SysIndexes>()
-                                                            where i.object_id == c.object_id && i.is_primary_key
-                                                            join ic in Database.View<SysIndexColumn>() on new { i.object_id, i.index_id } equals new { ic.object_id, ic.index_id }
-                                                            where ic.column_id == c.column_id
-                                                            select i.name).Any(),
-                                              ForeingKey = (from fkc in Database.View<SysForeignKeyColumns>()
-                                                            where fkc.parent_object_id == c.object_id && fkc.parent_column_id == c.column_id
-                                                            join fk in Database.View<SysForeignKeys>().DefaultIfEmpty() on fkc.constraint_object_id equals fk.object_id
+                                              PrimaryKey = t.Indices().Any(i=> i.is_primary_key && i.IndexColumns().Any(ic=>ic.column_id == c.column_id)),
+                                              ForeingKey = (from fk in t.ForeignKeys()
+                                                            where fk.ForeignKeyColumns().Any(fkc => fkc.parent_column_id == c.column_id)
                                                             join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
                                                             select fk.name == null ? null: new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).SingleOrDefaultEx(),
                                           }).ToDictionary(a => a.Name),
 
-                                Indices = (from i in Database.View<SysIndexes>()
-                                           where i.object_id == t.object_id && !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
+                                Indices = (from i in t.Indices()
+                                           where !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
                                            select new DiffViewIndex { IndexName = i.name }).ToList().Concat(
                                            (from v in Database.View<SysViews>()
                                             where v.name.StartsWith("VIX_" + t.name + "_")
-                                            join i in Database.View<SysIndexes>() on v.object_id equals i.object_id
+                                            from i in v.Indices()
                                             where !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
                                             select new DiffViewIndex { IndexName = i.name, ViewName = v.name }).ToList()).ToDictionary(a => a.IndexName),
 
 
-                                FreeIndices = (from i in Database.View<SysIndexes>()
-                                               where i.object_id == t.object_id && !i.is_primary_key && !(i.is_unique && i.name.StartsWith("IX_"))
+                                FreeIndices = (from i in t.Indices() 
+                                               where !i.is_primary_key && !(i.is_unique && i.name.StartsWith("IX_"))
                                                select new DiffFreeIndex
                                                {
                                                    IndexName = i.name,
-                                                   Columns = (from ic in Database.View<SysIndexColumn>().Where(ic => ic.object_id == t.object_id && ic.index_id == i.index_id)
-                                                              join c in Database.View<SysColumns>().Where(ic => ic.object_id == t.object_id)
-                                                                 on ic.column_id equals c.column_id
+                                                   Columns = (from ic in i.IndexColumns()
+                                                              join c in t.Columns() on ic.column_id equals c.column_id
                                                               select c.name).ToList()
                                                }).ToList()
                             }).ToDictionary(c => c.Name);

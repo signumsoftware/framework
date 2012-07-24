@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Linq.Expressions;
+using Signum.Utilities;
 
 namespace Signum.Engine.SchemaInfoTables
 {
@@ -21,6 +23,13 @@ namespace Signum.Engine.SchemaInfoTables
     {
         public int schema_id;
         public string name;
+
+        static Expression<Func<SysSchemas, IQueryable<SysTables>>> TablesExpression =
+            s => Database.View<SysTables>().Where(t => t.schema_id == s.schema_id);
+        public IQueryable<SysTables> Tables()
+        {
+            return TablesExpression.Evaluate(this);
+        }
     }
 
 
@@ -30,6 +39,34 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
         public int object_id;
         public int schema_id;
+
+        static Expression<Func<SysTables, IQueryable<SysColumns>>> ColumnsExpression =
+            t => Database.View<SysColumns>().Where(c => c.object_id == t.object_id);
+        public IQueryable<SysColumns> Columns()
+        {
+            return ColumnsExpression.Evaluate(this);
+        }
+
+        static Expression<Func<SysTables, IQueryable<SysForeignKeys>>> ForeignKeysExpression =
+            t => Database.View<SysForeignKeys>().Where(fk => fk.parent_object_id == t.object_id);
+        public IQueryable<SysForeignKeys> ForeignKeys()
+        {
+            return ForeignKeysExpression.Evaluate(this);
+        }
+
+        static Expression<Func<SysTables, IQueryable<SysIndexes>>> IndicesExpression =
+            t => Database.View<SysIndexes>().Where(ix => ix.object_id == t.object_id);
+        public IQueryable<SysIndexes> Indices()
+        {
+            return IndicesExpression.Evaluate(this);
+        }
+
+        static Expression<Func<SysTables, IQueryable<SysExtendedProperties>>> ExtendedPropertiesExpression =
+            t => Database.View<SysExtendedProperties>().Where(ep => ep.major_id == t.object_id);
+        public IQueryable<SysExtendedProperties> ExtendedProperties()
+        {
+            return ExtendedPropertiesExpression.Evaluate(this);
+        }
     }
 
     [SqlViewName("sys.views")]
@@ -37,6 +74,14 @@ namespace Signum.Engine.SchemaInfoTables
     {
         public string name;
         public int object_id;
+
+
+        static Expression<Func<SysViews, IQueryable<SysIndexes>>> IndicesExpression =
+            v => Database.View<SysIndexes>().Where(ix => ix.object_id == v.object_id);
+        public IQueryable<SysIndexes> Indices()
+        {
+            return IndicesExpression.Evaluate(this);
+        }
     }
 
     [SqlViewName("sys.columns")]
@@ -67,7 +112,14 @@ namespace Signum.Engine.SchemaInfoTables
         public int object_id;
         public string name;
         public int parent_object_id;
-        public int referenced_object_id; 
+        public int referenced_object_id;
+
+        static Expression<Func<SysForeignKeys, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
+            fk => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.constraint_object_id == fk.object_id);
+        public IQueryable<SysForeignKeyColumns> ForeignKeyColumns()
+        {
+            return ForeignKeyColumnsExpression.Evaluate(this);
+        }
     }
 
     [SqlViewName("sys.foreign_key_columns")]
@@ -89,6 +141,13 @@ namespace Signum.Engine.SchemaInfoTables
         public int object_id;
         public bool is_unique;
         public bool is_primary_key;
+
+        static Expression<Func<SysIndexes, IQueryable<SysIndexColumn>>> IndexColumnsExpression =
+            ix => Database.View<SysIndexColumn>().Where(ixc => ixc.index_id == ix.index_id && ixc.object_id == ix.object_id);
+        public IQueryable<SysIndexColumn> IndexColumns()
+        {
+            return IndexColumnsExpression.Evaluate(this);
+        }
     }
 
     [SqlViewName("sys.index_columns")]
