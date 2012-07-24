@@ -154,6 +154,8 @@ namespace Signum.Web.Files
 
             FileLine fl = new FileLine(context.Type, context.UntypedValue, context, "", context.PropertyRoute);
 
+            EntityBaseHelper.ConfigureEntityBase(fl, fl.Type.CleanType());
+
             Common.FireCommonTasks(fl);
 
             if (settingsModifier != null)
