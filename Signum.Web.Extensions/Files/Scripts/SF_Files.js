@@ -12,7 +12,7 @@ SF.registerModule("Files", function () {
 
             options: {}, //baseLine options + asyncUpload + uploadUrl + uploadDroppedUrl + downloadUrl
 
-            _init: function () {
+            _create: function () {
                 $("#" + this.options.prefix).data("fileLine").initDragDrop($(this.pf("DivNew")));
             },
 
