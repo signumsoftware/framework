@@ -58,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
 
             var t = elementType.CleanType();
             if (t.IsIdentifiableEntity())
-                return Implementations.By(Parent.Type);
+                return Implementations.By(t);
 
             return null;
         }

@@ -240,18 +240,33 @@ namespace Signum.Engine.DynamicQuery
 
             Expression e = MetadataVisitor.JustVisit(lambda, entityType);
 
-            if (e is MetaProjectorExpression)
-                e = ((MetaProjectorExpression)e).Projector;
-
-            MetaExpression me = e as MetaExpression;
+            MetaExpression me = e as MetaExpression ?? 
+                (e as MetaProjectorExpression).TryCC(p=>p.Projector) as MetaExpression;
             CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
 
-            if (cm != null)
+            if (e is MetaExpression && cm != null && cm.PropertyRoutes.Any())
             {
-                this.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
-                this.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
-                var cleanType = Type.CleanType();
-                this.Implementations = cleanType.IsIIdentifiable() ? (Implementations?)ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes.Select(pr => pr.GetImplementations())) : null;
+                var cleanType = e.Type.CleanType();
+
+                var only = cm.PropertyRoutes.Only();
+
+                Implementations = !cleanType.IsIIdentifiable() ? null :
+                        only != null && only.PropertyRouteType == PropertyRouteType.Root ? Signum.Entities.Implementations.By(cleanType) :
+                        (Implementations?)ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes.Select(pr => pr.GetImplementations()));
+
+                switch (cm.PropertyRoutes[0].PropertyRouteType)
+                {
+                    case PropertyRouteType.LiteEntity:
+                    case PropertyRouteType.Root:
+                        return;
+                    case PropertyRouteType.FieldOrProperty:
+                        Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
+                        Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
+                        return;
+                    case PropertyRouteType.MListItems:
+                        Format = Reflector.FormatString(cm.PropertyRoutes[0].Type);
+                        return;
+                }
             }
 
             IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
