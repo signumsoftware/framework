@@ -10,6 +10,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 using System.Linq.Expressions;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -38,9 +39,9 @@ namespace Signum.Engine.DynamicQuery
                     var cleanType = Type.CleanType();
                     var only = propertyRoutes.Only();
 
-                    Implementations = !cleanType.IsIIdentifiable() ? null :
+                    Implementations = !cleanType.IsIIdentifiable() ? (Implementations?)null :
                         only != null && only.PropertyRouteType == PropertyRouteType.Root ? Signum.Entities.Implementations.By(cleanType) :
-                        (Implementations?)AggregateImplementations(PropertyRoutes.Select(pr => pr.GetImplementations()));
+                        CastImplementations(AggregateImplementations(PropertyRoutes.Select(pr => pr.GetImplementations())), cleanType);
 
                     switch (propertyRoutes[0].PropertyRouteType)
                     {
@@ -107,6 +108,22 @@ namespace Signum.Engine.DynamicQuery
             return Signum.Entities.Implementations.By(types);
         }
 
+        internal static Implementations CastImplementations(Implementations implementations, Type cleanType)
+        {
+            if (implementations.IsByAll)
+            {
+                if (!Schema.Current.Tables.ContainsKey(cleanType))
+                    throw new InvalidOperationException("Tye type {0} is not registered in the schema as a concrete table".Formato(cleanType));
+
+                return Signum.Entities.Implementations.By(cleanType);
+            }
+
+            if (implementations.Types.All(cleanType.IsAssignableFrom))
+                return implementations;
+
+            return Signum.Entities.Implementations.By(implementations.Types.Where(cleanType.IsAssignableFrom).ToArray());
+        }
+
         public string DisplayName()
         {
             if (OverrideDisplayName != null)
@@ -161,5 +178,7 @@ namespace Signum.Engine.DynamicQuery
                 Unit = Unit,
             };
         }
+
+
     }
 }

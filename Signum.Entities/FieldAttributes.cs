@@ -72,7 +72,10 @@ namespace Signum.Entities
             if (types == null || types.Length == 0)
                 return new Implementations { arrayOrType = types ?? new Type[0] };
 
-            var error = types.Select(Error).NotNull().ToString("\r\n");
+            if (types.Length == 1)
+                return By(types[0]);
+
+           var error = types.Select(Error).NotNull().ToString("\r\n");
 
            if (error.HasText())
                throw new InvalidOperationException(error);

@@ -250,9 +250,9 @@ namespace Signum.Engine.DynamicQuery
 
                 var only = cm.PropertyRoutes.Only();
 
-                Implementations = !cleanType.IsIIdentifiable() ? null :
+                Implementations = !cleanType.IsIIdentifiable() ? (Implementations?)null :
                         only != null && only.PropertyRouteType == PropertyRouteType.Root ? Signum.Entities.Implementations.By(cleanType) :
-                        (Implementations?)ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes.Select(pr => pr.GetImplementations()));
+                        ColumnDescriptionFactory.CastImplementations(ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes.Select(pr => pr.GetImplementations())), cleanType);
 
                 switch (cm.PropertyRoutes[0].PropertyRouteType)
                 {

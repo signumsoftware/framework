@@ -390,7 +390,7 @@ namespace Signum.Engine.Linq
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
             {
-                var pi = member as PropertyInfo ??  Reflector.TryFindPropertyInfo((FieldInfo)member);
+                var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
 
                 if (pi == null)
                     return new MetaExpression(memberType, null);
@@ -430,10 +430,9 @@ namespace Signum.Engine.Linq
             if (imp == null)
                 return new[] { route.Add(piName) };
 
-            if (imp.Value.IsByAll)
-                throw new InvalidOperationException("Metas doesn't work on ImplementedByAll");
+            var fimp = ColumnDescriptionFactory.CastImplementations(imp.Value, type);
 
-            return imp.Value.Types.Where(t => type.IsAssignableFrom(t)).Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
+            return fimp.Types.Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
         }
 
         protected override Expression VisitTypeIs(TypeBinaryExpression b)
