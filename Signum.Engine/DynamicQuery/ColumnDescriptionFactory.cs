@@ -37,37 +37,61 @@ namespace Signum.Engine.DynamicQuery
                 if (propertyRoutes != null && propertyRoutes.Any() /*Out of IB casting*/)
                 {
                     var cleanType = Type.CleanType();
-                    var only = propertyRoutes.Only();
 
-                    Implementations = !cleanType.IsIIdentifiable() ? (Implementations?)null :
-                        only != null && only.PropertyRouteType == PropertyRouteType.Root ? Signum.Entities.Implementations.By(cleanType) :
-                        CastImplementations(AggregateImplementations(PropertyRoutes.Select(pr => pr.GetImplementations())), cleanType);
-
-                    switch (propertyRoutes[0].PropertyRouteType)
-                    {
-                        case PropertyRouteType.LiteEntity:
-                        case PropertyRouteType.Root:
-                            return;
-                        case PropertyRouteType.FieldOrProperty:
-                            Format = GetFormat(propertyRoutes);
-                            Unit = GetUnit(propertyRoutes);
-                            return;
-                        case PropertyRouteType.MListItems:
-                            Format = Reflector.FormatString(propertyRoutes[0].Type);
-                            return;
-                    }
+                    Implementations = GetImplementations(propertyRoutes, cleanType);
+                    Format = GetFormat(propertyRoutes);
+                    Unit = GetUnit(propertyRoutes);
                 }
             }
         }
 
-        internal static string GetUnit(PropertyRoute[] value)
+        internal static Entities.Implementations? GetImplementations(PropertyRoute[] propertyRoutes, Type cleanType)
         {
-            return value.Select(pr => pr.SimplifyNoRoot().PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
+            if (!cleanType.IsIIdentifiable())
+                return (Implementations?)null;
+
+            var only = propertyRoutes.Only();
+            if (only != null && only.PropertyRouteType == PropertyRouteType.Root)
+                return Signum.Entities.Implementations.By(cleanType);
+
+            var aggregate = AggregateImplementations(propertyRoutes.Select(pr => pr.GetImplementations()));
+
+            if (propertyRoutes.First().Type.CleanType() != cleanType)
+                return CastImplementations(aggregate, cleanType);
+
+            return aggregate;
         }
 
-        internal static string GetFormat(PropertyRoute[] value)
+        internal static string GetUnit(PropertyRoute[] routes)
         {
-            return value.Select(pr => Reflector.FormatString(pr)).Distinct().Only();
+            switch (routes[0].PropertyRouteType)
+            {
+                case PropertyRouteType.LiteEntity:
+                case PropertyRouteType.Root:
+                    return null;
+                case PropertyRouteType.FieldOrProperty:
+                    return routes.Select(pr => pr.SimplifyNoRoot().PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
+                case PropertyRouteType.MListItems:
+                    return null;
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        internal static string GetFormat(PropertyRoute[] routes)
+        {
+            switch (routes[0].PropertyRouteType)
+            {
+                case PropertyRouteType.LiteEntity:
+                case PropertyRouteType.Root:
+                    return null;
+                case PropertyRouteType.FieldOrProperty:
+                    return routes.Select(pr => Reflector.FormatString(pr)).Distinct().Only();
+                case PropertyRouteType.MListItems:
+                    return Reflector.FormatString(routes[0].Type);
+            }
+
+            throw new InvalidOperationException();
         }
 
         public ColumnDescriptionFactory(int index, MemberInfo mi, Meta meta)

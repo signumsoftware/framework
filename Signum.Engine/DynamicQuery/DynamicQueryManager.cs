@@ -248,25 +248,9 @@ namespace Signum.Engine.DynamicQuery
             {
                 var cleanType = e.Type.CleanType();
 
-                var only = cm.PropertyRoutes.Only();
-
-                Implementations = !cleanType.IsIIdentifiable() ? (Implementations?)null :
-                        only != null && only.PropertyRouteType == PropertyRouteType.Root ? Signum.Entities.Implementations.By(cleanType) :
-                        ColumnDescriptionFactory.CastImplementations(ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes.Select(pr => pr.GetImplementations())), cleanType);
-
-                switch (cm.PropertyRoutes[0].PropertyRouteType)
-                {
-                    case PropertyRouteType.LiteEntity:
-                    case PropertyRouteType.Root:
-                        return;
-                    case PropertyRouteType.FieldOrProperty:
-                        Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
-                        Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
-                        return;
-                    case PropertyRouteType.MListItems:
-                        Format = Reflector.FormatString(cm.PropertyRoutes[0].Type);
-                        return;
-                }
+                Implementations = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
+                Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
+                Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
             }
 
             IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
