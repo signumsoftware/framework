@@ -242,7 +242,8 @@ namespace Signum.Web
                 return OverrideImplementations[route];
 
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
-                return FindImplementations(route.Parent);
+                return SchemaSettings.ToImplementations(route.Parent, route.Type.CleanType(), route.Parent.FieldInfo.GetCustomAttributes(true).Cast<Attribute>().ToArray());
+
 
             return SchemaSettings.ToImplementations(route, route.Type.CleanType(), route.FieldInfo.GetCustomAttributes(true).Cast<Attribute>().ToArray());
         }
