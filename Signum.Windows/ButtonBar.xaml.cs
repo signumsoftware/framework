@@ -104,11 +104,10 @@ namespace Signum.Windows
                     .Select(d => d(e.NewValue, MainControl, ViewButtons))
                     .NotNull().SelectMany(d => d).NotNull().ToList());
 
-            stackPanel.Children.Clear();
-
-            foreach (var item in elements)
+            wrapPanel.Children.RemoveRange(2, wrapPanel.Children.Count - 3);
+            for (int i = 0; i < elements.Count; i++)
             {
-                stackPanel.Children.Add((UIElement)item);
+                wrapPanel.Children.Insert(i + 2, elements[i]);
             }
         }
 

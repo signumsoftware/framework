@@ -79,12 +79,14 @@ namespace ASP
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations.Value;
-    bool? allowMultiple = findOptions.AllowMultiple;
-    if (allowMultiple == null && findOptions.FilterMode != FilterMode.OnlyResults)
+    if (findOptions.AllowMultiple == null && findOptions.FilterMode != FilterMode.OnlyResults)
     {
-        allowMultiple = Navigator.QuerySettings(findOptions.QueryName).AllowMultiple;
+        findOptions.AllowMultiple = Navigator.QuerySettings(findOptions.QueryName).AllowMultiple;
     }
-    int elementsPerPage = findOptions.ElementsPerPage ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage) ?? FindOptions.DefaultElementsPerPage;
+    findOptions.ElementsPerPage = findOptions.ElementsPerPage ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage) ?? FindOptions.DefaultElementsPerPage;
+    
+    ViewData[ViewDataKeys.FindOptions] = findOptions;
+    
     JsFindNavigator jsFindNavigator = JsFindNavigator.GetFor(Model.ControlID);
 
 
@@ -306,13 +308,13 @@ WriteLiteral("\" class=\"sf-search-results\">\r\n            <thead class=\"ui-w
 "r-top\">\r\n                <tr>\r\n");
 
 
-                     if (allowMultiple.HasValue)
+                     if (findOptions.AllowMultiple.HasValue)
                     {
 
 WriteLiteral("                        <th class=\"ui-state-default th-col-selection\">\r\n");
 
 
-                             if (allowMultiple.Value)
+                             if (findOptions.AllowMultiple.Value)
                             {
                                 
                            Write(Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "{0}.toggleSelectAll()".Formato(jsFindNavigator.ToJS()) }));
@@ -375,7 +377,7 @@ WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbod
 "content\">\r\n");
 
 
-                   int columnsCount = columns.Count + (findOptions.View ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0); 
+                   int columnsCount = columns.Count + (findOptions.View ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0); 
 
 WriteLiteral("                <tr>\r\n                    <td colspan=\"");
 
@@ -391,7 +393,7 @@ WriteLiteral("</td>\r\n                </tr>\r\n");
 
 
                    
-                    ViewData[ViewDataKeys.ElementsPerPage] = elementsPerPage;
+                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage;
                     ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
                     ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
                 
@@ -409,7 +411,7 @@ WriteLiteral("\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</di
     { 
         FindOptions = findOptions,
         Prefix = Model.ControlID,
-        ElementsPerPage = elementsPerPage
+        ElementsPerPage = findOptions.ElementsPerPage
     };
 
 
