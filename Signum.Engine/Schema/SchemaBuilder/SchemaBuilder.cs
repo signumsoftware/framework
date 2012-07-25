@@ -199,7 +199,7 @@ namespace Signum.Engine.Maps
                 if (!Settings.Attributes(route).Any(a=>a is IgnoreAttribute))
                 {
                     if (!SilentMode() && Reflector.TryFindPropertyInfo(fi) == null)
-                        Debug.WriteLine("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
+                        Debug.WriteLine("WARNING!!: Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
 
                     Field field = GenerateField(route, contexto, table, preName, forceNull);
 
