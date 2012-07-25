@@ -25,7 +25,26 @@ namespace Signum.Engine.DynamicQuery
 
         public string Format { get; set; }
         public string Unit { get; set; }
-        public Implementations? Implementations { get; set; }
+        Implementations? implementations;
+        public Implementations? Implementations
+        {
+            get { return implementations; }
+
+            set
+            {
+                if (value != null && !value.Value.IsByAll)
+                {
+                    var ct = Type.CleanType();
+                    string errors = value.Value.Types.Where(t => !ct.IsAssignableFrom(t)).ToString(a => a.Name, ", ");
+
+                    if (errors.Any())
+                        throw new InvalidOperationException("Column {0} Implenentations should be assignable to {1}: {2}".Formato(Name, ct.Name, errors));
+
+                }
+
+                implementations = value;
+            }
+        }
 
         PropertyRoute[] propertyRoutes;
         public PropertyRoute[] PropertyRoutes
@@ -56,7 +75,7 @@ namespace Signum.Engine.DynamicQuery
 
             var aggregate = AggregateImplementations(propertyRoutes.Select(pr => pr.GetImplementations()));
 
-            if (propertyRoutes.First().Type.CleanType() != cleanType)
+            if (!cleanType.IsAssignableFrom(propertyRoutes.First().Type.CleanType()))
                 return CastImplementations(aggregate, cleanType);
 
             return aggregate;
@@ -136,6 +155,8 @@ namespace Signum.Engine.DynamicQuery
         {
             if (implementations.IsByAll)
             {
+                
+
                 if (!Schema.Current.Tables.ContainsKey(cleanType))
                     throw new InvalidOperationException("Tye type {0} is not registered in the schema as a concrete table".Formato(cleanType));
 
