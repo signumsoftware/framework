@@ -43,8 +43,10 @@ namespace Signum.Web.Files
                 //Write FileLine template
                 TypeElementContext<FilePathDN> templateTC = new TypeElementContext<FilePathDN>(null, (TypeContext)fileRepeater.Parent, 0);
                 using (FileLine fl = new FileLine(typeof(FilePathDN), templateTC.Value, templateTC, "", templateTC.PropertyRoute) { Remove = false, AsyncUpload = fileRepeater.AsyncUpload, FileType = fileRepeater.FileType, OnlyValue = true })
+                {
+                    fl.Implementations = fileRepeater.Implementations;
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(fileRepeater, helper.InternalFileLine(fl)));
-                
+                }
                 using (sb.Surround(new HtmlTag("div").IdName(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
                 {
                     if (fileRepeater.UntypedValue != null)
@@ -98,7 +100,10 @@ namespace Signum.Web.Files
                     TypeContext<FilePathDN> tc = (TypeContext<FilePathDN>)TypeContextUtilities.CleanTypeContext(itemTC);
 
                     using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.PropertyRoute) { Remove = false, OnlyValue = true })
+                    {
+                        fl.Implementations = fileRepeater.Implementations;
                         sb.AddLine(helper.InternalFileLine(fl));
+                    }
                 }
             }
 
@@ -118,7 +123,8 @@ namespace Signum.Web.Files
 
             FileRepeater fl = new FileRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            //Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
+            EntityBaseHelper.ConfigureEntityBase(fl, typeof(S).CleanType());
+
             Common.FireCommonTasks(fl);
 
             if (settingsModifier != null)
