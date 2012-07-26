@@ -180,7 +180,7 @@ SF.registerModule("Operations", function () {
 
     SF.OperationExecutor = function (_options) {
         SF.OperationManager.call(this, $.extend({
-            controllerUrl: null
+            controllerUrl: SF.Urls.operationExecute
         }, _options));
 
         this.validateAndAjax = function (newPrefix, onAjaxSuccess) {
@@ -216,6 +216,9 @@ SF.registerModule("Operations", function () {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
+            if (this.options.controllerUrl == SF.Urls.operationExecute) {
+                this.options.controllerUrl = SF.Urls.operationExecuteContextual;
+            }
 
             $('.sf-search-ctxmenu-overlay').remove();
             this.ajax(null, SF.opMarkCellOnSuccess);
@@ -227,7 +230,7 @@ SF.registerModule("Operations", function () {
     //ConstructorFrom options = OperationManager options + returnType
     SF.ConstructorFrom = function (_options) {
         SF.OperationManager.call(this, $.extend({
-            controllerUrl: null,
+            controllerUrl: SF.Urls.operationConstructFrom,
             returnType: null
         }, _options));
 
@@ -274,7 +277,7 @@ SF.registerModule("Operations", function () {
 
     SF.DeleteExecutor = function (_options) {
         SF.OperationManager.call(this, $.extend({
-            controllerUrl: null
+            controllerUrl: SF.Urls.operationDelete
         }, _options));
 
         this.contextualDelete = function (runtimeType, id) {
@@ -297,7 +300,7 @@ SF.registerModule("Operations", function () {
     //ConstructorFromMany options = OperationManager options + returnType
     SF.ConstructorFromMany = function (_options) {
         SF.OperationManager.call(this, $.extend({
-            controllerUrl: null,
+            controllerUrl: SF.Urls.operationConstructFromMany,
             returnType: null
         }, _options));
 
@@ -322,7 +325,7 @@ SF.registerModule("Operations", function () {
         this.ajax = function (newPrefix, items, onSuccess) {
             if (SF.Blocker.isEnabled()) {
                 return false;
-            } 
+            }
             else {
                 SF.Blocker.enable();
             }

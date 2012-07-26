@@ -36,7 +36,6 @@ namespace Signum.Web.Operations
                     {"contextual", IsContextual.TryCC(a=>a.ToJS())},
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
-                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
                     {"validationOptions", ValidationOptions.TryCC(vo => vo.ToJS())}
                 };
 
@@ -47,6 +46,10 @@ namespace Signum.Web.Operations
                 var prefixString = Prefix.TryCC(p => p.ToJS());
                 if (prefixString.HasText() && prefixString != "null" && prefixString != "''")
                     builder.Add("prefix", prefixString);
+
+                var controllerUrlString = ControllerUrl.TryCC(c => c.ToJS());
+                if (controllerUrlString.HasText() && controllerUrlString != "null" && controllerUrlString != "''")
+                    builder.Add("controllerUrl", controllerUrlString);
 
                 return builder.ToJS();
             };

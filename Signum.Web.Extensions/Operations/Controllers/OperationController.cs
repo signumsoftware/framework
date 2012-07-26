@@ -23,7 +23,7 @@ namespace Signum.Web.Operations
     public class OperationController : Controller
     {
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult OperationExecute(string operationFullKey, bool isLite, string prefix, string oldPrefix)
+        public ActionResult Execute(string operationFullKey, bool isLite, string prefix, string oldPrefix)
         {
             IdentifiableEntity entity = null;
             if (isLite)
@@ -64,7 +64,7 @@ namespace Signum.Web.Operations
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult DeleteExecute(string operationFullKey, string prefix, string oldPrefix)
+        public ActionResult Delete(string operationFullKey, string prefix, string oldPrefix)
         {
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(oldPrefix, EntityBaseKeys.RuntimeInfo)]);
             if (!runtimeInfo.IdOrNull.HasValue)
@@ -79,7 +79,7 @@ namespace Signum.Web.Operations
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFromExecute(string operationFullKey, bool isLite, string prefix, string oldPrefix)
+        public ActionResult ConstructFrom(string operationFullKey, bool isLite, string prefix, string oldPrefix)
         {
             IdentifiableEntity entity = null;
             if (isLite)
@@ -105,7 +105,7 @@ namespace Signum.Web.Operations
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFromManyExecute(string runtimeType, List<int> ids, string operationFullKey, string prefix)
+        public ActionResult ConstructFromMany(string runtimeType, List<int> ids, string operationFullKey, string prefix)
         {
             Type type = Navigator.ResolveType(runtimeType);
 
