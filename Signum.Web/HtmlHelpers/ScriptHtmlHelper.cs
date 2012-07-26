@@ -157,26 +157,7 @@ namespace Signum.Web
 
         public static MvcHtmlString RegisterSFUrls(this HtmlHelper html, UrlHelper url)
         {
-            return RegisterUrls(html, new Dictionary<string, string>
-            {
-                { "popupView", url.SignumAction("PopupView") },
-                { "partialView", url.SignumAction("PartialView") },
-                { "validate", url.SignumAction("Validate") },
-                { "validatePartial", url.SignumAction("ValidatePartial") },
-                { "trySave", url.SignumAction("TrySave") },
-                { "trySavePartial", url.SignumAction("TrySavePartial") },
-                { "find", url.SignumAction("Find") },
-                { "partialFind", url.SignumAction("PartialFind") },
-                { "search", url.SignumAction("Search") },
-                { "subTokensCombo", url.SignumAction("NewSubTokensCombo") },
-                { "addFilter", url.Action("AddFilter", "Signum") },
-                { "quickFilter", url.SignumAction("QuickFilter") },
-                { "entityContextMenu", url.SignumAction("EntityContextMenu") },
-                { "create", url.SignumAction("Create") },
-                { "popupCreate", url.SignumAction("PopupCreate") },
-                { "typeChooser", url.SignumAction("GetTypeChooser") },
-                { "autocomplete", url.SignumAction("Autocomplete") }
-            });
+            return RegisterUrls(html, Navigator.Manager.GetDefaultSFUrls(url));
         }
 
         public static MvcHtmlString RegisterUrls(this HtmlHelper html, Dictionary<string, string> namedUrls)
