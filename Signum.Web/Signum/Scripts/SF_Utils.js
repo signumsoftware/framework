@@ -242,6 +242,7 @@ SF.Notify = (function () {
     };
 
     var info = function (s, t, cssClass) {
+        SF.Notify.clear();
         css = (cssClass != undefined ? cssClass : "sf-info");
         $messageArea = $("#sfMessageArea");
         if ($messageArea.length == 0) {
