@@ -240,14 +240,21 @@ namespace Signum.Engine.DynamicQuery
 
             Expression e = MetadataVisitor.JustVisit(lambda, entityType);
 
-            MetaExpression me = e as MetaExpression ?? 
-                (e as MetaProjectorExpression).TryCC(p=>p.Projector) as MetaExpression;
+            MetaExpression me =  e as MetaExpression;
+
+            if (e is MetaProjectorExpression)
+            {
+                this.IsProjection = true;
+                me = ((MetaProjectorExpression)e).Projector as MetaExpression;
+            }
+
             CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
 
-            if (e is MetaExpression && cm != null && cm.PropertyRoutes.Any())
+            if (cm != null && cm.PropertyRoutes.Any())
             {
-                var cleanType = e.Type.CleanType();
+                var cleanType = me.Type.CleanType();
 
+                PropertyRoute = cm.PropertyRoutes.Only();
                 Implementations = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
                 Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                 Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
@@ -258,7 +265,11 @@ namespace Signum.Engine.DynamicQuery
 
         public readonly Type Type;
         public readonly Type EntityType;
-        public readonly string Key; 
+        public readonly string Key;
+
+        public bool IsProjection;
+
+        public bool Inherit = true;
 
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
@@ -267,13 +278,10 @@ namespace Signum.Engine.DynamicQuery
         public Implementations? Implementations;
         public Func<bool> IsAllowed;
         public PropertyRoute PropertyRoute;
-        public bool Inherit = true;
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
-            return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
+            return new ExtensionToken(parent, Key, Type, IsProjection, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
         }
-
-       
     }
 }
