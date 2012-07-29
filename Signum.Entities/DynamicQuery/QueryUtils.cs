@@ -63,7 +63,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.Double:
                 case TypeCode.Decimal:
                 case TypeCode.Single:
-                    return FilterType.DecimalNumber;
+                    return FilterType.Decimal;
                 case TypeCode.Byte:
                 case TypeCode.SByte:
                 case TypeCode.Int16:
@@ -72,7 +72,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
-                    return FilterType.Number;
+                    return FilterType.Integer;
                 case TypeCode.DateTime:
                     return FilterType.DateTime;
 
@@ -130,7 +130,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             },
             { 
-                FilterType.Number, new List<FilterOperation>
+                FilterType.Integer, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 
@@ -141,7 +141,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             },
             { 
-                FilterType.DecimalNumber, new List<FilterOperation>
+                FilterType.Decimal, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 

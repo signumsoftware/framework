@@ -116,8 +116,8 @@ namespace Signum.Entities.DynamicQuery
 
     public enum FilterType
     {
-        Number,
-        DecimalNumber,
+        Integer,
+        Decimal,
         String, 
         DateTime,
         Lite,
