@@ -21,15 +21,20 @@
         <tr>
             <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type">
                 <div class="ui-widget-header">
-                    @typeof(ChartType).NiceName()
-                    @Html.Hidden(chart.Compose("ChartType"), chart.Value.ChartType.ToString(), new { @class = "sf-chart-type-value" })
+                    @typeof(ChartScriptDN).NiceName()
+                    @using(var csc = chart.SubContext(c=>c.ChartScript))
+                    {
+                        @Html.Hidden(csc.Compose("RuntimeInfo"), csc.RuntimeInfo().ToString(), new { @class = "sf-chart-type-value" })
+                    }
                     @Html.Hidden(chart.Compose("GroupResults"), chart.Value.GroupResults, new { @class = "sf-chart-group-results" })
                 </div>
-                @foreach (var group in ChartUtils.ChartTypePosition.GroupBy(ctp => ctp.Row).OrderBy(group => group.Key))
+                @foreach (var group in  ChartClient.Scripts.Value.GroupsOf(4))
                 {
-                    foreach (var type in group.OrderBy(ctp => ctp.Column))
+                    foreach (var script in group)
                     { 
-                        <div class="@ChartClient.ChartTypeImgClass(chart.Value, type.ChartType)" data-related="@type.ChartType.ToString()" title="@type.ChartType.NiceToString()"></div>
+                        <img src="@Html.Action((Signum.Web.Files.FileController fc)=>fc.DownloadFile(script.Id))"
+                         data-related="@script.Id.ToString()" 
+                         title="@script.ToString()"/>
                     }
                     <div class="clearall"></div>
                 }
@@ -42,28 +47,12 @@
                         <th class="sf-chart-token-narrow">@Resources.Chart_Group</th>
                         <th class="sf-chart-token-wide">Token</th>
                     </tr>
-                    @{
-                        if (chart.Value.Dimension1 != null)
-                        {
-                                @Html.HiddenRuntimeInfo(chart, cr => cr.Dimension1)
-                                @Html.EmbeddedControl(chart, cr => cr.Dimension1, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
-                        }
-                        if (chart.Value.Dimension2 != null)
-                        {
-                                @Html.HiddenRuntimeInfo(chart, cr => cr.Dimension2)
-                                @Html.EmbeddedControl(chart, cr => cr.Dimension2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
-                        }
-                        if (chart.Value.Value1 != null)
-                        {
-                                @Html.HiddenRuntimeInfo(chart, cr => cr.Value1)
-                                @Html.EmbeddedControl(chart, cr => cr.Value1, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
-                        }
-                        if (chart.Value.Value2 != null)
-                        {
-                                @Html.HiddenRuntimeInfo(chart, cr => cr.Value2)
-                                @Html.EmbeddedControl(chart, cr => cr.Value2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
-                        }
-                    }
+                    @foreach (var item in chart.TypeElementContext(a=>a.Columns))
+	                {
+                        @Html.HiddenRuntimeInfo(item)
+                        @Html.EmbeddedControl(chart, cr => cr, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+	                }
+                    
                 </table>
             </td>
         </tr>

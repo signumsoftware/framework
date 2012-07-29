@@ -80,9 +80,9 @@ namespace Signum.Web.Chart
         [HttpPost]
         public PartialViewResult UpdateChartBuilder(string prefix)
         {
-            var lastToken = Request["lastTokenChanged"];
+            string lastToken = Request["lastTokenChanged"];
             
-            var request = ExtractChartRequestCtx(prefix, lastToken.HasText() ? (ChartTokenName?)lastToken.ToEnum<ChartTokenName>() : null).Value;   
+            var request = ExtractChartRequestCtx(prefix, lastToken.TryCS(int.Parse)).Value;   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
@@ -154,14 +154,14 @@ namespace Signum.Web.Chart
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
         }
 
-        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, ChartTokenName? lastTokenChanged)
+        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, int? lastTokenChanged)
         {
             var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params["webQueryName"]))
                     .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
 
-            var chart = ctx.Value.Chart;
+            ChartBase chart = ctx.Value.Chart;
             if (lastTokenChanged != null)
-                chart.GetToken(lastTokenChanged.Value).TokenChanged();
+                chart.Columns[lastTokenChanged.Value].TokenChanged();
 
             return ctx;
         }
@@ -172,17 +172,21 @@ namespace Signum.Web.Chart
 
             if (chartRequest.Chart.GroupResults)
             {
-                var filters = chartRequest.Filters.Where(a=>!(a.Token is AggregateToken)).Select(f => new FilterOption { Token = f.Token, ColumnName = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
+                var filters = chartRequest.Filters
+                    .Where(a => !(a.Token is AggregateToken))
+                    .Select(f => new FilterOption
+                    {
+                        Token = f.Token,
+                        ColumnName = f.Token.FullKey(),
+                        Value = f.Value,
+                        Operation = f.Operation
+                    }).ToList();
 
-                var chartTokenFilters = new List<FilterOption>
+                foreach (var column in chartRequest.Chart.Columns.Iterate())
                 {
-                    AddFilter(chartRequest, chartRequest.Chart.Dimension1, "d1"),
-                    AddFilter(chartRequest, chartRequest.Chart.Dimension2, "d2"),
-                    AddFilter(chartRequest, chartRequest.Chart.Value1, "v1"),
-                    AddFilter(chartRequest, chartRequest.Chart.Value2, "v2")
-                };
-
-                filters.AddRange(chartTokenFilters.NotNull());
+                    if (column.Value.ScriptColumn.IsGroupKey)
+                        filters.AddRange(GetFilter(column.Value, "t" + column.Position));
+                }
 
                 var findOptions = new FindOptions(chartRequest.QueryName)
                 {
@@ -209,12 +213,9 @@ namespace Signum.Web.Chart
             }
         }
 
-        private FilterOption AddFilter(ChartRequest request, ChartTokenDN chartToken, string key)
+        private FilterOption GetFilter(ChartColumnDN chartToken, string key)
         {
-            if (chartToken == null || chartToken.Token is AggregateToken)
-                return null;
-
-            if (key == "d1" && (request.Chart.ChartType == ChartType.StackedAreas || request.Chart.ChartType == ChartType.TotalAreas))
+            if (chartToken == null ||  chartToken.Token is AggregateToken)
                 return null;
 
             bool hasKey = Request.Params.AllKeys.Contains(key);

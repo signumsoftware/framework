@@ -104,19 +104,19 @@ WriteTo(@__razor_helper_writer, Html.Field(Signum.Entities.Extensions.Properties
 WriteLiteral("\r\n");
 
 
- using (var tc = Html.TypeContext<ChartTokenDN>())
+ using (var tc = Html.TypeContext<ChartColumnDN>())
 {
     if (tc.Value == null)
     {
-        tc.Value = new ChartTokenDN();
+        tc.Value = new ChartColumnDN();
     }
     ChartBase chart = ((TypeContext<ChartBase>)tc.Parent).Value;
     
 
-WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
+WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"token");
 
 
-                                      Write(chart.GetTokenName(tc.Value));
+                                            Write(((TypeElementContext<ChartColumnDN>)tc).Index);
 
 WriteLiteral("\">\r\n        <td>");
 
@@ -172,7 +172,7 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
            Write(Html.ValueLine(tc, ct => ct.DisplayName));
 
                                                          
-                if (tc.Value.Token != null && tc.Value.IsColor && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                if (tc.Value.Token != null && tc.Value.ScriptColumn.IsGroupColor && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
                     var type = tc.Value.Token.Type.CleanType();
 

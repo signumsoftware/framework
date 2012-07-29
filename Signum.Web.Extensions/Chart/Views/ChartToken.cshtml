@@ -17,15 +17,15 @@
                  Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
                           (ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType))));
 }
-@using (var tc = Html.TypeContext<ChartTokenDN>())
+@using (var tc = Html.TypeContext<ChartColumnDN>())
 {
     if (tc.Value == null)
     {
-        tc.Value = new ChartTokenDN();
+        tc.Value = new ChartColumnDN();
     }
     ChartBase chart = ((TypeContext<ChartBase>)tc.Parent).Value;
     
-    <tr class="sf-chart-token" data-token="@chart.GetTokenName(tc.Value)">
+    <tr class="sf-chart-token" data-token="token@(((TypeElementContext<ChartColumnDN>)tc).Index)">
         <td>@tc.Value.PropertyLabel
         </td>
         <td>
@@ -58,7 +58,7 @@
             @using (Html.FieldInline())
             { 
                 @Html.ValueLine(tc, ct => ct.DisplayName)
-                if (tc.Value.Token != null && tc.Value.IsColor && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                if (tc.Value.Token != null && tc.Value.ScriptColumn.IsGroupColor && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
                     var type = tc.Value.Token.Type.CleanType();
 

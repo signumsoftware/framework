@@ -42,9 +42,7 @@ namespace Signum.Engine.Chart
                                                 uq.Query,
                                                 uq.Id,
                                                 uq.DisplayName,
-                                                Filters = uq.Filters.Count,
-                                                uq.Chart.ChartType,
-                                                uq.Chart.ChartResultType,
+                                                uq.Chart.ChartScript,
                                                 uq.Chart.GroupResults,
                                             }).ToDynamic();
 
@@ -72,7 +70,7 @@ namespace Signum.Engine.Chart
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            foreach (var item in userQuery.Chart.ChartTokens())
+            foreach (var item in userQuery.Chart.Columns)
             {
                 item.parentChart = userQuery.Chart;
             }
@@ -201,8 +199,7 @@ namespace Signum.Engine.Chart
         static GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>> miExecuteChart = new GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQuery<int>)dq));
         static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQuery<T> dq)
         {
-            ChartTokenDN[] chartTokens = request.ChartTokens().ToArray();
-            List<Column> columns = chartTokens.Select(t => t.CreateColumn()).ToList();
+            List<Column> columns = request.Chart.Columns.Select(t => t.CreateColumn()).ToList();
 
             var multiplications = request.Multiplications;;
 

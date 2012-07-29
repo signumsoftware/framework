@@ -25,9 +25,17 @@ namespace Signum.Entities.Chart
     }
 
     [Serializable]
-    public class ChartTokenDN : QueryTokenDN
+    public class ChartColumnDN : QueryTokenDN
     {
-        public ChartTokenDN()
+        [Ignore]
+        ChartScriptColumnDN scriptColumn;
+        public ChartScriptColumnDN ScriptColumn
+        {
+            get { return scriptColumn; }
+            set { scriptColumn = value; }
+        }
+        
+        public ChartColumnDN()
         {
 
         }
@@ -60,20 +68,20 @@ namespace Signum.Entities.Chart
         internal ChartBase parentChart;
 
         [AvoidLocalization]
-        public bool GroupByVisible { get { return parentChart.token_GroupByVisible(this); } }
+        public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
 
         [AvoidLocalization]
-        public bool Grouping { get { return parentChart.GroupResults; } }
+        public bool ShouldAggregate { get { return parentChart.GroupResults && !ScriptColumn.IsGroupKey; } }
 
         [AvoidLocalization]
-        public bool IsColor { get { return parentChart.token_IsColor(this); } }
+        public string PropertyLabel { get { return ScriptColumn.PropertyName; } }
 
-        [AvoidLocalization]
-        public bool ShouldAggregate { get { return parentChart.token_ShouldAggregate(this); } }
-
-        [AvoidLocalization]
-        public string PropertyLabel { get { return parentChart.token_PropertyLabel(this); } }
-
+        int index;
+        public int Index
+        {
+            get { return index; }
+            set { Set(ref index, value, () => Index); }
+        }
 
         public void NotifyChange(bool needNewQuery)
         {
@@ -95,9 +103,17 @@ namespace Signum.Entities.Chart
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if(pi.Is(()=>Token) && Token is IDataErrorInfo)
+            if(pi.Is(()=>Token))
             {
-                return ((IDataErrorInfo)Token).Error;
+                if (Token is IDataErrorInfo)
+                {
+                    var err = ((IDataErrorInfo)Token).Error;
+                    if (err != null)
+                        return err;
+                }
+
+                if (!ChartUtils.IsChartColumnType(token, ScriptColumn.ColumnType))
+                    return "An {0} is not {1}".Formato(token, ScriptColumn.ColumnType);
             }
 
             return base.PropertyValidation(pi);
@@ -126,11 +142,11 @@ namespace Signum.Entities.Chart
         {
             var result = parentChart.SubTokensChart(token, columnDescriptions, this.ShouldAggregate);
 
-            if (this.Grouping && !this.ShouldAggregate && token != null)
+            if (this.parentChart.GroupResults && ScriptColumn.IsGroupKey && token != null)
             {
                 FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
 
-                if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
+                if (ft == FilterType.Integer || ft == FilterType.Decimal)
                 {
                     result.Add(new IntervalQueryToken(token));
                 }

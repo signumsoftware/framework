@@ -107,7 +107,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Chart\ChartPermissions.cs" />
-    <Compile Include="Chart\ChartToken.cs" />
+    <Compile Include="Chart\ChartScript.cs" />
+    <Compile Include="Chart\ChartColumn.cs" />
     <Compile Include="Chart\ChartRequest.cs" />
     <Compile Include="Chart\ChartUtils.cs" />
     <Compile Include="Chart\IChartServer.cs" />

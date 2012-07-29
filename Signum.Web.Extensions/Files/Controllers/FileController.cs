@@ -158,29 +158,25 @@ namespace Signum.Web.Files
         public FileResult Download(int? filePathID)
         {
             if (filePathID == null)
-                throw new ArgumentException("Argument 'filePathID' was not passed to the controller");
+                throw new ArgumentException("filePathID");
 
             FilePathDN fp = Database.Retrieve<FilePathDN>(filePathID.Value);
+          
+            return File(FilePathLogic.GetByteArray(fp), 
+                MimeType.FromFileName(fp.FullPhysicalPath), 
+                fp.FileName);
+        }
 
-            if (fp == null)
-                throw new ArgumentException("Argument 'filePathID' was not passed to the controller");
-            /*
-            byte[] binaryFile;
+        public FileResult DownloadFile(int? fileID)
+        {
+            if (fileID == null)
+                throw new ArgumentNullException("fileID");
 
-            binaryFile = fp.FullWebPath != null ? new WebClient().DownloadData(fp.FullWebPath)
-                : FilePathLogic.GetByteArray(fp);
+            FileDN file = Database.Retrieve<FileDN>(fileID.Value);
 
-            return File(binaryFile, SignumController.GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);*/
-
-            
-            //
-            //HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(path));
-            //HttpContext.Response.ContentType = 
-            //HttpContext.Response.TransmitFile(path);
-
-            string path = fp.FullPhysicalPath;
-            return File(FilePathLogic.GetByteArray(fp), MimeType.FromExtension(path), fp.FileName);
-            //return File(path,  MimeType.FromFileName(path)); <--this cannot handle dots inside path
+            return File(file.BinaryFile,
+                MimeType.FromFileName(file.FileName),
+                file.FileName);
         }
     }
 }

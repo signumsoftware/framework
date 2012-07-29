@@ -68,7 +68,7 @@
 
                 var data = @Html.Json(json);
 
-                var myChart = SF.Chart.Factory.getGraphType('@ucTc.Value.Chart.ChartType.ToString()');
+                var myChart = SF.Chart.Factory.getGraphType('@ucTc.Value.Chart.ChartScript.ToString()');
                 
                 eval(myChart.createChartSVG('@divSelector') + myChart.paintChart('@divSelector'));
 

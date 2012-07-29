@@ -22,36 +22,19 @@ namespace Signum.Entities.Chart
     {
         public ChartBase()
         {
-            UpdateTokens();
+            SyncronizeColumns();
         }
 
-        ChartType chartType;
-        public ChartType ChartType
+        ChartScriptDN chartScript;
+        [NotNullValidator]
+        public ChartScriptDN ChartScript
         {
-            get { return chartType; }
+            get { return chartScript; }
             set
             {
-                if (Set(ref chartType, value, () => ChartType))
+                if (Set(ref chartScript, value, () => ChartScript))
                 {
-                    ChartResultType = ChartUtils.GetChartResultType(value);
-                    UpdateTokens();
-                    NotifyChange(false);
-                }
-            }
-        }
-
-        ChartResultType chartResultType;
-        public ChartResultType ChartResultType
-        {
-            get { return chartResultType; }
-            private set
-            {
-                if (Set(ref chartResultType, value, () => ChartResultType))
-                {
-                    if (chartResultType == Chart.ChartResultType.TypeValue || chartResultType == Chart.ChartResultType.TypeTypeValue)
-                        GroupResults = true;
-
-                    NotifyChange(true);
+                    SyncronizeColumns();
                 }
             }
         }
@@ -62,95 +45,59 @@ namespace Signum.Entities.Chart
             get { return groupResults; }
             set
             {
-                if (!value && (chartResultType == Chart.ChartResultType.TypeValue || chartResultType == Chart.ChartResultType.TypeTypeValue))
-                    return;
-
                 if (Set(ref groupResults, value, () => GroupResults))
                 {
-                    UpdateGroup();
+                    NotifyAllColumns();
                     NotifyChange(true);
                 }
             }
         }
 
-        ChartTokenDN dimension1;
-        public ChartTokenDN Dimension1
+        [NotifyCollectionChanged, ValidateChildProperty]
+        MList<ChartColumnDN> columns = new MList<ChartColumnDN>();
+        public MList<ChartColumnDN> Columns
         {
-            get { return dimension1; }
+            get { return columns; }
+            set { Set(ref columns, value, () => Columns); }
         }
 
-        ChartTokenDN dimension2;
-        public ChartTokenDN Dimension2
+        void NotifyAllColumns()
         {
-            get { return dimension2; }
-        }
-
-        ChartTokenDN value1;
-        public ChartTokenDN Value1
-        {
-            get { return value1; }
-        }
-
-        ChartTokenDN value2;
-        public ChartTokenDN Value2
-        {
-            get { return value2; }
-        }
-
-
-        void UpdateGroup()
-        {
-            UpdateTokenGroup(dimension1);
-            UpdateTokenGroup(dimension2);
-            UpdateTokenGroup(value1);
-            UpdateTokenGroup(value2);
-        }
-
-        private void UpdateTokenGroup(ChartTokenDN chartToken)
-        {
-            if (chartToken != null)
+            foreach (var item in Columns)
             {
-                chartToken.NotifyAll();
+                item.NotifyAll();
             }
         }
 
-        protected void UpdateTokens()
+        protected bool SyncronizeColumns()
         {
-            SetToken(ref dimension1, ChartUtils.IsVisible(chartResultType, ChartTokenName.Dimension1), () => Dimension1);
-            SetToken(ref dimension2, ChartUtils.IsVisible(chartResultType, ChartTokenName.Dimension2), () => Dimension2);
-            SetToken(ref value1, ChartUtils.IsVisible(chartResultType, ChartTokenName.Value1), () => Value1);
-            SetToken(ref value2, ChartUtils.IsVisible(chartResultType, ChartTokenName.Value2), () => Value2);
-        }
+            bool result = false;
 
-        void SetToken(ref ChartTokenDN token, bool should, Expression<Func<ChartTokenDN>> property)
-        {
-            if (token == null)
+            if (chartScript == null)
             {
-                if (should)
-                {
-                    token = new ChartTokenDN();
-                    token.parentChart = this;
-                    token.ExternalPropertyValidation += token_ExternalPropertyValidation;
-                }
-                else
-                {
-                    //nothing
-                }
-            }
-            else
-            {
-                if (should)
-                {
-                    token.NotifyAll();
-                }
-                else
-                {
-                    token.ExternalPropertyValidation -= token_ExternalPropertyValidation;
-                    token = null;
-                }
+                result = true;
+                columns.Clear();
             }
 
-            Notify(property);
+            for (int i = 0; i < chartScript.Columns.Count; i++)
+            {
+                if (columns.Count <= i)
+                {
+                    columns.Add(new ChartColumnDN());
+                    result = true;
+                }
+               
+                columns[i].ScriptColumn = chartScript.Columns[i];
+
+            }
+
+            if (columns.Count > chartScript.Columns.Count)
+            {
+                columns.RemoveRange(chartScript.Columns.Count, columns.Count - chartScript.Columns.Count);
+                return true;
+            }
+
+                return result;
         }
 
         [field: NonSerialized, Ignore]
@@ -172,104 +119,6 @@ namespace Signum.Entities.Chart
         {
             get { return needNewQuery; }
             set { Set(ref needNewQuery, value, () => NeedNewQuery); }
-        }
-
-        internal bool token_ShouldAggregate(ChartTokenDN token)
-        {
-            return GroupResults && ChartUtils.ShouldAggregate(chartResultType, GetTokenName(token));
-        }
-
-        internal bool token_IsColor(ChartTokenDN token)
-        {
-            return ChartUtils.IsColorToken(chartResultType, GetTokenName(token));
-        }
-
-        internal string token_PropertyLabel(ChartTokenDN token)
-        {
-            var chartLavel = ChartUtils.PropertyLabel(chartType, GetTokenName(token));
-            if (chartLavel == null)
-                return null;
-
-            return chartLavel.NiceToString();
-        }
-
-        internal bool token_GroupByVisible(ChartTokenDN token)
-        {
-            return ChartUtils.CanGroupBy(chartResultType, GetTokenName(token));
-        }
-
-        string token_ExternalPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
-        {
-            ChartTokenDN ct = sender as ChartTokenDN;
-
-            if (ct != null)
-            {
-                if (pi.Is(() => ct.Token))
-                {
-                    if (groupResults)
-                    {
-                        if (ChartUtils.ShouldAggregate(chartResultType, GetTokenName((ChartTokenDN)sender)))
-                        {
-                            if (!(ct.Token is AggregateToken))
-                                return Resources.ExpressionShouldBeSomeKindOfAggregate;
-                        }
-                        else
-                        {
-                            if (ct.Token is AggregateToken)
-                                return Resources.ExpressionCanNotBeAnAggregate;
-                        }
-                    }
-
-                    return ChartUtils.ValidateProperty(chartResultType, GetTokenName(ct), ct.Token);
-                }
-            }
-
-            return null;
-        }
-
-        protected override void RebindEvents()
-        {
-            base.RebindEvents();
-
-            RebindEvents(dimension1);
-            RebindEvents(value1);
-
-            RebindEvents(dimension2);
-            RebindEvents(value2);             
-        }
-
-        private void RebindEvents(ChartTokenDN token)
-        {
-            if (token == null)
-                return;
-
-            token.ExternalPropertyValidation += token_ExternalPropertyValidation;
-        }
-
-        public ChartTokenName GetTokenName(ChartTokenDN token)
-        {
-            if (token == null)
-                throw new ArgumentNullException("token");
-
-            if (token == dimension1) return ChartTokenName.Dimension1;
-            if (token == dimension2) return ChartTokenName.Dimension2;
-            if (token == value1) return ChartTokenName.Value1;
-            if (token == value2) return ChartTokenName.Value2;
-
-            throw new InvalidOperationException("token not found");
-        }
-
-        public ChartTokenDN GetToken(ChartTokenName chartTokenName)
-        {
-            switch (chartTokenName)
-            {
-                case ChartTokenName.Dimension1: return dimension1;
-                case ChartTokenName.Dimension2: return dimension2;
-                case ChartTokenName.Value1: return value1;
-                case ChartTokenName.Value2: return value2;
-            }
-
-            return null;
         }
 
         public List<QueryToken> SubTokensFilters(QueryToken token, List<ColumnDescription> list)
@@ -298,7 +147,7 @@ namespace Signum.Entities.Chart
                     {
                         FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
 
-                        if (ft == FilterType.Number || ft == FilterType.DecimalNumber || ft == FilterType.Boolean)
+                        if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
                         {
                             result.Add(new AggregateToken(token, AggregateFunction.Average));
                             result.Add(new AggregateToken(token, AggregateFunction.Sum));
@@ -316,21 +165,6 @@ namespace Signum.Entities.Chart
             }
 
             return result;
-        }
-
-        public IEnumerable<ChartTokenDN> ChartTokens()
-        {
-            if (Dimension1 != null)
-                yield return Dimension1;
-
-            if (Dimension2 != null)
-                yield return Dimension2;
-
-            if (Value1 != null)
-                yield return Value1;
-
-            if (Value2 != null)
-                yield return Value2;
         }
 
       
@@ -374,14 +208,9 @@ namespace Signum.Entities.Chart
             set { Set(ref orders, value, () => Orders); }
         }
 
-        public IEnumerable<ChartTokenDN> ChartTokens()
-        {
-            return chart.ChartTokens();
-        }
-
         public List<QueryToken> AllTokens()
         {
-            var allTokens = ChartTokens().Select(a => a.Token).ToList();
+            var allTokens = Chart.Columns.Select(a => a.Token).ToList();
 
             if (Filters != null)
                 allTokens.AddRange(Filters.Select(a => a.Token));
@@ -480,17 +309,9 @@ namespace Signum.Entities.Chart
                 foreach (var f in Filters)
                     f.ParseData(t => this.Chart.SubTokensChart(t, description.Columns, true));
 
-            if (chart.Dimension1 != null)
-                chart.Dimension1.ParseData(description);
-
-            if (chart.Dimension2 != null)
-                chart.Dimension2.ParseData(description);
-
-            if (chart.Value1 != null)
-                chart.Value1.ParseData(description);
-
-            if (chart.Value2 != null)
-                chart.Value2.ParseData(description);
+            if (Chart != null && Chart.Columns != null)
+                foreach (var c in chart.Columns)
+                    c.ParseData(description);
 
             if (Orders != null)
                 foreach (var o in Orders)
@@ -522,7 +343,12 @@ namespace Signum.Entities.Chart
                 Chart =
                 {
                     GroupResults = request.Chart.GroupResults,
-                    ChartType = request.Chart.ChartType,
+                    ChartScript = request.Chart.ChartScript,
+                    Columns = request.Chart.Columns.Select(c=>new ChartColumnDN
+                    {
+                         DisplayName = c.DisplayName,
+                         Token = c.Token.Clone(),
+                    }).ToMList()
                 },
 
                 Orders = request.Orders.Select(o=>new QueryOrderDN
@@ -531,11 +357,6 @@ namespace Signum.Entities.Chart
                      OrderType = o.OrderType
                 }).ToMList()
             };
-
-            Assign(result.Chart.Dimension1, request.Chart.Dimension1);
-            Assign(result.Chart.Dimension2, request.Chart.Dimension2);
-            Assign(result.Chart.Value1, request.Chart.Value1);
-            Assign(result.Chart.Value2, request.Chart.Value2);
 
             return result;
         }
@@ -549,7 +370,7 @@ namespace Signum.Entities.Chart
                     Orders[i].Index = i;
         }
 
-        private static void Assign(ChartTokenDN result, ChartTokenDN request)
+        private static void Assign(ChartColumnDN result, ChartColumnDN request)
         {
             if (request == null || result == null)
                 return;
@@ -573,19 +394,20 @@ namespace Signum.Entities.Chart
                 Chart =
                 {
                     GroupResults = uq.Chart.GroupResults,
-                    ChartType = uq.Chart.ChartType,
+                    ChartScript = uq.Chart.ChartScript,
+                    Columns = uq.Chart.Columns.Select(c => new ChartColumnDN
+                    {
+                        DisplayName = c.DisplayName,
+                        Token = c.Token.Clone(),
+                    }).ToMList()
                 },
 
                 Orders = uq.Orders.Select(o => new Order(o.Token, o.OrderType)).ToList(),
             };
 
-            Assign(result.Chart.Dimension1, uq.Chart.Dimension1);
-            Assign(result.Chart.Dimension2, uq.Chart.Dimension2);
-            Assign(result.Chart.Value1, uq.Chart.Value1);
-            Assign(result.Chart.Value2, uq.Chart.Value2);
-
             return result;
-
         }
     }
+
+    
 }

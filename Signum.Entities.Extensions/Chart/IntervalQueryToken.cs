@@ -29,14 +29,14 @@ namespace Signum.Entities.Chart
 
             var ft = QueryUtils.GetFilterType(parent.Type);
 
-            if (ft != FilterType.Number && ft != FilterType.DecimalNumber)
+            if (ft != FilterType.Integer && ft != FilterType.Decimal)
                 throw new ArgumentException("parent should be a Number");
 
-            isDecimal = ft == FilterType.DecimalNumber;
+            isDecimal = ft == FilterType.Decimal;
 
             Type t = parent.Type.UnNullify();
 
-            Intervals = (ft == FilterType.DecimalNumber ? "... {0:0.0} {1:0.0} ..." : "... {0} {1} ...").Formato(0, 10);
+            Intervals = (ft == FilterType.Decimal ? "... {0:0.0} {1:0.0} ..." : "... {0} {1} ...").Formato(0, 10);
         }
 
         //0,5,6.5,8
