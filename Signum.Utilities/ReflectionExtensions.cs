@@ -30,6 +30,15 @@ namespace Signum.Utilities
             return Nullable.GetUnderlyingType(type) != null;
         }
 
+        public static bool IsAnonymous(this Type type)
+        {
+            // HACK: The only way to detect anonymous types right now.
+            return Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute), false)
+                && type.IsGenericType && type.Name.Contains("AnonymousType")
+                && (type.Name.StartsWith("<>") || type.Name.StartsWith("VB$"))
+                && (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
+        }
+
         public static Type ReturningType(this MemberInfo m)
         {
             return (m is PropertyInfo) ? ((PropertyInfo)m).PropertyType :
