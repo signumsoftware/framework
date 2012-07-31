@@ -202,6 +202,14 @@ namespace Signum.Entities.Exceptions
             set { Set(ref session, value, () => Session); }
         }
 
+        [SqlDbType(Size = int.MaxValue)]
+        string data;
+        public string Data
+        {
+            get { return data; }
+            set { Set(ref data, value, () => Data); }
+        }
+
         public override string ToString()
         {
             return "{0}: {1}".Formato(exceptionType, exceptionMessage).Etc(200);
