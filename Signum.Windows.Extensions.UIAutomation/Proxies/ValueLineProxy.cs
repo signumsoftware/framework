@@ -94,7 +94,7 @@ namespace Signum.Windows.UIAutomation
                         ValueControl.ChildById("PART_EditableTextBox").Value(value);
                         break;
                     case "CheckBox":
-                        ValueControl.ChildById("checkbox").Value(value);
+                        ValueControl.SetCheck(value == "True");
                         break;
                     default:
                         throw new NotImplementedException("Unexpected Value Control of type {0}".Formato(ValueControl.Current.ClassName));
