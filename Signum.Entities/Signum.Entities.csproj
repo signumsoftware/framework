@@ -103,6 +103,7 @@
     <Compile Include="Basics\Alert.cs" />
     <Compile Include="Basics\Color.cs" />
     <Compile Include="DynamicQuery\Meta.cs" />
+    <Compile Include="ObjectDumper.cs" />
     <Compile Include="Patterns\CorruptEntity.cs" />
     <Compile Include="DynamicQuery\Order.cs" />
     <Compile Include="DynamicQuery\QueryDescription.cs" />

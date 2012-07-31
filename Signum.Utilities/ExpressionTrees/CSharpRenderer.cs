@@ -43,6 +43,11 @@ namespace Signum.Utilities.ExpressionTrees
             return default(T);
         }
 
+        public static bool IsBasicType(Type t) 
+        {
+            return basicTypes.ContainsKey(Type.GetTypeCode(t));
+        }
+
         static Dictionary<TypeCode, string> basicTypes = new Dictionary<TypeCode, string>
         {
             { TypeCode.Boolean, "bool"}, 
