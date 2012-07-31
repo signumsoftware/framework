@@ -96,7 +96,6 @@ namespace Signum.Windows
 
             return links;
         }
-
     }
 
     ///// <summary>
