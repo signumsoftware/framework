@@ -50,7 +50,7 @@ SF.registerModule("FindNavigator", function () {
                     return true;
                 };
 
-                var $tblResults = $(this.pf("tblResults"));
+                var $tblResults = self.element.find(".sf-search-results-container");
                 $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection),th:not(.th-col-entity):not(.th-col-selection) span,th:not(.th-col-entity):not(.th-col-selection) .sf-header-droppable", function (e) {
                     if (e.target != this) {
                         return;
@@ -68,7 +68,7 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $(this.pf("tblResults td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)")).live('contextmenu', function (e) {
+                $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
                     if (!closeMyOpenedCtxMenu(e.target)) {
                         return false;
                     }
@@ -90,20 +90,20 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $(this.pf("tblResults") + " .sf-search-ctxitem.quickfilter").live('click', function () {
+                $tblResults.on("click", ".sf-search-ctxitem.quickfilter", function () {
                     var $elem = $(this).closest("td");
                     $('.sf-search-ctxmenu-overlay').remove();
                     self.quickFilterCell($elem);
                 });
 
-                $(this.pf("tblResults") + " .sf-search-ctxitem.quickfilter-header").live('click', function () {
+                $tblResults.on("click", ".sf-search-ctxitem.quickfilter-header", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
                     self.quickFilterHeader($elem);
                     return false;
                 });
 
-                $(this.pf("tblResults") + " .sf-search-ctxitem.remove-column").live('click', function () {
+                $tblResults.on("click", ".sf-search-ctxitem.remove-column", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
 
@@ -111,7 +111,7 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $(this.pf("tblResults") + " .sf-search-ctxitem.edit-column").live('click', function () {
+                $tblResults.on("click", ".sf-search-ctxitem.edit-column", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
 
@@ -119,12 +119,12 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $(this.pf("tblResults") + " .sf-pagination-button").live('click', function () {
+                $tblResults.on("click", ".sf-pagination-button", function () {
                     $(self.pf(self.keys.page)).val($(this).attr("data-page"));
                     self.search();
                 });
 
-                $(this.pf("sfElems")).live('change', function () {
+                $tblResults.on("change", ".sf-pagination-size", function () {
                     if ($(this).find("option:selected").val() == -1) {
                         self.clearResults();
                     }
