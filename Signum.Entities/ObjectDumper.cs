@@ -15,11 +15,9 @@ namespace Signum.Entities
     {
         public static string Dump(this object o)
         {
-            var objects = new HashSet<Object>();
-            var res = new StringBuilder();
-            Dump(o, 0, res, objects);
-            string r = res.TryToString();
-            return "{0};"; //.Formato(r.HasText() ? r.Left(r.Length - 3) : "null");
+            var od = new DumpVisitor();
+            od.DumpObject(o);
+            return od.Sb.TryToString();
         }
 
         static string Indent(this string t, int level)
@@ -27,165 +25,187 @@ namespace Signum.Entities
             return t.PadLeft(t.Length + (level * 3));
         }
 
-        static void Dump(object o, int level, StringBuilder res, HashSet<object> objects)
+        class DumpVisitor
         {
-            if (o == null)
+            HashSet<Object> objects = new HashSet<Object>();
+            public StringBuilder Sb = new StringBuilder();
+            int level = 0;
+
+            public void DumpObject(object o)
             {
-                res.Append("null");
-                return;
-            }
-
-            Type t = o.GetType();
-
-            if (IsDelegate(t))
-            {
-                res.Append("DELEGATE");
-                return;
-            }
-
-            if (IsBasicType(t))
-            {
-                WritePropertyOrField(t, null, o, level, res, objects);
-                return;
-            }
-
-            res.Append(CSharpRenderer.TypeName(t));
-
-            if (objects.Contains(o))
-            {
-                res.Append("{0} ".Formato(o.ToString() + "{...} // CICLO"));
-                return;
-            }
-
-            objects.Add(o);
-
-            if (o is IdentifiableEntity || o is Lite)
-            {
-                var id = o is IdentifiableEntity ? (o as IdentifiableEntity).IdOrNull : (o as Lite).IdOrNull;
-                res.Append(id.HasValue ? "({0})".Formato(id.Value) : "");
-                string comment = " // " + o.ToString();
-                if (o is Lite && ((Lite)o).UntypedEntityOrNull == null)
+                if (o == null)
                 {
-                    res.Append("{}" + comment);
+                    Sb.Append("null");
                     return;
                 }
+
+                Type t = o.GetType();
+
+                if (IsDelegate(t))
+                {
+                    Sb.Append("[DELEGATE]");
+                    return;
+                }
+
+                if (IsBasicType(t))
+                {
+                    Sb.Append(DumpValue(o));
+                    return;
+                }
+
+                Sb.Append("new ");
+
+                Sb.Append(CSharpRenderer.TypeName(t));
+
+                if (objects.Contains(o))
+                {
+                    if (o is IdentifiableEntity || o is Lite)
+                    {
+                        var id = o is IdentifiableEntity ? (o as IdentifiableEntity).IdOrNull : (o as Lite).IdOrNull;
+                        Sb.Append(id.HasValue ? "({0})".Formato(id.Value) : "");
+                    }
+                    Sb.Append(" /* [CICLE] {0} */".Formato(o.ToString()));
+                    return;
+                }
+
+                objects.Add(o);
+
+                if (o is IdentifiableEntity)
+                {
+                    var id = (o as IdentifiableEntity).IdOrNull;
+                    Sb.Append(id.HasValue ? "({0})".Formato(id.Value) : "");
+                    Sb.Append(" /* {0} */".Formato(o.ToString()));
+                }
+
+                if (o is Lite)
+                {
+                    var l = o as Lite;
+                    Sb.Append("({0}, \"{1}\")".Formato((l.IdOrNull.HasValue ? l.Id.ToString() : "null"), l.ToString()));
+                    if (((Lite)o).UntypedEntityOrNull == null)
+                        return;
+                }
+
+                if (o is IEnumerable && !Any((o as IEnumerable)))
+                {
+                    Sb.Append("{}");
+                    return;
+                }
+
+                Sb.AppendLine().AppendLine("{".Indent(level));
+                level += 1;
+
+                if (o is IEnumerable)
+                {
+                    if (o is IDictionary)
+                    {
+                        foreach (DictionaryEntry item in (o as IDictionary))
+                        {
+                            Sb.Append("{".Indent(level));
+                            DumpObject(item.Key);
+                            Sb.Append(", ");
+                            DumpObject(item.Value);
+                            Sb.AppendLine("},");
+                        }
+                    }
+                    else
+                        foreach (var item in (o as IEnumerable))
+                        {
+                            Sb.Append("".Indent(level));
+                            DumpObject(item);
+                            Sb.AppendLine(",");
+                        }
+                }
+                else if (t.IsAnonymous())
+                    foreach (var prop in t.GetProperties(BindingFlags.Instance |
+                                                         BindingFlags.Public))
+                    {
+                        DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));
+                    }
                 else
-                    res.Append(comment);
-            }
+                    foreach (var field in Reflector.InstanceFieldsInOrder(t))
+                    {
+                        DumpPropertyOrField(field.FieldType, field.Name, field.GetValue(o));
+                    }
 
-            if (o is IEnumerable && !Any((o as IEnumerable)))
-            {
-                res.Append("{}");
+                level -= 1;
+                Sb.Append("}".Indent(level));
                 return;
             }
 
-            res.AppendLine("{".Indent(level));
-            level += 1;
-
-            if (o is IEnumerable)
+            private bool Any(IEnumerable ie)
             {
-                foreach (var item in (o as IEnumerable))
+                if (ie is IList)
+                    return (ie as IList).Count > 0;
+
+                if (ie is Array)
+                    return (ie as Array).Length > 0;
+
+                foreach (var item in ie)
                 {
-                    res.Append("{".Indent(level));
-                    WritePropertyOrField(item.GetType(), null, item, level, res, objects);
-                    res.Append("},".Indent(level)).AppendLine();
-                }
-            }
-            else if (t.IsAnonymous())
-                foreach (var prop in t.GetProperties(BindingFlags.Instance |
-                                                     BindingFlags.Public))
-                {
-                    WritePropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null), level, res, objects);
-                    res.Append(",").AppendLine();
-                }
-            else
-                foreach (var field in Reflector.InstanceFieldsInOrder(t))
-                {
-                    WritePropertyOrField(field.FieldType, field.Name, field.GetValue(o), level, res, objects);
-                    res.Append(",").AppendLine();
+                    return true;
                 }
 
-            res.AppendLine("}".Indent(level - 1));
-            return;
-        }
-
-        private static bool Any(IEnumerable ie)
-        {
-            if (ie is IList)
-                return (ie as IList).Count > 0;
-
-            if (ie is Array)
-                return (ie as Array).Length > 0;
-
-            foreach (var item in ie)
-            {
-                return true;
+                return false;
             }
 
-            return false;
-        }
-
-        private static void WritePropertyOrField(Type type, string name, object obj, int level, StringBuilder res, HashSet<object> objects)
-        {
-            if (IsDelegate(type))
-                return;
-            if (IsBasicType(type))
-                res.Append("{0} = {1},".Formato(name, writeValue(obj)).Indent(level));
-            else
+            private void DumpPropertyOrField(Type type, string name, object obj)
             {
-                res.Append("{0}new = ".Formato(name.HasText() ? name + " = " : null).Indent(level));
-                Dump(obj, level, res, objects);
+                if (IsDelegate(type))
+                    return;
+                Sb.AppendFormat("{0} = ".Indent(level), name);
+                DumpObject(obj);
+                Sb.AppendLine(",");
             }
-        }
 
-        private static bool IsDelegate(Type type)
-        {
-            return typeof(Delegate).IsAssignableFrom(type);
-        }
-
-        static bool IsBasicType(Type type)
-        {
-            var unType = type.UnNullify();
-            return CSharpRenderer.IsBasicType(unType) || unType == typeof(DateTime);
-        }
-
-        static string writeValue(object item)
-        {
-            string value = item.TryToString() ?? "null";
-            string startDelimiter = null;
-            string endDelimiter = null;
-
-            if (item != null)
+            private bool IsDelegate(Type type)
             {
-                if (item is string)
+                return typeof(Delegate).IsAssignableFrom(type);
+            }
+
+            bool IsBasicType(Type type)
+            {
+                var unType = type.UnNullify();
+                return CSharpRenderer.IsBasicType(unType) || unType == typeof(DateTime);
+            }
+
+            string DumpValue(object item)
+            {
+                string value = item.TryToString() ?? "null";
+                string startDelimiter = null;
+                string endDelimiter = null;
+
+                if (item != null)
                 {
-                    startDelimiter = endDelimiter = "\"";
-                    if (value.Contains("\\"))
+                    if (item is string)
+                    {
+                        startDelimiter = endDelimiter = "\"";
                         value = value.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t");
+                    }
+
+                    if (item is decimal || item is double || item is float)
+                        value = value.Replace(',', '.');
+
+                    if (item is decimal)
+                        endDelimiter = "M";
+
+                    if (item is float)
+                        endDelimiter = "F";
+
+                    if (item is Enum)
+                        startDelimiter = item.GetType().Name + ".";
+
+                    if (item is bool)
+                        value = value.ToLower();
+
+                    if (item is DateTime)
+                    {
+                        value = "DateTime.Parse(\"{0}\")".Formato(value);
+                    }
                 }
 
-                if (item is decimal || item is double || item is float)
-                    value = value.Replace(',', '.');
-
-                if (item is decimal)
-                    endDelimiter = "M";
-
-                if (item is float)
-                    endDelimiter = "F";
-
-                if (item is Enum)
-                    startDelimiter = item.GetType().Name + ".";
-
-                if (item is bool)
-                    value = value.ToLower();
-
-                if (item is DateTime)
-                {
-                    value = "DateTime.Parse(\"{0}\")".Formato(value);
-                }
+                return "{0}{1}{2}".Formato(startDelimiter, value, endDelimiter);
             }
+        };
 
-            return "{0}{1}{2}".Formato(startDelimiter, value, endDelimiter);
-        }
     }
 }
