@@ -67,6 +67,13 @@ namespace Signum.Engine.SchemaInfoTables
         {
             return ExtendedPropertiesExpression.Evaluate(this);
         }
+
+        static Expression<Func<SysTables, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
+            fk => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.parent_object_id == fk.object_id);
+        public IQueryable<SysForeignKeyColumns> ForeignKeyColumns()
+        {
+            return ForeignKeyColumnsExpression.Evaluate(this);
+        }
     }
 
     [SqlViewName("sys.views")]
