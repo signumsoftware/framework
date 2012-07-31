@@ -15,7 +15,12 @@ namespace Signum.Entities
     {
         public static string Dump(this object o)
         {
-            var od = new DumpVisitor();
+            return o.Dump(false);
+        }
+
+        public static string Dump(this object o, bool showIgnoredFields)
+        {
+            var od = new DumpVisitor(showIgnoredFields);
             od.DumpObject(o);
             return od.Sb.TryToString();
         }
@@ -30,6 +35,12 @@ namespace Signum.Entities
             HashSet<Object> objects = new HashSet<Object>();
             public StringBuilder Sb = new StringBuilder();
             int level = 0;
+            bool showIgnoredFields = false;
+
+            public DumpVisitor(bool showIgnoredFields)
+            {
+                this.showIgnoredFields = showIgnoredFields;
+            }
 
             public void DumpObject(object o)
             {
@@ -94,7 +105,17 @@ namespace Signum.Entities
                 Sb.AppendLine().AppendLine("{".Indent(level));
                 level += 1;
 
-                if (o is IEnumerable)
+                if (t.Namespace.HasText() && t.Namespace.StartsWith("System.Reflection"))
+                    Sb.AppendLine("ToString = {0},".Formato(o.ToString()).Indent(level));
+                else if (o is Exception)
+                {
+                    var ex = o as Exception;
+                    DumpPropertyOrField(typeof(string), "Message", ex.Message);
+                    DumpPropertyOrField(typeof(string), "StackTrace", ex.StackTrace);
+                    DumpPropertyOrField(typeof(Exception), "InnerException", ex.InnerException);
+                    DumpPropertyOrField(typeof(IDictionary), "Data", ex.Data);
+                }
+                else if (o is IEnumerable)
                 {
                     if (o is IDictionary)
                     {
@@ -124,7 +145,8 @@ namespace Signum.Entities
                 else
                     foreach (var field in Reflector.InstanceFieldsInOrder(t))
                     {
-                        DumpPropertyOrField(field.FieldType, field.Name, field.GetValue(o));
+                        if (showIgnoredFields || !field.IsDefined(typeof(IgnoreAttribute), false))
+                            DumpPropertyOrField(field.FieldType, field.Name, field.GetValue(o));
                     }
 
                 level -= 1;
@@ -150,8 +172,6 @@ namespace Signum.Entities
 
             private void DumpPropertyOrField(Type type, string name, object obj)
             {
-                if (IsDelegate(type))
-                    return;
                 Sb.AppendFormat("{0} = ".Indent(level), name);
                 DumpObject(obj);
                 Sb.AppendLine(",");
