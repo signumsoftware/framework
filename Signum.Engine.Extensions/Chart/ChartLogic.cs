@@ -171,7 +171,7 @@ namespace Signum.Engine.Chart
         private static LambdaExpression KeySelector(BuildExpressionContext context, HashSet<QueryToken> keyTokens)
         {
             var keySelector = Expression.Lambda(
-              TupleReflection.TupleChainConstructor(keyTokens.Select(t => t.BuildExpression(context))),
+              TupleReflection.TupleChainConstructor(keyTokens.Select(t => t.BuildExpression(context)).ToList()),
               context.Parameter);
             return keySelector;
         }
