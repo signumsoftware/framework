@@ -103,9 +103,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            if (listDetail.ShouldWriteOldIndex(itemTC))
-                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
-
+            sb.AddLine(ListBaseHelper.WriteIndex(helper, listDetail, itemTC, itemTC.Index));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             //TODO: Anto - RequestLoadAll con ItemTC

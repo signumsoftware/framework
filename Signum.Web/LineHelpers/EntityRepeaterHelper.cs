@@ -84,11 +84,36 @@ namespace Signum.Web
                                         { "data-icon", "ui-icon-circle-close" }, 
                                         { "data-text", false } 
                                     }));
+
+                    if (entityRepeater.Reorder)
+                    {
+                        sb.AddLine(
+                            helper.Span(itemTC.Compose("btnUp"),
+                                Resources.Signum_entityRepeater_moveUp,
+                                "sf-line-button sf-move-up",
+                                new Dictionary<string, object> 
+                                {  
+                                   { "onclick", "{0}.moveUp('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                   { "data-icon", "ui-icon-triangle-1-n" },
+                                   { "data-text", false },
+                                   { "title", Resources.Signum_entityRepeater_moveUp }
+                                }));
+
+                        sb.AddLine(
+                            helper.Span(itemTC.Compose("btnDown"),
+                                Resources.Signum_entityRepeater_moveDown,
+                                "sf-line-button sf-move-down",
+                                new Dictionary<string, object> 
+                                {   
+                                   { "onclick", "{0}.moveDown('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                   { "data-icon", "ui-icon-triangle-1-s" },
+                                   { "data-text", false },
+                                   { "title", Resources.Signum_entityRepeater_moveDown }
+                                }));
+                    }
                 }
 
-                if (entityRepeater.ShouldWriteOldIndex(itemTC))
-                    sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
-
+                sb.AddLine(ListBaseHelper.WriteIndex(helper, entityRepeater, itemTC, itemTC.Index));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater));

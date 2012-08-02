@@ -30,6 +30,8 @@ namespace Signum.Web
 
         public int? MaxElements { get; set; }
 
+        public bool Reorder { get; set; }
+
         public EntityRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
@@ -37,6 +39,7 @@ namespace Signum.Web
             AddElementLinkText = Resources.New;
             Find = false;
             LabelClass = "sf-label-repeater-line";
+            Reorder = false;
         }
 
         public override string ToJS()
@@ -50,6 +53,8 @@ namespace Signum.Web
             result.Add("maxElements", MaxElements.TryToString());
             if (RemoveElementLinkText.HasText())
                 result.Add("removeItemLinkText", RemoveElementLinkText.SingleQuote());
+            if (Reorder)
+                result.Add("reorder", "true");
             return result;
         }
 

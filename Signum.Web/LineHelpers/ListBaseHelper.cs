@@ -117,5 +117,12 @@ namespace Signum.Web
                   htmlAttr);
 
         }
+
+        public static MvcHtmlString WriteIndex(HtmlHelper helper, EntityListBase listBase, TypeContext itemTC, int itemIndex)
+        {
+            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
+                listBase.ShouldWriteOldIndex(itemTC) ? itemIndex.ToString() : "", 
+                itemIndex.ToString()));
+        }
     }
 }
