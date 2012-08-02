@@ -92,7 +92,8 @@ namespace Signum.Web.Files
                                         }));
                 }
 
-                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
+                    itemTC.Index.ToString(), itemTC.Index.ToString())));
 
                 //Render FileLine for the current item
                 using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityBaseKeys.Entity)).Class("sf-line-entity")))
