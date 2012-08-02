@@ -269,15 +269,15 @@ SF.Chart.ChartBase.prototype = {
     },
 
     getTokenLabel: function (tokenValue) {
-        return !SF.isEmpty(tokenValue) && typeof tokenValue.toStr != "undefined" ? tokenValue.toStr : tokenValue;
+        return (!SF.isEmpty(tokenValue) && typeof tokenValue.toStr != "undefined" ? tokenValue.toStr : tokenValue) || "[ null ]";
     },
 
     getTokenKey: function (tokenValue) {
-        return !SF.isEmpty(tokenValue) && typeof tokenValue.key != "undefined" ? tokenValue.key : tokenValue;
+        return (!SF.isEmpty(tokenValue) && typeof tokenValue.key != "undefined" ? tokenValue.key : tokenValue) || "null";
     },
 
     getTokenColor: function (tokenValue, color) {
-        return ((!SF.isEmpty(tokenValue) && typeof tokenValue.color != "undefined") ? tokenValue.color : null) || color(JSON.stringify(tokenValue));
+        return ((!SF.isEmpty(tokenValue) && typeof tokenValue.color != "undefined") ? tokenValue.color : null) || color(this.getTokenKey(tokenValue));
     },
 
 
@@ -364,7 +364,7 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength," + this.brt +
-            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return JSON.stringify(v.dimension1); })]);" + this.br + this.br;
+            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return myChart.getTokenKey(v.dimension1); })]);" + this.br + this.br;
     },
 
     getXAxis: function () {
@@ -377,7 +377,7 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
     getYAxis: function () {
         return "//y axis scale" + this.br +
             "var y = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(data.serie, function (e) { return JSON.stringify(e); }))" + this.brt +
+            ".domain($.map(data.serie, function (e) { return myChart.getTokenKey(e.dimension1); }))" + this.brt +
             ".rangeBands([0, xAxisTopPosition - padding- (2 * chartAxisPadding)]);" + this.br + this.br;
     },
 
@@ -415,8 +415,8 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + (padding + chartAxisPadding + (y.rangeBand() / 2)) + ')')" + this.brt +
             ".enterData(data.serie, 'line', 'y-axis-tick')" + this.brt +
             ".attr('x2', ticksLength)" + this.brt +
-            ".attr('y1', function (v) { return y(JSON.stringify(v)); })" + this.brt +
-            ".attr('y2', function (v) { return y(JSON.stringify(v)); });" + this.br +
+            ".attr('y1', function (v) { return y(myChart.getTokenKey(v.dimension1)); })" + this.brt +
+            ".attr('y2', function (v) { return y(myChart.getTokenKey(v.dimension1)); });" + this.br +
             this.br +
             "//paint y-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + (xAxisTopPosition / 2) + ') rotate(270)')" + this.brt +
@@ -431,8 +431,8 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".enterData(data.serie, 'rect', 'shape')" + this.brt +
             ".attr('width', function (v) { return x(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('height', y.rangeBand)" + this.brt +
-            ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
-            ".attr('fill', function (v) { return  myChart.getTokenLabel(v.dimension1); })" + this.brt +
+            ".attr('y', function (v) { return y(myChart.getTokenKey(v.dimension1)); })" + this.brt +
+            ".attr('fill', function (v) { return  myChart.getTokenColor(v.dimension1, color); })" + this.brt +
             ".attr('stroke', '#fff')" + this.brt +
             ".attr('data-d1', function(v) { return myChart.getTokenKey(v.dimension1); })" + this.brt +
             ".attr('data-entity', function(v) { return v.entity || ''; })" + this.brt +
@@ -445,7 +445,7 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin) + ', ' + (padding + chartAxisPadding + (y.rangeBand() / 2) + (fontSize / 2)) + ')')" + this.brt +
             ".enterData(data.serie, 'text', 'y-axis-tick-label sf-chart-strong')" + this.brt +
             ".attr('x', function(v) { var posx = x(myChart.getTokenKey(v.value1)); return posx >= xHalf ? 0 : posx; })" + this.brt +
-            ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
+            ".attr('y', function (v) { return y(myChart.getTokenKey(v.dimension1)); })" + this.brt +
             ".attr('fill', function(v) { return x(myChart.getTokenKey(v.value1)) >= xHalf ? '#fff' : myChart.getTokenColor(v.dimension1, color); })" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
             "}" + this.br + this.br;
@@ -467,13 +467,13 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - fontSize - labelMargin - ticksLength," + this.brt +
-            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return JSON.stringify(v.dimension1); })]);" + this.br + this.br;
+            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return myChart.getTokenKey(v.dimension1); })]);" + this.br + this.br;
     },
 
     getXAxis: function () {
         return "//x axis scale" + this.br +
             "var x = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(data.serie, function (e) { return JSON.stringify(e); }))" + this.brt +
+            ".domain($.map(data.serie, function (e) { return myChart.getTokenKey(e.dimension1); }))" + this.brt +
             ".rangeBands([0, width - yAxisLeftPosition - padding - (2 * chartAxisPadding)]);" + this.br + this.br;
     },
 
@@ -489,8 +489,8 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2) + chartAxisPadding) + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(data.serie, 'line', 'x-axis-tick')" + this.brt +
             ".attr('y2', ticksLength)" + this.brt +
-            ".attr('x1', function (v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('x2', function (v) { return x(JSON.stringify(v)); });" + this.br +
+            ".attr('x1', function (v) { return x(myChart.getTokenKey(v.dimension1)); })" + this.brt +
+            ".attr('x2', function (v) { return x(myChart.getTokenKey(v.dimension1)); });" + this.br +
             this.br +
             "//paint x-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')" + this.brt +
@@ -536,7 +536,7 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".enterData(data.serie, 'rect', 'shape')" + this.brt +
             ".attr('height', function (v) { return y(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('width', x.rangeBand)" + this.brt +
-            ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
+            ".attr('x', function (v) { return x(myChart.getTokenKey(v.dimension1)); })" + this.brt +
             ".attr('fill', function (v) { return myChart.getTokenColor(v.dimension1, color); })" + this.brt +
             ".attr('stroke', '#fff')" + this.brt +
             ".attr('data-d1', function(v) { return myChart.getTokenKey(v.dimension1); })" + this.brt +
@@ -550,7 +550,7 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2) + (fontSize / 2)) + ', ' + xAxisTopPosition + ') rotate(270)')" + this.brt +
             ".enterData(data.serie, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
             ".attr('x', function (v) { var posy = y(myChart.getTokenKey(v.value1)); return posy >= yHalf ? posy - labelMargin : posy + labelMargin; })" + this.brt +
-            ".attr('y', function (v) { return x(JSON.stringify(v)) })" + this.brt +
+            ".attr('y', function (v) { return x(myChart.getTokenKey(v.dimension1)) })" + this.brt +
             ".attr('text-anchor', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? 'end' : 'start'; })" + this.brt +
 	        ".attr('fill', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? '#fff' : myChart.getTokenColor(v.dimension1, color); })" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
@@ -581,16 +581,16 @@ SF.Chart.Lines.prototype = $.extend({}, new SF.Chart.Columns(), {
             "chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(data.serie, 'line', 'x-axis-tick')" + this.brt +
             ".attr('y2', function (v, i) { return (i%2 == 0 ? ticksLength : (ticksLength + fontSize + labelMargin)); })" + this.brt +
-            ".attr('x1', function (v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('x2', function (v) { return x(JSON.stringify(v)); });" + this.br +
+            ".attr('x1', function (v) { return x(myChart.getTokenKey(v.dimension1)); })" + this.brt +
+            ".attr('x2', function (v) { return x(myChart.getTokenKey(v.dimension1)); });" + this.br +
             this.br +
             "//paint x-axis tick labels" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')" + this.brt +
             ".enterData(data.serie, 'text', 'x-axis-tick-label')" + this.brt +
-            ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
+            ".attr('x', function (v) { return x(myChart.getTokenKey(v.dimension1)); })" + this.brt +
             ".attr('y', function (v, i) { return (i%2 == 0 ? 0 : (fontSize + labelMargin)); })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
-            ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
+            ".text(function (v) { return myChart.getTokenKey(v.dimension1); });" + this.br +
             this.br +
             "//paint x-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')" + this.brt +
@@ -607,12 +607,12 @@ SF.Chart.Lines.prototype = $.extend({}, new SF.Chart.Columns(), {
             ".attr('fill', 'none')" + this.brt +
             ".attr('stroke-width', 3)" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
-            ".attr('d', myChart.getPathPoints($.map(data.serie, function(v) { return {x: x(JSON.stringify(v)), y: y(myChart.getTokenKey(v.value1))};})))" + this.br +
+            ".attr('d', myChart.getPathPoints($.map(data.serie, function(v) { return {x: x(myChart.getTokenKey(v.dimension1)), y: y(myChart.getTokenKey(v.value1))};})))" + this.br +
             this.br +
             "//paint graph - hover area trigger" + this.br +
             "chart.append('svg:g').attr('class', 'hover-trigger').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(data.serie, 'circle', 'hover-trigger')" + this.brt +
-            ".attr('cx', function(v) { return x(JSON.stringify(v)); })" + this.brt +
+            ".attr('cx', function(v) { return x(myChart.getTokenKey(v.dimension1)); })" + this.brt +
             ".attr('cy', function(v) { return y(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('r', 15)" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
@@ -628,7 +628,7 @@ SF.Chart.Lines.prototype = $.extend({}, new SF.Chart.Columns(), {
             ".enterData(data.serie, 'circle', 'point')" + this.brt +
             ".attr('fill', color)" + this.brt +
             ".attr('r', 5)" + this.brt +
-            ".attr('cx', function(v) { return x(JSON.stringify(v)); })" + this.brt +
+            ".attr('cx', function(v) { return x(myChart.getTokenKey(v.dimension1)); })" + this.brt +
             ".attr('cy', function(v) { return y(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('data-d1', function(v) { return myChart.getTokenKey(v.dimension1); })" + this.brt +
             ".attr('data-entity', function(v) { return v.entity || ''; })" + this.brt +
@@ -691,13 +691,13 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - (fontSize * 3) - (labelMargin * 3) - ticksLength," + this.brt +
-            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return JSON.stringify(s.dimension2); })]);" + this.br + this.br;
+            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return myChart.getTokenKey(s.dimension2); })]);" + this.br + this.br;
     },
 
     getXAxis: function () {
         return "//x axis scale" + this.br +
             "var x = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(data.dimension1, function (v) { return JSON.stringify(v); }))" + this.brt +
+            ".domain($.map(data.dimension1, function (d) { return myChart.getTokenKey(d); }))" + this.brt +
             ".rangeBands([0, width - yAxisLeftPosition - padding - (2 * chartAxisPadding)]);" + this.br + this.br;
     },
 
@@ -728,19 +728,19 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         return "//paint x-axis ticks" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(data.dimension1, 'line', 'x-axis-tick')" + this.brt +
-            ".attr('y2', function (v, i) { return (i%2 == 0 ? ticksLength : (ticksLength + fontSize + labelMargin)); })" + this.brt +
-            ".attr('x1', function (v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('x2', function (v) { return x(JSON.stringify(v)); });" + this.br +
+            ".attr('y2', function (d, i) { return (i%2 == 0 ? ticksLength : (ticksLength + fontSize + labelMargin)); })" + this.brt +
+            ".attr('x1', function (d) { return x(myChart.getTokenKey(d)); })" + this.brt +
+            ".attr('x2', function (d) { return x(myChart.getTokenKey(d)); });" + this.br +
             this.br +
             "//paint x-axis tick labels" + this.br +
             "if ((x.rangeBand() * 2) > yAxisLabelWidth)" + this.br +
             "{" + this.brt +
             "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')" + this.brt +
             ".enterData(data.dimension1, 'text', 'x-axis-tick-label')" + this.brt +
-            ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('y', function (v, i) { return (i%2 == 0 ? 0 : (fontSize + labelMargin)); })" + this.brt +
+            ".attr('x', function (d) { return x(myChart.getTokenKey(d)); })" + this.brt +
+            ".attr('y', function (d, i) { return (i%2 == 0 ? 0 : (fontSize + labelMargin)); })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
-            ".text(function (v) { return myChart.getTokenLabel(v); });" + this.br +
+            ".text(function (d) { return myChart.getTokenLabel(d); });" + this.br +
             "}" + this.br +
             this.br +
             "//paint x-axis - token label" + this.br +
@@ -816,12 +816,12 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('fill', 'none')" + this.brt +
             ".attr('stroke-width', 3)" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
-            ".attr('d', function(s) { return myChart.getPathPoints($.map(s.values, function(v, i) { return { x: x(JSON.stringify(data.dimension1[i])), y: (SF.isEmpty(v) ? null : y(myChart.getTokenKey(v))) }; }) )})" + this.br +
+            ".attr('d', function(s) { return myChart.getPathPoints($.map(s.values, function(v, i) { return { x: x(myChart.getTokenKey(data.dimension1[i])), y: (SF.isEmpty(v) ? null : y(myChart.getTokenKey(v))) }; }) )})" + this.br +
             this.br +
             "//paint graph - hover area trigger" + this.br +
             "chart.enterData(data.series, 'g', 'hover-trigger-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'circle', 'point')" + this.brt +
-            ".attr('cx', function(pair, i) { return x(JSON.stringify(data.dimension1[i])); })" + this.brt +
+            ".attr('cx', function(pair, i) { return x(myChart.getTokenKey(data.dimension1[i])); })" + this.brt +
             ".attr('cy', function(pair) { return SF.isEmpty(pair) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
             ".attr('r', function(pair) { return SF.isEmpty(pair.value) ? 0 : 15; })" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
@@ -838,7 +838,7 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('fill', function(pair) { return myChart.getTokenColor(pair.dimension2, color); })" + this.brt +
             ".attr('fill-opacity', function(pair) { SF.isEmpty(pair.value) ? 0 : 100; })" + this.brt +
             ".attr('r', function(pair) { return SF.isEmpty(pair.value) ? 0 : 5; })" + this.brt +
-            ".attr('cx', function(pair, i) { return x(JSON.stringify(data.dimension1[i])); })" + this.brt +
+            ".attr('cx', function(pair, i) { return x(myChart.getTokenKey(data.dimension1[i])); })" + this.brt +
             ".attr('cy', function(pair) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
             ".attr('data-d1', function(pair, i) { return myChart.getTokenKey(data.dimension1[i]); })" + this.brt +
             ".attr('data-d2', function(pair) { return myChart.getTokenKey(pair.dimension2); })" + this.brt +
@@ -856,7 +856,7 @@ SF.Chart.MultiColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     paintGraph: function () {
         return "//graph x-subscale" + this.br +
             "var xSubscale = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(data.series, function (s) { return JSON.stringify(s.dimension2); }))" + this.brt +
+            ".domain($.map(data.series, function (s) { return myChart.getTokenKey(s.dimension2); }))" + this.brt +
             ".rangeBands([0, x.rangeBand()]);" + this.br +
             this.br +
             "//paint graph" + this.br +
@@ -864,8 +864,8 @@ SF.Chart.MultiColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
             ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : myChart.getTokenColor(pair.dimension2, color); })" + this.brt +
-            ".attr('x', function(pair, i) { return xSubscale(JSON.stringify(pair.dimension2)); })" + this.brt +
-            ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
+            ".attr('x', function(pair, i) { return xSubscale(myChart.getTokenKey(pair.dimension2)); })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(' + x(myChart.getTokenKey(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', xSubscale.rangeBand())" + this.brt +
             ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
             ".attr('data-d1', function(pair, i) { return myChart.getTokenKey(data.dimension1[i]); })" + this.brt +
@@ -891,7 +891,7 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - fontSize - labelMargin - ticksLength," + this.brt +
-            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return JSON.stringify(s.dimension2); })]);" + this.br + this.br;
+            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return myChart.getTokenKey(s.dimension2); })]);" + this.br + this.br;
     },
 
     getYAxis: function () {
@@ -906,8 +906,8 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(data.dimension1, 'line', 'x-axis-tick')" + this.brt +
             ".attr('y2', ticksLength)" + this.brt +
-            ".attr('x1', function (v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('x2', function (v) { return x(JSON.stringify(v)); });" + this.br +
+            ".attr('x1', function (d) { return x(myChart.getTokenKey(d)); })" + this.brt +
+            ".attr('x2', function (d) { return x(myChart.getTokenKey(d)); });" + this.br +
             this.br +
             "//paint x-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')" + this.brt +
@@ -923,7 +923,7 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
             ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : myChart.getTokenColor(pair.dimension2, color); })" + this.brt +
-            ".attr('transform', function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
+            ".attr('transform', function(pair, i) { return 'translate(' + x(myChart.getTokenKey(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', x.rangeBand())" + this.brt +
             ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
             ".attr('y', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = y(emptyCountArray[i]); emptyCountArray[i] += pair.value; return offset; } })" + this.brt +
@@ -939,7 +939,7 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             "chart.append('svg:g').attr('class', 'x-axis-tick-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') rotate(270)')" + this.brt +
             ".enterData(data.dimension1, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
             ".attr('x', function (v, i) { var posy = y(countArray[i]); return posy >= yHalf ? posy - labelMargin : posy + labelMargin; })" + this.brt +
-            ".attr('y', function (v, i) { return x(JSON.stringify(v)) })" + this.brt +
+            ".attr('y', function (v, i) { return x(myChart.getTokenKey(v)) })" + this.brt +
             ".attr('text-anchor', function (v, i) { var posy = y(countArray[i]); return posy >= yHalf ? 'end' : 'start'; })" + this.brt +
             ".attr('fill', function(v, i) { return y(countArray[i]) >= yHalf ? '#fff' : '#000'; })" + this.brt +
             ".text(function (v, i) { return myChart.getTokenLabel(v); });" + this.br +
@@ -968,7 +968,7 @@ SF.Chart.TotalColumns.prototype = $.extend({}, new SF.Chart.StackedColumns(), {
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
             ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : myChart.getTokenColor(pair.dimension2, color); })" + this.brt +
-            ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(' + x(myChart.getTokenKey(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', x.rangeBand())" + this.brt +
             ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y((100 * myChart.getTokenKey(pair.value)) / countArray[i]); })" + this.brt +
             ".attr('y', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = emptyCountArray[i]; emptyCountArray[i] += myChart.getTokenKey(pair.value); return y((100 * offset) / countArray[i]); } })" + this.brt +
@@ -983,7 +983,7 @@ SF.Chart.TotalColumns.prototype = $.extend({}, new SF.Chart.StackedColumns(), {
             "chart.append('svg:g').attr('class', 'x-axis-tick-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', 0) rotate(270)')" + this.brt +
             ".enterData(data.dimension1, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
             ".attr('x', -yHalf)" + this.brt +
-            ".attr('y', function (v, i) { return x(JSON.stringify(v)) })" + this.brt +
+            ".attr('y', function (v, i) { return x(myChart.getTokenKey(v)) })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
             ".text(function (v, i) { return myChart.getTokenLabel(v); });" + this.br +
@@ -1006,7 +1006,7 @@ SF.Chart.HorizontalTypeTypeValue.prototype = $.extend({}, new SF.Chart.TypeTypeV
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength," + this.brt +
-            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return JSON.stringify(s.dimension2); })]);" + this.br + this.br;
+            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return myChart.getTokenKey(s.dimension2); })]);" + this.br + this.br;
     },
 
     getXAxis: function () {
@@ -1019,7 +1019,7 @@ SF.Chart.HorizontalTypeTypeValue.prototype = $.extend({}, new SF.Chart.TypeTypeV
     getYAxis: function () {
         return "//y axis scale" + this.br +
             "var y = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(data.dimension1, function (v) { return JSON.stringify(v); }))" + this.brt +
+            ".domain($.map(data.dimension1, function (v) { return myChart.getTokenKey(v); }))" + this.brt +
             ".rangeBands([0, xAxisTopPosition - padding - fontSize - labelMargin - (2 * chartAxisPadding)]);" + this.br + this.br;
     },
 
@@ -1058,8 +1058,8 @@ SF.Chart.HorizontalTypeTypeValue.prototype = $.extend({}, new SF.Chart.TypeTypeV
             "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + (padding + fontSize + labelMargin + chartAxisPadding + (y.rangeBand() / 2)) + ')')" + this.brt +
             ".enterData(data.dimension1, 'line', 'y-axis-tick')" + this.brt +
             ".attr('x2', ticksLength)" + this.brt +
-            ".attr('y1', function (v) { return y(JSON.stringify(v)); })" + this.brt +
-            ".attr('y2', function (v) { return y(JSON.stringify(v)); });" + this.br +
+            ".attr('y1', function (v) { return y(myChart.getTokenKey(v)); })" + this.brt +
+            ".attr('y2', function (v) { return y(myChart.getTokenKey(v)); });" + this.br +
             this.br +
             "//paint y-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + ((xAxisTopPosition - fontSize - labelMargin) / 2) + ') rotate(270)')" + this.brt +
@@ -1084,7 +1084,7 @@ SF.Chart.MultiBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength," + this.brt +
-            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return JSON.stringify(s.dimension2); })]);" + this.br + this.br;
+            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return myChart.getTokenKey(s.dimension2); })]);" + this.br + this.br;
     },
 
     paintYAxisRuler: function () {
@@ -1092,13 +1092,13 @@ SF.Chart.MultiBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
             "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + (padding + fontSize + labelMargin + chartAxisPadding + (y.rangeBand() / 2)) + ')')" + this.brt +
             ".enterData(data.dimension1, 'line', 'y-axis-tick')" + this.brt +
             ".attr('x2', ticksLength)" + this.brt +
-            ".attr('y1', function (v) { return y(JSON.stringify(v)); })" + this.brt +
-            ".attr('y2', function (v) { return y(JSON.stringify(v)); });" + this.br +
+            ".attr('y1', function (v) { return y(myChart.getTokenKey(v)); })" + this.brt +
+            ".attr('y2', function (v) { return y(myChart.getTokenKey(v)); });" + this.br +
             this.br +
             "//paint y-axis - tick labels" + this.br +
             "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + (padding + fontSize + labelMargin + chartAxisPadding + (y.rangeBand() / 2)) + ')')" + this.brt +
             ".enterData(data.dimension1, 'text', 'y-axis-tick-label')" + this.brt +
-            ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
+            ".attr('y', function (v) { return y(myChart.getTokenKey(v)); })" + this.brt +
             ".attr('dominant-baseline', 'middle')" + this.brt +
             ".attr('text-anchor', 'end')" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v); });" + this.br +
@@ -1113,7 +1113,7 @@ SF.Chart.MultiBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
     paintGraph: function () {
         return "//graph y-subscale" + this.br +
             "var ySubscale = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(data.series, function (s) { return JSON.stringify(s.dimension2); }))" + this.brt +
+            ".domain($.map(data.series, function (s) { return myChart.getTokenKey(s.dimension2); }))" + this.brt +
             ".rangeBands([0, y.rangeBand()]);" + this.br +
             this.br +
             "//paint graph" + this.br +
@@ -1121,8 +1121,8 @@ SF.Chart.MultiBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
             ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : myChart.getTokenColor(pair.dimension2, color); })" + this.brt +
-            ".attr('y', function(pair, i) { return ySubscale(JSON.stringify(pair.dimension2)); })" + this.brt +
-            ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(JSON.stringify(data.dimension1[i])) + ')'; })" + this.brt +
+            ".attr('y', function(pair, i) { return ySubscale(myChart.getTokenKey(pair.dimension2)); })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(myChart.getTokenKey(data.dimension1[i])) + ')'; })" + this.brt +
             ".attr('height', ySubscale.rangeBand())" + this.brt +
             ".attr('width', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : x(myChart.getTokenLabel(pair.value)); })" + this.brt +
             ".attr('data-d1', function(pair, i) { return myChart.getTokenKey(data.dimension1[i]); })" + this.brt +
@@ -1152,7 +1152,7 @@ SF.Chart.StackedBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeVal
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
             ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : myChart.getTokenColor(pair.dimension2, color); })" + this.brt +
-            ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(JSON.stringify(data.dimension1[i])) + ')'; })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(myChart.getTokenKey(data.dimension1[i])) + ')'; })" + this.brt +
             ".attr('height', y.rangeBand())" + this.brt +
             ".attr('width', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : x(myChart.getTokenLabel(pair.value)); })" + this.brt +
             ".attr('x', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = x(emptyCountArray[i]); emptyCountArray[i] += pair.value; return offset; } })" + this.brt +
@@ -1168,7 +1168,7 @@ SF.Chart.StackedBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeVal
             "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding + (y.rangeBand() / 2) + (fontSize / 2)) + ')')" + this.brt +
             ".enterData(data.dimension1, 'text', 'y-axis-tick-label sf-chart-strong')" + this.brt +
             ".attr('x', function (v, i) { var posx = x(countArray[i]); return posx >= xHalf ? posx - labelMargin : posx + labelMargin; })" + this.brt +
-            ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
+            ".attr('y', function (v) { return y(myChart.getTokenKey(v)); })" + this.brt +
             ".attr('text-anchor', function (v, i) { var posx = x(countArray[i]); return posx >= xHalf ? 'end' : 'start'; })" + this.brt +
             ".attr('fill', function (v, i) { var posx = x(countArray[i]); return posx >= xHalf ? '#fff' : '#000'; })" + this.brt +
             ".text(function (v, i) { return myChart.getTokenLabel(data.dimension1[i]); });" + this.br +
@@ -1197,7 +1197,7 @@ SF.Chart.TotalBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
             ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : myChart.getTokenColor(pair.dimension2, color); })" + this.brt +
-            ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(JSON.stringify(data.dimension1[i])) + ')'; })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(myChart.getTokenKey(data.dimension1[i])) + ')'; })" + this.brt +
             ".attr('height', y.rangeBand())" + this.brt +
             ".attr('width', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : x((100 * pair.value) / countArray[i]); })" + this.brt +
             ".attr('x', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = emptyCountArray[i]; emptyCountArray[i] += pair.value; return x((100 * offset) / countArray[i]); } })" + this.brt +
@@ -1211,7 +1211,7 @@ SF.Chart.TotalBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
             "var xHalf = (width - padding - yAxisLeftPosition) / 2;" + this.brt +
             "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + xHalf + ', ' + (padding + fontSize + labelMargin + chartAxisPadding + (y.rangeBand() / 2) + (fontSize / 2)) + ')')" + this.brt +
             ".enterData(data.dimension1, 'text', 'y-axis-tick-label sf-chart-strong')" + this.brt +
-            ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
+            ".attr('y', function (v) { return y(myChart.getTokenKey(v)); })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
             ".text(function (v, i) { return myChart.getTokenLabel(data.dimension1[i]); });" + this.br +
@@ -1241,8 +1241,8 @@ SF.Chart.StackedAreas.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('fill', function(s) { return myChart.getTokenColor(s.dimension2, color); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('d', function(s) { return myChart.getPathPoints($.merge(" + this.brt + "\t" +
-            "$.map(countArray, function(v, i) { return { x: x(JSON.stringify(data.dimension1[i])), y: y(countArray[i]) }; }).reverse(), " + this.brt + "\t" +
-            "$.map(s.values, function(v, i) { var offset = y(countArray[i]); countArray[i] += v; return { x: x(JSON.stringify(data.dimension1[i])), y: offset + y(SF.isEmpty(v) ? 0 : v) }; }) ))})" + this.brt +
+            "$.map(countArray, function(v, i) { return { x: x(myChart.getTokenKey(data.dimension1[i])), y: y(countArray[i]) }; }).reverse(), " + this.brt + "\t" +
+            "$.map(s.values, function(v, i) { var offset = y(countArray[i]); countArray[i] += v; return { x: x(myChart.getTokenKey(data.dimension1[i])), y: offset + y(SF.isEmpty(v) ? 0 : v) }; }) ))})" + this.brt +
             ".attr('data-d2', function(v) { return myChart.getTokenKey(v.dimension2); })" + this.brt +
             ".append('svg:title')" + this.brt +
             ".text(function(s) { return myChart.getTokenLabel(s.dimension2); })" + this.br +
@@ -1272,8 +1272,8 @@ SF.Chart.TotalAreas.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('fill', function(s) { return myChart.getTokenColor(s.dimension2, color); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('d', function(s) { return myChart.getPathPoints($.merge(" + this.brt + "\t" +
-            "$.map(countArray, function(v, i) { return { x: x(JSON.stringify(data.dimension1[i])), y: y((100 * emptyCountArray[i]) / countArray[i]) }; }).reverse(), " + this.brt + "\t" +
-            "$.map(s.values, function(v, i) { var offset = emptyCountArray[i]; emptyCountArray[i] += v; return { x: x(JSON.stringify(data.dimension1[i])), y: y((100 * (offset + (SF.isEmpty(v) ? 0 : v))) / countArray[i]) }; }) ))})" + this.brt +
+            "$.map(countArray, function(v, i) { return { x: x(myChart.getTokenKey(data.dimension1[i])), y: y((100 * emptyCountArray[i]) / countArray[i]) }; }).reverse(), " + this.brt + "\t" +
+            "$.map(s.values, function(v, i) { var offset = emptyCountArray[i]; emptyCountArray[i] += v; return { x: x(myChart.getTokenKey(data.dimension1[i])), y: y((100 * (offset + (SF.isEmpty(v) ? 0 : v))) / countArray[i]) }; }) ))})" + this.brt +
             ".attr('data-d2', function(v) { return myChart.getTokenKey(v.dimension2); })" + this.brt +
             ".append('svg:title')" + this.brt +
             ".text(function(s) { return myChart.getTokenLabel(s.dimension2); })" + this.br +
@@ -1296,7 +1296,7 @@ SF.Chart.Points.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength," + this.brt +
-            "color = (data.points.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.points, function(v) { return JSON.stringify(v.value1); })]);" + this.br + this.br;
+            "color = (data.points.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.points, function(v) { return myChart.getTokenKey(v.value1); })]);" + this.br + this.br;
     },
 
     getXAxis: function () {
@@ -1431,7 +1431,7 @@ SF.Chart.Pie.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "padding= " + this.padding + "," + this.brt +
             "r = d3.min([((width - padding) / 2), (height - padding)]) / 3;" + this.brt +
             "rInner = 0," + this.brt +
-            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return JSON.stringify(v.dimension1); })]);" + this.br + this.br;
+            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return myChart.getTokenKey(v.dimension1); })]);" + this.br + this.br;
     },
 
     getXAxis: function () { return ""; },
@@ -1491,6 +1491,6 @@ SF.Chart.Doughnout.prototype = $.extend({}, new SF.Chart.Pie(), {
             "padding= " + this.padding + "," + this.brt +
             "r = d3.min([width, height - fontSize - labelMargin]) / 3;" + this.brt +
             "rInner = r / 2," + this.brt +
-            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return JSON.stringify(v.dimension1); })]);" + this.br + this.br;
+            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return myChart.getTokenKey(v.dimension1); })]);" + this.br + this.br;
     }
 });
