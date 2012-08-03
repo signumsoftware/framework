@@ -30,8 +30,6 @@ namespace Signum.Web
 
         public int? MaxElements { get; set; }
 
-        public bool Reorder { get; set; }
-
         public EntityRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
@@ -53,8 +51,6 @@ namespace Signum.Web
             result.Add("maxElements", MaxElements.TryToString());
             if (RemoveElementLinkText.HasText())
                 result.Add("removeItemLinkText", RemoveElementLinkText.SingleQuote());
-            if (Reorder)
-                result.Add("reorder", "true");
             return result;
         }
 
@@ -90,6 +86,16 @@ namespace Signum.Web
         }
 
         protected override string DefaultRemove()
+        {
+            return null;
+        }
+
+        protected override string DefaultMoveUp()
+        {
+            return null;
+        }
+
+        protected override string DefaultMoveDown()
         {
             return null;
         }

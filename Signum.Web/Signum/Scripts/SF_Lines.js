@@ -455,7 +455,7 @@ SF.registerModule("Lines", function () {
 
         $.widget("SF.entityList", $.SF.baseLine, {
 
-            options: {},
+            options: {}, //baseLine options + reorder
 
             keys: {
                 entity: "sfEntity",
@@ -700,9 +700,15 @@ SF.registerModule("Lines", function () {
                 var hasElements = this.getItems().length > 0;
                 $(this.pf("btnRemove")).toggle(hasElements);
                 $(this.pf("btnView")).toggle(hasElements);
+                $(this.pf("btnUp")).toggle(hasElements);
+                $(this.pf("btnDown")).toggle(hasElements);
             },
 
             moveUp: function (selectedItemPrefix) {
+                if (typeof selectedItemPrefix == "undefined") {
+                    selectedItemPrefix = this.selectedItemPrefix();
+                }
+
                 var suffix = this.itemSuffix();
                 var $item = $("#" + SF.compose(selectedItemPrefix, suffix));
                 var $itemPrev = $item.prev();
@@ -722,6 +728,10 @@ SF.registerModule("Lines", function () {
             },
 
             moveDown: function (selectedItemPrefix) {
+                if (typeof selectedItemPrefix == "undefined") {
+                    selectedItemPrefix = this.selectedItemPrefix();
+                }
+
                 var suffix = this.itemSuffix();
                 var $item = $("#" + SF.compose(selectedItemPrefix, suffix));
                 var $itemNext = $item.next();
@@ -743,7 +753,7 @@ SF.registerModule("Lines", function () {
 
         $.widget("SF.entityListDetail", $.SF.entityList, {
 
-            options: {}, //baseLine Options + detailDiv
+            options: {}, //entityList Options + detailDiv
 
             typedCreate: function (_viewOptions) {
                 if (SF.isEmpty(_viewOptions.type)) {
@@ -916,7 +926,7 @@ SF.registerModule("Lines", function () {
 
         $.widget("SF.entityRepeater", $.SF.entityList, {
 
-            options: {}, //baseLine Options + maxElements + removeItemLinkText + reorder
+            options: {}, //entityList Options + maxElements + removeItemLinkText
 
             keys: {
                 entity: "sfEntity",
