@@ -285,6 +285,18 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.RepeaterItemExists(prefix, 4, true);
             selenium.RepeaterItemExists(prefix, 5, true);
 
+            //move up
+            string secondItemMichael = "jq=#Members_4_sfIndexes[value=';2']";
+            string thirdItemMichael = "jq=#Members_4_sfIndexes[value=';3']";
+            Assert.IsTrue(!selenium.IsElementPresent(secondItemMichael) && !selenium.IsElementPresent(thirdItemMichael));
+            selenium.RepeaterItemMove(true, prefix, 4);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(thirdItemMichael));
+            //move down
+            selenium.RepeaterItemMove(false, prefix, 2);
+            selenium.WaitAjaxFinished(() => 
+                selenium.IsElementPresent(secondItemMichael) && 
+                !selenium.IsElementPresent(thirdItemMichael));
+
             prefix = "OtherAwards_";
 
             //create with implementations
