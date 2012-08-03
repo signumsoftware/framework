@@ -46,7 +46,16 @@ namespace Signum.Web
                 using (sb.Surround(new HtmlTag("div").Id(listDetail.ControlID).Class("sf-field-list")))
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
-                    using (sbSelect.Surround(new HtmlTag("select").IdName(listDetail.Compose(EntityListBaseKeys.List)).Attr("multiple", "multiple").Attr("ondblclick", listDetail.GetViewing()).Class("sf-entity-list")))
+
+                    var sbSelectContainer = new HtmlTag("select").Attr("multiple", "multiple")
+                        .IdName(listDetail.Compose(EntityListBaseKeys.List))
+                        .Class("sf-entity-list")
+                        .Attr("ondblclick", listDetail.GetViewing());
+
+                    if (listDetail.ListHtmlProps.Any())
+                        sbSelectContainer.Attrs(listDetail.ListHtmlProps);
+
+                    using (sbSelect.Surround(sbSelectContainer))
                     {
                         if (listDetail.UntypedValue != null)
                         {
@@ -69,6 +78,8 @@ namespace Signum.Web
                             sb.AddLine(ListBaseHelper.CreateButton(helper, listDetail, null).Surround("li"));
                             sb.AddLine(ListBaseHelper.FindButton(helper, listDetail).Surround("li"));
                             sb.AddLine(ListBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
+                            sb.AddLine(ListBaseHelper.MoveUpButton(helper, listDetail).Surround("li"));
+                            sb.AddLine(ListBaseHelper.MoveDownButton(helper, listDetail).Surround("li"));
                         }
                     }
                 }
