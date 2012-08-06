@@ -91,7 +91,7 @@ SF.registerModule("Lines", function () {
                     return;
                 }
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = this.getEmbeddedTemplate(viewOptions);
+                var template = this.getEmbeddedTemplate();
                 if (!SF.isEmpty(template)) {
                     new SF.ViewNavigator(viewOptions).showCreateOk(template);
                 }
@@ -383,7 +383,7 @@ SF.registerModule("Lines", function () {
                     throw "ViewOptions type parameter must not be null in entityLineDetail typedCreate. Call create instead";
                 }
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = this.getEmbeddedTemplate(viewOptions);
+                var template = this.getEmbeddedTemplate();
                 if (!SF.isEmpty(template)) { //Template pre-loaded: EmbeddedEntity
                     $('#' + viewOptions.containerDiv).html(template);
                     SF.triggerNewContent($('#' + viewOptions.containerDiv));
@@ -569,10 +569,12 @@ SF.registerModule("Lines", function () {
                 return validatorResult;
             },
 
-            getEmbeddedTemplate: function (viewOptions) {
+            getEmbeddedTemplate: function () {
                 var template = window[SF.compose(this.options.prefix, "sfTemplate")];
                 if (!SF.isEmpty(template)) {
-                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+                    var newPrefixIndex = this.getLastPrefixIndex() + 1;
+                    var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
+                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix);
                 }
                 return template;
             },
@@ -776,7 +778,7 @@ SF.registerModule("Lines", function () {
                 }
                 this.restoreCurrent();
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = this.getEmbeddedTemplate(viewOptions);
+                var template = this.getEmbeddedTemplate();
                 if (!SF.isEmpty(template)) {
                     $('#' + viewOptions.containerDiv).html(template);
                     SF.triggerNewContent($('#' + viewOptions.containerDiv));
@@ -969,7 +971,7 @@ SF.registerModule("Lines", function () {
                 }
 
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = this.getEmbeddedTemplate(viewOptions);
+                var template = this.getEmbeddedTemplate();
                 if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
                     template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
                     this.onItemCreated(template, viewOptions);
