@@ -207,7 +207,7 @@ namespace Signum.Entities
 
     public class TelephoneValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex TelephoneRegex = new Regex(@"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-0-9]+$");
+        public static readonly Regex TelephoneRegex = new Regex(@"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-\.0-9]+$");
 
         public TelephoneValidatorAttribute()
             : base(TelephoneRegex)
