@@ -26,7 +26,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Class("sf-repeater-field")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(entityRepeater.ControlID).Class("sf-repeater-field")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {
@@ -56,6 +56,10 @@ namespace Signum.Web
                 }
             }
 
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityRepeater({1})".Formato(entityRepeater.ControlID, entityRepeater.OptionsJS())))
+                .ToHtml());
+
             return sb.ToHtml();
         }
 
@@ -71,15 +75,45 @@ namespace Signum.Web
                         sb.AddLine(
                             helper.Href(itemTC.Compose("btnRemove"),
                                     entityRepeater.RemoveElementLinkText,
-                                    "javascript:new SF.ERep({0}).remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
+                                    "",
                                     entityRepeater.RemoveElementLinkText,
                                     "sf-line-button sf-remove",
-                                    new Dictionary<string, object> { { "data-icon", "ui-icon-circle-close" }, { "data-text", false } }));
+                                    new Dictionary<string, object> 
+                                    {
+                                        { "onclick", "{0}.remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                        { "data-icon", "ui-icon-circle-close" }, 
+                                        { "data-text", false } 
+                                    }));
+
+                    if (entityRepeater.Reorder)
+                    {
+                        sb.AddLine(
+                            helper.Span(itemTC.Compose("btnUp"),
+                                Resources.Signum_entityRepeater_moveUp,
+                                "sf-line-button sf-move-up",
+                                new Dictionary<string, object> 
+                                {  
+                                   { "onclick", "{0}.moveUp('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                   { "data-icon", "ui-icon-triangle-1-n" },
+                                   { "data-text", false },
+                                   { "title", Resources.Signum_entityRepeater_moveUp }
+                                }));
+
+                        sb.AddLine(
+                            helper.Span(itemTC.Compose("btnDown"),
+                                Resources.Signum_entityRepeater_moveDown,
+                                "sf-line-button sf-move-down",
+                                new Dictionary<string, object> 
+                                {   
+                                   { "onclick", "{0}.moveDown('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                   { "data-icon", "ui-icon-triangle-1-s" },
+                                   { "data-text", false },
+                                   { "title", Resources.Signum_entityRepeater_moveDown }
+                                }));
+                    }
                 }
 
-                if (entityRepeater.ShouldWriteOldIndex(itemTC))
-                    sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
-
+                sb.AddLine(ListBaseHelper.WriteIndex(helper, entityRepeater, itemTC, itemTC.Index));
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater));

@@ -74,22 +74,6 @@ namespace Signum.Utilities
             return new Disposable(() => t.CurrentUICulture = old);
         }
 
-        public static void ResetPublicationOnly<T>(this Lazy<T> lazy)
-        {
-            const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
-
-            LazyThreadSafetyMode mode = (LazyThreadSafetyMode)typeof(Lazy<T>).GetProperty("Mode", flags).GetValue(lazy, null);
-            if (mode != LazyThreadSafetyMode.PublicationOnly)
-                throw new InvalidOperationException("ResetPublicationOnly only works for Lazy<T> with LazyThreadSafetyMode.PublicationOnly");
-
-            typeof(Lazy<T>).GetField("m_boxed", flags).SetValue(lazy, null); 
-        }
-
-        public static void Load<T>(this Lazy<T> lazy)
-        {
-            var a = lazy.Value;
-        }
-
         public static void SafeUpdate<T>(ref T variable, Func<T, T> repUpdateFunction) where T : class
         {
             T oldValue, newValue;

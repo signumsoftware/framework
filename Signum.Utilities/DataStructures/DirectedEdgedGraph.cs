@@ -125,7 +125,7 @@ namespace Signum.Utilities.DataStructures
             if (!adjacency.ContainsKey(node))
                 return false;
 
-            return RemoveFullNode(node, InverseRelatedTo(node));
+            return RemoveFullNode(node, InverseRelatedTo(node).Select(a=>a.Key));
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace Signum.Utilities.DataStructures
 
         public Dictionary<T, E> TryRelatedTo(T node)
         {
-            return TryGet(node) ?? new Dictionary<T, E>();
+            return TryGet(node) ?? new Dictionary<T, E>(Comparer);
         }
 
         public Dictionary<T, E> RelatedTo(T node)
@@ -184,9 +184,14 @@ namespace Signum.Utilities.DataStructures
         /// <summary>
         /// Costly
         /// </summary>
-        public IEnumerable<T> InverseRelatedTo(T node)
+        public IEnumerable<KeyValuePair<T, E>> InverseRelatedTo(T node)
         {
-            return this.Where(n => Connected(n, node));
+            foreach (var item in adjacency)
+            {
+                E edge;
+                if (item.Value.TryGetValue(node, out edge))
+                    yield return KVP.Create(item.Key, edge);
+            }
         }
 
         public HashSet<T> IndirectlyRelatedTo(T node)
@@ -316,7 +321,7 @@ namespace Signum.Utilities.DataStructures
             if (adjacency.ContainsKey(node))
                 return;
 
-            var dic = new Dictionary<T, E>();
+            var dic = new Dictionary<T, E>(Comparer);
             adjacency.Add(node, dic);
 
             foreach (var item in expandFunction(node))

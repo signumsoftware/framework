@@ -76,7 +76,7 @@ namespace Signum.Entities.DynamicQuery
             return SubTokensBase(Column.Type, Column.Implementations);
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return Column.Implementations;
         }

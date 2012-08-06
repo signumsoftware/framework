@@ -146,11 +146,29 @@ namespace Signum.Engine
                 return;
 
             StringDistance sd = new StringDistance();
-            var distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b => Math.Max(a.Length, b.Length) - sd.LongestCommonSubsequence(a, b)));
 
-            Solution bestSolution = new Solution(null, int.MaxValue); 
+            Dictionary<string, Dictionary<string, float>> distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b =>
+            {
+                int lcs = sd.LongestCommonSubsequence(a, b);
+
+                int max = Math.Max(a.Length, b.Length);
+
+                return max / (lcs + 0.1f);
+            }));
+
+            Dictionary<string, float> minDistances = distances.SelectDictionary(a => a, dic => dic.Values.Min());
+            {
+                int extra = oldOnly.Count - newOnly.Count;
+
+                if (extra > 0)
+                {
+                    var toRemove = minDistances.OrderByDescending(a => a.Value).Take(extra).Select(a => a.Key).ToList();
+                    minDistances.SetRange(toRemove, a => a, a => 0);
+                }
+            }
+
+            Solution bestSolution = new Solution(null, int.MaxValue);
             Action<int, Solution> findMinimumPermutation = null;
-
 
             findMinimumPermutation = (pos, current) =>
             {
@@ -167,22 +185,30 @@ namespace Signum.Engine
                         return;
 
                     string old = oldOnly[pos];
-                    var dist = distances[old]; 
+                    var dist = distances[old];
 
-                    for (int i = 0; i < newOnly.Count; i++)
+                    var list = (from n in newOnly
+                                where !current.Selections.Any(a => a.NewValue == n)
+                                let d = dist[n]
+                                orderby d
+                                select new { n, d }).ToList();
+
+                    float sum = current.Sum - minDistances[old];
+
+                    foreach (var item in list)
                     {
-                        var @new = newOnly[i];
-                        if (!current.Selections.Any(a=>a.NewValue == @new))
-                            findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old,  @new)), current.Sum + dist[@new]));
+                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, item.n)), sum + item.d));
                     }
 
-                    if ((oldOnly.Count - pos) > (newOnly.Count - current.Selections.Take(pos).Count(a=>a.NewValue != null)))
-                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, (string)null)), current.Sum));
+                    if ((oldOnly.Count - pos) > (newOnly.Count - current.Selections.Take(pos).Count(a => a.NewValue != null)))
+                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, (string)null)), sum));
                 }
             };
 
-            findMinimumPermutation(0, Solution.Empty);
-         
+            var min = new Solution(ImmutableStack<Selection>.Empty, minDistances.Values.Sum());
+
+            findMinimumPermutation(0, min);
+
             Dictionary<string, string> replacements = new Dictionary<string, string>();
 
             if (Interactive)
@@ -207,7 +233,7 @@ namespace Signum.Engine
                     }
 
                     bestSolution = new Solution(null, int.MaxValue);
-                    findMinimumPermutation(0, Solution.Empty);
+                    findMinimumPermutation(0, min);
                 }
             }
             else
@@ -245,16 +271,14 @@ namespace Signum.Engine
 
         public struct Solution
         {
-            public Solution(ImmutableStack<Selection> selections, int sum)
+            public Solution(ImmutableStack<Selection> selections, float sum)
             {
                 this.Selections = selections;
                 this.Sum = sum;
             }
 
             public readonly ImmutableStack<Selection> Selections;
-            public readonly int Sum;
-
-            public static readonly Solution Empty = new Solution(ImmutableStack<Selection>.Empty, 0);
+            public readonly float Sum;
         }
 
         public struct Selection

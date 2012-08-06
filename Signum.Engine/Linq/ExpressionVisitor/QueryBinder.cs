@@ -203,7 +203,10 @@ namespace Signum.Engine.Linq
             if (expression is ProjectionExpression)
                 return (ProjectionExpression)expression;
 
-            expression = RemoveGroupByConvert(expression);
+            expression = RemoveProjectionConvert(expression);
+
+            if (expression is ProjectionExpression)
+                return (ProjectionExpression)expression;
 
             if (expression.NodeType == ExpressionType.New && expression.Type.IsInstantiationOf(typeof(Grouping<,>)))
             {
@@ -214,10 +217,11 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
         }
 
-        private static Expression RemoveGroupByConvert(Expression expression)
+        private static Expression RemoveProjectionConvert(Expression expression)
         {
             if (expression.NodeType == ExpressionType.Convert && (expression.Type.IsInstantiationOf(typeof(IGrouping<,>)) ||
-                                                                  expression.Type.IsInstantiationOf(typeof(IEnumerable<>))))
+                                                                  expression.Type.IsInstantiationOf(typeof(IEnumerable<>)) || 
+                                                                  expression.Type.IsInstantiationOf(typeof(IQueryable<>)) ))
                 expression = ((UnaryExpression)expression).Operand;
             return expression;
         }
@@ -916,7 +920,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            source = RemoveGroupByConvert(source);
+            source = RemoveProjectionConvert(source);
 
             switch (source.NodeType)
             {

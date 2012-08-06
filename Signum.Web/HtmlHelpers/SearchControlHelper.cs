@@ -54,6 +54,7 @@ namespace Signum.Web
 
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
             Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
+            Navigator.SetViewableAndCreable(findOptions);
 
             var viewData = new ViewDataDictionary(context);
             viewData[ViewDataKeys.FindOptions] = findOptions;
@@ -114,7 +115,7 @@ namespace Signum.Web
             {
                 var htmlAttr = new Dictionary<string, object>
                     {
-                        { "onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()) },
+                        { "onclick", "SF.FindNavigator.openFinder({0});".Formato(foptions.ToJS()) },
                         { "data-icon", "ui-icon-circle-arrow-e" },
                         { "data-text", false}
                     };
@@ -156,7 +157,7 @@ namespace Signum.Web
                         {
                             { "data-icon", "ui-icon-close" },
                             { "data-text", false},
-                            { "onclick", "new SF.FindNavigator({{prefix:\"{0}\"}}).deleteFilter(this);".Formato(context.ControlID) },
+                            { "onclick", "SF.FindNavigator.deleteFilter(this)" },
                         };
                         sb.AddLine(helper.Href(
                             context.Compose("btnDelete", index.ToString()),
@@ -262,8 +263,7 @@ namespace Signum.Web
 
             HtmlTag dropdown = new HtmlTag("select").IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options)
-                .Attr("onchange", "new SF.FindNavigator({{prefix:'{0}',webQueryName:'{1}'}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) +
-                    ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');");
+                .Attr("onchange", "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2})".Formato(Navigator.ResolveWebQueryName(queryName), context.ControlID, index));
 
             if (writeExpander)
                 dropdown.Attr("style", "display:none");
@@ -313,6 +313,8 @@ namespace Signum.Web
 
         private static MvcHtmlString PrintValueField(HtmlHelper helper, Context parent, FilterOption filterOption)
         {
+            var implementations = filterOption.Token.GetImplementations(); 
+
             if (filterOption.Token.Type.IsLite())
             {
                 Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type);
@@ -320,11 +322,11 @@ namespace Signum.Web
                     Database.FillToString(lite);
 
                 Type cleanType = Lite.Extract(filterOption.Token.Type);
-                if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))
+                if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !implementations.Value.IsByAll)
                 {
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        Implementations = filterOption.Token.Implementations(),
+                        Implementations = implementations.Value,
                     };
                     EntityBaseHelper.ConfigureEntityButtons(ec, filterOption.Token.Type.CleanType());
                     ec.LabelVisible = false;
@@ -336,9 +338,10 @@ namespace Signum.Web
                 {
                     EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        Implementations = filterOption.Token.Implementations(),
+                        Implementations = implementations.Value,
                     };
-                    if (el.Implementations.TryCS(i => i.IsByAll) == true)
+
+                    if (el.Implementations.Value.IsByAll)
                         el.Autocomplete = false;
 
                     EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
@@ -354,7 +357,7 @@ namespace Signum.Web
                 EmbeddedEntity lite = (EmbeddedEntity)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                 {
-                    Implementations = filterOption.Token.Implementations(),
+                    Implementations = null,
                 };
                 EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
                 el.LabelVisible = false;

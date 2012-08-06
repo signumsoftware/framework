@@ -101,7 +101,6 @@ namespace Signum.Web
             ShowValidationMessage = true,
             ReadOnly = false,
             ValueFirst = false,
-            ShowFieldDiv = true,
             OnlyValue = false
         };
 
@@ -141,12 +140,6 @@ namespace Signum.Web
         {
             get { return this[BoolStyles.ValueFirst] ?? Parent.ValueFirst; }
             set { this[BoolStyles.ValueFirst] = value; }
-        }
-
-        public bool ShowFieldDiv    /* to deprecate */
-        {
-            get { return this[BoolStyles.ShowFieldDiv] ?? Parent.ShowFieldDiv; }
-            set { this[BoolStyles.ShowFieldDiv] = value; }
         }
 
         public override string ToString()

@@ -37,18 +37,13 @@ namespace Signum.Engine.Linq
             return this.Translate(expression, tr => tr.CleanCommandText());
         }
 
-        public SqlPreCommandSimple GetMainPreCommand(Expression expression)
-        {
-            return this.Translate(expression, tr => tr.MainPreCommand());
-        }
-        
         public override object Execute(Expression expression)
         {
             using (HeavyProfiler.Log("DB"))
                 return this.Translate(expression, tr => tr.Execute());
         }
 
-        T Translate<T>(Expression expression, Func<ITranslateResult, T> continuation) //For debugging purposes
+        internal R Translate<R>(Expression expression, Func<ITranslateResult, R> continuation) //For debugging purposes
         {
             using (Alias.NewGenerator())
             {
@@ -104,7 +99,7 @@ namespace Signum.Engine.Linq
             return rewriteConditions;
         }
 
-        internal int Delete(IQueryable query)
+        internal R Delete<R>(IQueryable query, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
         {
             using (Alias.NewGenerator())
             {
@@ -113,18 +108,20 @@ namespace Signum.Engine.Linq
                 using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
                 {
                     Expression cleaned = Clean(query.Expression, true, log);
-                    
+
                     log.Switch("Bind");
                     var binder = new QueryBinder();
                     CommandExpression delete = binder.BindDelete(cleaned);
                     CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, binder, log);
-                    cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+                    CommandExpression deleteSimplified = UpdateDeleteSimplifier.Simplify(deleteOptimized, removeSelectRowCount);
+
+                    cr = TranslatorBuilder.BuildCommandResult(deleteSimplified);
                 }
-                return cr.Execute();
+                return continuation(cr);
             }
         }
 
-        internal int Update<T>(IQueryable<T> query, Expression<Func<T, T>> set)
+        internal R Update<T, R>(IQueryable<T> query, Expression<Func<T, T>> set, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
         {
             using (Alias.NewGenerator())
             {
@@ -137,10 +134,11 @@ namespace Signum.Engine.Linq
                     log.Switch("Bind");
                     CommandExpression update = binder.BindUpdate(cleaned, set);
                     CommandExpression updateOptimized = (CommandExpression)Optimize(update, binder, log);
+                    CommandExpression updateSimplified = UpdateDeleteSimplifier.Simplify(updateOptimized, removeSelectRowCount);
                     log.Switch("TR");
-                    cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
+                    cr = TranslatorBuilder.BuildCommandResult(updateSimplified);
                 }
-                return cr.Execute();
+                return continuation(cr);
             }
         }
     }

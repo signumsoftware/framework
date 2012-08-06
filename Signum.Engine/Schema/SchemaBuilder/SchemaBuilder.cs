@@ -199,7 +199,7 @@ namespace Signum.Engine.Maps
                 if (!Settings.Attributes(route).Any(a=>a is IgnoreAttribute))
                 {
                     if (!SilentMode() && Reflector.TryFindPropertyInfo(fi) == null)
-                        Debug.WriteLine("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
+                        Debug.WriteLine("WARNING!!: Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
 
                     Field field = GenerateField(route, contexto, table, preName, forceNull);
 
@@ -258,12 +258,12 @@ namespace Signum.Engine.Maps
                 case KindOfField.Reference:
                     {
                         Implementations at = Settings.GetImplementations(route);
-                        if (at == null)
+                        if(at.IsByAll)
+                            return GenerateFieldImplmentedByAll(route, name, forceNull);
+                        else if(at.Types.Only() == route.Type.CleanType())
                             return GenerateFieldReference(route, name, forceNull);
-                        else if (at is ImplementedByAttribute)
-                            return GenerateFieldImplmentedBy(route, name, forceNull, (ImplementedByAttribute)at);
                         else
-                            return GenerateFieldImplmentedByAll(route, name, forceNull, (ImplementedByAllAttribute)at);
+                            return GenerateFieldImplmentedBy(route, name, forceNull, at.Types);
                     }
                 case KindOfField.Enum:
                     return GenerateFieldEnum(route, name, forceNull);
@@ -358,19 +358,19 @@ namespace Signum.Engine.Maps
             };
         }
 
-        protected virtual Field GenerateFieldImplmentedBy(PropertyRoute route, NameSequence name, bool forceNull, ImplementedByAttribute ib)
+        protected virtual Field GenerateFieldImplmentedBy(PropertyRoute route, NameSequence name, bool forceNull, IEnumerable<Type> types)
         {
             Type cleanType = Lite.Extract(route.Type) ?? route.Type;
-            string erroneos = ib.ImplementedTypes.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
+            string erroneos = types.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
             if (erroneos.Length != 0)
                 throw new InvalidOperationException("Type {0} do not implement {1}".Formato(erroneos, cleanType));
 
-            bool nullable = Settings.IsNullable(route, forceNull) || ib.ImplementedTypes.Length > 1;
+            bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
             return new FieldImplementedBy(route.Type)
             {
                 IndexType = Settings.GetIndexType(route),
-                ImplementationColumns = ib.ImplementedTypes.ToDictionary(t => t, t => new ImplementationColumn
+                ImplementationColumns = types.ToDictionary(t => t, t => new ImplementationColumn
                 {
                     ReferenceTable = Include(t, route),
                     Name = name.Add(TypeLogic.GetCleanName(t)).ToString(),
@@ -380,7 +380,7 @@ namespace Signum.Engine.Maps
             };
         }
 
-        protected virtual Field GenerateFieldImplmentedByAll(PropertyRoute route, NameSequence preName, bool forceNull, ImplementedByAllAttribute iba)
+        protected virtual Field GenerateFieldImplmentedByAll(PropertyRoute route, NameSequence preName, bool forceNull)
         {
             bool nullable = Settings.IsNullable(route, forceNull);
 
@@ -510,6 +510,56 @@ namespace Signum.Engine.Maps
             return "idParent";
         }
         #endregion
+
+
+        List<WhenIncludedPair> whens = new List<WhenIncludedPair>();
+
+        public void WhenIncluded<T1>(Action action) 
+            where T1 : IdentifiableEntity
+        {
+            WhenIncluded(new[] { typeof(T1) }, action);
+        }
+
+        public void WhenIncluded<T1, T2>(Action action)
+            where T1 : IdentifiableEntity
+            where T2 : IdentifiableEntity
+        {
+            WhenIncluded(new[] { typeof(T1), typeof(T2) }, action);
+        }
+
+        public void WhenIncluded<T1, T2, T3>(Action action)
+            where T1 : IdentifiableEntity
+            where T2 : IdentifiableEntity
+            where T3 : IdentifiableEntity
+        {
+              WhenIncluded(new[] { typeof(T1), typeof(T2), typeof(T3) }, action);
+        }
+
+        public void WhenIncluded(Type[] types, Action action)
+        {
+            whens.Add(new WhenIncludedPair
+            {
+                Action = action,
+                RegisteredTypes = types ?? new Type[0],
+            });
+        }
+
+        public void ExecuteWhenIncluded()
+        {
+            foreach (var item in whens)
+            {
+                if (item.RegisteredTypes.All(t => Schema.Tables.ContainsKey(t)))
+                    item.Action();
+            }
+
+            whens = null;
+        }
+
+        class WhenIncludedPair
+        {
+            public Action Action;
+            public Type[] RegisteredTypes;
+        }
     }
 
     internal class ViewBuilder : SchemaBuilder

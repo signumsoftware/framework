@@ -219,8 +219,8 @@ namespace Signum.Test
 
                                         return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.ElementsPerPage, request.CurrentPage);
                                     })
-                                    .Column(a => a.Entity, cl => cl.Implementations = new ImplementedByAttribute(typeof(ArtistDN), typeof(BandDN)))
-                                    .Column(a => a.LastAward, cl => cl.Implementations = new ImplementedByAllAttribute());
+                                    .Column(a => a.Entity, cl => cl.Implementations = Implementations.By(typeof(ArtistDN), typeof(BandDN)))
+                                    .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll);
         }
 
         public const string Japan = "Japan";

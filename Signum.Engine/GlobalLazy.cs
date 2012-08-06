@@ -24,21 +24,21 @@ namespace Signum.Engine
             initialized = true;
 
             var s = Schema.Current;
-            foreach (var lp in registeredLazyList.Values.ToList())
+            foreach (var kvp in registeredLazyList.ToList())
             {
-                if (lp.InvalidateWith != null)
+                if (kvp.Value != null)
                 {
-                    AttachInvalidations(s, lp);
+                    AttachInvalidations(s,kvp.Key, kvp.Value);
                 }
             }
         }
 
-        private static void AttachInvalidations(Schema s, ILazyProxy lp)
+        private static void AttachInvalidations(Schema s, IResetLazy lazy, params Type[] types)
         {
-            Action a = () => lp.Reset();
+            Action a = () => lazy.Reset();
 
             List<Type> cached = new List<Type>();
-            foreach (var type in lp.InvalidateWith)
+            foreach (var type in types)
             {
                 var cc = s.CacheController(type);
                 if (cc != null && cc.IsComplete)
@@ -48,7 +48,7 @@ namespace Signum.Engine
                 }
             }
 
-            var nonCached = lp.InvalidateWith.Except(cached).ToList();
+            var nonCached = types.Except(cached).ToList();
             if (nonCached.Any())
             {
                 foreach (var type in nonCached)
@@ -56,7 +56,7 @@ namespace Signum.Engine
                     giAttachInvalidations.GetInvoker(type)(s, a);
                 }
 
-                var dgIn = DirectedGraph<Table>.Generate(lp.InvalidateWith.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
+                var dgIn = DirectedGraph<Table>.Generate(types.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
                 var dgOut = DirectedGraph<Table>.Generate(cached.Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
 
                 foreach (var table in dgIn.Except(dgOut))
@@ -94,10 +94,10 @@ namespace Signum.Engine
             ee.PreUnsafeDelete += q => action();
         }
 
-        static Dictionary<object, ILazyProxy> registeredLazyList = new Dictionary<object, ILazyProxy>();
-        public static Lazy<T> Create<T>(Func<T> func)
+        static Dictionary<IResetLazy, Type[]> registeredLazyList = new Dictionary<IResetLazy, Type[]>();
+        public static ResetLazy<T> Create<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T:class
         {
-            var result = new Lazy<T>(() =>
+            var result = new ResetLazy<T>(() =>
             {
                 using (Schema.Current.GlobalMode())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
@@ -105,63 +105,36 @@ namespace Signum.Engine
                 {
                     return func();
                 }
-            }, LazyThreadSafetyMode.PublicationOnly);
+            }, mode);
 
-            registeredLazyList.Add(result, new LazyProxy<T>(result));
+            registeredLazyList.Add(result, null);
 
             return result;
         }
 
-        public static Lazy<T> InvalidateWith<T>(this Lazy<T> lazy, params Type[] types)
+        public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T:class
         {
-            var lp = registeredLazyList.GetOrThrow(lazy, "The lazy is not a GlobalLazy");
-            
-            lp.InvalidateWith = types;
+            if (!registeredLazyList.ContainsKey(lazy))
+                throw new InvalidOperationException("The lazy is not a GlobalLazy");
+
+            registeredLazyList[lazy] = types;
 
             if (initialized)
-                AttachInvalidations(Schema.Current, lp);
+                AttachInvalidations(Schema.Current, lazy, types);
 
             return lazy;
         }
 
         public static void ResetAll()
         {
-            foreach (var lp in registeredLazyList.Values)
+            foreach (var lp in registeredLazyList.Keys)
                 lp.Reset();
         }
 
         public static void LoadAll()
         {
-            foreach (var lp in registeredLazyList.Values)
+            foreach (var lp in registeredLazyList.Keys)
                 lp.Load();
-        }
-
-        interface ILazyProxy
-        {
-            void Reset();
-            void Load();
-            Type[] InvalidateWith { get; set; }
-        }
-
-        class LazyProxy<T> : ILazyProxy
-        {
-            Lazy<T> lazy;
-            public LazyProxy(Lazy<T> lazy)
-            {
-                this.lazy = lazy;
-            }
-
-            public void Reset()
-            {
-                lazy.ResetPublicationOnly();
-            }
-
-            public void Load()
-            {
-                lazy.Load();
-            }
-
-            public Type[] InvalidateWith { get; set; }
         }
     }
 }

@@ -167,7 +167,9 @@ namespace Signum.Web
         { 
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
-            EntityListBaseKeys.Index,
+            EntityComboKeys.Combo,
+            EntityListBaseKeys.Indexes,
+            EntityListBaseKeys.List
         };
 
         static GenericInvoker<Func<Delegate>> giForAutoEntity = new GenericInvoker<Func<Delegate>>(() => ForAutoEntity<IIdentifiable>());
@@ -290,7 +292,7 @@ namespace Signum.Web
         public static List<string> IndexPrefixes(this IDictionary<string, string> inputs)
         {
             return inputs.Keys
-                .Where(k => k != EntityListBaseKeys.ListPresent)
+                .Where(k => k != EntityListBaseKeys.ListPresent && k != EntityListBaseKeys.List)
                 .Select(str => str.Substring(0, str.IndexOf(TypeContext.Separator)))
                 .Distinct()
                 .OrderBy(a => int.Parse(a))
@@ -673,7 +675,9 @@ namespace Signum.Web
         {
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
-            foreach (var index in ctx.Inputs.IndexPrefixes())
+            var indexPrefixes = ctx.Inputs.IndexPrefixes();
+
+            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.ControlID, ip, EntityListBaseKeys.Indexes)).TryCC(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
             {
                 SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), null, route, ctx);
 
@@ -707,7 +711,7 @@ namespace Signum.Web
             {
                 Debug.Assert(!itemCtx.Empty());
 
-                int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Index).ToInt();
+                int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).TryCC(s => s.Split(new [] {';'})[0]).ToInt();
 
                 if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
                     itemCtx.Value = oldList[oldIndex.Value];

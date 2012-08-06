@@ -133,7 +133,10 @@ namespace Signum.Engine.Maps
 
         public Attribute[] Attributes(PropertyRoute route)
         {
-            var overriden = OverridenAttributes.TryGetC(route) ; 
+            if(route.PropertyRouteType == PropertyRouteType.Root || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(route.PropertyRouteType));
+
+            var overriden = OverridenAttributes.TryGetC(route); 
 
             if(overriden!= null)
                 return overriden; 
@@ -144,7 +147,6 @@ namespace Signum.Engine.Maps
                     return route.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
                 case PropertyRouteType.MListItems: 
                     return route.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray();
-
                 default:
                     throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(route.PropertyRouteType));
 	        }
@@ -178,16 +180,16 @@ namespace Signum.Engine.Maps
         public bool ImplementedBy<T>(Expression<Func<T, object>> route, Type typeToImplement) where T : IdentifiableEntity
         {
             var imp = GetImplementations(route);
-            return imp != null && imp.ImplementedBy(typeToImplement);
+            return !imp.IsByAll  && imp.Types.Contains(typeToImplement);
         }
 
         public void AssertImplementedBy<T>(Expression<Func<T, object>> route, Type typeToImplement) where T : IdentifiableEntity
         {
             var propRoute = PropertyRoute.Construct(route);
 
-            var imp = GetImplementations(propRoute);
+            Implementations imp = GetImplementations(propRoute);
 
-            if (imp == null || !imp.ImplementedBy(typeToImplement))
+            if (imp.IsByAll || !imp.Types.Contains(typeToImplement))
                 throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".Formato(propRoute, typeToImplement.Name));
         }
 
@@ -196,20 +198,29 @@ namespace Signum.Engine.Maps
             return GetImplementations(PropertyRoute.Construct(route));
         }
 
-        internal Implementations GetImplementations(PropertyRoute route)
+        public Implementations GetImplementations(PropertyRoute route)
         {
+            var t = route.Type.CleanType();  
+            if (!route.Type.CleanType().IsIIdentifiable())
+                throw new InvalidOperationException("{0} is not a {1}".Formato(route, typeof(IIdentifiable).Name));
+
             var fieldAtt = Attributes(route);
 
+            return ToImplementations(route, t, fieldAtt);
+        }
+
+        public static Implementations ToImplementations(PropertyRoute route, Type t, Attribute[] fieldAtt)
+        {
             ImplementedByAttribute ib = fieldAtt.OfType<ImplementedByAttribute>().SingleOrDefaultEx();
             ImplementedByAllAttribute iba = fieldAtt.OfType<ImplementedByAllAttribute>().SingleOrDefaultEx();
 
             if (ib != null && iba != null)
                 throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
 
-            if (ib != null) return ib;
-            if (iba != null) return iba;
+            if (ib != null) return Implementations.By(ib.ImplementedTypes);
+            if (iba != null) return Implementations.ByAll;
 
-            return null;
+            return Implementations.By(t);
         }
 
         internal SqlDbTypePair GetSqlDbType(PropertyRoute route)

@@ -90,8 +90,8 @@ WriteLiteral("                <a href=\"");
 
                     Write(Navigator.ViewRoute(ident));
 
-WriteLiteral("\" style=\"float:left; display:block; margin-left:5px\">\r\n                <span clas" +
-"s=\"ui-icon ui-icon-extlink\">fullscreen</span>\r\n                </a>\r\n");
+WriteLiteral("\" class=\"sf-popup-fullscreen\">\r\n                <span class=\"ui-icon ui-icon-extl" +
+"ink\">fullscreen</span>\r\n                </a>\r\n");
 
 
             }

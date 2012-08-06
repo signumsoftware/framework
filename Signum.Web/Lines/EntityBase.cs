@@ -38,11 +38,11 @@ namespace Signum.Web
         {
             get 
             {
-                return Implementations != null && !Implementations.IsByAll && ((ImplementedByAttribute)Implementations).ImplementedTypes.Length > 1;
+                return Implementations != null && !Implementations.Value.IsByAll && Implementations.Value.Types.Count() > 1;
             }
         }
 
-        public Implementations Implementations { get; set; }
+        public Implementations? Implementations { get; set; }
 
         public ViewMode ViewMode { get; set; } 
         
@@ -75,16 +75,25 @@ namespace Signum.Web
 
         protected virtual JsOptionsBuilder OptionsJSInternal()
         {
-            return new JsOptionsBuilder(false)
+            var options = new JsOptionsBuilder(false)
             {
-                {"prefix", ControlID.SingleQuote()},
-                {"onEntityChanged", "function(){ " + OnEntityChanged + " }"}, 
+                {"prefix", ControlID.SingleQuote()}
             };
+
+            if (OnEntityChanged.HasText())
+                options.Add("onEntityChanged", "function(){ " + OnEntityChanged + " }");
+            
+            return options;
         }
 
         public virtual JsViewOptions DefaultJsViewOptions()
         {
-            return new JsViewOptions { PartialViewName = this.PartialViewName };
+            var options = new JsViewOptions();
+
+            if (PartialViewName.HasText())
+                options.PartialViewName = this.PartialViewName;
+            
+            return options;
         }
 
         public JsFindOptions DefaultJsfindOptions()

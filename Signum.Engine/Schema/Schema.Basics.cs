@@ -57,7 +57,7 @@ namespace Signum.Engine.Maps
                 {
                     identity = value;
                     if (inserter != null && inserter.IsValueCreated) // not too fast
-                        inserter.ResetPublicationOnly();
+                        inserter.Reset();
                 }
             }
         }
@@ -83,9 +83,9 @@ namespace Signum.Engine.Maps
         {
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
 
-            inserter = new Lazy<InsertCache>(InitializeInsert, LazyThreadSafetyMode.PublicationOnly);
-            updater = new Lazy<UpdateCache>(InitializeUpdate, LazyThreadSafetyMode.PublicationOnly);
-            saveCollections = new Lazy<CollectionsCache>(InitializeCollections, LazyThreadSafetyMode.PublicationOnly);
+            inserter = new ResetLazy<InsertCache>(InitializeInsert);
+            updater = new ResetLazy<UpdateCache>(InitializeUpdate);
+            saveCollections = new ResetLazy<CollectionsCache>(InitializeCollections);
         }
 
         public Field GetField(MemberInfo member)

@@ -204,19 +204,19 @@ namespace Signum.Windows
 
         public static DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
         {
-            DataTemplate template = GetEntitySettings(entityType).TryCC(ess => ess.DataTemplate);
-            if (template != null)
-                return template;
-
             if (entityType.IsLite())
             {
-                template = (DataTemplate)element.FindResource(typeof(Lite));
+                DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
                 if (template != null)
                     return template;
             }
 
             if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
             {
+                DataTemplate template = GetEntitySettings(entityType).TryCC(ess => ess.DataTemplate);
+                if (template != null)
+                    return template;
+
                 template = (DataTemplate)element.FindResource(typeof(ModifiableEntity));
                 if (template != null)
                     return template;
@@ -225,7 +225,7 @@ namespace Signum.Windows
             return null;
         }
 
-        public static Type SelectType(Window parent, Type[] implementations)
+        public static Type SelectType(Window parent, IEnumerable<Type> implementations)
         {
             return Manager.SelectTypes(parent, implementations);
         }
@@ -783,13 +783,14 @@ namespace Signum.Windows
                 throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
         }
 
-        public virtual Type SelectTypes(Window parent, Type[] implementations)
+        public virtual Type SelectTypes(Window parent, IEnumerable<Type> implementations)
         {
-            if (implementations == null || implementations.Length == 0)
+            if (implementations == null || implementations.Count() == 0)
                 throw new ArgumentException("implementations");
 
-            if (implementations.Length == 1)
-                return implementations[0];
+            var only = implementations.Only();
+            if (only != null)
+                return only;
 
             Type sel;
             if (SelectorWindow.ShowDialog(implementations, out sel,

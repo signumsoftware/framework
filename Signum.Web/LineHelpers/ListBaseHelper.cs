@@ -115,7 +115,63 @@ namespace Signum.Web
                   Resources.LineButton_Remove,
                   "sf-line-button sf-remove",
                   htmlAttr);
+        }
 
+        public static MvcHtmlString MoveUpButton(HtmlHelper helper, EntityListBase listBase)
+        {
+            if (!listBase.Reorder)
+                return MvcHtmlString.Empty;
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetMovingUp() },
+                { "data-icon", "ui-icon-triangle-1-n" },
+                { "data-text", false}
+            };
+
+            IList list = (IList)listBase.UntypedValue;
+
+            if (list == null || list.Count == 0)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(listBase.Compose("btnUp"),
+                  Resources.Signum_entityRepeater_moveUp,
+                  "",
+                  Resources.Signum_entityRepeater_moveUp,
+                  "sf-line-button move-up",
+                  htmlAttr);
+        }
+
+        public static MvcHtmlString MoveDownButton(HtmlHelper helper, EntityListBase listBase)
+        {
+            if (!listBase.Reorder)
+                return MvcHtmlString.Empty;
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetMovingDown() },
+                { "data-icon", "ui-icon-triangle-1-s" },
+                { "data-text", false}
+            };
+
+            IList list = (IList)listBase.UntypedValue;
+
+            if (list == null || list.Count == 0)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(listBase.Compose("btnDown"),
+                  Resources.Signum_entityRepeater_moveDown,
+                  "",
+                  Resources.Signum_entityRepeater_moveDown,
+                  "sf-line-button move-down",
+                  htmlAttr);
+        }
+
+        public static MvcHtmlString WriteIndex(HtmlHelper helper, EntityListBase listBase, TypeContext itemTC, int itemIndex)
+        {
+            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
+                listBase.ShouldWriteOldIndex(itemTC) ? itemIndex.ToString() : "", 
+                itemIndex.ToString()));
         }
     }
 }
