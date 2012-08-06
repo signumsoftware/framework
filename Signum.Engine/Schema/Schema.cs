@@ -449,7 +449,10 @@ namespace Signum.Engine.Maps
 
             var table = Table(root);
 
-            return PropertyRoute.GenerateRoutes(root).Where(a=>a.Type.CleanType().IsIIdentifiable()).ToDictionary(r=>r, r => FindImplementations(r)).ToDictionary();
+            return PropertyRoute.GenerateRoutes(root)
+                .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
+                .Where(r => r.Type.CleanType().IsIIdentifiable())
+                .ToDictionary(r => r, r => FindImplementations(r));
         }
 
         public Implementations FindImplementations(PropertyRoute route)
