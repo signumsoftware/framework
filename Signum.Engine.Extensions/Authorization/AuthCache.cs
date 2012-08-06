@@ -46,7 +46,7 @@ namespace Signum.Entities.Authorization
         where AR : AllowedRule<R, A>, new()
         where R : IdentifiableEntity
     {
-        readonly Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules; 
+        readonly ResetLazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules; 
 
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
@@ -195,33 +195,29 @@ namespace Signum.Entities.Authorization
 
         Dictionary<Lite<RoleDN>, RoleAllowedCache> NewCache()
         {
-            using (AuthLogic.Disable())
-            using (new EntityCache(true))
+            List<Lite<RoleDN>> roles = AuthLogic.RolesInOrder().ToList();
+
+            Dictionary<Lite<RoleDN>, A> defaultBehaviours =
+                Database.Query<RT>().Where(a => a.Resource == null)
+                .Select(a => new { a.Role, a.Allowed }).ToDictionary(a => a.Role, a => a.Allowed);
+
+            Dictionary<Lite<RoleDN>, Dictionary<K, A>> realRules =
+               Database.Query<RT>().Where(a => a.Resource != null)
+               .Select(a => new { a.Role, a.Allowed, a.Resource })
+                  .AgGroupToDictionary(ru => ru.Role, gr => gr
+                      .ToDictionary(ru => ToKey(ru.Resource), ru => ru.Allowed));
+
+            Dictionary<Lite<RoleDN>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleDN>, RoleAllowedCache>();
+            foreach (var role in roles)
             {
-                List<Lite<RoleDN>> roles = AuthLogic.RolesInOrder().ToList();
+                var related = AuthLogic.RelatedTo(role);
 
-                Dictionary<Lite<RoleDN>, A> defaultBehaviours = 
-                    Database.Query<RT>().Where(a => a.Resource == null)
-                    .Select(a => new { a.Role, a.Allowed }).ToDictionary(a => a.Role, a => a.Allowed);
+                var behaviour = defaultBehaviours.TryGet(role, Max.BaseAllowed).Equals(Max.BaseAllowed) ? Max : Min;
 
-                Dictionary<Lite<RoleDN>, Dictionary<K, A>> realRules =
-                   Database.Query<RT>().Where(a => a.Resource != null)
-                   .Select(a => new { a.Role, a.Allowed, a.Resource })
-                      .AgGroupToDictionary(ru => ru.Role, gr => gr
-                          .ToDictionary(ru => ToKey(ru.Resource), ru => ru.Allowed));
-
-                Dictionary<Lite<RoleDN>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleDN>, RoleAllowedCache>();
-                foreach (var role in roles)
-                {
-                    var related = AuthLogic.RelatedTo(role);
-
-                    var behaviour = defaultBehaviours.TryGet(role, Max.BaseAllowed).Equals(Max.BaseAllowed) ? Max : Min;
-
-                    newRules.Add(role, new RoleAllowedCache(behaviour, related.Select(r => newRules[r]).ToList(), realRules.TryGetC(role)));
-                }
-
-                return newRules;
+                newRules.Add(role, new RoleAllowedCache(behaviour, related.Select(r => newRules[r]).ToList(), realRules.TryGetC(role)));
             }
+
+            return newRules;
         }
 
         internal void GetRules(BaseRulePack<AR> rules, IEnumerable<R> resources)

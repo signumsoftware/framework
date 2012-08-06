@@ -296,8 +296,6 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8)));
 
             //Move columns
-            Assert.IsFalse(selenium.CanMoveColumn(1, true));
-            Assert.IsFalse(selenium.CanMoveColumn(8, false));
             selenium.MoveColumn(7, "Label Id", true);
             selenium.MoveColumn(6, "Label Id", false);
 
@@ -320,14 +318,12 @@ namespace Signum.Web.Extensions.Sample.Test
             string prefix = "Members_0_"; //prefix for all the popup
 
             //User columns are not present in popup
-            Assert.IsFalse(selenium.IsElementPresent("jq=#{0}divSearchControl .sf-add-column".Formato(prefix)));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-add-column".Formato(prefix)));
 
             //Edit names
             selenium.EditColumnName(5, "Male", prefix);
 
             //Move columns
-            Assert.IsFalse(selenium.CanMoveColumn(3, true, prefix));
-            Assert.IsFalse(selenium.CanMoveColumn(8, false, prefix));
             selenium.MoveColumn(3, "Id", false, prefix);
             selenium.MoveColumn(4, "Id", true, prefix);
 
@@ -358,7 +354,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(2)); //Entity with id 1 of each type
 
             selenium.DeleteFilter(0);
-            selenium.FilterSelectToken(0, "label=IAuthor", true);
+            selenium.FilterSelectToken(0, "value=Entity", true);
             selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "value=(Artist)", true);
             selenium.ExpandTokens(2);
@@ -370,7 +366,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Create implemented type
             selenium.SearchCreateWithImpl("Artist");
-            Assert.IsTrue(selenium.IsElementPresent("jq=#Dead")); //there's an artist valueline
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Dead")); //there's an artist valueline
         }
 
         [TestMethod]

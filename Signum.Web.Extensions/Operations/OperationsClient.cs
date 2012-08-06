@@ -31,6 +31,18 @@ namespace Signum.Web.Operations
             scripts.Add("~/Operations/Scripts/SF_Operations.js");
             Navigator.Manager.DefaultScripts += () => scripts;
 
+            Navigator.Manager.DefaultSFUrls.Add(url =>
+            {
+                return new Dictionary<string, string> 
+                { 
+                    { "operationExecute", url.Action("Execute", "Operation") },
+                    { "operationExecuteContextual", url.Action("ContextualExecute", "Operation") },
+                    { "operationDelete", url.Action("Delete", "Operation") },
+                    { "operationConstructFrom", url.Action("ConstructFrom", "Operation") },
+                    { "operationConstructFromMany", url.Action("ConstructFromMany", "Operation") },
+                };
+            });
+
             ButtonBarEntityHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarElement);
 
             Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);

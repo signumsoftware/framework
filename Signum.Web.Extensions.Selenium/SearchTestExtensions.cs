@@ -23,8 +23,10 @@ namespace Signum.Web.Selenium
 
         public static void Search(this ISelenium selenium, string prefix)
         {
-            selenium.Click(SearchSelector(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RowSelector(selenium, 1, prefix)));
+            string searchButton = SearchSelector(prefix);
+            selenium.Click(searchButton);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) && 
+                !selenium.IsElementPresent("{0}.sf-searching".Formato(searchButton)));
         }
 
         public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage)
@@ -44,8 +46,8 @@ namespace Signum.Web.Selenium
 
         public static void ToggleFilters(this ISelenium selenium, bool show, string prefix)
         {
-            selenium.Click("jq=#{0}divSearchControl .sf-filters-header".Formato(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}divSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
+            selenium.Click("jq=#{0}sfSearchControl .sf-filters-header".Formato(prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
         }
 
         public static void FilterSelectToken(this ISelenium selenium, int tokenSelectorIndexBase0, string itemSelector, bool willExpand)
@@ -190,20 +192,6 @@ namespace Signum.Web.Selenium
             Assert.IsTrue(selenium.IsElementPresent("{0}:contains('{1}')".Formato(headerSelector, newName)));
         }
 
-        public static bool CanMoveColumn(this ISelenium selenium, int columnIndexBase1, bool left)
-        {
-            return CanMoveColumn(selenium, columnIndexBase1, left, "");
-        }
-
-        public static bool CanMoveColumn(this ISelenium selenium, int columnIndexBase1, bool left, string prefix)
-        {
-            string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
-            selenium.ContextMenu(headerSelector);
-            bool result = selenium.IsElementPresent("{0} .move-column-{1}".Formato(headerSelector, left ? "left" : "right"));
-            selenium.ContextMenu(headerSelector); //close it
-            return result;
-        }
-
         public static void MoveColumn(this ISelenium selenium, int columnIndexBase1, string columnName, bool left)
         {
             MoveColumn(selenium, columnIndexBase1, columnName, left, "");
@@ -212,8 +200,11 @@ namespace Signum.Web.Selenium
         public static void MoveColumn(this ISelenium selenium, int columnIndexBase1, string columnName, bool left, string prefix)
         {
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
-            selenium.ContextMenu(headerSelector);
-            selenium.Click("{0} .move-column-{1}".Formato(headerSelector, left ? "left" : "right"));
+            string targetSelector = left ? 
+                "{0} .sf-header-droppable-left".Formato(SearchTestExtensions.TableHeaderSelector(columnIndexBase1 - 1, prefix)) :
+                "{0} .sf-header-droppable-right".Formato(SearchTestExtensions.TableHeaderSelector(columnIndexBase1 + 1, prefix));
+            
+            selenium.DragAndDropToObject(headerSelector, targetSelector);
 
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:contains('{1}')".Formato(
                 SearchTestExtensions.TableHeaderSelector((left ? (columnIndexBase1 - 1) : (columnIndexBase1 + 1)), prefix),

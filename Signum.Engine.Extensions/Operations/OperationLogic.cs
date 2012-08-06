@@ -188,7 +188,7 @@ namespace Signum.Engine.Operations
 
             operation.AssertIsValid();
 
-            operations.GetOrAdd(operation.Type).Add(operation.Key, operation);
+            operations.GetOrAdd(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
 
             if (operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false)
             {

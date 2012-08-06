@@ -117,6 +117,9 @@ namespace Signum.Web.Reports
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
+            if (ctx.Prefix.HasText())
+                return null;
+
             Lite<UserQueryDN> currentUserQuery = null;
             string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
@@ -127,7 +130,7 @@ namespace Signum.Web.Reports
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
                 AltText = Resources.ExcelReport,
                 Text = Resources.ExcelReport,
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((currentUserQuery != null ? currentUserQuery.IdOrNull : null), ctx.Prefix)).ToJS(),
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}}, SF.FindNavigator.getFor('{1}').requestDataForSearch())".Formato((currentUserQuery != null ? currentUserQuery.IdOrNull : null), ctx.Prefix)).ToJS(),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
@@ -151,7 +154,7 @@ namespace Signum.Web.Reports
                         {
                             AltText = report.ToString(),
                             Text = report.ToString(),
-                            OnClick = Js.SubmitOnly(RouteHelper.New().Action("ExcelReport", "Report"), "$.extend({{excelReport:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato(report.Id, ctx.Prefix)).ToJS(),
+                            OnClick = Js.SubmitOnly(RouteHelper.New().Action("ExcelReport", "Report"), "$.extend({{excelReport:'{0}'}}, SF.FindNavigator.getFor('{1}').requestDataForSearch())".Formato(report.Id, ctx.Prefix)).ToJS(),
                             DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });
                     }

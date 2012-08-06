@@ -48,6 +48,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.Web.PageInspector.Loader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
@@ -55,12 +56,12 @@
     <Reference Include="System.ServiceModel.Activation" />
     <Reference Include="System.ServiceModel.Activities" />
     <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web.Helpers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Microsoft ASP.NET\ASP.NET MVC 3\Assemblies\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages" />
-    <Reference Include="System.Web.Helpers" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -256,7 +257,9 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
+    <Compile Include="Chart\ChartOmniboxProvider.cs" />
     <Compile Include="Chart\Controllers\ChartController.cs" />
+    <Compile Include="Chart\UserChartOmniboxProvider.cs" />
     <Compile Include="Chart\Views\ChartBuilder.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -395,6 +398,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Omnibox\Controllers\OmniboxController.cs" />
+    <Compile Include="Omnibox\DynamicQueryOmniboxProvider.cs" />
+    <Compile Include="Omnibox\EntityOmniboxProvider.cs" />
+    <Compile Include="Omnibox\OmniboxClient.cs" />
     <Compile Include="Processes\Views\ProcessPanel.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -656,6 +663,7 @@
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
+    <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
     <Compile Include="UserQueries\UserQueriesHelper.cs" />
     <Compile Include="UserQueries\Views\QueryColumn.cs">
@@ -854,6 +862,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Omnibox\Scripts\SF_Omnibox.js" />
     <Content Include="Operations\Scripts\SF_Operations.js" />
     <Content Include="Processes\Scripts\SF_Process.js" />
     <Content Include="Processes\Views\_ViewStart.cshtml">

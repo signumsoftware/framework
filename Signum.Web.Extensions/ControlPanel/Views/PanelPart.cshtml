@@ -4,14 +4,23 @@
 @using Signum.Web.ControlPanel
 @model PanelPart
            
-@{ string prefix = "Parts_{0}_{1}_".Formato(Model.Row, Model.Column); }
+@{ 
+    string prefix = "r{0}c{1}".Formato(Model.Row, Model.Column);
+    ControlPanelClient.PartViews config = ControlPanelClient.PanelPartViews[Model.Content.GetType()];
+}
 <div class="ui-widget ui-widget-content ui-corner-all sf-ftbl-part">
     <div class="ui-widget-header ui-corner-all sf-ftbl-part-header">
         @Model.ToString()
         @Html.TextBox(prefix + "Title", Model.Title, new { style = "display:none" })
+        @if (config.FullScreenLink)
+        {
+            <a id="@TypeContextUtilities.Compose(prefix, "sfFullScreen")" class="sf-ftbl-header-fullscreen">
+                <span class="ui-icon ui-icon-extlink">fullscreen</span>
+            </a>
+        }
     </div>
     <div>
-        @{ Html.RenderPartial(ControlPanelClient.PanelPartViews[Model.Content.GetType()].FrontEnd, Model); }
+        @{ Html.RenderPartial(config.FrontEnd, Model); }
     </div>
     <div>
         @Html.Hidden(prefix + "Row", Model.Row, new { @class = "sf-ftbl-part-row" })

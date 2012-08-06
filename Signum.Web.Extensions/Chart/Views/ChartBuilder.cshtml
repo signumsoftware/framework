@@ -17,7 +17,7 @@
         queryDescription = DynamicQueryManager.Current.QueryDescription(((UserChartDN)((TypeContext)chart.Parent).UntypedValue).QueryName);
     }
 
-    <table class="sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.ControlID)))">
+    <table id="@chart.Compose("sfChartBuilder")" class="sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.ControlID)))">
         <tr>
             <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type">
                 <div class="ui-widget-header">

@@ -106,12 +106,12 @@ WriteLiteral("\r\n\r\n");
 WriteLiteral("        <div id=\"");
 
 
-            Write(ucTc.Compose("divChartControl"));
+            Write(ucTc.Compose("sfChartControl"));
 
 WriteLiteral("\" class=\"sf-search-control sf-chart-control\" data-prefix=\"");
 
 
-                                                                                                      Write(ucTc.ControlID);
+                                                                                                     Write(ucTc.ControlID);
 
 WriteLiteral("\">\r\n            <div style=\"display:none\">\r\n                ");
 
@@ -122,11 +122,6 @@ WriteLiteral("\r\n                ");
 
 
            Write(Html.HiddenRuntimeInfo(ucTc, cr => cr.Chart));
-
-WriteLiteral("\r\n                ");
-
-
-           Write(Html.Hidden(ucTc.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(request.QueryName)));
 
 WriteLiteral("\r\n        \r\n                ");
 
@@ -152,7 +147,40 @@ WriteLiteral("\r\n\r\n");
 
                  using (var chart = ucTc.SubContext(cr => cr.Chart))
                 {
-                    Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+
+WriteLiteral("                    <div id=\"");
+
+
+                        Write(ucTc.Compose("sfChartBuilderContainer"));
+
+WriteLiteral("\">\r\n                        ");
+
+
+                   Write(Html.Partial(ChartClient.ChartBuilderView, chart));
+
+WriteLiteral("\r\n                    </div>\r\n");
+
+
+
+WriteLiteral("                    <script type=\"text/javascript\">\r\n                        $(\'#" +
+"");
+
+
+                       Write(ucTc.Compose("sfChartBuilderContainer"));
+
+WriteLiteral("\').chartBuilder($.extend({ prefix: \'");
+
+
+                                                                                                   Write(ucTc.ControlID);
+
+WriteLiteral("\'}, ");
+
+
+                                                                                                                      Write(MvcHtmlString.Create(uc.ToJS()));
+
+WriteLiteral("));\r\n                    </script>\r\n");
+
+
                 }
 
 WriteLiteral("            </div>\r\n            <div id=\"");
@@ -160,15 +188,22 @@ WriteLiteral("            </div>\r\n            <div id=\"");
 
                 Write(ucTc.Compose("sfChartContainer"));
 
-WriteLiteral("\">\r\n                <div class=\"sf-chart-container\" data-open-url=\"");
+WriteLiteral("\">\r\n                <div class=\"sf-chart-container\" \r\n                    data-op" +
+"en-url=\"");
 
 
-                                                           Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)));
+                               Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)));
 
-WriteLiteral("\"></div>\r\n            </div>\r\n        </div>\r\n");
+WriteLiteral("\" \r\n                    data-fullscreen-url=\"");
 
 
-        MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
+                                     Write(Url.Action<ChartController>(cc => cc.FullScreen(ucTc.ControlID)));
+
+WriteLiteral("\">\r\n                </div>\r\n            </div>\r\n        </div>\r\n");
+
+
+    
+                MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
 
 WriteLiteral("        <script type=\"text/javascript\">\r\n            $(function() {\r\n            " +
 "    var $chartContainer = $(\'");
@@ -198,7 +233,18 @@ WriteLiteral("\') + myChart.paintChart(\'");
 
                                                                              Write(divSelector);
 
-WriteLiteral("\'));\r\n            });\r\n        </script>\r\n");
+WriteLiteral("\'));\r\n\r\n                $(\"#\" + SF.compose(\"");
+
+
+                               Write(ucTc.ControlID);
+
+WriteLiteral("\", \"sfFullScreen\")).on(\"mousedown\", function(e){\r\n                    SF.Chart.ge" +
+"tFor(\'");
+
+
+                                Write(ucTc.ControlID);
+
+WriteLiteral("\').fullScreen(e);\r\n                });\r\n            });\r\n        </script>\r\n");
 
 
     

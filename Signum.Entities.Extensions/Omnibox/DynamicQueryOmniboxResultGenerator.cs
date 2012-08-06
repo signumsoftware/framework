@@ -211,7 +211,7 @@ namespace Signum.Entities.Omnibox
             switch (ft)
             {
                 case FilterType.Number:
-                case FilterType.DecimalNumber: return new[] { new ValueTuple { Value = 0, Match = null } };
+                case FilterType.DecimalNumber: return new[] { new ValueTuple { Value = Activator.CreateInstance(queryToken.Type.UnNullify()), Match = null } };
                 case FilterType.String: return new[] { new ValueTuple { Value = "", Match = null } };
                 case FilterType.DateTime: return new[] { new ValueTuple { Value = DateTime.Today, Match = null } };
                 case FilterType.Lite:
@@ -261,7 +261,7 @@ namespace Signum.Entities.Omnibox
                     {
                         var patten = OmniboxUtils.CleanCommas(omniboxToken.Value);
 
-                        var result = OmniboxParser.Manager.AutoComplete(queryToken.Type.CleanType(), queryToken.Implementations(), patten, AutoCompleteLimit);
+                        var result = OmniboxParser.Manager.AutoComplete(queryToken.Type.CleanType(), queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
 
                         return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();  
                     }
@@ -270,15 +270,11 @@ namespace Signum.Entities.Omnibox
                         int id;
                         if (int.TryParse(omniboxToken.Value, out id))
                         {
-                            var imp = queryToken.Implementations();
-
-                            if(imp == null)
-                                return new []{ new ValueTuple { Value = CreateLite(queryToken.Type.CleanType(), id), Match = null}};
+                            var imp = queryToken.GetImplementations().Value;
 
                             if (!imp.IsByAll)
                             {
-                                return ((ImplementedByAttribute)imp).ImplementedTypes.Select(t=>
-                                    new ValueTuple { Value =  CreateLite(t, id) }).ToArray();
+                                return imp.Types.Select(t =>new ValueTuple { Value = CreateLite(t, id) }).ToArray();
                             }
                         }
                     }break;
@@ -477,12 +473,13 @@ namespace Signum.Entities.Omnibox
         {
             string token = QueryToken.TryCC(q => q.FullKey());
 
-            if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token)
+            if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token || CanFilter.HasText())
                 return token;
 
             string oper = DynamicQueryOmniboxResultGenerator.ToStringOperation(Operation.Value);
 
-            if (Syntax.Completion == FilterSyntaxCompletion.Operation && Value == null)
+            if ((Syntax.Completion == FilterSyntaxCompletion.Operation && Value == null) ||
+                Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
                 return token + oper;
 
             return token + oper + DynamicQueryOmniboxResultGenerator.ToStringValue(Value);

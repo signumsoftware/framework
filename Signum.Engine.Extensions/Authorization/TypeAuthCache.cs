@@ -38,7 +38,7 @@ namespace Signum.Entities.Authorization
 
     class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions> 
     {
-        readonly Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules;
+        readonly ResetLazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules;
 
         DefaultBehaviour<TypeAllowedAndConditions> Min;
         DefaultBehaviour<TypeAllowedAndConditions> Max;
@@ -81,16 +81,11 @@ namespace Signum.Entities.Authorization
 
         static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
         {
-            var t = Schema.Current.Table<RuleTypeDN>();
-            var rec = (FieldReference)t.Fields["resource"].Field;
-            var cond = (FieldMList)t.Fields["conditions"].Field;
-            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
+            TypeDN type = (TypeDN)arg;
 
-            var conditions = new SqlPreCommandSimple("DELETE cond FROM {0} cond INNER JOIN {1} r ON cond.{2} = r.{3} WHERE r.{4} = {5}".Formato(
-                cond.RelationalTable.Name.SqlScape(), t.Name.SqlScape(), cond.RelationalTable.BackReference.Name.SqlScape(), "Id", rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<DbParameter> { param });
-            var rule = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name.SqlScape(), rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<DbParameter> { param });
+            var command = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeDN>().Where(a => a.Resource == type));
 
-            return SqlPreCommand.Combine(Spacing.Simple, conditions, rule); 
+            return command;
         }    
 
      

@@ -53,7 +53,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Type("Name", "test");
             selenium.Type("Year", "2010");
             selenium.LineFindWithImplAndSelectElements("Author_", "Band", false, new int[]{0});
-            selenium.Select("Label", "label=Virgin");
+            selenium.Select("Label_sfCombo", "label=Virgin");
 
             selenium.EntityButtonClick("AlbumOperation_Save");
             selenium.WaitForPageToLoad(PageLoadTimeout);
@@ -168,7 +168,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.EntityButtonLocator("AlbumOperation_Save")));
 
             selenium.Type("New_Name", "test greatest empty");
-            selenium.Select("New_Label", "label=Virgin");
+            selenium.Select("New_Label_sfCombo", "label=Virgin");
 
             selenium.EntityButtonClick("AlbumOperation_Save");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.EntityButtonLocator("AlbumOperation_Modify")));
@@ -189,7 +189,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             selenium.Type("Name", "test greatest hits");
-            selenium.Select("Label", "label=Virgin");
+            selenium.Select("Label_sfCombo", "label=Virgin");
 
             selenium.EntityButtonClick("AlbumOperation_Save");
             selenium.WaitForPageToLoad(PageLoadTimeout);

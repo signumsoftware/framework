@@ -27,7 +27,7 @@ namespace Signum.Web.Files
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Class("sf-repeater-field sf-file-repeater-field")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(fileRepeater.ControlID).Class("sf-repeater-field sf-file-repeater-field")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {
@@ -40,16 +40,13 @@ namespace Signum.Web.Files
 
                 sb.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/SF_Files.css") }).ToHtmlSelf());
 
-                sb.AddLine(new HtmlTag("script")
-                    .Attr("type", "text/javascript")
-                    .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
-                    .ToHtml());
-
                 //Write FileLine template
                 TypeElementContext<FilePathDN> templateTC = new TypeElementContext<FilePathDN>(null, (TypeContext)fileRepeater.Parent, 0);
                 using (FileLine fl = new FileLine(typeof(FilePathDN), templateTC.Value, templateTC, "", templateTC.PropertyRoute) { Remove = false, AsyncUpload = fileRepeater.AsyncUpload, FileType = fileRepeater.FileType, OnlyValue = true })
+                {
+                    fl.Implementations = fileRepeater.Implementations;
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(fileRepeater, helper.InternalFileLine(fl)));
-                
+                }
                 using (sb.Surround(new HtmlTag("div").IdName(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
                 {
                     if (fileRepeater.UntypedValue != null)
@@ -59,6 +56,16 @@ namespace Signum.Web.Files
                     }
                 }
             }
+
+            sb.AddLine(new HtmlTag("script")
+                .Attr("type", "text/javascript")
+                .InnerHtml(MvcHtmlString.Create("$(function(){ " + 
+                    "SF.Loader.loadJs('{0}', function(){{ $('#{1}').fileRepeater({2}); }});".Formato(
+                        RouteHelper.New().Content("~/Files/Scripts/SF_Files.js"), 
+                        fileRepeater.ControlID, 
+                        fileRepeater.OptionsJS()) +
+                    "});"))
+                .ToHtml());
 
             return sb.ToHtml();
         }
@@ -73,14 +80,20 @@ namespace Signum.Web.Files
                     if (fileRepeater.Remove)
                         sb.AddLine(
                             helper.Href(itemTC.Compose("btnRemove"),
-                                          fileRepeater.RemoveElementLinkText,
-                                          "javascript:new SF.ERep({0}).remove('{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
-                                          fileRepeater.RemoveElementLinkText,
-                                          "sf-line-button sf-remove",
-                                          new Dictionary<string, object> { { "data-icon", "ui-icon-circle-close" }, { "data-text", false } }));
+                                        fileRepeater.RemoveElementLinkText,
+                                        "",
+                                        fileRepeater.RemoveElementLinkText,
+                                        "sf-line-button sf-remove",
+                                        new Dictionary<string, object> 
+                                        { 
+                                            { "onclick", "{0}.remove('{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID) },
+                                            { "data-icon", "ui-icon-circle-close" }, 
+                                            { "data-text", false } 
+                                        }));
                 }
 
-                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
+                    itemTC.Index.ToString(), itemTC.Index.ToString())));
 
                 //Render FileLine for the current item
                 using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityBaseKeys.Entity)).Class("sf-line-entity")))
@@ -88,7 +101,10 @@ namespace Signum.Web.Files
                     TypeContext<FilePathDN> tc = (TypeContext<FilePathDN>)TypeContextUtilities.CleanTypeContext(itemTC);
 
                     using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.PropertyRoute) { Remove = false, OnlyValue = true })
+                    {
+                        fl.Implementations = fileRepeater.Implementations;
                         sb.AddLine(helper.InternalFileLine(fl));
+                    }
                 }
             }
 
@@ -108,7 +124,8 @@ namespace Signum.Web.Files
 
             FileRepeater fl = new FileRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            //Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
+            EntityBaseHelper.ConfigureEntityBase(fl, typeof(S).CleanType());
+
             Common.FireCommonTasks(fl);
 
             if (settingsModifier != null)

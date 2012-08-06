@@ -108,7 +108,7 @@ namespace Signum.Engine.Help
         
         public static string QueryUrl(Enum query)
         {
-            return HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType())
+            return HelpLogic.EntityUrl(GetQueryType(query))
                 + "#" + "q-" + QueryUtils.GetQueryUniqueKey(query).ToString().Replace(".", "_");
         }
 
@@ -222,7 +222,7 @@ namespace Signum.Engine.Help
 
         public static Type GetQueryType(object query)
         {
-            return DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType();
+            return DynamicQueryManager.Current[query].EntityColumn().Implementations.Value.Types.FirstEx();
         }
 
         private static List<FileXDocument> LoadDocuments(string subdirectory)

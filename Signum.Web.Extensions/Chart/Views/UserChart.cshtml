@@ -24,12 +24,16 @@
 }
 </style>
 
-<div class="sf-chart-control" data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" data-add-filter-url="@Url.Action("AddFilter", "Chart")" data-prefix="@Model.ControlID">
+<div class="sf-chart-control" 
+    data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" 
+    data-add-filter-url="@Url.Action("AddFilter", "Chart")" 
+    data-prefix="@Model.ControlID">
+
     @using (var uc = Html.TypeContext<UserChartDN>())
     {
         object queryName = QueryLogic.ToQueryName(uc.Value.Query.Key);
         ViewData[ViewDataKeys.QueryName] = queryName; //To be use inside Repeaters
-        @Html.Hidden(uc.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryName))
+        @Html.Hidden("webQueryName", Navigator.ResolveWebQueryName(queryName))
 
         using (var query = uc.SubContext(tc => tc.Query))
         {
@@ -54,8 +58,13 @@
 
         using (var chart = uc.SubContext(tc => tc.Chart))
         {
-            @Html.HiddenRuntimeInfo(chart)
-            Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+            <div id="@uc.Compose("sfChartBuilderContainer")">
+                @Html.HiddenRuntimeInfo(chart)
+                @Html.Partial(ChartClient.ChartBuilderView, chart)
+            </div>
+            <script type="text/javascript">
+                $('#@uc.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@uc.ControlID' }, @MvcHtmlString.Create(uc.Value.ToJS())));
+            </script>
         }
     }
 </div>

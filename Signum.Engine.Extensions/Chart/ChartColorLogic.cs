@@ -16,7 +16,7 @@ namespace Signum.Engine.Chart
 {
     public static class ChartColorLogic
     {
-        public static readonly Lazy<Dictionary<Type, Dictionary<int, Color>>> Colors = GlobalLazy.Create(() =>
+        public static readonly ResetLazy<Dictionary<Type, Dictionary<int, Color>>> Colors = GlobalLazy.Create(() =>
               Database.Query<ChartColorDN>()
               .Select(cc => new { cc.Related.RuntimeType, cc.Related.Id, cc.Color.Argb })
               .AgGroupToDictionary(a => a.RuntimeType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))))

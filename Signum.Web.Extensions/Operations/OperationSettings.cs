@@ -125,15 +125,6 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options(string controllerUrl)
         {
-            if (string.IsNullOrEmpty(controllerUrl))
-            { 
-                string action = OperationInfo.OperationType == OperationType.Execute ? "OperationExecute" : 
-                                OperationInfo.OperationType == OperationType.ConstructorFrom ? "ConstructFromExecute" :
-                                OperationInfo.OperationType == OperationType.Delete ? "DeleteExecute" : null;
-                
-                controllerUrl = RouteHelper.New().Action(action, "Operation");
-            }
-
             return new JsOperationOptions
             {
                 Operation = OperationInfo.Key,
@@ -163,14 +154,6 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options(string controllerUrl)
         {
-            if (string.IsNullOrEmpty(controllerUrl))
-            {
-                string action = OperationInfo.OperationType == OperationType.Execute ? "ContextualExecute" :
-                                OperationInfo.OperationType == OperationType.ConstructorFrom ? "ConstructFromExecute" :
-                                OperationInfo.OperationType == OperationType.Delete ? "DeleteExecute" : null;
-
-                controllerUrl = RouteHelper.New().Action(action, "Operation");
-            }
             return new JsOperationOptions
             {
                 Operation = OperationInfo.Key,
@@ -203,9 +186,6 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options(string controllerUrl)
         {
-            if (string.IsNullOrEmpty(controllerUrl))
-                controllerUrl = RouteHelper.New().Action("ConstructFromManyExecute", "Operation");
-            
             return new JsOperationOptions
             {
                 Operation = OperationInfo.Key,

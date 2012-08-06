@@ -176,7 +176,7 @@ namespace Signum.Web.Chart
                     return ctx.None();
 
                 var qd = DynamicQueryManager.Current.QueryDescription(
-                    Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+                    Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
                 var chartToken = (ChartTokenDN)ctx.Parent.UntypedValue;
                 var chart = (ChartBase)ctx.Parent.Parent.UntypedValue;
@@ -205,7 +205,7 @@ namespace Signum.Web.Chart
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
             {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+                Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
@@ -215,7 +215,7 @@ namespace Signum.Web.Chart
         static List<Order> ExtractChartOrders(MappingContext<List<Order>> ctx)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+                Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
             
@@ -224,22 +224,28 @@ namespace Signum.Web.Chart
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
+            if (ctx.Prefix.HasText())
+                return null;
+
+            return new[] { ChartQueryButton(ctx.Prefix) };
+        }
+
+        public static ToolBarButton ChartQueryButton(string prefix)
+        {
             if (!ChartPermissions.ViewCharting.IsAuthorized())
                 return null;
 
             string chartNewText = Resources.Chart_Chart;
 
-            return new[]
-            {
+            return
                 new ToolBarButton
                 {
-                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
+                    Id = TypeContextUtilities.Compose(prefix, "qbChartNew"),
                     AltText = chartNewText,
                     Text = chartNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(ctx.Prefix).requestData()).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), JsFindNavigator.GetFor(prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
-                }
-            };
+                };
         }
 
         public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
@@ -276,7 +282,7 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = Js.Submit(RouteHelper.New().Action("CreateUserChart", "Chart"), "SF.Chart.Builder.requestProcessedData({0})".Formato(prefix)).ToJS(),
+                    OnClick = Js.Submit(RouteHelper.New().Action("CreateUserChart", "Chart"), "SF.Chart.getFor('{0}').requestProcessedData()".Formato(prefix)).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }
@@ -315,7 +321,7 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
                     AltText = ucExportDataText,
                     Text = ucExportDataText,
-                    OnClick = "SF.Chart.Builder.exportData('{0}', '{1}', '{2}')".Formato(prefix, RouteHelper.New().Action("Validate", "Chart"), RouteHelper.New().Action("ExportData", "Chart")),
+                    OnClick = "SF.Chart.getFor('{0}').exportData('{1}', '{2}')".Formato(prefix, RouteHelper.New().Action("Validate", "Chart"), RouteHelper.New().Action("ExportData", "Chart")),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }
@@ -573,6 +579,34 @@ namespace Signum.Web.Chart
 
             return SearchControlHelper.TokenOptionsCombo(
                 helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, null), context, 0, false);
+        }
+
+        public static string ToJS(this ChartRequest request)
+        {
+            return new JsOptionsBuilder(true)
+            {
+                { "webQueryName", request.QueryName.TryCC(q => Navigator.ResolveWebQueryName(q).SingleQuote()) },
+                { "orders", request.Orders.IsEmpty() ? null : ("[" + request.Orders.ToString(oo => oo.ToJS().SingleQuote(), ",") + "]") }
+            }.ToJS();
+        }
+
+        public static string ToJS(this Order order)
+        {
+            return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.FullKey();
+        }
+
+        public static string ToJS(this UserChartDN userChart)
+        {
+            return new JsOptionsBuilder(true)
+            {
+                { "webQueryName", userChart.QueryName.TryCC(q => Navigator.ResolveWebQueryName(q).SingleQuote()) },
+                { "orders", userChart.Orders.IsEmpty() ? null : ("[" + userChart.Orders.ToString(oo => oo.ToJS().SingleQuote(), ",") + "]") }
+            }.ToJS();
+        }
+
+        public static string ToJS(this QueryOrderDN order)
+        {
+            return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.FullKey();
         }
     }
 }

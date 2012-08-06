@@ -44,7 +44,7 @@ namespace Signum.Engine.Authorization
             get { return string.IsNullOrEmpty(AnonymousUserName) ? null : anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
         }
 
-        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
+        static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -284,7 +284,7 @@ namespace Signum.Engine.Authorization
             var userEntity = RetrieveUser(username, passwordHash);
             userEntity.PasswordHash = newPasswordHash;
             using (AuthLogic.Disable())
-                userEntity.Save();
+                userEntity.Execute(UserOperation.Save);
 
             return Login(username, newPasswordHash);
         }
@@ -294,7 +294,7 @@ namespace Signum.Engine.Authorization
             var userEntity = user.RetrieveAndForget();
             userEntity.PasswordHash = newPasswordHash;
             using (AuthLogic.Disable())
-                userEntity.Save();
+                userEntity.Execute(UserOperation.Save);
         }
 
         public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] serviceInterfaces)

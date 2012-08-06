@@ -20,6 +20,11 @@
     line-height: 20px;
     margin-bottom: 2px;     
 }
+.sf-ftbl-header-fullscreen
+{
+    display: inline-block;    
+    cursor: pointer;
+}
 .sf-ftbl-part-header .sf-remove
 {
     float: right;

@@ -111,6 +111,8 @@ namespace Signum.Test.Extensions
                 TypeConditionLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.InCondition(MusicGroups.JapanEntities));
 
                 started = true;
+
+                sb.ExecuteWhenIncluded();
             }
         }
 

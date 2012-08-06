@@ -341,7 +341,7 @@ namespace Signum.Entities.Chart
             return Parent.GetPropertyRoute(); 
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return null;
         }
