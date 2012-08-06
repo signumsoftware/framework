@@ -91,14 +91,17 @@ SF.registerModule("Lines", function () {
                     return;
                 }
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
-                if (!SF.isEmpty(template)) { //Template pre-loaded: In case of a list, it will be created with "_0" itemprefix => replace it with the current one
-                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+                var template = this.getEmbeddedTemplate(viewOptions);
+                if (!SF.isEmpty(template)) {
                     new SF.ViewNavigator(viewOptions).showCreateOk(template);
                 }
                 else {
                     new SF.ViewNavigator(viewOptions).createOk();
                 }
+            },
+
+            getEmbeddedTemplate: function (viewOptions) {
+                return window[SF.compose(this.options.prefix, "sfTemplate")];
             },
 
             find: function (_findOptions) {
@@ -380,7 +383,7 @@ SF.registerModule("Lines", function () {
                     throw "ViewOptions type parameter must not be null in entityLineDetail typedCreate. Call create instead";
                 }
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                var template = this.getEmbeddedTemplate(viewOptions);
                 if (!SF.isEmpty(template)) { //Template pre-loaded: EmbeddedEntity
                     $('#' + viewOptions.containerDiv).html(template);
                     SF.triggerNewContent($('#' + viewOptions.containerDiv));
@@ -564,6 +567,14 @@ SF.registerModule("Lines", function () {
                 this.updateLinks(validatorResult.newToStr, validatorResult.newLink, itemPrefix);
                 $.extend(validatorResult, { acceptChanges: true });
                 return validatorResult;
+            },
+
+            getEmbeddedTemplate: function (viewOptions) {
+                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                if (!SF.isEmpty(template)) {
+                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+                }
+                return template;
             },
 
             viewOptionsForCreating: function (_viewOptions) {
@@ -761,9 +772,8 @@ SF.registerModule("Lines", function () {
                 }
                 this.restoreCurrent();
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
-                if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
-                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+                var template = this.getEmbeddedTemplate(viewOptions);
+                if (!SF.isEmpty(template)) {
                     $('#' + viewOptions.containerDiv).html(template);
                     SF.triggerNewContent($('#' + viewOptions.containerDiv));
                 }
@@ -962,7 +972,7 @@ SF.registerModule("Lines", function () {
                 }
 
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                var template = this.getEmbeddedTemplate(viewOptions);
                 if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
                     template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
                     this.onItemCreated(template, viewOptions);
