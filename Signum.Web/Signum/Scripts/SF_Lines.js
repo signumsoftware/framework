@@ -597,24 +597,24 @@ SF.registerModule("Lines", function () {
                 });
                 var validatorResult = this.checkValidation(valOptions, itemPrefix);
                 if (validatorResult.acceptChanges) {
-                    this.newListItem(clonedElements, runtimeType, itemPrefix, validatorResult.newToStr);
+                    this.newListItem(clonedElements, itemPrefix, { type: runtimeType, toStr: validatorResult.newToStr });
                 }
                 return validatorResult.acceptChanges;
             },
 
-            newListItem: function (clonedElements, runtimeType, itemPrefix, newToStr) {
+            newListItem: function (clonedElements, itemPrefix, item) {
                 var listInfo = this.staticInfo();
-                var itemInfoValue = new SF.RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n');
+                var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o');
                 listInfo.find().after(SF.hiddenInput(SF.compose(itemPrefix, this.keys.indexes), ";" + (this.getLastNewIndex() + 1).toString()))
                     .after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue))
                     .after(SF.hiddenDiv(SF.compose(itemPrefix, this.keys.entity), ""));
                 $('#' + SF.compose(itemPrefix, this.keys.entity)).append(clonedElements);
 
                 var select = $(this.pf(this.keys.list));
-                if (SF.isEmpty(newToStr)) {
-                    newToStr = "&nbsp;";
+                if (SF.isEmpty(item.toStr)) {
+                    item.toStr = "&nbsp;";
                 }
-                select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='sf-value-line'>" + newToStr + "</option>");
+                select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='sf-value-line'>" + item.toStr + "</option>");
                 select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
                 select.children('option:last').attr('selected', true);
             },
@@ -679,17 +679,21 @@ SF.registerModule("Lines", function () {
                 if (selectedItems == null || selectedItems.length == 0) {
                     throw "No item was returned from Find Window";
                 }
+                var self = this;
+                this.foreachNewItem(selectedItems, function (item, itemPrefix) {
+                    self.newListItem('', itemPrefix, item);
+                });
+                return true;
+            },
+
+            foreachNewItem: function (selectedItems, itemAction) {
                 var lastPrefixIndex = this.getLastPrefixIndex();
                 for (var i = 0, l = selectedItems.length; i < l; i++) {
                     var item = selectedItems[i];
                     lastPrefixIndex++;
                     var itemPrefix = SF.compose(this.options.prefix, lastPrefixIndex.toString());
-
-                    this.newListItem('', item.type, itemPrefix, item.toStr);
-                    this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
-                    $('#' + SF.compose(itemPrefix, SF.Keys.toStr)).html(item.toStr);
+                    itemAction(item, itemPrefix);
                 }
-                return true;
             },
 
             remove: function () {
@@ -820,7 +824,7 @@ SF.registerModule("Lines", function () {
                 }
 
                 var itemPrefix = viewOptions.prefix;
-                this.newListItem('', viewOptions.type, itemPrefix);
+                this.newListItem('', itemPrefix, { type: viewOptions.type });
                 this.fireOnEntityChanged();
             },
 
@@ -902,19 +906,12 @@ SF.registerModule("Lines", function () {
                 if (selectedItems == null || selectedItems.length == 0) {
                     throw "No item was returned from Find Window";
                 }
-                var lastPrefixIndex = this.getLastPrefixIndex();
-                for (var i = 0, l = selectedItems.length; i < l; i++) {
-                    var item = selectedItems[i];
-                    lastPrefixIndex++;
-                    var itemPrefix = SF.compose(this.options.prefix, lastPrefixIndex.toString());
-
-                    this.newListItem('', item.type, itemPrefix, item.toStr);
-                    this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
-                    $('#' + SF.compose(itemPrefix, SF.Keys.toStr)).html(item.toStr);
-
-                    //View result in the detailDiv
-                    $(this.pf(this.keys.list)).dblclick();
-                }
+                var self = this;
+                this.foreachNewItem(selectedItems, function (item, itemPrefix) {
+                    self.newListItem('', itemPrefix, item);
+                });
+                //View result in the detailDiv
+                $(this.pf(this.keys.list)).dblclick();
                 return true;
             },
 
@@ -1001,14 +998,13 @@ SF.registerModule("Lines", function () {
                 }
 
                 var itemPrefix = viewOptions.prefix;
-                this.newRepItem(newHtml, viewOptions.type, itemPrefix);
+                this.newRepItem(newHtml, itemPrefix, { type: viewOptions.type });
                 this.fireOnEntityChanged();
             },
 
-            newRepItem: function (newHtml, runtimeType, itemPrefix) {
+            newRepItem: function (newHtml, itemPrefix, item) {
                 var listInfo = this.staticInfo();
-                var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n');
-
+                var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o');
                 var $div = $("<fieldset id='" + SF.compose(itemPrefix, this.keys.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.keys.repeaterItem) + "' class='" + this.keys.repeaterItemClass + "'>" +
                     "<legend>" +
                     "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + this.options.removeItemLinkText + "</a>" +
@@ -1086,24 +1082,19 @@ SF.registerModule("Lines", function () {
                 if (selectedItems == null || selectedItems.length == 0) {
                     throw "No item was returned from Find Window";
                 }
-                var lastPrefixIndex = this.getLastPrefixIndex();
-                for (var i = 0, l = selectedItems.length; i < l; i++) {
-                    if (!this.canAddItems()) {
+                var self = this;
+                this.foreachNewItem(selectedItems, function (item, itemPrefix) {
+                    if (!self.canAddItems()) {
                         return;
                     }
 
-                    var item = selectedItems[i];
-                    lastPrefixIndex++;
-                    var itemPrefix = SF.compose(this.options.prefix, lastPrefixIndex.toString());
-
-                    this.newRepItem('', item.type, itemPrefix);
-                    this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
+                    self.newRepItem('', itemPrefix, item);
 
                     //View results in the repeater
-                    var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
+                    var viewOptions = self.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
                     new SF.ViewNavigator(viewOptions).viewEmbedded();
-                    SF.triggerNewContent($(SF.compose(itemPrefix, this.keys.entity)));
-                }
+                    SF.triggerNewContent($(SF.compose(itemPrefix, self.keys.entity)));
+                });
                 return true;
             },
 
