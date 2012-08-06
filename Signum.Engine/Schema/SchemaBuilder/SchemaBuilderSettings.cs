@@ -200,27 +200,13 @@ namespace Signum.Engine.Maps
 
         public Implementations GetImplementations(PropertyRoute route)
         {
-            var t = route.Type.CleanType();  
+            var cleanType = route.Type.CleanType();  
             if (!route.Type.CleanType().IsIIdentifiable())
                 throw new InvalidOperationException("{0} is not a {1}".Formato(route, typeof(IIdentifiable).Name));
 
             var fieldAtt = Attributes(route);
 
-            return ToImplementations(route, t, fieldAtt);
-        }
-
-        public static Implementations ToImplementations(PropertyRoute route, Type t, Attribute[] fieldAtt)
-        {
-            ImplementedByAttribute ib = fieldAtt.OfType<ImplementedByAttribute>().SingleOrDefaultEx();
-            ImplementedByAllAttribute iba = fieldAtt.OfType<ImplementedByAllAttribute>().SingleOrDefaultEx();
-
-            if (ib != null && iba != null)
-                throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
-
-            if (ib != null) return Implementations.By(ib.ImplementedTypes);
-            if (iba != null) return Implementations.ByAll;
-
-            return Implementations.By(t);
+            return Implementations.FromAttributes(cleanType, fieldAtt, route);
         }
 
         internal SqlDbTypePair GetSqlDbType(PropertyRoute route)

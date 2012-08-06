@@ -29,6 +29,7 @@ namespace Signum.Windows
 
         public Action<bool, ICollectionView> CollectionViewOperations { get; set; }
 
+        public abstract Implementations FindImplementations(PropertyRoute route);
     }
 
     public class EntitySettings<T> : EntitySettings where T:IdentifiableEntity
@@ -140,6 +141,11 @@ namespace Signum.Windows
 
             return true;
         }
+
+        public override Implementations FindImplementations(PropertyRoute route)
+        {
+            throw new InvalidOperationException("Call Server.FindImplementations for IdentifiableEntities");
+        }
     }
 
 
@@ -226,6 +232,16 @@ namespace Signum.Windows
                 }
 
             return true;
+        }
+
+        public Dictionary<PropertyRoute, Implementations> OverrideImplementations { get; set; }
+
+        public override Implementations FindImplementations(PropertyRoute route)
+        {
+            if (OverrideImplementations != null && OverrideImplementations.ContainsKey(route))
+                return OverrideImplementations[route];
+
+            return ModelEntity.GetImplementations(route);
         }
     }
 

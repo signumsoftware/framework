@@ -55,6 +55,20 @@ namespace Signum.Entities
             }
         }
 
+        public static Implementations FromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        {
+            ImplementedByAttribute ib = fieldAttributes.OfType<ImplementedByAttribute>().SingleOrDefaultEx();
+            ImplementedByAllAttribute iba = fieldAttributes.OfType<ImplementedByAllAttribute>().SingleOrDefaultEx();
+
+            if (ib != null && iba != null)
+                throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
+
+            if (ib != null) return Implementations.By(ib.ImplementedTypes);
+            if (iba != null) return Implementations.ByAll;
+
+            return Implementations.By(t);
+        }
+
         public static Implementations ByAll { get { return new Implementations(); } }
 
         public static Implementations By(Type type)
