@@ -585,7 +585,6 @@ SF.registerModule("Lines", function () {
                 var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
                 return $.extend({
                     onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions, _viewOptions.type, itemPrefix); },
-                    onOkClosed: function () { self.fireOnEntityChanged(); },
                     onCancelled: null,
                     controllerUrl: null,
                     prefix: itemPrefix,
@@ -619,6 +618,7 @@ SF.registerModule("Lines", function () {
                 select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='sf-value-line'>" + item.toStr + "</option>");
                 select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
                 select.children('option:last').attr('selected', true);
+                this.fireOnEntityChanged();
             },
 
             view: function (_viewOptions) {
@@ -672,7 +672,6 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     prefix: itemPrefix,
                     onOk: function (selectedItems) { return self.onFindingOk(selectedItems); },
-                    onOkClosed: function () { self.fireOnEntityChanged(); },
                     allowMultiple: true
                 }, _findOptions);
             },
@@ -827,7 +826,6 @@ SF.registerModule("Lines", function () {
 
                 var itemPrefix = viewOptions.prefix;
                 this.newListItem('', itemPrefix, { type: viewOptions.type });
-                this.fireOnEntityChanged();
             },
 
             view: function (_viewOptions) {
@@ -899,7 +897,6 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     prefix: itemPrefix,
                     onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-                    onOkClosed: function () { self.fireOnEntityChanged(); },
                     allowMultiple: true
                 }, _findOptions);
             },
@@ -1001,7 +998,6 @@ SF.registerModule("Lines", function () {
 
                 var itemPrefix = viewOptions.prefix;
                 this.newRepItem(newHtml, itemPrefix, { type: viewOptions.type });
-                this.fireOnEntityChanged();
             },
 
             newRepItem: function (newHtml, itemPrefix, item) {
@@ -1023,6 +1019,7 @@ SF.registerModule("Lines", function () {
                 $(this.pf(this.keys.itemsContainer)).append($div);
                 $("#" + SF.compose(itemPrefix, this.keys.entity)).html(newHtml);
                 SF.triggerNewContent($("#" + SF.compose(itemPrefix, this.keys.repeaterItem)));
+                this.fireOnEntityChanged();
             },
 
             _getRepeaterCall: function () {
@@ -1075,7 +1072,6 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     prefix: itemPrefix,
                     onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-                    onOkClosed: function () { self.fireOnEntityChanged(); },
                     allowMultiple: true
                 }, _findOptions);
             },
