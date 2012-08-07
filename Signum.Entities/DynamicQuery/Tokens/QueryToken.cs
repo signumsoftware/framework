@@ -78,7 +78,7 @@ namespace Signum.Entities.DynamicQuery
 
                 var onlyType = implementations.Value.Types.Only();
 
-                if (onlyType != null)
+                if (onlyType != null && onlyType == cleanType)
                     return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
                         .Concat(EntityProperties(onlyType).Concat(OnEntityExtension(onlyType, this)).OrderBy(a => a.ToString())).ToList();
 
