@@ -6,6 +6,8 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Files;
+using System.Xml.Linq;
+using System.Collections;
 
 namespace Signum.Entities.Chart
 {
@@ -75,6 +77,113 @@ namespace Signum.Entities.Chart
             
             base.PostRetrieving();
         }
+
+        public XDocument ExportXml()
+        {
+            var icon = Icon == null? null: Icon.Entity;
+
+            return new XDocument(new XDeclaration("1.0", "utf-8", "yes"),
+                new XElement("ChartScript",
+                    new XAttribute("Name", Name),
+                    new XAttribute("GroupBy", GroupBy.ToString()),
+                    new XElement("Columns",
+                        Columns.Select(c => new XElement("Column",
+                            new XAttribute("DisplayName", c.DisplayName),
+                            new XAttribute("ColumnType", c.ColumnType.ToString()),
+                            c.IsOptional ? new XAttribute("IsOptional", true) : null
+                         ))),
+                    icon == null ? null :
+                    new XElement("Icon",
+                        new XAttribute("FileName", icon.FileName),
+                        new XCData(Convert.ToBase64String(Icon.Entity.BinaryFile))),
+                    new XElement("Script", new XCData(Script))));
+                    
+        }
+
+        public void ImportXml(XDocument doc, bool force = false)
+        {
+            XElement script = doc.Root;
+
+            string name = script.Attribute("Name").Value;
+            GroupByChart groupBy = script.Attribute("GroupBy").Value.ToEnum<GroupByChart>();
+
+            List<ChartScriptColumnDN> columns = script.Element("Columns").Elements("Column").Select(c => new ChartScriptColumnDN
+            {
+                DisplayName = c.Attribute("DisplayName").Value,
+                ColumnType = c.Attribute("ColumnType").Value.ToEnum<ChartColumnType>(),
+                IsOptional = c.Attribute("IsOptional").Let(a => a != null && a.Value == "True"),
+            }).ToList();
+
+            if (!IsNew && Name != name && !force)
+                AsssertColumns(columns);
+
+            this.Name = name;
+            this.GroupBy = groupBy;
+
+            this.Columns = columns.ToMList();
+
+            this.Script = script.Elements("Script").Nodes().OfType<XCData>().Single().Value;
+
+            var newFile = script.Element("Icon").TryCC(icon => new FileDN
+            {
+                FileName = icon.Attribute("FileName").Value,
+                BinaryFile = Convert.FromBase64String(icon.Nodes().OfType<XCData>().Single().Value),
+            });
+
+            if (newFile == null)
+            {
+                Icon = null;
+            }
+            else
+            {
+                var oldFile = icon.Entity;
+
+                if (oldFile.FileName != newFile.FileName || !AreEqual(oldFile.BinaryFile, newFile.BinaryFile))
+                    Icon = oldFile.ToLiteFat();
+            }
+        }
+
+        static bool AreEqual(byte[] a1, byte[] a2)
+        {
+            if (a1.Length != a2.Length)
+                return false;
+
+            for (int i = 0; i < a1.Length; i++)
+            {
+                if (a1[i] != a2[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        private void AsssertColumns(List<ChartScriptColumnDN> columns)
+        {
+            string errors = Columns.ZipOrDefault(columns, (o, n) =>
+            {
+                if (o == null)
+                {
+                    if (!n.IsOptional)
+                        return "Adding non optional column {0}".Formato(n.DisplayName);
+                }
+                else if (n == null)
+                {
+                    if (o.IsOptional)
+                        return "Removing non optional column {0}".Formato(o.DisplayName);
+                }
+                else if (n.ColumnType != o.ColumnType)
+                {
+                    return "The column type of '{0}' ({1}) does not match with '{2}' ({3})".Formato(
+                        o.DisplayName, o.ColumnType,
+                        n.DisplayName, n.ColumnType);
+                }
+
+                return null;
+            }).NotNull().ToString("\r\n");
+
+            if (errors.HasText())
+                throw new FormatException("The columns doesn't match: \r\n" + errors);
+        }
     }
 
     public enum GroupByChart
@@ -95,12 +204,12 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable, SqlDbType(Size = 80)]
-        string propertyName;
+        string displayName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 80)]
-        public string PropertyName
+        public string DisplayName
         {
-            get { return propertyName; }
-            set { Set(ref propertyName, value, () => PropertyName); }
+            get { return displayName; }
+            set { Set(ref displayName, value, () => DisplayName); }
         }
 
         bool isOptional;
@@ -115,23 +224,6 @@ namespace Signum.Entities.Chart
         {
             get { return columnType; }
             set { Set(ref columnType, value, () => ColumnType); }
-        }
-
-        bool isGroupColor;
-        public bool IsGroupColor
-        {
-            get { return isGroupColor; }
-            set { Set(ref isGroupColor, value, () => IsGroupColor); }
-        }
-
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
-        {
-            if (pi.Is(() => IsGroupColor) && IsGroupColor && ColumnType != ChartColumnType.Groupable)
-            {
-                return "{0} can not be set if column type is not {1}".Formato(pi.NiceName(), ColumnType.NiceToString());
-            }
-
-            return base.PropertyValidation(pi);
         }
 
         public bool IsGroupKey

@@ -74,7 +74,7 @@ namespace Signum.Entities.Chart
         public bool ShouldAggregate { get { return parentChart.GroupResults && !ScriptColumn.IsGroupKey; } }
 
         [AvoidLocalization]
-        public string PropertyLabel { get { return ScriptColumn.PropertyName; } }
+        public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
 
         int index;
         public int Index

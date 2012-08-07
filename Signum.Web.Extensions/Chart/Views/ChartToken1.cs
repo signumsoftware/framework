@@ -172,7 +172,7 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
            Write(Html.ValueLine(tc, ct => ct.DisplayName));
 
                                                          
-                if (tc.Value.Token != null && tc.Value.ScriptColumn.IsGroupColor && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                if (tc.Value.Token != null && tc.Value.ScriptColumn.ShowPalette && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
                     var type = tc.Value.Token.Type.CleanType();
 

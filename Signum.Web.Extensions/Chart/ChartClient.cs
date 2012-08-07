@@ -341,7 +341,7 @@ namespace Signum.Web.Chart
             { 
                 name = "column" + i,
                 title = c.GetTitle(), 
-                converter = c.Converter(c.ScriptColumn.IsGroupColor, i)
+                converter = c.Converter(c.ScriptColumn.ShowPalette, i)
             }).ToList();
 
             if (request.Chart.GroupResults)
