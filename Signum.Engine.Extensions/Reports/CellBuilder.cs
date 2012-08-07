@@ -54,7 +54,7 @@ namespace Signum.Engine.Reports
 
         public TemplateCells GetTemplateCell(Type type)
         {
-            TypeCode tc = type.UnNullify().Map(a => a.IsEnum ? TypeCode.Object : Type.GetTypeCode(a));
+            TypeCode tc = type.UnNullify().Let(a => a.IsEnum ? TypeCode.Object : Type.GetTypeCode(a));
             return DefaultTemplateCells.TryGetS(tc) ?? TemplateCells.General;
         }
 
