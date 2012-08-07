@@ -518,10 +518,14 @@ SF.registerModule("Lines", function () {
             getLastPrefixIndex: function () {
                 var lastPrefixIndex = -1;
                 var $items = this.getItems();
-                if ($items.length > 0) {
-                    var lastId = $items[$items.length - 1].id;
-                    lastPrefixIndex = lastId.substring(this.options.prefix.length + 1, lastId.indexOf(this.itemSuffix()) - 1);
-                }
+                var self = this;
+                $items.each(function () {
+                    var currId = this.id;
+                    var currPrefixIndex = parseInt(currId.substring(self.options.prefix.length + 1, currId.indexOf(self.itemSuffix()) - 1), 10);
+                    if (currPrefixIndex > lastPrefixIndex) {
+                        lastPrefixIndex = currPrefixIndex;
+                    }
+                });
                 return parseInt(lastPrefixIndex, 10);
             },
 
@@ -536,11 +540,15 @@ SF.registerModule("Lines", function () {
             },
 
             getLastNewIndex: function () {
-                var lastPrefixIndex = this.getLastPrefixIndex();
-                if (lastPrefixIndex == -1) {
+                var $last = this.getItems().filter(":last");
+                if ($last.length == 0) {
                     return -1;
                 }
-                return this.getNewIndex(SF.compose(this.options.prefix, lastPrefixIndex.toString()));
+
+                var lastId = $last[0].id;
+                var lastPrefix = lastId.substring(0, lastId.indexOf(this.itemSuffix()) - 1);
+
+                return this.getNewIndex(lastPrefix);
             },
 
             checkValidation: function (validatorOptions, itemPrefix) {
