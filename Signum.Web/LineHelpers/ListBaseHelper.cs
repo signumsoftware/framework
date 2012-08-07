@@ -54,9 +54,6 @@ namespace Signum.Web
             if (!listBase.View)
                 return MvcHtmlString.Empty;
 
-            if (listBase.ViewMode == ViewMode.Navigate && !listBase.ElementType.CleanType().IsIIdentifiable())
-                return MvcHtmlString.Empty;
-
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", listBase.GetViewing() },
