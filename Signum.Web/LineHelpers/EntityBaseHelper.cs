@@ -145,7 +145,7 @@ namespace Signum.Web
 
         public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.Find || !entityBase.Type.CleanType().IsIIdentifiable())
+            if (!entityBase.Find)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
