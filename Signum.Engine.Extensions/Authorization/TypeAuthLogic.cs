@@ -148,6 +148,9 @@ namespace Signum.Engine.Authorization
             if (!TypeLogic.TypeToDN.ContainsKey(type))
                 return AuthUtils.MaxType.BaseAllowed;
 
+            if (EnumProxy.Extract(type) != null)
+                return new TypeAllowedAndConditions(TypeAllowed.Read);
+
             TypeAllowed? temp = TypeAuthLogic.GetTemporallyAllowed(type);
             if (temp.HasValue)
                 return new TypeAllowedAndConditions(temp.Value);
