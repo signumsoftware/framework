@@ -54,9 +54,6 @@ namespace Signum.Web
             if (!listBase.View)
                 return MvcHtmlString.Empty;
 
-            if (listBase.ViewMode == ViewMode.Navigate && !listBase.ElementType.CleanType().IsIIdentifiable())
-                return MvcHtmlString.Empty;
-
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", listBase.GetViewing() },
@@ -74,7 +71,7 @@ namespace Signum.Web
 
         public static MvcHtmlString FindButton(HtmlHelper helper, EntityListBase listBase)
         {
-            if ((!listBase.Find) || !listBase.ElementType.CleanType().IsIIdentifiable())
+            if (!listBase.Find)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
