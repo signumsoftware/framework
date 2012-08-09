@@ -436,6 +436,16 @@ namespace Signum.Entities
         {
             get { return Resources.HaveNoRepeatedElements; }
         }
+
+        public static string ByKey<T, K>(IEnumerable<T> collection, Func<T, K> keySelector)
+        {
+            var errors = collection.GroupBy(keySelector)
+                .Select(gr => new { gr.Key, Count = gr.Count() })
+                .Where(a => a.Count > 1)
+                .ToString(e => "{0} x {1}".Formato(e.Key, e.Count), ", ");
+
+            return errors;
+        }
     }
 
     public class CountIsValidatorAttribute : ValidatorAttribute
