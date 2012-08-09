@@ -50,8 +50,10 @@ namespace Signum.Engine
             bool Started { get; }
             void Rollback();
             void Commit();
-            ICoreTransaction Finish();
+            void Finish();
             void Start();
+
+            ICoreTransaction Parent { get; } 
 
             Dictionary<string, object> UserData { get; }
         }
@@ -94,7 +96,7 @@ namespace Signum.Engine
 
             public void Commit(){ }
 
-            public ICoreTransaction Finish() { return parent; }
+            public void Finish() { }
 
             public Dictionary<string, object> UserData
             {
@@ -104,6 +106,11 @@ namespace Signum.Engine
             public void CallPostRealCommit()
             {
 
+            }
+
+            public ICoreTransaction Parent
+            {
+                get { return parent; }
             }
         }
 
@@ -181,7 +188,7 @@ namespace Signum.Engine
                 }
             }
 
-            public virtual ICoreTransaction Finish()
+            public virtual void Finish()
             {
                 if (Transaction != null)
                 {
@@ -194,14 +201,17 @@ namespace Signum.Engine
                     Connection.Dispose();
                     Connection = null;
                 }
-
-                return parent;
             }
 
             Dictionary<string, object> userData;
             public Dictionary<string, object> UserData
             {
                 get { return userData ?? (userData = new Dictionary<string, object>());  }
+            }
+
+            public ICoreTransaction Parent
+            {
+                get { return parent; }
             }
         }
 
@@ -270,11 +280,16 @@ namespace Signum.Engine
                 }
             }
 
-            public ICoreTransaction Finish() { return parent; }
+            public void Finish() { }
 
             public Dictionary<string, object> UserData
             {
                 get { return parent.UserData; }
+            }
+
+            public ICoreTransaction Parent
+            {
+                get { return parent; }
             }
         }
 
@@ -344,7 +359,7 @@ namespace Signum.Engine
                 }
             }
 
-            public ICoreTransaction Finish()
+            public void Finish()
             {
                 //if (Transaction != null)
                 //{
@@ -357,14 +372,17 @@ namespace Signum.Engine
                     Connection.Dispose();
                     Connection = null;
                 }
-
-                return parent;
             }
 
             Dictionary<string, object> userData;
             public Dictionary<string, object> UserData
             {
                 get { return userData ?? (userData = new Dictionary<string, object>()); }
+            }
+
+            public ICoreTransaction Parent
+            {
+                get { return parent; }
             }
         }
 
@@ -384,11 +402,11 @@ namespace Signum.Engine
             }
 
     
-            public override ICoreTransaction Finish()
+            public override void Finish()
             {
                 avoidIndependentTransactions.Value = false;
 
-                return base.Finish();
+                base.Finish();
             }
         }
 
@@ -513,15 +531,20 @@ namespace Signum.Engine
 
         public void Dispose()
         {
-            if (!commited)
-                coreTransaction.Rollback();
+            try
+            {
+                if (!commited)
+                    coreTransaction.Rollback(); //... sqlTransacion.Rollback()
 
-            ICoreTransaction parent = coreTransaction.Finish();
-
-            if (parent == null)
-                currents.Value.Remove(Connector.Current);
-            else
-                currents.Value[Connector.Current] = parent;
+                coreTransaction.Finish(); //... sqlTransaction.Dispose() sqlConnection.Dispose()
+            }
+            finally
+            {
+                if (coreTransaction.Parent == null)
+                    currents.Value.Remove(Connector.Current);
+                else
+                    currents.Value[Connector.Current] = coreTransaction.Parent;
+            }
 
             if (commited)
                 coreTransaction.CallPostRealCommit();
