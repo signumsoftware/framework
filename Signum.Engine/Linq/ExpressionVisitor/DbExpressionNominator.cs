@@ -747,7 +747,7 @@ namespace Signum.Engine.Linq
             if (exp != isNotNull.Expression)
                 isNotNull = new IsNotNullExpression(exp);
 
-            if (Has(exp))
+            if (Has(exp) && IsFullNominateOrAggresive)
                 return Add(isNotNull);
 
             return isNotNull;
@@ -759,7 +759,7 @@ namespace Signum.Engine.Linq
             if (exp != isNull.Expression)
                 isNull = new IsNullExpression(exp);
 
-            if (Has(exp))
+            if (Has(exp) && IsFullNominateOrAggresive)
                 return Add(isNull);
 
             return isNull;

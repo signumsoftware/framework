@@ -10,6 +10,7 @@ using System.IO;
 using Signum.Utilities;
 using Signum.Engine.Linq;
 using System.Data.SqlTypes;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test.LinqProvider
 {
@@ -36,6 +37,35 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex, a => a.Name).ToList(); 
         }
+
+        [TestMethod]
+        public void GroupStringByEnumSimilar()
+        {
+            var queryA = (from a in Database.Query<ArtistDN>()
+                         group a.Name by a.Sex into g
+                         select g).QueryText();
+
+            var queryN = Database.Query<ArtistDN>().GroupBy(a => a.Sex, a => a.Name).QueryText();
+
+            Assert.AreEqual(queryN, queryA);
+        }
+
+          [TestMethod]
+        public void GroupMultiAggregate()
+        {
+            var sexos = from a in Database.Query<ArtistDN>()
+                        group a.Name.Length by a.Sex into g
+                        select new
+                        {
+                            Key = g.Key,
+                            Sum = g.Sum(),
+                            Min = g.Min(),
+                            Max = g.Max(),
+                            Avg = g.Average()
+                        };
+            sexos.ToList();
+        }
+
 
         [TestMethod]
         public void GroupEntityByEnum()
@@ -312,6 +342,8 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex).SelectMany(a => a).ToList();
         }
+
+        
 
         //[TestMethod]
         //public void SumSum()
