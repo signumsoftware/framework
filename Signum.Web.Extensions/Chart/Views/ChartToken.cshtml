@@ -23,7 +23,7 @@
     {
         tc.Value = new ChartColumnDN();
     }
-    ChartBase chart = ((TypeContext<ChartBase>)tc.Parent).Value;
+    ChartRequest chart = ((TypeContext<ChartRequest>)tc.Parent).Value;
     
     <tr class="sf-chart-token" data-token="token@(((TypeElementContext<ChartColumnDN>)tc).Index)">
         <td>@tc.Value.PropertyLabel
@@ -58,7 +58,7 @@
             @using (Html.FieldInline())
             { 
                 @Html.ValueLine(tc, ct => ct.DisplayName)
-                if (tc.Value.Token != null && tc.Value.ScriptColumn.IsGroupColor && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                if (tc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
                     var type = tc.Value.Token.Type.CleanType();
 

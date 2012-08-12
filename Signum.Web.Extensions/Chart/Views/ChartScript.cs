@@ -41,18 +41,17 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Signum.Engine;
-    using Signum.Entities.UserQueries;
-    using Signum.Web.Chart;
     using Signum.Entities.Chart;
+    using Signum.Web.Files;
+    using Signum.Engine;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/UserChartOrder.cshtml")]
-    public class _Page_Chart_Views_UserChartOrder_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartScript.cshtml")]
+    public class _Page_Chart_Views_ChartScript_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_Chart_Views_UserChartOrder_cshtml()
+        public _Page_Chart_Views_ChartScript_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -67,31 +66,34 @@ namespace ASP
 
 
 
-
-
 WriteLiteral("\r\n");
 
 
- using (var e = Html.TypeContext<QueryOrderDN>())
+ using (var cc = Html.TypeContext<ChartScriptDN>())
 {
-    using (var style = e.SubContext())
-    {
-        style.OnlyValue = true;
+	
+Write(Html.ValueLine(cc, c => c.Name));
 
-WriteLiteral("    <div style=\"float: left\">\r\n        ");
+                                 
+	
+Write(Html.FileLine(cc, c => c.Icon.TryCC(i=>i.Retrieve())));
 
+                                                       
+	
+Write(Html.ValueLine(cc, c => c.GroupBy));
 
-   Write(Html.ChartTokenCombo(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, ViewData[ViewDataKeys.QueryName], e));
+                                    
+    
+Write(Html.EntityRepeater(cc, c => c.Columns));
 
-WriteLiteral("\r\n    </div>\r\n");
+                                            
+    
+	
+Write(Html.ValueLine(cc, c => c.Script, vl => vl.ValueLineType = ValueLineType.TextArea));
 
-
-        
-   Write(Html.ValueLine(style, f => f.OrderType));
-
-                                                
-    }
+                                                                                    
 }
+
 
         }
     }

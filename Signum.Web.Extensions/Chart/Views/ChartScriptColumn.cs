@@ -41,18 +41,15 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Signum.Engine;
-    using Signum.Entities.UserQueries;
-    using Signum.Web.Chart;
     using Signum.Entities.Chart;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/UserChartOrder.cshtml")]
-    public class _Page_Chart_Views_UserChartOrder_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartScriptColumn.cshtml")]
+    public class _Page_Chart_Views_ChartScriptColumn_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_Chart_Views_UserChartOrder_cshtml()
+        public _Page_Chart_Views_ChartScriptColumn_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -66,32 +63,35 @@ namespace ASP
         {
 
 
-
-
-
-WriteLiteral("\r\n");
-
-
- using (var e = Html.TypeContext<QueryOrderDN>())
+ using (var cc = Html.TypeContext<ChartScriptColumnDN>())
 {
-    using (var style = e.SubContext())
-    {
-        style.OnlyValue = true;
 
-WriteLiteral("    <div style=\"float: left\">\r\n        ");
+WriteLiteral("    <div>\r\n        <div style=\"float: left\">\r\n            ");
 
 
-   Write(Html.ChartTokenCombo(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, ViewData[ViewDataKeys.QueryName], e));
+       Write(Html.ValueLine(cc, c => c.DisplayName));
 
-WriteLiteral("\r\n    </div>\r\n");
+WriteLiteral("\r\n            <div style=\"float: left\">\r\n                ");
 
 
-        
-   Write(Html.ValueLine(style, f => f.OrderType));
+           Write(Html.ValueLine(cc, c => c.IsOptional));
 
-                                                
-    }
+WriteLiteral("\r\n            </div>\r\n            <div style=\"float: left\">\r\n                ");
+
+
+           Write(Html.ValueLine(cc, c => c.IsGroupKey));
+
+WriteLiteral("\r\n            </div>\r\n        </div>\r\n        <div style=\"float: left\">\r\n        " +
+"    ");
+
+
+       Write(Html.ValueLine(cc, c => c.ColumnType));
+
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+
+
 }
+
 
         }
     }

@@ -1,0 +1,13 @@
+﻿@using Signum.Entities.Chart
+@using Signum.Web.Files
+@using Signum.Engine
+
+@using (var cc = Html.TypeContext<ChartScriptDN>())
+{
+	@Html.ValueLine(cc, c => c.Name)
+	@Html.FileLine(cc, c => c.Icon.TryCC(i=>i.Retrieve()))
+	@Html.ValueLine(cc, c => c.GroupBy)
+    @Html.EntityRepeater(cc, c => c.Columns)
+    
+	@Html.ValueLine(cc, c => c.Script, vl => vl.ValueLineType = ValueLineType.TextArea)
+}

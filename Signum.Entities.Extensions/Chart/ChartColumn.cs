@@ -15,15 +15,6 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Entities.Chart
 {
-    public enum AggregateFunction
-    {
-        Count,
-        Average,
-        Sum,
-        Min,
-        Max,
-    }
-
     [Serializable]
     public class ChartColumnDN : QueryTokenDN
     {
@@ -65,7 +56,7 @@ namespace Signum.Entities.Chart
         }
 
         [Ignore]
-        internal ChartBase parentChart;
+        internal IChartBase parentChart;
 
         [AvoidLocalization]
         public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
@@ -140,7 +131,7 @@ namespace Signum.Entities.Chart
 
         public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
-            var result = parentChart.SubTokensChart(token, columnDescriptions, this.ShouldAggregate);
+            var result = token.SubTokensChart(columnDescriptions, this.ShouldAggregate && this.parentChart.GroupResults);
 
             if (this.parentChart.GroupResults && ScriptColumn.IsGroupKey && token != null)
             {

@@ -86,17 +86,19 @@ namespace Signum.Web.Chart
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
-            return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix).SubContext(cr => cr.Chart));
+            return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix));
         }
 
         [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
         {
-            var request = ExtractChartRequestCtx("", null).Value;
+            ChartRequest request = ExtractChartRequestCtx("", null).Value;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
-            List<QueryToken> subtokens = request.Chart.SubTokensFilters(QueryUtils.Parse(tokenName, qt => request.Chart.SubTokensFilters(qt, qd.Columns)), qd.Columns);
+            QueryToken token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
+
+            List<QueryToken> subtokens = token.SubTokensChart(qd.Columns, request.GroupResults);
 
             if (subtokens.IsEmpty())
                 return Content("");
@@ -111,7 +113,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix)
         {
-            var request = ExtractChartRequestCtx(prefix, null).Value;
+            ChartRequest request = ExtractChartRequestCtx(prefix, null).Value;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
@@ -120,7 +122,7 @@ namespace Signum.Web.Chart
             FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
             {
-                fo.Token = QueryUtils.Parse(tokenName, qt => request.Chart.SubTokensFilters(qt, qd.Columns));
+                fo.Token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
@@ -159,7 +161,7 @@ namespace Signum.Web.Chart
             var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params["webQueryName"]))
                     .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
 
-            ChartBase chart = ctx.Value.Chart;
+            ChartRequest chart = ctx.Value;
             if (lastTokenChanged != null)
                 chart.Columns[lastTokenChanged.Value].TokenChanged();
 
@@ -170,7 +172,7 @@ namespace Signum.Web.Chart
         {
             var chartRequest = ExtractChartRequestCtx(prefix, null).Value;
 
-            if (chartRequest.Chart.GroupResults)
+            if (chartRequest.GroupResults)
             {
                 var filters = chartRequest.Filters
                     .Where(a => !(a.Token is AggregateToken))
@@ -182,7 +184,7 @@ namespace Signum.Web.Chart
                         Operation = f.Operation
                     }).ToList();
 
-                foreach (var column in chartRequest.Chart.Columns.Iterate())
+                foreach (var column in chartRequest.Columns.Iterate())
                 {
                     if (column.Value.ScriptColumn.IsGroupKey)
                         filters.AddRange(GetFilter(column.Value, "t" + column.Position));
@@ -265,7 +267,7 @@ namespace Signum.Web.Chart
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));
 
-            var userChart = UserChartDN.FromRequest(request);
+            var userChart = request.ToUserChart();
 
             userChart.Related = UserDN.Current.ToLite<IdentifiableEntity>();
 
@@ -278,7 +280,7 @@ namespace Signum.Web.Chart
         {
             UserChartDN uc = Database.Retrieve<UserChartDN>(lite);
 
-            ChartRequest request = UserChartDN.ToRequest(uc);
+            ChartRequest request = uc.ToRequest();
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),

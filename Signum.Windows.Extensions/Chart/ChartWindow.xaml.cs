@@ -395,19 +395,6 @@ namespace Signum.Windows.Chart
         }
     }
 
-    [Serializable]
-    public class ChartNullException : Exception
-    {
-        public ChartTokenName ChartTokenName { get; private set; }
-
-        public override string Message
-        {
-            get { return "There are null values in {0}".Formato(ChartTokenName); }
-        }
-
-        public ChartNullException(ChartTokenName name) { this.ChartTokenName = name; }
-    }
-
     public class ChartRendererBase : UserControl
     {
         public virtual void DrawChart() { }

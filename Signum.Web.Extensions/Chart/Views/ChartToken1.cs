@@ -110,7 +110,7 @@ WriteLiteral("\r\n");
     {
         tc.Value = new ChartColumnDN();
     }
-    ChartBase chart = ((TypeContext<ChartBase>)tc.Parent).Value;
+    ChartRequest chart = ((TypeContext<ChartRequest>)tc.Parent).Value;
     
 
 WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"token");
@@ -172,7 +172,7 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
            Write(Html.ValueLine(tc, ct => ct.DisplayName));
 
                                                          
-                if (tc.Value.Token != null && tc.Value.ScriptColumn.ShowPalette && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                if (tc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
                     var type = tc.Value.Token.Type.CleanType();
 

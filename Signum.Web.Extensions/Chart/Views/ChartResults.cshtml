@@ -31,7 +31,7 @@ else
             <table id="@Model.Compose("tblResults")" class="sf-search-results">
                 <thead class="ui-widget-header ui-corner-top">
                     <tr>
-                        @if (!Model.Value.Chart.GroupResults && viewable)
+                        @if (!Model.Value.GroupResults && viewable)
                         {
                             <th class="ui-state-default th-col-entity">
                             </th>
@@ -65,7 +65,7 @@ else
                     {
                         foreach (var row in queryResult.Rows)
                         {
-                            if (Model.Value.Chart.GroupResults)
+                            if (Model.Value.GroupResults)
                             {
                                 <tr>
                                     @foreach (var col in queryResult.Columns)

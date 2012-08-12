@@ -7,6 +7,7 @@ using System.Reflection;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Extensions.Properties;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart
 {
@@ -19,31 +20,32 @@ namespace Signum.Entities.Chart
 
             switch (QueryUtils.TryGetFilterType(token.Type))
             {
-                case FilterType.String: 
-                case FilterType.Lite: 
-                case FilterType.Boolean: 
-                case FilterType.Enum: 
-                    return ct == ChartColumnType.Groupable;
-                case FilterType.Integer: 
-                    return ct == ChartColumnType.Magnitude || 
-                           ct == ChartColumnType.Positionable || 
-                           ct == ChartColumnType.Groupable || 
-                           ct == ChartColumnType.GroupableAndPositionable;
-                case FilterType.Decimal: 
-                    return ct == ChartColumnType.Magnitude || 
-                           ct == ChartColumnType.Positionable;
-                case FilterType.DateTime: 
-                {
-                    if(IsDateOnly(token))
-                        return  ct == ChartColumnType.Positionable || 
-                                ct == ChartColumnType.Groupable || 
-                                ct == ChartColumnType.GroupableAndPositionable;
+                case FilterType.Lite:
+                case FilterType.Boolean:
+                case FilterType.Enum:
+                    return Flag(ct, ChartColumnType.Entity);
+                case FilterType.String:
+                case FilterType.Guid:
+                    return Flag(ct, ChartColumnType.String);
+                case FilterType.Integer:
+                    return Flag(ct, ChartColumnType.Integer);
+                case FilterType.Decimal:
+                    return Flag(ct, ChartColumnType.Decimal);
+                case FilterType.DateTime:
+                    {
+                        if (IsDateOnly(token))
+                            return Flag(ct, ChartColumnType.Date);
 
-                    return ct == ChartColumnType.Positionable;
-                }
+                        return Flag(ct, ChartColumnType.DateTime);
+                    }
             }
 
             return false;
+        }
+
+        public static bool Flag(ChartColumnType ct, ChartColumnType flag)
+        {
+            return (ct & flag) == flag;
         }
 
         public static bool IsDateOnly(QueryToken token)
@@ -68,6 +70,128 @@ namespace Signum.Entities.Chart
             }
 
             return false;
+        }
+
+        public static List<QueryToken> SubTokensChart(this QueryToken token, IEnumerable<ColumnDescription> columnDescriptions, bool canAggregate)
+        {
+            var result = QueryUtils.SubTokens(token, columnDescriptions);
+
+            if (canAggregate)
+            {
+                if (token == null)
+                {
+                    result.Add(new AggregateToken(null, AggregateFunction.Count));
+                }
+                else if (!(token is AggregateToken))
+                {
+                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                    if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
+                    {
+                        result.Add(new AggregateToken(token, AggregateFunction.Average));
+                        result.Add(new AggregateToken(token, AggregateFunction.Sum));
+
+                        result.Add(new AggregateToken(token, AggregateFunction.Min));
+                        result.Add(new AggregateToken(token, AggregateFunction.Max));
+                    }
+                    else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
+                    {
+                        result.Add(new AggregateToken(token, AggregateFunction.Min));
+                        result.Add(new AggregateToken(token, AggregateFunction.Max));
+                    }
+                }
+            }
+
+            return result;
+        }
+        
+        public static bool SyncronizeColumns(this ChartScriptDN chartScript, MList<ChartColumnDN> columns)
+        {
+            bool result = false;
+
+            if (chartScript == null)
+            {
+                result = true;
+                columns.Clear();
+            }
+
+            for (int i = 0; i < chartScript.Columns.Count; i++)
+            {
+                if (columns.Count <= i)
+                {
+                    columns.Add(new ChartColumnDN());
+                    result = true;
+                }
+
+                columns[i].ScriptColumn = chartScript.Columns[i];
+
+            }
+
+            if (columns.Count > chartScript.Columns.Count)
+            {
+                columns.RemoveRange(chartScript.Columns.Count, columns.Count - chartScript.Columns.Count);
+                return true;
+            }
+
+            return result;
+        }
+
+        public static UserChartDN ToUserChart(this ChartRequest request)
+        {
+            var result = new UserChartDN
+            {
+                QueryName = request.QueryName,
+
+                GroupResults = request.GroupResults,
+                ChartScript = request.ChartScript,
+                
+                Filters = request.Filters.Select(f => new QueryFilterDN
+                {
+                    Token = f.Token,
+                    Operation = f.Operation,
+                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
+                }).ToMList(),
+                
+                Columns = request.Columns.Select(c => new ChartColumnDN
+                {
+                    DisplayName = c.DisplayName,
+                    Token = c.Token.Clone(),
+                }).ToMList(),
+
+                Orders = request.Orders.Select(o => new QueryOrderDN
+                {
+                    Token = o.Token,
+                    OrderType = o.OrderType
+                }).ToMList()
+            };
+
+            return result;
+        }
+
+        public static ChartRequest ToRequest(this UserChartDN uq)
+        {
+            var result = new ChartRequest(uq.QueryName)
+            {
+                GroupResults = uq.GroupResults,
+                ChartScript = uq.ChartScript,
+                
+                Filters = uq.Filters.Select(qf => new Filter
+                {
+                    Token = qf.Token,
+                    Operation = qf.Operation,
+                    Value = qf.Value
+                }).ToList(),
+
+                Columns = uq.Columns.Select(c => new ChartColumnDN
+                {
+                    DisplayName = c.DisplayName,
+                    Token = c.Token.Clone(),
+                }).ToMList(),
+
+                Orders = uq.Orders.Select(o => new Order(o.Token, o.OrderType)).ToList(),
+            };
+
+            return result;
         }
     }
 

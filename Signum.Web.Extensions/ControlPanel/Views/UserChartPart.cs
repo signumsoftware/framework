@@ -78,8 +78,6 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
-
 
 Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
                 "~/scripts/d3.v2.min.js"));
@@ -89,12 +87,12 @@ WriteLiteral("\r\n");
 
 Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
 
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
 
 
    
     UserChartDN uc = ((UserChartPartDN)Model.Content).UserChart;
-    ChartRequest request = UserChartDN.ToRequest(uc);
+    ChartRequest request = uc.ToRequest();
 
     using (var ucTc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
     {
@@ -103,67 +101,52 @@ WriteLiteral("\r\n\r\n");
         var json = ChartClient.DataJson(ucTc.Value, resultTable);
 
 
-WriteLiteral("        <div id=\"");
+WriteLiteral("    <div id=\"");
 
 
-            Write(ucTc.Compose("sfChartControl"));
+        Write(ucTc.Compose("sfChartControl"));
 
 WriteLiteral("\" class=\"sf-search-control sf-chart-control\" data-prefix=\"");
 
 
-                                                                                                     Write(ucTc.ControlID);
+                                                                                                 Write(ucTc.ControlID);
 
-WriteLiteral("\">\r\n            <div style=\"display:none\">\r\n                ");
-
-
-           Write(Html.HiddenRuntimeInfo(ucTc));
-
-WriteLiteral("\r\n                ");
+WriteLiteral("\">\r\n        <div style=\"display: none\">\r\n            ");
 
 
-           Write(Html.HiddenRuntimeInfo(ucTc, cr => cr.Chart));
+       Write(Html.HiddenRuntimeInfo(ucTc));
 
-WriteLiteral("\r\n        \r\n                ");
+WriteLiteral("\r\n            ");
 
 
-           Write(Html.Hidden(ucTc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
+       Write(Html.Hidden(ucTc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
                     (request.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
 
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
 
 
-                  
-                    ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-                    ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
-                
+              
+        ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+        ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
+            
 
-WriteLiteral("\r\n                ");
-
-
-           Write(Html.Partial(Navigator.Manager.FilterBuilderView, ucTc));
-
-WriteLiteral("\r\n\r\n");
+WriteLiteral("            ");
 
 
-                 using (var chart = ucTc.SubContext(cr => cr.Chart))
-                {
+       Write(Html.Partial(Navigator.Manager.FilterBuilderView, ucTc));
 
-WriteLiteral("                    <div id=\"");
-
-
-                        Write(ucTc.Compose("sfChartBuilderContainer"));
-
-WriteLiteral("\">\r\n                        ");
+WriteLiteral("\r\n            <div id=\"");
 
 
-                   Write(Html.Partial(ChartClient.ChartBuilderView, chart));
+                Write(ucTc.Compose("sfChartBuilderContainer"));
 
-WriteLiteral("\r\n                    </div>\r\n");
+WriteLiteral("\">\r\n                ");
 
 
+           Write(Html.Partial(ChartClient.ChartBuilderView, request));
 
-WriteLiteral("                    <script type=\"text/javascript\">\r\n                        $(\'#" +
-"");
+WriteLiteral("\r\n            </div>\r\n            <script type=\"text/javascript\">\r\n              " +
+"          $(\'#");
 
 
                        Write(ucTc.Compose("sfChartBuilderContainer"));
@@ -178,18 +161,13 @@ WriteLiteral("\'}, ");
 
                                                                                                                       Write(MvcHtmlString.Create(uc.ToJS()));
 
-WriteLiteral("));\r\n                    </script>\r\n");
+WriteLiteral("));\r\n            </script>\r\n        </div>\r\n        <div id=\"");
 
 
-                }
+            Write(ucTc.Compose("sfChartContainer"));
 
-WriteLiteral("            </div>\r\n            <div id=\"");
-
-
-                Write(ucTc.Compose("sfChartContainer"));
-
-WriteLiteral("\">\r\n                <div class=\"sf-chart-container\" \r\n                    data-op" +
-"en-url=\"");
+WriteLiteral("\">\r\n            <div class=\"sf-chart-container\" \r\n                    data-open-u" +
+"rl=\"");
 
 
                                Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)));
@@ -199,14 +177,14 @@ WriteLiteral("\" \r\n                    data-fullscreen-url=\"");
 
                                      Write(Url.Action<ChartController>(cc => cc.FullScreen(ucTc.ControlID)));
 
-WriteLiteral("\">\r\n                </div>\r\n            </div>\r\n        </div>\r\n");
+WriteLiteral("\">\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
 
 
     
-                MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
+        MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
 
-WriteLiteral("        <script type=\"text/javascript\">\r\n            $(function() {\r\n            " +
-"    var $chartContainer = $(\'");
+WriteLiteral("    <script type=\"text/javascript\">\r\n            $(function() {\r\n                " +
+"var $chartContainer = $(\'");
 
 
                                     Write(divSelector);
@@ -221,7 +199,7 @@ WriteLiteral("\');\r\n                        \r\n                $chartContaine
 WriteLiteral(";\r\n\r\n                var myChart = SF.Chart.Factory.getGraphType(\'");
 
 
-                                                        Write(ucTc.Value.Chart.ChartScript.ToString());
+                                                        Write(ucTc.Value.ChartScript.ToString());
 
 WriteLiteral("\');\r\n                \r\n                eval(myChart.createChartSVG(\'");
 
@@ -244,11 +222,12 @@ WriteLiteral("\", \"sfFullScreen\")).on(\"mousedown\", function(e){\r\n         
 
                                 Write(ucTc.ControlID);
 
-WriteLiteral("\').fullScreen(e);\r\n                });\r\n            });\r\n        </script>\r\n");
+WriteLiteral("\').fullScreen(e);\r\n                });\r\n            });\r\n    </script>\r\n");
 
 
     
     }
+
 
 
         }

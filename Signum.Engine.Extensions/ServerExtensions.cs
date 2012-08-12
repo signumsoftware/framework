@@ -354,14 +354,14 @@ namespace Signum.Services
         public List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => ChartLogic.GetUserCharts(queryName));
+            () => UserChartLogic.GetUserCharts(queryName));
         }
 
         [SuggestUserInterface]
         public void RemoveUserChart(Lite<UserChartDN> lite)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-              () => ChartLogic.RemoveUserChart(lite));
+              () => UserChartLogic.RemoveUserChart(lite));
         }
 
         #endregion

@@ -47,6 +47,7 @@ namespace ASP
     using Signum.Entities.Reflection;
     using Signum.Entities.Chart;
     using Signum.Web.Chart;
+    using Signum.Engine.Chart;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartBuilder.cshtml")]
@@ -76,10 +77,9 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
 
 
- using (var chart = Html.TypeContext<ChartBase>())
+ using (var chart = Html.TypeContext<ChartRequest>())
 {
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     if (queryDescription == null)
@@ -124,7 +124,7 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </div>\r\n");
 
 
-                 foreach (var group in  ChartClient.Scripts.Value.GroupsOf(4))
+                 foreach (var group in ChartScriptLogic.Scripts.Value.GroupsOf(4))
                 {
                     foreach (var script in group)
                     { 

@@ -8,14 +8,12 @@
 @using Signum.Engine.Chart
 @using Signum.Engine.DynamicQuery
 @model PanelPart
-
 @Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
                 "~/scripts/d3.v2.min.js")
 @Html.ScriptCss("~/Chart/Content/SF_Chart.css")
-
 @{ 
     UserChartDN uc = ((UserChartPartDN)Model.Content).UserChart;
-    ChartRequest request = UserChartDN.ToRequest(uc);
+    ChartRequest request = uc.ToRequest();
 
     using (var ucTc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
     {
@@ -23,41 +21,33 @@
 
         var json = ChartClient.DataJson(ucTc.Value, resultTable);
 
-        <div id="@ucTc.Compose("sfChartControl")" class="sf-search-control sf-chart-control" data-prefix="@ucTc.ControlID">
-            <div style="display:none">
-                @Html.HiddenRuntimeInfo(ucTc)
-                @Html.HiddenRuntimeInfo(ucTc, cr => cr.Chart)
-        
-                @Html.Hidden(ucTc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
+    <div id="@ucTc.Compose("sfChartControl")" class="sf-search-control sf-chart-control" data-prefix="@ucTc.ControlID">
+        <div style="display: none">
+            @Html.HiddenRuntimeInfo(ucTc)
+            @Html.Hidden(ucTc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
                     (request.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
-
-                @{
-                    ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-                    ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
-                }
-
-                @Html.Partial(Navigator.Manager.FilterBuilderView, ucTc)
-
-                @using (var chart = ucTc.SubContext(cr => cr.Chart))
-                {
-                    <div id="@ucTc.Compose("sfChartBuilderContainer")">
-                        @Html.Partial(ChartClient.ChartBuilderView, chart)
-                    </div>
-                    <script type="text/javascript">
-                        $('#@ucTc.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@ucTc.ControlID'}, @MvcHtmlString.Create(uc.ToJS())));
-                    </script>
-                }
+            @{
+        ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+        ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
+            }
+            @Html.Partial(Navigator.Manager.FilterBuilderView, ucTc)
+            <div id="@ucTc.Compose("sfChartBuilderContainer")">
+                @Html.Partial(ChartClient.ChartBuilderView, request)
             </div>
-            <div id="@ucTc.Compose("sfChartContainer")">
-                <div class="sf-chart-container" 
+            <script type="text/javascript">
+                        $('#@ucTc.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@ucTc.ControlID'}, @MvcHtmlString.Create(uc.ToJS())));
+            </script>
+        </div>
+        <div id="@ucTc.Compose("sfChartContainer")">
+            <div class="sf-chart-container" 
                     data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)))" 
                     data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(ucTc.ControlID)))">
-                </div>
             </div>
         </div>
+    </div>
     
-                MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
-        <script type="text/javascript">
+        MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
+    <script type="text/javascript">
             $(function() {
                 var $chartContainer = $('@divSelector');
                         
@@ -68,7 +58,7 @@
 
                 var data = @Html.Json(json);
 
-                var myChart = SF.Chart.Factory.getGraphType('@ucTc.Value.Chart.ChartScript.ToString()');
+                var myChart = SF.Chart.Factory.getGraphType('@ucTc.Value.ChartScript.ToString()');
                 
                 eval(myChart.createChartSVG('@divSelector') + myChart.paintChart('@divSelector'));
 
@@ -76,7 +66,7 @@
                     SF.Chart.getFor('@ucTc.ControlID').fullScreen(e);
                 });
             });
-        </script>
+    </script>
     
     }
 }

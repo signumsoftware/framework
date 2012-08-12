@@ -117,6 +117,8 @@
     <Compile Include="Chart\ChartLogic.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Chart\ChartScriptLogic.cs" />
+    <Compile Include="Chart\UserChartLogic.cs" />
     <Compile Include="ControlPanel\ControlPanelLogic.cs" />
     <Compile Include="Deployment\DeploymentLogic.cs" />
     <Compile Include="Disconnected\DisconnectedTools.cs" />

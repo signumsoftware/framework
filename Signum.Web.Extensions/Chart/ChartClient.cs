@@ -27,10 +27,6 @@ namespace Signum.Web.Chart
 {
     public static class ChartClient
     {
-        public static ResetLazy<List<ChartScriptDN>> Scripts = new ResetLazy<List<ChartScriptDN>>(() =>
-            Database.Query<ChartScriptDN>().ToList())
-            .InvalidateWith(typeof(ChartScriptDN));
-
         public static string ViewPrefix = "~/Chart/Views/{0}.cshtml";
 
         public static string ChartControlView = ViewPrefix.Formato("ChartControl");
@@ -54,24 +50,25 @@ namespace Signum.Web.Chart
                     string queryKey = ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = QueryLogic.ToQueryName(queryKey);
             
-                    var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue).Chart;
+                    var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue);
 
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qt => chart.SubTokensChart(qt, qd.Columns, true));
+                    return QueryUtils.Parse(tokenStr, qt => qt.SubTokensChart(qd.Columns, chart.GroupResults));
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EmbeddedEntitySettings<ChartRequest>(),
-                    new EmbeddedEntitySettings<ChartBase>(),
                     new EmbeddedEntitySettings<ChartColumnDN> { PartialViewName = _ => ViewPrefix.Formato("ChartToken") },
+                    new EmbeddedEntitySettings<ChartScriptColumnDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptColumn") },
+                    new EntitySettings<ChartScriptDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
 
                     new EntitySettings<UserChartDN>(EntityType.Default) 
                     { 
                         PartialViewName = _ => ViewPrefix.Formato("UserChart"),
                         MappingAdmin = new EntityMapping<UserChartDN>(true)
-                            .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
-                                .SetProperty(cb=>cb.Columns, new MListMapping<ChartColumnDN>(mappingChartColumn)))
+                        
+                            .SetProperty(cb=>cb.Columns, new MListMapping<ChartColumnDN>(mappingChartColumn))
                             .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterDN>
                             {
                                 ElementMapping = new EntityMapping<QueryFilterDN>(false)
@@ -180,9 +177,9 @@ namespace Signum.Web.Chart
                     Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
                 var chartToken = (ChartColumnDN)ctx.Parent.UntypedValue;
-                var chart = (ChartBase)ctx.Parent.Parent.UntypedValue;
+                var chart = (IChartBase)ctx.Parent.Parent.UntypedValue;
 
-                return QueryUtils.Parse(tokenName, qt => chart.SubTokensChart(qt, qd.Columns, true));
+                return QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, chart.GroupResults));
             })
             .SetProperty(ct => ct.DisplayName, ctx =>
             {
@@ -192,28 +189,20 @@ namespace Signum.Web.Chart
                 return ctx.Input;
             });
 
-        public static EntityMapping<ChartBase> MappingChartBase = new EntityMapping<ChartBase>(true)
-            .SetProperty(cb => cb.Columns, new MListMapping<ChartColumnDN>(ctx =>
-            {
-                if (ctx.Value == null)
-                    return ctx.None();
-                else
-                    return mappingChartColumn.GetValue(ctx);
-            }));
-
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
-            .SetProperty(cr => cr.Chart, MappingChartBase);
-                 
+            .SetProperty(cb => cb.Columns, new MListMapping<ChartColumnDN>(mappingChartColumn));
+
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
-            {
+        {
             var qd = DynamicQueryManager.Current.QueryDescription(
                 Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
-            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToFilter()).ToList();
+            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qt => qt.SubTokensChart(qd.Columns, chartRequest.GroupResults))
+                .Select(fo => fo.ToFilter()).ToList();
         }
 
         static List<Order> ExtractChartOrders(MappingContext<List<Order>> ctx)
@@ -222,8 +211,9 @@ namespace Signum.Web.Chart
                 Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
-            
-            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToOrder()).ToList();
+
+            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qt => qt.SubTokensChart(qd.Columns, chartRequest.GroupResults))
+                .Select(fo => fo.ToOrder()).ToList();
         }
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
@@ -264,7 +254,7 @@ namespace Signum.Web.Chart
             if (url.HasText() && url.Contains("UC"))
                 currentUserChart = new Lite<UserChartDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
 
-            foreach (var uc in ChartLogic.GetUserCharts(queryName))
+            foreach (var uc in UserChartLogic.GetUserCharts(queryName))
             {
                 items.Add(new ToolBarButton
                 {
@@ -335,16 +325,14 @@ namespace Signum.Web.Chart
 
         public static object DataJson(ChartRequest request, ResultTable resultTable)
         {
-            var chart = request.Chart;
-
-            var cols = request.Chart.Columns.Select((c,i)=>new 
+            var cols = request.Columns.Select((c,i)=>new 
             { 
                 name = "column" + i,
                 title = c.GetTitle(), 
-                converter = c.Converter(c.ScriptColumn.ShowPalette, i)
+                converter = c.Converter(i)
             }).ToList();
 
-            if (request.Chart.GroupResults)
+            if (request.GroupResults)
             {
                 cols.Insert(0, new
                 {
@@ -361,7 +349,7 @@ namespace Signum.Web.Chart
             };
         }
 
-        private static Func<ResultRow,object> Converter(this ChartColumnDN ct, bool color, int columnIndex)
+        private static Func<ResultRow,object> Converter(this ChartColumnDN ct, int columnIndex)
         {
             if (ct == null)
                 return null;
@@ -370,53 +358,31 @@ namespace Signum.Web.Chart
 
             if (typeof(Lite).IsAssignableFrom(type))
             {
-                if(color)
-                    return r =>
+                return r =>
+                {
+                    Lite l = (Lite)r[columnIndex];
+                    return new
                     {
-                        Lite l = (Lite)r[columnIndex];
-                        return new
-                        {
-                            key = l.TryCC(li => li.Key()),
-                            toStr = l.TryCC(li => li.ToString()),
-                            color = l == null ? "#555" : ChartColorLogic.ColorFor(l).TryToHtml(),
-                        };
+                        key = l.TryCC(li => li.Key()),
+                        toStr = l.TryCC(li => li.ToString()),
+                        color = l == null ? "#555" : ChartColorLogic.ColorFor(l).TryToHtml(),
                     };
-                else
-                    return r =>
-                    {
-                        Lite l = (Lite)r[columnIndex];
-                        return new
-                        {
-                            key = l.TryCC(li => li.Key()),
-                            toStr = l.TryCC(li => li.ToString())
-                        };
-                    };
+                };
             }
             else if (type.IsEnum)
             {
                 var dic = ChartColorLogic.Colors.Value.TryGetC(EnumProxy.Generate(type));
 
-                if (color)
-                    return r =>
+                return r =>
+                {
+                    Enum e = (Enum)r[columnIndex];
+                    return new
                     {
-                        Enum e = (Enum)r[columnIndex];
-                        return new
-                        {
-                            key = e.TryToString(),
-                            toStr = e.TryCC(en => en.NiceToString()),
-                            color = e == null ? "#555" : dic.TryGetS(Convert.ToInt32(e)).TryToHtml(),
-                        };
+                        key = e.TryToString(),
+                        toStr = e.TryCC(en => en.NiceToString()),
+                        color = e == null ? "#555" : dic.TryGetS(Convert.ToInt32(e)).TryToHtml(),
                     };
-                else
-                    return r =>
-                    {
-                        Enum e = (Enum)r[columnIndex];
-                        return new
-                        {
-                            key = e.TryToString(),
-                            toStr = e.TryCC(en => en.NiceToString())
-                        };
-                    };
+                };
             }
             else if (typeof(DateTime) == type)
             {
@@ -447,20 +413,7 @@ namespace Signum.Web.Chart
                 return r => r[columnIndex];
         }
 
-        public static string ChartTypeImgClass(ChartBase chart, ChartScriptDN script)
-        {
-            string css = "sf-chart-img sf-chart-img-" + script.Id.ToString().ToLower();
-
-            if (script.ColumnsToString() == chart.ChartScript.ColumnsToString())
-                css += " sf-chart-img-equiv";
-
-            if (script.Is(chart.ChartScript))
-                css += " sf-chart-img-curr";
-            
-            return css;
-        }
-
-        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, QueryTokenDN chartToken, ChartBase chart, object queryName, Context context)
+        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, object queryName, Context context)
         {
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
@@ -474,7 +427,7 @@ namespace Signum.Web.Chart
 
             bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.ShouldAggregate) ?? true;
 
-            var rootTokens = chart.SubTokensChart(null, qd.Columns, canAggregate);
+            var rootTokens = ChartUtils.SubTokensChart(null, qd.Columns, chart.GroupResults && canAggregate);
 
             sb.AddLine(SearchControlHelper.TokenOptionsCombo(
                 helper, qd.QueryName, SearchControlHelper.TokensCombo(rootTokens, queryToken), context, 0, false));
@@ -482,7 +435,7 @@ namespace Signum.Web.Chart
             for (int i = 0; i < tokenPath.Count; i++)
             {
                 QueryToken t = tokenPath[i];
-                List<QueryToken> subtokens = chart.SubTokensChart(t, qd.Columns, canAggregate);
+                List<QueryToken> subtokens = t.SubTokensChart(qd.Columns, canAggregate);
                 if (!subtokens.IsEmpty())
                 {
                     bool moreTokens = i + 1 < tokenPath.Count;
@@ -494,9 +447,9 @@ namespace Signum.Web.Chart
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString ChartRootTokens(this HtmlHelper helper, ChartBase chart, QueryDescription qd, Context context)
+        public static MvcHtmlString ChartRootTokens(this HtmlHelper helper, IChartBase chart, QueryDescription qd, Context context)
         {
-            var subtokens = chart.SubTokensChart(null, qd.Columns, true);
+            var subtokens = ChartUtils.SubTokensChart(null, qd.Columns, chart.GroupResults);
 
             return SearchControlHelper.TokenOptionsCombo(
                 helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, null), context, 0, false);

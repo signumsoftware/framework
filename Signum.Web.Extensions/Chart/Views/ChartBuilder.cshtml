@@ -8,8 +8,8 @@
 @using Signum.Entities.Chart
 @using Signum.Web.Chart
 @using Signum.Utilities
-
-@using (var chart = Html.TypeContext<ChartBase>())
+@using Signum.Engine.Chart
+@using (var chart = Html.TypeContext<ChartRequest>())
 {
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     if (queryDescription == null)
@@ -28,7 +28,7 @@
                     }
                     @Html.Hidden(chart.Compose("GroupResults"), chart.Value.GroupResults, new { @class = "sf-chart-group-results" })
                 </div>
-                @foreach (var group in  ChartClient.Scripts.Value.GroupsOf(4))
+                @foreach (var group in ChartScriptLogic.Scripts.Value.GroupsOf(4))
                 {
                     foreach (var script in group)
                     { 

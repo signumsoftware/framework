@@ -46,6 +46,7 @@ namespace Signum.Entities.Chart
             set { Set(ref groupBy, value, () => GroupBy); }
         }
 
+        [NotifyCollectionChanged, ValidateChildProperty]
         MList<ChartScriptColumnDN> columns = new MList<ChartScriptColumnDN>();
         public MList<ChartScriptColumnDN> Columns
         {
@@ -62,6 +63,36 @@ namespace Signum.Entities.Chart
         public string ColumnsToString()
         {
             return Columns.ToString(a => a.ColumnType.ToString(), "|");
+        }
+
+        protected override string ChildPropertyValidation(ModifiableEntity sender, System.Reflection.PropertyInfo pi)
+        {
+            var column = sender as ChartScriptColumnDN;
+
+            if (column != null && pi.Is(() => column.IsGroupKey))
+            {
+                if (column.IsGroupKey)
+                {
+                    if (!ChartUtils.Flag(ChartColumnType.Groupable, column.ColumnType))
+                        return "{0} can not be true for {1}".Formato(pi.NiceName(), column.ColumnType.NiceToString());
+                }
+            }
+
+            return base.ChildPropertyValidation(sender, pi);
+        }
+
+        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        {
+            if (pi.Is(() => GroupBy))
+            {
+                if (GroupBy == GroupByChart.Always || GroupBy == GroupByChart.Optional)
+                {
+                    if (!Columns.Any(a => a.IsGroupKey))
+                        return "{0} {1} requires some key columns".Formato(pi.NiceName(), groupBy.NiceToString());
+                }
+            }
+
+            return base.PropertyValidation(pi);
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -186,6 +217,12 @@ namespace Signum.Entities.Chart
         }
     }
 
+    public enum ChartScriptOperations
+    {
+        Clone,
+        Delete
+    }
+
     public enum GroupByChart
     {
         Always,
@@ -226,17 +263,26 @@ namespace Signum.Entities.Chart
             set { Set(ref columnType, value, () => ColumnType); }
         }
 
+        bool isGroupKey;
         public bool IsGroupKey
         {
-            get { return columnType == ChartColumnType.Groupable || columnType == ChartColumnType.GroupableAndPositionable; }
+            get { return isGroupKey; }
+            set { Set(ref isGroupKey, value, () => IsGroupKey); }
         }
     }
 
     public enum ChartColumnType
     {
-        Groupable, // String | Entity | Boolean | Enum | Integer | Date | Interval,
-        Magnitude, //Integer | Decimal
-        Positionable, //Integer | Decimal | Date | DateTime
-        GroupableAndPositionable, // Integer | Date 
+        Decimal = 1,
+        DateTime = 2,
+        Integer = 4,
+        Date = 8,
+        String = 16, //Guid
+        Entity = 32, //Enum | Boolean 
+
+        Groupable = Integer | Date | String | Entity, 
+        Magnitude = Integer | Decimal,
+        Positionable = Integer | Decimal | Date | DateTime,
+        GroupableAndPositionable  = Integer | Date 
     }
 }
