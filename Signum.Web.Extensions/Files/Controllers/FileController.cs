@@ -59,40 +59,39 @@ namespace Signum.Web.Files
         {
             bool shouldSaveFilePath = !RuntimeInfo.FromFormValue((string)Request["fileParentRuntimeInfo"]).IsNew;
 
-            FilePathDN fp = null;
-            string prefix = "";
-            foreach (string file in Request.Files)
+            string fileName = Request.Files.Cast<string>().Single();
+
+            string prefix = fileName.Substring(0, fileName.IndexOf(FileLineKeys.File) - 1);
+
+            RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
+
+            IFile file;
+
+            if (info.RuntimeType == typeof(FilePathDN))
             {
-                prefix = file.Substring(0, file.IndexOf(FileLineKeys.File) - 1);
-
-                RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-                if (info.RuntimeType != typeof(FilePathDN))
-                    continue;
-
-                if (info.IdOrNull.HasValue)
-                    continue; //Only new files will come with content
-
-                HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
-                if (string.IsNullOrEmpty(hpf.FileName))
-                    continue; //It will have been uploaded by drag-drop
-
                 string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
                 if (!fileType.HasText())
-                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(file));
+                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(fileName));
 
-                fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
-                {
-                    FileName = Path.GetFileName(hpf.FileName),
-                    BinaryFile = hpf.InputStream.ReadAllBytes()
-                };
-
-                if (shouldSaveFilePath)
-                    fp = fp.Save();
-                else 
-                    Session[Request.Form[ViewDataKeys.TabId] + prefix] = fp;
+                file = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
+            }
+            else
+            {
+                file = (IFile)Activator.CreateInstance(info.RuntimeType);
             }
 
-            return UploadResult(prefix, fp, shouldSaveFilePath);
+            HttpPostedFileBase hpf = Request.Files[fileName] as HttpPostedFileBase;
+
+            file.FileName = Path.GetFileName(hpf.FileName);
+            file.BinaryFile = hpf.InputStream.ReadAllBytes();
+
+            if (shouldSaveFilePath)
+                ((IdentifiableEntity)file).Save();
+            else
+                Session[Request.Form[ViewDataKeys.TabId] + prefix] = file;
+
+
+            return UploadResult(prefix, file, shouldSaveFilePath);
         }
 
         public ContentResult UploadDropped()
@@ -104,28 +103,32 @@ namespace Signum.Web.Files
             string prefix = Request.Headers["X-Prefix"];
 
             RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Headers["X-" + TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-            if (info.RuntimeType != typeof(FilePathDN))
-                throw new InvalidOperationException("Only FilePaths can be uploaded with drag and drop");
-
-            string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
-            if (!fileType.HasText())
-                throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(prefix));
-
-            FilePathDN fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
+            IFile file;
+            if (info.RuntimeType == typeof(FilePathDN))
             {
-                FileName = fileName,
-                BinaryFile = Request.InputStream.ReadAllBytes()
-            };
+                string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
+                if (!fileType.HasText())
+                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(prefix));
+
+                file = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
+            }
+            else
+            {
+                file = (IFile)Activator.CreateInstance(info.RuntimeType);
+            }
+
+            file.FileName = fileName;
+            file.BinaryFile = Request.InputStream.ReadAllBytes();
 
             if (shouldSaveFilePath)
-                fp = fp.Save();
+                ((IdentifiableEntity)file).Save();
             else
-                Session[Request.Headers["X-" + ViewDataKeys.TabId] + prefix] = fp;
+                Session[Request.Headers["X-" + ViewDataKeys.TabId] + prefix] = file;
 
-            return UploadResult(prefix, fp, shouldSaveFilePath);
+            return UploadResult(prefix, file, shouldSaveFilePath);
         }
 
-        private ContentResult UploadResult(string prefix, FilePathDN filePath, bool shouldHaveSaved)
+        private ContentResult UploadResult(string prefix, IFile file, bool shouldHaveSaved)
         {
             StringBuilder sb = new StringBuilder();
             //Use plain javascript not to have to add also the reference to jquery in the result iframe
@@ -133,11 +136,13 @@ namespace Signum.Web.Files
             sb.AppendLine("<script type='text/javascript'>");
             sb.AppendLine("var parDoc = window.parent.document;");
 
-            if (filePath.TryCS(f => f.IdOrNull) != null || !shouldHaveSaved)
+            if (/*file.TryCS(f => f.IdOrNull) != null ||*/ !shouldHaveSaved)
             {
+                RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
+
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(prefix));
-                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.ToStrLink), filePath.FileName));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(filePath).ToString()));
+                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.ToStrLink), file.FileName));
+                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo), ri.ToString()));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(TypeContextUtilities.Compose(prefix, "DivNew")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "DivOld")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "btnRemove")));

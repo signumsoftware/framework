@@ -25,7 +25,9 @@ namespace Signum.Web.Files
     {
         public static string ViewPrefix = "~/Files/Views/{0}.cshtml";
 
-        public static void Start(bool filePath, bool embeddedFile)
+
+
+        public static void Start(bool filePath, bool file, bool embeddedFile)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -79,6 +81,46 @@ namespace Signum.Web.Files
                     };
 
                     es.MappingAdmin = es.MappingDefault;
+                }
+
+                if (file)
+                {
+                    var es = new EntitySettings<FileDN>(EntityType.Default);
+                    Navigator.AddSetting(es);
+
+                    var baseMapping = (Mapping<FileDN>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+
+                    es.MappingDefault = ctx =>
+                    {
+                        RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                        if (runtimeInfo.RuntimeType == null)
+                            return null;
+                        else
+                        {
+                            if (runtimeInfo.IsNew)
+                            {
+                                var result = new FileDN();
+
+                                string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
+                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+
+                                if (hpf != null)
+                                {
+                                    result.FileName = Path.GetFileName(hpf.FileName);
+                                    result.BinaryFile = hpf.InputStream.ReadAllBytes();
+
+                                    return result;
+                                }
+                                else
+                                {
+                                    FileDN fileInSession = (FileDN)ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
+                                    return fileInSession;
+                                }
+                            }
+                        }
+
+                        return baseMapping(ctx);
+                    };
                 }
 
                 if (embeddedFile)
