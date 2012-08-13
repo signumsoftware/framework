@@ -543,6 +543,7 @@ namespace Signum.Engine.Maps
         IEnumerable<int> GetAllIds();
 
         event Action Invalidation;
+        event Action Disabled; 
 
         bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
 
@@ -558,6 +559,7 @@ namespace Signum.Engine.Maps
 
         public abstract IEnumerable<int> GetAllIds();
         public abstract event Action Invalidation;
+        public abstract event Action Disabled;
 
         bool ICacheController.CompleteCache(IdentifiableEntity entity, IRetriever retriver)
         {
