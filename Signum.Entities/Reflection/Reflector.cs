@@ -38,7 +38,7 @@ namespace Signum.Entities.Reflection
         static Reflector()
         {
             DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
-            DescriptionManager.CleanType = LiteUtils.CleanType; //To allow Lite<T>
+            DescriptionManager.CleanType = t=> EnumProxy.Extract(t) ?? t.CleanType(); //To allow Lite<T>
         }
 
         public static string CleanTypeName(Type t)
@@ -284,14 +284,13 @@ namespace Signum.Entities.Reflection
 
         public static string FormatString(PropertyRoute route)
         {
-            if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
-                throw new InvalidOperationException("PropertyRoute of type Property expected");
+            var simpleRoute = route.SimplifyNoRoot();
 
-            FormatAttribute format = route.PropertyInfo.SingleAttribute<FormatAttribute>();
+            FormatAttribute format = simpleRoute.PropertyInfo.SingleAttribute<FormatAttribute>();
             if (format != null)
                 return format.Format;
 
-            var pp = Validator.GetOrCreatePropertyPack(route);
+            var pp = Validator.GetOrCreatePropertyPack(simpleRoute);
             if (pp != null)
             {
                 DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();

@@ -48,10 +48,10 @@ namespace Signum.Entities.DynamicQuery
 
         protected override List<QueryToken> SubTokensInternal()
         {
-            return SubTokensBase(typeof(string), Implementations());
+            return SubTokensBase(typeof(string), GetImplementations());
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return null;
         }

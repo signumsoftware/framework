@@ -65,7 +65,7 @@ namespace Signum.Windows
         {
             base.OnLoad(sender, e);
 
-            if (Common.GetIsReadOnly(this) || Implementations != null && Implementations.IsByAll)
+            if (Common.GetIsReadOnly(this) || Implementations == null || Implementations.Value.IsByAll)
                 AutoComplete = false;
         }
 
@@ -84,7 +84,7 @@ namespace Signum.Windows
             if (AutoCompleting != null)
                 value = AutoCompleting(arg);
             else
-                value = Server.FindLiteLike(CleanType, safeImplementations, arg, AutoCompleteElements);  
+                value = Server.FindLiteLike(CleanType, safeImplementations.Value, arg, AutoCompleteElements);  
 
             return value;
         }

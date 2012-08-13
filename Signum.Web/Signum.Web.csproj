@@ -41,6 +41,7 @@
     <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <HintPath>C:/Program%20Files%20(x86)/Microsoft%20SQL%20Server/100/SDK/Assemblies/Microsoft.SqlServer.Types.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Web.PageInspector.Loader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
@@ -48,12 +49,12 @@
     <Reference Include="System.ServiceModel.Activation" />
     <Reference Include="System.ServiceModel.Activities" />
     <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web.Helpers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Microsoft ASP.NET\ASP.NET MVC 3\Assemblies\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages" />
-    <Reference Include="System.Web.Helpers" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />

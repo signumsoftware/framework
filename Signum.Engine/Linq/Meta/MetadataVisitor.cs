@@ -338,7 +338,7 @@ namespace Signum.Engine.Linq
                 return null;
 
             Type t = value.GetType();
-            return t.IsInstantiationOf(typeof(Query<>)) ?
+            return typeof(IQueryable).IsAssignableFrom(t) ?
                 t.GetGenericArguments()[0] :
                 null;
         }
@@ -347,7 +347,7 @@ namespace Signum.Engine.Linq
         {
             Type type = TableType(c.Value);
             if (type != null)
-                return new MetaProjectorExpression(c.Type, new MetaExpression(type, null));
+                return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(new[] { PropertyRoute.Root(type) })));
 
             return MakeVoidMeta(c.Type);
         }
@@ -390,7 +390,7 @@ namespace Signum.Engine.Linq
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
             {
-                var pi = member as PropertyInfo ??  Reflector.TryFindPropertyInfo((FieldInfo)member);
+                var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
 
                 if (pi == null)
                     return new MetaExpression(memberType, null);
@@ -408,19 +408,31 @@ namespace Signum.Engine.Linq
                     return new MetaExpression(memberType, new CleanMeta(new[]{ PropertyRoute.Root(source.Type).Add(pi)}));
             }
 
+            if (source.Type.IsLite() && member.Name == "Entity")
+            {
+                MetaExpression meta = (MetaExpression)source;
+
+                if (meta.Meta is CleanMeta)
+                {
+                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.Select(pr=>pr.Add("Entity")).ToArray();
+
+                    return new MetaExpression(memberType, new CleanMeta(routes));
+                }
+            }
+
             return MakeDirtyMeta(memberType, source);
         }
 
         private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
         {
-            Implementations imp = route.GetImplementations();
+            Implementations? imp = route.TryGetImplementations();
 
             if (imp == null)
                 return new[] { route.Add(piName) };
-            else if (imp.IsByAll)
-                throw new InvalidOperationException("Metas doesn't work on ImplementedByAll");
-            else
-                return ((ImplementedByAttribute)imp).ImplementedTypes.Where(t=>type.IsAssignableFrom(t)).Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
+
+            var fimp = ColumnDescriptionFactory.CastImplementations(imp.Value, type);
+
+            return fimp.Types.Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
         }
 
         protected override Expression VisitTypeIs(TypeBinaryExpression b)

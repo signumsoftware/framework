@@ -194,6 +194,11 @@ namespace Signum.Web
             Manager.SetTokens(queryName, orders);
         }
 
+        public static void SetViewableAndCreable(FindOptions findOptions)
+        {
+            Manager.SetViewableAndCreable(findOptions);
+        }
+
         public static SortedList<string, string> ToSortedList(this NameValueCollection form, string prefix)
         {
             SortedList<string, string> formValues = new SortedList<string, string>(form.Count);
@@ -406,6 +411,16 @@ namespace Signum.Web
         {
             Manager.Initialize();
         }
+
+        public static List<Lite<T>> ParseLiteKeys<T>(string commaSeparatedLites) where T : class, IIdentifiable
+        {
+            return commaSeparatedLites.Split(',').Select(Lite.Parse<T>).ToList();
+        }
+
+        public static List<Lite<T>> ParseLiteIds<T>(string commaSeparatedLites) where T : IdentifiableEntity
+        {
+            return commaSeparatedLites.Split(',').Select(str => new Lite<T>(int.Parse(str))).ToList();
+        }
     }
     
     public class NavigationManager
@@ -445,12 +460,42 @@ namespace Signum.Web
         };
         public Func<List<string>> DefaultScripts = () => defaultScripts;
 
+        public List<Func<UrlHelper, Dictionary<string, string>>> DefaultSFUrls = new List<Func<UrlHelper,Dictionary<string,string>>>
+        {
+            url => new Dictionary<string, string>
+            {
+                { "popupView", url.SignumAction("PopupView") },
+                { "partialView", url.SignumAction("PartialView") },
+                { "validate", url.SignumAction("Validate") },
+                { "validatePartial", url.SignumAction("ValidatePartial") },
+                { "trySave", url.SignumAction("TrySave") },
+                { "trySavePartial", url.SignumAction("TrySavePartial") },
+                { "find", url.SignumAction("Find") },
+                { "partialFind", url.SignumAction("PartialFind") },
+                { "search", url.SignumAction("Search") },
+                { "subTokensCombo", url.SignumAction("NewSubTokensCombo") },
+                { "addFilter", url.Action("AddFilter", "Signum") },
+                { "quickFilter", url.SignumAction("QuickFilter") },
+                { "entityContextMenu", url.SignumAction("EntityContextMenu") },
+                { "create", url.SignumAction("Create") },
+                { "popupCreate", url.SignumAction("PopupCreate") },
+                { "typeChooser", url.SignumAction("GetTypeChooser") },
+                { "autocomplete", url.SignumAction("Autocomplete") }
+            }
+        };
+
+        public Dictionary<string, string> GetDefaultSFUrls(UrlHelper url) 
+        {
+            var urls = new Dictionary<string, string>();
+            urls.AddRange(DefaultSFUrls.SelectMany(f => f(url)));
+            return urls;
+        }
+
         public NavigationManager()
         {
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
         }
-
         
         public event Action Initializing;
         public bool Initialized { get; private set; }
@@ -641,9 +686,9 @@ namespace Signum.Web
                 throw new UnauthorizedAccessException(Resources.Query0IsNotAllowed.Formato(findOptions.QueryName));
 
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
+            SetViewableAndCreable(findOptions);
 
             controller.ViewData.Model = new Context(null, "");
-
             controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
 
             controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
@@ -706,18 +751,32 @@ namespace Signum.Web
                 o.Token = QueryUtils.Parse(o.ColumnName, queryDescription);
         }
 
+        protected internal virtual void SetViewableAndCreable(FindOptions findOptions)
+        {
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+            Type entitiesType = Lite.Extract(entityColumn.Type);
+            Implementations? implementations = entityColumn.Implementations;
+
+            findOptions.View = findOptions.View &&
+                (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin)));
+
+            findOptions.Create = findOptions.Create && findOptions.View && 
+                (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsCreable(t, EntitySettingsContext.Admin)));
+        }
+        
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            SetViewableAndCreable(findOptions);
 
             controller.ViewData.Model = context;
             controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
             
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+            controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             
             if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
                 controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);

@@ -21,23 +21,13 @@ namespace Signum.Engine.DynamicQuery
     {
         public static List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
-            Type[] types;
-            if (implementations == null)
-            {
-                if (!Schema.Current.Tables.ContainsKey(liteType))
-                    throw new InvalidOperationException("Type {0} is not in the schema".Formato(liteType));
-
-                types = new[] { liteType };
-            }
-            else if (implementations.IsByAll)
+            if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll not supported for FindLiteLike");
-            else
-                types = ((ImplementedByAttribute)implementations).ImplementedTypes;
 
-            return FindLiteLike(liteType, types, subString, count);
+            return FindLiteLike(liteType, implementations.Types, subString, count);
         }
 
-        public static List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count)
+        public static List<Lite> FindLiteLike(Type liteType, IEnumerable<Type> types, string subString, int count)
         {
             return (from mi in new[] { miLiteStarting, miLiteContaining }
                     from type in types
@@ -63,15 +53,10 @@ namespace Signum.Engine.DynamicQuery
 
         public static List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
-            if (implementations == null)
-            {
-                return Database.RetrieveAllLite(liteType);
-            }
-
             if (implementations.IsByAll)
-                throw new InvalidOperationException("ImplementedByAll is not supported for RetrieAllLite");
+                throw new InvalidOperationException("ImplementedByAll is not supported for RetrieveAllLite");
 
-            return ((ImplementedByAttribute)implementations).ImplementedTypes.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
+            return implementations.Types.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
         }
 
         static GenericInvoker<Func<List<Lite>>> miAllLite = new GenericInvoker<Func<List<Lite>>>(() => AllLite<TypeDN, TypeDN>());

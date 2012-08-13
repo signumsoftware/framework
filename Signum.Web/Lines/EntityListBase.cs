@@ -16,15 +16,26 @@ namespace Signum.Web
 {
     public static class EntityListBaseKeys
     {
-        public const string Index = "sfIndex";
+        public const string Indexes = "sfIndexes";
+        public const string List = "sfList";
         public const string ListPresent = "sfListPresent";
     }
 
     public abstract class EntityListBase : EntityBase
     {
+        public bool Reorder { get; set; }
+
         public EntityListBase(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
+        }
+
+        protected override JsOptionsBuilder OptionsJSInternal()
+        {
+            var result = base.OptionsJSInternal();
+            if (Reorder)
+                result.Add("reorder", "true");
+            return result;
         }
 
         protected override void SetReadOnly()
@@ -33,7 +44,25 @@ namespace Signum.Web
             Find = false;
             Create = false;
             Remove = false;
-            //Implementations = null;
+            Reorder = false;
+        }
+
+        public string MovingUp { get; set; }
+        protected abstract string DefaultMoveUp();
+        internal string GetMovingUp()
+        {
+            if (!Reorder)
+                return "";
+            return MovingUp ?? DefaultMoveUp();
+        }
+
+        public string MovingDown { get; set; }
+        protected abstract string DefaultMoveDown();
+        internal string GetMovingDown()
+        {
+            if (!Reorder)
+                return "";
+            return MovingDown ?? DefaultMoveDown();
         }
 
         public Type ElementType

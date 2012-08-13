@@ -24,44 +24,46 @@ namespace Signum.Engine
             initialized = true;
 
             var s = Schema.Current;
-            foreach (var lp in registeredLazyList.Values.ToList())
+            foreach (var kvp in registeredLazyList.ToList())
             {
-                if (lp.InvalidateWith != null)
+                if (kvp.Value != null)
                 {
-                    AttachInvalidations(s, lp);
+                    AttachInvalidations(s,kvp.Key, kvp.Value);
                 }
             }
         }
 
-        private static void AttachInvalidations(Schema s, ILazyProxy lp)
+        private static void AttachInvalidations(Schema s, IResetLazy lazy, params Type[] types)
         {
-            Action a = () => lp.Reset();
+            Action reset = () => lazy.Reset();
 
             List<Type> cached = new List<Type>();
-            foreach (var type in lp.InvalidateWith)
+            foreach (var type in types)
             {
                 var cc = s.CacheController(type);
                 if (cc != null && cc.IsComplete)
                 {
-                    cc.Invalidation += a;
+                    cc.Invalidation += reset;
                     cached.Add(type);
                 }
             }
 
-            var nonCached = lp.InvalidateWith.Except(cached).ToList();
+            Action postReset = () => Transaction.PostRealCommit += dic => reset();
+
+            var nonCached = types.Except(cached).ToList();
             if (nonCached.Any())
             {
                 foreach (var type in nonCached)
                 {
-                    giAttachInvalidations.GetInvoker(type)(s, a);
+                    giAttachInvalidations.GetInvoker(type)(s, postReset);
                 }
 
-                var dgIn = DirectedGraph<Table>.Generate(lp.InvalidateWith.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
+                var dgIn = DirectedGraph<Table>.Generate(types.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
                 var dgOut = DirectedGraph<Table>.Generate(cached.Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
 
                 foreach (var table in dgIn.Except(dgOut))
                 {
-                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, a);
+                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, postReset);
                 }
             }
         }
@@ -94,74 +96,63 @@ namespace Signum.Engine
             ee.PreUnsafeDelete += q => action();
         }
 
-        static Dictionary<object, ILazyProxy> registeredLazyList = new Dictionary<object, ILazyProxy>();
-        public static Lazy<T> Create<T>(Func<T> func)
+        static Dictionary<IResetLazy, Type[]> registeredLazyList = new Dictionary<IResetLazy, Type[]>();
+        public static ResetLazy<T> Create<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T:class
         {
-            var result = new Lazy<T>(() =>
+            var result = new ResetLazy<T>(() =>
             {
                 using (Schema.Current.GlobalMode())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
+                using (Transaction tr = singleThreaded.Value? null:  Transaction.ForceNew())
                 using (new EntityCache(true))
                 {
-                    return func();
-                }
-            }, LazyThreadSafetyMode.PublicationOnly);
+                    var value = func();
 
-            registeredLazyList.Add(result, new LazyProxy<T>(result));
+                    if (tr != null)
+                        tr.Commit();
+
+                    return value;
+                }
+            }, mode);
+
+            registeredLazyList.Add(result, null);
 
             return result;
         }
 
-        public static Lazy<T> InvalidateWith<T>(this Lazy<T> lazy, params Type[] types)
+        static ThreadVariable<bool> singleThreaded = Statics.ThreadVariable<bool>("singleThreadedGlobalLazy");
+        public static IDisposable SingleThreadMode()
         {
-            var lp = registeredLazyList.GetOrThrow(lazy, "The lazy is not a GlobalLazy");
-            
-            lp.InvalidateWith = types;
+            var oldValue = singleThreaded.Value;
+
+            singleThreaded.Value = true;
+
+            return new Disposable(() => singleThreaded.Value = oldValue);
+        }
+
+        public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T:class
+        {
+            if (!registeredLazyList.ContainsKey(lazy))
+                throw new InvalidOperationException("The lazy is not a GlobalLazy");
+
+            registeredLazyList[lazy] = types;
 
             if (initialized)
-                AttachInvalidations(Schema.Current, lp);
+                AttachInvalidations(Schema.Current, lazy, types);
 
             return lazy;
         }
 
         public static void ResetAll()
         {
-            foreach (var lp in registeredLazyList.Values)
+            foreach (var lp in registeredLazyList.Keys)
                 lp.Reset();
         }
 
         public static void LoadAll()
         {
-            foreach (var lp in registeredLazyList.Values)
+            foreach (var lp in registeredLazyList.Keys)
                 lp.Load();
-        }
-
-        interface ILazyProxy
-        {
-            void Reset();
-            void Load();
-            Type[] InvalidateWith { get; set; }
-        }
-
-        class LazyProxy<T> : ILazyProxy
-        {
-            Lazy<T> lazy;
-            public LazyProxy(Lazy<T> lazy)
-            {
-                this.lazy = lazy;
-            }
-
-            public void Reset()
-            {
-                lazy.ResetPublicationOnly();
-            }
-
-            public void Load()
-            {
-                lazy.Load();
-            }
-
-            public Type[] InvalidateWith { get; set; }
         }
     }
 }

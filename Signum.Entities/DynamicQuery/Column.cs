@@ -26,7 +26,7 @@ namespace Signum.Entities.DynamicQuery
 
         public string Name { get { return Token.FullKey(); } }
         public virtual Type Type { get { return Token.Type; } }
-        public Implementations Implementations { get { return Token.Implementations(); } }
+        public Implementations? Implementations { get { return Token.GetImplementations(); } }
         public string Format { get { return Token.Format; } }
         public string Unit { get { return Token.Unit; } }
 

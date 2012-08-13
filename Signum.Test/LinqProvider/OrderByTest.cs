@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
 using Signum.Engine.Exceptions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test.LinqProvider
 {
@@ -107,5 +108,63 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).GroupBy(a => a.Sex, (s, gr) => new { Sex = s, Count = gr.Count() }).ToList();
         }
+
+
+        [TestMethod]
+        public void OrderByIgnore()
+        {
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).Count() > 1).Select(a => a.Id).ToList();
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).Sum(s => s.Name.Length) > 1).Select(a => a.Id).ToList();
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).Any(s => s.Name.StartsWith("a"))).Select(a => a.Id).ToList();
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).All(s => s.Name.StartsWith("a"))).Select(a => a.Id).ToList();
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).Contains(null)).Select(a => a.Id).ToList();
+
+
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().OrderBy(a => a.Name).Count();
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().OrderBy(a => a.Name).Sum(s => s.Name.Length);
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().OrderBy(a => a.Name).Any(s => s.Name.StartsWith("a"));
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().OrderBy(a => a.Name).All(s => s.Name.StartsWith("a"));
+
+            using (AsserNoQueryWith("ORDER"))
+                Database.Query<AlbumDN>().OrderBy(a => a.Name).Contains(null);
+        }
+
+
+
+        public IDisposable AsserNoQueryWith(string text)
+        {
+            var oldLogger = Connector.CurrentLogger;
+            var sw =  new StringWriter();
+            Connector.CurrentLogger = sw;
+            return new Disposable(() =>
+            {
+                Connector.CurrentLogger = oldLogger;
+                string str = sw.ToString();
+
+                sw.Dispose();
+                Debug.Write(str);
+
+                Assert.IsTrue(!str.Contains(text));
+            }); 
+        }
+
+       
     }
 }

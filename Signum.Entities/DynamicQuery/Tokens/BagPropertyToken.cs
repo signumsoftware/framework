@@ -52,10 +52,10 @@ namespace Signum.Entities.DynamicQuery
 
         protected override List<QueryToken> SubTokensInternal()
         {
-            return SubTokensBase(PropertyInfo.PropertyType, Implementations());
+            return SubTokensBase(PropertyInfo.PropertyType, GetImplementations());
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return null;
         }

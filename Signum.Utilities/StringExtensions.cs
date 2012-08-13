@@ -275,28 +275,96 @@ namespace Signum.Utilities
 
         public static string SpacePascal(this string pascalStr, bool preserveUppercase)
         {
-            
-            StringBuilder sb = new StringBuilder();
-            if (pascalStr.Length > 0)
-                sb.Append(pascalStr[0]); 
+            if (string.IsNullOrEmpty(pascalStr))
+                return pascalStr;
 
-            for (int i = 1; i < pascalStr.Length; i++)
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < pascalStr.Length; i++)
             {
-                char a = pascalStr[i];
-                if (char.IsUpper(a) && !char.IsUpper(pascalStr[i - 1]))
+                switch (Kind(pascalStr, i))
                 {
-                    if (sb.Length > 0)
-                        sb.Append(' ');
-                    if (preserveUppercase || i == 0 || (i < pascalStr.Length - 1 && char.IsUpper(pascalStr[i + 1])))
-                        sb.Append(a);
-                    else
-                        sb.Append(char.ToLower(a));
+                    case CharKind.Lowecase:
+                        sb.Append(pascalStr[i]);
+                        break;
+
+                    case CharKind.StartOfWord:
+                        sb.Append(" ");
+                        sb.Append(preserveUppercase ? pascalStr[i] : char.ToLower(pascalStr[i]));
+                        break;
+
+                    case CharKind.StartOfSentence:
+                        sb.Append(pascalStr[i]);
+                        break;
+
+                    case CharKind.Abbreviation:
+                        sb.Append(pascalStr[i]);
+                        break;
+
+                    case CharKind.StartOfAbreviation:
+                        sb.Append(" ");
+                        sb.Append(pascalStr[i]);
+                        break;
+                    default:
+                        break;
                 }
-                else
-                    sb.Append(a);
             }
 
             return sb.ToString();
+        }
+
+        static CharKind Kind(string pascalStr, int i)
+        {
+            if (i == 0)
+                return CharKind.StartOfSentence;
+
+            if(!char.IsUpper(pascalStr[i]))
+                return CharKind.Lowecase;
+
+            if (i + 1 == pascalStr.Length)
+            {
+                if (char.IsUpper(pascalStr[i - 1]))
+                    return CharKind.Abbreviation;
+
+                return CharKind.StartOfWord;
+            }
+
+            if (!char.IsUpper(pascalStr[i + 1]))
+                return CharKind.StartOfWord;  // Xb
+
+            if (!char.IsUpper(pascalStr[i - 1]))
+            {
+                if (i + 2 == pascalStr.Length)
+                    return CharKind.StartOfAbreviation; //aXB|
+
+                if (!char.IsUpper(pascalStr[i + 2]))
+                    return CharKind.StartOfWord; //aXBc
+
+                return CharKind.StartOfAbreviation; //aXBC
+            }
+
+            return CharKind.Abbreviation; //AXB
+        }
+
+        public enum CharKind
+        {
+            Lowecase,
+            StartOfWord,
+            StartOfSentence,
+            StartOfAbreviation,
+            Abbreviation,
+
+        }
+
+        private static bool IsUpper(string pascalStr, int index)
+        {
+            if (index < 0)
+                return false;
+
+            if (index >= pascalStr.Length)
+                return false;
+
+            return !char.IsUpper(pascalStr[index]); 
         }
 
         public static string FirstUpper(this string str)

@@ -26,6 +26,8 @@ namespace Signum.Test
         My_Test,
         TEST,
         YouAreFromONU,
+        ILoveYou,
+        YoYTu,
     }
 
 
@@ -39,12 +41,14 @@ namespace Signum.Test
         [TestMethod]
         public void EnumToStr()
         {
-            Assert.AreEqual(EnumPruebas.Test.NiceToString(), "Test");
-            Assert.AreEqual(EnumPruebas.Test2.NiceToString(), "Test!");
-            Assert.AreEqual(EnumPruebas.MyTest.NiceToString(), "My test");
-            Assert.AreEqual(EnumPruebas.My_Test.NiceToString(), "My Test");
-            Assert.AreEqual(EnumPruebas.TEST.NiceToString(), "TEST");
-            Assert.AreEqual(EnumPruebas.YouAreFromONU.NiceToString(), "You are from ONU");
+            Assert.AreEqual("Test",         EnumPruebas.Test.NiceToString());
+            Assert.AreEqual("Test!",        EnumPruebas.Test2.NiceToString());
+            Assert.AreEqual("My test",      EnumPruebas.MyTest.NiceToString());
+            Assert.AreEqual("My Test",      EnumPruebas.My_Test.NiceToString());
+            Assert.AreEqual("TEST",         EnumPruebas.TEST.NiceToString());
+            Assert.AreEqual("You are from ONU", EnumPruebas.YouAreFromONU.NiceToString());
+            Assert.AreEqual("I love you", EnumPruebas.ILoveYou.NiceToString());
+            Assert.AreEqual("Yo y tu", EnumPruebas.YoYTu.NiceToString());
         }
 
         [TestMethod]

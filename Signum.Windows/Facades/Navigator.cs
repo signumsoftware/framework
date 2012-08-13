@@ -204,19 +204,19 @@ namespace Signum.Windows
 
         public static DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
         {
-            DataTemplate template = GetEntitySettings(entityType).TryCC(ess => ess.DataTemplate);
-            if (template != null)
-                return template;
-
             if (entityType.IsLite())
             {
-                template = (DataTemplate)element.FindResource(typeof(Lite));
+                DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
                 if (template != null)
                     return template;
             }
 
             if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
             {
+                DataTemplate template = GetEntitySettings(entityType).TryCC(ess => ess.DataTemplate);
+                if (template != null)
+                    return template;
+
                 template = (DataTemplate)element.FindResource(typeof(ModifiableEntity));
                 if (template != null)
                     return template;
@@ -225,7 +225,7 @@ namespace Signum.Windows
             return null;
         }
 
-        public static Type SelectType(Window parent, Type[] implementations)
+        public static Type SelectType(Window parent, IEnumerable<Type> implementations)
         {
             return Manager.SelectTypes(parent, implementations);
         }
@@ -297,6 +297,22 @@ namespace Signum.Windows
             return (EmbeddedEntitySettings<T>)Manager.EntitySettings[typeof(T)];
         }
 
+        public static Implementations FindImplementations(PropertyRoute pr)
+        {
+            if (typeof(ModelEntity).IsAssignableFrom(pr.RootType))
+            {
+                EntitySettings es = Navigator.GetEntitySettings(pr.RootType);
+
+                if (es != null) //Not mandatory, on windows it's usual not to register model entities. 
+                    return es.FindImplementations(pr);
+
+                return ModelEntity.GetImplementations(pr); 
+            }
+            else
+            {
+                return Server.FindImplementations(pr);
+            }
+        }
     }
 
     public class NavigationManager
@@ -322,7 +338,7 @@ namespace Signum.Windows
             if (!initialized)
             {
                 //Looking for a better place to do this
-                PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
+                PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
                 QueryToken.EntityExtensions = (type, parent) => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(type, parent));
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
@@ -783,13 +799,14 @@ namespace Signum.Windows
                 throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
         }
 
-        public virtual Type SelectTypes(Window parent, Type[] implementations)
+        public virtual Type SelectTypes(Window parent, IEnumerable<Type> implementations)
         {
-            if (implementations == null || implementations.Length == 0)
+            if (implementations == null || implementations.Count() == 0)
                 throw new ArgumentException("implementations");
 
-            if (implementations.Length == 1)
-                return implementations[0];
+            var only = implementations.Only();
+            if (only != null)
+                return only;
 
             Type sel;
             if (SelectorWindow.ShowDialog(implementations, out sel,

@@ -50,7 +50,7 @@ namespace Signum.Web
         public static readonly Type[] ImplementedByAll = new Type[0];
         public static readonly string ImplementedByAllKey = "[All]";
 
-        public StaticInfo(Type staticType, Implementations implementations)
+        public StaticInfo(Type staticType, Implementations? implementations)
         {
             if (staticType.IsEmbeddedEntity())
             {
@@ -61,9 +61,8 @@ namespace Signum.Web
             }
             else
             {
-                Types = implementations == null ? new[] { staticType.CleanType() } :
-                        implementations.IsByAll ? ImplementedByAll :
-                        ((ImplementedByAttribute)implementations).ImplementedTypes;
+                Types = implementations.Value.IsByAll ? ImplementedByAll :
+                        implementations.Value.Types.ToArray();
             }
         }
 
@@ -133,7 +132,7 @@ namespace Signum.Web
             RuntimeType = entity.GetType();
         }
 
-        public RuntimeInfo(IdentifiableEntity entity)
+        public RuntimeInfo(IIdentifiable entity)
         {
             if (entity == null)
             {

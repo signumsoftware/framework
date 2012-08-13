@@ -42,6 +42,7 @@ namespace Signum.Engine.DynamicQuery
             }
             set
             {
+                value.QueryName = queryName;
                 queries[queryName] = value;
             }
         }
@@ -110,7 +111,7 @@ namespace Signum.Engine.DynamicQuery
 
         public Dictionary<object, IDynamicQuery> GetQueries(Type entityType)
         {
-            return queries.Where(kvp => kvp.Value.EntityColumn().CompatibleWith(entityType)).ToDictionary();
+            return queries.Where(kvp => kvp.Value.EntityColumn().Implementations.Value.Types.Contains(entityType)).ToDictionary();
         }
 
         public Dictionary<object, IDynamicQuery> GetQueries()
@@ -239,18 +240,24 @@ namespace Signum.Engine.DynamicQuery
 
             Expression e = MetadataVisitor.JustVisit(lambda, entityType);
 
-            if (e is MetaProjectorExpression)
-                e = ((MetaProjectorExpression)e).Projector;
+            MetaExpression me =  e as MetaExpression;
 
-            MetaExpression me = e as MetaExpression;
+            if (e is MetaProjectorExpression)
+            {
+                this.IsProjection = true;
+                me = ((MetaProjectorExpression)e).Projector as MetaExpression;
+            }
+
             CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
 
-            if (cm != null)
+            if (cm != null && cm.PropertyRoutes.Any())
             {
-                this.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
-                this.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
-                this.Implementations = ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes, type.CleanType());
-                this.PropertyRoute = cm.PropertyRoutes.FirstOrDefault();
+                var cleanType = me.Type.CleanType();
+
+                PropertyRoute = cm.PropertyRoutes.Only();
+                Implementations = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
+                Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
+                Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
             }
 
             IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
@@ -258,22 +265,23 @@ namespace Signum.Engine.DynamicQuery
 
         public readonly Type Type;
         public readonly Type EntityType;
-        public readonly string Key; 
+        public readonly string Key;
+
+        public bool IsProjection;
+
+        public bool Inherit = true;
 
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
         public string Format;
         public string Unit;
-        public Implementations Implementations;
+        public Implementations? Implementations;
         public Func<bool> IsAllowed;
         public PropertyRoute PropertyRoute;
-        public bool Inherit = true;
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
-            return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
+            return new ExtensionToken(parent, Key, Type, IsProjection, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
         }
-
-       
     }
 }

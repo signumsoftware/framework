@@ -6,12 +6,13 @@ using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Linq
 {
     internal class OrderByRewriter : DbExpressionVisitor
     {
-        IEnumerable<OrderExpression> gatheredOrderings;
+        ReadOnlyCollection<OrderExpression> gatheredOrderings;
         SelectExpression outerMostSelect;
 
         private OrderByRewriter() { }
@@ -26,7 +27,7 @@ namespace Signum.Engine.Linq
             var oldGatheredOrderings = gatheredOrderings;
             var oldOuterMostSelect = outerMostSelect;
 
-            gatheredOrderings = Enumerable.Empty<OrderExpression>();
+            gatheredOrderings = null;
             outerMostSelect = proj.Select;
 
             var result = base.VisitProjection(proj);
@@ -43,11 +44,12 @@ namespace Signum.Engine.Linq
 
             select = (SelectExpression)base.VisitSelect(select);
             if (select.GroupBy != null && select.GroupBy.Any())
-                gatheredOrderings = Enumerable.Empty<OrderExpression>();
+                gatheredOrderings = null;
 
-            if (select.IsReverse)
-                gatheredOrderings = gatheredOrderings.Select(o => 
-                    new OrderExpression(o.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending, o.Expression));  
+            if (select.IsReverse && !gatheredOrderings.IsNullOrEmpty())
+                gatheredOrderings = gatheredOrderings.Select(o => new OrderExpression(
+                    o.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending,
+                    o.Expression)).ToReadOnly();  
 
             if (select.OrderBy != null && select.OrderBy.Count > 0)
                 this.PrependOrderings(select.OrderBy);
@@ -57,13 +59,49 @@ namespace Signum.Engine.Linq
             if (select.Top != null)
             {
                 orderings = gatheredOrderings;
-                gatheredOrderings = Enumerable.Empty<OrderExpression>();
+                gatheredOrderings = null;
             }
 
             if (AreEqual(select.OrderBy, orderings) && !select.IsReverse)
                 return select;
 
             return new SelectExpression(select.Alias, select.IsDistinct, false, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy);
+        }
+
+        protected override Expression VisitScalar(ScalarExpression scalar)
+        {
+            var saveGatheredOrderings = gatheredOrderings;
+            gatheredOrderings = null;
+
+            var result = base.VisitScalar(scalar);
+
+            gatheredOrderings = saveGatheredOrderings;
+
+            return result;
+        }
+
+        protected override Expression VisitExists(ExistsExpression exists)
+        {
+            var saveGatheredOrderings = gatheredOrderings;
+            gatheredOrderings = null;
+
+            var result = base.VisitExists(exists);
+
+            gatheredOrderings = saveGatheredOrderings;
+
+            return result;
+        }
+
+        protected override Expression VisitIn(InExpression @in)
+        {
+            var saveGatheredOrderings = gatheredOrderings;
+            gatheredOrderings = null;
+
+            var result = base.VisitIn(@in);
+
+            gatheredOrderings = saveGatheredOrderings;
+
+            return result;
         }
 
         static bool AreEqual(IEnumerable<OrderExpression> col1, IEnumerable<OrderExpression> col2)
@@ -86,18 +124,32 @@ namespace Signum.Engine.Linq
             if (col == null)
                 return false;
 
-            AggregateExpression exp = col.Expression as AggregateExpression;
-            if (exp == null)
+            Expression exp = col.Expression;
+
+            if (exp is IsNullExpression)
+                exp = ((IsNullExpression)exp).Expression;
+
+            if (exp.NodeType == ExpressionType.Coalesce)
+            {
+                var be = ((BinaryExpression)exp);
+                if (be.Right.NodeType == ExpressionType.Constant || be.Right.NodeType == (ExpressionType)DbExpressionType.SqlConstant)
+                    exp = ((BinaryExpression)exp).Left;
+            }
+
+            AggregateExpression aggExp = exp as AggregateExpression;
+            if (aggExp == null)
                 return false;
 
-            return exp.AggregateFunction == AggregateFunction.Count || exp.AggregateFunction == AggregateFunction.Sum || exp.AggregateFunction == AggregateFunction.Average;
+            return aggExp.AggregateFunction == AggregateFunction.Count ||
+                aggExp.AggregateFunction == AggregateFunction.Sum ||
+                aggExp.AggregateFunction == AggregateFunction.Average;
         }
 
         protected override Expression VisitJoin(JoinExpression join)
         {
             SourceExpression left = this.VisitSource(join.Left);
 
-            IEnumerable<OrderExpression> leftOrders = this.gatheredOrderings;
+            ReadOnlyCollection<OrderExpression> leftOrders = this.gatheredOrderings;
             this.gatheredOrderings = null;
 
             SourceExpression right = this.VisitSource(join.Right);
@@ -113,22 +165,19 @@ namespace Signum.Engine.Linq
             return join;
         }
 
-        protected void PrependOrderings(IEnumerable<OrderExpression> newOrderings)
+        protected void PrependOrderings(ReadOnlyCollection<OrderExpression> newOrderings)
         {
             if (newOrderings != null)
             {
-                if (this.gatheredOrderings == null)
+                if (this.gatheredOrderings.IsNullOrEmpty())
                 {
                     this.gatheredOrderings = newOrderings;
                 }
                 else
                 {
-                    List<OrderExpression> list = this.gatheredOrderings as List<OrderExpression>;
-                    if (list == null)
-                    {
-                        this.gatheredOrderings = list = new List<OrderExpression>(this.gatheredOrderings);
-                    }
+                    List<OrderExpression> list = this.gatheredOrderings.ToList();
                     list.InsertRange(0, newOrderings);
+                    this.gatheredOrderings = list.ToReadOnly();
                 }
             }
         }

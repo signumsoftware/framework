@@ -178,6 +178,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Detail.
+        /// </summary>
+        public static string Detail {
+            get {
+                return ResourceManager.GetString("Detail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Field.
         /// </summary>
         public static string Field {
@@ -471,6 +480,24 @@ namespace Signum.Web.Properties {
         public static string Signum_enterTheNewColumnName {
             get {
                 return ResourceManager.GetString("Signum_enterTheNewColumnName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Move down.
+        /// </summary>
+        public static string Signum_entityRepeater_moveDown {
+            get {
+                return ResourceManager.GetString("Signum_entityRepeater_moveDown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Move up.
+        /// </summary>
+        public static string Signum_entityRepeater_moveUp {
+            get {
+                return ResourceManager.GetString("Signum_entityRepeater_moveUp", resourceCulture);
             }
         }
         

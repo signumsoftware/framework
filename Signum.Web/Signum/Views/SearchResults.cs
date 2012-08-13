@@ -76,8 +76,8 @@ WriteLiteral("\r\n");
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
    Type entitiesType = Lite.Extract(entityColumn.Type);
-   Implementations implementations = entityColumn.Implementations;
-   bool viewable = (bool)ViewData[ViewDataKeys.View] && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
+   Implementations implementations = entityColumn.Implementations.Value;
+   bool viewable = (bool)ViewData[ViewDataKeys.View] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin)));
    bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
 
    FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];

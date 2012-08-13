@@ -43,11 +43,11 @@ namespace Signum.Windows
             this.InitializeComponent();
         }
 
-
+           
         private void filterRemove_Click(object sender, EventArgs e)
         {
             Filters.Remove((FilterOption)((FilterLine)sender).DataContext);
-        }
+                }
 
 
         //private void lvFilters_DragOver(object sender, DragEventArgs e)

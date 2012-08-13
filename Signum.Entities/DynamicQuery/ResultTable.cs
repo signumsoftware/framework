@@ -31,22 +31,22 @@ namespace Signum.Entities.DynamicQuery
         {
             get { return entityValues != null; }
         }
-        
+
         internal Array entityValues;
         public ColumnDescription EntityColumn { get; private set; }
         public ResultColumn[] Columns { get; private set; }
-         
+
         public ResultRow[] Rows { get; private set; }
 
         public ResultTable(ResultColumn[] columns, int totalElements, int currentPage, int elementsPerPage)
         {
-            int rows = columns.Select(a => a.Values.Length).Distinct().SingleEx(()=>"Unsyncronized number of rows in the results");
+            int rows = columns.Select(a => a.Values.Length).Distinct().SingleEx(() => "Unsyncronized number of rows in the results");
 
             ResultColumn entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx(); ;
             if (entityColumn != null)
             {
                 this.EntityColumn = ((ColumnToken)entityColumn.Column.Token).Column;
-                entityValues = entityColumn.Values; 
+                entityValues = entityColumn.Values;
             }
             this.Columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed()).ToArray();
 
@@ -57,19 +57,28 @@ namespace Signum.Entities.DynamicQuery
 
             this.TotalElements = totalElements;
             this.CurrentPage = currentPage;
-            this.ElementsPerPage = elementsPerPage; 
+            this.ElementsPerPage = elementsPerPage;
         }
 
 
         public DataTable ToDataTable()
         {
             DataTable dt = new DataTable("Table");
-            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name, c.Column.Type)).ToArray());
+            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name,
+                c.Column.Type.IsLite() ? typeof(string) : c.Column.Type.UnNullify())).ToArray());
             foreach (var row in Rows)
             {
-                dt.Rows.Add(Columns.Select((_, i) => row[i]).ToArray());
+                dt.Rows.Add(Columns.Select((_, i) => Convert(row[i])).ToArray());
             }
             return dt;
+        }
+
+        private object Convert(object p)
+        {
+            if (p is Lite)
+                return ((Lite)p).KeyLong();
+
+            return p;
         }
 
         public int TotalElements { get; private set; }
@@ -118,12 +127,12 @@ namespace Signum.Entities.DynamicQuery
 
         public Lite Entity
         {
-            get { return  (Lite)Table.entityValues.GetValue(Index); }
+            get { return (Lite)Table.entityValues.GetValue(Index); }
         }
 
         public T GetValue<T>(string columnName)
         {
-            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(()=>"column not found")];
+            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => "column not found")];
         }
 
         public T GetValue<T>(int columnIndex)
