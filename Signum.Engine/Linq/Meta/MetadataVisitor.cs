@@ -61,11 +61,11 @@ namespace Signum.Engine.Linq
             });
         }
 
-        internal static Expression JustVisit(LambdaExpression expression, Type type)
+        internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
         {
             var cleaned = MetaEvaluator.Clean(expression);
 
-            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, Expression.Constant(null, type)));
+            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, new MetaExpression(route.Type, new CleanMeta(new[] { route }))));
 
             return new MetadataVisitor().Visit(replaced);
         }
@@ -341,6 +341,14 @@ namespace Signum.Engine.Linq
             return typeof(IQueryable).IsAssignableFrom(t) ?
                 t.GetGenericArguments()[0] :
                 null;
+        }
+
+        protected override Expression Visit(Expression exp)
+        {
+            if (exp is MetaExpression)
+                return exp; 
+
+            return base.Visit(exp);
         }
 
         protected override Expression VisitConstant(ConstantExpression c)
