@@ -421,10 +421,10 @@ SF.registerModule("FindNavigator", function () {
                 var columnName = $th.find("input:hidden").val();
                 var currentOrders = this.options.orders;
 
-                var indexCurrOrder = currentOrders.indexOf(columnName);
+                var indexCurrOrder = $.inArray(columnName, currentOrders);
                 var newOrder = "";
                 if (indexCurrOrder === -1) {
-                    indexCurrOrder = currentOrders.indexOf("-" + columnName);
+                    indexCurrOrder = $.inArray("-" + columnName, currentOrders);
                 }
                 else {
                     newOrder = "-";
