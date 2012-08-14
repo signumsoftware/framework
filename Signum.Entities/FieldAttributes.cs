@@ -55,7 +55,7 @@ namespace Signum.Entities
             }
         }
 
-        public static Implementations FromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        public static Implementations? TryFromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
         {
             ImplementedByAttribute ib = fieldAttributes.OfType<ImplementedByAttribute>().SingleOrDefaultEx();
             ImplementedByAllAttribute iba = fieldAttributes.OfType<ImplementedByAllAttribute>().SingleOrDefaultEx();
@@ -66,7 +66,21 @@ namespace Signum.Entities
             if (ib != null) return Implementations.By(ib.ImplementedTypes);
             if (iba != null) return Implementations.ByAll;
 
-            return Implementations.By(t);
+            if (Error(t) == null)
+                return Implementations.By(t);
+
+            return null;
+        }
+
+
+        public static Implementations FromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        {
+            Implementations? imp = TryFromAttributes(t, fieldAttributes, route);
+
+            if (imp == null)
+                throw new InvalidOperationException(Error(t) + " se implementations for {0}".Formato(route));
+
+            return imp.Value;
         }
 
         public static Implementations ByAll { get { return new Implementations(); } }
@@ -100,7 +114,7 @@ namespace Signum.Entities
         static string Error(Type type)
         {
             if(!type.IsIdentifiableEntity())
-                return  "{0} are not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
+                return  "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
 
             if (type.IsAbstract)
                 return "{0} is abstract".Formato(type.Name);
