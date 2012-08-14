@@ -68,8 +68,8 @@ namespace Signum.Entities.DynamicQuery
             return Parent.GetPropertyRoute();
         }
 
-        public override Implementations Implementations()
-        {
+        public override Implementations? GetImplementations()
+        {  
             return null;
         }
 
@@ -141,7 +141,7 @@ namespace Signum.Entities.DynamicQuery
             return Parent.GetPropertyRoute();
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return null;
         }
@@ -218,7 +218,7 @@ namespace Signum.Entities.DynamicQuery
             return Parent.GetPropertyRoute();
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return null;
         }
