@@ -226,6 +226,13 @@ namespace Signum.Entities.Disconnected
             set { Set(ref copyTable, value, () => CopyTable); }
         }
 
+        int? maxIdInRange;
+        public int? MaxIdInRange
+        {
+            get { return maxIdInRange; }
+            set { Set(ref maxIdInRange, value, () => MaxIdInRange); }
+        }
+
         [SqlDbType(Size = int.MaxValue)]
         string errors;
         public string Errors

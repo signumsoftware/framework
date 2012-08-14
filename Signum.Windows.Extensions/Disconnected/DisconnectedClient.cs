@@ -73,6 +73,7 @@ namespace Signum.Windows.Disconnected
             }
         }
 
+
         static GenericInvoker<Action<EntitySettings>> miAttachTypeEvent = new GenericInvoker<Action<EntitySettings>>(es => AttachTypeEvent<TypeDN>((EntitySettings<TypeDN>)es));
         private static void AttachTypeEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
@@ -86,7 +87,7 @@ namespace Signum.Windows.Disconnected
 
             settings.IsReadOnly += (entity, admin) =>
             {
-                var upload = strategies[typeof(T)].Upload;
+                Upload upload = strategies[typeof(T)].Upload;
 
                 if (OfflineMode)
                 {
@@ -97,7 +98,7 @@ namespace Signum.Windows.Disconnected
                         return false;
 
                     if (upload == Upload.New)
-                        return !entity.IsNew;
+                        return !entity.IsNew && !;
 
                     //Upload.Subset
                     return !entity.IsNew && !((IDisconnectedEntity)entity).DisconnectedMachine.Is(DisconnectedMachineDN.Current);
