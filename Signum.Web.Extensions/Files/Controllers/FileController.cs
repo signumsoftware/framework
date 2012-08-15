@@ -24,6 +24,7 @@ using System.Net;
 using Signum.Engine.Files;
 using System.Reflection;
 using Signum.Web.Controllers;
+using Signum.Web.PortableAreas;
 #endregion
 
 namespace Signum.Web.Files
@@ -166,22 +167,18 @@ namespace Signum.Web.Files
                 throw new ArgumentException("filePathID");
 
             FilePathDN fp = Database.Retrieve<FilePathDN>(filePathID.Value);
-          
-            return File(FilePathLogic.GetByteArray(fp), 
-                MimeType.FromFileName(fp.FullPhysicalPath), 
-                fp.FileName);
+
+            return File(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath), fp.FileName);
         }
 
-        public FileResult DownloadFile(int? fileID)
+        public ActionResult DownloadFile(int? fileID)
         {
             if (fileID == null)
                 throw new ArgumentNullException("fileID");
 
             FileDN file = Database.Retrieve<FileDN>(fileID.Value);
 
-            return File(file.BinaryFile,
-                MimeType.FromFileName(file.FileName),
-                file.FileName);
+            return new StaticContentResult(file.BinaryFile, file.FileName);
         }
     }
 }
