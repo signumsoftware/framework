@@ -309,17 +309,17 @@ namespace Signum.Utilities
             else
                 resource = Resources.Ago;
 
-            int months = ts.Days / 30;
+            int months = Math.Abs(ts.Days) / 30;
             if (months > 0)
-                return resource.Formato((months == 1 ? Resources._0Month : Resources._0Months).Formato(months)).ToLower();
-            if (ts.Days > 0)
-                return resource.Formato((ts.Days == 1 ? Resources._0Day : Resources._0Days).Formato(ts.Days)).ToLower();
-            if (ts.Hours > 0)
-                return resource.Formato((ts.Hours == 1 ? Resources._0Hour : Resources._0Hours).Formato(ts.Hours)).ToLower();
-            if (ts.Minutes > 0)
-                return resource.Formato((ts.Minutes == 1 ? Resources._0Minute : Resources._0Minutes).Formato(ts.Minutes)).ToLower();
+                return resource.Formato((months == 1 ? Resources._0Month : Resources._0Months).Formato(Math.Abs(months))).ToLower();
+            if (Math.Abs(ts.Days) > 0)
+                return resource.Formato((ts.Days == 1 ? Resources._0Day : Resources._0Days).Formato(Math.Abs(ts.Days))).ToLower();
+            if (Math.Abs(ts.Hours) > 0)
+                return resource.Formato((ts.Hours == 1 ? Resources._0Hour : Resources._0Hours).Formato(Math.Abs(ts.Hours))).ToLower();
+            if (Math.Abs(ts.Minutes) > 0)
+                return resource.Formato((ts.Minutes == 1 ? Resources._0Minute : Resources._0Minutes).Formato(Math.Abs(ts.Minutes))).ToLower();
 
-            return resource.Formato((ts.Seconds == 1 ? Resources._0Second : Resources._0Seconds).Formato(ts.Seconds)).ToLower();
+            return resource.Formato((ts.Seconds == 1 ? Resources._0Second : Resources._0Seconds).Formato(Math.Abs(ts.Seconds))).ToLower();
         }
         
         public static DateTime MonthStart(this DateTime dateTime)
