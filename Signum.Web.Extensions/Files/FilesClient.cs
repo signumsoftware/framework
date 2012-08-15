@@ -17,6 +17,9 @@ using System.IO;
 using Signum.Engine.Basics;
 using Signum.Engine.Files;
 using Signum.Engine;
+using System.Linq.Expressions;
+using Signum.Engine.DynamicQuery;
+using Signum.Utilities.ExpressionTrees;
 #endregion
 
 namespace Signum.Web.Files
@@ -24,8 +27,6 @@ namespace Signum.Web.Files
     public static class FilesClient
     {
         public static string ViewPrefix = "~/Files/Views/{0}.cshtml";
-
-
 
         public static void Start(bool filePath, bool file, bool embeddedFile)
         {
@@ -158,7 +159,14 @@ namespace Signum.Web.Files
                     };
                 }
 
+                var dqm = DynamicQueryManager.Current;
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
+
+                dqm.RegisterExpression((FileDN f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FileDN f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
+            
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebImage),
                        col => (help, obj) => ((WebImage)obj).FullWebPath == null ? null :
@@ -177,5 +185,55 @@ namespace Signum.Web.Files
             }
 
         }
+
+        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
+            fp => new WebImage { FullWebPath = fp.FullWebPath };
+        public static WebImage WebImage(this FilePathDN fp)
+        {
+            return WebImageExpression.Evaluate(fp);
+        }
+
+        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
+           fp => new WebDownload { FullWebPath = fp.FullWebPath };
+        public static WebDownload WebDownload(this FilePathDN fp)
+        {
+            return WebDownloadExpression.Evaluate(fp);
+        }
+
+        static Expression<Func<FileDN, WebImage>> WebImageFileExpression =
+            f => new WebImage { FullWebPath = DownloadFileUrl(f.Id) };
+        [ExpressionField("WebImageFileExpression")]
+        public static WebImage WebImage(this FileDN f)
+        {
+            return WebImageFileExpression.Evaluate(f);
+        }
+
+        static Expression<Func<FileDN, WebDownload>> WebDownloadFileExpression =
+           f => new WebDownload { FullWebPath = DownloadFileUrl(f.Id)};
+        [ExpressionField("WebDownloadFileExpression")]
+        public static WebDownload WebDownload(this FileDN f)
+        {
+            return WebDownloadFileExpression.Evaluate(f);
+        }
+
+        static string DownloadFileUrl(int? id)
+        {
+            if (id == null)
+                return null;
+
+            return RouteHelper.New().Action((FileController fc) => fc.DownloadFile(id)); 
+        }
+    }
+
+    [Serializable, ForceLocalization]
+    public class WebImage
+    {
+        public string FullWebPath;
+    }
+
+    [Serializable, ForceLocalization]
+    public class WebDownload
+    {
+        public string FullWebPath;
     }
 }
