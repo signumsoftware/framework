@@ -15,6 +15,9 @@ using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using System.Collections;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Linq;
+using Signum.Entities.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Maps
 {
@@ -479,7 +482,46 @@ namespace Signum.Engine.Maps
             if (ibaField != null)
                 return Implementations.ByAll;
 
-            throw new InvalidOperationException("{0} is not a {1}".Formato(route, typeof(IIdentifiable).Name));
+            Implementations? implementations = CalculateExpressionImplementations(route);
+
+            if (implementations != null)
+                return implementations.Value;
+
+            var ss = Schema.Current.Settings;
+            if (route.FollowC(r => r.Parent).SelectMany(r => ss.Attributes(r)).Any(a => a is IgnoreAttribute))
+            {
+                var atts = ss.Attributes(route);
+
+                return Implementations.TryFromAttributes(route.GetType().CleanType(), atts, route) ?? Implementations.By();
+            }
+
+            throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(route, typeof(IIdentifiable).Name));
+        }
+
+        private Implementations? CalculateExpressionImplementations(PropertyRoute route)
+        {
+            if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
+                return null;
+
+            var lambda = ExpressionCleaner.GetFieldExpansion(route.Parent.Type, route.PropertyInfo);
+            if (lambda == null)
+                return null;
+
+            Expression e = MetadataVisitor.JustVisit(lambda, route.Parent);
+
+            MetaExpression me = e as MetaExpression;
+            if (me == null)
+                return null;
+
+            CleanMeta cm = me.Meta as CleanMeta;
+            if (cm == null)
+                return null;
+
+            var imp = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, me.Type.CleanType());
+            if (imp == null)
+                return null;
+
+            return imp.Value;
         }
 
         /// <summary>
