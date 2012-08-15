@@ -153,7 +153,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new MonthStartToken(Parent.Clone());
+            return new DayOfYearToken(Parent.Clone());
         }
     }
 
@@ -230,7 +230,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new MonthStartToken(Parent.Clone());
+            return new DayOfWeekToken(Parent.Clone());
         }
     }   
 
