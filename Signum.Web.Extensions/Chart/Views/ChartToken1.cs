@@ -67,9 +67,9 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
     
 WriteTo(@__razor_helper_writer, Html.Field(Signum.Entities.Extensions.Properties.Resources.ColorsFor0.Formato(type.NiceName()),
                  Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
-                          (ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)))));
+                          (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)))));
 
-                                                                                                      ;
+                                                                                                           ;
 
 });
 
@@ -110,13 +110,12 @@ WriteLiteral("\r\n");
     {
         tc.Value = new ChartColumnDN();
     }
-    ChartRequest chart = ((TypeContext<ChartRequest>)tc.Parent).Value;
     
 
 WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"token");
 
 
-                                            Write(((TypeElementContext<ChartColumnDN>)tc).Index);
+                                            Write(((TypeElementContext<ChartColumnDN>)tc.Parent).Index);
 
 WriteLiteral("\">\r\n        <td>");
 
@@ -129,7 +128,7 @@ WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
              if (tc.Value.GroupByVisible)
             {
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
-                bool groupResults = chart.GroupResults;
+                bool groupResults = tc.Value.ParentChart.GroupResults;
                 if (groupResults)
                 {
                     groupCheck.Attr("checked", "checked");
@@ -148,7 +147,7 @@ WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query
 "      ");
 
 
-           Write(Html.ChartTokenCombo(tc.Value, chart, ViewData[ViewDataKeys.QueryName], tc));
+           Write(Html.ChartTokenCombo(tc.Value, tc.Value.ParentChart, ViewData[ViewDataKeys.QueryName], tc));
 
 WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
 

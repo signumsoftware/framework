@@ -35,6 +35,7 @@ namespace Signum.Web.Chart
 
             var request = new ChartRequest(findOptions.QueryName)
             {
+                ChartScript = ChartScriptLogic.Scripts.Value.FirstEx(() => "No ChartScript loaded in the database"),
                 Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList()
             };
 
@@ -45,7 +46,7 @@ namespace Signum.Web.Chart
 
         public ViewResult FullScreen(string prefix)
         {
-            var request = ExtractChartRequestCtx(prefix, null).Value;
+            var request = this.ExtractChartRequestCtx(prefix, null).Value;
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
@@ -64,25 +65,12 @@ namespace Signum.Web.Chart
             return implementations.IsByAll || implementations.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin));
         }
 
-        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool view)
-        { 
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-
-            ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartControlView;
-            ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
-            ViewData[ViewDataKeys.QueryDescription] = queryDescription;
-            ViewData[ViewDataKeys.FilterOptions] = filterOptions;
-            ViewData[ViewDataKeys.View] = view;
-            
-            return View(Navigator.Manager.SearchPageView,  new TypeContext<ChartRequest>(request, ""));
-        }
-
         [HttpPost]
         public PartialViewResult UpdateChartBuilder(string prefix)
         {
             string lastToken = Request["lastTokenChanged"];
             
-            var request = ExtractChartRequestCtx(prefix, lastToken.TryCS(int.Parse)).Value;   
+            var request = this.ExtractChartRequestCtx(prefix, lastToken.TryCS(int.Parse)).Value;   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
@@ -92,7 +80,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
         {
-            ChartRequest request = ExtractChartRequestCtx("", null).Value;
+            ChartRequest request = this.ExtractChartRequestCtx("", null).Value;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
@@ -113,7 +101,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix)
         {
-            ChartRequest request = ExtractChartRequestCtx(prefix, null).Value;
+            ChartRequest request = this.ExtractChartRequestCtx(prefix, null).Value;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
@@ -134,7 +122,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ActionResult Draw(string prefix)
         {
-            var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
+            var requestCtx = this.ExtractChartRequestCtx(prefix, null).ValidateGlobal();
 
             if (requestCtx.GlobalErrors.Any())
             {
@@ -156,21 +144,9 @@ namespace Signum.Web.Chart
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
         }
 
-        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, int? lastTokenChanged)
-        {
-            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params["webQueryName"]))
-                    .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
-
-            ChartRequest chart = ctx.Value;
-            if (lastTokenChanged != null)
-                chart.Columns[lastTokenChanged.Value].TokenChanged();
-
-            return ctx;
-        }
-
         public ActionResult OpenSubgroup(string prefix)
         {
-            var chartRequest = ExtractChartRequestCtx(prefix, null).Value;
+            var chartRequest = this.ExtractChartRequestCtx(prefix, null).Value;
 
             if (chartRequest.GroupResults)
             {
@@ -237,7 +213,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public JsonResult Validate(string prefix)
         {
-            var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
+            var requestCtx = this.ExtractChartRequestCtx(prefix, null).ValidateGlobal();
 
             ModelState.FromContext(requestCtx);
             return JsonAction.ModelState(ModelState);
@@ -258,6 +234,31 @@ namespace Signum.Web.Chart
             return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
         #endregion
+
+        public MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, int? lastTokenChanged)
+        {
+            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params["webQueryName"]))
+                    .ApplyChanges(ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
+
+            ChartRequest chart = ctx.Value;
+            if (lastTokenChanged != null)
+                chart.Columns[lastTokenChanged.Value].TokenChanged();
+
+            return ctx;
+        }
+
+        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool view)
+        {
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartControlView;
+            ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
+            ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+            ViewData[ViewDataKeys.FilterOptions] = filterOptions;
+            ViewData[ViewDataKeys.View] = view;
+
+            return View(Navigator.Manager.SearchPageView, new TypeContext<ChartRequest>(request, ""));
+        }
 
         #region user chart
         public ActionResult CreateUserChart(string prefix)
@@ -296,46 +297,5 @@ namespace Signum.Web.Chart
             return Redirect(Navigator.FindRoute(queryName));
         }
         #endregion
-
-        #region chart color
-
-        public ActionResult Colors(string typeName)
-        {
-            Type type = Navigator.ResolveType(typeName);
-
-            var model = ChartColorLogic.GetPalette(type);
-
-            return Navigator.View(this, model);
-        }
-
-        public ActionResult SavePalette(string typeName)
-        {
-            Type type = Navigator.ResolveType(typeName);
-
-            var ctx =  ChartColorLogic.GetPalette(type).ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
-
-            if (ctx.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(ctx);
-                return JsonAction.ModelState(ModelState);
-            }
-
-            var palette = ctx.Value;
-
-            ChartColorLogic.SavePalette(palette);
-
-            return Redirect(Url.Action<ChartController>(cc => cc.Colors(typeName)));
-        }
-
-        public ActionResult CreateNewPalette(string typeName)
-        {
-            Type type = Navigator.ResolveType(typeName);
-
-            ChartColorLogic.CreateNewPalette(type);
-
-            return Redirect(Url.Action<ChartController>(cc => cc.Colors(typeName)));
-        }
-
-        #endregion 
     }
 }

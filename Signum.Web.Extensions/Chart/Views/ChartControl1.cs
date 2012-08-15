@@ -204,7 +204,7 @@ WriteLiteral("\">");
 WriteLiteral("</button>\r\n        ");
 
 
-   Write(ChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID).ToString(Html));
+   Write(UserChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID).ToString(Html));
 
 WriteLiteral("\r\n    </div>\r\n    \r\n    <div class=\"clearall\"></div>\r\n\r\n    <div id=\"");
 

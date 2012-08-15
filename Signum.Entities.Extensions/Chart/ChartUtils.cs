@@ -105,31 +105,31 @@ namespace Signum.Entities.Chart
             return result;
         }
         
-        public static bool SyncronizeColumns(this ChartScriptDN chartScript, MList<ChartColumnDN> columns)
+        public static bool SyncronizeColumns(this ChartScriptDN chartScript, IChartBase chart)
         {
             bool result = false;
 
             if (chartScript == null)
             {
                 result = true;
-                columns.Clear();
+                chart.Columns.Clear();
             }
 
             for (int i = 0; i < chartScript.Columns.Count; i++)
             {
-                if (columns.Count <= i)
+                if (chart.Columns.Count <= i)
                 {
-                    columns.Add(new ChartColumnDN());
+                    chart.Columns.Add(new ChartColumnDN());
                     result = true;
                 }
 
-                columns[i].ScriptColumn = chartScript.Columns[i];
-
+                chart.Columns[i].ScriptColumn = chartScript.Columns[i];
+                chart.Columns[i].parentChart = chart; 
             }
 
-            if (columns.Count > chartScript.Columns.Count)
+            if (chart.Columns.Count > chartScript.Columns.Count)
             {
-                columns.RemoveRange(chartScript.Columns.Count, columns.Count - chartScript.Columns.Count);
+                chart.Columns.RemoveRange(chartScript.Columns.Count, chart.Columns.Count - chartScript.Columns.Count);
                 return true;
             }
 

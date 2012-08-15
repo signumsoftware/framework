@@ -15,8 +15,6 @@
 }
 .sf-chart-img
 {
-    background-image: url('../Images/chartType.png');
-    background-repeat: no-repeat;
     height: 40px;
     width: 40px;
     float: left;
@@ -30,25 +28,6 @@
 {
     background-color: #81bffc;    
 }
-.sf-chart-img-pie { background-position: 0 0 }
-.sf-chart-img-doughnout { background-position: 0 -40px }
-.sf-chart-img-points { background-position: 0 -80px }
-.sf-chart-img-bubbles { background-position: 0 -120px }
-
-.sf-chart-img-columns { background-position: -40px 0 }
-.sf-chart-img-multicolumns { background-position: -40px -40px }
-.sf-chart-img-stackedcolumns { background-position: -40px -80px }
-.sf-chart-img-totalcolumns { background-position: -40px -120px }
-
-.sf-chart-img-bars { background-position: -80px 0 }
-.sf-chart-img-multibars { background-position: -80px -40px }
-.sf-chart-img-stackedbars { background-position: -80px -80px }
-.sf-chart-img-totalbars { background-position: -80px -120px }
-
-.sf-chart-img-lines { background-position: -120px 0 }
-.sf-chart-img-multilines { background-position: -120px -40px }
-.sf-chart-img-stackedareas { background-position: -120px -80px }
-.sf-chart-img-totalareas { background-position: -120px -120px }
 
 .sf-chart-tokens table
 {

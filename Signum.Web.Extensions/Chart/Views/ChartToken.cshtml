@@ -15,7 +15,7 @@
         
     @Html.Field(Signum.Entities.Extensions.Properties.Resources.ColorsFor0.Formato(type.NiceName()),
                  Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
-                          (ChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType))));
+                          (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType))));
 }
 @using (var tc = Html.TypeContext<ChartColumnDN>())
 {
@@ -23,16 +23,15 @@
     {
         tc.Value = new ChartColumnDN();
     }
-    ChartRequest chart = ((TypeContext<ChartRequest>)tc.Parent).Value;
     
-    <tr class="sf-chart-token" data-token="token@(((TypeElementContext<ChartColumnDN>)tc).Index)">
+    <tr class="sf-chart-token" data-token="token@(((TypeElementContext<ChartColumnDN>)tc.Parent).Index)">
         <td>@tc.Value.PropertyLabel
         </td>
         <td>
             @if (tc.Value.GroupByVisible)
             {
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
-                bool groupResults = chart.GroupResults;
+                bool groupResults = tc.Value.ParentChart.GroupResults;
                 if (groupResults)
                 {
                     groupCheck.Attr("checked", "checked");
@@ -43,7 +42,7 @@
         </td>
         <td>
             <div class="sf-query-token">
-                @Html.ChartTokenCombo(tc.Value, chart, ViewData[ViewDataKeys.QueryName], tc)
+                @Html.ChartTokenCombo(tc.Value, tc.Value.ParentChart, ViewData[ViewDataKeys.QueryName], tc)
             </div>
             <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
         </td>

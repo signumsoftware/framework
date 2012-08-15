@@ -63,7 +63,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value, () => ChartScript))
                 {
-                    chartScript.SyncronizeColumns(columns);
+                    chartScript.SyncronizeColumns(this);
                 }
             }
         }

@@ -59,6 +59,9 @@ namespace Signum.Entities.Chart
         internal IChartBase parentChart;
 
         [AvoidLocalization]
+        public IChartBase ParentChart { get { return parentChart; } }
+
+        [AvoidLocalization]
         public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
 
         [AvoidLocalization]

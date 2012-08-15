@@ -215,6 +215,20 @@ namespace Signum.Entities.Chart
             if (errors.HasText())
                 throw new FormatException("The columns doesn't match: \r\n" + errors);
         }
+
+        public bool IsCompatibleWith(MList<ChartColumnDN> columns)
+        {
+            return Columns.ZipOrDefault(columns, (s, c) =>
+            {
+                if (s == null)
+                    return false;
+
+                if (c == null)
+                    return s.IsOptional;
+
+                return ChartUtils.IsChartColumnType(c.Token, s.ColumnType);
+            }).All(a => a);
+        }
     }
 
     public enum ChartScriptOperations

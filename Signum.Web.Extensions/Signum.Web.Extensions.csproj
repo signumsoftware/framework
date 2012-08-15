@@ -258,7 +258,10 @@
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
     <Compile Include="Chart\ChartOmniboxProvider.cs" />
+    <Compile Include="Chart\ChartColorClient.cs" />
     <Compile Include="Chart\Controllers\ChartController.cs" />
+    <Compile Include="Chart\Controllers\ColorChartController.cs" />
+    <Compile Include="Chart\UserChartClient.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
     <Compile Include="Chart\Views\ChartBuilder.cs">
       <AutoGen>True</AutoGen>
@@ -849,7 +852,7 @@
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
     <Content Include="Chart\Content\SF_Chart.css" />
-    <Content Include="Chart\Images\chartType.png" />
+    <Content Include="Chart\Images\unknown.png" />
     <Content Include="Chart\Scripts\SF_Chart.js" />
     <Content Include="ControlPanel\Content\SF_FlowTable.css" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
@@ -950,7 +953,6 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartToken1.cs</LastGenOutput>
     </Content>
-    <None Include="Chart\Images\chartType.psd" />
     <Content Include="Chart\Views\ChartResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartResults.cs</LastGenOutput>

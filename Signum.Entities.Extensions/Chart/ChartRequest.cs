@@ -23,6 +23,8 @@ namespace Signum.Entities.Chart
 
         bool GroupResults { get; }
 
+        MList<ChartColumnDN> Columns { get; }
+
         void NotifyChange(bool needNewQuery);
     }
 
@@ -50,7 +52,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value, () => ChartScript))
                 {
-                    chartScript.SyncronizeColumns(columns);
+                    chartScript.SyncronizeColumns(this);
                 }
             }
         }

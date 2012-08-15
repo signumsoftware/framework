@@ -108,7 +108,7 @@ WriteLiteral("\">\r\n        <tr>\r\n            <td class=\"ui-widget ui-widget
 WriteLiteral("\r\n");
 
 
-                     using(var csc = chart.SubContext(c=>c.ChartScript))
+                     using (var csc = chart.SubContext(c => c.ChartScript))
                     {
                         
                    Write(Html.Hidden(csc.Compose("RuntimeInfo"), csc.RuntimeInfo().ToString(), new { @class = "sf-chart-type-value" }));
@@ -124,32 +124,39 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </div>\r\n");
 
 
-                 foreach (var group in ChartScriptLogic.Scripts.Value.GroupsOf(4))
+                 foreach (var group in ChartScriptLogic.Scripts.Value.OrderBy(a => a.Id).GroupsOf(4))
                 {
                     foreach (var script in group)
                     { 
 
-WriteLiteral("                        <img src=\"");
+WriteLiteral("                    <div class=\"");
 
 
-                             Write(Html.Action((Signum.Web.Files.FileController fc)=>fc.DownloadFile(script.Id)));
+                           Write(ChartClient.ChartTypeImgClass(chart.Value.Columns, chart.Value.ChartScript, script));
 
-WriteLiteral("\"\r\n                         data-related=\"");
-
-
-                                  Write(script.Id.ToString());
-
-WriteLiteral("\" \r\n                         title=\"");
+WriteLiteral("\" data-related=\"");
 
 
-                           Write(script.ToString());
+                                                                                                                               Write(script.Id.ToString());
 
-WriteLiteral("\"/>\r\n");
+WriteLiteral("\"  title=\"");
+
+
+                                                                                                                                                              Write(script.ToString());
+
+WriteLiteral("\">\r\n                        <img src=\" ");
+
+
+                               Write(script.Icon == null ?
+                        Url.Content("~/Chart/Images/unkwnown.png") :
+                        Url.Action((Signum.Web.Files.FileController fc) => fc.DownloadFile(script.Icon.Id)));
+
+WriteLiteral("\" />\r\n                    </div>\r\n");
 
 
                     }
 
-WriteLiteral("                    <div class=\"clearall\"></div>\r\n");
+WriteLiteral("                    <div class=\"clearall\">\r\n                    </div>\r\n");
 
 
                 }
@@ -166,29 +173,30 @@ WriteLiteral("</div>\r\n                <table>\r\n                    <tr>\r\n 
 
                                                      Write(Resources.Chart_Dimension);
 
-WriteLiteral("</th>\r\n                        <th class=\"sf-chart-token-narrow\">");
+WriteLiteral("\r\n                        </th>\r\n                        <th class=\"sf-chart-toke" +
+"n-narrow\">");
 
 
                                                      Write(Resources.Chart_Group);
 
-WriteLiteral("</th>\r\n                        <th class=\"sf-chart-token-wide\">Token</th>\r\n      " +
-"              </tr>\r\n");
+WriteLiteral("\r\n                        </th>\r\n                        <th class=\"sf-chart-toke" +
+"n-wide\">\r\n                            Token\r\n                        </th>\r\n    " +
+"                </tr>\r\n");
 
 
-                     foreach (var item in chart.TypeElementContext(a=>a.Columns))
-	                {
+                     foreach (var column in chart.TypeElementContext(a => a.Columns))
+                    {
                         
-                   Write(Html.HiddenRuntimeInfo(item));
+                   Write(Html.HiddenRuntimeInfo(column));
 
-                                                     
+                                                       
                         
-                   Write(Html.EmbeddedControl(chart, cr => cr, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+                   Write(Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
 
-                                                                                                                                      
-	                }
+                                                                                                                                     
+                    }
 
-WriteLiteral("                    \r\n                </table>\r\n            </td>\r\n        </tr>\r" +
-"\n    </table>\r\n");
+WriteLiteral("                </table>\r\n            </td>\r\n        </tr>\r\n    </table>\r\n");
 
 
 }
