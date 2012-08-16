@@ -433,9 +433,12 @@ namespace Signum.Engine.Linq
 
         private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
         {
+            if (route.PropertyRouteType == PropertyRouteType.Root)
+                return new[] { PropertyRoute.Root(type).Add(piName) };
+
             Implementations? imp = route.TryGetImplementations();
 
-            if (imp == null)
+            if (imp == null) //Embedded
                 return new[] { route.Add(piName) };
 
             var fimp = ColumnDescriptionFactory.CastImplementations(imp.Value, type);
