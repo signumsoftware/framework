@@ -238,7 +238,7 @@ namespace Signum.Engine.DynamicQuery
             this.Key = key;
             this.Lambda = lambda;
 
-            Expression e = MetadataVisitor.JustVisit(lambda, PropertyRoute.Root(entityType));
+            Expression e = MetadataVisitor.JustVisit(lambda, entityType);
 
             MetaExpression me =  e as MetaExpression;
 
