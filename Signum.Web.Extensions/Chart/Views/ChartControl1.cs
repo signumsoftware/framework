@@ -216,7 +216,67 @@ WriteLiteral("\" class=\"ui-widget ui-corner-all sf-search-results-container\">\
 
            Html.RenderPartial(ChartClient.ChartResultsView); 
 
-WriteLiteral("    </div>\r\n</div>\r\n");
+WriteLiteral("    </div>\r\n\r\n     <fieldset class=\"sf-chart-code\" >\r\n        <legend>Code</legen" +
+"d>\r\n          <button type=\"submit\" class=\"sf-query-button sf-save-script\" data-" +
+"icon=\"ui-icon-pencil\" id=\"");
+
+
+                                                                                                 Write(Model.Compose("qbSaveScript"));
+
+WriteLiteral("\" data-url=\"");
+
+
+                                                                                                                                            Write(Url.Action<ChartController>(cc => cc.SaveScript()));
+
+WriteLiteral("\">");
+
+
+                                                                                                                                                                                                  Write(Signum.Web.Properties.Resources.Save);
+
+WriteLiteral("</button>\r\n      \r\n        <div class=\"sf-chart-code-container\">\r\n            <te" +
+"xtarea rows=\"60\">");
+
+
+                           Write(Model.Value.ChartScript.Script);
+
+WriteLiteral("</textarea>\r\n        </div>\r\n");
+
+
+           MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); 
+
+WriteLiteral("        <script type=\"text/javascript\">\r\n                (function() {\r\n         " +
+"           var $myChart = SF.Chart.getFor(\'");
+
+
+                                               Write(Model.ControlID);
+
+WriteLiteral("\');\r\n                    $myChart.initOrders();\r\n\r\n                    var $chart" +
+"Container = $(\'");
+
+
+                                        Write(divSelector);
+
+WriteLiteral("\');\r\n                    $chartContainer.closest(\'.sf-tabs\').bind(\"tabsshow\", fun" +
+"ction(event, ui) {\r\n                        if (ui.panel.id == \'");
+
+
+                                        Write(Model.Compose("sfChartContainer"));
+
+WriteLiteral("\') {\r\n                            var data = ");
+
+
+                                  Write(Html.Json());
+
+WriteLiteral(@";
+                            $chartContainer.data(""data"", data);
+                            $myChart.reDraw($chartContainer, false);
+                        }
+                    });
+                })();
+        </script>
+    </fieldset>
+</div>
+");
 
 
         }

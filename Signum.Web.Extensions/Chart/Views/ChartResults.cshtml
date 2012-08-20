@@ -8,13 +8,11 @@
 @using Signum.Entities.Chart
 @using Signum.Web.Chart
 @model TypeContext<ChartRequest>
-
 @{ 
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
     bool viewable = (bool)ViewData[ViewDataKeys.View];
     var formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
 }
-
 @if (queryResult == null)
 { 
     @Resources.Signum_noResults
@@ -24,9 +22,10 @@ else
     <div class="sf-tabs">
         <fieldset id="@Model.Compose("sfChartContainer")">
             <legend>Chart</legend>
-            <div class="sf-chart-container" data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)))"></div>
+            <div class="sf-chart-container" data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)))">
+            </div>
         </fieldset>
-        <fieldset id="@Model.Compose("sfChartData")">
+        <fieldset id="@Model.Compose("sfChartData")" data="@ChartClient.DataJson(Model.Value, queryResult)">
             <legend>Data</legend>
             <table id="@Model.Compose("tblResults")" class="sf-search-results">
                 <thead class="ui-widget-header ui-corner-top">
@@ -46,10 +45,10 @@ else
                                 {
                                     orderType = order.OrderType;
                                 }
-                                <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
-                                    <input type="hidden" value="@col.Column.Name" />
-                                    @col.Column.DisplayName
-                                </th>
+                            <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
+                                <input type="hidden" value="@col.Column.Name" />
+                                @col.Column.DisplayName
+                            </th>
                             }
                         }
                     </tr>
@@ -58,7 +57,8 @@ else
                     @if (!queryResult.Rows.Any())
                     {
                         <tr>
-                            <td colspan="@(queryResult.Columns.Count() + (viewable ? 1 : 0))">@Resources.Signum_noResults</td>
+                            <td colspan="@(queryResult.Columns.Count() + (viewable ? 1 : 0))">@Resources.Signum_noResults
+                            </td>
                         </tr>
                     }
                     else
@@ -67,32 +67,32 @@ else
                         {
                             if (Model.Value.GroupResults)
                             {
-                                <tr>
-                                    @foreach (var col in queryResult.Columns)
-                                    {
-                                        <td>
-                                            @formatters[col.Index](Html, row[col])
-                                        </td>
-                                    }   
-                                </tr>
+                        <tr>
+                            @foreach (var col in queryResult.Columns)
+                            {
+                                <td>
+                                    @formatters[col.Index](Html, row[col])
+                                </td>
+                            }
+                        </tr>
                             }
                             else
                             {
                                 Lite entityField = row.Entity;
-                                <tr data-entity="@entityField.Key()">
-                                    @if (entityField != null && viewable)
-                                    {
-                                        <td>
-                                            @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)
-                                        </td>
-                                    }
-                                    @foreach (var col in queryResult.Columns)
-                                    {
-                                        <td>
-                                            @formatters[col.Index](Html, row[col])
-                                        </td>
-                                    }
-                                </tr>
+                        <tr data-entity="@entityField.Key()">
+                            @if (entityField != null && viewable)
+                            {
+                                <td>
+                                    @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)
+                                </td>
+                            }
+                            @foreach (var col in queryResult.Columns)
+                            {
+                                <td>
+                                    @formatters[col.Index](Html, row[col])
+                                </td>
+                            }
+                        </tr>
                             }
                         }
                     }
@@ -101,30 +101,5 @@ else
                 </tfoot>
             </table>
         </fieldset>
-        <fieldset id="@Model.Compose("sfChartCode")" class="sf-chart-code">
-            <legend>Code</legend>
-            <div class="sf-chart-code-container">
-                <textarea rows="60"></textarea>
-            </div>
-            @{ MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); }
-            <script type="text/javascript">
-                (function() {
-                    var $myChart = SF.Chart.getFor('@Model.ControlID');
-                    $myChart.initOrders();
-
-                    var $chartContainer = $('@divSelector');
-                    $chartContainer.closest('.sf-tabs').bind("tabsshow", function(event, ui) {
-                        if (ui.panel.id == '@(Model.Compose("sfChartContainer"))') {
-                            var data = @Html.Json(ChartClient.DataJson(Model.Value, queryResult));
-                            $chartContainer.data("data", data);
-                            $myChart.reDraw($chartContainer, false);
-                        }
-                    });
-                })();
-            </script>
-        </fieldset>
     </div>
 }
-
-
-

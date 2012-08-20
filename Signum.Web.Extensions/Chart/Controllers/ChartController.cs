@@ -144,6 +144,20 @@ namespace Signum.Web.Chart
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
         }
 
+        public ActionResult SaveScript()
+        {
+            RuntimeInfo script = RuntimeInfo.FromFormValue(Request["script"]);
+            string code = Request["code"];
+
+            ChartScriptDN cs = script.ToLite<ChartScriptDN>().Retrieve();
+
+            cs.Script = code;
+
+            cs.Save();
+
+            return null;
+        }
+
         public ActionResult OpenSubgroup(string prefix)
         {
             var chartRequest = this.ExtractChartRequestCtx(prefix, null).Value;

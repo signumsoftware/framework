@@ -51,7 +51,7 @@ namespace Signum.Web.Chart
                         PartialViewName = _ => ChartClient.ViewPrefix.Formato("UserChart"),
                         MappingAdmin = new EntityMapping<UserChartDN>(true)
                         
-                            .SetProperty(cb=>cb.Columns, new MListMapping<ChartColumnDN>(ChartClient.MappingChartColumn))
+                            .SetProperty(cb=>cb.Columns, new ChartClient.MListCorrelatedOrDefaultMapping<ChartColumnDN>(ChartClient.MappingChartColumn))
                             .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterDN>
                             {
                                 ElementMapping = new EntityMapping<QueryFilterDN>(false)

@@ -24,7 +24,7 @@
                     @typeof(ChartScriptDN).NiceName()
                     @using (var csc = chart.SubContext(c => c.ChartScript))
                     {
-                        @Html.Hidden(csc.Compose("RuntimeInfo"), csc.RuntimeInfo().ToString(), new { @class = "sf-chart-type-value" })
+                        @Html.Hidden(csc.Compose("sfRuntimeInfo"), csc.RuntimeInfo().ToString(), new { @class = "sf-chart-type-value" })
                     }
                     @Html.Hidden(chart.Compose("GroupResults"), chart.Value.GroupResults, new { @class = "sf-chart-group-results" })
                 </div>
@@ -32,7 +32,7 @@
                 {
                     foreach (var script in group)
                     { 
-                    <div class="@ChartClient.ChartTypeImgClass(chart.Value.Columns, chart.Value.ChartScript, script)" data-related="@script.Id.ToString()"  title="@script.ToString()">
+                    <div class="@ChartClient.ChartTypeImgClass(chart.Value.Columns, chart.Value.ChartScript, script)" data-related="@(new RuntimeInfo(script).ToString())"  title="@script.ToString()">
                         <img src=" @(script.Icon == null ?
                         Url.Content("~/Chart/Images/unkwnown.png") :
                         Url.Action((Signum.Web.Files.FileController fc) => fc.DownloadFile(script.Icon.Id)))" />

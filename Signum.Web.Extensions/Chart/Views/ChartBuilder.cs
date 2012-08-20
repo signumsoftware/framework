@@ -111,9 +111,9 @@ WriteLiteral("\r\n");
                      using (var csc = chart.SubContext(c => c.ChartScript))
                     {
                         
-                   Write(Html.Hidden(csc.Compose("RuntimeInfo"), csc.RuntimeInfo().ToString(), new { @class = "sf-chart-type-value" }));
+                   Write(Html.Hidden(csc.Compose("sfRuntimeInfo"), csc.RuntimeInfo().ToString(), new { @class = "sf-chart-type-value" }));
 
-                                                                                                                                      
+                                                                                                                                        
                     }
 
 WriteLiteral("                    ");
@@ -137,12 +137,12 @@ WriteLiteral("                    <div class=\"");
 WriteLiteral("\" data-related=\"");
 
 
-                                                                                                                               Write(script.Id.ToString());
+                                                                                                                                Write(new RuntimeInfo(script).ToString());
 
 WriteLiteral("\"  title=\"");
 
 
-                                                                                                                                                              Write(script.ToString());
+                                                                                                                                                                              Write(script.ToString());
 
 WriteLiteral("\">\r\n                        <img src=\" ");
 

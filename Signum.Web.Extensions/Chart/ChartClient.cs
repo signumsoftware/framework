@@ -22,6 +22,7 @@ using Signum.Engine.Chart;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Reflection;
+using System.Diagnostics;
 
 namespace Signum.Web.Chart
 {
@@ -80,9 +81,8 @@ namespace Signum.Web.Chart
                     Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
                 var chartToken = (ChartColumnDN)ctx.Parent.UntypedValue;
-                var chart = (IChartBase)ctx.Parent.Parent.UntypedValue;
 
-                return QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, chart.GroupResults));
+                return QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, chartToken.ParentChart.GroupResults));
             })
             .SetProperty(ct => ct.DisplayName, ctx =>
             {
@@ -95,7 +95,42 @@ namespace Signum.Web.Chart
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
-            .SetProperty(cb => cb.Columns, new MListMapping<ChartColumnDN>(MappingChartColumn));
+            .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnDN>(MappingChartColumn));
+
+
+        public class MListCorrelatedOrDefaultMapping<S> : MListMapping<S>
+        {
+            public MListCorrelatedOrDefaultMapping()
+                : base()
+            {
+            }
+
+            public MListCorrelatedOrDefaultMapping(Mapping<S> elementMapping)
+                : base(elementMapping)
+            {
+            }
+
+            public override MList<S> GetValue(MappingContext<MList<S>> ctx)
+            {
+                MList<S> list = ctx.Value;
+                int i = 0;
+
+                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx).OrderBy(mc => mc.ControlID.Substring(mc.ControlID.LastIndexOf("_") + 1).ToInt().Value))
+                {
+                    if (i < list.Count)
+                    {
+                        itemCtx.Value = list[i];
+                        itemCtx.Value = ElementMapping(itemCtx);
+
+                        ctx.AddChild(itemCtx);
+                        list[i] = itemCtx.Value;
+                    }
+                    i++;
+                }
+
+                return list;
+            }
+        }
 
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
         {
@@ -156,7 +191,7 @@ namespace Signum.Web.Chart
                 converter = c.Converter(i)
             }).ToList();
 
-            if (request.GroupResults)
+            if (!request.GroupResults)
             {
                 cols.Insert(0, new
                 {

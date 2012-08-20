@@ -112,10 +112,10 @@ WriteLiteral("\r\n");
     }
     
 
-WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"token");
+WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
 
 
-                                            Write(((TypeElementContext<ChartColumnDN>)tc.Parent).Index);
+                                       Write(((TypeElementContext<ChartColumnDN>)tc.Parent).Index);
 
 WriteLiteral("\">\r\n        <td>");
 
