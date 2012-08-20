@@ -35,7 +35,16 @@ namespace Signum.Engine
 
         private static void AttachInvalidations(Schema s, IResetLazy lazy, params Type[] types)
         {
-            Action reset = () => lazy.Reset();
+            Action reset = () =>
+            {
+                if (singleThreaded.Value)
+                {
+                    lazy.Reset();
+                    Transaction.Rolledback += () => lazy.Reset();
+                }
+
+                Transaction.PostRealCommit += dic => lazy.Reset();
+            };
 
             List<Type> cached = new List<Type>();
             foreach (var type in types)
@@ -43,19 +52,17 @@ namespace Signum.Engine
                 var cc = s.CacheController(type);
                 if (cc != null && cc.IsComplete)
                 {
-                    cc.Invalidation += reset;
+                    cc.Disabled += reset;
                     cached.Add(type);
                 }
             }
-
-            Action postReset = () => Transaction.PostRealCommit += dic => reset();
 
             var nonCached = types.Except(cached).ToList();
             if (nonCached.Any())
             {
                 foreach (var type in nonCached)
                 {
-                    giAttachInvalidations.GetInvoker(type)(s, postReset);
+                    giAttachInvalidations.GetInvoker(type)(s, reset);
                 }
 
                 var dgIn = DirectedGraph<Table>.Generate(types.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
@@ -63,7 +70,7 @@ namespace Signum.Engine
 
                 foreach (var table in dgIn.Except(dgOut))
                 {
-                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, postReset);
+                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, reset);
                 }
             }
         }
@@ -124,9 +131,7 @@ namespace Signum.Engine
         public static IDisposable SingleThreadMode()
         {
             var oldValue = singleThreaded.Value;
-
             singleThreaded.Value = true;
-
             return new Disposable(() => singleThreaded.Value = oldValue);
         }
 

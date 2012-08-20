@@ -294,18 +294,21 @@ namespace Signum.Engine.Linq
 
         private Expression TrySqlDayOftheWeek(Expression expression)
         {
-            if (!IsFullNominateOrAggresive)
-                return null;
-
             Expression expr = Visit(expression);
             if (innerProjection || !Has(expr))
                 return null;
 
-            Expression result = Expression.Convert(Expression.Subtract(
+            var number = Expression.Subtract(
                     TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
-                    Expression.Constant(1)), typeof(DayOfWeek));
+                    new SqlConstantExpression(1)); 
 
-            return Add(result);
+            Add(number);
+
+            Expression result = Expression.Convert(number, typeof(DayOfWeek));
+            if (IsFullNominate)
+                Add(result);
+
+            return result;
         }
 
         private Expression TrySqlMonthStart(Expression expression)
@@ -635,10 +638,10 @@ namespace Signum.Engine.Linq
                        (untu == typeof(int) || untu == typeof(long)))
                         return Add(new SqlCastExpression(u.Type, u.Operand));
 
-                    if (IsFullNominate || isAggressive && u.Operand.Type.UnNullify() == u.Type.UnNullify())
+                    if (IsFullNominate || isAggressive && optu == untu)
                         return Add(result);
 
-                    if ("Sql" + u.Type.UnNullify().Name == u.Operand.Type.UnNullify().Name)
+                    if ("Sql" + untu.Name == optu.Name)
                         return Add(result);
                 }
             }
@@ -747,7 +750,7 @@ namespace Signum.Engine.Linq
             if (exp != isNotNull.Expression)
                 isNotNull = new IsNotNullExpression(exp);
 
-            if (Has(exp))
+            if (Has(exp) && IsFullNominateOrAggresive)
                 return Add(isNotNull);
 
             return isNotNull;
@@ -759,7 +762,7 @@ namespace Signum.Engine.Linq
             if (exp != isNull.Expression)
                 isNull = new IsNullExpression(exp);
 
-            if (Has(exp))
+            if (Has(exp) && IsFullNominateOrAggresive)
                 return Add(isNull);
 
             return isNull;

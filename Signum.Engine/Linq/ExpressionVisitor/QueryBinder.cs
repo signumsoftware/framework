@@ -303,15 +303,14 @@ namespace Signum.Engine.Linq
             Expression exp =
                 aggregateFunction == AggregateFunction.Count ? null :
                 selector != null ? MapAndVisitExpand(selector, ref projection) :
-                DbExpressionNominator.FullNominate(projection.Projector);
+                projection.Projector;
 
             projection = ApplyExpansions(projection);
 
             if (coalesceTrick)
                 exp = Expression.Convert(exp, resultType.Nullify());
 
-            if (exp != null)
-                exp = DbExpressionNominator.FullNominate(exp);
+            exp = DbExpressionNominator.FullNominate(exp);
 
             Alias alias = NextSelectAlias();
             var aggregate = !coalesceTrick ? new AggregateExpression(resultType, exp, aggregateFunction) :
@@ -333,8 +332,10 @@ namespace Signum.Engine.Linq
             {
                 Expression exp2 =
                      aggregateFunction == AggregateFunction.Count ? null :
-                     selector != null ? DbExpressionNominator.FullNominate(MapAndVisitExpand(selector, ref info.Projection)) :
+                     selector != null ? MapAndVisitExpand(selector, ref info.Projection) :
                      info.Projection.Projector;
+
+                exp2 = DbExpressionNominator.FullNominate(exp2);
 
                 return new AggregateSubqueryExpression(info.GroupAlias, new AggregateExpression(resultType, exp2, aggregateFunction), subquery);
             }

@@ -68,6 +68,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DateTimeFunctions()
         {
+            Dump((NoteWithDateDN n) => n.CreationTime.DayOfWeek);
             Dump((NoteWithDateDN n) => n.CreationTime.Year);
             Dump((NoteWithDateDN n) => n.CreationTime.Month);
             Dump((NoteWithDateDN n) => n.CreationTime.Day);
@@ -76,6 +77,15 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateDN n) => n.CreationTime.Minute);
             Dump((NoteWithDateDN n) => n.CreationTime.Second);
             Dump((NoteWithDateDN n) => n.CreationTime.Millisecond);
+        }
+
+        [TestMethod]
+        public void DateTimeDayOfWeek()
+        {
+            //var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+            var list = Database.Query<NoteWithDateDN>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+            var list2 = Database.Query<NoteWithDateDN>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
         }
 
         [TestMethod]
