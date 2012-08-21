@@ -68,7 +68,6 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DateTimeFunctions()
         {
-            Dump((NoteWithDateDN n) => n.CreationTime.DayOfWeek);
             Dump((NoteWithDateDN n) => n.CreationTime.Year);
             Dump((NoteWithDateDN n) => n.CreationTime.Month);
             Dump((NoteWithDateDN n) => n.CreationTime.Day);
