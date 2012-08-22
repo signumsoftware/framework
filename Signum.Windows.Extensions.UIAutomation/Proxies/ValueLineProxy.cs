@@ -342,9 +342,26 @@ namespace Signum.Windows.UIAutomation
 
     public class EntityDetailProxy : EntityBaseProxy
     {
+        public static Condition DetailCondition = ConditionBuilder.ToCondition(a => a.Current.ControlType != ControlType.Text && a.Current.ControlType != ControlType.Button); 
+
         public AutomationElement GetDetailControl()
         {
-            return Element.Child(a => a.Current.ControlType != ControlType.Text && a.Current.ControlType != ControlType.Button);
+            return Element.ChildByCondition(DetailCondition);
+        }
+
+        public AutomationElement TryDetailControl()
+        {
+            return Element.TryChildByCondition(DetailCondition);
+        }
+
+        public AutomationElement GetOrCreateDetailControl()
+        {
+            var result = TryDetailControl();
+
+            if (result == null)
+                CreateButton.ButtonInvoke();
+
+            return GetDetailControl();
         }
 
         public EntityDetailProxy(AutomationElement element, PropertyRoute route)

@@ -39,6 +39,7 @@ namespace Signum.Windows.UIAutomation
             SearchControl.Search();
         }
 
+      
         public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
             return SearchControl.ViewElementAt<T>(index); 
