@@ -23,9 +23,9 @@ namespace Signum.Windows.UIAutomation
             Close();
         }
 
-        public void Wait(int milliseconds)
+        public void WaitForImputIdle(int? milliseconds = null)
         {
-            wp.WaitForInputIdle(milliseconds);
+            wp.WaitForInputIdle(milliseconds ?? WaitExtensions.DefaultTimeOut);
         }
 
         public virtual bool Close()

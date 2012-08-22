@@ -26,6 +26,13 @@ namespace Signum.Windows.UIAutomation
             return combo.Pattern<SelectionPattern>().Current.GetSelection().SingleOrDefault();
         }
 
+        public static AutomationElement TabItemSelect(this AutomationElement container, string tabItemName)
+        {
+            var tabItem = container.Descendant(h => h.Current.ControlType == ControlType.TabItem && h.Current.Name == tabItemName);
+            tabItem.Pattern<SelectionItemPattern>().Select();
+            return tabItem;
+        }
+
         public static void ButtonInvoke(this AutomationElement button)
         {
             button.Pattern<InvokePattern>().Invoke();

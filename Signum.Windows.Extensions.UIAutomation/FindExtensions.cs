@@ -61,7 +61,7 @@ namespace Signum.Windows.UIAutomation
 
         public static AutomationElement TryElementByCondition(this AutomationElement parent, TreeScope scope, Condition condition)
         {
-            return parent.FindFirst(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, condition));
+            return parent.FindFirst(scope, condition);
         }
 
 
