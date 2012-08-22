@@ -552,6 +552,79 @@ namespace Signum.Windows
             }
         }
 
+        public static readonly DependencyProperty AutomationHelpTextFromDataContextProperty =
+           DependencyProperty.RegisterAttached("AutomationHelpTextFromDataContext", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
+        public static bool GetAutomationHelpTextFromDataContext(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(AutomationHelpTextFromDataContextProperty);
+        }
+
+        public static void SetAutomationHelpTextFromDataContext(DependencyObject obj, bool value)
+        {
+            obj.SetValue(AutomationHelpTextFromDataContextProperty, value);
+        }
+
+        static void RegisterUpdater(DependencyObject sender, object value)
+        {
+            var fe = (FrameworkElement)sender;
+
+            if ((bool)value)
+            {
+                fe.DataContextChanged += Common_DataContextChanged;
+
+                AutomationProperties.SetHelpText(fe, GetEntityStringAndHascode(fe.DataContext));
+            }
+            else
+            {
+                fe.DataContextChanged -= Common_DataContextChanged;
+
+                AutomationProperties.SetHelpText(fe, "");
+            }
+        }
+
+        static void Common_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            AutomationProperties.SetHelpText((DependencyObject)sender, GetEntityStringAndHascode(e.NewValue));
+        }
+
+
+        public static string GetEntityStringAndHascode(object newValue)
+        {
+            if (newValue == null)
+                return "";
+
+            return GetEntityString(newValue) + " Hash: " + ReferenceEqualityComparer<object>.Default.GetHashCode(newValue).ToString("x");
+        }
+
+        static string GetEntityString(object newValue)
+        {
+            if (newValue == null)
+                return "";
+
+            if (newValue is EmbeddedEntity)
+                return newValue.GetType().Name;
+
+            var ident = newValue as IdentifiableEntity;
+            if (ident != null)
+            {
+                if (ident.IsNew)
+                    return "{0};New".Formato(Server.ServerTypes[ident.GetType()].CleanName);
+
+                return ident.ToLite().Key();
+            }
+
+            var lite = newValue as Lite;
+            if (lite != null)
+            {
+                if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
+                    return "{0};New".Formato(Server.ServerTypes[lite.RuntimeType].CleanName);
+
+                return lite.Key();
+            }
+
+            return "";
+        }
+
         #endregion
 
         public static readonly RoutedEvent ChangeDataContextEvent = EventManager.RegisterRoutedEvent("ChangeDataContext", RoutingStrategy.Bubble, typeof(ChangeDataContextHandler), typeof(Common));
