@@ -90,7 +90,7 @@
     <Compile Include="DynamicQuery\Tokens\EntityPropertyToken.cs" />
     <Compile Include="DynamicQuery\Tokens\AsTypeToken.cs" />
     <Compile Include="DynamicQuery\Tokens\ColumnToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\MonthStartToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\DateTimeSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\NetPropertyToken.cs" />
     <Compile Include="ModelEntity.cs" />
     <Compile Include="DynamicQuery\Column.cs" />
@@ -103,6 +103,7 @@
     <Compile Include="Basics\Alert.cs" />
     <Compile Include="Basics\Color.cs" />
     <Compile Include="DynamicQuery\Meta.cs" />
+    <Compile Include="ObjectDumper.cs" />
     <Compile Include="Patterns\CorruptEntity.cs" />
     <Compile Include="DynamicQuery\Order.cs" />
     <Compile Include="DynamicQuery\QueryDescription.cs" />

@@ -22,18 +22,6 @@ namespace Signum.Engine
     /// </summary>
     public class Transaction : IDisposable
     {
-        public static Action<string, StackTrace> UnexpectedBehaviourCallback { get; set; }
-
-        static Transaction()
-        {
-            UnexpectedBehaviourCallback = (msg, st) => Debug.WriteLine(msg); 
-        }
-
-        static void NotifyRollback()
-        {
-            UnexpectedBehaviourCallback("TRANSACTION ROLLBACKED!", new StackTrace(2, true));
-        }
-
         static readonly Variable<Dictionary<Connector, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<Connector, ICoreTransaction>>("transactions");
 
         bool commited;
@@ -46,9 +34,13 @@ namespace Signum.Engine
             event Action PreRealCommit;
             DbConnection Connection { get; }
             DbTransaction Transaction { get; }
-            bool RolledBack { get; }
+           
             bool Started { get; }
+
+            bool IsRolledback { get; }
             void Rollback();
+            event Action Rolledback;
+
             void Commit();
             void Finish();
             void Start();
@@ -64,7 +56,7 @@ namespace Signum.Engine
 
             public FakedTransaction(ICoreTransaction parent)
             {
-                if (parent != null && parent.RolledBack)
+                if (parent != null && parent.IsRolledback)
                     throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
 
                 this.parent = parent;
@@ -84,7 +76,7 @@ namespace Signum.Engine
 
             public DbConnection Connection{ get { return parent.Connection; } }
             public DbTransaction Transaction{ get { return parent.Transaction; } }
-            public bool RolledBack { get{ return parent.RolledBack;} }
+            public bool IsRolledback { get{ return parent.IsRolledback;} }
             public bool Started { get { return parent.Started; } }
 
             public void Start() { parent.Start(); }
@@ -112,6 +104,12 @@ namespace Signum.Engine
             {
                 get { return parent; }
             }
+
+            public event Action Rolledback
+            {
+                add { parent.Rolledback += value; }
+                remove { parent.Rolledback -= value; }
+            }
         }
 
         class RealTransaction : ICoreTransaction
@@ -120,10 +118,11 @@ namespace Signum.Engine
 
             public DbConnection Connection { get; private set; }
             public DbTransaction Transaction { get; private set; }
-            public bool RolledBack { get; private set; }
+            public bool IsRolledback { get; private set; }
             public bool Started { get; private set; }
             public event Action<Dictionary<string, object>> PostRealCommit;
             public event Action PreRealCommit;
+            public event Action Rolledback;
 
             IsolationLevel? IsolationLevel;
 
@@ -180,11 +179,12 @@ namespace Signum.Engine
 
             public void Rollback()
             {
-                if (Started && !RolledBack)
+                if (Started && !IsRolledback)
                 {
                     Transaction.Rollback();
-                    NotifyRollback();
-                    RolledBack = true;
+                    IsRolledback = true;
+                    if (Rolledback != null)
+                        Rolledback();
                 }
             }
 
@@ -213,20 +213,22 @@ namespace Signum.Engine
             {
                 get { return parent; }
             }
+
         }
 
         class NamedTransaction : ICoreTransaction
         {
             ICoreTransaction parent;
             string savePointName;
-            public bool RolledBack { get; private set; }
+            public bool IsRolledback { get; private set; }
             public bool Started { get; private set; }
             public event Action<Dictionary<string, object>> PostRealCommit;
             public event Action PreRealCommit;
+            public event Action Rolledback;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
-                if (parent != null && parent.RolledBack)
+                if (parent != null && parent.IsRolledback)
                     throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
 
                 this.parent = parent;
@@ -249,11 +251,12 @@ namespace Signum.Engine
 
             public void Rollback()
             {
-                if (Started && !RolledBack)
+                if (Started && !IsRolledback)
                 {
                     Connector.Current.RollbackTransactionPoint(Transaction, savePointName);
-                    NotifyRollback();
-                    RolledBack = true;
+                    IsRolledback = true;
+                    if (Rolledback != null)
+                        Rolledback();
                 }
             }
 
@@ -290,7 +293,7 @@ namespace Signum.Engine
             public ICoreTransaction Parent
             {
                 get { return parent; }
-            }
+        }
         }
 
         class NoneTransaction : ICoreTransaction
@@ -299,10 +302,11 @@ namespace Signum.Engine
 
             public DbConnection Connection { get; private set; }
             public DbTransaction Transaction { get{return null;}}
-            public bool RolledBack { get; private set; }
+            public bool IsRolledback { get; private set; }
             public bool Started { get; private set; }
             public event Action<Dictionary<string, object>> PostRealCommit;
             public event Action PreRealCommit;
+            public event Action Rolledback;
 
             public NoneTransaction(ICoreTransaction parent)
             {
@@ -351,11 +355,12 @@ namespace Signum.Engine
 
             public void Rollback()
             {
-                if (Started && !RolledBack)
+                if (Started && !IsRolledback)
                 {
                     //Transaction.Rollback();
-                    NotifyRollback();
-                    RolledBack = true;
+                    IsRolledback = true;
+                    if (Rolledback != null)
+                        Rolledback();
                 }
             }
 
@@ -483,6 +488,12 @@ namespace Signum.Engine
             remove { GetCurrent().PreRealCommit -= value; }
         }
 
+        public static event Action Rolledback
+        {
+            add { GetCurrent().Rolledback += value; }
+            remove { GetCurrent().Rolledback -= value; }
+        }
+
         public static Dictionary<string, object> UserData
         {
             get { return GetCurrent().UserData; }
@@ -521,7 +532,7 @@ namespace Signum.Engine
 
         public void Commit()
         {
-            if (coreTransaction.RolledBack)
+            if (coreTransaction.IsRolledback)
                 throw new InvalidOperationException("The transation is rolled back and can not be commited.");
 
             coreTransaction.Commit();
@@ -533,7 +544,7 @@ namespace Signum.Engine
         {
             try
             {
-                if (!commited)
+            if (!commited)
                     coreTransaction.Rollback(); //... sqlTransacion.Rollback()
 
                 coreTransaction.Finish(); //... sqlTransaction.Dispose() sqlConnection.Dispose()
@@ -541,8 +552,8 @@ namespace Signum.Engine
             finally
             {
                 if (coreTransaction.Parent == null)
-                    currents.Value.Remove(Connector.Current);
-                else
+                currents.Value.Remove(Connector.Current);
+            else
                     currents.Value[Connector.Current] = coreTransaction.Parent;
             }
 

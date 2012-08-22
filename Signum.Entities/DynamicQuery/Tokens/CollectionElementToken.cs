@@ -52,25 +52,42 @@ namespace Signum.Entities.DynamicQuery
 
         public override Implementations? GetImplementations()
         {
+            ExtensionToken et = Parent as ExtensionToken;
+
+            if (et != null && et.IsProjection)
+                return et.GetElementImplementations();
+
             var pr = GetPropertyRoute();
             if (pr != null)
                 return pr.TryGetImplementations();
-
-            var t = elementType.CleanType();
-            if (t.IsIdentifiableEntity())
-                return Implementations.By(Parent.Type);
 
             return null;
         }
 
         public override string Format
         {
-            get { return Parent.Format; }
+            get
+            {
+                ExtensionToken et = Parent as ExtensionToken;
+
+                if (et != null && et.IsProjection)
+                    return et.ElementFormat;
+
+                return Parent.Format;
+            }
         }
 
         public override string Unit
         {
-            get { return Parent.Unit; }
+            get
+            {
+                ExtensionToken et = Parent as ExtensionToken;
+
+                if (et != null && et.IsProjection)
+                    return et.ElementUnit;
+
+                return Parent.Unit;
+            }
         }
 
         public override bool IsAllowed()
@@ -85,12 +102,13 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
-            PropertyRoute parent = Parent.GetPropertyRoute();
-            if (parent == null)
-                return null;
+            ExtensionToken et = Parent as ExtensionToken;
+            if (et != null && et.IsProjection)
+                return et.GetElementPropertyRoute();
 
-            if (parent.Type.ElementType() != null)
-                return parent.Add("Item");
+            PropertyRoute parent = Parent.GetPropertyRoute();
+            if (parent != null && parent.Type.ElementType() != null)
+               return parent.Add("Item");
 
             return parent; 
         }
@@ -125,8 +143,9 @@ namespace Signum.Entities.DynamicQuery
 
         internal Expression BuildExpressionLambda(BuildExpressionContext context, LambdaExpression lambda)
         {
-            MethodInfo mi = typeof(IQueryable).IsAssignableFrom(Parent.Type) ? (CollectionElementType == CollectionElementType.All ? miAllQ : miAnyQ) :
-                                                                               (CollectionElementType == CollectionElementType.All ? miAllE : miAnyE);
+            MethodInfo mi = typeof(IQueryable).IsAssignableFrom(Parent.Type) ? 
+                    (CollectionElementType == CollectionElementType.All ? miAllQ : miAnyQ) :
+                    (CollectionElementType == CollectionElementType.All ? miAllE : miAnyE);
 
             var collection = Parent.BuildExpression(context);
             

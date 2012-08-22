@@ -13,7 +13,10 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ExtensionToken : QueryToken
     {
-        public ExtensionToken(QueryToken parent, string key, Type type, string unit, string format, Implementations? implementations, bool isAllowed, PropertyRoute propertyRoute)
+        public ExtensionToken(QueryToken parent, string key, Type type, bool isProjection,
+            string unit, string format, 
+            Implementations? implementations,
+            bool isAllowed, PropertyRoute propertyRoute)
             : base(parent)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(parent.Type.CleanType()))
@@ -21,6 +24,7 @@ namespace Signum.Entities.DynamicQuery
 
             this.key= key;
             this.type = type;
+            this.isProjection = isProjection;
             this.unit = unit;
             this.format = format;
             this.implementations = implementations;
@@ -40,17 +44,22 @@ namespace Signum.Entities.DynamicQuery
             return DisplayName + Resources.Of + Parent.ToString();
         }
 
-        string format;
-        public override string Format { get { return format; } }
-
-        string unit;
-        public override string Unit { get { return unit; } }
-
         Type type;
         public override Type Type { get { return type.BuildLite().Nullify(); } }
 
         string key;
         public override string Key { get { return key; } }
+
+        bool isProjection;
+        public bool IsProjection { get { return isProjection; } }
+
+        string format;
+        public override string Format { get { return isProjection ? null : format; } }
+        public string ElementFormat { get { return isProjection? format: null; } }
+
+        string unit;
+        public override string Unit { get { return isProjection? null: unit; } }
+        public string ElementUnit { get { return isProjection?  unit: null; } }
 
         protected override List<QueryToken> SubTokensInternal()
         {
@@ -72,13 +81,23 @@ namespace Signum.Entities.DynamicQuery
         public PropertyRoute propertyRoute;
         public override PropertyRoute GetPropertyRoute()
         {
-            return propertyRoute;
+            return isProjection ? null : propertyRoute;
+        }
+
+        public PropertyRoute GetElementPropertyRoute()
+        {
+            return isProjection ? propertyRoute : null;
         }
 
         public Implementations? implementations;
         public override Implementations? GetImplementations()
         {
-            return implementations;
+            return isProjection ? null : implementations;
+        }
+
+        public Implementations? GetElementImplementations()
+        {
+            return isProjection ? implementations : null; 
         }
 
         bool isAllowed; 
@@ -89,7 +108,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new ExtensionToken(this.Parent.Clone(), key, type, unit, format, implementations, isAllowed, propertyRoute); 
+            return new ExtensionToken(this.Parent.Clone(), key, type, isProjection, unit, format, implementations, isAllowed, propertyRoute); 
         }
     }
 }

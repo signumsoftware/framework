@@ -91,14 +91,17 @@ SF.registerModule("Lines", function () {
                     return;
                 }
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
-                if (!SF.isEmpty(template)) { //Template pre-loaded: In case of a list, it will be created with "_0" itemprefix => replace it with the current one
-                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+                var template = this.getEmbeddedTemplate();
+                if (!SF.isEmpty(template)) {
                     new SF.ViewNavigator(viewOptions).showCreateOk(template);
                 }
                 else {
                     new SF.ViewNavigator(viewOptions).createOk();
                 }
+            },
+
+            getEmbeddedTemplate: function (viewOptions) {
+                return window[SF.compose(this.options.prefix, "sfTemplate")];
             },
 
             find: function (_findOptions) {
@@ -380,7 +383,7 @@ SF.registerModule("Lines", function () {
                     throw "ViewOptions type parameter must not be null in entityLineDetail typedCreate. Call create instead";
                 }
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                var template = this.getEmbeddedTemplate();
                 if (!SF.isEmpty(template)) { //Template pre-loaded: EmbeddedEntity
                     $('#' + viewOptions.containerDiv).html(template);
                     SF.triggerNewContent($('#' + viewOptions.containerDiv));
@@ -455,12 +458,16 @@ SF.registerModule("Lines", function () {
 
         $.widget("SF.entityList", $.SF.baseLine, {
 
-            options: {},
+            options: {}, //baseLine options + reorder
 
             keys: {
                 entity: "sfEntity",
-                index: "sfIndex",
+                indexes: "sfIndexes",
                 list: "sfList"
+            },
+
+            itemSuffix: function () {
+                return SF.Keys.toStr;
             },
 
             updateLinks: function (newToStr, newLink, itemPrefix) {
@@ -492,23 +499,56 @@ SF.registerModule("Lines", function () {
             },
 
             selectedItemPrefix: function () {
-                var selected = $(this.pf(this.keys.list) + " > option:selected");
+                var $items = this.getItems();
+                if ($items.length == 0) {
+                    return null;
+                }
+                var selected = $items.filter(":selected");
                 if (selected.length == 0) {
                     return null;
                 }
-
                 var nameSelected = selected[0].id;
                 return nameSelected.substr(0, nameSelected.indexOf(SF.Keys.toStr) - 1);
             },
 
-            getLastIndex: function () {
-                var lastElement = $(this.pf(this.keys.list) + " > option:last");
-                var lastIndex = -1;
-                if (lastElement.length > 0) {
-                    var nameSelected = lastElement[0].id;
-                    lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(SF.Keys.toStr) - 1);
+            getItems: function () {
+                return $(this.pf(this.keys.list) + " > option");
+            },
+
+            getLastPrefixIndex: function () {
+                var lastPrefixIndex = -1;
+                var $items = this.getItems();
+                var self = this;
+                $items.each(function () {
+                    var currId = this.id;
+                    var currPrefixIndex = parseInt(currId.substring(self.options.prefix.length + 1, currId.indexOf(self.itemSuffix()) - 1), 10);
+                    if (currPrefixIndex > lastPrefixIndex) {
+                        lastPrefixIndex = currPrefixIndex;
+                    }
+                });
+                return parseInt(lastPrefixIndex, 10);
+            },
+
+            getNewIndex: function (itemPrefix) {
+                return parseInt($("#" + SF.compose(itemPrefix, this.keys.indexes)).val().split(";")[1]);
+            },
+
+            setNewIndex: function (itemPrefix, newIndex) {
+                var $indexes = $("#" + SF.compose(itemPrefix, this.keys.indexes));
+                var indexes = $indexes.val().split(";");
+                $indexes.val(indexes[0].toString() + ";" + newIndex.toString());
+            },
+
+            getLastNewIndex: function () {
+                var $last = this.getItems().filter(":last");
+                if ($last.length == 0) {
+                    return -1;
                 }
-                return lastIndex;
+
+                var lastId = $last[0].id;
+                var lastPrefix = lastId.substring(0, lastId.indexOf(this.itemSuffix()) - 1);
+
+                return this.getNewIndex(lastPrefix);
             },
 
             checkValidation: function (validatorOptions, itemPrefix) {
@@ -537,13 +577,22 @@ SF.registerModule("Lines", function () {
                 return validatorResult;
             },
 
+            getEmbeddedTemplate: function () {
+                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                if (!SF.isEmpty(template)) {
+                    var newPrefixIndex = this.getLastPrefixIndex() + 1;
+                    var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
+                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix);
+                }
+                return template;
+            },
+
             viewOptionsForCreating: function (_viewOptions) {
                 var self = this;
-                var newIndex = +this.getLastIndex() + 1;
-                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                var newPrefixIndex = this.getLastPrefixIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
                 return $.extend({
                     onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions, _viewOptions.type, itemPrefix); },
-                    onOkClosed: function () { self.fireOnEntityChanged(); },
                     onCancelled: null,
                     controllerUrl: null,
                     prefix: itemPrefix,
@@ -557,25 +606,27 @@ SF.registerModule("Lines", function () {
                 });
                 var validatorResult = this.checkValidation(valOptions, itemPrefix);
                 if (validatorResult.acceptChanges) {
-                    this.newListItem(clonedElements, runtimeType, itemPrefix, validatorResult.newToStr);
+                    this.newListItem(clonedElements, itemPrefix, { type: runtimeType, toStr: validatorResult.newToStr });
                 }
                 return validatorResult.acceptChanges;
             },
 
-            newListItem: function (clonedElements, runtimeType, itemPrefix, newToStr) {
+            newListItem: function (clonedElements, itemPrefix, item) {
                 var listInfo = this.staticInfo();
-                var itemInfoValue = new SF.RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n');
-                listInfo.find().after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue))
+                var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o');
+                listInfo.find().after(SF.hiddenInput(SF.compose(itemPrefix, this.keys.indexes), ";" + (this.getLastNewIndex() + 1).toString()))
+                    .after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue))
                     .after(SF.hiddenDiv(SF.compose(itemPrefix, this.keys.entity), ""));
                 $('#' + SF.compose(itemPrefix, this.keys.entity)).append(clonedElements);
 
                 var select = $(this.pf(this.keys.list));
-                if (SF.isEmpty(newToStr)) {
-                    newToStr = "&nbsp;";
+                if (SF.isEmpty(item.toStr)) {
+                    item.toStr = "&nbsp;";
                 }
-                select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='sf-value-line'>" + newToStr + "</option>");
+                select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='sf-value-line'>" + item.toStr + "</option>");
                 select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
                 select.children('option:last').attr('selected', true);
+                this.fireOnEntityChanged();
             },
 
             view: function (_viewOptions) {
@@ -623,13 +674,12 @@ SF.registerModule("Lines", function () {
             },
 
             createFindOptions: function (_findOptions) {
-                var newIndex = +this.getLastIndex() + 1;
-                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                var newPrefixIndex = this.getLastPrefixIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
                 var self = this;
                 return $.extend({
                     prefix: itemPrefix,
                     onOk: function (selectedItems) { return self.onFindingOk(selectedItems); },
-                    onOkClosed: function () { self.fireOnEntityChanged(); },
                     allowMultiple: true
                 }, _findOptions);
             },
@@ -638,17 +688,21 @@ SF.registerModule("Lines", function () {
                 if (selectedItems == null || selectedItems.length == 0) {
                     throw "No item was returned from Find Window";
                 }
-                var lastIndex = +this.getLastIndex();
+                var self = this;
+                this.foreachNewItem(selectedItems, function (item, itemPrefix) {
+                    self.newListItem('', itemPrefix, item);
+                });
+                return true;
+            },
+
+            foreachNewItem: function (selectedItems, itemAction) {
+                var lastPrefixIndex = this.getLastPrefixIndex();
                 for (var i = 0, l = selectedItems.length; i < l; i++) {
                     var item = selectedItems[i];
-                    lastIndex++;
-                    var itemPrefix = SF.compose(this.options.prefix, lastIndex.toString());
-
-                    this.newListItem('', item.type, itemPrefix, item.toStr);
-                    this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
-                    $('#' + SF.compose(itemPrefix, SF.Keys.toStr)).html(item.toStr);
+                    lastPrefixIndex++;
+                    var itemPrefix = SF.compose(this.options.prefix, lastPrefixIndex.toString());
+                    itemAction(item, itemPrefix);
                 }
-                return true;
             },
 
             remove: function () {
@@ -660,22 +714,70 @@ SF.registerModule("Lines", function () {
             },
 
             removeInIndex: function (selectedItemPrefix) {
-                $.each([SF.Keys.runtimeInfo, SF.Keys.toStr, this.keys.entity, this.keys.index], function (i, key) {
+                $.each([SF.Keys.runtimeInfo, SF.Keys.toStr, this.keys.entity, this.keys.indexes], function (i, key) {
                     $("#" + SF.compose(selectedItemPrefix, key)).remove();
                 });
                 this.fireOnEntityChanged();
             },
 
             updateButtonsDisplay: function () {
-                var hasElements = $(this.pf(this.keys.list) + " > option").length > 0;
+                var hasElements = this.getItems().length > 0;
                 $(this.pf("btnRemove")).toggle(hasElements);
                 $(this.pf("btnView")).toggle(hasElements);
+                $(this.pf("btnUp")).toggle(hasElements);
+                $(this.pf("btnDown")).toggle(hasElements);
+            },
+
+            moveUp: function (selectedItemPrefix) {
+                if (typeof selectedItemPrefix == "undefined") {
+                    selectedItemPrefix = this.selectedItemPrefix();
+                }
+
+                var suffix = this.itemSuffix();
+                var $item = $("#" + SF.compose(selectedItemPrefix, suffix));
+                var $itemPrev = $item.prev();
+
+                if ($itemPrev.length == 0) {
+                    return;
+                }
+
+                var itemPrevId = $itemPrev[0].id;
+                var itemPrevPrefix = itemPrevId.substring(0, itemPrevId.indexOf(suffix) - 1);
+
+                var prevNewIndex = this.getNewIndex(itemPrevPrefix);
+                this.setNewIndex(selectedItemPrefix, prevNewIndex);
+                this.setNewIndex(itemPrevPrefix, prevNewIndex + 1);
+
+                $item.insertBefore($itemPrev);
+            },
+
+            moveDown: function (selectedItemPrefix) {
+                if (typeof selectedItemPrefix == "undefined") {
+                    selectedItemPrefix = this.selectedItemPrefix();
+                }
+
+                var suffix = this.itemSuffix();
+                var $item = $("#" + SF.compose(selectedItemPrefix, suffix));
+                var $itemNext = $item.next();
+
+                if ($itemNext.length == 0) {
+                    return;
+                }
+
+                var itemNextId = $itemNext[0].id;
+                var itemNextPrefix = itemNextId.substring(0, itemNextId.indexOf(suffix) - 1);
+
+                var nextNewIndex = this.getNewIndex(itemNextPrefix);
+                this.setNewIndex(selectedItemPrefix, nextNewIndex);
+                this.setNewIndex(itemNextPrefix, nextNewIndex - 1);
+
+                $item.insertAfter($itemNext);
             }
         });
 
         $.widget("SF.entityListDetail", $.SF.entityList, {
 
-            options: {}, //baseLine Options + detailDiv
+            options: {}, //entityList Options + detailDiv
 
             typedCreate: function (_viewOptions) {
                 if (SF.isEmpty(_viewOptions.type)) {
@@ -683,9 +785,8 @@ SF.registerModule("Lines", function () {
                 }
                 this.restoreCurrent();
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
-                if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
-                    template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
+                var template = this.getEmbeddedTemplate();
+                if (!SF.isEmpty(template)) {
                     $('#' + viewOptions.containerDiv).html(template);
                     SF.triggerNewContent($('#' + viewOptions.containerDiv));
                 }
@@ -697,8 +798,8 @@ SF.registerModule("Lines", function () {
             },
 
             viewOptionsForCreating: function (_viewOptions) {
-                var newIndex = +this.getLastIndex() + 1;
-                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                var newPrefixIndex = this.getLastPrefixIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
                 return $.extend({
                     containerDiv: this.options.detailDiv,
                     prefix: itemPrefix,
@@ -732,8 +833,7 @@ SF.registerModule("Lines", function () {
                 }
 
                 var itemPrefix = viewOptions.prefix;
-                this.newListItem('', viewOptions.type, itemPrefix);
-                this.fireOnEntityChanged();
+                this.newListItem('', itemPrefix, { type: viewOptions.type });
             },
 
             view: function (_viewOptions) {
@@ -799,13 +899,12 @@ SF.registerModule("Lines", function () {
             },
 
             createFindOptions: function (_findOptions, _viewOptions) {
-                var newIndex = +this.getLastIndex() + 1;
-                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                var newPrefixIndex = this.getLastPrefixIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
                 var self = this;
                 return $.extend({
                     prefix: itemPrefix,
                     onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-                    onOkClosed: function () { self.fireOnEntityChanged(); },
                     allowMultiple: true
                 }, _findOptions);
             },
@@ -814,19 +913,12 @@ SF.registerModule("Lines", function () {
                 if (selectedItems == null || selectedItems.length == 0) {
                     throw "No item was returned from Find Window";
                 }
-                var lastIndex = +this.getLastIndex();
-                for (var i = 0, l = selectedItems.length; i < l; i++) {
-                    var item = selectedItems[i];
-                    lastIndex++;
-                    var itemPrefix = SF.compose(this.options.prefix, lastIndex.toString());
-
-                    this.newListItem('', item.type, itemPrefix, item.toStr);
-                    this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
-                    $('#' + SF.compose(itemPrefix, SF.Keys.toStr)).html(item.toStr);
-
-                    //View result in the detailDiv
-                    $(this.pf(this.keys.list)).dblclick();
-                }
+                var self = this;
+                this.foreachNewItem(selectedItems, function (item, itemPrefix) {
+                    self.newListItem('', itemPrefix, item);
+                });
+                //View result in the detailDiv
+                $(this.pf(this.keys.list)).dblclick();
                 return true;
             },
 
@@ -848,33 +940,31 @@ SF.registerModule("Lines", function () {
 
         $.widget("SF.entityRepeater", $.SF.entityList, {
 
-            options: {}, //baseLine Options + maxElements + removeItemLinkText
+            options: {}, //entityList Options + maxElements + removeItemLinkText
 
             keys: {
                 entity: "sfEntity",
-                index: "sfIndex",
+                indexes: "sfIndexes",
                 itemsContainer: "sfItemsContainer",
                 repeaterItem: "sfRepeaterItem",
                 repeaterItemClass: "sf-repeater-element"
             },
 
+            itemSuffix: function () {
+                return this.keys.repeaterItem;
+            },
+
+            getItems: function () {
+                return $(this.pf(this.keys.itemsContainer) + " > ." + this.keys.repeaterItemClass);
+            },
+
             canAddItems: function () {
                 if (!SF.isEmpty(this.options.maxElements)) {
-                    if ($(this.pf(this.keys.itemsContainer) + " > ." + this.keys.repeaterItemClass).length >= +this.options.maxElements) {
+                    if (this.getItems().length >= +this.options.maxElements) {
                         return false;
                     }
                 }
                 return true;
-            },
-
-            getLastIndex: function () {
-                var lastElement = $(this.pf(this.keys.itemsContainer) + " > ." + this.keys.repeaterItemClass + ":last");
-                var lastIndex = -1;
-                if (lastElement.length !== 0) {
-                    var nameSelected = lastElement[0].id;
-                    lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(this.keys.repeaterItem) - 1);
-                }
-                return lastIndex;
             },
 
             typedCreate: function (_viewOptions) {
@@ -886,7 +976,7 @@ SF.registerModule("Lines", function () {
                 }
 
                 var viewOptions = this.viewOptionsForCreating(_viewOptions);
-                var template = window[SF.compose(this.options.prefix, "sfTemplate")];
+                var template = this.getEmbeddedTemplate();
                 if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
                     template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
                     this.onItemCreated(template, viewOptions);
@@ -900,8 +990,8 @@ SF.registerModule("Lines", function () {
             },
 
             viewOptionsForCreating: function (_viewOptions) {
-                var newIndex = +this.getLastIndex() + 1;
-                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                var newPrefixIndex = this.getLastPrefixIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
                 return $.extend({
                     containerDiv: "",
                     prefix: itemPrefix,
@@ -915,18 +1005,19 @@ SF.registerModule("Lines", function () {
                 }
 
                 var itemPrefix = viewOptions.prefix;
-                this.newRepItem(newHtml, viewOptions.type, itemPrefix);
-                this.fireOnEntityChanged();
+                this.newRepItem(newHtml, itemPrefix, { type: viewOptions.type });
             },
 
-            newRepItem: function (newHtml, runtimeType, itemPrefix) {
+            newRepItem: function (newHtml, itemPrefix, item) {
                 var listInfo = this.staticInfo();
-                var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n');
-
+                var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o');
                 var $div = $("<fieldset id='" + SF.compose(itemPrefix, this.keys.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.keys.repeaterItem) + "' class='" + this.keys.repeaterItemClass + "'>" +
                     "<legend>" +
                     "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + this.options.removeItemLinkText + "</a>" +
+                    (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.entityRepeater_moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-n' data-text='false'>" + lang.signum.entityRepeater_moveUp + "</span>") : "") +
+                    (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.entityRepeater_moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-s' data-text='false'>" + lang.signum.entityRepeater_moveDown + "</span>") : "") +
                     "</legend>" +
+                    SF.hiddenInput(SF.compose(itemPrefix, this.keys.indexes), ";" + (this.getLastNewIndex() + 1).toString()) +
                     SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) +
                     "<div id='" + SF.compose(itemPrefix, this.keys.entity) + "' name='" + SF.compose(itemPrefix, this.keys.entity) + "' class='sf-line-entity'>" +
                     "</div>" + //sfEntity
@@ -936,10 +1027,23 @@ SF.registerModule("Lines", function () {
                 $(this.pf(this.keys.itemsContainer)).append($div);
                 $("#" + SF.compose(itemPrefix, this.keys.entity)).html(newHtml);
                 SF.triggerNewContent($("#" + SF.compose(itemPrefix, this.keys.repeaterItem)));
+                this.fireOnEntityChanged();
+            },
+
+            _getRepeaterCall: function () {
+                return "$('#" + this.options.prefix + "').data('entityRepeater')";
             },
 
             _getRemoving: function (itemPrefix) {
-                return "$('#" + this.options.prefix + "').data('entityRepeater').remove('" + itemPrefix + "');";
+                return this._getRepeaterCall() + ".remove('" + itemPrefix + "');";
+            },
+
+            _getMovingUp: function (itemPrefix) {
+                return this._getRepeaterCall() + ".moveUp('" + itemPrefix + "');";
+            },
+
+            _getMovingDown: function (itemPrefix) {
+                return this._getRepeaterCall() + ".moveDown('" + itemPrefix + "');";
             },
 
             viewOptionsForViewing: function (_viewOptions, itemPrefix) { //Used in onFindingOk
@@ -970,13 +1074,12 @@ SF.registerModule("Lines", function () {
             },
 
             createFindOptions: function (_findOptions, _viewOptions) {
-                var newIndex = +this.getLastIndex() + 1;
-                var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
+                var newPrefixIndex = this.getLastPrefixIndex() + 1;
+                var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
                 var self = this;
                 return $.extend({
                     prefix: itemPrefix,
                     onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-                    onOkClosed: function () { self.fireOnEntityChanged(); },
                     allowMultiple: true
                 }, _findOptions);
             },
@@ -985,24 +1088,19 @@ SF.registerModule("Lines", function () {
                 if (selectedItems == null || selectedItems.length == 0) {
                     throw "No item was returned from Find Window";
                 }
-                var lastIndex = +this.getLastIndex();
-                for (var i = 0, l = selectedItems.length; i < l; i++) {
-                    if (!this.canAddItems()) {
+                var self = this;
+                this.foreachNewItem(selectedItems, function (item, itemPrefix) {
+                    if (!self.canAddItems()) {
                         return;
                     }
 
-                    var item = selectedItems[i];
-                    lastIndex++;
-                    var itemPrefix = SF.compose(this.options.prefix, lastIndex.toString());
-
-                    this.newRepItem('', item.type, itemPrefix);
-                    this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
+                    self.newRepItem('', itemPrefix, item);
 
                     //View results in the repeater
-                    var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
+                    var viewOptions = self.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
                     new SF.ViewNavigator(viewOptions).viewEmbedded();
-                    SF.triggerNewContent($(SF.compose(itemPrefix, this.keys.entity)));
-                }
+                    SF.triggerNewContent($(SF.compose(itemPrefix, self.keys.entity)));
+                });
                 return true;
             },
 
@@ -1037,7 +1135,7 @@ SF.registerModule("Lines", function () {
     };
 
     SF.getInfoParams = function (prefix) {
-        return $("#" + SF.compose(prefix, SF.Keys.runtimeInfo) + ", #" + SF.compose(prefix, $.SF.entityList.prototype.keys.index));
+        return $("#" + SF.compose(prefix, SF.Keys.runtimeInfo) + ", #" + SF.compose(prefix, $.SF.entityList.prototype.keys.indexes));
     };
 });
 

@@ -460,12 +460,42 @@ namespace Signum.Web
         };
         public Func<List<string>> DefaultScripts = () => defaultScripts;
 
+        public List<Func<UrlHelper, Dictionary<string, string>>> DefaultSFUrls = new List<Func<UrlHelper,Dictionary<string,string>>>
+        {
+            url => new Dictionary<string, string>
+            {
+                { "popupView", url.SignumAction("PopupView") },
+                { "partialView", url.SignumAction("PartialView") },
+                { "validate", url.SignumAction("Validate") },
+                { "validatePartial", url.SignumAction("ValidatePartial") },
+                { "trySave", url.SignumAction("TrySave") },
+                { "trySavePartial", url.SignumAction("TrySavePartial") },
+                { "find", url.SignumAction("Find") },
+                { "partialFind", url.SignumAction("PartialFind") },
+                { "search", url.SignumAction("Search") },
+                { "subTokensCombo", url.SignumAction("NewSubTokensCombo") },
+                { "addFilter", url.Action("AddFilter", "Signum") },
+                { "quickFilter", url.SignumAction("QuickFilter") },
+                { "entityContextMenu", url.SignumAction("EntityContextMenu") },
+                { "create", url.SignumAction("Create") },
+                { "popupCreate", url.SignumAction("PopupCreate") },
+                { "typeChooser", url.SignumAction("GetTypeChooser") },
+                { "autocomplete", url.SignumAction("Autocomplete") }
+            }
+        };
+
+        public Dictionary<string, string> GetDefaultSFUrls(UrlHelper url) 
+        {
+            var urls = new Dictionary<string, string>();
+            urls.AddRange(DefaultSFUrls.SelectMany(f => f(url)));
+            return urls;
+        }
+
         public NavigationManager()
         {
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
         }
-
         
         public event Action Initializing;
         public bool Initialized { get; private set; }
@@ -727,8 +757,17 @@ namespace Signum.Web
             var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
             Type entitiesType = Lite.Extract(entityColumn.Type);
             Implementations? implementations = entityColumn.Implementations;
-            findOptions.View = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
-            findOptions.Create = findOptions.Create && findOptions.View && (implementations != null || Navigator.IsCreable(entitiesType, EntitySettingsContext.Admin));
+
+            if (findOptions.View)
+            {
+                findOptions.View = implementations.Value.IsByAll ? true : 
+                    implementations.Value.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin));
+            }
+            if (findOptions.Create)
+            {
+                findOptions.Create = findOptions.View &&
+                    (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsCreable(t, EntitySettingsContext.Admin)));
+            }
         }
         
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)

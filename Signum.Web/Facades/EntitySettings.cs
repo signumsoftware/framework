@@ -235,16 +235,10 @@ namespace Signum.Web
 
         public Implementations FindImplementations(PropertyRoute route)
         {
-            if (!typeof(ModelEntity).IsAssignableFrom(route.RootType))
-                throw new InvalidOperationException("Route out");
-
             if (OverrideImplementations != null && OverrideImplementations.ContainsKey(route))
                 return OverrideImplementations[route];
 
-            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
-                return FindImplementations(route.Parent);
-
-            return SchemaSettings.ToImplementations(route, route.Type.CleanType(), route.FieldInfo.GetCustomAttributes(true).Cast<Attribute>().ToArray());
+            return ModelEntity.GetImplementations(route); 
         }
     }
 

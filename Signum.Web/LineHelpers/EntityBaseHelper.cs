@@ -94,9 +94,6 @@ namespace Signum.Web
             if (!entityBase.View || (entityBase is EntityLine && entityBase.ViewMode == ViewMode.Navigate))
                 return MvcHtmlString.Empty;
 
-            if (entityBase.ViewMode == ViewMode.Navigate && !entityBase.Type.CleanType().IsIIdentifiable())
-                return MvcHtmlString.Empty;
-
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", new MvcHtmlString(entityBase.GetViewing()) },
@@ -145,7 +142,7 @@ namespace Signum.Web
 
         public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.Find || !entityBase.Type.CleanType().IsIIdentifiable())
+            if (!entityBase.Find)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
@@ -205,6 +202,9 @@ namespace Signum.Web
 
         public static void ConfigureEntityButtons(EntityBase eb, Type cleanType)
         {
+            bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
+            eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
+
             eb.Create &= 
                 cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, eb.EntitySettingsContext) :
                 eb.Implementations.Value.IsByAll ? false :
@@ -219,9 +219,6 @@ namespace Signum.Web
                 cleanType.IsEmbeddedEntity() ? false :
                 eb.Implementations.Value.IsByAll ? false :
                 eb.Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
-
-            bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
-            eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
         }
     }
 

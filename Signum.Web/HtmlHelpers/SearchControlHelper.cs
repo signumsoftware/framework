@@ -357,7 +357,7 @@ namespace Signum.Web
                 EmbeddedEntity lite = (EmbeddedEntity)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                 {
-                    Implementations = implementations.Value,
+                    Implementations = null,
                 };
                 EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
                 el.LabelVisible = false;

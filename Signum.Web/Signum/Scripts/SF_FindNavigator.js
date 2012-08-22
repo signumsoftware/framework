@@ -50,7 +50,7 @@ SF.registerModule("FindNavigator", function () {
                     return true;
                 };
 
-                var $tblResults = $(this.pf("tblResults"));
+                var $tblResults = self.element.find(".sf-search-results-container");
                 $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection),th:not(.th-col-entity):not(.th-col-selection) span,th:not(.th-col-entity):not(.th-col-selection) .sf-header-droppable", function (e) {
                     if (e.target != this) {
                         return;
@@ -68,7 +68,7 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $(this.pf("tblResults td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)")).live('contextmenu', function (e) {
+                $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
                     if (!closeMyOpenedCtxMenu(e.target)) {
                         return false;
                     }
@@ -90,20 +90,20 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $(this.pf("tblResults") + " .sf-search-ctxitem.quickfilter").live('click', function () {
+                $tblResults.on("click", ".sf-search-ctxitem.quickfilter", function () {
                     var $elem = $(this).closest("td");
                     $('.sf-search-ctxmenu-overlay').remove();
                     self.quickFilterCell($elem);
                 });
 
-                $(this.pf("tblResults") + " .sf-search-ctxitem.quickfilter-header").live('click', function () {
+                $tblResults.on("click", ".sf-search-ctxitem.quickfilter-header", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
                     self.quickFilterHeader($elem);
                     return false;
                 });
 
-                $(this.pf("tblResults") + " .sf-search-ctxitem.remove-column").live('click', function () {
+                $tblResults.on("click", ".sf-search-ctxitem.remove-column", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
 
@@ -111,7 +111,7 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $(this.pf("tblResults") + " .sf-search-ctxitem.edit-column").live('click', function () {
+                $tblResults.on("click", ".sf-search-ctxitem.edit-column", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
 
@@ -119,12 +119,12 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $(this.pf("tblResults") + " .sf-pagination-button").live('click', function () {
+                $tblResults.on("click", ".sf-pagination-button", function () {
                     $(self.pf(self.keys.page)).val($(this).attr("data-page"));
                     self.search();
                 });
 
-                $(this.pf("sfElems")).live('change', function () {
+                $tblResults.on("change", ".sf-pagination-size", function () {
                     if ($(this).find("option:selected").val() == -1) {
                         self.clearResults();
                     }
@@ -144,8 +144,8 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo, index) {
-                    self.newSubTokensComboAdded($("#" + idSelectedCombo), index);
+                this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo) {
+                    self.newSubTokensComboAdded($("#" + idSelectedCombo));
                 });
 
                 if (this.options.searchOnLoad) {
@@ -421,10 +421,10 @@ SF.registerModule("FindNavigator", function () {
                 var columnName = $th.find("input:hidden").val();
                 var currentOrders = this.options.orders;
 
-                var indexCurrOrder = currentOrders.indexOf(columnName);
+                var indexCurrOrder = $.inArray(columnName, currentOrders);
                 var newOrder = "";
                 if (indexCurrOrder === -1) {
-                    indexCurrOrder = currentOrders.indexOf("-" + columnName);
+                    indexCurrOrder = $.inArray("-" + columnName, currentOrders);
                 }
                 else {
                     newOrder = "-";
@@ -598,7 +598,7 @@ SF.registerModule("FindNavigator", function () {
                     data: serializer.serialize(),
                     async: false,
                     success: function (filterHtml) {
-                        var $filterList = self.element.find(".sf-filters-list");
+                        var $filterList = self.element.closest(".sf-search-control").find(".sf-filters-list");
                         $filterList.find(".sf-explanation").hide();
                         $filterList.find("table").show();
 
@@ -617,19 +617,20 @@ SF.registerModule("FindNavigator", function () {
                 return parseInt(lastRowIndex) + 1;
             },
 
-            newSubTokensComboAdded: function ($selectedCombo, index) {
+            newSubTokensComboAdded: function ($selectedCombo) {
                 var $btnAddFilter = $(this.pf("btnAddFilter"));
                 var $btnAddColumn = $(this.pf("btnAddColumn"));
 
                 var self = this;
                 var $selectedOption = $selectedCombo.children("option:selected");
                 if ($selectedOption.val() == "") {
-                    if (index == 0) {
+                    var $prevSelect = $selectedCombo.prev("select");
+                    if ($prevSelect.length == 0) {
                         this.changeButtonState($btnAddFilter, lang.signum.selectToken);
                         this.changeButtonState($btnAddColumn, lang.signum.selectToken);
                     }
                     else {
-                        var $prevSelectedOption = $(this.pf("ddlTokens_" + (parseInt(index, 10) - 1))).find("option:selected");
+                        var $prevSelectedOption = $prevSelect.find("option:selected");
                         this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilter(); });
                         this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumn(); });
                     }
@@ -778,22 +779,17 @@ SF.registerModule("FindNavigator", function () {
                     }
                 };
 
-                if ($(this.pf("divResults")).is(':visible')) {
+                var $tabContainer = $button.closest(".sf-tabs");
+                if ($tabContainer.length == 0) {
                     makeSearch();
                 }
                 else {
-                    var $tabContainer = $button.closest(".sf-tabs");
-                    if ($tabContainer.length > 0) {
-                        var self = this;
-                        $tabContainer.bind("tabsshow", function () {
-                            if ($(self.pf("divResults")).is(':visible')) {
-                                makeSearch();
-                            }
-                        });
-                    }
-                    else {
-                        makeSearch();
-                    }
+                    var self = this;
+                    $tabContainer.bind("tabsshow", function (evt, ui) {
+                        if ($(ui.panel).find(self.element).length > 0) {
+                            makeSearch();
+                        }
+                    });
                 }
             }
         });
@@ -879,6 +875,16 @@ SF.registerModule("FindNavigator", function () {
 
             this.clearChildSubtokenCombos($selectedCombo, prefix, index);
 
+            var $container = $selectedCombo.closest(".sf-search-control");
+            if ($container != null) {
+                $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
+            }
+
+            var $selectedOption = $selectedCombo.children("option:selected");
+            if ($selectedOption.val() == "") {
+                return;
+            }
+
             var serializer = new SF.Serializer().add({
                 webQueryName: webQueryName,
                 tokenName: this.constructTokenName(prefix),
@@ -897,11 +903,6 @@ SF.registerModule("FindNavigator", function () {
                 success: function (newCombo) {
                     if (!SF.isEmpty(newCombo)) {
                         $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
-                    }
-
-                    var $container = $selectedCombo.closest(".sf-search-control");
-                    if ($container != null) {
-                        $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"), index);
                     }
                 }
             });

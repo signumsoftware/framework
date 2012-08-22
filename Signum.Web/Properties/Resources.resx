@@ -327,4 +327,10 @@
   <data name="Detail" xml:space="preserve">
     <value>Detail</value>
   </data>
+  <data name="Signum_entityRepeater_moveDown" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="Signum_entityRepeater_moveUp" xml:space="preserve">
+    <value>Move up</value>
+  </data>
 </root>

@@ -109,23 +109,15 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
-            PropertyRoute parent = Parent.GetPropertyRoute();
-            if (parent == null)
-            {
-                Type type = Lite.Extract(Parent.Type); //Because Parent.Type is always a lite
-                if (type != null)
-                    return PropertyRoute.Root(type).Add(PropertyInfo);
+            Type type = Lite.Extract(Parent.Type); //Because Add doesn't work with lites
+            if (type != null)
+                return PropertyRoute.Root(type).Add(PropertyInfo);
 
+            PropertyRoute pr = Parent.GetPropertyRoute();
+            if (pr == null)
                 return null;
-            }
-            else
-            {
-                Type type = Lite.Extract(parent.Type); //Because Add doesn't work with lites
-                if (type != null)
-                    return PropertyRoute.Root(type).Add(PropertyInfo);
 
-                return parent.Add(PropertyInfo);
-            }
+            return pr.Add(PropertyInfo);
         }
 
         public override string NiceName()

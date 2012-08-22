@@ -171,6 +171,7 @@ namespace Signum.Web
             op.Add("webQueryName", QueryName.TryCC(qn => Navigator.ResolveWebQueryName(qn).SingleQuote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
+            op.Add("view", !View ? "false" : null);
             op.Add("create", !Create ? "false" : null);
             op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
             op.Add("entityContextMenu", !EntityContextMenu ? "false" : null);

@@ -238,20 +238,26 @@ namespace Signum.Engine.DynamicQuery
             this.Key = key;
             this.Lambda = lambda;
 
-            Expression e = MetadataVisitor.JustVisit(lambda, entityType);
+            Expression e = MetadataVisitor.JustVisit(lambda, PropertyRoute.Root(entityType));
+
+            MetaExpression me =  e as MetaExpression;
 
             if (e is MetaProjectorExpression)
-                e = ((MetaProjectorExpression)e).Projector;
+            {
+                this.IsProjection = true;
+                me = ((MetaProjectorExpression)e).Projector as MetaExpression;
+            }
 
-            MetaExpression me = e as MetaExpression;
             CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
 
-            if (cm != null)
+            if (cm != null && cm.PropertyRoutes.Any())
             {
-                this.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
-                this.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
-                var cleanType = Type.CleanType();
-                this.Implementations = cleanType.IsIIdentifiable() ? (Implementations?)ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes.Select(pr => pr.GetImplementations())) : null;
+                var cleanType = me.Type.CleanType();
+
+                PropertyRoute = cm.PropertyRoutes.Only();
+                Implementations = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
+                Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
+                Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
             }
 
             IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
@@ -259,7 +265,11 @@ namespace Signum.Engine.DynamicQuery
 
         public readonly Type Type;
         public readonly Type EntityType;
-        public readonly string Key; 
+        public readonly string Key;
+
+        public bool IsProjection;
+
+        public bool Inherit = true;
 
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
@@ -268,13 +278,10 @@ namespace Signum.Engine.DynamicQuery
         public Implementations? Implementations;
         public Func<bool> IsAllowed;
         public PropertyRoute PropertyRoute;
-        public bool Inherit = true;
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
-            return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
+            return new ExtensionToken(parent, Key, Type, IsProjection, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
         }
-
-       
     }
 }

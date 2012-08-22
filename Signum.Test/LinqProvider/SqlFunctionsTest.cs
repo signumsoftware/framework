@@ -79,6 +79,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void DateTimeDayOfWeek()
+        {
+            //var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+            var list = Database.Query<NoteWithDateDN>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+            var list2 = Database.Query<NoteWithDateDN>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
+        }
+
+        [TestMethod]
         public void DateDiffFunctions()
         {
             Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());

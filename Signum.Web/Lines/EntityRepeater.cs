@@ -37,6 +37,7 @@ namespace Signum.Web
             AddElementLinkText = Resources.New;
             Find = false;
             LabelClass = "sf-label-repeater-line";
+            Reorder = false;
         }
 
         public override string ToJS()
@@ -85,6 +86,16 @@ namespace Signum.Web
         }
 
         protected override string DefaultRemove()
+        {
+            return null;
+        }
+
+        protected override string DefaultMoveUp()
+        {
+            return null;
+        }
+
+        protected override string DefaultMoveDown()
         {
             return null;
         }

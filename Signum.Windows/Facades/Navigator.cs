@@ -297,6 +297,22 @@ namespace Signum.Windows
             return (EmbeddedEntitySettings<T>)Manager.EntitySettings[typeof(T)];
         }
 
+        public static Implementations FindImplementations(PropertyRoute pr)
+        {
+            if (typeof(ModelEntity).IsAssignableFrom(pr.RootType))
+            {
+                EntitySettings es = Navigator.GetEntitySettings(pr.RootType);
+
+                if (es != null) //Not mandatory, on windows it's usual not to register model entities. 
+                    return es.FindImplementations(pr);
+
+                return ModelEntity.GetImplementations(pr); 
+            }
+            else
+            {
+                return Server.FindImplementations(pr);
+            }
+        }
     }
 
     public class NavigationManager
@@ -322,7 +338,7 @@ namespace Signum.Windows
             if (!initialized)
             {
                 //Looking for a better place to do this
-                PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
+                PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
                 QueryToken.EntityExtensions = (type, parent) => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(type, parent));
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));

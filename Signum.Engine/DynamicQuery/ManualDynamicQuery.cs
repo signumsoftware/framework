@@ -7,6 +7,8 @@ using Signum.Utilities.Reflection;
 using Signum.Entities;
 using System.Linq.Expressions;
 using System.Reflection;
+using Signum.Utilities;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -20,7 +22,21 @@ namespace Signum.Engine.DynamicQuery
                 throw new ArgumentNullException("execute");
 
             this.Execute = execute;
-        }        
+        }
+
+        protected override ColumnDescriptionFactory[] InitializeColumns()
+        {
+            var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+              .Select((e, i) =>
+              {
+                  if (e.MemberInfo.ReturningType().IsIIdentifiable())
+                      throw new InvalidOperationException("The Type of column {0} is a subtype of IIdentifiable, for Manual queries use a Lite instead".Formato(e.MemberInfo.Name));
+
+                  return new ColumnDescriptionFactory(i, e.MemberInfo, null);
+              })
+            .ToArray();
+            return result;
+        }
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
@@ -39,6 +55,7 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
                 Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription()) },
                 Orders = new List<Order>(),
+                ElementsPerPage = QueryRequest.AllElements,
             };
 
             return Execute(req, GetColumnDescriptions()).Collection.Count();

@@ -55,7 +55,7 @@ namespace Signum.Engine.DynamicQuery
         {
             columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found");
 
-            var errors =  columns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable() && sc.Type.IsAbstract).ToString(a=>a.Name, ", ");
+            var errors =  columns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a=>a.Name, ", ");
 
             if (errors.HasText())
                 throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".Formato(errors, QueryUtils.GetQueryUniqueKey(QueryName)));

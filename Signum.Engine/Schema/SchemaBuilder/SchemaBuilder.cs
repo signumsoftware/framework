@@ -199,7 +199,7 @@ namespace Signum.Engine.Maps
                 if (!Settings.Attributes(route).Any(a=>a is IgnoreAttribute))
                 {
                     if (!SilentMode() && Reflector.TryFindPropertyInfo(fi) == null)
-                        Debug.WriteLine("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
+                        Debug.WriteLine("WARNING!!: Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
 
                     Field field = GenerateField(route, contexto, table, preName, forceNull);
 
@@ -510,6 +510,56 @@ namespace Signum.Engine.Maps
             return "idParent";
         }
         #endregion
+
+
+        List<WhenIncludedPair> whens = new List<WhenIncludedPair>();
+
+        public void WhenIncluded<T1>(Action action) 
+            where T1 : IdentifiableEntity
+        {
+            WhenIncluded(new[] { typeof(T1) }, action);
+        }
+
+        public void WhenIncluded<T1, T2>(Action action)
+            where T1 : IdentifiableEntity
+            where T2 : IdentifiableEntity
+        {
+            WhenIncluded(new[] { typeof(T1), typeof(T2) }, action);
+        }
+
+        public void WhenIncluded<T1, T2, T3>(Action action)
+            where T1 : IdentifiableEntity
+            where T2 : IdentifiableEntity
+            where T3 : IdentifiableEntity
+        {
+              WhenIncluded(new[] { typeof(T1), typeof(T2), typeof(T3) }, action);
+        }
+
+        public void WhenIncluded(Type[] types, Action action)
+        {
+            whens.Add(new WhenIncludedPair
+            {
+                Action = action,
+                RegisteredTypes = types ?? new Type[0],
+            });
+        }
+
+        public void ExecuteWhenIncluded()
+        {
+            foreach (var item in whens)
+            {
+                if (item.RegisteredTypes.All(t => Schema.Tables.ContainsKey(t)))
+                    item.Action();
+            }
+
+            whens = null;
+        }
+
+        class WhenIncludedPair
+        {
+            public Action Action;
+            public Type[] RegisteredTypes;
+        }
     }
 
     internal class ViewBuilder : SchemaBuilder
