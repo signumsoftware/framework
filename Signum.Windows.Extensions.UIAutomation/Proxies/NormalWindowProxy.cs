@@ -14,6 +14,7 @@ namespace Signum.Windows.UIAutomation
 {
     public class NormalWindowProxy<T>: WindowProxy, ILineContainer<T> where T: ModifiableEntity
     {
+        public WindowProxy ParentWindow { get { return this;} }
         public PropertyRoute PreviousRoute { get; set; }
 
         AutomationElement ILineContainer.Element
@@ -24,6 +25,7 @@ namespace Signum.Windows.UIAutomation
         public NormalWindowProxy(AutomationElement element)
             : base(element)
         {
+            
         }
 
         public ButtonBarProxy ButtonBar
@@ -61,11 +63,15 @@ namespace Signum.Windows.UIAutomation
         public void Save()
         {
             ButtonBar.SaveButton.ButtonInvoke();
+
+            this.WaitDataContextChangedAssertMessageBox(actionDescription: ()=> "Save " + EntityId);
         }
 
         public void Reload()
         {
             ButtonBar.ReloadButton.ButtonInvoke();
+
+            this.WaitDataContextChangedAssertMessageBox(actionDescription: () => "Reload " + EntityId);
         }
 
         public void Reload(bool confirm)
@@ -81,27 +87,36 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public static int ExecuteTimeout = 3 * 1000;
-
         public void Execute(Enum operationKey, int? timeOut = null)
         {
-            var time = timeOut ?? ExecuteTimeout;
+            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
 
             ButtonBar.GetOperationButton(operationKey).ButtonInvoke();
-            if (!Element.Pattern<WindowPattern>().WaitForInputIdle(time))
-                throw new TimeoutException("Reloading entity after {0} took more than {1} ms".Formato(OperationDN.UniqueKey(operationKey), time));
+            this.WaitDataContextChangedAssertMessageBox(actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
         }
 
-        public static int ConstructFromTimeout = 2 * 1000;
+        public void WaitDataContextChangedAssertMessageBox(int? timeOut = null, Func<string> actionDescription = null)
+        {
+            Element.WaitDataContextChanged(this,timeOut, actionDescription);
+        }
+
 
         public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
         {
-            var time = timeOut ?? ConstructFromTimeout;
+            var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
 
-            return Element.GetWindowAfter(
+            return GetWindowAfter(
                 () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
-                () => "Executing {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time), time);
+                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time));
         }
+
+        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T:IdentifiableEntity
+        {
+            AutomationElement element = ConstructFrom(operationKey, timeOut);
+
+            return new NormalWindowProxy<T>(element);
+        }
+
 
         public override void Dispose()
         {
@@ -111,7 +126,7 @@ namespace Signum.Windows.UIAutomation
 
                 Element.Wait(() =>
                 {
-                    if (Element.Current.IsOffscreen)
+                    if (IsClosed)
                         return true;
 
                     confirmation = TryGetCurrentMessageBox();
@@ -128,9 +143,16 @@ namespace Signum.Windows.UIAutomation
                     confirmation.NoButton.ButtonInvoke();
                 }
             }
+
+            OnDisposed(); 
         }
     }
 
+    public class OperationTimeouts
+    {
+        public static int ExecuteTimeout = 3 * 1000;
+        public static int ConstructFromTimeout = 2 * 1000;
+    }
   
 
     public class ButtonBarProxy

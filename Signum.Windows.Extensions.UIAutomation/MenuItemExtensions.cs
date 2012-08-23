@@ -9,9 +9,9 @@ namespace Signum.Windows.UIAutomation
 {
     public static class MenuItemExtensions
     {
-        public static AutomationElement MenuItemOpenWindow(this AutomationElement window, params string[] menuNames)
+        public static AutomationElement MenuItemOpenWindow(this WindowProxy window, params string[] menuNames)
         {
-            var menuItem = MenuItemFind(window, menuNames);
+            var menuItem = MenuItemFind(window.Element, menuNames);
 
             AutomationElement newWindow = window.GetWindowAfter(
                 () => menuItem.ButtonInvoke(),
@@ -20,12 +20,12 @@ namespace Signum.Windows.UIAutomation
             return newWindow;
         }
 
-        public static AutomationElement MenuItemFind(AutomationElement window, params string[] menuNames)
+        public static AutomationElement MenuItemFind(AutomationElement element, params string[] menuNames)
         {
             if (menuNames == null || menuNames.Length == 0)
                 throw new ArgumentNullException("menuNames");
 
-            var menuBar = window.Child(c => c.Current.ControlType == ControlType.Menu);
+            var menuBar = element.Child(c => c.Current.ControlType == ControlType.Menu);
 
             var menuItem = menuBar.ChildByCondition(new PropertyCondition(AutomationElement.NameProperty, menuNames[0]));
 

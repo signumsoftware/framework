@@ -6,6 +6,8 @@ using System.Windows.Automation;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Entities.Operations;
+using Signum.Engine.Basics;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -16,7 +18,7 @@ namespace Signum.Windows.UIAutomation
         public SearchWindowProxy(AutomationElement element)
             : base(element)
         {
-            SearchControl = new SearchControlProxy(element.ChildById("searchControl"));
+            SearchControl = new SearchControlProxy(element.ChildById("searchControl"), this);
         }
 
         public FilterOptionProxy AddFilterString(string token, FilterOperation operation, string value)
@@ -39,7 +41,7 @@ namespace Signum.Windows.UIAutomation
             SearchControl.Search();
         }
 
-      
+
         public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
             return SearchControl.ViewElementAt<T>(index); 
@@ -70,9 +72,12 @@ namespace Signum.Windows.UIAutomation
     {
         public AutomationElement Element { get; private set; }
 
-        public SearchControlProxy(AutomationElement element)
+        public WindowProxy ParentWindow { get; private set; }
+
+        public SearchControlProxy(AutomationElement element, WindowProxy parentWindow)
         {
             this.Element = element;
+            this.ParentWindow = parentWindow;
         }
 
         public void SelectToken(string token)
@@ -109,7 +114,7 @@ namespace Signum.Windows.UIAutomation
             if (filterLine == null)
                 throw new ElementNotAvailableException("Last FilterLine not found");
 
-            return new FilterOptionProxy(filterLine);
+            return new FilterOptionProxy(filterLine, this);
         }
 
         public AutomationElement FilterBuilderControl
@@ -155,7 +160,7 @@ namespace Signum.Windows.UIAutomation
         {
             SelectToken(token);
 
-            var win = Element.GetModalWindowAfter(() => Element.ChildById("btCreateColumn").ButtonInvoke(),
+            var win = ParentWindow.GetModalWindowAfter(() => Element.ChildById("btCreateColumn").ButtonInvoke(),
                 () => "Adding new column for {0} on SearchControl {1}".Formato(token, Element.Current.ItemStatus));
 
             using(WindowProxy wp = new WindowProxy(win))
@@ -169,7 +174,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T : IdentifiableEntity
         {
-            var win = Element.GetWindowAfter(
+            var win = ParentWindow.GetWindowAfter(
                 () => Element.ChildById("btView").ButtonInvoke(),
                 () => "View selected entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
@@ -183,9 +188,10 @@ namespace Signum.Windows.UIAutomation
 
         private AutomationElement CreateBasic(int? timeOut = null)
         {
-            var win = Element.GetWindowAfter(
+            var win = ParentWindow.GetWindowAfter(
                 () => Element.ChildById("btCreate").ButtonInvoke(),
                 () => "Create a new entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
+
             return win;
         }
 
@@ -250,7 +256,7 @@ namespace Signum.Windows.UIAutomation
 
         public PagerProxy Pager
         {
-            get { return new PagerProxy(Element.ChildById("pageSelector"), this); }
+            get { return new PagerProxy(Element.ChildById("pageSelector")); }
         }
 
         public int? ElementsPerPage
@@ -267,13 +273,43 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
+        public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
+        {
+            var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
+
+            return ParentWindow.GetWindowAfter(
+                () => GetOperationButton(operationKey).ButtonInvoke(),
+                () => "Finding a window after {0} from SearchControl {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), QueryName, time), timeOut);
+        }
+
+        public string QueryNameKey
+        {
+            get { return Element.Current.ItemStatus; }
+        }
+
+        public object QueryName
+        {
+            get { return QueryLogic.QueryNames[QueryNameKey]; }
+        }
+
+        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T : IdentifiableEntity
+        {
+            AutomationElement element = ConstructFrom(operationKey, timeOut);
+
+            return new NormalWindowProxy<T>(element);
+        }
+
+        public AutomationElement GetOperationButton(Enum operationKey)
+        {
+            return Element.Child(a => a.Current.ItemStatus == OperationDN.UniqueKey(operationKey));
+        }
     }
 
     public class PagerProxy
     {
         public AutomationElement Element { get; private set; }
 
-        public PagerProxy(AutomationElement element, SearchControlProxy searchControl)
+        public PagerProxy(AutomationElement element)
         {
             this.Element = element;
         }
@@ -298,10 +334,12 @@ namespace Signum.Windows.UIAutomation
     public class FilterOptionProxy
     {
         public AutomationElement Element { get; private set; }
+        SearchControlProxy searchControl;
 
-        public FilterOptionProxy(AutomationElement element)
+        public FilterOptionProxy(AutomationElement element, SearchControlProxy searchControl)
         {
             this.Element = element;
+            this.searchControl = searchControl;
         }
 
         public void SetOperation(FilterOperation operation)
@@ -320,7 +358,7 @@ namespace Signum.Windows.UIAutomation
                     break;
 
                 case "EntityLine":
-                    new EntityLineProxy(valueControl, null).AutoComplete(value);
+                    new EntityLineProxy(valueControl, null,searchControl.ParentWindow).AutoComplete(value);
                     break;
                 default: throw new InvalidOperationException();
             }
@@ -329,6 +367,37 @@ namespace Signum.Windows.UIAutomation
         public void Remove()
         {
             Element.ChildById("btRemove").ButtonInvoke();
+        }
+    }
+
+    public static class SearchControlExtensions
+    {
+        public static SearchControlProxy GetSearchControl(this WindowProxy window)
+        {
+            var sc = window.Element.Descendant(a => a.Current.ClassName == "SearchControl");
+
+            return new SearchControlProxy(sc, window);
+        }
+
+        public static SearchControlProxy GetSearchControl(this WindowProxy window, object queryName)
+        {
+            var sc = window.Element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.ItemStatus == QueryUtils.GetQueryUniqueKey(queryName));
+
+            return new SearchControlProxy(sc, window);
+        }
+
+        public static SearchControlProxy GetSearchControl(this AutomationElement element, WindowProxy window)
+        {
+            var sc = element.Descendant(a => a.Current.ClassName == "SearchControl");
+
+            return new SearchControlProxy(sc, window);
+        }
+
+        public static SearchControlProxy GetSearchControl(this AutomationElement element, object queryName, WindowProxy window)
+        {
+            var sc = element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.ItemStatus == QueryUtils.GetQueryUniqueKey(queryName));
+
+            return new SearchControlProxy(sc, window);
         }
     }
 }

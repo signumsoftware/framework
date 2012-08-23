@@ -13,15 +13,16 @@ namespace Signum.Windows.UIAutomation
     {
         public PropertyRoute PreviousRoute { get; set; }
         public AutomationElement Element { get; set;  }
+        public WindowProxy ParentWindow { get; set; }
     }
 
     public interface ILineContainer<T> : ILineContainer where T : ModifiableEntity
     {
-
     }
 
     public interface ILineContainer
     {
+        WindowProxy ParentWindow { get; }
         PropertyRoute PreviousRoute { get; }
         AutomationElement Element { get; }
     }
@@ -39,35 +40,35 @@ namespace Signum.Windows.UIAutomation
         {
             var entityLine = container.Element.Descendant(a => a.Current.ClassName == "EntityLine" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityLineProxy(entityLine, route);
+            return new EntityLineProxy(entityLine, route, container.ParentWindow);
         }
 
         public static EntityComboProxy EntityCombo(this ILineContainer container, PropertyRoute route)
         {
             var entityCombo = container.Element.Descendant(a => a.Current.ClassName == "EntityCombo" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityComboProxy(entityCombo, route);
+            return new EntityComboProxy(entityCombo, route, container.ParentWindow);
         }
 
         public static EntityDetailProxy EntityDetail(this ILineContainer container, PropertyRoute route)
         {
             var entityDetails = container.Element.Descendant(a => a.Current.ClassName == "EntityDetail" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityDetailProxy(entityDetails, route);
+            return new EntityDetailProxy(entityDetails, route, container.ParentWindow);
         }
 
         public static EntityListProxy EntityList(this ILineContainer container, PropertyRoute route)
         {
             var entityList = container.Element.Descendant(a => a.Current.ClassName == "EntityList" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityListProxy(entityList, route);
+            return new EntityListProxy(entityList, route, container.ParentWindow);
         }
 
         public static EntityRepeaterProxy EntityRepeater(this ILineContainer container, PropertyRoute route)
         {
             var entityRepeater = container.Element.Descendant(a => a.Current.ClassName == "EntityRepeater" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityRepeaterProxy(entityRepeater, route);
+            return new EntityRepeaterProxy(entityRepeater, route, container.ParentWindow);
         }
     }
 

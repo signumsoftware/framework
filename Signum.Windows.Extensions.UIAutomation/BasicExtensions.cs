@@ -78,46 +78,6 @@ namespace Signum.Windows.UIAutomation
 
 
 
-        public static int WindowAfterTimeout = 5 * 1000;
-
-        public static AutomationElement GetWindowAfter(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
-        {
-            var previous = AutomationElement.RootElement.Children(a => a.Current.ProcessId == element.Current.ProcessId).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
-
-            action();
-
-            AutomationElement newWindow = null;
-
-            element.Wait(() =>
-            {
-                newWindow = AutomationElement.RootElement
-                    .Children(a => a.Current.ProcessId == element.Current.ProcessId)
-                    .FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
-
-                return newWindow != null;
-            }, actionDescription, timeOut ?? WindowAfterTimeout);
-            return newWindow;
-        }
-
-        public static AutomationElement GetModalWindowAfter(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
-        {
-            TreeWalker walker = new TreeWalker(ConditionBuilder.ToCondition(a => a.Current.ControlType == ControlType.Window));
-
-            var parentWindow = walker.Normalize(element);
-
-            action();
-
-            AutomationElement newWindow = null;
-
-            element.Wait(() =>
-            {
-                newWindow = walker.GetFirstChild(parentWindow);
-
-                return newWindow != null;
-            }, actionDescription, timeOut ?? WindowAfterTimeout);
-            return newWindow;
-        }
-
         public static void SelectByName(this List<AutomationElement> list, string toString, Func<string> containerDescription)
         {
             var filtered = list.Where(a => a.Current.Name == toString).ToList();
