@@ -32,7 +32,7 @@ namespace Signum.Windows.UIAutomation
             for (int i = 1; i < menuNames.Length; i++)
             {
                 menuItem.Pattern<ExpandCollapsePattern>().Expand();
-                menuItem = menuItem.ChildByCondition(new PropertyCondition(AutomationElement.NameProperty, menuNames[i]));
+                menuItem = menuItem.WaitChildByCondition(new PropertyCondition(AutomationElement.NameProperty, menuNames[i]));
             }
             return menuItem;
         }
