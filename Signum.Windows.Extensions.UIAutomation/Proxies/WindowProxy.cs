@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Automation;
+using System.Runtime.InteropServices;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -28,11 +29,34 @@ namespace Signum.Windows.UIAutomation
             wp.WaitForInputIdle(milliseconds ?? WaitExtensions.DefaultTimeOut);
         }
 
+        public virtual bool IsClosed
+        {
+            get
+            {
+                try
+                {
+                    return Element.Current.IsOffscreen;
+                }
+                catch (ElementNotAvailableException)
+                {
+                    return true;
+                }
+                catch (InvalidOperationException)
+                {
+                    return true;
+                }
+                catch (COMException)
+                {
+                    return true;
+                }
+            }
+        }
+
         public virtual bool Close()
         {
             try
             {
-                if (Element.Current.IsOffscreen)
+                if (IsClosed)
                     return false;
 
                 wp.Close();
