@@ -779,22 +779,17 @@ SF.registerModule("FindNavigator", function () {
                     }
                 };
 
-                if ($(this.pf("divResults")).is(':visible')) {
+                var $tabContainer = $button.closest(".sf-tabs");
+                if ($tabContainer.length == 0) {
                     makeSearch();
                 }
                 else {
-                    var $tabContainer = $button.closest(".sf-tabs");
-                    if ($tabContainer.length > 0) {
-                        var self = this;
-                        $tabContainer.bind("tabsshow", function () {
-                            if ($(self.pf("divResults")).is(':visible')) {
-                                makeSearch();
-                            }
-                        });
-                    }
-                    else {
-                        makeSearch();
-                    }
+                    var self = this;
+                    $tabContainer.bind("tabsshow", function (evt, ui) {
+                        if ($(ui.panel).find(self.element).length > 0) {
+                            makeSearch();
+                        }
+                    });
                 }
             }
         });
