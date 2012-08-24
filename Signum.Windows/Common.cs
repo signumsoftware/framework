@@ -553,7 +553,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty AutomationHelpTextFromDataContextProperty =
-           DependencyProperty.RegisterAttached("AutomationHelpTextFromDataContext", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
+           DependencyProperty.RegisterAttached("AutomationHelpTextFromDataContext", typeof(bool), typeof(Common), new UIPropertyMetadata(false, RegisterUpdater));
         public static bool GetAutomationHelpTextFromDataContext(DependencyObject obj)
         {
             return (bool)obj.GetValue(AutomationHelpTextFromDataContextProperty);
@@ -564,11 +564,11 @@ namespace Signum.Windows
             obj.SetValue(AutomationHelpTextFromDataContextProperty, value);
         }
 
-        static void RegisterUpdater(DependencyObject sender, object value)
+        static void RegisterUpdater(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             var fe = (FrameworkElement)sender;
 
-            if ((bool)value)
+            if ((bool)args.NewValue)
             {
                 fe.DataContextChanged += Common_DataContextChanged;
 

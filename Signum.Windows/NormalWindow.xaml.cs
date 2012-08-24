@@ -109,11 +109,11 @@ namespace Signum.Windows
                 {
                     case AllowErrors.Yes: break;
                     case AllowErrors.No:
-                        MessageBox.Show(type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), Properties.Resources.FixErrors,
+                        MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), Properties.Resources.FixErrors,
                             MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         return;
                     case AllowErrors.Ask:
-                        if (MessageBox.Show(type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) +"\r\n" +  Properties.Resources.ContinueAnyway, Properties.Resources.ContinueWithErrors,
+                        if (MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) +"\r\n" +  Properties.Resources.ContinueAnyway, Properties.Resources.ContinueWithErrors,
                             MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.None) == MessageBoxResult.No)
                             return;
                         break;
@@ -132,7 +132,7 @@ namespace Signum.Windows
         {
             if (!this.HasChanges())
             {
-                MessageBox.Show(Properties.Resources.NoChanges);
+                MessageBox.Show(this, Properties.Resources.NoChanges);
 
                 return;
             }
@@ -160,7 +160,7 @@ namespace Signum.Windows
             {
                 if (buttonBar.SaveVisible)
                 {
-                    var result = MessageBox.Show(Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
+                    var result = MessageBox.Show(this, Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
                         MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
 
                     if (result == MessageBoxResult.Cancel)
@@ -174,7 +174,7 @@ namespace Signum.Windows
                 }
                 else
                 {
-                    var result = MessageBox.Show(Properties.Resources.LoseChanges, Properties.Resources.ThereAreChanges, MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
+                    var result = MessageBox.Show(this, Properties.Resources.LoseChanges, Properties.Resources.ThereAreChanges, MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
 
                     if (result == MessageBoxResult.Cancel)
                     {

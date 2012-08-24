@@ -77,8 +77,7 @@ namespace Signum.Windows
 
             tb.Inlines.Add(new Run(TotalElements.ToString()) { FontWeight = FontWeights.Bold });
             tb.Inlines.Add(new Run(" "));
-            tb.Inlines.Add(new Run(Signum.Windows.Properties.Resources.Results)); 
-
+            tb.Inlines.Add(new Run(Signum.Windows.Properties.Resources.Results));
         }
     }
 }
