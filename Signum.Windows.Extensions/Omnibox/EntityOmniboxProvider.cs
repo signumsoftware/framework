@@ -6,6 +6,7 @@ using Signum.Entities.Omnibox;
 using System.Windows.Documents;
 using System.Windows.Media;
 using Signum.Utilities;
+using System.Windows;
 
 namespace Signum.Windows.Omnibox
 {
@@ -62,7 +63,7 @@ namespace Signum.Windows.Omnibox
             lines.Add(new Run(" ({0})".Formato(Extensions.Properties.Resources.View)) { Foreground = Brushes.DodgerBlue });
         }
 
-        public override void OnSelected(EntityOmniboxResult result)
+        public override void OnSelected(EntityOmniboxResult result, Window window)
         {
             if (result.Lite != null)
                 Navigator.NavigateUntyped(result.Lite);

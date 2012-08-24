@@ -41,7 +41,7 @@ namespace Signum.Windows.Disconnected
         {
             if (!Completed)
             {
-                MessageBox.Show("Operation can not be cancelled");
+                MessageBox.Show(this, "Operation can not be cancelled");
 
                 e.Cancel = true;
             }

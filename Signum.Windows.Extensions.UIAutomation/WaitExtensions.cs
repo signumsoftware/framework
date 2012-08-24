@@ -34,21 +34,21 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public static void WaitDataContextChanged(this AutomationElement automationElement,WindowProxy window,  int? timeOut = null, Func<string> actionDescription = null)
+        public static void WaitDataContextChangedAfter(this AutomationElement element, WindowProxy window, Action action, int? timeOut = null, Func<string> actionDescription = null)
         {
+            string oldValue = element.Current.HelpText;
 
-
-            string oldValue = automationElement.Current.HelpText;
+            action();
 
             if (string.IsNullOrEmpty(oldValue))
                 throw new InvalidOperationException("Element does not has HelpText set. Consider setting m:Common.AutomationHelpTextFromDataContext on the WPF control");
 
-            if(actionDescription == null)
+            if (actionDescription == null)
                 actionDescription = () => "DataContextChanged for {0}".Formato(oldValue);
 
-            automationElement.Wait(() =>
+            element.Wait(() =>
             {
-                var newValue = automationElement.Current.HelpText;
+                var newValue = element.Current.HelpText;
                 if (newValue != null && newValue != oldValue)
                     return true;
 

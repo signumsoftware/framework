@@ -9,6 +9,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using Signum.Utilities;
 using Signum.Windows.Authorization;
+using System.Windows;
 
 namespace Signum.Windows.UserQueries
 {
@@ -26,7 +27,7 @@ namespace Signum.Windows.UserQueries
             lines.Add(new Run(" ({0})".Formato(typeof(UserQueryDN).NiceName())) { Foreground = Brushes.DodgerBlue });
         }
 
-        public override void OnSelected(UserQueryOmniboxResult result)
+        public override void OnSelected(UserQueryOmniboxResult result, Window window)
         {
             UserQueryDN uq = result.UserQuery.RetrieveAndForget();
 

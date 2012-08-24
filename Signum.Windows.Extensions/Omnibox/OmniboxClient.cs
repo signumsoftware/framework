@@ -17,7 +17,7 @@ namespace Signum.Windows.Omnibox
 {
     public static class OmniboxClient
     {
-        public static Polymorphic<Action<OmniboxResult>> OnResultSelected = new Polymorphic<Action<OmniboxResult>>();
+        public static Polymorphic<Action<OmniboxResult, Window>> OnResultSelected = new Polymorphic<Action<OmniboxResult, Window>>();
         public static Polymorphic<Action<OmniboxResult, InlineCollection>> RenderLines = new Polymorphic<Action<OmniboxResult, InlineCollection>>();
 
         public static void Start()
@@ -31,8 +31,8 @@ namespace Signum.Windows.Omnibox
         public static void Register<T>(this OmniboxProvider<T> provider) where T : OmniboxResult
         {
             OmniboxParser.Generators.Add(provider.CreateGenerator());
-            OnResultSelected.Register(new Action<T>(provider.OnSelected));
-            RenderLines.Register(new Action<T,InlineCollection>(provider.RenderLines));
+            OnResultSelected.Register(new Action<T, Window>(provider.OnSelected));
+            RenderLines.Register(new Action<T, InlineCollection>(provider.RenderLines));
         }
 
         public static void AddMatch(this InlineCollection lines, OmniboxMatch match)
@@ -52,7 +52,7 @@ namespace Signum.Windows.Omnibox
 
         public abstract void RenderLines(T result, InlineCollection lines);
 
-        public abstract void OnSelected(T result);
+        public abstract void OnSelected(T result, Window window);
     }
 
     public class WindowsOmniboxManager : OmniboxManager

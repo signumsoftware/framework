@@ -62,16 +62,16 @@ namespace Signum.Windows.UIAutomation
 
         public void Save()
         {
-            ButtonBar.SaveButton.ButtonInvoke();
-
-            this.WaitDataContextChangedAssertMessageBox(actionDescription: ()=> "Save " + EntityId);
+            this.WaitDataContextChangedAfter(
+            action: () => ButtonBar.SaveButton.ButtonInvoke(),
+            actionDescription: () => "Save " + EntityId);
         }
 
         public void Reload()
         {
-            ButtonBar.ReloadButton.ButtonInvoke();
-
-            this.WaitDataContextChangedAssertMessageBox(actionDescription: () => "Reload " + EntityId);
+            this.WaitDataContextChangedAfter(
+            action: () => ButtonBar.ReloadButton.ButtonInvoke(),
+            actionDescription: () => "Reload " + EntityId);
         }
 
         public void Reload(bool confirm)
@@ -91,15 +91,15 @@ namespace Signum.Windows.UIAutomation
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
 
-            ButtonBar.GetOperationButton(operationKey).ButtonInvoke();
-            this.WaitDataContextChangedAssertMessageBox(actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
+            this.WaitDataContextChangedAfter(
+            action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
+            actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
         }
 
-        public void WaitDataContextChangedAssertMessageBox(int? timeOut = null, Func<string> actionDescription = null)
+        public void WaitDataContextChangedAfter(Action action, int? timeOut = null, Func<string> actionDescription = null)
         {
-            Element.WaitDataContextChanged(this,timeOut, actionDescription);
+            Element.WaitDataContextChangedAfter(this, action, timeOut, actionDescription);
         }
-
 
         public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
         {
@@ -138,9 +138,9 @@ namespace Signum.Windows.UIAutomation
                 }, () => "Waiting for normal window to close or show confirmation dialog");
 
 
-                if (confirmation != null)
+                if (confirmation != null && !confirmation.IsError)
                 {
-                    confirmation.NoButton.ButtonInvoke();
+                    confirmation.OkButton.ButtonInvoke();
                 }
             }
 

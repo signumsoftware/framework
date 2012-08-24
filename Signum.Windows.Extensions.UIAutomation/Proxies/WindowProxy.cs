@@ -85,10 +85,17 @@ namespace Signum.Windows.UIAutomation
 
         public void AssertMessageBoxError()
         {
-            var mb = TryGetCurrentMessageBox();
-
-            if (mb != null && mb.IsError)
-                throw new MessageBoxErrorException("Error MessageBox shown: {0}\r\nMessage: {1}".Formato(mb.Title, mb.Title));
+              var mb = TryGetCurrentMessageBox();
+            try
+            {
+                if (mb != null && mb.IsError)
+                    throw new MessageBoxErrorException("Error MessageBox shown: {0}\r\nMessage: {1}".Formato(mb.Title, mb.Message));
+            }
+            finally
+            {
+                if (mb != null)
+                    mb.Close();
+            }
         }
 
         public MessageBoxProxy TryGetCurrentMessageBox()

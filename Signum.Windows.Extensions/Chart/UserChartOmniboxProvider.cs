@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
 using Signum.Entities.DynamicQuery;
+using System.Windows;
 
 namespace Signum.Windows.Chart
 {
@@ -28,7 +29,7 @@ namespace Signum.Windows.Chart
             lines.Add(new Run(" ({0})".Formato(typeof(UserChartDN).NiceName())) { Foreground = Brushes.DarkViolet });
         }
 
-        public override void OnSelected(UserChartOmniboxResult result)
+        public override void OnSelected(UserChartOmniboxResult result, Window window)
         {
             UserChartDN uq = result.UserChart.RetrieveAndForget();
 
@@ -36,12 +37,12 @@ namespace Signum.Windows.Chart
 
             using (UserChartMenuItem.AutoSet(uq))
             {
-                ChartWindow window = new ChartWindow()
+                ChartWindow cw = new ChartWindow()
                 {
                     DataContext = new ChartRequest(query)
                 };
 
-                window.Show();
+                cw.Show();
             }
         }
     }

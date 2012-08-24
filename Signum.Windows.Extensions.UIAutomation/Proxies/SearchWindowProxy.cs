@@ -8,6 +8,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Operations;
 using Signum.Engine.Basics;
+using System.Windows;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -41,6 +42,10 @@ namespace Signum.Windows.UIAutomation
             SearchControl.Search();
         }
 
+        public NormalWindowProxy<T> Create<T>() where T : IdentifiableEntity
+        {
+            return SearchControl.Create<T>();
+        }
 
         public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
@@ -127,6 +132,15 @@ namespace Signum.Windows.UIAutomation
             get{ return Element.ChildById("btFind");}
         }
 
+        public List<AutomationElement> HeaderItems
+        {
+            get 
+            {
+                return Element.Descendants(e => e.Current.ControlType == ControlType.HeaderItem);
+            }
+        
+        }
+
         public void Search()
         {
             SearchButton.ButtonInvoke();
@@ -137,7 +151,10 @@ namespace Signum.Windows.UIAutomation
         private void WaitSearch()
         {
             Element.Wait(
-                () => SearchButton.Current.IsEnabled,
+                () =>{
+                        ParentWindow.AssertMessageBoxError();
+                        return SearchButton.Current.IsEnabled;
+                     },
                 () => "Waiting after search on SearchControl {0}".Formato(Element.Current.ItemStatus));
         }
 
@@ -270,6 +287,8 @@ namespace Signum.Windows.UIAutomation
                 var item = value != null ? combo.Child(a => a.Current.Name == value.Value.ToString()) : combo.ChildrenAll().Last();
 
                 item.Pattern<SelectionItemPattern>().Select();
+
+                WaitSearch();
             }
         }
 
@@ -303,6 +322,17 @@ namespace Signum.Windows.UIAutomation
         {
             return Element.Child(a => a.Current.ItemStatus == OperationDN.UniqueKey(operationKey));
         }
+
+        public void ValidateHeadersItems()
+        {
+            foreach (var columnHeader in HeaderItems)
+	        {
+                columnHeader.ButtonInvoke();
+                WaitSearch();
+	        }
+        
+        }
+
     }
 
     public class PagerProxy

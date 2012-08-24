@@ -43,7 +43,7 @@ namespace Signum.Windows.Omnibox
             if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
                 autoCompleteTb.SelectEnd();
             else if (selected != null)
-                OmniboxClient.OnResultSelected.Invoke(selected);
+                OmniboxClient.OnResultSelected.Invoke(selected, Window.GetWindow((DependencyObject)sender));
         }
     }
 }
