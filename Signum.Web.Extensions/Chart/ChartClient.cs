@@ -45,7 +45,7 @@ namespace Signum.Web.Chart
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EmbeddedEntitySettings<ChartRequest>(),
-                    new EmbeddedEntitySettings<ChartColumnDN> { PartialViewName = _ => ViewPrefix.Formato("ChartToken") },
+                    new EmbeddedEntitySettings<ChartColumnDN> { PartialViewName = _ => ViewPrefix.Formato("ChartColumn") },
                     new EmbeddedEntitySettings<ChartScriptColumnDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptColumn") },
                     new EntitySettings<ChartScriptDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
                 });
@@ -190,6 +190,8 @@ namespace Signum.Web.Chart
             { 
                 name = "c" + i,
                 title = c.GetTitle(), 
+                token = c.TokenString,
+                isGroupKey = c.IsGroupKey,
                 converter = c.Converter(i)
             }).ToList();
 
@@ -199,13 +201,15 @@ namespace Signum.Web.Chart
                 {
                     name = "entity",
                     title = "",
+                    token = "Entity",
+                    isGroupKey = (bool?)true,
                     converter = new Func<ResultRow, object>(r => r.Entity.Key())
                 });
             }
 
             return new
             {
-                labels = cols.ToDictionary(a => a.name, a => a.title),
+                columns = cols.ToDictionary(a => a.name, a => new { a.title, a.token, a.isGroupKey }),
                 rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter(r))).ToList()
             };
         }
@@ -286,7 +290,7 @@ namespace Signum.Web.Chart
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.ShouldAggregate) ?? true;
+            bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.IsGroupKey == false) ?? true;
 
             var rootTokens = ChartUtils.SubTokensChart(null, qd.Columns, chart.GroupResults && canAggregate);
 

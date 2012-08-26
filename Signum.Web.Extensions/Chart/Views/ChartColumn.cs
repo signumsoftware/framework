@@ -51,8 +51,8 @@ namespace ASP
     using Signum.Entities.Authorization;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartToken.cshtml")]
-    public class _Page_Chart_Views_ChartToken_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartColumn.cshtml")]
+    public class _Page_Chart_Views_ChartColumn_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
@@ -76,7 +76,7 @@ WriteTo(@__razor_helper_writer, Html.Field(Signum.Entities.Extensions.Properties
 }
 
 
-        public _Page_Chart_Views_ChartToken_cshtml()
+        public _Page_Chart_Views_ChartColumn_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -111,6 +111,8 @@ WriteLiteral("\r\n");
         tc.Value = new ChartColumnDN();
     }
     
+    var groupBy = tc.Value.ParentChart.ChartScript.GroupBy;
+    
 
 WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
 
@@ -125,9 +127,19 @@ WriteLiteral("\">\r\n        <td>");
 WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
 
 
-             if (tc.Value.GroupByVisible)
+             if (groupBy != GroupByChart.Never && tc.Value.ScriptColumn.IsGroupKey)
             {
-                var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
+                var groupCheck = new HtmlTag("input")
+                    .IdName(tc.Compose("group"))
+                    .Attr("type", "checkbox")
+                    .Attr("value", "True")
+                    .Class("sf-chart-group-trigger");
+
+                if (groupBy == GroupByChart.Always)
+                {
+                    groupCheck.Attr("disabled", "disabled");
+                }
+                
                 bool groupResults = tc.Value.ParentChart.GroupResults;
                 if (groupResults)
                 {

@@ -4,6 +4,7 @@
 @model TypeContext<ChartScriptDN>
 @Html.ScriptCss(
     "~/Content/CodeMirror/codemirror.css",
+    "~/Content/CodeMirror/dialog.css",
     "~/Content/CodeMirror/simple-hint.css")
 @Html.ScriptsJs(
         "~/Scripts/CodeMirror/codemirror.js",
@@ -12,7 +13,9 @@
         "~/Scripts/CodeMirror/searchcursor.js",
         "~/Scripts/CodeMirror/simple-hint.js",
         "~/Scripts/CodeMirror/javascript-hint.js",
-        "~/Scripts/CodeMirror/match-highlighter.js"
+        "~/Scripts/CodeMirror/match-highlighter.js",
+        "~/Scripts/CodeMirror/search.js",
+        "~/Scripts/CodeMirror/dialog.js"
         )
   
     <style type="text/css">
@@ -48,12 +51,12 @@
     <pre style="color: Green">
 //var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
 //var data = { 
-//              "labels": { "c0": "Order", "c1": "Count" },
-//              "rows": 
-//              [
-//                 { "c0": { "key": "Product;1", "toStr": "Apple", "color": null }, "c1": 153 },
-//                 { "c0": { "key": "Product;2", "toStr": "Orange", "color": null }, "c1": 179 },
-//              ]
+//              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true}, 
+                            "c1": { "title":"Count", "token":"Count", "isGroupKey":true} 
+                          },
+//              "rows": [ { "c0": { "key": "Product;1", "toStr": "Apple", "color": null }, "c1": 153 },
+//                        { "c0": { "key": "Product;2", "toStr": "Orange", "color": null }, "c1": 179 },
+//                      ]
 //           }
 // DrawChart(chart, data);
 // All yours!...
@@ -72,7 +75,7 @@
             "Ctrl-Space": "autocomplete",
             "Ctrl-K": "commentSelection",
             "Ctrl-U": "uncommentSelection",
-            "Ctrl-F": "autoFormatSelection",
+            "Ctrl-I": "autoFormatSelection",
             "F11": function(cm) { setFullScreen(cm, !isFullScreen(cm)); },
             "Esc": function(cm) { if (isFullScreen(cm)) setFullScreen(cm, false); } },
         onCursorActivity: function () {

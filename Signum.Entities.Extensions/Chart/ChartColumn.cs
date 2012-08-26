@@ -62,10 +62,7 @@ namespace Signum.Entities.Chart
         public IChartBase ParentChart { get { return parentChart; } }
 
         [AvoidLocalization]
-        public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
-
-        [AvoidLocalization]
-        public bool ShouldAggregate { get { return parentChart.GroupResults && !ScriptColumn.IsGroupKey; } }
+        public bool? IsGroupKey { get { return !parentChart.GroupResults ? (bool?)null: ScriptColumn.IsGroupKey; } }
 
         [AvoidLocalization]
         public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
@@ -90,9 +87,8 @@ namespace Signum.Entities.Chart
         internal void NotifyAll()
         {
             Notify(() => Token);
-            Notify(() => GroupByVisible);
+            Notify(() => IsGroupKey);
             Notify(() => PropertyLabel);
-            Notify(() => ShouldAggregate);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -134,7 +130,7 @@ namespace Signum.Entities.Chart
 
         public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
-            var result = token.SubTokensChart(columnDescriptions, this.ShouldAggregate && this.parentChart.GroupResults);
+            var result = token.SubTokensChart(columnDescriptions, this.IsGroupKey == false);
 
             if (this.parentChart.GroupResults && ScriptColumn.IsGroupKey && token != null)
             {

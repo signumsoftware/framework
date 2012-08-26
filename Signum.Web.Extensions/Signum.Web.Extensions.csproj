@@ -268,6 +268,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartBuilder.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Chart\Views\ChartColumn.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartColumn.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\Views\ChartControl1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -297,11 +302,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartScriptColumn.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Chart\Views\ChartToken1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ChartToken.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Chart\Views\UserChartOrder.cs">
       <AutoGen>True</AutoGen>
@@ -859,6 +859,7 @@
     <Content Include="Chart\Content\SF_Chart.css" />
     <Content Include="Chart\Images\unknown.png" />
     <Content Include="Chart\Scripts\SF_Chart.js" />
+    <Content Include="Chart\Scripts\SF_Chart_Utils.js" />
     <Content Include="ControlPanel\Content\SF_FlowTable.css" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
     <Content Include="ControlPanel\Scripts\SF_FlowTable.js" />
@@ -954,9 +955,9 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartBuilder.cs</LastGenOutput>
     </Content>
-    <Content Include="Chart\Views\ChartToken.cshtml">
+    <Content Include="Chart\Views\ChartColumn.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ChartToken1.cs</LastGenOutput>
+      <LastGenOutput>ChartColumn.cs</LastGenOutput>
     </Content>
     <Content Include="Chart\Views\ChartResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

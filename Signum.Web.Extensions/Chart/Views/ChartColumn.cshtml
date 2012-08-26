@@ -24,13 +24,25 @@
         tc.Value = new ChartColumnDN();
     }
     
+    var groupBy = tc.Value.ParentChart.ChartScript.GroupBy;
+    
     <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnDN>)tc.Parent).Index)">
         <td>@tc.Value.PropertyLabel
         </td>
         <td>
-            @if (tc.Value.GroupByVisible)
+            @if (groupBy != GroupByChart.Never && tc.Value.ScriptColumn.IsGroupKey)
             {
-                var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
+                var groupCheck = new HtmlTag("input")
+                    .IdName(tc.Compose("group"))
+                    .Attr("type", "checkbox")
+                    .Attr("value", "True")
+                    .Class("sf-chart-group-trigger");
+
+                if (groupBy == GroupByChart.Always)
+                {
+                    groupCheck.Attr("disabled", "disabled");
+                }
+                
                 bool groupResults = tc.Value.ParentChart.GroupResults;
                 if (groupResults)
                 {

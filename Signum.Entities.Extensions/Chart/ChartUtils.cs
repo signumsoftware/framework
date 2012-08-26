@@ -15,6 +15,9 @@ namespace Signum.Entities.Chart
     {
         public static bool IsChartColumnType(QueryToken token, ChartColumnType ct)
         {
+            if (token == null)
+                return false;
+
             if (token is IntervalQueryToken)
                 return ct == ChartColumnType.Groupable;
 

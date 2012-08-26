@@ -70,6 +70,7 @@ namespace ASP
 
 Write(Html.ScriptCss(
     "~/Content/CodeMirror/codemirror.css",
+    "~/Content/CodeMirror/dialog.css",
     "~/Content/CodeMirror/simple-hint.css"));
 
 WriteLiteral("\r\n");
@@ -82,7 +83,9 @@ Write(Html.ScriptsJs(
         "~/Scripts/CodeMirror/searchcursor.js",
         "~/Scripts/CodeMirror/simple-hint.js",
         "~/Scripts/CodeMirror/javascript-hint.js",
-        "~/Scripts/CodeMirror/match-highlighter.js"
+        "~/Scripts/CodeMirror/match-highlighter.js",
+        "~/Scripts/CodeMirror/search.js",
+        "~/Scripts/CodeMirror/dialog.js"
         ));
 
 WriteLiteral(@"
@@ -120,12 +123,12 @@ WriteLiteral(@"
     <pre style=""color: Green"">
 //var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
 //var data = { 
-//              ""labels"": { ""c0"": ""Order"", ""c1"": ""Count"" },
-//              ""rows"": 
-//              [
-//                 { ""c0"": { ""key"": ""Product;1"", ""toStr"": ""Apple"", ""color"": null }, ""c1"": 153 },
-//                 { ""c0"": { ""key"": ""Product;2"", ""toStr"": ""Orange"", ""color"": null }, ""c1"": 179 },
-//              ]
+//              ""columns"": { ""c0"": { ""title"":""Product"", ""token"":""Product"", ""isGroupKey"":true}, 
+                            ""c1"": { ""title"":""Count"", ""token"":""Count"", ""isGroupKey"":true} 
+                          },
+//              ""rows"": [ { ""c0"": { ""key"": ""Product;1"", ""toStr"": ""Apple"", ""color"": null }, ""c1"": 153 },
+//                        { ""c0"": { ""key"": ""Product;2"", ""toStr"": ""Orange"", ""color"": null }, ""c1"": 179 },
+//                      ]
 //           }
 // DrawChart(chart, data);
 // All yours!...
@@ -144,7 +147,7 @@ WriteLiteral("\");\r\n    var changedDelay;\r\n   \r\n    var editor = CodeMirro
 "ea[0], {\r\n        lineNumbers: true,\r\n        matchBrackets: true,\r\n        mode" +
 ": \"javascript\",\r\n        extraKeys: {\r\n            \"Ctrl-Space\": \"autocomplete\"," +
 "\r\n            \"Ctrl-K\": \"commentSelection\",\r\n            \"Ctrl-U\": \"uncommentSel" +
-"ection\",\r\n            \"Ctrl-F\": \"autoFormatSelection\",\r\n            \"F11\": funct" +
+"ection\",\r\n            \"Ctrl-I\": \"autoFormatSelection\",\r\n            \"F11\": funct" +
 "ion(cm) { setFullScreen(cm, !isFullScreen(cm)); },\r\n            \"Esc\": function(" +
 "cm) { if (isFullScreen(cm)) setFullScreen(cm, false); } },\r\n        onCursorActi" +
 "vity: function () {\r\n            editor.matchHighlight(\"CodeMirror-matchhighligh" +

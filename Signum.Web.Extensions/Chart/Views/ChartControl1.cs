@@ -83,6 +83,7 @@ WriteLiteral("\r\n");
 
 
 Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
+                "~/Chart/Scripts/SF_Chart_Utils.js",
                 "~/scripts/d3.v2.min.js",
                 "~/scripts/underscore-min.js"));
 
@@ -231,22 +232,8 @@ WriteLiteral("    </div>\r\n    <script type=\"text/javascript\">\r\n        (fu
 
                                        Write(Model.ControlID);
 
-WriteLiteral("\');\r\n            $myChart.initOrders();\r\n\r\n            //                    var " +
-"$chartContainer = $(\'#");
-
-
-                                                       Write(Model.Compose("sfChartContainer"));
-
-WriteLiteral("  > .sf-chart-container\');\r\n            //                    $chartContainer.clo" +
-"sest(\'.sf-tabs\').bind(\"tabsshow\", function(event, ui) {\r\n            //         " +
-"               if (ui.panel.id == \'");
-
-
-                                                      Write(Model.Compose("sfChartContainer"));
-
-WriteLiteral("\') {\r\n            //                            $myChart.reDraw($chartContainer, " +
-"false);\r\n            //                        }\r\n            //                " +
-"    });\r\n        })();\r\n    </script>\r\n</div>\r\n");
+WriteLiteral("\');\r\n            //$myChart.initOrders();\r\n        })();\r\n    </script>\r\n</div>\r\n" +
+"");
 
 
         }

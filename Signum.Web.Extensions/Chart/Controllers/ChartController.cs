@@ -163,7 +163,7 @@ namespace Signum.Web.Chart
                 foreach (var column in chartRequest.Columns.Iterate())
                 {
                     if (column.Value.ScriptColumn.IsGroupKey)
-                        filters.AddRange(GetFilter(column.Value, "t" + column.Position));
+                        filters.AddRange(GetFilter(column.Value, "c" + column.Position));
                 }
 
                 var findOptions = new FindOptions(chartRequest.QueryName)
@@ -196,17 +196,19 @@ namespace Signum.Web.Chart
             if (chartToken == null ||  chartToken.Token is AggregateToken)
                 return null;
 
-            bool hasKey = Request.Params.AllKeys.Contains(key);
-            var value = hasKey ? Request.Params[key] : null;
 
             var token = chartToken.Token;
 
+            bool hasKey = Request.Params.AllKeys.Contains(key);
+            var value = !hasKey ? null : 
+                FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(Request.Params[key]), token.Type);
+            
             return new FilterOption
             {
                 ColumnName = token.FullKey(),
                 Token = token,
                 Operation = FilterOperation.EqualTo,
-                Value = hasKey ? FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(value), token.Type) : null
+                Value = value,
             };
         }
 

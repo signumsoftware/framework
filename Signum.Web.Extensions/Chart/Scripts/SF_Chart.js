@@ -23,18 +23,19 @@ SF.Chart = (function () {
             $(".sf-chart-img").live("click", function () {
                 var $this = $(this);
                 $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
-                self.updateChartBuilder();
+                
 
-               
                 var $resultsContainer = $chartControl.find(".sf-search-results-container");
                 if ($this.hasClass("sf-chart-img-equiv")) {
                     if ($resultsContainer.find("svg").length > 0) {
-                        self.reDraw();
+                        self.reDrawOnUpdateBuilder  = true;
                     }
                 }
                 else {
                     $resultsContainer.html("");
                 }
+
+                self.updateChartBuilder();
             });
 
             $(".sf-chart-group-trigger").live("change", function () {
@@ -69,6 +70,7 @@ SF.Chart = (function () {
                             new SF.Validator().showErrors(null);
                             $chartControl.find(".sf-search-results-container").html(result);
                             SF.triggerNewContent($chartControl.find(".sf-search-results-container"));
+                            self.initOrders();
                             self.reDraw();
                         }
                     }
@@ -122,14 +124,6 @@ SF.Chart = (function () {
             };
         },
 
-        requestProcessedData: function () {
-            return {
-                webQueryName: this.options.webQueryName,
-                filters: this.serializeFilters(),
-                orders: this.serializeOrders(this.options.orders)
-            };
-        },
-
         requestData: function () {
             return this.$chartControl.find(":input:not(#webQueryName)").serialize() +
                 "&webQueryName=" + this.options.webQueryName +
@@ -150,9 +144,18 @@ SF.Chart = (function () {
                 success: function (result) {
                     $chartBuilder.replaceWith(result);
                     SF.triggerNewContent(self.$chartControl.find(".sf-chart-builder"));
+                    if(self.reDrawOnUpdateBuilder )
+                    {
+                        self.reDraw();
+                        self.reDrawOnUpdateBuilder = false;
+                    }
+
                 }
             });
         },    
+
+       
+     
 
         originalAddFilter: $.SF.findNavigator.prototype.addFilter,
 
@@ -171,17 +174,18 @@ SF.Chart = (function () {
 
         showError: function(e, __baseLineNumber__ , chart){
             var message = e.toString();
-            if(e.lineNumber != undefined)
+            if(e.lineNumber != undefined && e.stack != undefined && e.stack.indexOf("DrawChart") == 0)
             {
                 var lineNumber = (e.lineNumber - __baseLineNumber__); 
                 this.exceptionLine = lineNumber;
                 message = "Line " + lineNumber + ": " + message; 
             }else{
-                this.exceptionLine = 0;
+                this.exceptionLine = 1;
             }
 
             chart.select(".sf-chart-error").remove();
-            chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", chart.attr("height") / 2).text(message);
+            chart.append('svg:rect').attr('class', 'sf-chart-error').attr("y", (chart.attr("height") / 2) - 10).attr("fill", "#FBEFFB").attr("stroke", "#FAC0DB").attr("width", chart.attr("width")-1).attr("height", 20);
+            chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", chart.attr("height") / 2).attr("fill", "red").attr("dy", 5).attr("dx", 4).text(message);
         },
 
         reDraw: function () {
@@ -204,6 +208,7 @@ SF.Chart = (function () {
                 var getLabel = SF.Chart.Utils.getLabel;
                 var getKey = SF.Chart.Utils.getKey;
                 var getColor = SF.Chart.Utils.getColor;
+                var getClickKeys = SF.Chart.Utils.getClickKeys;
                 __baseLineNumber__ = new Error().lineNumber; 
                 func = eval(code);
             }catch(e){
@@ -213,7 +218,8 @@ SF.Chart = (function () {
 
             var hasError = false;
             try{
-            func(chart, data);
+                func(chart, data);
+                this.bindMouseClick($chartContainer);
             }catch(e){
                this.showError(e,__baseLineNumber__, chart);
             }
@@ -233,6 +239,14 @@ SF.Chart = (function () {
             SF.EntityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
                 SF.submitOnly(exportUrl, data)
             });
+        },
+
+        requestProcessedData: function () {
+            return {
+                webQueryName: this.options.webQueryName,
+                filters: this.serializeFilters(),
+                orders: this.serializeOrders(this.options.orders)
+            };
         },
 
         fullScreen: function (evt) {
@@ -258,135 +272,29 @@ SF.Chart = (function () {
                 self.$chartControl.find(".sf-chart-draw").click();
                 return false;
             });
+        },
+
+         bindMouseClick: function ($chartContainer) {
+           
+            $chartContainer.find('[data-click]').click(function () {
+                
+                var url = $chartContainer.attr('data-open-url');
+
+                var $chartControl = $chartContainer.closest(".sf-chart-control");
+                var findNavigator = SF.Chart.getFor($chartControl.attr("data-prefix"));
+
+
+                var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
+                options += "&webQueryName=" + findNavigator.options.webQueryName;
+                options += "&orders=" + findNavigator.serializeOrders(findNavigator.options.orders);
+                options += "&filters=" + findNavigator.serializeFilters();
+                options += $(this).data("click");
+
+                window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+            });
         }
+
+
     });
 })(jQuery);
-
-SF.Chart.Utils = (function () {
-  
-    Array.prototype.enterData = function (data, tag, cssClass) {
-        return this.selectAll(tag + "." + cssClass).data(data)
-        .enter().append("svg:" + tag)
-        .attr("class", cssClass);
-    };
-
-    return {
-
-        getLabel: function (tokenValue) {
-           return tokenValue !== null && tokenValue.toStr != undefined ? tokenValue.toStr : tokenValue;
-        },
-
-        getKey: function (tokenValue) {
-           return tokenValue !== null && tokenValue.key != undefined ? tokenValue.key : tokenValue;
-        },
-
-        getColor: function (tokenValue, color) {
-            return ((tokenValue !== null  && tokenValue.color != undefined) ? tokenValue.color : null) || color(JSON.stringify(tokenValue));
-        },
-
-        getPathPoints: function (points) {
-            var result = "";
-            var jump = true;
-            $.each(points, function (i, p) {
-                if (p.x == null || p.y == null) {
-                    jump = true;
-                }
-                else {
-                    result += (jump ? " M " : " ") + p.x + " " + p.y;
-                    jump = false;
-                }
-            });
-            return result;
-        },
-
-        bindMouseClick: function ($chartContainer) {
-            $chartContainer.find('.shape,.slice,.hover-trigger,.point').not('g').click(function () {
-                var $this = $(this);
-
-                var extractAttribute = function ($shape, attrName) {
-                    var att = $shape.attr("data-" + attrName);
-                    if (typeof att != "undefined") {
-                        return "&" + attrName + "=" + att;
-                    }
-                    else {
-                        return "";
-                    }
-                };
-
-                var serializeData = function ($shape) {
-                    var $chartControl = $shape.closest(".sf-chart-control");
-                    var findNavigator = SF.Chart.getFor($chartControl.attr("data-prefix"));
-
-                    var data = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
-                    data += "&webQueryName=" + findNavigator.options.webQueryName;
-                    data += "&orders=" + findNavigator.serializeOrders(findNavigator.options.orders);
-                    data += "&filters=" + findNavigator.serializeFilters();
-                    data += extractAttribute($shape, "d1");
-                    data += extractAttribute($shape, "d2");
-                    data += extractAttribute($shape, "v1");
-                    data += extractAttribute($shape, "v2");
-                    data += extractAttribute($shape, "entity");
-                    return data;
-                };
-
-                var url = $this.closest('.sf-chart-container').attr('data-open-url');
-                window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + serializeData($this));
-            });
-        }
-    };
-
-})();
-
-
-//    getMaxValue1: function (series) {
-//        var completeArray = [];
-//        $.each(series, function (i, s) {
-//            $.merge(completeArray, s.values);
-//        });
-//        var self = this;
-//        return d3.max($.map(completeArray, function (e) { return self.getTokenKey(e); }));
-//    },
-
-//    createEmptyCountArray: function (length) {
-//        var countArray = [];
-//        for (var i = 0; i < length; i++) {
-//            countArray.push(0);
-//        }
-//        return countArray;
-//    },
-
-//    createCountArray: function (series) {
-//        if (series.length == 0) {
-//            return [];
-//        }
-
-//        var dimensionCount = series[0].values.length;
-//        var countArray = this.createEmptyCountArray(dimensionCount);
-
-//        var self = this;
-//        $.each(series, function (i, serie) {
-//            for (var i = 0; i < dimensionCount; i++) {
-//                var v = serie.values[i];
-//                if (!SF.isEmpty(v)) {
-//                    countArray[i] += self.getTokenKey(v);
-//                }
-//            }
-//        });
-
-//        return countArray;
-//    },
-
-
-
-//    getSizeScale: function (data, area) {
-//        var sum = 0;
-//        var self = this;
-//        $.each(data.points, function (i, p) {
-//            sum += self.getTokenKey(p.value2);
-//        });
-
-//        return d3.scale.linear()
-//            .domain([0, sum])
-//            .range([0, area]);
-//    },
 

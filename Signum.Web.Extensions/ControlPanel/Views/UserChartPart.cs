@@ -80,7 +80,9 @@ namespace ASP
 
 
 Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
-                "~/scripts/d3.v2.min.js"));
+                "~/Chart/Scripts/SF_Chart_Utils.js",
+                "~/scripts/d3.v2.min.js",
+                "~/scripts/underscore-min.js"));
 
 WriteLiteral("\r\n");
 

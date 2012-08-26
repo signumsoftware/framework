@@ -91,6 +91,11 @@ namespace Signum.Entities.Chart
                     if (!Columns.Any(a => a.IsGroupKey))
                         return "{0} {1} requires some key columns".Formato(pi.NiceName(), groupBy.NiceToString());
                 }
+                else
+                {
+                    if (Columns.Any(a => a.IsGroupKey))
+                        return "{0} {1} should not have key".Formato(pi.NiceName(), groupBy.NiceToString());
+                }
             }
 
             if (pi.Is(() => Script))
