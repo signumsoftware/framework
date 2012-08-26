@@ -10,6 +10,7 @@ using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Utilities;
 using System.IO;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Chart
 {
@@ -73,6 +74,79 @@ namespace Signum.Engine.Chart
                     s.Icon.Retrieve();
 
                 s.ExportXml().Save(Path.Combine(folderName, s.Name + ".xml"));
+            }
+        }
+
+        public static void ImportAllScripts(string folderName)
+        {
+            string[] fileNames = Directory.GetFiles(folderName, "*.xml");
+
+            var charts = Database.Query<ChartScriptDN>().ToDictionary(a => a.Name); 
+
+            bool overriteAll = false;
+            bool forceAll = false;
+            foreach (var item in fileNames)
+            {
+                var name = Path.GetFileNameWithoutExtension(item);
+
+                var previous = charts.TryGetC(name);
+                if (previous != null && previous.Icon != null)
+                    previous.Icon.Retrieve();
+
+                var script = previous ?? new ChartScriptDN();
+
+                try
+                {
+                    script.ImportXml(XDocument.Load(item), name, false);
+                }
+                catch (FormatException f)
+                {
+                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, f.Message);
+                    if (AskYNA("Foce {0}? (*yes, no, all)".Formato(name), ref forceAll))
+                        script.ImportXml(XDocument.Load(item), name, true);
+                }
+
+                if (previous != null)
+                {
+                    if (previous.HasChanges() && AskYNA("Override {0}? (*yes, no, all)".Formato(name), ref overriteAll))
+                    {
+                        previous.Save();
+                        Console.WriteLine("{0} overriden.".Formato(name));
+                    }
+                }
+                else
+                {
+                    script.Save();
+                    Console.WriteLine("{0} created.".Formato(name));
+                }
+            }
+        }
+
+        private static bool AskYNA(string message, ref bool all)
+        {
+
+            if (all)
+                return true;
+
+            while (true)
+            {
+                Console.Write(message);
+
+                var str = Console.ReadLine();
+
+                if (!str.HasText())
+                    return true;
+
+                var c = char.ToLower(str[0]);
+
+                if (c == 'a' || c == 'y')
+                {
+                    all = c == 'a';
+                    return true;
+                }
+                else if (c == 'n')
+                    return false;
+
             }
         }
     }

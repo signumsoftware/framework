@@ -9,6 +9,7 @@ using Signum.Entities.Files;
 using System.Xml.Linq;
 using System.Collections;
 using System.Text.RegularExpressions;
+using Signum.Entities.Reflection;
 
 namespace Signum.Entities.Chart
 {
@@ -129,12 +130,12 @@ namespace Signum.Entities.Chart
 
             return new XDocument(new XDeclaration("1.0", "utf-8", "yes"),
                 new XElement("ChartScript",
-                    new XAttribute("Name", Name),
                     new XAttribute("GroupBy", GroupBy.ToString()),
                     new XElement("Columns",
                         Columns.Select(c => new XElement("Column",
                             new XAttribute("DisplayName", c.DisplayName),
                             new XAttribute("ColumnType", c.ColumnType.ToString()),
+                            c.IsGroupKey ? new XAttribute("IsGroupKey", true) : null,
                             c.IsOptional ? new XAttribute("IsOptional", true) : null
                          ))),
                     icon == null ? null :
@@ -145,27 +146,40 @@ namespace Signum.Entities.Chart
                     
         }
 
-        public void ImportXml(XDocument doc, bool force = false)
+        public void ImportXml(XDocument doc, string name, bool force = false)
         {
             XElement script = doc.Root;
 
-            string name = script.Attribute("Name").Value;
             GroupByChart groupBy = script.Attribute("GroupBy").Value.ToEnum<GroupByChart>();
 
             List<ChartScriptColumnDN> columns = script.Element("Columns").Elements("Column").Select(c => new ChartScriptColumnDN
             {
                 DisplayName = c.Attribute("DisplayName").Value,
                 ColumnType = c.Attribute("ColumnType").Value.ToEnum<ChartColumnType>(),
-                IsOptional = c.Attribute("IsOptional").Let(a => a != null && a.Value == "True"),
+                IsGroupKey = c.Attribute("IsGroupKey").Let(a => a != null && a.Value == "true"),
+                IsOptional = c.Attribute("IsOptional").Let(a => a != null && a.Value == "true"),
             }).ToList();
 
-            if (!IsNew && Name != name && !force)
+            if (!IsNew && !force)
                 AsssertColumns(columns);
 
             this.Name = name;
             this.GroupBy = groupBy;
 
-            this.Columns = columns.ToMList();
+            if (this.Columns.Count == columns.Count)
+            {
+                this.Columns.ZipForeach(columns, (o, n) =>
+                {
+                    o.ColumnType = n.ColumnType;
+                    o.DisplayName = n.DisplayName;
+                    o.IsGroupKey = n.IsGroupKey;
+                    o.IsOptional = n.IsOptional;
+                }); 
+            }
+            else
+            {
+                this.Columns = columns.ToMList();
+            }
 
             this.Script = script.Elements("Script").Nodes().OfType<XCData>().Single().Value;
 
@@ -242,6 +256,12 @@ namespace Signum.Entities.Chart
 
                 return ChartUtils.IsChartColumnType(c.Token, s.ColumnType);
             }).All(a => a);
+        }
+
+        public bool HasChanges()
+        {
+            var graph = GraphExplorer.FromRoot(this);
+            return graph.Any(a => a.SelfModified);
         }
     }
 
