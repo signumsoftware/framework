@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ChartScript GroupBy="Always">
+  <Columns>
+    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Columns" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Height" ColumnType="Magnitude" />
+  </Columns>
+  <Icon FileName="totalcolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAlVJREFUeNrsmD1LHUEUhs9KqpDOQhHTBPGjthEJNiaNZSoLbSUW0UIsg78gPyJYpLZIbAL5KJJoRLEQCYqxkpB/cHdn5rhn70W8Zueddc5AbnEHlr2zl5l55jlnZj8yZqZeLgPU46UPmARweWO7ZxPxAfrz3ftj/vLzgqx1ZJ0jV535pi7nZ7Pj9HJxJrvb9u3OEX/6cVbb1km9/P386SS9WprNogG/HlzQwvx01zUZwJRHYRzlxtLOh+8C+E/bz3vn9GJhprZNXhjKc0u7H/cFMD4Hy4lCOBnIebYp7jT2wbUKS012OAh4e4/0DeTbRwUcwbVyQ032YGyw00GMBckxBCd19TbDLt6CXEdwrbKuBhSDIQsoxAiulcagC1rwhVjsI7i8SGQwZAEaBHCFSQGosCBtEZxERh9ihQVpi+BMCkAJU6wFiTyCs87p78WS6LEWpsYf0+HRaRVqOepydXJsRAdYJXqkhfWhTXo4t1Rj1snMpXf6u79Vnq90iyQ2ROwMhCO23vv4vRZJfP4whGNryn6UOTgxNkonv3535dHdXJp4MhxGrYGrDGoB1wZX6dHKKhzo8tvrsv6nhspAuKqufie5Zctrgf23SQTHNve2vQdg2II/zzFcO8TaRdLAArbvh5NVrjfYpsQWGNgHcNIvpwkxtgDtIzhX6BeJvCaGLOAJArjynCTE0RY69n1wwck1Mxi2gOxDOE7wwNp+3FNYAHCcwmB7jDgL1pEaroFBjrZQ2VfChTdq0lnQwknJ5Omk1z6/bb9ZzroA+19Y+4D/sVwLMAAe1Sa/GfDcBAAAAABJRU5ErkJggg==]]></Icon>
+  <Script><![CDATA[function DrawChart(chart, data){
+
+//config variables
+var yAxisLabelWidth = 60,
+	fontSize = 0,
+	ticksLength = 4,
+	labelMargin = 5,
+	chartAxisPadding = 5,
+	padding = 5,
+	yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength,
+	xAxisTopPosition = height - padding - fontSize - labelMargin - ticksLength,
+	color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function (s) { return myChart.getTokenKey(s.dimension2); })]);
+
+//x axis scale
+var x = d3.scale.ordinal()
+	.domain($.map(data.dimension1, function (d) { return myChart.getTokenKey(d); }))
+	.rangeBands([0, width - yAxisLeftPosition - padding - (2 * chartAxisPadding)]);
+
+//y axis scale
+var y = d3.scale.linear()
+	.domain([0, 100])
+	.range([0, xAxisTopPosition - padding - fontSize - labelMargin]);
+
+//paint x-axis ticks
+chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ')')
+	.enterData(data.dimension1, 'line', 'x-axis-tick')
+	.attr('y2', ticksLength)
+	.attr('x1', function (d) { return x(myChart.getTokenKey(d)); })
+	.attr('x2', function (d) { return x(myChart.getTokenKey(d)); });
+
+//paint x-axis - token label
+chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')
+	.append('svg:text').attr('class', 'x-axis-token-label')
+	.attr('text-anchor', 'middle')
+	.text(data.labels.dimension1);
+
+//paint y-axis - ruler
+var yTicks = y.ticks(10);
+chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
+	.enterData(yTicks, 'line', 'y-ruler')
+	.attr('x2', width - yAxisLeftPosition - padding)
+	.attr('y1', function (t) { return -y(t); })
+	.attr('y2', function (t) { return -y(t); });
+
+//paint y-axis - ticks
+chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + xAxisTopPosition + ')')
+	.enterData(yTicks, 'line', 'y-axis-tick')
+	.attr('x2', ticksLength)
+	.attr('y1', function (t) { return -y(t); })
+	.attr('y2', function (t) { return -y(t); });
+
+//paint y-axis - tick labels
+chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + xAxisTopPosition + ')')
+	.enterData(yTicks, 'text', 'y-axis-tick-label')
+	.attr('y', function (t) { return -y(t); })
+	.attr('dominant-baseline', 'middle')
+	.attr('text-anchor', 'end')
+	.text(String);
+
+//paint y-axis - token label
+chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + ((xAxisTopPosition - fontSize - labelMargin) / 2) + ') rotate(270)')
+	.append('svg:text').attr('class', 'y-axis-token-label')
+	.attr('text-anchor', 'middle')
+	.text(data.labels.value1);
+
+//paint graph
+var countArray = myChart.createCountArray(data.series);
+var emptyCountArray = myChart.createEmptyCountArray(data.dimension1.length);
+chart.enterData(data.series, 'g', 'shape-serie').attr('transform', 'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')
+	.enterData(function (s) { return $.map(s.values, function (v) { return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')
+	.attr('stroke', function (pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })
+	.attr('fill', function (pair) { return SF.isEmpty(pair.value) ? 'none' : myChart.getTokenColor(pair.dimension2, color); })
+	.attr('transform', function (pair, i) { return 'translate(' + x(myChart.getTokenKey(data.dimension1[i])) + ', 0)'; })
+	.attr('width', x.rangeBand())
+	.attr('height', function (pair, i) { return SF.isEmpty(pair.value) ? 0 : y((100 * myChart.getTokenKey(pair.value)) / countArray[i]); })
+	.attr('y', function (pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = emptyCountArray[i]; emptyCountArray[i] += myChart.getTokenKey(pair.value); return y((100 * offset) / countArray[i]); } })
+	.attr('data-d1', function (pair, i) { return myChart.getTokenKey(data.dimension1[i]); })
+	.attr('data-d2', function (pair) { return myChart.getTokenKey(pair.dimension2); })
+	.append('svg:title')
+	.text(function (pair, i) { return SF.isEmpty(pair.value) ? null : myChart.getTokenLabel(data.dimension1[i]) + ', ' + myChart.getTokenLabel(pair.dimension2) + ': ' + myChart.getTokenLabel(pair.value); });
+
+//paint x-axis tick labels
+var yHalf = (xAxisTopPosition - padding) / 2;
+if (x.rangeBand() > fontSize) {
+    chart.append('svg:g').attr('class', 'x-axis-tick-serie').attr('transform', 'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', 0) rotate(270)')
+	.enterData(data.dimension1, 'text', 'x-axis-tick-label sf-chart-strong')
+	.attr('x', -yHalf)
+	.attr('y', function (v, i) { return x(myChart.getTokenKey(v)) })
+	.attr('text-anchor', 'middle')
+	.attr('fill', '#fff')
+	.text(function (v, i) { return myChart.getTokenLabel(v); });
+}
+
+//paint x-axis
+chart.append('svg:g').attr('class', 'x-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
+	.append('svg:line')
+	.attr('class', 'x-axis')
+	.attr('x2', width - yAxisLeftPosition - padding);
+
+//paint y-axis
+chart.append('svg:g').attr('class', 'y-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin) + ')')
+	.append('svg:line')
+	.attr('class', 'y-axis')
+	.attr('y2', xAxisTopPosition - padding - fontSize - labelMargin);
+
+//paint color legend
+var legendScale = d3.scale.ordinal().domain($.map(data.series, function (s, i) { return i; })).rangeBands([0, width - yAxisLeftPosition - padding]),
+	legendRectWidth = 10,
+	legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;
+
+if (legendLabelWidth + labelMargin + legendRectWidth > yAxisLabelWidth * 2) {
+    chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')
+	.enterData(data.series, 'rect', 'color-rect')
+	.attr('x', function (e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })
+	.attr('width', legendRectWidth).attr('height', fontSize)
+	.attr('fill', function (s) { return myChart.getTokenColor(s.dimension2, color); });
+
+    chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')
+	.enterData(data.series, 'text', 'color-text')
+	.attr('x', function (e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })
+	.text(function (s) { return myChart.getTokenLabel(s.dimension2); });
+}
+
+}
+]]></Script>
+</ChartScript>

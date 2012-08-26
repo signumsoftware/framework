@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ChartScript GroupBy="Optional">
+  <Columns>
+    <Column DisplayName="Color" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Horizontal Axis" ColumnType="Positionable" />
+    <Column DisplayName="Vertical Axis" ColumnType="Positionable" />
+  </Columns>
+  <Icon FileName="points.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAytJREFUeNrsWN1PUnEYfmhw+FC0Tz+T6bxwols206ZMzPIDLw43XbRVduVFN62vv6PuyjZnrdwqda0SU8GWlnnhbSpaQssVDQQMBZQM+XUOWihgATvUueDdzthg4332vs/zvO97BIQQ8Dn2gOeRAsgJwLbr3bwlojDalx6nmf7ybgCUJA0F5RqI5Id1XCd22U3016kBiJkceWUaSDMLdDEB9Dg/0ra+uv6DeUcQsDuwbO9DRkOXluIQpMtupp1P1P1ZbA6HA157L8iJLq0sU6H7Kwct08PIzK+ARNEMafFp+FcWYH0/ymn1rDNhOdyfYf8wFptIKIkMZH0FgR9eBHwOEL8XlFjGKUBKLInIIaKksXEwX9mIFVsP1uYfIrDOgMuqgrzwOKcAc5RNWGXaGspRCekuOSIAslzLaOjUWmYMQQLLi1WgOBZJkGv1nVqr0QBKmg5pUS2i8S8Y7Kg7f+0BYT/5+KQmSVKM+k9xp2eSvBidgd+/AU29EpfbVAJeVVA/Poua6nJUV5Vj+LWRfxWkREIsLa/C7fUh64CcfxxsVJXAbPoEn9vFtLg0+STku80Ik12A248nydDYpqia1UpcvRCfqJJuMyNvQ6IyvDEmXyTxRiBA4HL74PWt/xsVB/e5RRNtmdJBLGWWTaUGsr2KXWf1KUZUQ4xvssG2OOkiWbKZaFNHLrE/1xBbzzGy+PQk8XxboHkzi23GoR3L5obHwiybo/zxQZFYGmXZlPBnkuSUNmEtbNkUF9bwB2AaKwg1s2zOGoJXn7xIhfQwkTit87R1mr3YZMgua4V8n0LHGcAOxlgHt4y1hVHdlSjGyoIsrmmP+odOq5l2Pavvz2YvtiUHfI5eQH1PK9+fGMgIDhq2Gas+AWNdnIsUkWP+1e/fbz2aJPTFu6S1vZPcvD9B4gb4y1gdLm9CLWEFEy4ioTh0sb2cCBVgZNwYf4vZbWVwy1hbEjDW7NJmfLdvuwoPHUVuxRldopMlAuClc7UC5klYdUFB1HVpbXN65v5NQ27l2R3ca6gtgX5sswBNdTEUIHXVceWDfHsF132jLWhvgtQ76hTA/xw/BRgAN0sztqA7z64AAAAASUVORK5CYII=]]></Icon>
+  <Script><![CDATA[function DrawChart(chart, data){
+
+//config variables
+var yAxisLabelWidth = 60,
+	fontSize= 15,
+	ticksLength= 4,
+	labelMargin= 5,
+	chartAxisPadding= 5,
+	padding= 5,
+	yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength,
+	xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength,
+	color = (data.points.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.points, function(v) { return myChart.getTokenKey(v.value1); })]);
+
+//x axis scale
+var x = d3.scale.linear()
+	.domain([0, d3.max($.map(data.points, function (e) { return myChart.getTokenKey(e.dimension1); }))])
+	.range([0, width - yAxisLeftPosition - padding]);
+
+//y axis scale
+var y = d3.scale.linear()
+	.domain([0, d3.max($.map(data.points, function (e) { return myChart.getTokenKey(e.dimension2); }))])
+	.range([0, xAxisTopPosition - padding]);
+
+//paint x-axis - ticks
+var xTicks = x.ticks(10);
+chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
+	.enterData(xTicks, 'line', 'x-axis-tick')
+	.attr('x1', x)
+	.attr('x2', x)
+	.attr('y2', ticksLength);
+
+//paint x-axis - tick labels
+chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')
+	.enterData(xTicks, 'text', 'x-axis-tick-label')
+	.attr('x', x)
+	.attr('text-anchor', 'middle')
+	.text(String);
+
+//paint x-axis - token label
+chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + height + ')')
+	.append('svg:text').attr('class', 'x-axis-token-label')
+	.attr('text-anchor', 'middle')
+	.text(data.labels.dimension1);
+
+//paint y-axis - ruler
+var yTicks = y.ticks(8);
+chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
+	.enterData(yTicks, 'line', 'y-ruler')
+	.attr('x2', width - yAxisLeftPosition - padding)
+	.attr('y1', function(t) { return -y(t); })
+	.attr('y2', function(t) { return -y(t); });
+
+//paint y-axis - ticks
+chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + xAxisTopPosition + ')')
+	.enterData(yTicks, 'line', 'y-axis-tick')
+	.attr('x2', ticksLength)
+	.attr('y1', function(t) { return -y(t); })
+	.attr('y2', function(t) { return -y(t); });
+
+//paint y-axis - tick labels
+chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + xAxisTopPosition + ')')
+	.enterData(yTicks, 'text', 'y-axis-tick-label')
+	.attr('y', function(t) { return -y(t); })
+	.attr('dominant-baseline', 'middle')
+	.attr('text-anchor', 'end')
+	.text(String);
+
+//paint y-axis - token label
+chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + (xAxisTopPosition / 2) + ') rotate(270)')
+	.append('svg:text').attr('class', 'y-axis-token-label')
+	.attr('text-anchor', 'middle')
+	.text(data.labels.dimension2);
+
+//paint graph
+chart.enterData(data.points, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')
+	.append('svg:circle').attr('class', 'shape')
+	.attr('stroke', function(p) { return myChart.getTokenColor(p.value1, color); })
+	.attr('fill', function(p) { return myChart.getTokenColor(p.value1, color); })
+	.attr('shape-rendering', 'initial')
+	.attr('r', 5)
+	.attr('cx', function(p) { return x(myChart.getTokenKey(p.dimension1)); })
+	.attr('cy', function(p) { return y(myChart.getTokenKey(p.dimension2)); })
+	.attr('data-v1', function(p) { return myChart.getTokenKey(p.value1); })
+	.append('svg:title')
+	.text(function(p) { return myChart.getTokenLabel(p.value1) + ': ' + myChart.getTokenLabel(p.dimension1) + ', ' + myChart.getTokenLabel(p.dimension2); })
+
+//paint x-axis
+chart.append('svg:g').attr('class', 'x-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
+	.append('svg:line')
+	.attr('class', 'x-axis')
+	.attr('x2', width - yAxisLeftPosition - padding);
+
+//paint y-axis
+chart.append('svg:g').attr('class', 'y-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')
+	.append('svg:line')
+	.attr('class', 'y-axis')
+	.attr('y2', xAxisTopPosition - padding);
+
+}
+]]></Script>
+</ChartScript>
