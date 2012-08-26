@@ -65,31 +65,25 @@ namespace ASP
 
  using (var cc = Html.TypeContext<ChartScriptColumnDN>())
 {
+    using (Html.FieldInline())
+    {
+        
+   Write(Html.ValueLine(cc, c => c.DisplayName));
 
-WriteLiteral("    <div>\r\n        <div style=\"float: left\">\r\n            ");
+                                               
+        
+   Write(Html.ValueLine(cc, c => c.ColumnType));
 
+                                              
+        
+   Write(Html.ValueLine(cc, c => c.IsGroupKey));
 
-       Write(Html.ValueLine(cc, c => c.DisplayName));
+                                              
+        
+   Write(Html.ValueLine(cc, c => c.IsOptional));
 
-WriteLiteral("\r\n            <div style=\"float: left\">\r\n                ");
-
-
-           Write(Html.ValueLine(cc, c => c.IsOptional));
-
-WriteLiteral("\r\n            </div>\r\n            <div style=\"float: left\">\r\n                ");
-
-
-           Write(Html.ValueLine(cc, c => c.IsGroupKey));
-
-WriteLiteral("\r\n            </div>\r\n        </div>\r\n        <div style=\"float: left\">\r\n        " +
-"    ");
-
-
-       Write(Html.ValueLine(cc, c => c.ColumnType));
-
-WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
-
-
+                                              
+    }    
 }
 
 

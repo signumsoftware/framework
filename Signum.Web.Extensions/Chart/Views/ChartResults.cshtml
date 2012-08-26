@@ -22,10 +22,12 @@ else
     <div class="sf-tabs">
         <fieldset id="@Model.Compose("sfChartContainer")">
             <legend>Chart</legend>
-            <div class="sf-chart-container" data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)))">
+            <div class="sf-chart-container" 
+            data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)))"
+            data-json="@Html.Json(ChartClient.DataJson(Model.Value, queryResult)).ToString()">
             </div>
         </fieldset>
-        <fieldset id="@Model.Compose("sfChartData")" data="@ChartClient.DataJson(Model.Value, queryResult)">
+        <fieldset id="@Model.Compose("sfChartData")" >
             <legend>Data</legend>
             <table id="@Model.Compose("tblResults")" class="sf-search-results">
                 <thead class="ui-widget-header ui-corner-top">

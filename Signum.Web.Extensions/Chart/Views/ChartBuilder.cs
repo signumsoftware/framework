@@ -196,7 +196,18 @@ WriteLiteral("\r\n                        </th>\r\n                        <th c
                                                                                                                                      
                     }
 
-WriteLiteral("                </table>\r\n            </td>\r\n        </tr>\r\n    </table>\r\n");
+WriteLiteral("                </table>\r\n                <textarea class=\"sf-chart-currentScript" +
+"\" style=\"display:none\" data-url=\"");
+
+
+                                                                                   Write(Navigator.ViewRoute(chart.Value.ChartScript));
+
+WriteLiteral("\">\r\n                    ");
+
+
+               Write(chart.Value.ChartScript.Script);
+
+WriteLiteral("\r\n                </textarea>\r\n            </td>\r\n        </tr>\r\n    </table>\r\n");
 
 
 }

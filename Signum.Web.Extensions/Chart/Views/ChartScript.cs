@@ -66,32 +66,64 @@ namespace ASP
 
 
 
+
+Write(Html.ScriptCss(
+    "~/Chart/Content/SF_Chart.css"));
+
 WriteLiteral("\r\n");
 
 
  using (var cc = Html.TypeContext<ChartScriptDN>())
 {
-	
-Write(Html.ValueLine(cc, c => c.Name));
 
-                                 
-	
-Write(Html.FileLine(cc, c => c.Icon.TryCC(i=>i.Retrieve())));
+WriteLiteral("    <div>\r\n        <div style=\"float: left\">\r\n            ");
 
-                                                       
-	
+
+       Write(Html.ValueLine(cc, c => c.Name));
+
+WriteLiteral("\r\n            ");
+
+
+       Write(Html.FileLine(cc, c => c.Icon.TryCC(i => i.Retrieve()), a => { a.LabelVisible = true; a.LabelText = Html.PropertyNiceName(() => cc.Value.Icon); }));
+
+WriteLiteral("\r\n        </div>\r\n");
+
+
+         if (cc.Value.Icon != null && !cc.Value.Icon.IsNew)
+        {
+
+WriteLiteral("            <div style=\"float: left\">\r\n                <img src=\"");
+
+
+                     Write(Url.Action((FileController fc) => fc.DownloadFile(cc.Value.Icon.Id)));
+
+WriteLiteral("\" />\r\n            </div>\r\n");
+
+
+        }
+
+WriteLiteral("        <div class=\"clearall\" />\r\n    </div>\r\n");
+
+
+ 
+    
 Write(Html.ValueLine(cc, c => c.GroupBy));
 
-                                    
-    
-Write(Html.EntityRepeater(cc, c => c.Columns));
+                                       
 
-                                            
-    
-	
-Write(Html.ValueLine(cc, c => c.Script, vl => vl.ValueLineType = ValueLineType.TextArea));
+WriteLiteral("    <div class=\"sf-chartscript-columns\">\r\n        ");
 
-                                                                                    
+
+   Write(Html.EntityRepeater(cc, c => c.Columns));
+
+WriteLiteral("\r\n    </div>\r\n");
+
+
+    
+    
+Write(Html.Partial(Signum.Web.Chart.ChartClient.ChartScriptCodeView, cc));
+
+                                                                       
 }
 
 

@@ -8,6 +8,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Files;
 using System.Xml.Linq;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Chart
 {
@@ -89,6 +90,14 @@ namespace Signum.Entities.Chart
                 {
                     if (!Columns.Any(a => a.IsGroupKey))
                         return "{0} {1} requires some key columns".Formato(pi.NiceName(), groupBy.NiceToString());
+                }
+            }
+
+            if (pi.Is(() => Script))
+            {
+                if (!Regex.IsMatch(Script, @"^\s*function\s+DrawChart\s*\(\s*chart\s*,\s*data\s*\)\s*{.*}\s*$", RegexOptions.Singleline))
+                {
+                    return "{0} should be a definition of function DrawChart(chart, data)".Formato(pi.NiceName());
                 }
             }
 

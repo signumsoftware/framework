@@ -76,30 +76,29 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
-
 
 Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
 
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
 
 
 Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
-                "~/scripts/d3.v2.min.js"));
+                "~/scripts/d3.v2.min.js",
+                "~/scripts/underscore-min.js"));
 
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
 
 
    
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
     bool viewable = (bool)ViewData[ViewDataKeys.View];
-    
+
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);
 
 
-WriteLiteral("\r\n<div id=\"");
+WriteLiteral("<div id=\"");
 
 
     Write(Model.Compose("sfChartControl"));
@@ -119,25 +118,25 @@ WriteLiteral("\" \r\n    data-prefix=\"");
 
             Write(Model.ControlID);
 
-WriteLiteral("\" >\r\n\r\n    ");
+WriteLiteral("\" >\r\n    ");
 
 
 Write(Html.HiddenRuntimeInfo(Model));
 
-WriteLiteral("\r\n\r\n    ");
+WriteLiteral("\r\n    ");
 
 
 Write(Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
         (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
 
-WriteLiteral("\r\n\r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"ui-w" +
-"idget sf-filters\">\r\n                <div class=\"ui-widget-header ui-corner-top s" +
-"f-filters-body\">\r\n                    ");
+WriteLiteral("\r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"ui-wid" +
+"get sf-filters\">\r\n                <div class=\"ui-widget-header ui-corner-top sf-" +
+"filters-body\">\r\n                    ");
 
 
                Write(Html.ChartRootTokens(Model.Value, queryDescription, Model));
 
-WriteLiteral("\r\n                    \r\n                    ");
+WriteLiteral("\r\n                    ");
 
 
                Write(Html.Href(
@@ -152,24 +151,24 @@ WriteLiteral("\r\n                    \r\n                    ");
                                 { "data-url", Url.SignumAction("AddFilter") }
                             }));
 
-WriteLiteral("\r\n                </div>  \r\n");
+WriteLiteral("\r\n                </div>\r\n");
 
 
                    
                     Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
                 
 
-WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n\r\n        <div id=\"");
+WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n    <div id=\"");
 
 
-            Write(Model.Compose("sfChartBuilderContainer"));
+        Write(Model.Compose("sfChartBuilderContainer"));
 
-WriteLiteral("\">\r\n            ");
+WriteLiteral("\">\r\n        ");
 
 
-       Write(Html.Partial(ChartClient.ChartBuilderView, Model.Value));
+   Write(Html.Partial(ChartClient.ChartBuilderView, Model.Value));
 
-WriteLiteral("\r\n        </div>\r\n        <script type=\"text/javascript\">\r\n            $(\'#");
+WriteLiteral("\r\n    </div>\r\n    <script type=\"text/javascript\">\r\n            $(\'#");
 
 
            Write(Model.Compose("sfChartBuilderContainer"));
@@ -184,29 +183,39 @@ WriteLiteral("\' }, ");
 
                                                                                                              Write(MvcHtmlString.Create(Model.Value.ToJS()));
 
-WriteLiteral("));\r\n        </script>\r\n    <div class=\"sf-query-button-bar\">\r\n        <button ty" +
-"pe=\"submit\" class=\"sf-query-button sf-chart-draw\" data-icon=\"ui-icon-pencil\" id=" +
-"\"");
+WriteLiteral("));\r\n    </script>\r\n    <div class=\"sf-query-button-bar\">\r\n        <button type=\"" +
+"submit\" class=\"sf-query-button sf-chart-draw\" data-icon=\"ui-icon-refresh\" id=\"");
 
 
-                                                                                              Write(Model.Compose("qbDraw"));
+                                                                                               Write(Model.Compose("qbDraw"));
 
 WriteLiteral("\" data-url=\"");
 
 
-                                                                                                                                   Write(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)));
+                                                                                                                                    Write(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)));
 
 WriteLiteral("\">");
 
 
-                                                                                                                                                                                                  Write(Resources.Chart_Draw);
+                                                                                                                                                                                                   Write(Resources.Chart_Draw);
+
+WriteLiteral("</button>\r\n        <button class=\"sf-query-button sf-chart-script-edit\" data-icon" +
+"=\"ui-icon-script\" id=\"");
+
+
+                                                                                       Write(Model.Compose("qbEdit"));
+
+WriteLiteral("\">");
+
+
+                                                                                                                 Write(Resources.UserChart_Edit);
 
 WriteLiteral("</button>\r\n        ");
 
 
    Write(UserChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID).ToString(Html));
 
-WriteLiteral("\r\n    </div>\r\n    \r\n    <div class=\"clearall\"></div>\r\n\r\n    <div id=\"");
+WriteLiteral("\r\n    </div>\r\n    <div class=\"clearall\">\r\n    </div>\r\n    <div id=\"");
 
 
         Write(Model.Compose("divResults"));
@@ -216,67 +225,28 @@ WriteLiteral("\" class=\"ui-widget ui-corner-all sf-search-results-container\">\
 
            Html.RenderPartial(ChartClient.ChartResultsView); 
 
-WriteLiteral("    </div>\r\n\r\n     <fieldset class=\"sf-chart-code\" >\r\n        <legend>Code</legen" +
-"d>\r\n          <button type=\"submit\" class=\"sf-query-button sf-save-script\" data-" +
-"icon=\"ui-icon-pencil\" id=\"");
+WriteLiteral("    </div>\r\n    <script type=\"text/javascript\">\r\n        (function () {\r\n        " +
+"    var $myChart = SF.Chart.getFor(\'");
 
 
-                                                                                                 Write(Model.Compose("qbSaveScript"));
+                                       Write(Model.ControlID);
 
-WriteLiteral("\" data-url=\"");
-
-
-                                                                                                                                            Write(Url.Action<ChartController>(cc => cc.SaveScript()));
-
-WriteLiteral("\">");
+WriteLiteral("\');\r\n            $myChart.initOrders();\r\n\r\n            //                    var " +
+"$chartContainer = $(\'#");
 
 
-                                                                                                                                                                                                  Write(Signum.Web.Properties.Resources.Save);
+                                                       Write(Model.Compose("sfChartContainer"));
 
-WriteLiteral("</button>\r\n      \r\n        <div class=\"sf-chart-code-container\">\r\n            <te" +
-"xtarea rows=\"60\">");
-
-
-                           Write(Model.Value.ChartScript.Script);
-
-WriteLiteral("</textarea>\r\n        </div>\r\n");
+WriteLiteral("  > .sf-chart-container\');\r\n            //                    $chartContainer.clo" +
+"sest(\'.sf-tabs\').bind(\"tabsshow\", function(event, ui) {\r\n            //         " +
+"               if (ui.panel.id == \'");
 
 
-           MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); 
+                                                      Write(Model.Compose("sfChartContainer"));
 
-WriteLiteral("        <script type=\"text/javascript\">\r\n                (function() {\r\n         " +
-"           var $myChart = SF.Chart.getFor(\'");
-
-
-                                               Write(Model.ControlID);
-
-WriteLiteral("\');\r\n                    $myChart.initOrders();\r\n\r\n                    var $chart" +
-"Container = $(\'");
-
-
-                                        Write(divSelector);
-
-WriteLiteral("\');\r\n                    $chartContainer.closest(\'.sf-tabs\').bind(\"tabsshow\", fun" +
-"ction(event, ui) {\r\n                        if (ui.panel.id == \'");
-
-
-                                        Write(Model.Compose("sfChartContainer"));
-
-WriteLiteral("\') {\r\n                            var data = ");
-
-
-                                  Write(Html.Json());
-
-WriteLiteral(@";
-                            $chartContainer.data(""data"", data);
-                            $myChart.reDraw($chartContainer, false);
-                        }
-                    });
-                })();
-        </script>
-    </fieldset>
-</div>
-");
+WriteLiteral("\') {\r\n            //                            $myChart.reDraw($chartContainer, " +
+"false);\r\n            //                        }\r\n            //                " +
+"    });\r\n        })();\r\n    </script>\r\n</div>\r\n");
 
 
         }

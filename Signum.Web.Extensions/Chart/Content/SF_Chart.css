@@ -1,4 +1,15 @@
-﻿.sf-chart-builder
+﻿.sf-chartscript-columns .sf-repeater-element
+{
+    border:none;
+    padding:0px;
+}
+
+.sf-chartscript-columns .sf-repeater-element legend
+{
+    float:left;
+}
+
+.sf-chart-builder
 {
     width: 100%;    
     margin-top: 2px;

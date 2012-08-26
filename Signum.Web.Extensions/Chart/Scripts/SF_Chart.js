@@ -18,17 +18,18 @@ SF.Chart = (function () {
 
         _create: function() {
             var self = this;
-
+            var $chartControl = self.element.closest(".sf-chart-control");
+            self.$chartControl = $chartControl;
             $(".sf-chart-img").live("click", function () {
                 var $this = $(this);
                 $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
                 self.updateChartBuilder();
 
-                var $chartControl = self.element.closest(".sf-chart-control");
+               
                 var $resultsContainer = $chartControl.find(".sf-search-results-container");
                 if ($this.hasClass("sf-chart-img-equiv")) {
                     if ($resultsContainer.find("svg").length > 0) {
-                        self.reDraw($chartControl.find(".sf-chart-container"), true);
+                        self.reDraw();
                     }
                 }
                 else {
@@ -66,34 +67,37 @@ SF.Chart = (function () {
                         }
                         else {
                             new SF.Validator().showErrors(null);
-                            var $chartControl = self.element.closest(".sf-chart-control");
                             $chartControl.find(".sf-search-results-container").html(result);
                             SF.triggerNewContent($chartControl.find(".sf-search-results-container"));
+                            self.reDraw();
                         }
                     }
                 });
             });
 
-            $(".sf-save-script").live("click", function (e) {
+            $(".sf-chart-script-edit").live("click", function (e) {
                 e.preventDefault();
-                var $this = $(this);
-                var $chartControl = this.element.closest(".sf-chart-control");
+                var $textArea = self.element.find("textarea.sf-chart-currentScript");
 
-                $.ajax({
-                    url: $this.attr("data-url"),
-                    data: {
-                       code : $chartControl.find('.sf-chart-code-container textarea').val(),
-                       script : $chartControl.find(".ui-widget-header .sf-chart-type-value").val()
-                    },
-                    success: function (result) {
-                       alert("Saved!");
-                    }
-                });
+                var win = window.open($textArea.data("url"));
+
+                window.changeTextArea = function(value)
+                {
+                     $textArea.val(value);
+                     self.reDraw();
+                }; 
+
+                window.getExceptionNumber = function(){
+                   if(self.exceptionLine == null || self.exceptionLine == undefined)
+                       return null;
+
+                   var temp = self.exceptionLine;
+                   self.exceptionLine = null;
+                   return temp;
+                }
             });
 
-            
-
-            this.element.closest(".sf-chart-control").on("sf-new-subtokens-combo", function(event, idSelectedCombo, index) {
+            this.$chartControl.on("sf-new-subtokens-combo", function(event, idSelectedCombo, index) {
                 self.newSubTokensComboAdded($("#" + idSelectedCombo), index);
             });
 
@@ -101,7 +105,6 @@ SF.Chart = (function () {
 
             SF.FindNavigator.newSubTokensCombo = function (webQueryName, prefix, index, url) {
                 var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
-                var $chartControl = self.element.closest(".sf-chart-control");
                 if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
                     if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
                         url = $chartControl.attr("data-subtokens-url");
@@ -128,15 +131,14 @@ SF.Chart = (function () {
         },
 
         requestData: function () {
-            return this.element.closest(".sf-chart-control").find(":input:not(#webQueryName)").serialize() +
+            return this.$chartControl.find(":input:not(#webQueryName)").serialize() +
                 "&webQueryName=" + this.options.webQueryName +
                 "&filters=" + this.serializeFilters() +
                 "&orders=" + this.serializeOrders(this.options.orders);
         },
 
         updateChartBuilder: function (tokenChanged) {
-            var $chartControl = this.element.closest(".sf-chart-control");
-            var $chartBuilder = $chartControl.find(".sf-chart-builder");
+            var $chartBuilder = this.$chartControl.find(".sf-chart-builder");
             var data = this.requestData();
             if (!SF.isEmpty(tokenChanged)) {
                 data += "&lastTokenChanged=" + tokenChanged;
@@ -147,7 +149,7 @@ SF.Chart = (function () {
                 data: data,
                 success: function (result) {
                     $chartBuilder.replaceWith(result);
-                    SF.triggerNewContent($chartControl.find(".sf-chart-builder"));
+                    SF.triggerNewContent(self.$chartControl.find(".sf-chart-builder"));
                 }
             });
         },    
@@ -157,9 +159,8 @@ SF.Chart = (function () {
         addFilter: function () {
             var $addFilter = $(this.pf("btnAddFilter"));
             if ($addFilter.closest(".sf-chart-builder").length == 0) {
-                var $chartControl = $addFilter.closest(".sf-chart-control");
-                if ($chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
-                    url = $chartControl.attr("data-add-filter-url");
+                if (this.$chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+                    url = this.$chartControl.attr("data-add-filter-url");
                     this.originalAddFilter.call(this, url);
                 }
                 else {
@@ -168,29 +169,61 @@ SF.Chart = (function () {
             }
         },
 
-        reDraw: function ($chartContainer, force) {
+        showError: function(e, __baseLineNumber__ , chart){
+            var message = e.toString();
+            if(e.lineNumber != undefined)
+            {
+                var lineNumber = (e.lineNumber - __baseLineNumber__); 
+                this.exceptionLine = lineNumber;
+                message = "Line " + lineNumber + ": " + message; 
+            }else{
+                this.exceptionLine = 0;
+            }
+
+            chart.select(".sf-chart-error").remove();
+            chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", chart.attr("height") / 2).text(message);
+        },
+
+        reDraw: function () {
+            var $chartContainer = this.$chartControl.find(".sf-chart-container");
+
             $chartContainer.html("");
 
-            var data = $chartContainer.data("data");
+            var data = $chartContainer.data("json");
             var width = $chartContainer.width();
             var height = $chartContainer.height();
 
-            var $chartControl = this.element.closest(".sf-chart-control");
-            
-            var code = $chartControl.find('.sf-chart-code-container textarea').val();
+            var code = "(" + this.$chartControl.find('textarea.sf-chart-currentScript').val() + ")";
 
-            var chart = d3.select('#' + $chartControl.attr("id") + " .sf-chart-container")
+            var chart = d3.select('#' + this.$chartControl.attr("id") + " .sf-chart-container")
                 .append('svg:svg').attr('width', width).attr('height', height);
 
-            try{
-            eval(code);
+            var func;
+            var __baseLineNumber__;
+            try {
+                var getLabel = SF.Chart.Utils.getLabel;
+                var getKey = SF.Chart.Utils.getKey;
+                var getColor = SF.Chart.Utils.getColor;
+                __baseLineNumber__ = new Error().lineNumber; 
+                func = eval(code);
             }catch(e){
-               chart.append('svg:text').attr('class', 'sf-chart-error').text(e);
+               this.showError(e, __baseLineNumber__, chart);
+               return; 
             }
+
+            var hasError = false;
+            try{
+            func(chart, data);
+            }catch(e){
+               this.showError(e,__baseLineNumber__, chart);
+            }
+
+            if(this.exceptionLine == null)
+                this.exceptionLine = -1;
         },
 
         exportData: function (validateUrl, exportUrl) {
-            var $inputs = this.element.closest(".sf-chart-control").find(":input").not(":button");
+            var $inputs = this.$chartControl.find(":input").not(":button");
 
             var data = this.requestProcessedData();
             $inputs.each(function () {
@@ -204,7 +237,7 @@ SF.Chart = (function () {
 
         fullScreen: function (evt) {
             evt.preventDefault();
-            var url = this.element.closest(".sf-chart-control").find(".sf-chart-container").attr("data-fullscreen-url")
+            var url = this.$chartControl.find(".sf-chart-container").attr("data-fullscreen-url")
                     + "&" + this.requestData();
             if (evt.ctrlKey || evt.which == 2) {
                 window.open(url);
@@ -222,7 +255,7 @@ SF.Chart = (function () {
             })
             .click(function (e) {
                 self.newSortOrder($(e.target), e.shiftKey);
-                self.element.closest(".sf-chart-control").find(".sf-chart-draw").click();
+                self.$chartControl.find(".sf-chart-draw").click();
                 return false;
             });
         }
@@ -238,12 +271,17 @@ SF.Chart.Utils = (function () {
     };
 
     return {
-        getTokenLabel: function (tokenValue) {
-            return !SF.isEmpty(tokenValue) ? (typeof tokenValue.toStr != "undefined" ? tokenValue.toStr : tokenValue) : tokenValue;
+
+        getLabel: function (tokenValue) {
+           return tokenValue !== null && tokenValue.toStr != undefined ? tokenValue.toStr : tokenValue;
         },
 
-        getTokenKey: function (tokenValue) {
-            return !SF.isEmpty(tokenValue) ? (typeof tokenValue.key != "undefined" ? tokenValue.key : tokenValue) : tokenValue;
+        getKey: function (tokenValue) {
+           return tokenValue !== null && tokenValue.key != undefined ? tokenValue.key : tokenValue;
+        },
+
+        getColor: function (tokenValue, color) {
+            return ((tokenValue !== null  && tokenValue.color != undefined) ? tokenValue.color : null) || color(JSON.stringify(tokenValue));
         },
 
         getPathPoints: function (points) {

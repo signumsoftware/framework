@@ -100,22 +100,22 @@ WriteLiteral("    <div class=\"sf-tabs\">\r\n        <fieldset id=\"");
                  Write(Model.Compose("sfChartContainer"));
 
 WriteLiteral("\">\r\n            <legend>Chart</legend>\r\n            <div class=\"sf-chart-containe" +
-"r\" data-open-url=\"");
+"r\" \r\n            data-open-url=\"");
 
 
-                                                       Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)));
+                       Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)));
+
+WriteLiteral("\"\r\n            data-json=\"");
+
+
+                  Write(Html.Json(ChartClient.DataJson(Model.Value, queryResult)).ToString());
 
 WriteLiteral("\">\r\n            </div>\r\n        </fieldset>\r\n        <fieldset id=\"");
 
 
                  Write(Model.Compose("sfChartData"));
 
-WriteLiteral("\" data=\"");
-
-
-                                                      Write(ChartClient.DataJson(Model.Value, queryResult));
-
-WriteLiteral("\">\r\n            <legend>Data</legend>\r\n            <table id=\"");
+WriteLiteral("\" >\r\n            <legend>Data</legend>\r\n            <table id=\"");
 
 
                   Write(Model.Compose("tblResults"));

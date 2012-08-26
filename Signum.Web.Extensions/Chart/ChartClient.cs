@@ -23,6 +23,7 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Reflection;
 using System.Diagnostics;
+using System.Text;
 
 namespace Signum.Web.Chart
 {
@@ -33,6 +34,7 @@ namespace Signum.Web.Chart
         public static string ChartControlView = ViewPrefix.Formato("ChartControl");
         public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");
         public static string ChartResultsView = ViewPrefix.Formato("ChartResults");
+        public static string ChartScriptCodeView = ViewPrefix.Formato("ChartScriptCode");
 
         public static void Start()
         {
@@ -181,12 +183,12 @@ namespace Signum.Web.Chart
         }
 
        
-
+        //Manual Json printer for performance and pretty print
         public static object DataJson(ChartRequest request, ResultTable resultTable)
         {
             var cols = request.Columns.Select((c,i)=>new 
             { 
-                name = "column" + i,
+                name = "c" + i,
                 title = c.GetTitle(), 
                 converter = c.Converter(i)
             }).ToList();
@@ -208,7 +210,7 @@ namespace Signum.Web.Chart
             };
         }
 
-        private static Func<ResultRow,object> Converter(this ChartColumnDN ct, int columnIndex)
+        private static Func<ResultRow, object> Converter(this ChartColumnDN ct, int columnIndex)
         {
             if (ct == null)
                 return null;

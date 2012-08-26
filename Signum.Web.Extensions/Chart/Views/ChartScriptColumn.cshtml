@@ -1,18 +1,11 @@
 ﻿@using Signum.Entities.Chart
 @using (var cc = Html.TypeContext<ChartScriptColumnDN>())
 {
-    <div>
-        <div style="float: left">
-            @Html.ValueLine(cc, c => c.DisplayName)
-            <div style="float: left">
-                @Html.ValueLine(cc, c => c.IsOptional)
-            </div>
-            <div style="float: left">
-                @Html.ValueLine(cc, c => c.IsGroupKey)
-            </div>
-        </div>
-        <div style="float: left">
-            @Html.ValueLine(cc, c => c.ColumnType)
-        </div>
-    </div>
+    using (Html.FieldInline())
+    {
+        @Html.ValueLine(cc, c => c.DisplayName)
+        @Html.ValueLine(cc, c => c.ColumnType)
+        @Html.ValueLine(cc, c => c.IsGroupKey)
+        @Html.ValueLine(cc, c => c.IsOptional)
+    }    
 }
