@@ -81,7 +81,7 @@
     <Compile Include="ConditionBuilder.cs" />
     <Compile Include="Proxies\LineContainer.cs" />
     <Compile Include="Proxies\SelectWindoProxy.cs" />
-    <Compile Include="Proxies\ValueLineProxy.cs" />
+    <Compile Include="Proxies\LineProxy.cs" />
     <Compile Include="FindExtensions.cs" />
     <Compile Include="MenuItemExtensions.cs" />
     <Compile Include="Proxies\NormalWindowProxy.cs" />

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Automation;
 using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -27,6 +28,29 @@ namespace Signum.Windows.UIAutomation
         public void SelectType(Type type)
         {
             SelectOption(type.FullName);
+        }
+
+        public AutomationElement SelectOptionWindow(string value, int? timeout = null)
+        {
+            return this.GetWindowAfter(
+                () => SelectOption(value),
+                () => "select {0} on selector window".Formato(value), timeout);
+        }
+
+        public NormalWindowProxy<T> SelectTypeWindow<T>(int? timeout = null) where T : IdentifiableEntity
+        {
+            var element = this.GetWindowAfter(
+               () => SelectOption(typeof(T).FullName),
+               () => "select {0} on type selector window".Formato(typeof(T)), timeout);
+
+            return new NormalWindowProxy<T>(element);
+        }
+
+        public AutomationElement SelectTypeWindow(Type type, int? timeout = null)
+        {
+            return this.GetWindowAfter(
+                () => SelectOption(type.FullName),
+                () => "select {0} on type selector window".Formato(type), timeout);
         }
     }
 }

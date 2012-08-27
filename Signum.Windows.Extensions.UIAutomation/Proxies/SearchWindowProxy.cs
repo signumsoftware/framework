@@ -71,6 +71,13 @@ namespace Signum.Windows.UIAutomation
         {
             OkButton.ButtonInvoke();
         }
+
+        public AutomationElement OkWindow(int? timeout = null)
+        {
+            return this.GetWindowAfter(
+                () => OkButton.ButtonInvoke(),
+                () => "Accept button on search window", timeout);
+        }
     }
 
     public class SearchControlProxy
