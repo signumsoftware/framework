@@ -15,42 +15,73 @@ namespace Signum.Windows.UIAutomation
         {
         }
 
-        public void SelectOption(string value)
+        public void Check(string value)
         {
-            Element.Child(a => a.Current.ControlType == ControlType.Button && a.Current.ItemStatus == value).ButtonInvoke();
+            Element.Child(a => a.Current.ControlType == ControlType.Button && a.Current.ItemStatus == value).Check();
         }
 
-        public void SelectType<T>() where T: IdentifiableEntity
+        public void Check<T>() where T : IdentifiableEntity
         {
-            SelectOption(typeof(T).FullName); 
+            Check(typeof(T).FullName); 
         }
 
-        public void SelectType(Type type)
+        public void Check(Type type)
         {
-            SelectOption(type.FullName);
+            Check(type.FullName);
         }
 
-        public AutomationElement SelectOptionWindow(string value, int? timeout = null)
+        public AutomationElement CheckCapture(string value, int? timeout = null)
         {
-            return this.GetWindowAfter(
-                () => SelectOption(value),
+            return Element.CaptureWindow(
+                () => Check(value),
                 () => "select {0} on selector window".Formato(value), timeout);
         }
 
-        public NormalWindowProxy<T> SelectTypeWindow<T>(int? timeout = null) where T : IdentifiableEntity
+        public NormalWindowProxy<T> CheckCapture<T>(int? timeout = null) where T : IdentifiableEntity
         {
-            var element = this.GetWindowAfter(
-               () => SelectOption(typeof(T).FullName),
-               () => "select {0} on type selector window".Formato(typeof(T)), timeout);
-
-            return new NormalWindowProxy<T>(element);
+            return new NormalWindowProxy<T>(CheckCapture( typeof(T).FullName, timeout));
         }
 
-        public AutomationElement SelectTypeWindow(Type type, int? timeout = null)
+        public AutomationElement CheckCapture(Type type, int? timeout = null)
         {
-            return this.GetWindowAfter(
-                () => SelectOption(type.FullName),
-                () => "select {0} on type selector window".Formato(type), timeout);
+            return CheckCapture(type.FullName, timeout);
+        }
+
+
+
+        public static void Select(AutomationElement element, string value)
+        {
+            using (var selector = new SelectorWindowProxy(element))
+            {
+                selector.Check(value);
+            }
+        }
+
+        public static void Select<T>(AutomationElement element) where T : IdentifiableEntity
+        {
+            Select(element, typeof(T).FullName);
+        }
+
+        public static void Select(AutomationElement element, Type type)
+        {
+            Select(element, type.FullName);
+        }
+
+
+        public static AutomationElement SelectCapture(AutomationElement element, string value, int? timeout = null)
+        {
+            using (var selector = new SelectorWindowProxy(element))
+                return selector.CheckCapture(value, timeout);
+        }
+
+        public static NormalWindowProxy<T> SelectCapture<T>(AutomationElement element, int? timeout = null) where T : IdentifiableEntity
+        {
+            return new NormalWindowProxy<T>(SelectCapture(element, typeof(T).FullName, timeout));
+        }
+
+        public static AutomationElement SelectCapture(AutomationElement element, Type type, int? timeout = null)
+        {
+            return SelectCapture(element, type.FullName, timeout);
         }
     }
 }

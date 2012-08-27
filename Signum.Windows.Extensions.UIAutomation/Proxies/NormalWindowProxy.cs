@@ -25,7 +25,7 @@ namespace Signum.Windows.UIAutomation
         public NormalWindowProxy(AutomationElement element)
             : base(element)
         {
-            
+            Element.WaitDataContextSet(() => "DataContextSet for {0}".Formato(typeof(T).Name));
         }
 
         public ButtonBarProxy ButtonBar
@@ -62,14 +62,14 @@ namespace Signum.Windows.UIAutomation
 
         public void Save()
         {
-            this.WaitDataContextChangedAfter(
+            Element.WaitDataContextChangedAfter(
             action: () => ButtonBar.SaveButton.ButtonInvoke(),
             actionDescription: () => "Save " + EntityId);
         }
 
         public void Reload()
         {
-            this.WaitDataContextChangedAfter(
+            Element.WaitDataContextChangedAfter(
             action: () => ButtonBar.ReloadButton.ButtonInvoke(),
             actionDescription: () => "Reload " + EntityId);
         }
@@ -78,7 +78,7 @@ namespace Signum.Windows.UIAutomation
         {
             ButtonBar.ReloadButton.ButtonInvoke();
 
-            using (var mb = WaitCurrentMessageBox())
+            using (var mb = Element.WaitMessageBoxChild())
             {
                 if (confirm)
                     mb.OkButton.ButtonInvoke();
@@ -91,21 +91,17 @@ namespace Signum.Windows.UIAutomation
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
 
-            this.WaitDataContextChangedAfter(
+            Element.WaitDataContextChangedAfter(
             action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
             actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
         }
 
-        public void WaitDataContextChangedAfter(Action action, int? timeOut = null, Func<string> actionDescription = null)
-        {
-            Element.WaitDataContextChangedAfter(this, action, timeOut, actionDescription);
-        }
 
         public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
 
-            return GetWindowAfter(
+            return Element.CaptureWindow(
                 () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
                 () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time));
         }
@@ -129,7 +125,7 @@ namespace Signum.Windows.UIAutomation
                     if (IsClosed)
                         return true;
 
-                    confirmation = TryGetCurrentMessageBox();
+                    confirmation = Element.TryMessageBoxChild();
 
                     if (confirmation != null)
                         return true;

@@ -130,8 +130,6 @@ namespace Signum.Windows.UIAutomation
 
     public class EntityBaseProxy : BaseLineProxy
     {
-        public WindowProxy ParentWindow { get; set; }
-
         public AutomationElement CreateButton
         {
             get { return Element.ChildById("btCreate"); }
@@ -152,12 +150,11 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("btRemove"); }
         }
 
-        public PropertyRoute Route { get; private set; } 
+        public PropertyRoute Route { get; private set; }
 
-        public EntityBaseProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
+        public EntityBaseProxy(AutomationElement element, PropertyRoute route)
             : base(element, route)
         {
-            ParentWindow = window;
         }
 
         public Lite LiteValue
@@ -182,14 +179,13 @@ namespace Signum.Windows.UIAutomation
             if (Element.TryChildById("btFind") == null)
                 throw new InvalidOperationException("The {0} {1} has no find button to complete the search for {2}".Formato(GetType().Name, this, value.KeyLong())); 
 
-            var win = FindBasic();
+            var win = FindCapture();
 
             if(win.Current.ClassName == "SelectorWindow")
             {
-                using(var selector = new SelectorWindowProxy(win))
+                using (var selector = new SelectorWindowProxy(win))
                 {
-                    win = ParentWindow.GetWindowAfter(() => selector.SelectType(value.RuntimeType),
-                        () => "Open SearchWindow on {0} after type selector took more than {1} ms".Formato(this, SearchWindowTimeout), SearchWindowTimeout);
+                    win = selector.CheckCapture(value.RuntimeType);
                 }
             }
 
@@ -211,12 +207,12 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> Create<T>(int? timeOut = null) where T: ModifiableEntity
         {
-            return new NormalWindowProxy<T>(CreateBasic(timeOut ?? NormalWindowTimeout));
+            return new NormalWindowProxy<T>(CreateCapture(timeOut ?? NormalWindowTimeout));
         }
 
-        public AutomationElement CreateBasic(int? timeOut = null)
+        public AutomationElement CreateCapture(int? timeOut = null)
         {
-            var win = ParentWindow.GetWindowAfter(
+            var win = Element.CaptureWindow(
                 () => CreateButton.ButtonInvoke(),
                 () => "Create a new entity on {0}".Formato(this), timeOut);
             return win;
@@ -224,25 +220,21 @@ namespace Signum.Windows.UIAutomation
 
         public SearchWindowProxy Find(int? timeOut = null)
         {
-            var win = FindBasic(timeOut);
+            var win = FindCapture(timeOut);
 
             return new SearchWindowProxy(win);
         }
 
-        public void FindSelectRow(int rowBase0, int? timeOut = null)
+        public void FindSelectRow(int index = 0, int? timeOut = null)
         {
-            var win = FindBasic(timeOut);
+            var win = FindCapture(timeOut);
 
-            var searchWindow = new SearchWindowProxy(win);
-
-            searchWindow.Search();
-            searchWindow.SearchControl.SelectElementAt(rowBase0);
-            searchWindow.Ok();
+            SearchWindowProxy.Select(win, index);
         }
 
         public void FindAutoByFilterId(int id, int? timeOut = null)
         {
-            var win = FindBasic(timeOut);
+            var win = FindCapture(timeOut);
             var searchWindow = new SearchWindowProxy(win);
 
            
@@ -252,9 +244,9 @@ namespace Signum.Windows.UIAutomation
             searchWindow.Ok();
         }
 
-        public AutomationElement FindBasic(int? timeOut = null)
+        public AutomationElement FindCapture(int? timeOut = null)
         {
-            var win = ParentWindow.GetWindowAfter(
+            var win = Element.CaptureWindow(
                 () => FindButton.ButtonInvoke(),
                 () => "Search entity on {0}".Formato(this), timeOut);
             return win;
@@ -262,7 +254,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T: ModifiableEntity
         {
-            var win = ParentWindow.GetWindowAfter(
+            var win = Element.CaptureWindow(
                 () => ViewButton.ButtonInvoke(),
                 () => "View entity on {0}".Formato(this), timeOut);
 
@@ -283,8 +275,8 @@ namespace Signum.Windows.UIAutomation
             get { return autoCompleteControl ?? (autoCompleteControl = Element.Child(a => a.Current.ClassName == "AutoCompleteTextBox")); }
         }
 
-        public EntityLineProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
-            : base(element, route, window)
+        public EntityLineProxy(AutomationElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
@@ -336,7 +328,7 @@ namespace Signum.Windows.UIAutomation
         }
 
         public EntityComboProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
-            : base(element, route, window)
+            : base(element, route)
         {
         }
 
@@ -394,7 +386,7 @@ namespace Signum.Windows.UIAutomation
         }
 
         public EntityDetailProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
-            : base(element, route, window)
+            : base(element, route)
         {
         }
     }
@@ -408,7 +400,7 @@ namespace Signum.Windows.UIAutomation
         }
 
         public EntityListProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
-            : base(element, route, window)
+            : base(element, route)
         {
         }
 
@@ -433,7 +425,7 @@ namespace Signum.Windows.UIAutomation
     public class EntityRepeaterProxy : EntityBaseProxy
     {
         public EntityRepeaterProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
-            : base(element, route, window)
+            : base(element, route)
         {
         }
 

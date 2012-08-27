@@ -13,7 +13,7 @@ namespace Signum.Windows.UIAutomation
         {
             var menuItem = MenuItemFind(window.Element, menuNames);
 
-            AutomationElement newWindow = window.GetWindowAfter(
+            AutomationElement newWindow = window.Element.CaptureWindow(
                 () => menuItem.ButtonInvoke(),
                 () => "New windows opened after menu " + menuNames.ToString(" -> "));
 

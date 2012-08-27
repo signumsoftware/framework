@@ -19,7 +19,7 @@ namespace Signum.Windows.UIAutomation
         public SearchWindowProxy(AutomationElement element)
             : base(element)
         {
-            SearchControl = new SearchControlProxy(element.ChildById("searchControl"), this);
+            SearchControl = new SearchControlProxy(element.ChildById("searchControl"));
         }
 
         public FilterOptionProxy AddFilterString(string token, FilterOperation operation, string value)
@@ -40,6 +40,11 @@ namespace Signum.Windows.UIAutomation
         public void Search()
         {
             SearchControl.Search();
+        }
+
+        public void WaitSearch()
+        {
+            SearchControl.WaitSearch();
         }
 
         public NormalWindowProxy<T> Create<T>() where T : IdentifiableEntity
@@ -72,11 +77,39 @@ namespace Signum.Windows.UIAutomation
             OkButton.ButtonInvoke();
         }
 
-        public AutomationElement OkWindow(int? timeout = null)
+        public AutomationElement OkCapture(int? timeout = null)
         {
-            return this.GetWindowAfter(
+            return Element.CaptureWindow(
                 () => OkButton.ButtonInvoke(),
                 () => "Accept button on search window", timeout);
+        }
+
+        public static void Select(AutomationElement element, int index = 0)
+        {
+            using (var searchWindow = new SearchWindowProxy(element))
+            {
+                if (searchWindow.SearchControl.SearchButton.Current.IsEnabled == true)
+                    searchWindow.Search();
+                else
+                    searchWindow.WaitSearch();
+
+                searchWindow.SelectElementAt(index);
+                searchWindow.Ok();
+            }
+        }
+
+        public static AutomationElement SearchAndSelectWindow(AutomationElement element, int index = 0)
+        {
+            using (var searchWindow = new SearchWindowProxy(element))
+            {
+                if (searchWindow.SearchControl.SearchButton.Current.IsEnabled == true)
+                    searchWindow.Search();
+                else
+                    searchWindow.WaitSearch();
+
+                searchWindow.SelectElementAt(index);
+                return searchWindow.OkCapture();
+            }
         }
     }
 
@@ -84,12 +117,9 @@ namespace Signum.Windows.UIAutomation
     {
         public AutomationElement Element { get; private set; }
 
-        public WindowProxy ParentWindow { get; private set; }
-
-        public SearchControlProxy(AutomationElement element, WindowProxy parentWindow)
+        public SearchControlProxy(AutomationElement element)
         {
             this.Element = element;
-            this.ParentWindow = parentWindow;
         }
 
         public void SelectToken(string token)
@@ -151,15 +181,14 @@ namespace Signum.Windows.UIAutomation
         public void Search()
         {
             SearchButton.ButtonInvoke();
-
             WaitSearch();
         }
 
-        private void WaitSearch()
+        public void WaitSearch()
         {
             Element.Wait(
                 () =>{
-                        ParentWindow.AssertMessageBoxError();
+                        Element.AssertMessageBoxChild();
                         return SearchButton.Current.IsEnabled;
                      },
                 () => "Waiting after search on SearchControl {0}".Formato(Element.Current.ItemStatus));
@@ -184,7 +213,7 @@ namespace Signum.Windows.UIAutomation
         {
             SelectToken(token);
 
-            var win = ParentWindow.GetModalWindowAfter(() => Element.ChildById("btCreateColumn").ButtonInvoke(),
+            var win = Element.CaptureChildWindow(() => Element.ChildById("btCreateColumn").ButtonInvoke(),
                 () => "Adding new column for {0} on SearchControl {1}".Formato(token, Element.Current.ItemStatus));
 
             using(WindowProxy wp = new WindowProxy(win))
@@ -198,7 +227,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T : IdentifiableEntity
         {
-            var win = ParentWindow.GetWindowAfter(
+            var win = Element.CaptureWindow(
                 () => Element.ChildById("btView").ButtonInvoke(),
                 () => "View selected entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
@@ -207,12 +236,12 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> Create<T>() where T:IdentifiableEntity
         {
-            return new NormalWindowProxy<T>(CreateBasic());
+            return new NormalWindowProxy<T>(CreateCapture());
         }
 
-        private AutomationElement CreateBasic(int? timeOut = null)
+        private AutomationElement CreateCapture(int? timeOut = null)
         {
-            var win = ParentWindow.GetWindowAfter(
+            var win = Element.CaptureWindow(
                 () => Element.ChildById("btCreate").ButtonInvoke(),
                 () => "Create a new entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
@@ -303,7 +332,7 @@ namespace Signum.Windows.UIAutomation
         {
             var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
 
-            return ParentWindow.GetWindowAfter(
+            return Element.CaptureWindow(
                 () => GetOperationButton(operationKey).ButtonInvoke(),
                 () => "Finding a window after {0} from SearchControl {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), QueryName, time), timeOut);
         }
@@ -339,7 +368,6 @@ namespace Signum.Windows.UIAutomation
 	        }
         
         }
-
     }
 
     public class PagerProxy
@@ -395,7 +423,7 @@ namespace Signum.Windows.UIAutomation
                     break;
 
                 case "EntityLine":
-                    new EntityLineProxy(valueControl, null,searchControl.ParentWindow).AutoComplete(value);
+                    new EntityLineProxy(valueControl, null).AutoComplete(value);
                     break;
                 default: throw new InvalidOperationException();
             }
@@ -409,32 +437,18 @@ namespace Signum.Windows.UIAutomation
 
     public static class SearchControlExtensions
     {
-        public static SearchControlProxy GetSearchControl(this WindowProxy window)
-        {
-            var sc = window.Element.Descendant(a => a.Current.ClassName == "SearchControl");
-
-            return new SearchControlProxy(sc, window);
-        }
-
-        public static SearchControlProxy GetSearchControl(this WindowProxy window, object queryName)
-        {
-            var sc = window.Element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.ItemStatus == QueryUtils.GetQueryUniqueKey(queryName));
-
-            return new SearchControlProxy(sc, window);
-        }
-
-        public static SearchControlProxy GetSearchControl(this AutomationElement element, WindowProxy window)
+        public static SearchControlProxy GetSearchControl(this AutomationElement element)
         {
             var sc = element.Descendant(a => a.Current.ClassName == "SearchControl");
 
-            return new SearchControlProxy(sc, window);
+            return new SearchControlProxy(sc);
         }
 
-        public static SearchControlProxy GetSearchControl(this AutomationElement element, object queryName, WindowProxy window)
+        public static SearchControlProxy GetSearchControl(this AutomationElement element, object queryName)
         {
             var sc = element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.ItemStatus == QueryUtils.GetQueryUniqueKey(queryName));
 
-            return new SearchControlProxy(sc, window);
+            return new SearchControlProxy(sc);
         }
     }
 }

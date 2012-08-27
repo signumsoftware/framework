@@ -34,14 +34,13 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public static void WaitDataContextChangedAfter(this AutomationElement element, WindowProxy window, Action action, int? timeOut = null, Func<string> actionDescription = null)
+        public static void WaitDataContextChangedAfter(this AutomationElement element, Action action, int? timeOut = null, Func<string> actionDescription = null)
         {
             string oldValue = element.Current.HelpText;
-
-            action();
-
             if (string.IsNullOrEmpty(oldValue))
                 throw new InvalidOperationException("Element does not has HelpText set. Consider setting m:Common.AutomationHelpTextFromDataContext on the WPF control");
+
+            action();
 
             if (actionDescription == null)
                 actionDescription = () => "DataContextChanged for {0}".Formato(oldValue);
@@ -52,10 +51,84 @@ namespace Signum.Windows.UIAutomation
                 if (newValue != null && newValue != oldValue)
                     return true;
 
-                window.AssertMessageBoxError();
+                element.AssertMessageBoxChild();
 
                 return false;
             }, actionDescription, timeOut);
+        }
+
+        public static void WaitDataContextSet(this AutomationElement element, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            if (actionDescription == null)
+                actionDescription = () => "Has DataContext";
+
+            element.Wait(() =>
+            {
+                var newValue = element.Current.HelpText;
+                if (newValue.HasText())
+                    return true;
+
+                element.AssertMessageBoxChild();
+
+                return false;
+            }, actionDescription, timeOut);
+        }
+
+        public static int WindowAfterTimeout = 5 * 1000;
+
+        public static AutomationElement CaptureWindow(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            if (actionDescription == null)
+                actionDescription = () => "Get Windows after";
+
+            var previous = GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+
+            action();
+
+            AutomationElement newWindow = null;
+
+            element.Wait(() =>
+            {
+                newWindow = GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+
+                MessageBoxProxy.AssertErrorWindow(newWindow);
+
+                if (newWindow != null)
+                    return true;
+
+                return false;
+            }, actionDescription, timeOut ?? WindowAfterTimeout);
+
+            return newWindow;
+        }
+
+        public static List<AutomationElement> GetAllProcessWindows(AutomationElement element)
+        {
+            return TreeHelper.BreathFirst(AutomationElement.RootElement,
+                e => e.Children(a => a.Current.ProcessId == element.Current.ProcessId && a.Current.ControlType == ControlType.Window)).ToList();
+        }
+
+        public static AutomationElement CaptureChildWindow(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
+        {
+            var parentWindow = WindowProxy.Normalize(element);
+
+            action();
+
+            AutomationElement newWindow = null;
+
+            element.Wait(() =>
+            {
+                newWindow = parentWindow.TryChild(a => a.Current.ControlType == ControlType.Window);
+
+                MessageBoxProxy.AssertErrorWindow(newWindow);
+
+                if (newWindow != null)
+                    return true;
+
+
+                return false;
+            }, actionDescription, timeOut ?? WindowAfterTimeout);
+            return newWindow;
         }
 
         public static AutomationElement WaitDescendant(this AutomationElement automationElement, Expression<Func<AutomationElement, bool>> condition, int? timeOut = null)

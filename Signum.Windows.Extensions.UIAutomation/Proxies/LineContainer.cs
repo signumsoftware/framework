@@ -40,7 +40,7 @@ namespace Signum.Windows.UIAutomation
         {
             var entityLine = container.Element.Descendant(a => a.Current.ClassName == "EntityLine" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityLineProxy(entityLine, route, container.ParentWindow);
+            return new EntityLineProxy(entityLine, route);
         }
 
         public static EntityComboProxy EntityCombo(this ILineContainer container, PropertyRoute route)
