@@ -640,8 +640,8 @@ namespace Signum.Web
         public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> newLite)
         {
             //commented out because of Lite<FileDN/FilePathDN>
-            //if (!ctx.Inputs.Keys.Except(Mapping.specialProperties).Any())
-            //    return newLite; // If form does not contains changes to the entity
+            if (!ctx.Inputs.Keys.Except(Mapping.specialProperties).Any())
+                return newLite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
                 throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(newLite.TryToString()));
