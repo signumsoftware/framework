@@ -7,128 +7,164 @@
   </Columns>
   <Icon FileName="totalcolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAlVJREFUeNrsmD1LHUEUhs9KqpDOQhHTBPGjthEJNiaNZSoLbSUW0UIsg78gPyJYpLZIbAL5KJJoRLEQCYqxkpB/cHdn5rhn70W8Zueddc5AbnEHlr2zl5l55jlnZj8yZqZeLgPU46UPmARweWO7ZxPxAfrz3ftj/vLzgqx1ZJ0jV535pi7nZ7Pj9HJxJrvb9u3OEX/6cVbb1km9/P386SS9WprNogG/HlzQwvx01zUZwJRHYRzlxtLOh+8C+E/bz3vn9GJhprZNXhjKc0u7H/cFMD4Hy4lCOBnIebYp7jT2wbUKS012OAh4e4/0DeTbRwUcwbVyQ032YGyw00GMBckxBCd19TbDLt6CXEdwrbKuBhSDIQsoxAiulcagC1rwhVjsI7i8SGQwZAEaBHCFSQGosCBtEZxERh9ihQVpi+BMCkAJU6wFiTyCs87p78WS6LEWpsYf0+HRaRVqOepydXJsRAdYJXqkhfWhTXo4t1Rj1snMpXf6u79Vnq90iyQ2ROwMhCO23vv4vRZJfP4whGNryn6UOTgxNkonv3535dHdXJp4MhxGrYGrDGoB1wZX6dHKKhzo8tvrsv6nhspAuKqufie5Zctrgf23SQTHNve2vQdg2II/zzFcO8TaRdLAArbvh5NVrjfYpsQWGNgHcNIvpwkxtgDtIzhX6BeJvCaGLOAJArjynCTE0RY69n1wwck1Mxi2gOxDOE7wwNp+3FNYAHCcwmB7jDgL1pEaroFBjrZQ2VfChTdq0lnQwknJ5Omk1z6/bb9ZzroA+19Y+4D/sVwLMAAe1Sa/GfDcBAAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
+  
+  var dimension1 = _.uniq(_.map(data.rows, function(r){return r.c0; }), false, function(c) { return getKey(c);});
+  
+  var series = _.toArray(º.groupBy(data.rows, function(r){return getKey(r.c1);}, function(list){
+    
+    var obj = º.toObject(list, function(r){return getKey(r.c0); });
+    
+    return {
+      dimension2 : _.first(list).c1,
+      values : _.map(dimension1, function(d1){ var row =  obj[getKey(d1)]; return { row: row, d1: d1, from: 0, to: row == undefined? 0 : row.c2}; }),
+    };
+    
+  }));
+  
+    
+  for(var j = 1; j < series.length; j++)
+  {
+    var sp = series[j - 1];
+    var s = series[j];
+    for(var i = 0; i < dimension1.length; i++)
+    {
+      s.values[i].from = sp.values[i].to;
+      s.values[i].to += sp.values[i].to;
+    }
+  }
+  
+  var last = _.last(series);
+  
+  for(var j = 0; j < series.length; j++)
+  {
+    var s = series[j];
+    for(var i = 0; i < dimension1.length; i++)
+    {
+      s.values[i].from /= last.values[i].to;
+      s.values[i].to /= last.values[i].to;
+    }
+  }
+  
+  //config variables
+  var yAxisLabelWidth = 60,
+      fontSize = 10,
+      ticksLength = 4,
+      labelMargin = 5,
+      chartAxisPadding = 5,
+      padding = 5,
+      yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength,
+        xAxisTopPosition = height - padding - fontSize - labelMargin - ticksLength,
+          color = d3.scale.category20().domain([0, $.map(series, function (s) { return getKey(s.dimension2); })]);
+  
+  //x axis scale
+  var x = d3.scale.ordinal()
+      .domain($.map(dimension1, function (d) { return getKey(d); }))
+      .rangeBands([0, width - yAxisLeftPosition - padding - (2 * chartAxisPadding)]);
+  
+  //y axis scale
+  var y = d3.scale.linear()
+      .domain([0, d3.max(series, function(s){ return d3.max(s.values, function(v){return v.to;}); })])
+      .range([0, xAxisTopPosition - padding - fontSize - labelMargin]);
+  
+  //paint x-axis ticks
+  chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ')')
+    .enterData(dimension1, 'line', 'x-axis-tick')
+      .attr('y2', ticksLength)
+      .attr('x1', function (d) { return x(getKey(d)); })
+      .attr('x2', function (d) { return x(getKey(d)); });
+  
+  //paint x-axis - token label
+  chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')
+    .append('svg:text').attr('class', 'x-axis-token-label')
+      .attr('text-anchor', 'middle')
+      .text(data.columns.c0.title);
+  
+  //paint y-axis - ruler
+  var yTicks = y.ticks(10);
+  chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
+    .enterData(yTicks, 'line', 'y-ruler')
+    .attr('x2', width - yAxisLeftPosition - padding)
+    .attr('y1', function (t) { return -y(t); })
+    .attr('y2', function (t) { return -y(t); });
+  
+  //paint y-axis - ticks
+  chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + xAxisTopPosition + ')')
+    .enterData(yTicks, 'line', 'y-axis-tick')
+      .attr('x2', ticksLength)
+      .attr('y1', function (t) { return -y(t); })
+      .attr('y2', function (t) { return -y(t); });
+  
+  //paint y-axis - tick labels
+  chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + xAxisTopPosition + ')')
+    .enterData(yTicks, 'text', 'y-axis-tick-label')
+      .attr('y', function (t) { return -y(t); })
+      .attr('dominant-baseline', 'middle')
+      .attr('text-anchor', 'end')
+      .text(function(a){return (a * 100) + '%';});;
+  
+  //paint y-axis - token label
+  chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + ((xAxisTopPosition - fontSize - labelMargin) / 2) + ') rotate(270)')
+    .append('svg:text').attr('class', 'y-axis-token-label')
+      .attr('text-anchor', 'middle')
+      .text(data.columns.c2.title);
+  
+  //paint graph
+  chart.enterData(series, 'g', 'shape-serie').attr('transform', 'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')
+    .enterData(function (s) { return s.values; }, 'rect', 'shape')
+      .filter(function(r){return r.row !== undefined; })
+      .attr('stroke', '#fff')
+      .attr('fill', function (r) { return  getColor(r.row.c1, color); })
+      .attr('transform', function (r) { return 'translate(' + x(getKey(r.row.c0)) + ', 0)'; })
+      .attr('width', x.rangeBand())
+      .attr('height', function (r) { return y(r.to - r.from); })
+      .attr('y', function (r) { return y(r.from) })
+      .attr('data-click', function (r) { return getClickKeys(r.row, data.columns); })
+      .append('svg:title')
+      .text(function (r, i) { return getLabel(r.row.c0) + ', ' + getLabel(r.row.c1) + ': ' + getLabel(r.row.c2); });
+   
 
-//config variables
-var yAxisLabelWidth = 60,
-	fontSize = 0,
-	ticksLength = 4,
-	labelMargin = 5,
-	chartAxisPadding = 5,
-	padding = 5,
-	yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength,
-	xAxisTopPosition = height - padding - fontSize - labelMargin - ticksLength,
-	color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function (s) { return myChart.getTokenKey(s.dimension2); })]);
-
-//x axis scale
-var x = d3.scale.ordinal()
-	.domain($.map(data.dimension1, function (d) { return myChart.getTokenKey(d); }))
-	.rangeBands([0, width - yAxisLeftPosition - padding - (2 * chartAxisPadding)]);
-
-//y axis scale
-var y = d3.scale.linear()
-	.domain([0, 100])
-	.range([0, xAxisTopPosition - padding - fontSize - labelMargin]);
-
-//paint x-axis ticks
-chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ')')
-	.enterData(data.dimension1, 'line', 'x-axis-tick')
-	.attr('y2', ticksLength)
-	.attr('x1', function (d) { return x(myChart.getTokenKey(d)); })
-	.attr('x2', function (d) { return x(myChart.getTokenKey(d)); });
-
-//paint x-axis - token label
-chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')
-	.append('svg:text').attr('class', 'x-axis-token-label')
-	.attr('text-anchor', 'middle')
-	.text(data.labels.dimension1);
-
-//paint y-axis - ruler
-var yTicks = y.ticks(10);
-chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
-	.enterData(yTicks, 'line', 'y-ruler')
-	.attr('x2', width - yAxisLeftPosition - padding)
-	.attr('y1', function (t) { return -y(t); })
-	.attr('y2', function (t) { return -y(t); });
-
-//paint y-axis - ticks
-chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + xAxisTopPosition + ')')
-	.enterData(yTicks, 'line', 'y-axis-tick')
-	.attr('x2', ticksLength)
-	.attr('y1', function (t) { return -y(t); })
-	.attr('y2', function (t) { return -y(t); });
-
-//paint y-axis - tick labels
-chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + xAxisTopPosition + ')')
-	.enterData(yTicks, 'text', 'y-axis-tick-label')
-	.attr('y', function (t) { return -y(t); })
-	.attr('dominant-baseline', 'middle')
-	.attr('text-anchor', 'end')
-	.text(String);
-
-//paint y-axis - token label
-chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + ((xAxisTopPosition - fontSize - labelMargin) / 2) + ') rotate(270)')
-	.append('svg:text').attr('class', 'y-axis-token-label')
-	.attr('text-anchor', 'middle')
-	.text(data.labels.value1);
-
-//paint graph
-var countArray = myChart.createCountArray(data.series);
-var emptyCountArray = myChart.createEmptyCountArray(data.dimension1.length);
-chart.enterData(data.series, 'g', 'shape-serie').attr('transform', 'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')
-	.enterData(function (s) { return $.map(s.values, function (v) { return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')
-	.attr('stroke', function (pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })
-	.attr('fill', function (pair) { return SF.isEmpty(pair.value) ? 'none' : myChart.getTokenColor(pair.dimension2, color); })
-	.attr('transform', function (pair, i) { return 'translate(' + x(myChart.getTokenKey(data.dimension1[i])) + ', 0)'; })
-	.attr('width', x.rangeBand())
-	.attr('height', function (pair, i) { return SF.isEmpty(pair.value) ? 0 : y((100 * myChart.getTokenKey(pair.value)) / countArray[i]); })
-	.attr('y', function (pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = emptyCountArray[i]; emptyCountArray[i] += myChart.getTokenKey(pair.value); return y((100 * offset) / countArray[i]); } })
-	.attr('data-d1', function (pair, i) { return myChart.getTokenKey(data.dimension1[i]); })
-	.attr('data-d2', function (pair) { return myChart.getTokenKey(pair.dimension2); })
-	.append('svg:title')
-	.text(function (pair, i) { return SF.isEmpty(pair.value) ? null : myChart.getTokenLabel(data.dimension1[i]) + ', ' + myChart.getTokenLabel(pair.dimension2) + ': ' + myChart.getTokenLabel(pair.value); });
-
-//paint x-axis tick labels
-var yHalf = (xAxisTopPosition - padding) / 2;
-if (x.rangeBand() > fontSize) {
-    chart.append('svg:g').attr('class', 'x-axis-tick-serie').attr('transform', 'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', 0) rotate(270)')
-	.enterData(data.dimension1, 'text', 'x-axis-tick-label sf-chart-strong')
-	.attr('x', -yHalf)
-	.attr('y', function (v, i) { return x(myChart.getTokenKey(v)) })
-	.attr('text-anchor', 'middle')
-	.attr('fill', '#fff')
-	.text(function (v, i) { return myChart.getTokenLabel(v); });
+  //paint x-axis tick labels
+  var yHalf = (xAxisTopPosition - padding) / 2;
+  if (x.rangeBand() > fontSize && series.length > 0) {
+    chart.append('svg:g').attr('class', 'x-axis-tick-serie').attr('transform', 'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') rotate(270)')
+      .enterData(_.last(series).values, 'text', 'x-axis-tick-label sf-chart-strong')
+        .attr('x', function (v, i) { var posy = y(v.to); return posy >= yHalf ? posy - labelMargin : posy + labelMargin; })
+        .attr('y', function (v, i) { return x(getKey(v.d1)) })
+        .attr('text-anchor', function (v, i) { var posy = y(v.to);  return posy >= yHalf ? 'end' : 'start'; })
+        .attr('fill', function (v, i) { var posy = y(v.to); return posy >= yHalf ? '#fff' : '#000'; })
+        .text(function (v, i) { return getLabel(v.d1); });
 }
-
-//paint x-axis
-chart.append('svg:g').attr('class', 'x-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
-	.append('svg:line')
-	.attr('class', 'x-axis')
-	.attr('x2', width - yAxisLeftPosition - padding);
-
-//paint y-axis
-chart.append('svg:g').attr('class', 'y-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin) + ')')
-	.append('svg:line')
-	.attr('class', 'y-axis')
-	.attr('y2', xAxisTopPosition - padding - fontSize - labelMargin);
-
-//paint color legend
-var legendScale = d3.scale.ordinal().domain($.map(data.series, function (s, i) { return i; })).rangeBands([0, width - yAxisLeftPosition - padding]),
-	legendRectWidth = 10,
-	legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;
-
-if (legendLabelWidth + labelMargin + legendRectWidth > yAxisLabelWidth * 2) {
+  
+  //paint x-axis
+  chart.append('svg:g').attr('class', 'x-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
+    .append('svg:line')
+    .attr('class', 'x-axis')
+    .attr('x2', width - yAxisLeftPosition - padding);
+  
+  //paint y-axis
+  chart.append('svg:g').attr('class', 'y-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin) + ')')
+    .append('svg:line')
+      .attr('class', 'y-axis')
+      .attr('y2', xAxisTopPosition - padding - fontSize - labelMargin);
+  
+  //paint color legend
+  var legendScale = d3.scale.ordinal().domain($.map(series, function (s, i) { return i; })).rangeBands([0, width - yAxisLeftPosition - padding]),
+      legendRectWidth = 10,
+      legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;
+  
+  if (legendLabelWidth + labelMargin + legendRectWidth > yAxisLabelWidth * 2) {
     chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')
-	.enterData(data.series, 'rect', 'color-rect')
-	.attr('x', function (e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })
-	.attr('width', legendRectWidth).attr('height', fontSize)
-	.attr('fill', function (s) { return myChart.getTokenColor(s.dimension2, color); });
-
-    chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')
-	.enterData(data.series, 'text', 'color-text')
-	.attr('x', function (e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })
-	.text(function (s) { return myChart.getTokenLabel(s.dimension2); });
+      .enterData(series, 'rect', 'color-rect')
+      .attr('x', function (e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })
+      .attr('width', legendRectWidth).attr('height', fontSize)
+      .attr('fill', function (s) { return getColor(s.dimension2, color); });
+  
+  chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')
+    .enterData(series, 'text', 'color-text')
+      .attr('x', function (e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })
+      .text(function (s) { return getLabel(s.dimension2); });
 }
-
+  
 }
 ]]></Script>
 </ChartScript>
