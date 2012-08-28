@@ -19,8 +19,7 @@
       values : _.map(dimension1, function(d1){ return obj[getKey(d1)]; })
     };
     
-  }
-                                  ));
+  } ));
   
   //config variables
   var yAxisLabelWidth = 100,
@@ -102,15 +101,16 @@
   //paint graph
   chart.enterData(series, 'g', 'shape-serie').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding) + ')')
     .enterData(function (s) {   return s.values; }, 'rect', 'shape')
-      .attr('stroke', function (r) { return SF.isEmpty(r.c2) ? 'none' : '#fff'; })
-      .attr('fill', function (r) { return SF.isEmpty(r.c2) ? 'none' : getColor(r.c1, color); })
+      .filter(function (r){return r != undefined;})
+      .attr('stroke', '#fff')
+      .attr('fill', function (r) { return getColor(r.c1, color); })
       .attr('y', function (r) { return ySubscale(getKey(r.c1)); })
       .attr('transform', function (r) { return 'translate(0, ' + y(getKey(r.c0)) + ')'; })
       .attr('height', ySubscale.rangeBand())
-      .attr('width', function (r) { return SF.isEmpty(r.c2) ? 0 : x(getLabel(r.c2)); })
+      .attr('width', function (r) { return x(getLabel(r.c2)); })
       .attr('data-click', function (r) { return getClickKeys(r, data.columns); })
       .append('svg:title')
-      .text(function (r) { return SF.isEmpty(r.c2) ? null : getLabel(r.c0) + ', ' + getLabel(r.c1) + ': ' + getLabel(r.c2); })
+      .text(function (r) { return getLabel(r.c0) + ', ' + getLabel(r.c1) + ': ' + getLabel(r.c2); })
       
       //paint x-axis
       chart.append('svg:g').attr('class', 'x-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')

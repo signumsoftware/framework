@@ -94,11 +94,7 @@ WriteLiteral(@"
       .CodeMirror {
         border: 1px solid #eee;
       }
-      .CodeMirror-scroll {
-        height: auto;
-        overflow-y: hidden;
-        overflow-x: auto;
-      }
+      
       
       span.CodeMirror-matchhighlight 
       { 

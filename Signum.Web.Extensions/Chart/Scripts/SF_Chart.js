@@ -16,19 +16,19 @@ SF.Chart = (function () {
 
         options: {},
 
-        _create: function() {
+        _create: function () {
             var self = this;
             var $chartControl = self.element.closest(".sf-chart-control");
             self.$chartControl = $chartControl;
             $(".sf-chart-img").live("click", function () {
                 var $this = $(this);
                 $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
-                
+
 
                 var $resultsContainer = $chartControl.find(".sf-search-results-container");
                 if ($this.hasClass("sf-chart-img-equiv")) {
                     if ($resultsContainer.find("svg").length > 0) {
-                        self.reDrawOnUpdateBuilder  = true;
+                        self.reDrawOnUpdateBuilder = true;
                     }
                 }
                 else {
@@ -52,7 +52,7 @@ SF.Chart = (function () {
                 self.updateChartBuilder($this.closest("tr").attr("data-token"));
             });
 
-            $(".sf-chart-draw").live("click", function(e){
+            $(".sf-chart-draw").live("click", function (e) {
                 e.preventDefault();
                 var $this = $(this);
                 $.ajax({
@@ -83,23 +83,22 @@ SF.Chart = (function () {
 
                 var win = window.open($textArea.data("url"));
 
-                window.changeTextArea = function(value)
-                {
-                     $textArea.val(value);
-                     self.reDraw();
-                }; 
+                window.changeTextArea = function (value) {
+                    $textArea.val(value);
+                    self.reDraw();
+                };
 
-                window.getExceptionNumber = function(){
-                   if(self.exceptionLine == null || self.exceptionLine == undefined)
-                       return null;
+                window.getExceptionNumber = function () {
+                    if (self.exceptionLine == null || self.exceptionLine == undefined)
+                        return null;
 
-                   var temp = self.exceptionLine;
-                   self.exceptionLine = null;
-                   return temp;
+                    var temp = self.exceptionLine;
+                    self.exceptionLine = null;
+                    return temp;
                 }
             });
 
-            this.$chartControl.on("sf-new-subtokens-combo", function(event, idSelectedCombo, index) {
+            this.$chartControl.on("sf-new-subtokens-combo", function (event, idSelectedCombo, index) {
                 self.newSubTokensComboAdded($("#" + idSelectedCombo), index);
             });
 
@@ -144,18 +143,17 @@ SF.Chart = (function () {
                 success: function (result) {
                     $chartBuilder.replaceWith(result);
                     SF.triggerNewContent(self.$chartControl.find(".sf-chart-builder"));
-                    if(self.reDrawOnUpdateBuilder )
-                    {
+                    if (self.reDrawOnUpdateBuilder) {
                         self.reDraw();
                         self.reDrawOnUpdateBuilder = false;
                     }
 
                 }
             });
-        },    
+        },
 
-       
-     
+
+
 
         originalAddFilter: $.SF.findNavigator.prototype.addFilter,
 
@@ -172,19 +170,23 @@ SF.Chart = (function () {
             }
         },
 
-        showError: function(e, __baseLineNumber__ , chart){
+        showError: function (e, __baseLineNumber__, chart) {
             var message = e.toString();
-            if(e.lineNumber != undefined && e.stack != undefined && e.stack.indexOf("DrawChart") == 0)
-            {
-                var lineNumber = (e.lineNumber - __baseLineNumber__); 
+
+            var regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
+            var match;
+            if (e.stack != undefined && (match = regex.exec(e.stack)) != null) {
+                var lineNumber = parseInt(match[2] || match[4] || match[6]) - __baseLineNumber__;
+                if(isNaN(lineNumber))
+                   lineNumber = 1;
                 this.exceptionLine = lineNumber;
-                message = "Line " + lineNumber + ": " + message; 
-            }else{
+                message = "Line " + lineNumber + ": " + message;
+            } else {
                 this.exceptionLine = 1;
             }
 
             chart.select(".sf-chart-error").remove();
-            chart.append('svg:rect').attr('class', 'sf-chart-error').attr("y", (chart.attr("height") / 2) - 10).attr("fill", "#FBEFFB").attr("stroke", "#FAC0DB").attr("width", chart.attr("width")-1).attr("height", 20);
+            chart.append('svg:rect').attr('class', 'sf-chart-error').attr("y", (chart.attr("height") / 2) - 10).attr("fill", "#FBEFFB").attr("stroke", "#FAC0DB").attr("width", chart.attr("width") - 1).attr("height", 20);
             chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", chart.attr("height") / 2).attr("fill", "red").attr("dy", 5).attr("dx", 4).text(message);
         },
 
@@ -209,22 +211,22 @@ SF.Chart = (function () {
                 var getKey = SF.Chart.Utils.getKey;
                 var getColor = SF.Chart.Utils.getColor;
                 var getClickKeys = SF.Chart.Utils.getClickKeys;
-                __baseLineNumber__ = new Error().lineNumber; 
+                __baseLineNumber__ = new Error().lineNumber;
                 func = eval(code);
-            }catch(e){
-               this.showError(e, __baseLineNumber__, chart);
-               return; 
+            } catch (e) {
+                this.showError(e, __baseLineNumber__, chart);
+                return;
             }
 
             var hasError = false;
-            try{
+            try {
                 func(chart, data);
                 this.bindMouseClick($chartContainer);
-            }catch(e){
-               this.showError(e,__baseLineNumber__, chart);
+            } catch (e) {
+                this.showError(e, __baseLineNumber__, chart);
             }
 
-            if(this.exceptionLine == null)
+            if (this.exceptionLine == null)
                 this.exceptionLine = -1;
         },
 
@@ -274,10 +276,10 @@ SF.Chart = (function () {
             });
         },
 
-         bindMouseClick: function ($chartContainer) {
-           
+        bindMouseClick: function ($chartContainer) {
+
             $chartContainer.find('[data-click]').click(function () {
-                
+
                 var url = $chartContainer.attr('data-open-url');
 
                 var $chartControl = $chartContainer.closest(".sf-chart-control");

@@ -101,7 +101,7 @@
   var xSubscale = d3.scale.ordinal()
       .domain($.map(series, function (s) { return getKey(s.dimension2); }))
       .rangeBands([interMagin, x.rangeBand() - interMagin]);
-   debugger; 
+
   //paint graph
   chart.enterData(series, 'g', 'shape-serie').attr('transform', 'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')
     .enterData(function (s) {   return s.values; }, 'rect', 'shape')

@@ -19,16 +19,16 @@ var yAxisLabelWidth = 60,
 	padding= 5,
 	yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength,
 	xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength,
-	color = (data.points.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.points, function(v) { return myChart.getTokenKey(v.value1); })]);
+	color = d3.scale.category20().domain([0, $.map(data.rows, function(v) { return getKey(v.c0); })]);
 
 //x axis scale
 var x = d3.scale.linear()
-	.domain([0, d3.max($.map(data.points, function (e) { return myChart.getTokenKey(e.dimension1); }))])
+	.domain([0, d3.max($.map(data.rows, function (e) { return getKey(e.c1); }))])
 	.range([0, width - yAxisLeftPosition - padding]);
 
 //y axis scale
 var y = d3.scale.linear()
-	.domain([0, d3.max($.map(data.points, function (e) { return myChart.getTokenKey(e.dimension2); }))])
+	.domain([0, d3.max($.map(data.rows, function (e) { return getKey(e.c2); }))])
 	.range([0, xAxisTopPosition - padding]);
 
 //paint x-axis - ticks
@@ -50,7 +50,7 @@ chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'tran
 chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + height + ')')
 	.append('svg:text').attr('class', 'x-axis-token-label')
 	.attr('text-anchor', 'middle')
-	.text(data.labels.dimension1);
+	.text(data.columns.c1.title);
 
 //paint y-axis - ruler
 var yTicks = y.ticks(8);
@@ -79,21 +79,25 @@ chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'tran
 chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + (xAxisTopPosition / 2) + ') rotate(270)')
 	.append('svg:text').attr('class', 'y-axis-token-label')
 	.attr('text-anchor', 'middle')
-	.text(data.labels.dimension2);
+	.text(data.columns.c2.title);
 
-//paint graph
-var sizeScale = myChart.getSizeScale(data, (width - yAxisLeftPosition) * (height - xAxisTopPosition));
-chart.enterData(data.points, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')
+  
+debugger;
+var sizeScale = d3.scale.linear()
+            .domain([0, _.reduce(data.rows, function(memo, p){ return memo + p.c3; }, 0)])
+            .range([0, (width - yAxisLeftPosition) * (height - xAxisTopPosition)]);
+//paint graph  
+chart.enterData(data.rows, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')
 	.append('svg:circle').attr('class', 'shape')
-	.attr('stroke', function(p) { return myChart.getTokenColor(p.value1, color); })
-	.attr('fill', function(p) { return myChart.getTokenColor(p.value1, color); })
+	.attr('stroke', function(p) { return getColor(p.c0, color); })
+	.attr('fill', function(p) { return getColor(p.c0, color); })
 	.attr('shape-rendering', 'initial')
-	.attr('r', function(p) { return Math.sqrt(sizeScale(myChart.getTokenKey(p.value2))/Math.PI); })
-	.attr('cx', function(p) { return x(myChart.getTokenKey(p.dimension1)); })
-	.attr('cy', function(p) { return y(myChart.getTokenKey(p.dimension2)); })
-	.attr('data-v1', function(p) { return myChart.getTokenKey(p.value1); })
+	.attr('r', function(p) { return Math.sqrt(sizeScale(getKey(p.c3))/Math.PI); })
+	.attr('cx', function(p) { return x(getKey(p.c1)); })
+	.attr('cy', function(p) { return y(getKey(p.c2)); })
+	.attr('data-click', function(p) { return getClickKeys(p, data.columns); })
 	.append('svg:title')
-	.text(function(p) { return '(' + myChart.getTokenLabel(p.dimension1) + ', ' + myChart.getTokenLabel(p.dimension2) + ') ' + myChart.getTokenLabel(p.value1) + ': ' + myChart.getTokenLabel(p.value2); })
+	.text(function(p) { return '(' + getLabel(p.c1) + ', ' + getLabel(p.c2) + ') ' + getLabel(p.c0) + ': ' + getLabel(p.c3); })
 
 //paint x-axis
 chart.append('svg:g').attr('class', 'x-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
