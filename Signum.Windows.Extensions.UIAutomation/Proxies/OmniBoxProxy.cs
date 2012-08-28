@@ -53,14 +53,14 @@ namespace Signum.Windows.UIAutomation.Proxies
 
             var lb = Element.WaitChildById("lstBox", timeOut);
 
-            var list = lb.Children(a => a.Current.ControlType == ControlType.ListItem);
-
-            var item = list.FirstOrDefault(a => a.Current.ItemStatus == itemsStatus);
+            var item = lb.TryDescendant( e => e.Current.ItemStatus == itemsStatus);
 
             if (item == null)
                 throw new KeyNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(autoCompleteText, itemsStatus));
 
-            return Element.CaptureWindow(() => item.Pattern<SelectionItemPattern>().Select(),
+            var listItem = item.Normalize(a => a.Current.ControlType == ControlType.ListItem);
+
+            return Element.CaptureWindow(() => listItem.Pattern<SelectionItemPattern>().Select(),
                 () => "window after selecting {0} on the omnibox".Formato(itemsStatus), timeOut);
 
         }

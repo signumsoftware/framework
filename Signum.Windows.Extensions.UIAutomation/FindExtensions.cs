@@ -28,6 +28,12 @@ namespace Signum.Windows.UIAutomation
             return parent.FindFirst(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
         }
 
+        public static AutomationElement TryNormalizeById(this AutomationElement parent, string automationId)
+        {
+            TreeWalker tw = new TreeWalker(new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
+
+            return tw.Normalize(parent);
+        }
 
         public static AutomationElement DescendantById(this AutomationElement parent, string automationId)
         {
@@ -42,6 +48,18 @@ namespace Signum.Windows.UIAutomation
         public static AutomationElement ElementById(this AutomationElement parent, TreeScope scope, string automationId)
         {
             var result = parent.FindFirst(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
+
+            if (result == null)
+                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
+
+            return result;
+        }
+
+        public static AutomationElement NormalizeById(this AutomationElement parent, string automationId)
+        {
+            TreeWalker tw = new TreeWalker(new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
+
+            var result = tw.Normalize(parent);
 
             if (result == null)
                 throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
@@ -81,6 +99,18 @@ namespace Signum.Windows.UIAutomation
 
             if (result == null)
                 throw new KeyNotFoundException("No AutomationElement found: {0}".Formato(condition.NiceToString()));
+
+            return result;
+        }
+
+        public static AutomationElement NormalizeByCondition(this AutomationElement parent, Condition condition)
+        {
+            TreeWalker tw = new TreeWalker(condition);
+
+            var result = tw.Normalize(parent);
+
+            if (result == null)
+                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
 
             return result;
         }
@@ -136,6 +166,20 @@ namespace Signum.Windows.UIAutomation
 
             if (result == null)
                 throw new KeyNotFoundException("No AutomationElement found with condition {0}".Formato(ExpressionEvaluator.PartialEval(condition).NiceToString()));
+
+            return result;
+        }
+
+        public static AutomationElement Normalize(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
+        {
+            var c = ConditionBuilder.ToCondition(condition);
+
+            TreeWalker tw = new TreeWalker(c);
+
+            var result = tw.Normalize(parent);
+
+            if (result == null)
+                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
 
             return result;
         }
