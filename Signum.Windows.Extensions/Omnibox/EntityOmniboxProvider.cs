@@ -68,5 +68,10 @@ namespace Signum.Windows.Omnibox
             if (result.Lite != null)
                 Navigator.NavigateUntyped(result.Lite);
         }
+
+        public override string GetItemStatus(EntityOmniboxResult result)
+        {
+            return "E:" + result.Lite.Key();
+        }
     }
 }

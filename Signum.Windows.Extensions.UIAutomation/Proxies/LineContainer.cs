@@ -29,6 +29,11 @@ namespace Signum.Windows.UIAutomation
 
     public static class LineContainerExtensions
     {
+        //public static bool IsVisible(this ILineContainer container, PropertyRoute route)
+        //{
+        //    return container.Element.Descendant(a => a.Current.ItemStatus == route.ToString()) != null;
+        //}
+
         public static ValueLineProxy ValueLine(this ILineContainer container, PropertyRoute route)
         {
             var valueLine = container.Element.Descendant(a => a.Current.ClassName == "ValueLine" && a.Current.ItemStatus == route.ToString());
@@ -89,6 +94,11 @@ namespace Signum.Windows.UIAutomation
 
             return new LineContainer<C> { Element = subContainer, PreviousRoute = typeof(C).IsEmbeddedEntity() ? route : null };
         }
+
+        //public static bool ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        //{
+        //    return container.Element.Descendant(a => a.Current.ItemStatus == route.ToString()) != null;
+        //}
 
         public static ValueLineProxy ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
         {

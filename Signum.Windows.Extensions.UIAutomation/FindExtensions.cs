@@ -159,9 +159,6 @@ namespace Signum.Windows.UIAutomation
             return parent.FindAll(scope, c).Cast<AutomationElement>().ToList();
         }
 
-
-
-
         public static List<AutomationElement> DescendantsAll(this AutomationElement parent)
         {
             return parent.ElementsByCondition(TreeScope.Descendants, PropertyCondition.TrueCondition);

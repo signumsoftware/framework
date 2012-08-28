@@ -9,13 +9,13 @@ namespace Signum.Windows.UIAutomation
 {
     public static class MenuItemExtensions
     {
-        public static AutomationElement MenuItemOpenWindow(this WindowProxy window, params string[] menuNames)
+        public static AutomationElement MenuItemOpenWindow(AutomationElement window, params string[] menuNames)
         {
-            var menuItem = MenuItemFind(window.Element, menuNames);
+            var menuItem = MenuItemFind(window, menuNames);
 
-            AutomationElement newWindow = window.Element.CaptureWindow(
+            AutomationElement newWindow = window.CaptureWindow(
                 () => menuItem.ButtonInvoke(),
-                () => "New windows opened after menu " + menuNames.ToString(" -> "));
+                () => "New windows opened after menu  " + menuNames.ToString(" -> "));
 
             return newWindow;
         }

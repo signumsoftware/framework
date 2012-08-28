@@ -15,6 +15,7 @@ using Signum.Entities.Omnibox;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Basics;
+using System.Windows.Automation;
 
 namespace Signum.Windows.Omnibox
 {
@@ -44,6 +45,8 @@ namespace Signum.Windows.Omnibox
                 return;
 
             OmniboxClient.RenderLines.Invoke(result, lines);
+
+            AutomationProperties.SetItemStatus(this, OmniboxClient.GetItemStatus.Invoke(result));
         }
     }
 }

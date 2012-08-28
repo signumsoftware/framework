@@ -119,7 +119,7 @@ namespace Signum.Entities.Omnibox
 
         public abstract List<Lite> AutoComplete(Type cleanType, Implementations implementations, string subString, int count);
 
-        internal string CleanQueryName(object queryName)
+        public string CleanQueryName(object queryName)
         {
             return (queryName is Type ? Reflector.CleanTypeName((Type)queryName) : queryName.ToString());
         }

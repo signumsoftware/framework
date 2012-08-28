@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Windows.UIAutomation.Proxies;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -19,6 +20,8 @@ namespace Signum.Windows.UIAutomation
             var item = combo.Child(itemCondition);
 
             item.Pattern<SelectionItemPattern>().Select();
+
+            combo.Pattern<ExpandCollapsePattern>().Collapse();
         }
 
         public static AutomationElement ComboGetSelectedItem(this AutomationElement combo)
@@ -59,6 +62,9 @@ namespace Signum.Windows.UIAutomation
         public static void Check(this AutomationElement element)
         {
             var  ck= element.Pattern<TogglePattern>();
+            if (ck.Current.ToggleState == ToggleState.Indeterminate)
+                ck.Toggle();
+
             if(ck.Current.ToggleState != ToggleState.On)
                 ck.Toggle();
 
@@ -67,8 +73,9 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static void UnCheck(this AutomationElement element)
-        {
+        { 
             var ck = element.Pattern<TogglePattern>();
+
             if (ck.Current.ToggleState != ToggleState.Off)
                 ck.Toggle();
 
@@ -98,6 +105,20 @@ namespace Signum.Windows.UIAutomation
 
                 filtered.Single().Pattern<SelectionItemPattern>().Select();
             }
+        }
+
+        public static bool IsVisible(this AutomationElement element)
+        {
+            //return !element.Current.IsOffscreen;
+            return !double.IsInfinity(element.Current.BoundingRectangle.X) && !double.IsInfinity(element.Current.BoundingRectangle.Y);
+        }
+
+        public static void WaitVisible(this AutomationElement element, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            if (actionDescription == null)
+                actionDescription = () => "Wait Visible " + element.Current.ClassName;
+
+            element.Wait(() => element.IsVisible(), actionDescription, timeOut);
         }
     }
 }

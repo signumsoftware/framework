@@ -38,5 +38,10 @@ namespace Signum.Windows.UserQueries
                 Navigator.Explore(new ExploreOptions(query));
             }
         }
+
+        public override string GetItemStatus(UserQueryOmniboxResult result)
+        {
+            return "UQ:" + result.UserQuery.Key();
+        }
     }
 }

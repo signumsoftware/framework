@@ -45,5 +45,10 @@ namespace Signum.Windows.Chart
                 cw.Show();
             }
         }
+
+        public override string GetItemStatus(UserChartOmniboxResult result)
+        {
+            return "UC:" + result.UserChart.Key();
+        }
     }
 }
