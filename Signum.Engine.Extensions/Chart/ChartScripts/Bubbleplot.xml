@@ -82,15 +82,16 @@ chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'tra
 	.text(data.columns.c2.title);
 
   
-debugger;
 var sizeScale = d3.scale.linear()
             .domain([0, _.reduce(data.rows, function(memo, p){ return memo + p.c3; }, 0)])
             .range([0, (width - yAxisLeftPosition) * (height - xAxisTopPosition)]);
 //paint graph  
-chart.enterData(data.rows, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')
+  chart.enterData(_.sortBy(data.rows, function (p){ return -getKey(p.c3);})  , 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')
 	.append('svg:circle').attr('class', 'shape')
 	.attr('stroke', function(p) { return getColor(p.c0, color); })
+    .attr('stroke-width', 3)
 	.attr('fill', function(p) { return getColor(p.c0, color); })
+    .attr('fill-opacity', .5)
 	.attr('shape-rendering', 'initial')
 	.attr('r', function(p) { return Math.sqrt(sizeScale(getKey(p.c3))/Math.PI); })
 	.attr('cx', function(p) { return x(getKey(p.c1)); })
