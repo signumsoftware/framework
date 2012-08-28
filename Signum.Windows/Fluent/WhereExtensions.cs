@@ -6,6 +6,7 @@ using System.Windows;
 using Signum.Utilities;
 using System.Windows.Media;
 using System.Collections;
+using System.Windows.Controls;
 
 namespace Signum.Windows
 {
@@ -253,6 +254,65 @@ namespace Signum.Windows
                 else
                     return BreathFirstLogical(parent, recursive, finalPredicate).Cast<T>();
             }
+        }
+
+        public static string DataContextBrokenBinding(this DependencyObject dep)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            FindDataContextBrokenBindings(0, dep, sb);
+
+            return sb.ToString();
+        }
+
+        static bool FindDataContextBrokenBindings(int depth, DependencyObject dep, StringBuilder sb)
+        {
+            var fe = dep as FrameworkElement;
+            var any = false;
+            for (int i = 0; i < depth; i++)
+                sb.Append(" ");
+            sb.Append(dep.GetType().Name);
+
+            if (fe != null && !IsTrivial(fe))
+            {
+                var source = DependencyPropertyHelper.GetValueSource(fe, FrameworkElement.DataContextProperty);
+
+                if (source.BaseValueSource != BaseValueSource.Inherited)
+                {
+                    sb.AppendFormat(" .DataContext source {0}{1}: {2} ({3})",
+                        source.BaseValueSource,
+                        source.IsExpression ? " (IsExpression)" : "",
+                        fe.DataContext.TryToString() ?? "null",
+                        fe.DataContext.TryCC(d => "(" + d.GetType().Name + " " + d.GetHashCode()));
+
+                    any = true;
+                }
+            }
+
+            int length = sb.Length;
+
+            sb.AppendLine();
+
+            int count = VisualTreeHelper.GetChildrenCount(dep);
+           
+            for (int i = 0; i < count; i++)
+            {
+                any |= FindDataContextBrokenBindings(depth + 1, VisualTreeHelper.GetChild(dep, i), sb);
+            }
+
+            if (!any)
+            {
+                sb.Remove(length, sb.Length - length);
+                sb.AppendLine(" (...)");
+            }
+
+            return any;
+        }
+
+        private static bool IsTrivial(FrameworkElement fe)
+        {
+            return fe is ContentPresenter && VisualTreeHelper.GetChildrenCount(fe) == 1 &&
+                VisualTreeHelper.GetChild(fe, 0).Let(a => a is AccessText || a is TextBlock);
         }
     }
 

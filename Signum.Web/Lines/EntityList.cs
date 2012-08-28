@@ -12,15 +12,19 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
 using Signum.Web.Properties;
+using System.Web.Routing;
 #endregion
 
 namespace Signum.Web
 {
     public class EntityList : EntityListBase
     {
+        public readonly RouteValueDictionary ListHtmlProps = new RouteValueDictionary();
+        
         public EntityList(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
+            Reorder = false;
         }
 
         public override string ToJS()
@@ -84,6 +88,26 @@ namespace Signum.Web
         public JsInstruction JsRemove()
         {
             return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
+        }
+
+        protected override string DefaultMoveUp()
+        {
+            return JsMoveUp().ToJS();
+        }
+
+        public JsInstruction JsMoveUp()
+        {
+            return new JsInstruction(() => "{0}.moveUp()".Formato(this.ToJS()));
+        }
+
+        protected override string DefaultMoveDown()
+        {
+            return JsMoveDown().ToJS();
+        }
+
+        public JsInstruction JsMoveDown()
+        {
+            return new JsInstruction(() => "{0}.moveDown()".Formato(this.ToJS()));
         }
     }
 }

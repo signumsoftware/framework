@@ -110,10 +110,15 @@ namespace Signum.Utilities
             return rm.GetGenderAwareResource(me.Member.Name, type.GetGender());
         }
 
-
         static string GetDescription(MemberInfo memberInfo)
         {
-            Assembly assembly = (memberInfo.DeclaringType ?? (Type)memberInfo).Assembly;
+            if (memberInfo.DeclaringType == typeof(DayOfWeek))
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)memberInfo).GetValue(null)];
+            }
+
+            Assembly assembly = (memberInfo as Type ?? memberInfo.DeclaringType).Assembly;
+
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
                 string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add("_", memberInfo.Name);

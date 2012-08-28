@@ -78,7 +78,7 @@ namespace Signum.Entities.DynamicQuery
 
                 var onlyType = implementations.Value.Types.Only();
 
-                if (onlyType != null)
+                if (onlyType != null && onlyType == cleanType)
                     return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
                         .Concat(EntityProperties(onlyType).Concat(OnEntityExtension(onlyType, this)).OrderBy(a => a.ToString())).ToList();
 
@@ -124,7 +124,10 @@ namespace Signum.Entities.DynamicQuery
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + Resources.Year), 
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + Resources.Month), 
                 new MonthStartToken(parent), 
+
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), utc + Resources.Day),
+                new DayOfYearToken(parent), 
+                new DayOfWeekToken(parent), 
                 new DateToken(parent), 
                 precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), utc + Resources.Hour), 
                 precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), utc + Resources.Minute), 

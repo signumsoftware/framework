@@ -484,6 +484,24 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Move down.
+        /// </summary>
+        public static string Signum_entityRepeater_moveDown {
+            get {
+                return ResourceManager.GetString("Signum_entityRepeater_moveDown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Move up.
+        /// </summary>
+        public static string Signum_entityRepeater_moveUp {
+            get {
+                return ResourceManager.GetString("Signum_entityRepeater_moveUp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
         public static string Signum_error {

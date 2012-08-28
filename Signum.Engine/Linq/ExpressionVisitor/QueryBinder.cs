@@ -203,7 +203,10 @@ namespace Signum.Engine.Linq
             if (expression is ProjectionExpression)
                 return (ProjectionExpression)expression;
 
-            expression = RemoveGroupByConvert(expression);
+            expression = RemoveProjectionConvert(expression);
+
+            if (expression is ProjectionExpression)
+                return (ProjectionExpression)expression;
 
             if (expression.NodeType == ExpressionType.New && expression.Type.IsInstantiationOf(typeof(Grouping<,>)))
             {
@@ -214,10 +217,11 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
         }
 
-        private static Expression RemoveGroupByConvert(Expression expression)
+        private static Expression RemoveProjectionConvert(Expression expression)
         {
             if (expression.NodeType == ExpressionType.Convert && (expression.Type.IsInstantiationOf(typeof(IGrouping<,>)) ||
-                                                                  expression.Type.IsInstantiationOf(typeof(IEnumerable<>))))
+                                                                  expression.Type.IsInstantiationOf(typeof(IEnumerable<>)) || 
+                                                                  expression.Type.IsInstantiationOf(typeof(IQueryable<>)) ))
                 expression = ((UnaryExpression)expression).Operand;
             return expression;
         }
@@ -299,15 +303,14 @@ namespace Signum.Engine.Linq
             Expression exp =
                 aggregateFunction == AggregateFunction.Count ? null :
                 selector != null ? MapAndVisitExpand(selector, ref projection) :
-                DbExpressionNominator.FullNominate(projection.Projector);
+                projection.Projector;
 
             projection = ApplyExpansions(projection);
 
             if (coalesceTrick)
                 exp = Expression.Convert(exp, resultType.Nullify());
 
-            if (exp != null)
-                exp = DbExpressionNominator.FullNominate(exp);
+            exp = DbExpressionNominator.FullNominate(exp);
 
             Alias alias = NextSelectAlias();
             var aggregate = !coalesceTrick ? new AggregateExpression(resultType, exp, aggregateFunction) :
@@ -329,8 +332,10 @@ namespace Signum.Engine.Linq
             {
                 Expression exp2 =
                      aggregateFunction == AggregateFunction.Count ? null :
-                     selector != null ? DbExpressionNominator.FullNominate(MapAndVisitExpand(selector, ref info.Projection)) :
+                     selector != null ? MapAndVisitExpand(selector, ref info.Projection) :
                      info.Projection.Projector;
+
+                exp2 = DbExpressionNominator.FullNominate(exp2);
 
                 return new AggregateSubqueryExpression(info.GroupAlias, new AggregateExpression(resultType, exp2, aggregateFunction), subquery);
             }
@@ -916,7 +921,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            source = RemoveGroupByConvert(source);
+            source = RemoveProjectionConvert(source);
 
             switch (source.NodeType)
             {

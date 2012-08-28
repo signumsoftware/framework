@@ -55,6 +55,7 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
                 Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription()) },
                 Orders = new List<Order>(),
+                ElementsPerPage = QueryRequest.AllElements,
             };
 
             return Execute(req, GetColumnDescriptions()).Collection.Count();

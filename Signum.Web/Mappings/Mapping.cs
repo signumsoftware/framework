@@ -168,7 +168,7 @@ namespace Signum.Web
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
             EntityComboKeys.Combo,
-            EntityListBaseKeys.Index,
+            EntityListBaseKeys.Indexes,
             EntityListBaseKeys.List
         };
 
@@ -676,7 +676,9 @@ namespace Signum.Web
         {
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
-            foreach (var index in ctx.Inputs.IndexPrefixes())
+            var indexPrefixes = ctx.Inputs.IndexPrefixes();
+
+            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.ControlID, ip, EntityListBaseKeys.Indexes)).TryCC(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
             {
                 SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), null, route, ctx);
 
@@ -710,7 +712,7 @@ namespace Signum.Web
             {
                 Debug.Assert(!itemCtx.Empty());
 
-                int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Index).ToInt();
+                int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).TryCC(s => s.Split(new [] {';'})[0]).ToInt();
 
                 if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
                     itemCtx.Value = oldList[oldIndex.Value];

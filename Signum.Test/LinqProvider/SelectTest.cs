@@ -386,7 +386,7 @@ namespace Signum.Test.LinqProvider
                             Name = n.Target is ArtistDN ? ((ArtistDN)n.Target).Name : ((BandDN)n.Target).Name,
                             FullName = n.Target is ArtistDN ? ((ArtistDN)n.Target).FullName : ((BandDN)n.Target).FullName
                         });
-
+            
             Assert.AreEqual(1, query.QueryText().CountRepetitions("ArtistDN"));
 
             query.ToList();

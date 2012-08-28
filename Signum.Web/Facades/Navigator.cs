@@ -758,11 +758,16 @@ namespace Signum.Web
             Type entitiesType = Lite.Extract(entityColumn.Type);
             Implementations? implementations = entityColumn.Implementations;
 
-            findOptions.View = findOptions.View &&
-                (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin)));
-
-            findOptions.Create = findOptions.Create && findOptions.View && 
-                (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsCreable(t, EntitySettingsContext.Admin)));
+            if (findOptions.View)
+            {
+                findOptions.View = implementations.Value.IsByAll ? true : 
+                    implementations.Value.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin));
+            }
+            if (findOptions.Create)
+            {
+                findOptions.Create = findOptions.View &&
+                    (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsCreable(t, EntitySettingsContext.Admin)));
+            }
         }
         
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)

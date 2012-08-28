@@ -57,7 +57,11 @@ namespace Signum.Entities.DynamicQuery
             if (et != null && et.IsProjection)
                 return et.GetElementImplementations();
 
-            return Parent.GetImplementations();
+            var pr = GetPropertyRoute();
+            if (pr != null)
+                return pr.TryGetImplementations();
+
+            return null;
         }
 
         public override string Format

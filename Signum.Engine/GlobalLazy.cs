@@ -35,7 +35,16 @@ namespace Signum.Engine
 
         private static void AttachInvalidations(Schema s, IResetLazy lazy, params Type[] types)
         {
-            Action a = () => lazy.Reset();
+            Action reset = () =>
+            {
+                if (singleThreaded.Value)
+                {
+                    lazy.Reset();
+                    Transaction.Rolledback += () => lazy.Reset();
+                }
+
+                Transaction.PostRealCommit += dic => lazy.Reset();
+            };
 
             List<Type> cached = new List<Type>();
             foreach (var type in types)
@@ -43,7 +52,7 @@ namespace Signum.Engine
                 var cc = s.CacheController(type);
                 if (cc != null && cc.IsComplete)
                 {
-                    cc.Invalidation += a;
+                    cc.Disabled += reset;
                     cached.Add(type);
                 }
             }
@@ -53,7 +62,7 @@ namespace Signum.Engine
             {
                 foreach (var type in nonCached)
                 {
-                    giAttachInvalidations.GetInvoker(type)(s, a);
+                    giAttachInvalidations.GetInvoker(type)(s, reset);
                 }
 
                 var dgIn = DirectedGraph<Table>.Generate(types.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
@@ -61,7 +70,7 @@ namespace Signum.Engine
 
                 foreach (var table in dgIn.Except(dgOut))
                 {
-                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, a);
+                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, reset);
                 }
             }
         }
@@ -101,15 +110,29 @@ namespace Signum.Engine
             {
                 using (Schema.Current.GlobalMode())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
+                using (Transaction tr = singleThreaded.Value? null:  Transaction.ForceNew())
                 using (new EntityCache(true))
                 {
-                    return func();
+                    var value = func();
+
+                    if (tr != null)
+                        tr.Commit();
+
+                    return value;
                 }
             }, mode);
 
             registeredLazyList.Add(result, null);
 
             return result;
+        }
+
+        static ThreadVariable<bool> singleThreaded = Statics.ThreadVariable<bool>("singleThreadedGlobalLazy");
+        public static IDisposable SingleThreadMode()
+        {
+            var oldValue = singleThreaded.Value;
+            singleThreaded.Value = true;
+            return new Disposable(() => singleThreaded.Value = oldValue);
         }
 
         public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T:class

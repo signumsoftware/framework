@@ -61,11 +61,11 @@ namespace Signum.Engine.Linq
             });
         }
 
-        internal static Expression JustVisit(LambdaExpression expression, Type type)
+        internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
         {
             var cleaned = MetaEvaluator.Clean(expression);
 
-            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, Expression.Constant(null, type)));
+            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, new MetaExpression(route.Type, new CleanMeta(new[] { route }))));
 
             return new MetadataVisitor().Visit(replaced);
         }
@@ -343,6 +343,14 @@ namespace Signum.Engine.Linq
                 null;
         }
 
+        protected override Expression Visit(Expression exp)
+        {
+            if (exp is MetaExpression)
+                return exp; 
+
+            return base.Visit(exp);
+        }
+
         protected override Expression VisitConstant(ConstantExpression c)
         {
             Type type = TableType(c.Value);
@@ -425,9 +433,12 @@ namespace Signum.Engine.Linq
 
         private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
         {
+            if (route.PropertyRouteType == PropertyRouteType.Root)
+                return new[] { PropertyRoute.Root(type).Add(piName) };
+
             Implementations? imp = route.TryGetImplementations();
 
-            if (imp == null)
+            if (imp == null) //Embedded
                 return new[] { route.Add(piName) };
 
             var fimp = ColumnDescriptionFactory.CastImplementations(imp.Value, type);

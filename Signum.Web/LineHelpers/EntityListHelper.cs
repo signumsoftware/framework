@@ -42,7 +42,12 @@ namespace Signum.Web
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
                     
-                    var sbSelectContainer = new HtmlTag("select").IdName(entityList.Compose(EntityListBaseKeys.List)).Class("sf-entity-list").Attr("multiple", "multiple");
+                    var sbSelectContainer = new HtmlTag("select").Attr("multiple", "multiple")
+                        .IdName(entityList.Compose(EntityListBaseKeys.List))
+                        .Class("sf-entity-list");
+
+                    if (entityList.ListHtmlProps.Any())
+                        sbSelectContainer.Attrs(entityList.ListHtmlProps);
                     
                     using (sbSelect.Surround(sbSelectContainer))
                     {
@@ -68,6 +73,8 @@ namespace Signum.Web
                             sb.AddLine(ListBaseHelper.CreateButton(helper, entityList, null).Surround("li"));
                             sb.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("li"));
                             sb.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("li"));
+                            sb.AddLine(ListBaseHelper.MoveUpButton(helper, entityList).Surround("li"));
+                            sb.AddLine(ListBaseHelper.MoveDownButton(helper, entityList).Surround("li"));
                         }
                     }
                 }
@@ -84,9 +91,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            if (entityList.ShouldWriteOldIndex(itemTC))
-                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
-
+            sb.AddLine(ListBaseHelper.WriteIndex(helper, entityList, itemTC, itemTC.Index));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (typeof(T).IsEmbeddedEntity() || 
