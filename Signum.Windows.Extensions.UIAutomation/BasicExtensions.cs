@@ -41,20 +41,32 @@ namespace Signum.Windows.UIAutomation
             return element.Pattern<ValuePattern>().Current.Value;
         }
 
-        public static ToggleState Check(this AutomationElement element)
+        public static void SetCheck(this AutomationElement element, bool isChecked)
+        {
+            if (isChecked)
+                element.Check();
+            else
+                element.UnCheck();
+        }
+
+        public static void Check(this AutomationElement element)
         {
             var  ck= element.Pattern<TogglePattern>();
             if(ck.Current.ToggleState != ToggleState.On)
                 ck.Toggle();
-            return ck.Current.ToggleState;
+
+            if (ck.Current.ToggleState != ToggleState.On)
+                throw new InvalidOperationException("The checkbox {0} has not been checked".Formato(element.Current.AutomationId));
         }
 
-        public static ToggleState UnCheck(this AutomationElement element)
+        public static void UnCheck(this AutomationElement element)
         {
             var ck = element.Pattern<TogglePattern>();
             if (ck.Current.ToggleState != ToggleState.Off)
                 ck.Toggle();
-            return ck.Current.ToggleState;
+
+            if (ck.Current.ToggleState != ToggleState.Off)
+                throw new InvalidOperationException("The checkbox {0} has not been unchecked".Formato(element.Current.AutomationId));
         }
 
 

@@ -158,6 +158,8 @@ namespace Signum.Engine.Operations
 
         internal static void OnErrorOperation(IOperation operation, IIdentifiable entity, Exception ex)
         {
+            ex.Data["entity"] = entity;
+
             if (ErrorOperation != null)
                 ErrorOperation(operation, entity, ex);
         }

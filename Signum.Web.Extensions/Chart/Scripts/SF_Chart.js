@@ -16,7 +16,7 @@ SF.Chart = (function () {
 
         options: {},
 
-        _create: function () {
+        _create: function() {
             var self = this;
             var $chartControl = self.element.closest(".sf-chart-control");
             self.$chartControl = $chartControl;
@@ -150,7 +150,7 @@ SF.Chart = (function () {
 
                 }
             });
-        },
+        },    
 
 
 
@@ -274,7 +274,7 @@ SF.Chart = (function () {
                 self.$chartControl.find(".sf-chart-draw").click();
                 return false;
             });
-        },
+    },
 
         bindMouseClick: function ($chartContainer) {
 
@@ -293,10 +293,10 @@ SF.Chart = (function () {
                 options += $(this).data("click");
 
                 window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
-            });
-        }
+});
+}
 
 
-    });
+        });
 })(jQuery);
 

@@ -75,9 +75,15 @@ namespace Signum.Web.Selenium
             }
         }
 
+        public static string RepeaterItemsContainerSelector(string prefix)
+        {
+            return "jq=#{0}sfItemsContainer".Formato(prefix);
+        }
+
         public static string RepeaterItemSelector(string prefix, int elementIndexBase0)
         {
-            return "jq=#{0}sfItemsContainer > #{0}{1}_sfRepeaterItem".Formato(prefix, elementIndexBase0);
+            return "{0} > #{1}{2}_sfRepeaterItem".Formato(
+                RepeaterItemsContainerSelector(prefix), prefix, elementIndexBase0);
         }
 
         public static void RepeaterItemExists(this ISelenium selenium, string prefix, int elementIndexBase0, bool exists)
@@ -97,6 +103,13 @@ namespace Signum.Web.Selenium
         public static void RepeaterWaitUntilItemLoaded(this ISelenium selenium, string repeaterPrefix, int itemIndexBase0)
         {
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RepeaterItemSelector(repeaterPrefix, itemIndexBase0)));
+        }
+
+        public static void RepeaterItemMove(this ISelenium selenium, bool up, string prefix, int elementIndexBase0)
+        {
+            selenium.Click("{0} > legend .sf-move-{1}".Formato(
+                RepeaterItemSelector(prefix, elementIndexBase0),
+                up ? "up" : "down"));
         }
 
         public static string LineCreateSelector(string prefix)

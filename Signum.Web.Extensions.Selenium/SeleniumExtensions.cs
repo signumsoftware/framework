@@ -222,9 +222,7 @@ namespace Signum.Web.Selenium
 
         public static bool EntityButtonEnabled(this ISelenium selenium, string idButton)
         {
-            string locator = EntityButtonLocator(idButton);
-            return selenium.IsElementPresent(locator) && 
-                  !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
+            return selenium.IsElementPresent("{0}:not(.sf-disabled)".Formato(EntityButtonLocator(idButton)));
         }
 
         public static void EntityOperationClick(this ISelenium selenium, Enum operationKey)
@@ -234,7 +232,7 @@ namespace Signum.Web.Selenium
 
         public static void EntityButtonClick(this ISelenium selenium, string idButton)
         {
-            selenium.Click(EntityButtonLocator(idButton));
+            selenium.Click("{0}:not(.sf-disabled)".Formato(EntityButtonLocator(idButton)));
         }
 
         public static void EntityMenuConstructFromClick(this ISelenium selenium, Enum constructFromKey)

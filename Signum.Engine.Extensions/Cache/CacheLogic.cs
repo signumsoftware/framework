@@ -33,6 +33,8 @@ namespace Signum.Engine.Cache
             int Loads { get; }
 
             int Hits { get; }
+
+            void OnDisabled();
         }
 
         interface IInstanceController
@@ -50,7 +52,7 @@ namespace Signum.Engine.Cache
             return new Disposable(() => inCache.Value = oldInCache);
         }
 
-        class SemiCached<T> : CacheController<T>, ICacheLogicController, IInstanceController
+        class SemiCacheController<T> : CacheController<T>, ICacheLogicController, IInstanceController
             where T : IdentifiableEntity
         {
             ConcurrentDictionary<Type, Dictionary<int, T>> cachedEntities = new ConcurrentDictionary<Type, Dictionary<int, T>>();
@@ -84,7 +86,7 @@ namespace Signum.Engine.Cache
                 }
             }
 
-            public SemiCached(Schema schema)
+            public SemiCacheController(Schema schema)
             {
                 var ee = schema.EntityEvents<T>();
 
@@ -98,7 +100,7 @@ namespace Signum.Engine.Cache
                 {
                     if (query.Any(e => kvp.Value.Contains(e.ToLite())))
                     {
-                        DisableAndInvalidateType(kvp.Key);
+                        DisableAndInvalidateAllConnected(kvp.Key);
                     }
                 }
             }
@@ -111,13 +113,13 @@ namespace Signum.Engine.Cache
                     {
                         if(kvp.Value.Contains(ident.ToLite()))
                         {
-                            DisableAndInvalidateType(kvp.Key);
+                            DisableAndInvalidateAllConnected(kvp.Key);
                         }
                     }
                 }
             }
 
-            private void DisableAndInvalidateType(Type referingType)
+            private void DisableAndInvalidateAllConnected(Type referingType)
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
 
@@ -209,9 +211,20 @@ namespace Signum.Engine.Cache
                 add { throw NoComplete(); }
                 remove { throw NoComplete(); }
             }
+
+            public override event Action Disabled
+            {
+                add { throw NoComplete(); }
+                remove { throw NoComplete(); }
+            }
+
+
+            public void OnDisabled()
+            {
+            }
         }
 
-        class CacheLogicController<T> : CacheController<T>, ICacheLogicController
+        class FullCacheController<T> : CacheController<T>, ICacheLogicController
             where T : IdentifiableEntity
         {
             class Pack
@@ -232,7 +245,7 @@ namespace Signum.Engine.Cache
             ResetLazy<Pack> pack;
             
 
-            public CacheLogicController(Schema schema)
+            public FullCacheController(Schema schema)
             {
                 pack = new ResetLazy<Pack>(() =>
                 {
@@ -330,6 +343,7 @@ namespace Signum.Engine.Cache
             public int Loads { get { return loads; } }
 
             public override event Action Invalidation;
+            public override event Action Disabled;
 
             void DisableAndInvalidate()
             {
@@ -387,6 +401,13 @@ namespace Signum.Engine.Cache
                 completer(entity, origin, retriver);
                 return true;
             }
+
+
+            public void OnDisabled()
+            {
+                if (Disabled != null)
+                    Disabled();
+            }
         }
 
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
@@ -429,6 +450,19 @@ namespace Signum.Engine.Cache
             return disabledTypes != null && disabledTypes.Contains(type);
         }
 
+        private static void DisableAllConnectedTypesInTransaction(Type type)
+        {
+            var connected = invalidations.IndirectlyRelatedTo(type, true);
+
+            var hs = DisabledTypesDuringTransaction();
+
+            foreach (var stype in connected)
+            {
+                hs.Add(stype);
+                controllers[stype].OnDisabled();
+            }
+        }
+
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -440,7 +474,7 @@ namespace Signum.Engine.Cache
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
         public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
-            var cc = new CacheLogicController<T>(sb.Schema);
+            var cc = new FullCacheController<T>(sb.Schema);
             controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
 
             TryCacheSubTables(typeof(T), sb);
@@ -448,7 +482,7 @@ namespace Signum.Engine.Cache
 
         public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
-            var cc = new SemiCached<T>(sb.Schema);
+            var cc = new SemiCacheController<T>(sb.Schema);
             controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
 
             TryCacheSubTables(typeof(T), sb);
@@ -475,11 +509,11 @@ namespace Signum.Engine.Cache
             }
         }
     
-        static CacheLogicController<T> GetController<T>() where T : IdentifiableEntity
+        static FullCacheController<T> GetController<T>() where T : IdentifiableEntity
         {
             var controller = controllers.GetOrThrow(typeof(T), "{0} is not registered in CacheLogic");
 
-            var result = controller as CacheLogicController<T>;
+            var result = controller as FullCacheController<T>;
 
             if (result == null)
                 throw new InvalidOperationException("{0} is not registered"); 
@@ -497,12 +531,7 @@ namespace Signum.Engine.Cache
             }
         }
 
-        private static void DisableAllConnectedTypesInTransaction(Type type)
-        {
-            var connected = invalidations.IndirectlyRelatedTo(type, true);
-
-            DisabledTypesDuringTransaction().AddRange(connected);
-        }
+       
 
         public static List<CacheStatistics> Statistics()
         {
@@ -526,10 +555,10 @@ namespace Signum.Engine.Cache
             if (controller == null)
                 return null;
 
-            if(controller.GetType().IsInstantiationOf(typeof(CacheLogicController<>)))
+            if(controller.GetType().IsInstantiationOf(typeof(FullCacheController<>)))
                 return CacheType.Cached;
 
-            if (controller.GetType().IsInstantiationOf(typeof(SemiCached<>)))
+            if (controller.GetType().IsInstantiationOf(typeof(SemiCacheController<>)))
                 return CacheType.Semi;
 
             throw new InvalidOperationException("Not expected");
