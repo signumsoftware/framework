@@ -118,8 +118,16 @@ WriteLiteral("\">\r\n");
 
      using (var uc = Html.TypeContext<UserChartDN>())
     {
+        
         object queryName = QueryLogic.ToQueryName(uc.Value.Query.Key);
-        ViewData[ViewDataKeys.QueryName] = queryName; //To be use inside Repeaters
+
+        QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+        if (queryDescription == null)
+        {
+            queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+            ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+        }
+        
         
    Write(Html.Hidden("webQueryName", Navigator.ResolveWebQueryName(queryName)));
 

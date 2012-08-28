@@ -79,14 +79,11 @@ namespace ASP
 
 
 
- using (var chart = Html.TypeContext<ChartRequest>())
+ using (var chart = Html.TypeContext<IChartBase>())
 {
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-    if (queryDescription == null)
-    {
-        queryDescription = DynamicQueryManager.Current.QueryDescription(((UserChartDN)((TypeContext)chart.Parent).UntypedValue).QueryName);
-    }
-
+   
+    
 
 WriteLiteral("    <table id=\"");
 
@@ -191,9 +188,9 @@ WriteLiteral("\r\n                        </th>\r\n                        <th c
 
                                                        
                         
-                   Write(Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+                   Write(Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription));
 
-                                                                                                                                     
+                                                                                                                                  
                     }
 
 WriteLiteral("                </table>\r\n                <textarea class=\"sf-chart-currentScript" +

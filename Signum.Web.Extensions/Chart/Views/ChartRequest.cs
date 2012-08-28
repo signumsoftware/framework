@@ -49,12 +49,12 @@ namespace ASP
     using Signum.Web.Chart;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartControl.cshtml")]
-    public class _Page_Chart_Views_ChartControl_cshtml : System.Web.Mvc.WebViewPage<TypeContext<ChartRequest>>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartRequest.cshtml")]
+    public class _Page_Chart_Views_ChartRequest_cshtml : System.Web.Mvc.WebViewPage<TypeContext<ChartRequest>>
     {
 
 
-        public _Page_Chart_Views_ChartControl_cshtml()
+        public _Page_Chart_Views_ChartRequest_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -91,7 +91,13 @@ WriteLiteral("\r\n");
 
 
    
-    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    QueryDescription queryDescription =  (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    if (queryDescription == null)
+    {
+        queryDescription = DynamicQueryManager.Current.QueryDescription(Model.Value.QueryName);
+        ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+    }
+    
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
     bool viewable = (bool)ViewData[ViewDataKeys.View];
 

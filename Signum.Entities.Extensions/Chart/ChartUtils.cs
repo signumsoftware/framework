@@ -154,12 +154,6 @@ namespace Signum.Entities.Chart
                     Operation = f.Operation,
                     ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
                 }).ToMList(),
-                
-                Columns = request.Columns.Select(c => new ChartColumnDN
-                {
-                    DisplayName = c.DisplayName,
-                    Token = c.Token.Clone(),
-                }).ToMList(),
 
                 Orders = request.Orders.Select(o => new QueryOrderDN
                 {
@@ -167,6 +161,12 @@ namespace Signum.Entities.Chart
                     OrderType = o.OrderType
                 }).ToMList()
             };
+
+            result.Columns.ZipForeach(request.Columns, (u, r) =>
+            {
+                u.Token = r.Token;
+                u.DisplayName = r.DisplayName;
+            });
 
             return result;
         }
@@ -185,14 +185,14 @@ namespace Signum.Entities.Chart
                     Value = qf.Value
                 }).ToList(),
 
-                Columns = uq.Columns.Select(c => new ChartColumnDN
-                {
-                    DisplayName = c.DisplayName,
-                    Token = c.Token.Clone(),
-                }).ToMList(),
-
                 Orders = uq.Orders.Select(o => new Order(o.Token, o.OrderType)).ToList(),
             };
+
+            result.Columns.ZipForeach(uq.Columns, (r, u) =>
+            {
+                r.Token = u.Token;
+                r.DisplayName = u.DisplayName;
+            });
 
             return result;
         }

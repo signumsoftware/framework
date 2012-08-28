@@ -9,14 +9,11 @@
 @using Signum.Web.Chart
 @using Signum.Utilities
 @using Signum.Engine.Chart
-@using (var chart = Html.TypeContext<ChartRequest>())
+@using (var chart = Html.TypeContext<IChartBase>())
 {
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-    if (queryDescription == null)
-    {
-        queryDescription = DynamicQueryManager.Current.QueryDescription(((UserChartDN)((TypeContext)chart.Parent).UntypedValue).QueryName);
-    }
-
+   
+    
     <table id="@chart.Compose("sfChartBuilder")" class="sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.ControlID)))">
         <tr>
             <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type">
@@ -57,7 +54,7 @@
                     @foreach (var column in chart.TypeElementContext(a => a.Columns))
                     {
                         @Html.HiddenRuntimeInfo(column)
-                        @Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                        @Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription)
                     }
                 </table>
                 <textarea class="sf-chart-currentScript" style="display:none" data-url="@Navigator.ViewRoute(chart.Value.ChartScript)">

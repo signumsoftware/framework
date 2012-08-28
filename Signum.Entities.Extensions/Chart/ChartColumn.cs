@@ -102,8 +102,28 @@ namespace Signum.Entities.Chart
                         return err;
                 }
 
+                if (parentChart.GroupResults)
+                {
+                    if (scriptColumn.IsGroupKey)
+                    {
+                        if (Token is AggregateToken)
+                            return "{0} is key, but {1} is an aggregate".Formato(scriptColumn.DisplayName, token.NiceName());
+                    }
+                    else
+                    {
+                        if (!(Token is AggregateToken))
+                            return "{0} should be an aggregate".Formato(scriptColumn.DisplayName, token.NiceName());
+                    }
+                }
+                else
+                {
+                    if (Token is AggregateToken)
+                        return "{1} is an aggregate, but the chart is not grouping".Formato(scriptColumn.DisplayName, token.NiceName());
+                }
+
+
                 if (!ChartUtils.IsChartColumnType(token, ScriptColumn.ColumnType))
-                    return "An {0} is not {1}".Formato(token, ScriptColumn.ColumnType);
+                    return "{0} is not {1}".Formato(token, ScriptColumn.ColumnType);
             }
 
             return base.PropertyValidation(pi);
@@ -119,6 +139,11 @@ namespace Signum.Entities.Chart
         protected override void PreSaving(ref bool graphModified)
         {
             tokenString = token == null ? null : token.FullKey();
+        }
+
+        internal new void ParseData(QueryDescription description)
+        {
+            ParseData(t => SubTokensChart(t, description.Columns));
         }
 
         public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
@@ -150,9 +175,6 @@ namespace Signum.Entities.Chart
             return new Column(Token, DisplayName); 
         }
 
-        internal new void ParseData(QueryDescription description)
-        {
-            ParseData(t => SubTokensChart(t, description.Columns));
-        }
+     
     }
 }

@@ -251,11 +251,9 @@ namespace Signum.Web.Chart
 
         ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool view)
         {
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-
-            ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartControlView;
+            ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartRequestView;
             ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
-            ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+            ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName); ;
             ViewData[ViewDataKeys.FilterOptions] = filterOptions;
             ViewData[ViewDataKeys.View] = view;
 

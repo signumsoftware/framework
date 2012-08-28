@@ -45,6 +45,7 @@ namespace ASP
     using Signum.Entities.UserQueries;
     using Signum.Web.Chart;
     using Signum.Entities.Chart;
+    using Signum.Entities.DynamicQuery;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/UserChartOrder.cshtml")]
@@ -69,6 +70,7 @@ namespace ASP
 
 
 
+
 WriteLiteral("\r\n");
 
 
@@ -81,7 +83,7 @@ WriteLiteral("\r\n");
 WriteLiteral("    <div style=\"float: left\">\r\n        ");
 
 
-   Write(Html.ChartTokenCombo(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, ViewData[ViewDataKeys.QueryName], e));
+   Write(Html.ChartTokenCombo(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], e));
 
 WriteLiteral("\r\n    </div>\r\n");
 

@@ -31,7 +31,7 @@ namespace Signum.Web.Chart
     {
         public static string ViewPrefix = "~/Chart/Views/{0}.cshtml";
 
-        public static string ChartControlView = ViewPrefix.Formato("ChartControl");
+        public static string ChartRequestView = ViewPrefix.Formato("ChartRequest");
         public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");
         public static string ChartResultsView = ViewPrefix.Formato("ChartResults");
         public static string ChartScriptCodeView = ViewPrefix.Formato("ChartScriptCode");
@@ -263,25 +263,23 @@ namespace Signum.Web.Chart
                     };
                 };
             }
-            else if (typeof(IFormattable).IsAssignableFrom(type) && ct.Token.Format.HasText())
-            {
-                return r =>
-                {
-                    return new
-                    {
-                        key = r[columnIndex],
-                        toStr = ((IFormattable)r[columnIndex]).TryToString(ct.Token.Format)
-                    };
-                };
-            }
+            //else if (typeof(IFormattable).IsAssignableFrom(type) && ct.Token.Format.HasText())
+            //{
+            //    return r =>
+            //    {
+            //        return new
+            //        {
+            //            key = r[columnIndex],
+            //            toStr = ((IFormattable)r[columnIndex]).TryToString(ct.Token.Format)
+            //        };
+            //    };
+            //}
             else
                 return r => r[columnIndex];
         }
 
-        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, object queryName, Context context)
+        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, QueryDescription qd, Context context)
         {
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-
             var tokenPath = chartToken.Token.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
 
             QueryToken queryToken = chartToken.Token;
@@ -305,7 +303,7 @@ namespace Signum.Web.Chart
                 {
                     bool moreTokens = i + 1 < tokenPath.Count;
                     sb.AddLine(SearchControlHelper.TokenOptionsCombo(
-                        helper, queryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
+                        helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
                 }
             }
             

@@ -14,7 +14,13 @@
                 "~/scripts/d3.v2.min.js",
                 "~/scripts/underscore-min.js")
 @{ 
-    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    QueryDescription queryDescription =  (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    if (queryDescription == null)
+    {
+        queryDescription = DynamicQueryManager.Current.QueryDescription(Model.Value.QueryName);
+        ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+    }
+    
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
     bool viewable = (bool)ViewData[ViewDataKeys.View];
 

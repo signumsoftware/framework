@@ -34,6 +34,7 @@ namespace Signum.Engine.Chart
 
                 ChartColorLogic.Start(sb, dqm);
                 ChartScriptLogic.Start(sb, dqm);
+                UserChartLogic.Start(sb, dqm);
             }
         }
 

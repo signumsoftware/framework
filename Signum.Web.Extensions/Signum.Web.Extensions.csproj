@@ -273,10 +273,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartColumn.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Chart\Views\ChartControl1.cs">
+    <Compile Include="Chart\Views\ChartRequest.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ChartControl.cshtml</DependentUpon>
+      <DependentUpon>ChartRequest.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartRequest1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartRequest.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Chart\Views\ChartPalette1.cs">
       <AutoGen>True</AutoGen>
@@ -947,9 +952,9 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PanelParts.cs</LastGenOutput>
     </Content>
-    <Content Include="Chart\Views\ChartControl.cshtml">
+    <Content Include="Chart\Views\ChartRequest.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ChartControl1.cs</LastGenOutput>
+      <LastGenOutput>ChartRequest.cs</LastGenOutput>
     </Content>
     <Content Include="Chart\Views\ChartBuilder.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

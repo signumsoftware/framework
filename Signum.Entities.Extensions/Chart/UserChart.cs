@@ -157,6 +157,11 @@ namespace Signum.Entities.Chart
                     Columns[i].Index = i;
         }
 
+        protected override void PostRetrieving()
+        {
+            chartScript.SyncronizeColumns(this);
+        }
+
         public void NotifyChange(bool needNewQuery)
         {
 
