@@ -280,6 +280,11 @@ namespace Signum.Windows.UIAutomation
             return Results.Children(c => c.Current.ControlType == ControlType.DataItem);
         }
 
+        public bool HasRows()
+        {
+            return Results.TryChild(c => c.Current.ControlType == ControlType.DataItem) != null;
+        }
+
         public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
             SelectElementAt(index);
@@ -361,11 +366,23 @@ namespace Signum.Windows.UIAutomation
 
         public void ValidateHeadersItems()
         {
+            StringBuilder sb = new StringBuilder();
+
             foreach (var columnHeader in HeaderItems)
 	        {
-                columnHeader.ButtonInvoke();
-                WaitSearch();
+                try
+                {
+                    columnHeader.ButtonInvoke();
+                    WaitSearch();
+                }
+                catch (MessageBoxErrorException e)
+                {
+                    sb.AppendFormat("{0} ==> {1}\r\n", columnHeader.Current.ItemStatus, e.Message);
+                }
 	        }
+
+            if (sb.Length > 0)
+                throw new MessageBoxErrorException(sb.ToString());
         
         }
     }
