@@ -15,7 +15,7 @@ namespace Signum.Windows.UIAutomation.Proxies
 {
     public class OmniBoxProxy
     {
-        public int OmniboxTimeout = 600;
+        public int OmniboxTimeout = 4000;
 
         public AutomationElement Element { get; private set; }
 
@@ -47,22 +47,25 @@ namespace Signum.Windows.UIAutomation.Proxies
 
         public AutomationElement SelectCapture(string autoCompleteText, string itemsStatus, int? timeOut = null)
         {
-            Element.Value(autoCompleteText);
+            return Element.CaptureWindow(
+                () =>
+                {
+                    Element.Value(autoCompleteText);
 
-            timeOut = timeOut ?? OmniboxTimeout;
+                    timeOut = timeOut ?? OmniboxTimeout;
 
-            var lb = Element.WaitChildById("lstBox", timeOut);
+                    var lb = Element.WaitChildById("lstBox", timeOut);
 
-            var item = lb.TryDescendant( e => e.Current.ItemStatus == itemsStatus);
+                    var item = lb.TryDescendant(e => e.Current.ItemStatus == itemsStatus);
 
-            if (item == null)
-                throw new KeyNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(autoCompleteText, itemsStatus));
+                    if (item == null)
+                        throw new KeyNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(autoCompleteText, itemsStatus));
 
-            var listItem = item.Normalize(a => a.Current.ControlType == ControlType.ListItem);
+                    var listItem = item.Normalize(a => a.Current.ControlType == ControlType.ListItem);
 
-            return Element.CaptureWindow(() => listItem.Pattern<SelectionItemPattern>().Select(),
+                    listItem.Pattern<SelectionItemPattern>().Select();
+                },
                 () => "window after selecting {0} on the omnibox".Formato(itemsStatus), timeOut);
-
         }
     }
 }

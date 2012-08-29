@@ -74,7 +74,7 @@ namespace Signum.Windows.UIAutomation
             }, actionDescription, timeOut);
         }
 
-        public static int WindowAfterTimeout = 5 * 1000;
+        public static int CapturaWindowTimeout = 5 * 1000;
 
         public static AutomationElement CaptureWindow(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
         {
@@ -82,6 +82,8 @@ namespace Signum.Windows.UIAutomation
                 actionDescription = () => "Get Windows after";
 
             var previous = GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+
+            bool bla = element.Current.IsPassword;
 
             action();
 
@@ -91,21 +93,34 @@ namespace Signum.Windows.UIAutomation
             {
                 newWindow = GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                MessageBoxProxy.AssertErrorWindow(newWindow);
+                MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
                 if (newWindow != null)
                     return true;
 
                 return false;
-            }, actionDescription, timeOut ?? WindowAfterTimeout);
+            }, actionDescription, timeOut ?? CapturaWindowTimeout);
 
             return newWindow;
         }
 
         public static List<AutomationElement> GetAllProcessWindows(AutomationElement element)
         {
-            return TreeHelper.BreathFirst(AutomationElement.RootElement,
-                e => e.Children(a => a.Current.ProcessId == element.Current.ProcessId && a.Current.ControlType == ControlType.Window)).ToList();
+            return GetRecursiveProcessWindows(AutomationElement.RootElement, element.Current.ProcessId);
+        }
+
+        static List<AutomationElement> GetRecursiveProcessWindows(AutomationElement parentWindow, int processId)
+        {
+            var children = parentWindow.Children(a => a.Current.ProcessId == processId && a.Current.ControlType == ControlType.Window);
+         
+            List<AutomationElement> result = new List<AutomationElement>();
+            foreach (var child in children)
+            {
+                result.Add(child);
+                result.AddRange(GetRecursiveProcessWindows(child, processId));
+            }
+
+            return result;
         }
 
         public static AutomationElement CaptureChildWindow(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
@@ -120,14 +135,14 @@ namespace Signum.Windows.UIAutomation
             {
                 newWindow = parentWindow.TryChild(a => a.Current.ControlType == ControlType.Window);
 
-                MessageBoxProxy.AssertErrorWindow(newWindow);
+                MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
-                if (newWindow != null)
+                if (newWindow != null )
                     return true;
 
 
                 return false;
-            }, actionDescription, timeOut ?? WindowAfterTimeout);
+            }, actionDescription, timeOut ?? CapturaWindowTimeout);
             return newWindow;
         }
 

@@ -431,7 +431,7 @@ namespace Signum.Windows.UIAutomation
 
         public List<RepeaterLineProxy> GetRepeaterElements()
         {
-            return Element.Children(a => a.Current.ClassName == "EntityRepeaterLineBorder").Select(ae => new RepeaterLineProxy(ae)).ToList();
+            return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterLineBorder").Select(ae => new RepeaterLineProxy(ae)).ToList();
         }
     }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Automation;
 using Signum.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -73,17 +74,17 @@ namespace Signum.Windows.UIAutomation
             return windowElement.Current.ControlType == ControlType.Window && windowElement.Current.ClassName == "#32770";
         }
 
-        public static void AssertErrorWindow(AutomationElement windowElement)
+        public static void AssertNoErrorWindow(AutomationElement windowElement)
         {
             if (windowElement != null && IsMessageBox(windowElement))
             {
                 var mb = new MessageBoxProxy(windowElement);
 
-                mb.AssertError();
+                mb.AssertNoError();
             }
         }
 
-        public void AssertError()
+        public void AssertNoError()
         {
             try
             {
@@ -104,7 +105,7 @@ namespace Signum.Windows.UIAutomation
             var mb = element.TryMessageBoxChild();
 
             if (mb != null)
-                mb.AssertError();
+                mb.AssertNoError();
         }
 
         public static MessageBoxProxy TryMessageBoxChild(this AutomationElement element)
@@ -126,6 +127,35 @@ namespace Signum.Windows.UIAutomation
             var win = parentWin.WaitChild(a => a.Current.ControlType == ControlType.Window && a.Current.ClassName == "#32770");
 
             return new MessageBoxProxy(win);
+        }
+
+        public static void AssertCapturesMessageBoxError(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            if (actionDescription == null)
+                actionDescription = () => "Capture MessageBox Error";
+
+            var parentWindow = WindowProxy.Normalize(element);
+
+            action();
+
+
+            element.Wait(() =>
+            {
+                AutomationElement newWindow = parentWindow.TryChild(a => a.Current.ControlType == ControlType.Window);
+                if (newWindow == null)
+                    return false;
+                if (MessageBoxProxy.IsMessageBox(newWindow))
+                {
+                    MessageBoxProxy winMessage = new MessageBoxProxy(newWindow);
+                    if (winMessage.IsError)
+                    {
+                        winMessage.Close();
+                        return true;
+                    }
+                }
+                throw new AssertFailedException(actionDescription());
+
+            }, actionDescription, timeOut ?? WaitExtensions.CapturaWindowTimeout);
         }
     }
 }
