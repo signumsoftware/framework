@@ -123,7 +123,7 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
-                    if (Transaction.AvoidIndependentTransactions)
+                    if (Transaction.InTestTransaction)
                         throw; 
 
                     var exLog = e.LogException();
