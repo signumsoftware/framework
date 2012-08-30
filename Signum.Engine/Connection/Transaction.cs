@@ -375,25 +375,25 @@ namespace Signum.Engine
             }
         }
 
-        public static bool AvoidIndependentTransactions
+        public static bool InTestTransaction
         {
-            get { return avoidIndependentTransactions.Value; }
+            get { return inTestTransaction.Value; }
         }
 
-        static readonly Variable<bool> avoidIndependentTransactions = Statics.ThreadVariable<bool>("avoidIndependentTransactions");
+        static readonly Variable<bool> inTestTransaction = Statics.ThreadVariable<bool>("inTestTransaction");
 
         class TestTransaction : RealTransaction 
         {
             public TestTransaction(ICoreTransaction parent, IsolationLevel? isolation)
                 : base(parent, isolation)
             {
-                avoidIndependentTransactions.Value = true;
+                inTestTransaction.Value = true;
             }
 
     
             public override ICoreTransaction Finish()
             {
-                avoidIndependentTransactions.Value = false;
+                inTestTransaction.Value = false;
 
                 return base.Finish();
             }
@@ -433,14 +433,14 @@ namespace Signum.Engine
 
         public static Transaction ForceNew()
         {
-            return new Transaction(parent => avoidIndependentTransactions.Value ? 
+            return new Transaction(parent => inTestTransaction.Value ? 
                 (ICoreTransaction)new FakedTransaction(parent) : 
                 (ICoreTransaction)new RealTransaction(parent, null));
         }
 
         public static Transaction ForceNew(IsolationLevel? isolationLevel)
         {
-            return new Transaction(parent => avoidIndependentTransactions.Value ? 
+            return new Transaction(parent => inTestTransaction.Value ? 
                 (ICoreTransaction)new FakedTransaction(parent) : 
                 (ICoreTransaction)new RealTransaction(parent, isolationLevel));
         }
