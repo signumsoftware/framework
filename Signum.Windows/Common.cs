@@ -539,7 +539,7 @@ namespace Signum.Windows
                 if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
                    Validator.GetOrCreatePropertyPack(context).Validators.OfType<NotNullableAttribute>().Any())
                 {
-                    vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify());
+                    vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).ToObservableCollection();
                 }
             }
         }

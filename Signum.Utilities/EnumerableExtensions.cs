@@ -974,6 +974,13 @@ namespace Signum.Utilities
                 (collection as List<T> ?? collection.ToList()).AsReadOnly();
         }
 
+        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
+        {
+            return collection == null ? null :
+              collection as ObservableCollection<T> ??
+              new ObservableCollection<T>(collection);
+        }
+
         public static IEnumerable<T> AsThreadSafe<T>(this IEnumerable<T> source)
         {
             return new TreadSafeEnumerator<T>(source);
