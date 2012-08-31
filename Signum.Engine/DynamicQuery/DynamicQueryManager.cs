@@ -16,6 +16,7 @@ using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -30,8 +31,7 @@ namespace Signum.Engine.DynamicQuery
         Dictionary<object, IDynamicQuery> queries = new Dictionary<object, IDynamicQuery>();
 
         Polymorphic<Dictionary<string, ExtensionInfo>> registeredExtensions =
-            new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces,
-            typeof(IIdentifiable)); 
+            new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null); 
 
         public IDynamicQuery this[object queryName]
         {
@@ -121,29 +121,30 @@ namespace Signum.Engine.DynamicQuery
 
         static DynamicQueryManager()
         {
-            QueryToken.EntityExtensions = (entityType, parent) => DynamicQueryManager.Current.GetExtensions(entityType, parent);
-            ExtensionToken.BuildExtension = (entityType, key, expression) => DynamicQueryManager.Current.BuildExtension(entityType, key, expression);
+            QueryToken.EntityExtensions = parent => DynamicQueryManager.Current.GetExtensions(parent);
+            ExtensionToken.BuildExtension = (parentType, key, parentExpression) => DynamicQueryManager.Current.BuildExtension(parentType, key, parentExpression);
         }
 
-        private Expression BuildExtension(Type entityType, string key, Expression context)
+        private Expression BuildExtension(Type parentType, string key, Expression parentExpression)
         {
-            LambdaExpression lambda = registeredExtensions.GetValue(entityType)[key].Lambda;
+            LambdaExpression lambda = registeredExtensions.GetValue(parentType)[key].Lambda;
 
-            return ExpressionReplacer.Replace(Expression.Invoke(lambda, context));
+            return ExpressionReplacer.Replace(Expression.Invoke(lambda, parentExpression));
         }
 
-        public IEnumerable<QueryToken> GetExtensions(Type entityType, QueryToken parent)
+        public IEnumerable<QueryToken> GetExtensions(QueryToken parent)
         {
-            var dic = registeredExtensions.TryGetValue(entityType);
+            var parentType = parent.Type.CleanType().UnNullify();
+
+            var dic = registeredExtensions.TryGetValue(parentType);
             
             if (dic == null)
                 return Enumerable.Empty<QueryToken>();
 
-            return dic.Values.Where(a => a.Inherit || a.EntityType == entityType).Select(v => v.CreateToken(parent));
+            return dic.Values.Where(a => a.Inherit || a.SourceType == parentType).Select(v => v.CreateToken(parent));
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
-            where E : class, IIdentifiable
         {
             if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
             {
@@ -163,7 +164,6 @@ namespace Signum.Engine.DynamicQuery
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
-           where E : class, IIdentifiable
         {
             if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
             {
@@ -192,19 +192,15 @@ namespace Signum.Engine.DynamicQuery
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key) 
-            where E : class, IIdentifiable
         {
-            var extension = new ExtensionInfo(typeof(S), key, extensionLambda, typeof(E))
-            {   
-                NiceName = niceName,
-            };
+            var extension = new ExtensionInfo(typeof(E), extensionLambda, typeof(S), key, niceName);
 
             return RegisterExpression(extension);
         }
 
         private ExtensionInfo RegisterExpression(ExtensionInfo extension)
         {
-            registeredExtensions.GetOrAdd(extension.EntityType)[extension.Key] = extension;
+            registeredExtensions.GetOrAdd(extension.SourceType)[extension.Key] = extension;
 
             registeredExtensions.ClearCache();
 
@@ -231,57 +227,74 @@ namespace Signum.Engine.DynamicQuery
 
     public class ExtensionInfo
     {
-        public ExtensionInfo(Type type, string key, LambdaExpression lambda, Type entityType)
+        public class ExtensionRouteInfo
+        {
+            public string Format;
+            public string Unit;
+            public Implementations? Implementations;
+            public Func<bool> IsAllowed;
+            public PropertyRoute PropertyRoute;
+        }
+
+        static ConcurrentDictionary<PropertyRoute, ExtensionRouteInfo> metas = new ConcurrentDictionary<PropertyRoute, ExtensionRouteInfo>();
+
+
+        public ExtensionInfo(Type sourceType, LambdaExpression lambda, Type type, string key, Func<string> niceName)
         {
             this.Type = type;
-            this.EntityType = entityType;
+            this.SourceType = sourceType;
             this.Key = key;
             this.Lambda = lambda;
-
-            Expression e = MetadataVisitor.JustVisit(lambda, PropertyRoute.Root(entityType));
-
-            MetaExpression me =  e as MetaExpression;
-
-            if (e is MetaProjectorExpression)
-            {
-                this.IsProjection = true;
-                me = ((MetaProjectorExpression)e).Projector as MetaExpression;
-            }
-
-            CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
-
-            if (cm != null && cm.PropertyRoutes.Any())
-            {
-                var cleanType = me.Type.CleanType();
-
-                PropertyRoute = cm.PropertyRoutes.Only();
-                Implementations = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
-                Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
-                Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
-            }
-
-            IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
+            this.IsProjection = type != typeof(string) && type.ElementType() != null;
+            this.NiceName = niceName;
         }
 
         public readonly Type Type;
-        public readonly Type EntityType;
+        public readonly Type SourceType;
         public readonly string Key;
-
         public bool IsProjection;
-
         public bool Inherit = true;
 
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
-        public string Format;
-        public string Unit;
-        public Implementations? Implementations;
-        public Func<bool> IsAllowed;
-        public PropertyRoute PropertyRoute;
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
-            return new ExtensionToken(parent, Key, Type, IsProjection, Unit, Format, Implementations, IsAllowed(), PropertyRoute) { DisplayName = NiceName() }; 
+            var info = metas.GetOrAdd(parent.GetPropertyRoute(), pr =>
+            {
+                Expression e = MetadataVisitor.JustVisit(Lambda, pr);
+
+                MetaExpression me = e as MetaExpression;
+
+                if (e is MetaProjectorExpression)
+                {
+                    this.IsProjection = true;
+                    me = ((MetaProjectorExpression)e).Projector as MetaExpression;
+                }
+
+                CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
+
+                var result = new ExtensionRouteInfo(); 
+
+                if (cm != null && cm.PropertyRoutes.Any())
+                {
+                    var cleanType = me.Type.CleanType();
+
+                    result.PropertyRoute = cm.PropertyRoutes.Only();
+                    result.Implementations = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
+                    result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
+                    result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
+                }
+
+                result.IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
+
+                return result;
+            });
+
+            return new ExtensionToken(parent, Key, Type, IsProjection, info.Unit, info.Format, info.Implementations, info.IsAllowed(), info.PropertyRoute)
+            {
+                DisplayName = NiceName()
+            }; 
         }
     }
 }

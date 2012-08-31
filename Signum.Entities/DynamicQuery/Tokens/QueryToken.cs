@@ -57,10 +57,31 @@ namespace Signum.Entities.DynamicQuery
         {
             var result = this.SubTokensInternal();
 
+            result.AddRange(OnEntityExtension(this));
+
             if (result.IsEmpty())
                 return new List<QueryToken>();
 
-            return result.Where(t => t.IsAllowed()).ToList();
+            result.RemoveAll(t => !t.IsAllowed());
+
+            result.Sort((a, b) =>
+            {
+                if (a.Key == "Id")
+                    return -1;
+
+                if (b.Key == "Id")
+                    return 1;
+
+                if (a.Key == "ToString")
+                    return -1;
+
+                if (b.Key == "ToString")
+                    return 1;
+
+                return StringComparer.CurrentCulture.Compare(a.ToString(), b.ToString());
+            }); 
+
+            return result;
         }
 
         protected List<QueryToken> SubTokensBase(Type type, Implementations? implementations)
@@ -80,10 +101,9 @@ namespace Signum.Entities.DynamicQuery
 
                 if (onlyType != null && onlyType == cleanType)
                     return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
-                        .Concat(EntityProperties(onlyType).Concat(OnEntityExtension(onlyType, this)).OrderBy(a => a.ToString())).ToList();
+                        .Concat(EntityProperties(onlyType)).ToList();
 
-                return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t))
-                    .Concat(OnEntityExtension(cleanType, this).OrderBy(a => a.ToString())).ToList();
+                return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList();
             }
 
             if (type.IsEmbeddedEntity())
@@ -104,15 +124,15 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>();
         }
 
-        public static IEnumerable<QueryToken> OnEntityExtension(Type type, QueryToken parent)
+        public static IEnumerable<QueryToken> OnEntityExtension(QueryToken parent)
         {
             if (EntityExtensions == null)
                 throw new InvalidOperationException("QuertToken.EntityExtensions function not set");
 
-            return EntityExtensions(type, parent);
+            return EntityExtensions(parent);
         }
 
-        public static Func<Type, QueryToken, IEnumerable<QueryToken>>  EntityExtensions;
+        public static Func<QueryToken, IEnumerable<QueryToken>>  EntityExtensions;
         
 
         public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precission)
