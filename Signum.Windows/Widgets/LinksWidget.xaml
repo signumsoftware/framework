@@ -33,7 +33,7 @@
             <ItemsControl x:Name="lvQuickLinks">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-					<Button FontFamily="Calibri, Segoe UI" Tag="{Binding}" Content="{Binding Path=Label}" Style="{DynamicResource LinkButtonStyle}" 
+					<Button FontFamily="Calibri, Segoe UI" Content="{Binding Path=Label}" Style="{DynamicResource LinkButtonStyle}" 
 						HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#ff375e5f" Cursor="Hand" Margin="21,0,5,0" ToolTip="{Binding Path=ToolTip}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

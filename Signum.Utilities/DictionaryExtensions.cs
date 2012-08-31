@@ -138,6 +138,13 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string errorContext)
+        {
+            var result = new Dictionary<K, V>();
+            result.AddRange<K, V>(collection, errorContext);
+            return result;
+        }
+
         public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string errorContext)
         {
             Dictionary<TKey, TSource> result = new Dictionary<TKey, TSource>();

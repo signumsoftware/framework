@@ -38,19 +38,19 @@ namespace Signum.Windows
 
             if (error.HasText())
             {
-                MessageBox.Show(Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Window.GetWindow(element), Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
         }
 
-        public static bool AssertErrors(Modifiable mod)
+        public static bool AssertErrors(Modifiable mod, Window window)
         {
             string error = GetErrors(mod); 
 
             if (error.HasText())
             {
-                MessageBox.Show(Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(window, Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;

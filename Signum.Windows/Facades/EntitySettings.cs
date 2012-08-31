@@ -84,7 +84,6 @@ namespace Signum.Windows
                     break;
                 case EntityType.Content:
                     ShowSave = false;
-                    IsCreable = admin => false;
                     IsViewable = (_, admin) => false;
                     break;
                 default:
