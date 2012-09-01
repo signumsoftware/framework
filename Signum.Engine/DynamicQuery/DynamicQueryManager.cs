@@ -236,7 +236,7 @@ namespace Signum.Engine.DynamicQuery
             public PropertyRoute PropertyRoute;
         }
 
-        static ConcurrentDictionary<PropertyRoute, ExtensionRouteInfo> metas = new ConcurrentDictionary<PropertyRoute, ExtensionRouteInfo>();
+        ConcurrentDictionary<PropertyRoute, ExtensionRouteInfo> metas = new ConcurrentDictionary<PropertyRoute, ExtensionRouteInfo>();
 
 
         public ExtensionInfo(Type sourceType, LambdaExpression lambda, Type type, string key, Func<string> niceName)

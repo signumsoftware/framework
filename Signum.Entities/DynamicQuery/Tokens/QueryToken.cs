@@ -66,22 +66,29 @@ namespace Signum.Entities.DynamicQuery
 
             result.Sort((a, b) =>
             {
-                if (a.Key == "Id")
-                    return -1;
-
-                if (b.Key == "Id")
-                    return 1;
-
-                if (a.Key == "ToString")
-                    return -1;
-
-                if (b.Key == "ToString")
-                    return 1;
-
-                return StringComparer.CurrentCulture.Compare(a.ToString(), b.ToString());
+                return
+                    PriorityCompare(a.Key, b.Key, s => s == "Id") ??
+                    PriorityCompare(a.Key, b.Key, s => s == "ToString") ??
+                    PriorityCompare(a.Key, b.Key, s => s.StartsWith("(")) ??
+                    string.Compare(a.ToString(), b.ToString());
             }); 
 
             return result;
+        }
+
+        public int? PriorityCompare(string a, string b, Func<string, bool> isPriority)
+        {
+            if (isPriority(a))
+            {
+                if (isPriority(b))
+                    return string.Compare(a, b);
+                return -1;
+            }
+
+            if (isPriority(b))
+                return 1;
+
+            return null;
         }
 
         protected List<QueryToken> SubTokensBase(Type type, Implementations? implementations)
