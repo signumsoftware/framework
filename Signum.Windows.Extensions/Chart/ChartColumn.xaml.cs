@@ -39,7 +39,6 @@ namespace Signum.Windows.Chart
             set { SetValue(GroupResultsProperty, value); }
         }
 
-        public IEnumerable<ColumnDescription> ColumnDescriptions { get; set; }
 
         public ChartToken()
         {
@@ -50,16 +49,26 @@ namespace Signum.Windows.Chart
 
         void ChartToken_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            UpdateGroup();
+            var oldColumn = e.OldValue as ChartColumnDN;
+
+            if (oldColumn != null)
+                oldColumn.Notified -= UpdateGroup;
+
+            var newColumn = e.NewValue as ChartColumnDN;
+
+            if (newColumn != null)
+                newColumn.Notified += UpdateGroup;
         }
 
         private List<QueryToken> token_SubTokensEvent(QueryToken token)
         {
-            var ct = DataContext as ChartTokenDN;
+            var ct = DataContext as ChartColumnDN;
             if (ct == null)
                 return new List<QueryToken>();
 
-            return ct.SubTokensChart(token, ColumnDescriptions);
+            var desc = this.VisualParents().OfType<ChartBuilder>().First().Description;
+
+            return ct.SubTokensChart(token, desc.Columns);
         }
 
         private void UpdateGroup()

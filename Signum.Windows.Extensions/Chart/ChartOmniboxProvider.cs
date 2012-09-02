@@ -37,7 +37,7 @@ namespace Signum.Windows.Chart
 
         public override void OnSelected(ChartOmniboxResult result)
         {
-            ChartWindow window = new ChartWindow()
+            ChartRequestWindow window = new ChartRequestWindow()
             {
                 DataContext = new ChartRequest(result.QueryName)
             };

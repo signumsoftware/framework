@@ -49,7 +49,7 @@ namespace Signum.Windows.Chart
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
-            return cr.Chart.SubTokensFilters(token, QueryDescription.Columns);
+            return token.SubTokensChart(QueryDescription.Columns, cr.GroupResults);
         }
 
         private List<QueryToken> QueryTokenBuilderOrders_SubTokensEvent(QueryToken token)
@@ -58,7 +58,7 @@ namespace Signum.Windows.Chart
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
-            return cr.Chart.SubTokensOrders(token, QueryDescription.Columns);
+            return token.SubTokensChart(QueryDescription.Columns, cr.GroupResults);
         }
     }
 }

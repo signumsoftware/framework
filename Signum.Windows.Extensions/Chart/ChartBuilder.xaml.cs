@@ -24,6 +24,9 @@ using System.Windows.Threading;
 using Signum.Windows;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
+using System.IO;
+using Signum.Entities.Files;
+using System.Collections.ObjectModel;
 
 namespace Signum.Windows.Chart
 {
@@ -32,77 +35,77 @@ namespace Signum.Windows.Chart
     /// </summary>
     public partial class ChartBuilder : UserControl
     {
-        public static PropertyLabelConverter PropertyLabel = new PropertyLabelConverter();
-        public static GroupByVisibleConverter GroupByVisible = new GroupByVisibleConverter();
         public static ChartTypeBackgroundConverter ChartTypeBackground = new ChartTypeBackgroundConverter();
 
-        public static IValueConverter ChartTypeToImage = ConverterFactory.New((ChartType ct) =>
-        ExtensionsImageLoader.GetImageSortName("charts/{0}.png".Formato(ct.ToString().ToLower())));
+        public List<ChartScriptDN> chartScripts = Server.RetrieveAll<ChartScriptDN>();
+
+        public ObservableCollection<ChartScriptDN> ChartScripts
+        {
+            get { return new ObservableCollection<ChartScriptDN>(chartScripts); }
+        }
+
+        public static IValueConverter ChartTypeToImage = ConverterFactory.New((Lite<FileDN> ct) =>
+        {
+            BitmapImage image = new BitmapImage();
+            image.BeginInit();
+            image.StreamSource = new MemoryStream(ct.Retrieve().BinaryFile);
+            image.EndInit();
+
+            return image;
+        });
 
         public QueryDescription Description;
         public Type EntityType;
-
-
    
-        public ChartBase Request
+        public IChartBase Request
         {
-            get { return (ChartBase)DataContext; }
+            get { return (IChartBase)DataContext; }
         }
 
         public ChartBuilder()
         {
             InitializeComponent();
-            this.Loaded += new RoutedEventHandler(ChartBuilder_Loaded);
-        }
-
-
-        void ChartBuilder_Loaded(object sender, RoutedEventArgs e)
-        {
-            qtbDimension1.ColumnDescriptions = Description.Columns;
-            qtbDimension2.ColumnDescriptions = Description.Columns;
-            qtbValue1.ColumnDescriptions = Description.Columns;
-            qtbValue2.ColumnDescriptions = Description.Columns;           
         }
     }
 
-    public class PropertyLabelConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            ChartType cr = (ChartType)value;
+    //public class PropertyLabelConverter : IValueConverter
+    //{
+    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        ChartType cr = (ChartType)value;
             
-            ChartTokenName pi = ((string)parameter).ToEnum<ChartTokenName>();
+    //        ChartTokenName pi = ((string)parameter).ToEnum<ChartTokenName>();
             
-            var label = ChartUtils.PropertyLabel(cr, pi);
+    //        var label = ChartUtils.PropertyLabel(cr, pi);
 
-            if (!label.HasValue)
-                return "";
+    //        if (!label.HasValue)
+    //            return "";
 
-            return label.Value.NiceToString();
-        }
+    //        return label.Value.NiceToString();
+    //    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 
-    public class GroupByVisibleConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            ChartResultType cr = (ChartResultType)value;
+    //public class GroupByVisibleConverter : IValueConverter
+    //{
+    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        ChartResultType cr = (ChartResultType)value;
 
-            ChartTokenName pi = ((string)parameter).ToEnum<ChartTokenName>();
+    //        ChartTokenName pi = ((string)parameter).ToEnum<ChartTokenName>();
 
-            return ChartUtils.CanGroupBy(cr, pi) ? Visibility.Visible : Visibility.Collapsed;
-        }
+    //        return ChartUtils.CanGroupBy(cr, pi) ? Visibility.Visible : Visibility.Collapsed;
+    //    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 
     public class ChartTypeBackgroundConverter : IMultiValueConverter
     {
@@ -110,10 +113,10 @@ namespace Signum.Windows.Chart
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.Length != 3 || !(values[0] is ChartResultType) || !(values[1] is ChartResultType) || !(values[2] is bool) ||  ((bool)values[2]))
+            if (values.Length != 3 || !(values[0] is ChartScriptDN) || !(values[1] is IChartBase) || !(values[2] is bool) || ((bool)values[2]))
                 return null;
 
-            if (((ChartResultType)values[0]) == ((ChartResultType)values[1]))
+            if (((ChartScriptDN)values[0]).IsCompatibleWith(((IChartBase)values[1]).Columns))
                 return superLightBlue;
 
             return null;

@@ -111,7 +111,6 @@ WriteLiteral("\r\n");
         tc.Value = new ChartColumnDN();
     }
     
-    var groupBy = tc.Value.ParentChart.ChartScript.GroupBy;
     
 
 WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
@@ -127,7 +126,7 @@ WriteLiteral("\">\r\n        <td>");
 WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
 
 
-             if (groupBy != GroupByChart.Never && tc.Value.ScriptColumn.IsGroupKey)
+             if (tc.Value.GroupByVisible)
             {
                 var groupCheck = new HtmlTag("input")
                     .IdName(tc.Compose("group"))
@@ -135,12 +134,12 @@ WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
                     .Attr("value", "True")
                     .Class("sf-chart-group-trigger");
 
-                if (groupBy == GroupByChart.Always)
+                if (!tc.Value.GroupByEnabled)
                 {
                     groupCheck.Attr("disabled", "disabled");
                 }
                 
-                bool groupResults = tc.Value.ParentChart.GroupResults;
+                bool groupResults = tc.Value.GroupByChecked;
                 if (groupResults)
                 {
                     groupCheck.Attr("checked", "checked");

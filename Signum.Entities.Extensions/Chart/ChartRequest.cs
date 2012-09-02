@@ -21,11 +21,11 @@ namespace Signum.Entities.Chart
     {
         ChartScriptDN ChartScript { get; }
 
-        bool GroupResults { get; }
+        bool GroupResults { get; set; }
 
         MList<ChartColumnDN> Columns { get; }
 
-        void NotifyChange(bool needNewQuery);
+        void InvalidateResults(bool needNewQuery);
     }
 
     [Serializable]
@@ -53,6 +53,7 @@ namespace Signum.Entities.Chart
                 if (Set(ref chartScript, value, () => ChartScript))
                 {
                     chartScript.SyncronizeColumns(this);
+                    NotifyAllColumns();
                 }
             }
         }
@@ -66,7 +67,7 @@ namespace Signum.Entities.Chart
                 if (Set(ref groupResults, value, () => GroupResults))
                 {
                     NotifyAllColumns();
-                    NotifyChange(true);
+                    InvalidateResults(true);
                 }
             }
         }
@@ -90,7 +91,7 @@ namespace Signum.Entities.Chart
         [field: NonSerialized, Ignore]
         public event Action ChartRequestChanged;
 
-        public void NotifyChange(bool needNewQuery)
+        public void InvalidateResults(bool needNewQuery)
         {
             if (needNewQuery)
                 this.NeedNewQuery = true;

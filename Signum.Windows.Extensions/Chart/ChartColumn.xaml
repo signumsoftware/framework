@@ -24,8 +24,10 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Label Content="{Binding PropertyLabel}" />
-            <ToggleButton IsChecked="{Binding GroupResults, ElementName=me}" ToolTip="Group results" 
+            <ToggleButton ToolTip="Group results" 
                       Visibility="{Binding GroupByVisible, Converter={x:Static m:Converters.BoolToVisibility}}" 
+                      IsEnabled="{Binding GroupByEnabled}"    
+                      IsChecked="{Binding GroupByChecked}" 
                       HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
                 <Image Source="/Signum.Windows.Extensions;Component/Images/charts/groupby.png" Stretch="None" SnapsToDevicePixels="True" />
             </ToggleButton>

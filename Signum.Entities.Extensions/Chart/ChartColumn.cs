@@ -62,7 +62,20 @@ namespace Signum.Entities.Chart
         public IChartBase ParentChart { get { return parentChart; } }
 
         [AvoidLocalization]
-        public bool? IsGroupKey { get { return !parentChart.GroupResults ? (bool?)null: ScriptColumn.IsGroupKey; } }
+        public bool? IsGroupKey { get { return (!parentChart.GroupResults) ? (bool?)null: ScriptColumn.IsGroupKey; } }
+
+        [AvoidLocalization]
+        public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
+
+        [AvoidLocalization]
+        public bool GroupByEnabled { get { return parentChart.ChartScript.GroupBy != GroupByChart.Always; } }
+
+        [AvoidLocalization]
+        public bool GroupByChecked
+        {
+            get { return parentChart.GroupResults; }
+            set { parentChart.GroupResults = value; }
+        }
 
         [AvoidLocalization]
         public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
@@ -76,19 +89,23 @@ namespace Signum.Entities.Chart
 
         public void NotifyChange(bool needNewQuery)
         {
-            parentChart.NotifyChange(needNewQuery);
+            parentChart.InvalidateResults(needNewQuery);
         }
 
-        internal void NotifyExternal<T>(Expression<Func<T>> property)
-        {
-            Notify(property);
-        }
+        [field: NonSerialized, Ignore]
+        public event Action Notified; 
 
         internal void NotifyAll()
         {
             Notify(() => Token);
             Notify(() => IsGroupKey);
+            Notify(() => GroupByEnabled);
+            Notify(() => GroupByChecked);
+            Notify(() => GroupByVisible);
             Notify(() => PropertyLabel);
+
+            if (Notified != null)
+                Notified();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

@@ -28,10 +28,10 @@ namespace Signum.Windows.Chart
     /// <summary>
     /// Interaction logic for ChartWindow.xaml
     /// </summary>
-    public partial class ChartWindow : Window
+    public partial class ChartRequestWindow : Window
     {
         public static readonly DependencyProperty FilterOptionsProperty =
-         DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(ChartWindow), new UIPropertyMetadata(null));
+         DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(ChartRequestWindow), new UIPropertyMetadata(null));
         public FreezableCollection<FilterOption> FilterOptions
         {
             get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
@@ -39,7 +39,7 @@ namespace Signum.Windows.Chart
         }
 
         public static readonly DependencyProperty OrderOptionsProperty =
-         DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(ChartWindow), new UIPropertyMetadata(null));
+         DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(ChartRequestWindow), new UIPropertyMetadata(null));
         public ObservableCollection<OrderOption> OrderOptions
         {
             get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
@@ -51,19 +51,17 @@ namespace Signum.Windows.Chart
         public QuerySettings Settings { get; private set; }
         public Type EntityType;
 
-        ChartRendererBase chartRenderer; 
 
         public ChartRequest Request
         {
             get { return (ChartRequest)DataContext; }
         }
 
-        public ChartWindow()
+        public ChartRequestWindow()
         {
             InitializeComponent();
 
-            chartRenderer = ChartClient.GetChartRenderer();
-            rendererPlaceHolder.Children.Insert(0, chartRenderer); 
+            //rendererPlaceHolder.Children.Insert(0, chartRenderer); 
 
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(ChartBuilder_DataContextChanged);
             this.Loaded += new RoutedEventHandler(ChartWindow_Loaded);
@@ -74,10 +72,10 @@ namespace Signum.Windows.Chart
         void ChartBuilder_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.OldValue != null)
-                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged -= Request_ChartRequestChanged;
+                ((ChartRequest)e.NewValue).ChartRequestChanged -= Request_ChartRequestChanged;
 
             if (e.NewValue != null)
-                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged += Request_ChartRequestChanged;
+                ((ChartRequest)e.NewValue).ChartRequestChanged += Request_ChartRequestChanged;
 
             qtbFilters.UpdateTokenList();
         }
@@ -90,7 +88,7 @@ namespace Signum.Windows.Chart
             UpdateFiltersOrdersUserInterface();
 
             ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
-            Request.Chart.ChartRequestChanged += Request_ChartRequestChanged;
+            Request.ChartRequestChanged += Request_ChartRequestChanged;
 
             chartBuilder.Description = Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
             Settings = Navigator.GetQuerySettings(Request.QueryName);
@@ -162,7 +160,7 @@ namespace Signum.Windows.Chart
             if (cr == null || Description == null)
                 return new List<QueryToken>();
 
-            return cr.Chart.SubTokensFilters(token, Description.Columns);
+            return ChartUtils.SubTokensChart(token, Description.Columns, cr.GroupResults);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
@@ -195,7 +193,7 @@ namespace Signum.Windows.Chart
                 () => resultTable = Server.Return((IChartServer cs) => cs.ExecuteChart(request)),
                 () =>
                 {
-                    request.Chart.NeedNewQuery = false;
+                    request.NeedNewQuery = false;
                     ReDrawChart();
                 },
                 () => execute.IsEnabled = true);
@@ -203,7 +201,7 @@ namespace Signum.Windows.Chart
 
         private void ReDrawChart()
         {
-            if (!Request.Chart.NeedNewQuery)
+            if (!Request.NeedNewQuery)
             {
                 if (resultTable != null)
                     SetResults();
@@ -228,17 +226,17 @@ namespace Signum.Windows.Chart
             return true;
         }
 
-        Func<ResultRow, List<FilterOption>> getFilters;  
+        Func<ResultRow, List<FilterOption>> getFilters;
 
         private void SetResults()
         {
             FillGridView();
 
-            if (Request.Chart.GroupResults)
+            if (Request.GroupResults)
             {
                 //so the values don't get affected till next SetResults
                 var filters = Request.Filters.Select(f => new FilterOption { Path = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
-                var keyColunns = Request.ChartTokens()
+                var keyColunns = Request.Columns
                     .Zip(resultTable.Columns, (t, c) => new { t.Token, Column = c })
                     .Where(a => !(a.Token is AggregateToken)).ToArray();
 
@@ -256,31 +254,8 @@ namespace Signum.Windows.Chart
 
             lvResult.Background = Brushes.White;
 
-            chartRenderer.ChartRequest = Request;
-            chartRenderer.ResultTable = resultTable;
 
-            try
-            {
-                chartRenderer.DrawChart();
-            }
-            catch (ChartNullException ex)
-            {
-                ChartRequest cr = Request;
-
-                ChartTokenDN ct = cr.Chart.GetToken(ex.ChartTokenName);
-
-                string message = "There are null values in {0} ({1}). \r\n Filter values?".Formato(ct.Token.ToString(), ct.PropertyLabel);
-
-                if (MessageBox.Show(Window.GetWindow(this), message, "Filter Null values?", MessageBoxButton.YesNo, MessageBoxImage.Hand) == MessageBoxResult.Yes)
-                {
-                    QueryToken token = ct.Token;
-
-                    if (token is IntervalQueryToken || token is NetPropertyToken)
-                        token = token.Parent;
-
-                    filterBuilder.Filters.Add(new FilterOption { Token = token, Operation = FilterOperation.DistinctTo, RealValue = null });
-                }
-            }
+            //chartRenderer.DrawChart();
         }
 
         static FilterOption[] GetTokenFilters(QueryToken queryToken, object p)
@@ -333,7 +308,7 @@ namespace Signum.Windows.Chart
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;
 
-            var keys = Request.ChartTokens().Select(a => a.Token).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
+            var keys = Request.Columns.Select(a => a.Token).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
             OrderOptions.RemoveAll(a => !(a.Token is AggregateToken) && !keys.Contains(a.Token.FullKey()));
         }
 
@@ -393,12 +368,5 @@ namespace Signum.Windows.Chart
                 });
             }
         }
-    }
-
-    public class ChartRendererBase : UserControl
-    {
-        public virtual void DrawChart() { }
-        public ResultTable ResultTable { get; set; }
-        public ChartRequest ChartRequest { get; set; }
     }
 }

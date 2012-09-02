@@ -14,17 +14,10 @@ namespace Signum.Windows.Chart
 {
     public static class ChartClient
     {
-        static Func<ChartRendererBase> RendererConstructor; 
-
-        public static void Start(Func<ChartRendererBase> rendererConstructor)
+        public static void Start()
         {
             if(Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (rendererConstructor == null)
-                    throw new ArgumentNullException("rendererConstructor"); 
-
-                RendererConstructor = rendererConstructor; 
-
                 QueryClient.Start();
 
                 Navigator.AddSetting(new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart() });
@@ -40,11 +33,6 @@ namespace Signum.Windows.Chart
                 return new ChartMenuItem();
 
             return null; 
-        }
-
-        internal static ChartRendererBase GetChartRenderer()
-        {
-            return RendererConstructor(); 
         }
     }
 
@@ -63,7 +51,7 @@ namespace Signum.Windows.Chart
 
         protected override void OnClick()
         {
-            ChartWindow window = new ChartWindow()
+            ChartRequestWindow window = new ChartRequestWindow()
             {
                 FilterOptions = this.SearchControl.FilterOptions,
                 DataContext = new ChartRequest(this.SearchControl.QueryName)
