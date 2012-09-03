@@ -13,14 +13,16 @@ namespace Signum.Entities
 {
     public static class ObjectDumper
     {
+        public static bool ShowByteArrays = false;
+
         public static string Dump(this object o)
         {
-            return o.Dump(false);
+            return o.Dump(false, ShowByteArrays);
         }
 
-        public static string Dump(this object o, bool showIgnoredFields)
+        public static string Dump(this object o, bool showIgnoredFields, bool showByteArrays)
         {
-            var od = new DumpVisitor(showIgnoredFields);
+            var od = new DumpVisitor(showIgnoredFields, showByteArrays);
             od.DumpObject(o);
             return od.Sb.TryToString();
         }
@@ -36,10 +38,12 @@ namespace Signum.Entities
             public StringBuilder Sb = new StringBuilder();
             int level = 0;
             bool showIgnoredFields = false;
+            bool showBiteArrays = false;
 
-            public DumpVisitor(bool showIgnoredFields)
+            public DumpVisitor(bool showIgnoredFields, bool showByteArrays)
             {
                 this.showIgnoredFields = showIgnoredFields;
+                this.showBiteArrays = showByteArrays;
             }
 
             public void DumpObject(object o)
@@ -99,6 +103,12 @@ namespace Signum.Entities
                 if (o is IEnumerable && !Any((o as IEnumerable)))
                 {
                     Sb.Append("{}");
+                    return;
+                }
+
+                if (o is byte[] && !showBiteArrays)
+                {
+                    Sb.Append("{...}");
                     return;
                 }
 
