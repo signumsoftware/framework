@@ -129,7 +129,7 @@ namespace Signum.Windows.UIAutomation
 
 
     public class EntityBaseProxy : BaseLineProxy
-    {   
+    {
         public AutomationElement CreateButton
         {
             get { return Element.ChildById("btCreate"); }
@@ -150,7 +150,7 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("btRemove"); }
         }
 
-        public PropertyRoute Route { get; private set; } 
+        public PropertyRoute Route { get; private set; }
 
         public EntityBaseProxy(AutomationElement element, PropertyRoute route)
             : base(element, route)
@@ -159,9 +159,12 @@ namespace Signum.Windows.UIAutomation
 
         public Lite LiteValue
         {
-            get { return 
-                string.IsNullOrEmpty(Element.Current.HelpText) ? null : 
-                Lite.Parse(Route == null ? typeof(IdentifiableEntity) : Lite.Extract(Route.Type), Element.Current.HelpText); }
+            get
+            {
+                return
+                    string.IsNullOrEmpty(Element.Current.HelpText) ? null :
+                    Lite.Parse(Route == null ? typeof(IdentifiableEntity) : Lite.Extract(Route.Type), Element.Current.HelpText.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
+            }
             set
             {
                 if (!FastSelect(value))
@@ -176,14 +179,13 @@ namespace Signum.Windows.UIAutomation
             if (Element.TryChildById("btFind") == null)
                 throw new InvalidOperationException("The {0} {1} has no find button to complete the search for {2}".Formato(GetType().Name, this, value.KeyLong())); 
 
-            var win = FindBasic();
+            var win = FindCapture();
 
             if(win.Current.ClassName == "SelectorWindow")
             {
-                using(var selector = new SelectorWindowProxy(win))
+                using (var selector = new SelectorWindowProxy(win))
                 {
-                    win = Element.GetWindowAfter(() => selector.SelectType(value.RuntimeType),
-                        () => "Open SearchWindow on {0} after type selector took more than {1} ms".Formato(this, SearchWindowTimeout), SearchWindowTimeout);
+                    win = selector.CheckCapture(value.RuntimeType);
                 }
             }
 
@@ -205,12 +207,12 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> Create<T>(int? timeOut = null) where T: ModifiableEntity
         {
-            return new NormalWindowProxy<T>(CreateBasic(timeOut ?? NormalWindowTimeout));
+            return new NormalWindowProxy<T>(CreateCapture(timeOut ?? NormalWindowTimeout));
         }
 
-        public AutomationElement CreateBasic(int? timeOut = null)
+        public AutomationElement CreateCapture(int? timeOut = null)
         {
-            var win = Element.GetWindowAfter(
+            var win = Element.CaptureWindow(
                 () => CreateButton.ButtonInvoke(),
                 () => "Create a new entity on {0}".Formato(this), timeOut);
             return win;
@@ -218,14 +220,33 @@ namespace Signum.Windows.UIAutomation
 
         public SearchWindowProxy Find(int? timeOut = null)
         {
-            var win = FindBasic(timeOut);
+            var win = FindCapture(timeOut);
 
             return new SearchWindowProxy(win);
         }
 
-        public AutomationElement FindBasic(int? timeOut = null)
+        public void FindSelectRow(int index = 0, int? timeOut = null)
         {
-            var win = Element.GetWindowAfter(
+            var win = FindCapture(timeOut);
+
+            SearchWindowProxy.Select(win, index);
+        }
+
+        public void FindAutoByFilterId(int id, int? timeOut = null)
+        {
+            var win = FindCapture(timeOut);
+            var searchWindow = new SearchWindowProxy(win);
+
+           
+            searchWindow.AddFilterString("Id", FilterOperation.EqualTo, id.ToString());
+            searchWindow.Search();
+            searchWindow.SelectElementAt(0);
+            searchWindow.Ok();
+        }
+
+        public AutomationElement FindCapture(int? timeOut = null)
+        {
+            var win = Element.CaptureWindow(
                 () => FindButton.ButtonInvoke(),
                 () => "Search entity on {0}".Formato(this), timeOut);
             return win;
@@ -233,7 +254,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T: ModifiableEntity
         {
-            var win = Element.GetWindowAfter(
+            var win = Element.CaptureWindow(
                 () => ViewButton.ButtonInvoke(),
                 () => "View entity on {0}".Formato(this), timeOut);
 
@@ -306,7 +327,7 @@ namespace Signum.Windows.UIAutomation
             get { return comboBox ?? (comboBox = Element.Child(a => a.Current.ControlType == ControlType.ComboBox)); }
         }
 
-        public EntityComboProxy(AutomationElement element, PropertyRoute route)
+        public EntityComboProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
             : base(element, route)
         {
         }
@@ -342,12 +363,29 @@ namespace Signum.Windows.UIAutomation
 
     public class EntityDetailProxy : EntityBaseProxy
     {
+        public static Condition DetailCondition = ConditionBuilder.ToCondition(a => a.Current.ControlType != ControlType.Text && a.Current.ControlType != ControlType.Button); 
+
         public AutomationElement GetDetailControl()
         {
-            return Element.Child(a => a.Current.ControlType != ControlType.Text && a.Current.ControlType != ControlType.Button);
+            return Element.ChildByCondition(DetailCondition);
         }
 
-        public EntityDetailProxy(AutomationElement element, PropertyRoute route)
+        public AutomationElement TryDetailControl()
+        {
+            return Element.TryChildByCondition(DetailCondition);
+        }
+
+        public AutomationElement GetOrCreateDetailControl()
+        {
+            var result = TryDetailControl();
+
+            if (result == null)
+                CreateButton.ButtonInvoke();
+
+            return GetDetailControl();
+        }
+
+        public EntityDetailProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
             : base(element, route)
         {
         }
@@ -361,7 +399,7 @@ namespace Signum.Windows.UIAutomation
             get { return listBox ?? (listBox = Element.Child(a => a.Current.ControlType == ControlType.List)); }
         }
 
-        public EntityListProxy(AutomationElement element, PropertyRoute route)
+        public EntityListProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
             : base(element, route)
         {
         }
@@ -386,14 +424,14 @@ namespace Signum.Windows.UIAutomation
 
     public class EntityRepeaterProxy : EntityBaseProxy
     {
-        public EntityRepeaterProxy(AutomationElement element, PropertyRoute route)
+        public EntityRepeaterProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
             : base(element, route)
         {
         }
 
         public List<RepeaterLineProxy> GetRepeaterElements()
         {
-            return Element.Children(a => a.Current.ClassName == "EntityRepeaterLineBorder").Select(ae => new RepeaterLineProxy(ae)).ToList();
+            return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterLineBorder").Select(ae => new RepeaterLineProxy(ae)).ToList();
         }
     }
 

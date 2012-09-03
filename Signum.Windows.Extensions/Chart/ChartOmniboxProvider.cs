@@ -12,6 +12,7 @@ using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
 using Signum.Entities.DynamicQuery;
 using Signum.Windows.Extensions.Properties;
+using System.Windows;
 
 namespace Signum.Windows.Chart
 {
@@ -35,14 +36,19 @@ namespace Signum.Windows.Chart
             lines.Add(new Run(" ({0})".Formato(Signum.Windows.Extensions.Properties.Resources.Chart)) { Foreground = Brushes.Violet });
         }
 
-        public override void OnSelected(ChartOmniboxResult result)
+        public override void OnSelected(ChartOmniboxResult result, Window window)
         {
-            ChartRequestWindow window = new ChartRequestWindow()
+            ChartRequestWindow cw = new ChartRequestWindow()
             {
                 DataContext = new ChartRequest(result.QueryName)
             };
 
-            window.Show();
+            cw.Show();
+        }
+
+        public override string GetItemStatus(ChartOmniboxResult result)
+        {
+            return "C:" + QueryUtils.GetQueryUniqueKey(result.QueryName);
         }
     }
 }

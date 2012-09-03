@@ -25,10 +25,10 @@ namespace Signum.Windows.Extensions.Sample.Test
         [TestMethod]
         public void Search()
         {
-            using (WindowProxy win = Common.StartAndLogin())
+            using (MainWindowProxy win = Common.StartAndLogin())
             {
                 //win.Core.MenuItemInvoke("Music");
-                using (SearchWindowProxy albums = new SearchWindowProxy(win.Element.MenuItemOpenWindow("Music", "Albumes")))
+                using (SearchWindowProxy albums = new SearchWindowProxy(win.MenuItemOpenWindow("Music", "Albumes")))
                 {
                     albums.AddFilterString("Entity.Name", FilterOperation.Contains, "A");
                     albums.AddFilterString("Entity.Author", FilterOperation.EqualTo, "Smashing");
@@ -64,7 +64,7 @@ namespace Signum.Windows.Extensions.Sample.Test
 
                         album.Save();
 
-                        using (var message = album.WaitCurrentMessageBox())
+                        using (var message = album.Element.WaitMessageBoxChild())
                         {
                             message.OkButton.ButtonInvoke();
                         }

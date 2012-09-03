@@ -34,7 +34,117 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
+        public static void WaitDataContextChangedAfter(this AutomationElement element, Action action, int? timeOut = null, Func<string> actionDescription = null)
+        {
+            string oldValue = element.Current.HelpText;
+            if (string.IsNullOrEmpty(oldValue))
+                throw new InvalidOperationException("Element does not has HelpText set. Consider setting m:Common.AutomationHelpTextFromDataContext on the WPF control");
 
+            action();
+
+            if (actionDescription == null)
+                actionDescription = () => "DataContextChanged for {0}".Formato(oldValue);
+
+            element.Wait(() =>
+            {
+                var newValue = element.Current.HelpText;
+                if (newValue != null && newValue != oldValue)
+                    return true;
+
+                element.AssertMessageBoxChild();
+
+                return false;
+            }, actionDescription, timeOut);
+        }
+
+        public static void WaitDataContextSet(this AutomationElement element, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            if (actionDescription == null)
+                actionDescription = () => "Has DataContext";
+
+            element.Wait(() =>
+            {
+                var newValue = element.Current.HelpText;
+                if (newValue.HasText())
+                    return true;
+
+                element.AssertMessageBoxChild();
+
+                return false;
+            }, actionDescription, timeOut);
+        }
+
+        public static int CapturaWindowTimeout = 5 * 1000;
+
+        public static AutomationElement CaptureWindow(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            if (actionDescription == null)
+                actionDescription = () => "Get Windows after";
+
+            var previous = GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+
+            bool bla = element.Current.IsPassword;
+
+            action();
+
+            AutomationElement newWindow = null;
+
+            element.Wait(() =>
+            {
+                newWindow = GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+
+                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+
+                if (newWindow != null)
+                    return true;
+
+                return false;
+            }, actionDescription, timeOut ?? CapturaWindowTimeout);
+
+            return newWindow;
+        }
+
+        public static List<AutomationElement> GetAllProcessWindows(AutomationElement element)
+        {
+            return GetRecursiveProcessWindows(AutomationElement.RootElement, element.Current.ProcessId);
+        }
+
+        static List<AutomationElement> GetRecursiveProcessWindows(AutomationElement parentWindow, int processId)
+        {
+            var children = parentWindow.Children(a => a.Current.ProcessId == processId && a.Current.ControlType == ControlType.Window);
+         
+            List<AutomationElement> result = new List<AutomationElement>();
+            foreach (var child in children)
+            {
+                result.Add(child);
+                result.AddRange(GetRecursiveProcessWindows(child, processId));
+            }
+
+            return result;
+        }
+
+        public static AutomationElement CaptureChildWindow(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
+        {
+            var parentWindow = WindowProxy.Normalize(element);
+
+            action();
+
+            AutomationElement newWindow = null;
+
+            element.Wait(() =>
+            {
+                newWindow = parentWindow.TryChild(a => a.Current.ControlType == ControlType.Window);
+
+                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+
+                if (newWindow != null )
+                    return true;
+
+
+                return false;
+            }, actionDescription, timeOut ?? CapturaWindowTimeout);
+            return newWindow;
+        }
 
         public static AutomationElement WaitDescendant(this AutomationElement automationElement, Expression<Func<AutomationElement, bool>> condition, int? timeOut = null)
         {

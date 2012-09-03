@@ -100,7 +100,7 @@ namespace Signum.Engine.Operations
 
                     if (!entity.IsNew)
                     {
-                        if (Transaction.AvoidIndependentTransactions)
+                        if (Transaction.InTestTransaction)
                             throw;
 
                         var exLog = ex.LogException();
