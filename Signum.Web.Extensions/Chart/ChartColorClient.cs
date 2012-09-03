@@ -50,6 +50,8 @@ namespace Signum.Web.Chart
                     }
                 });
 
+                ChartUtils.GetChartColor = ChartColorLogic.ColorFor;
+
                 ButtonBarEntityHelper.RegisterEntityButtons<ChartPaletteModel>((ctx, entity) =>
                 {
                     var typeName = Navigator.ResolveWebTypeName(entity.Type.ToType());

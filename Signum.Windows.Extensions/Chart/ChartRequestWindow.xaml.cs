@@ -254,6 +254,9 @@ namespace Signum.Windows.Chart
 
             lvResult.Background = Brushes.White;
 
+            
+
+            webBrowser.Source
 
             //chartRenderer.DrawChart();
         }

@@ -72,6 +72,8 @@
                     <Border Background="SteelBlue" Opacity="50" MouseDown="Border_MouseDown" Visibility="{Binding NeedNewQuery, Converter={x:Static m:Converters.BoolToVisibility}}">
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="20">Generate Chart</TextBlock>
                     </Border>
+                    <WebBrowser x:Name="webBrowser"  Visibility="{Binding NeedNewQuery, Converter={x:Static m:Converters.NotBoolToVisibility}}" >
+                    </WebBrowser>
                 </Grid>
             </TabItem>
             <TabItem>

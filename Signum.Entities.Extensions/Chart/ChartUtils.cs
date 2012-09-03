@@ -8,6 +8,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
+using System.Drawing;
 
 namespace Signum.Entities.Chart
 {
@@ -195,6 +196,93 @@ namespace Signum.Entities.Chart
             });
 
             return result;
+        }
+
+
+        public static Func<Type, int, Color?> GetChartColor = (type, id) => null;
+
+        //Manual Json printer for performance and pretty print
+        public static object DataJson(ChartRequest request, ResultTable resultTable)
+        {
+            var cols = request.Columns.Select((c, i) => new
+            {
+                name = "c" + i,
+                title = c.GetTitle(),
+                token = c.TokenString,
+                isGroupKey = c.IsGroupKey,
+                converter = c.Converter(i)
+            }).ToList();
+
+            if (!request.GroupResults)
+            {
+                cols.Insert(0, new
+                {
+                    name = "entity",
+                    title = "",
+                    token = "Entity",
+                    isGroupKey = (bool?)true,
+                    converter = new Func<ResultRow, object>(r => r.Entity.Key())
+                });
+            }
+
+            return new
+            {
+                columns = cols.ToDictionary(a => a.name, a => new { a.title, a.token, a.isGroupKey }),
+                rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter(r))).ToList()
+            };
+        }
+
+        private static Func<ResultRow, object> Converter(this ChartColumnDN ct, int columnIndex)
+        {
+            if (ct == null)
+                return null;
+
+            var type = ct.Token.Type.UnNullify();
+
+            if (typeof(Lite).IsAssignableFrom(type))
+            {
+                return r =>
+                {
+                    Lite l = (Lite)r[columnIndex];
+                    return new
+                    {
+                        key = l.TryCC(li => li.Key()),
+                        toStr = l.TryCC(li => li.ToString()),
+                        color = l == null ? "#555" : GetChartColor(l.RuntimeType, l.Id).TryToHtml(),
+                    };
+                };
+            }
+            else if (type.IsEnum)
+            {
+                var enumProxy = EnumProxy.Generate(type);
+
+                return r =>
+                {
+                    Enum e = (Enum)r[columnIndex];
+                    return new
+                    {
+                        key = e.TryToString(),
+                        toStr = e.TryCC(en => en.NiceToString()),
+                        color = e == null ? "#555" : GetChartColor(enumProxy, Convert.ToInt32(e)).TryToHtml(),
+                    };
+                };
+            }
+            else if (typeof(DateTime) == type)
+            {
+                return r =>
+                {
+                    DateTime? e = (DateTime?)r[columnIndex];
+                    if (e != null)
+                        e = e.Value.ToUserInterface();
+                    return new
+                    {
+                        key = e.TryToString("s"),
+                        toStr = ct.Token.Format.HasText() ? e.TryToString(ct.Token.Format) : r[columnIndex].TryToString()
+                    };
+                };
+            }
+            else
+                return r => r[columnIndex];
         }
     }
 

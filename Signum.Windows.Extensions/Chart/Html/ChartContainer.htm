@@ -1,0 +1,38 @@
+﻿<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Chart container</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=9" />
+        <script src="jquery-1.7.2.min.js" />
+        <script src="d3.v2.min.js" />
+        <script src="underscore-min.js" />
+	</head>
+	<body>
+    <div id="container">
+    
+    </div>
+
+    <ul style="display:none">
+        <li>Hola</li>
+        <li>a</li>
+        <li>el</li>
+        <li>mundo</li>
+    </ul>
+    <script>
+        $(function () 
+        {
+            var values = $("ul li").map(function (a) { return a.html(); });
+
+            values = _.filter(values, function (a, i) { return a.length > 2 });
+
+            var chart = d3.select('#container')
+                .append('svg:svg').attr('width', width).attr('height', height);
+
+            chart.enterData(values)
+            .append("svg:text").addClass("texto").text(function (a) { return a; });
+        });
+    
+    </script>
+
+	</body>
+</html>

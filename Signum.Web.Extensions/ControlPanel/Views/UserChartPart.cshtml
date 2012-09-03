@@ -43,7 +43,7 @@
             <div class="sf-chart-container" 
                     data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.ControlID)))" 
                     data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(crc.ControlID)))"
-                    data-json="@Html.Json(ChartClient.DataJson(crc.Value, resultTable)).ToString()">
+                    data-json="@Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString()">
             </div>
         </div>
     </div>

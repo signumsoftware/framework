@@ -108,7 +108,7 @@ WriteLiteral("\">\r\n            <legend>Chart</legend>\r\n            <div clas
 WriteLiteral("\"\r\n            data-json=\"");
 
 
-                  Write(Html.Json(ChartClient.DataJson(Model.Value, queryResult)).ToString());
+                  Write(Html.Json(ChartUtils.DataJson(Model.Value, queryResult)).ToString());
 
 WriteLiteral("\">\r\n            </div>\r\n        </fieldset>\r\n        <fieldset id=\"");
 

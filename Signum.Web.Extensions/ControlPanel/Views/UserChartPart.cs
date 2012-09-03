@@ -181,7 +181,7 @@ WriteLiteral("\" \r\n                    data-fullscreen-url=\"");
 WriteLiteral("\"\r\n                    data-json=\"");
 
 
-                          Write(Html.Json(ChartClient.DataJson(crc.Value, resultTable)).ToString());
+                          Write(Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString());
 
 WriteLiteral("\">\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
 
