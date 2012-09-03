@@ -30,7 +30,7 @@ namespace Signum.Services
         List<object> GetQueryNames();
 
         [OperationContract, NetDataContract]
-        List<QueryToken> ExternalQueryToken(Type type, QueryToken parent);
+        List<QueryToken> ExternalQueryToken(QueryToken parent);
     }
 
 }

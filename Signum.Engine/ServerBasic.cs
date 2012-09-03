@@ -176,10 +176,10 @@ namespace Signum.Services
         }
 
         [SuggestUserInterface]
-        public virtual List<QueryToken> ExternalQueryToken(Type type, QueryToken parent)
+        public virtual List<QueryToken> ExternalQueryToken(QueryToken parent)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-               () => DynamicQueryManager.Current.GetExtensions(type, parent).ToList());
+               () => DynamicQueryManager.Current.GetExtensions(parent).ToList());
         }
 
         [SuggestUserInterface]

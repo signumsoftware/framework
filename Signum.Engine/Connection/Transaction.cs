@@ -42,8 +42,10 @@ namespace Signum.Engine
             event Action Rolledback;
 
             void Commit();
-            ICoreTransaction Finish();
+            void Finish();
             void Start();
+
+            ICoreTransaction Parent { get; } 
 
             Dictionary<string, object> UserData { get; }
         }
@@ -86,7 +88,7 @@ namespace Signum.Engine
 
             public void Commit(){ }
 
-            public ICoreTransaction Finish() { return parent; }
+            public void Finish() { }
 
             public Dictionary<string, object> UserData
             {
@@ -96,6 +98,11 @@ namespace Signum.Engine
             public void CallPostRealCommit()
             {
 
+            }
+
+            public ICoreTransaction Parent
+            {
+                get { return parent; }
             }
 
             public event Action Rolledback
@@ -181,8 +188,7 @@ namespace Signum.Engine
                 }
             }
 
-         
-            public virtual ICoreTransaction Finish()
+            public virtual void Finish()
             {
                 if (Transaction != null)
                 {
@@ -195,8 +201,6 @@ namespace Signum.Engine
                     Connection.Dispose();
                     Connection = null;
                 }
-
-                return parent;
             }
 
             Dictionary<string, object> userData;
@@ -205,6 +209,10 @@ namespace Signum.Engine
                 get { return userData ?? (userData = new Dictionary<string, object>());  }
             }
 
+            public ICoreTransaction Parent
+            {
+                get { return parent; }
+            }
 
         }
 
@@ -275,12 +283,17 @@ namespace Signum.Engine
                 }
             }
 
-            public ICoreTransaction Finish() { return parent; }
+            public void Finish() { }
 
             public Dictionary<string, object> UserData
             {
                 get { return parent.UserData; }
             }
+
+            public ICoreTransaction Parent
+            {
+                get { return parent; }
+        }
         }
 
         class NoneTransaction : ICoreTransaction
@@ -351,7 +364,7 @@ namespace Signum.Engine
                 }
             }
 
-            public ICoreTransaction Finish()
+            public void Finish()
             {
                 //if (Transaction != null)
                 //{
@@ -364,8 +377,6 @@ namespace Signum.Engine
                     Connection.Dispose();
                     Connection = null;
                 }
-
-                return parent;
             }
 
             Dictionary<string, object> userData;
@@ -373,29 +384,34 @@ namespace Signum.Engine
             {
                 get { return userData ?? (userData = new Dictionary<string, object>()); }
             }
+
+            public ICoreTransaction Parent
+            {
+                get { return parent; }
+            }
         }
 
-        public static bool AvoidIndependentTransactions
+        public static bool InTestTransaction
         {
-            get { return avoidIndependentTransactions.Value; }
+            get { return inTestTransaction.Value; }
         }
 
-        static readonly Variable<bool> avoidIndependentTransactions = Statics.ThreadVariable<bool>("avoidIndependentTransactions");
+        static readonly Variable<bool> inTestTransaction = Statics.ThreadVariable<bool>("inTestTransaction");
 
         class TestTransaction : RealTransaction 
         {
             public TestTransaction(ICoreTransaction parent, IsolationLevel? isolation)
                 : base(parent, isolation)
             {
-                avoidIndependentTransactions.Value = true;
+                inTestTransaction.Value = true;
             }
 
     
-            public override ICoreTransaction Finish()
+            public override void Finish()
             {
-                avoidIndependentTransactions.Value = false;
+                inTestTransaction.Value = false;
 
-                return base.Finish();
+                base.Finish();
             }
         }
 
@@ -433,14 +449,14 @@ namespace Signum.Engine
 
         public static Transaction ForceNew()
         {
-            return new Transaction(parent => avoidIndependentTransactions.Value ? 
+            return new Transaction(parent => inTestTransaction.Value ? 
                 (ICoreTransaction)new FakedTransaction(parent) : 
                 (ICoreTransaction)new RealTransaction(parent, null));
         }
 
         public static Transaction ForceNew(IsolationLevel? isolationLevel)
         {
-            return new Transaction(parent => avoidIndependentTransactions.Value ? 
+            return new Transaction(parent => inTestTransaction.Value ? 
                 (ICoreTransaction)new FakedTransaction(parent) : 
                 (ICoreTransaction)new RealTransaction(parent, isolationLevel));
         }
@@ -526,15 +542,20 @@ namespace Signum.Engine
 
         public void Dispose()
         {
+            try
+            {
             if (!commited)
-                coreTransaction.Rollback();
+                    coreTransaction.Rollback(); //... sqlTransacion.Rollback()
 
-            ICoreTransaction parent = coreTransaction.Finish();
-
-            if (parent == null)
+                coreTransaction.Finish(); //... sqlTransaction.Dispose() sqlConnection.Dispose()
+            }
+            finally
+            {
+                if (coreTransaction.Parent == null)
                 currents.Value.Remove(Connector.Current);
             else
-                currents.Value[Connector.Current] = parent;
+                    currents.Value[Connector.Current] = coreTransaction.Parent;
+            }
 
             if (commited)
                 coreTransaction.CallPostRealCommit();

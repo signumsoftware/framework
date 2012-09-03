@@ -29,7 +29,7 @@ namespace Signum.Windows
             return val == Visibility.Visible;
         }
 
-        public static TabControl AddTab(this TabControl tabControl, string header, Control content)
+        public static TabControl AddTab(this TabControl tabControl, string header, FrameworkElement content)
         {
             tabControl.Items.Add(new TabItem { Header = header, Content = content });
             return tabControl;

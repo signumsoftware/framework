@@ -65,7 +65,7 @@ namespace Signum.Windows
         {
             base.OnLoad(sender, e);
 
-            if (Common.GetIsReadOnly(this) || Implementations == null || Implementations.Value.IsByAll)
+            if (Implementations == null || Implementations.Value.IsByAll)
                 AutoComplete = false;
         }
 
@@ -77,6 +77,10 @@ namespace Signum.Windows
             btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        public bool CanAutoComplete()
+        {
+            return !Common.GetIsReadOnly(this) && AutoComplete;
+        }
 
         private IEnumerable autoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
         {
@@ -91,7 +95,6 @@ namespace Signum.Windows
 
         private void autoCompleteTextBox_SelectedItemChanged(object sender, RoutedEventArgs e)
         {
-        
             autoCompleteTextBox.Visibility = Visibility.Hidden;
             cc.Focus();
         }
@@ -100,7 +103,9 @@ namespace Signum.Windows
         {
             if (e.IsCommit)
             {
-                SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
+                if (CanAutoComplete())
+                    SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
+
                 autoCompleteTextBox.Visibility = Visibility.Hidden;
                 cc.Focus();
             }
@@ -113,7 +118,7 @@ namespace Signum.Windows
 
         public void ActivateAutoComplete()
         {
-            if (AutoComplete && autoCompleteTextBox.Visibility != Visibility.Visible)
+            if (CanAutoComplete() && autoCompleteTextBox.Visibility != Visibility.Visible)
             {
                 autoCompleteTextBox.Visibility = Visibility.Visible;
                 autoCompleteTextBox.Text = Entity.TryCC(a => a.ToString());

@@ -243,7 +243,7 @@ namespace Signum.Windows
         {
             {ValueLineType.Enum, vl =>new ComboBox()
             { 
-                ItemsSource = vl.ItemSource ??  EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).PreAndNull(vl.Type.IsNullable()),
+                ItemsSource = vl.ItemSource ??  EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).PreAndNull(vl.Type.IsNullable()).ToObservableCollection(),
                 ItemTemplate = comboDataTemplate, 
                 VerticalContentAlignment = VerticalAlignment.Center
             }},

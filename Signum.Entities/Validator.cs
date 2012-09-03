@@ -85,7 +85,10 @@ namespace Signum.Entities
 
             public void When(Func<T, bool> isApplicable)
             {
-                validator.IsApplicable = m => isApplicable((T)m);
+                if (isApplicable == null)
+                    validator.IsApplicable = null;
+                else
+                    validator.IsApplicable = m => isApplicable((T)m);
             }
         }
     }

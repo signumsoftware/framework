@@ -1006,6 +1006,13 @@ namespace Signum.Utilities
                 (collection as List<T> ?? collection.ToList()).AsReadOnly();
         }
 
+        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
+        {
+            return collection == null ? null :
+              collection as ObservableCollection<T> ??
+              new ObservableCollection<T>(collection);
+        }
+
         public static IEnumerable<T> AsThreadSafe<T>(this IEnumerable<T> source)
         {
             return new TreadSafeEnumerator<T>(source);
@@ -1071,7 +1078,7 @@ namespace Signum.Utilities
                 if (lacking.Count != 0)
                     throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, lacking.ToString(", ")));
 
-            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
+           return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
 
 

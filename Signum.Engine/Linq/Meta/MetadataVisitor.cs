@@ -63,9 +63,12 @@ namespace Signum.Engine.Linq
 
         internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
         {
+            if (route.Type.IsLite())
+                route = route.Add("Entity");
+
             var cleaned = MetaEvaluator.Clean(expression);
 
-            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, new MetaExpression(route.Type, new CleanMeta(new[] { route }))));
+            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, new MetaExpression(route.Type.UnNullify(), new CleanMeta(new[] { route }))));
 
             return new MetadataVisitor().Visit(replaced);
         }

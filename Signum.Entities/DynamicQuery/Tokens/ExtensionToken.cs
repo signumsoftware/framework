@@ -19,9 +19,6 @@ namespace Signum.Entities.DynamicQuery
             bool isAllowed, PropertyRoute propertyRoute)
             : base(parent)
         {
-            if (!typeof(IIdentifiable).IsAssignableFrom(parent.Type.CleanType()))
-                throw new InvalidOperationException("Extensions only allowed over {0}".Formato(typeof(IIdentifiable).Name)); 
-
             this.key= key;
             this.type = type;
             this.isProjection = isProjection;
@@ -73,7 +70,9 @@ namespace Signum.Entities.DynamicQuery
             if (BuildExtension == null)
                 throw new InvalidOperationException("ExtensionToken.BuildExtension not set");
 
-            var result = BuildExtension(Parent.Type.CleanType(), Key, Parent.BuildExpression(context).ExtractEntity(false));
+            var parentExpression = Parent.BuildExpression(context).ExtractEntity(false).UnNullify();
+
+            var result = BuildExtension(Parent.Type.CleanType().UnNullify(), Key, parentExpression);
 
             return result.BuildLite().Nullify();
         }
