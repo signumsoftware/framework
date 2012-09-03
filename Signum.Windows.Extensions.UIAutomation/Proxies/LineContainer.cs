@@ -13,21 +13,27 @@ namespace Signum.Windows.UIAutomation
     {
         public PropertyRoute PreviousRoute { get; set; }
         public AutomationElement Element { get; set;  }
+        public WindowProxy ParentWindow { get; set; }
     }
 
     public interface ILineContainer<T> : ILineContainer where T : ModifiableEntity
     {
-
     }
 
     public interface ILineContainer
     {
+        WindowProxy ParentWindow { get; }
         PropertyRoute PreviousRoute { get; }
         AutomationElement Element { get; }
     }
 
     public static class LineContainerExtensions
     {
+        //public static bool IsVisible(this ILineContainer container, PropertyRoute route)
+        //{
+        //    return container.Element.Descendant(a => a.Current.ItemStatus == route.ToString()) != null;
+        //}
+
         public static ValueLineProxy ValueLine(this ILineContainer container, PropertyRoute route)
         {
             var valueLine = container.Element.Descendant(a => a.Current.ClassName == "ValueLine" && a.Current.ItemStatus == route.ToString());
@@ -46,28 +52,28 @@ namespace Signum.Windows.UIAutomation
         {
             var entityCombo = container.Element.Descendant(a => a.Current.ClassName == "EntityCombo" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityComboProxy(entityCombo, route);
+            return new EntityComboProxy(entityCombo, route, container.ParentWindow);
         }
 
         public static EntityDetailProxy EntityDetail(this ILineContainer container, PropertyRoute route)
         {
             var entityDetails = container.Element.Descendant(a => a.Current.ClassName == "EntityDetail" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityDetailProxy(entityDetails, route);
+            return new EntityDetailProxy(entityDetails, route, container.ParentWindow);
         }
 
         public static EntityListProxy EntityList(this ILineContainer container, PropertyRoute route)
         {
             var entityList = container.Element.Descendant(a => a.Current.ClassName == "EntityList" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityListProxy(entityList, route);
+            return new EntityListProxy(entityList, route, container.ParentWindow);
         }
 
         public static EntityRepeaterProxy EntityRepeater(this ILineContainer container, PropertyRoute route)
         {
             var entityRepeater = container.Element.Descendant(a => a.Current.ClassName == "EntityRepeater" && a.Current.ItemStatus == route.ToString());
 
-            return new EntityRepeaterProxy(entityRepeater, route);
+            return new EntityRepeaterProxy(entityRepeater, route, container.ParentWindow);
         }
     }
 
@@ -88,6 +94,11 @@ namespace Signum.Windows.UIAutomation
 
             return new LineContainer<C> { Element = subContainer, PreviousRoute = typeof(C).IsEmbeddedEntity() ? route : null };
         }
+
+        //public static bool ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        //{
+        //    return container.Element.Descendant(a => a.Current.ItemStatus == route.ToString()) != null;
+        //}
 
         public static ValueLineProxy ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
@@ -129,6 +140,15 @@ namespace Signum.Windows.UIAutomation
             PropertyRoute route = container.GetRoute(property);
 
             return container.EntityDetail(route);
+        }
+
+        public static ILineContainer<S> EntityDetailControl<T, S>(this ILineContainer<T> container, Expression<Func<T, S>> property)
+            where T : ModifiableEntity
+            where S : ModifiableEntity
+        {
+            PropertyRoute route = container.GetRoute(property);
+
+            return container.EntityDetail(route).GetDetailControl().ToLineContainer<S>();
         }
 
         public static EntityListProxy EntityList<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity

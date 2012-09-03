@@ -86,9 +86,15 @@ namespace Signum.Engine.Processes
                 if (InitialDelayMiliseconds > -1)
                     sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += () =>
                 {
-                        Thread.Sleep(InitialDelayMiliseconds);
+                    if(InitialDelayMiliseconds == 0)
                         Start();
-                    };
+
+                    Task.Factory.StartNew(() =>
+                    {
+                        Thread.Sleep(InitialDelayMiliseconds);
+                        Start(); 
+                    }); 
+                };
 
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saving += ProcessExecution_Saving;
 
@@ -321,7 +327,7 @@ namespace Signum.Engine.Processes
             registeredProcesses.Add(processKey, logic);
         }
 
-        public static int InitialDelayMiliseconds = 4;
+        public static int InitialDelayMiliseconds = -1;
         public static int MaxDegreeOfParallelism = 4;
 
         static CancellationTokenSource CancelNewProcesses;

@@ -309,7 +309,7 @@ namespace Signum.Windows.Operations
             }
             else if (args.OperationInfo.OperationType == OperationType.Delete)
             {
-                if (MessageBox.Show("Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show(Window.GetWindow(args.EntityControl), "Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     Lite lite = Lite.Create(ident.GetType(), ident);
                     Server.Return((IOperationServer s) => s.Delete(lite, args.OperationInfo.Key, null));

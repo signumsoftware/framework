@@ -30,7 +30,7 @@ namespace Signum.Windows.Processes
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.FromProcess){ Icon = Image("execute.png") },
+                    new EntityOperationSettings<ProcessDN>(ProcessOperation.FromProcess){ Icon = Image("execute.png") },
                     new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
                     new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Cancel){ Icon = Image("stop.png") },
                     new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Execute){ Icon = Image("play.png") },

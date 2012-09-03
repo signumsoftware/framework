@@ -203,7 +203,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            if (MessageBox.Show(Prop.Resources.AreYouSureToRemove0.Formato(CurrentUserChart), Prop.Resources.RemoveUserQuery,
+            if (MessageBox.Show(Window.GetWindow(this), Prop.Resources.AreYouSureToRemove0.Formato(CurrentUserChart), Prop.Resources.RemoveUserQuery,
                 MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
             {
                 Server.Execute((IChartServer s) => s.RemoveUserChart(CurrentUserChart.ToLite()));

@@ -41,7 +41,7 @@ namespace Signum.Windows.Files
         {
             if (DataContext == null)
             {
-                MessageBox.Show("FilePathDn is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Window.GetWindow(this), "FilePath is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
             Process.Start(((FilePathDN)DataContext).FullPhysicalPath);
@@ -51,7 +51,7 @@ namespace Signum.Windows.Files
         {
             if (DataContext == null)
             {
-                MessageBox.Show("FilePathDn is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Window.GetWindow(this), "FilePath is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
             System.Diagnostics.Process.Start(((FilePathDN)DataContext).FullWebPath);

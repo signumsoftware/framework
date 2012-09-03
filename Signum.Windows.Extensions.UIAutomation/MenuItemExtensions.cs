@@ -9,30 +9,30 @@ namespace Signum.Windows.UIAutomation
 {
     public static class MenuItemExtensions
     {
-        public static AutomationElement MenuItemOpenWindow(this AutomationElement window, params string[] menuNames)
+        public static AutomationElement MenuItemOpenWindow(AutomationElement window, params string[] menuNames)
         {
             var menuItem = MenuItemFind(window, menuNames);
 
-            AutomationElement newWindow = window.GetWindowAfter(
+            AutomationElement newWindow = window.CaptureWindow(
                 () => menuItem.ButtonInvoke(),
-                () => "New windows opened after menu " + menuNames.ToString(" -> "));
+                () => "New windows opened after menu  " + menuNames.ToString(" -> "));
 
             return newWindow;
         }
 
-        public static AutomationElement MenuItemFind(AutomationElement window, params string[] menuNames)
+        public static AutomationElement MenuItemFind(AutomationElement element, params string[] menuNames)
         {
             if (menuNames == null || menuNames.Length == 0)
                 throw new ArgumentNullException("menuNames");
 
-            var menuBar = window.Child(c => c.Current.ControlType == ControlType.Menu);
+            var menuBar = element.Child(c => c.Current.ControlType == ControlType.Menu);
 
             var menuItem = menuBar.ChildByCondition(new PropertyCondition(AutomationElement.NameProperty, menuNames[0]));
 
             for (int i = 1; i < menuNames.Length; i++)
             {
                 menuItem.Pattern<ExpandCollapsePattern>().Expand();
-                menuItem = menuItem.ChildByCondition(new PropertyCondition(AutomationElement.NameProperty, menuNames[i]));
+                menuItem = menuItem.WaitChildByCondition(new PropertyCondition(AutomationElement.NameProperty, menuNames[i]));
             }
             return menuItem;
         }

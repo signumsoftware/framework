@@ -317,7 +317,7 @@ namespace Signum.Windows.Chart
             string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);
             if (canOrder.HasText())
             {
-                MessageBox.Show(canOrder);
+                MessageBox.Show(this, canOrder);
                 return;
             }
 

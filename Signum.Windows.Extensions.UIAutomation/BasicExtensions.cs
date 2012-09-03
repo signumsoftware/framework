@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Windows.UIAutomation.Proxies;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -19,11 +20,20 @@ namespace Signum.Windows.UIAutomation
             var item = combo.Child(itemCondition);
 
             item.Pattern<SelectionItemPattern>().Select();
+
+            combo.Pattern<ExpandCollapsePattern>().Collapse();
         }
 
         public static AutomationElement ComboGetSelectedItem(this AutomationElement combo)
         {
             return combo.Pattern<SelectionPattern>().Current.GetSelection().SingleOrDefault();
+        }
+
+        public static AutomationElement TabItemSelect(this AutomationElement container, string tabItemName)
+        {
+            var tabItem = container.Descendant(h => h.Current.ControlType == ControlType.TabItem && h.Current.Name == tabItemName);
+            tabItem.Pattern<SelectionItemPattern>().Select();
+            return tabItem;
         }
 
         public static void ButtonInvoke(this AutomationElement button)
@@ -52,6 +62,9 @@ namespace Signum.Windows.UIAutomation
         public static void Check(this AutomationElement element)
         {
             var  ck= element.Pattern<TogglePattern>();
+            if (ck.Current.ToggleState == ToggleState.Indeterminate)
+                ck.Toggle();
+
             if(ck.Current.ToggleState != ToggleState.On)
                 ck.Toggle();
 
@@ -60,8 +73,9 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static void UnCheck(this AutomationElement element)
-        {
+        { 
             var ck = element.Pattern<TogglePattern>();
+
             if (ck.Current.ToggleState != ToggleState.Off)
                 ck.Toggle();
 
@@ -70,46 +84,6 @@ namespace Signum.Windows.UIAutomation
         }
 
 
-
-        public static int WindowAfterTimeout = 5 * 1000;
-
-        public static AutomationElement GetWindowAfter(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
-        {
-            var previous = AutomationElement.RootElement.Children(a => a.Current.ProcessId == element.Current.ProcessId).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
-
-            action();
-
-            AutomationElement newWindow = null;
-
-            element.Wait(() =>
-            {
-                newWindow = AutomationElement.RootElement
-                    .Children(a => a.Current.ProcessId == element.Current.ProcessId)
-                    .FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
-
-                return newWindow != null;
-            }, actionDescription, timeOut ?? WindowAfterTimeout);
-            return newWindow;
-        }
-
-        public static AutomationElement GetModalWindowAfter(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
-        {
-            TreeWalker walker = new TreeWalker(ConditionBuilder.ToCondition(a => a.Current.ControlType == ControlType.Window));
-
-            var parentWindow = walker.Normalize(element);
-
-            action();
-
-            AutomationElement newWindow = null;
-
-            element.Wait(() =>
-            {
-                newWindow = walker.GetFirstChild(parentWindow);
-
-                return newWindow != null;
-            }, actionDescription, timeOut ?? WindowAfterTimeout);
-            return newWindow;
-        }
 
         public static void SelectByName(this List<AutomationElement> list, string toString, Func<string> containerDescription)
         {
@@ -131,6 +105,20 @@ namespace Signum.Windows.UIAutomation
 
                 filtered.Single().Pattern<SelectionItemPattern>().Select();
             }
+        }
+
+        public static bool IsVisible(this AutomationElement element)
+        {
+            //return !element.Current.IsOffscreen;
+            return !double.IsInfinity(element.Current.BoundingRectangle.X) && !double.IsInfinity(element.Current.BoundingRectangle.Y);
+        }
+
+        public static void WaitVisible(this AutomationElement element, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            if (actionDescription == null)
+                actionDescription = () => "Wait Visible " + element.Current.ClassName;
+
+            element.Wait(() => element.IsVisible(), actionDescription, timeOut);
         }
     }
 }
