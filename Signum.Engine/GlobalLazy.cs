@@ -37,7 +37,7 @@ namespace Signum.Engine
         {
             Action reset = () =>
             {
-                if (singleThreaded.Value)
+                if (Transaction.InTestTransaction)
                 {
                     lazy.Reset();
                     Transaction.Rolledback += () => lazy.Reset();
@@ -110,7 +110,7 @@ namespace Signum.Engine
             {
                 using (Schema.Current.GlobalMode())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
-                using (Transaction tr = singleThreaded.Value? null:  Transaction.ForceNew())
+                using (Transaction tr = Transaction.InTestTransaction ? null:  Transaction.ForceNew())
                 using (new EntityCache(true))
                 {
                     var value = func();
@@ -125,14 +125,6 @@ namespace Signum.Engine
             registeredLazyList.Add(result, null);
 
             return result;
-        }
-
-        static ThreadVariable<bool> singleThreaded = Statics.ThreadVariable<bool>("singleThreadedGlobalLazy");
-        public static IDisposable SingleThreadMode()
-        {
-            var oldValue = singleThreaded.Value;
-            singleThreaded.Value = true;
-            return new Disposable(() => singleThreaded.Value = oldValue);
         }
 
         public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T:class
