@@ -262,7 +262,7 @@ namespace Signum.Utilities
 
             return new XDocument(
                 new XElement("Logs", new XAttribute("TotalTime", timeSpan.NiceToString()),
-                    Entries.Select(e => e.FullXml(timeSpan)))); 
+                    Entries.Select(e => e.FullXml(timeSpan.TotalMilliseconds)))); 
         }
 
         public static XDocument SqlStatisticsXDocument()
@@ -374,7 +374,15 @@ namespace Signum.Utilities
         {
             get
             {
-                return TimeSpan.FromMilliseconds(((End - Start) - Descendants().Sum(a => a.BeforeStart - a.Start)) / PerfCounter.FrequencyMilliseconds);
+                return TimeSpan.FromMilliseconds(ElapsedMilliseconds);
+            }
+        }
+
+        public double ElapsedMilliseconds
+        {
+            get
+            {
+                return ((End - Start) - Descendants().Sum(a => a.BeforeStart - a.Start)) / (double)PerfCounter.FrequencyMilliseconds;
             }
         }
 
@@ -410,15 +418,17 @@ namespace Signum.Utilities
             return "{0} {1}".Formato(Elapsed.NiceToString(), Role);
         }
 
-        public XElement FullXml(TimeSpan elapsedParent)
+        public XElement FullXml(double elapsedParent)
         {
+            var elapsedMs = ElapsedMilliseconds; 
+
             return new XElement("Log",
-                new XAttribute("Ratio", "{0:p}".Formato(this.Elapsed.Ticks / (double)elapsedParent.Ticks)),
-                new XAttribute("Time", Elapsed.NiceToString()),
+                new XAttribute("Time", elapsedMs < 10 ? "{0:.00}ms".Formato(elapsedMs): TimeSpan.FromMilliseconds(elapsedMs).NiceToString()),
+                new XAttribute("Ratio", "{0:p}".Formato(elapsedMs / elapsedParent)),
                 new XAttribute("Role", Role ?? ""),
-                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryLeft(100)),
                 new XAttribute("FullIndex", this.FullIndex()),
-                Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(this.Elapsed))
+                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryLeft(100)),
+                Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(elapsedMs))
                 );
         }
 
