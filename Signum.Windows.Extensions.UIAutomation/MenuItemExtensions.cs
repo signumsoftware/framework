@@ -9,25 +9,24 @@ namespace Signum.Windows.UIAutomation
 {
     public static class MenuItemExtensions
     {
-        public static AutomationElement MenuItemOpenWindow(AutomationElement window, params string[] menuNames)
+        public static AutomationElement MenuItemOpenWindow(AutomationElement menu, params string[] menuNames)
         {
-            var menuItem = MenuItemFind(window, menuNames);
+            var menuItem = MenuItemFind(menu, menuNames);
 
-            AutomationElement newWindow = window.CaptureWindow(
+            AutomationElement newWindow = menu.CaptureWindow(
                 () => menuItem.ButtonInvoke(),
                 () => "New windows opened after menu  " + menuNames.ToString(" -> "));
 
             return newWindow;
         }
 
-        public static AutomationElement MenuItemFind(AutomationElement element, params string[] menuNames)
+        public static AutomationElement MenuItemFind(AutomationElement menu, params string[] menuNames)
         {
             if (menuNames == null || menuNames.Length == 0)
                 throw new ArgumentNullException("menuNames");
 
-            var menuBar = element.Child(c => c.Current.ControlType == ControlType.Menu);
 
-            var menuItem = menuBar.ChildByCondition(new PropertyCondition(AutomationElement.NameProperty, menuNames[0]));
+            var menuItem = menu.ChildByCondition(new PropertyCondition(AutomationElement.NameProperty, menuNames[0]));
 
             for (int i = 1; i < menuNames.Length; i++)
             {
