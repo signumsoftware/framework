@@ -1039,7 +1039,7 @@ namespace Signum.Utilities
                 if (lacking.Count != 0)
                     throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, lacking.ToString(", ")));
 
-            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
+           return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
 
 

@@ -207,7 +207,7 @@ namespace Signum.Entities
 
     public class TelephoneValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex TelephoneRegex = new Regex(@"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-0-9]+$");
+        public static readonly Regex TelephoneRegex = new Regex(@"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-\.0-9]+$");
 
         public TelephoneValidatorAttribute()
             : base(TelephoneRegex)
@@ -435,6 +435,16 @@ namespace Signum.Entities
         public override string HelpMessage
         {
             get { return Resources.HaveNoRepeatedElements; }
+        }
+
+        public static string ByKey<T, K>(IEnumerable<T> collection, Func<T, K> keySelector)
+        {
+            var errors = collection.GroupBy(keySelector)
+                .Select(gr => new { gr.Key, Count = gr.Count() })
+                .Where(a => a.Count > 1)
+                .ToString(e => "{0} x {1}".Formato(e.Key, e.Count), ", ");
+
+            return errors;
         }
     }
 
