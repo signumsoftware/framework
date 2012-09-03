@@ -15,6 +15,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Windows
 {
+
     public static class Server
     {
         static Func<IBaseServer> getServer;
@@ -44,7 +45,7 @@ namespace Signum.Windows
                 current = getServer();
 
                 if (current == null)
-                    throw new InvalidOperationException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
+                    throw new NotConnectedToServerException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
 
                 if (Connecting != null)
                     Connecting();                     
@@ -342,4 +343,17 @@ namespace Signum.Windows
             return lite;
         }
     }
+
+    [Serializable]
+    public class NotConnectedToServerException : Exception
+    {
+        public NotConnectedToServerException() { }
+        public NotConnectedToServerException(string message) : base(message) { }
+        public NotConnectedToServerException(string message, Exception inner) : base(message, inner) { }
+        protected NotConnectedToServerException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
+    }
+
 }

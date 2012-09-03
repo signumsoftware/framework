@@ -9,10 +9,24 @@
 	mc:Ignorable="d">
 
     <SolidColorBrush x:Key="BlueBorder" Color="#FF0046AD"/>
-	
+    <SolidColorBrush x:Key="BlackBorder" Color="Black"/>
+
+    <LinearGradientBrush x:Key="ToolBarStyle" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FFF0F8FF" Offset="0"/>
+        <GradientStop Color="#FFD8EBFF" Offset="0.927"/>
+        <GradientStop Color="#FF6E8194" Offset="0.935"/>
+        <GradientStop Color="#336E8194" Offset="0.987"/>
+    </LinearGradientBrush>
+
+
     <LinearGradientBrush x:Key="BlueBackground" EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#FFFFFFFF" Offset="0"/>
         <GradientStop Color="#FFC9E4FF" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GrayBackground" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+        <GradientStop Color="#FFC9C9C9" Offset="1"/>
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="LightBlueBackground" EndPoint="0.5,1" StartPoint="0.5,0">
