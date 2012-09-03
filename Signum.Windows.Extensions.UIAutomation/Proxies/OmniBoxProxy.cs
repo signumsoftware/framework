@@ -11,7 +11,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine;
 
-namespace Signum.Windows.UIAutomation.Proxies
+namespace Signum.Windows.UIAutomation
 {
     public class OmniBoxProxy
     {
