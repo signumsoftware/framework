@@ -29,10 +29,13 @@ namespace Signum.Windows.Disconnected
         public static string DatabaseFile = "LocalDB.mdf";
         public static string DatabaseLogFile = "LocalDB_log.ldf";
 
-        static Dictionary<Type, StrategyPair> strategies; 
+        static Dictionary<Type, StrategyPair> strategies;
 
         public static bool OfflineMode { get; set; }
+
+        public static DisconnectedExportDN LastExport;
      
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -85,43 +88,47 @@ namespace Signum.Windows.Disconnected
                     return true;
             };
 
-            settings.IsReadOnly += (entity, admin) =>
+            settings.IsReadOnly += (entity, admin) => !Editable(entity, typeof(T));
+           
+        }
+
+        private static bool Editable(IdentifiableEntity entity, Type type)
+        {
+            Upload upload = strategies[type].Upload;
+
+            if (OfflineMode)
             {
-                Upload upload = strategies[typeof(T)].Upload;
-
-                if (OfflineMode)
-                {
-                    if (upload == Upload.None)
-                        return true;
-
-                    if (entity == null || entity.IsNew)
-                        return false;
-
-                    if (upload == Upload.New)
-                        return !entity.IsNew && !;
-
-                    //Upload.Subset
-                    return !entity.IsNew && !((IDisconnectedEntity)entity).DisconnectedMachine.Is(DisconnectedMachineDN.Current);
-                }
-                else
-                {
-                    if (upload == Upload.Subset && entity != null)
-                        return ((IDisconnectedEntity)entity).DisconnectedMachine != null;
-
+                if (upload == Upload.None)
                     return false;
+
+                if (entity == null)
+                    return true;
+
+                if (entity.IsNew)
+                    return true;
+
+                if (upload == Upload.Subset)
+                {
+                    var de = ((IDisconnectedEntity)entity);
+
+                    if(de.DisconnectedMachine != null)
+                        return de.DisconnectedMachine.Is(DisconnectedMachineDN.Current);
                 }
-            }; 
+
+                return DisconnectedExportRanges.InModifiableRange(type, entity.Id);
+            }
+            else
+            {
+                if (upload == Upload.Subset && entity != null)
+                    return ((IDisconnectedEntity)entity).DisconnectedMachine == null;
+
+                return true;
+            }
         }
 
         static void UpdateCache()
         {
             strategies = Server.Return((IDisconnectedServer ds) => ds.GetStrategyPairs());
         }
-
-        public static void DownloadDatabase(Window owner)
-        {
-
-        }
-
     }
 }

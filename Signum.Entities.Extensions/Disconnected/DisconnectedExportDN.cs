@@ -198,6 +198,31 @@ namespace Signum.Entities.Disconnected
         {
             return CalculateTotalExpression.Evaluate(this);
         }
+
+        internal DisconnectedExportDN Clone()
+        {
+            return new DisconnectedExportDN
+            {
+                Machine = machine,
+                Lock = Lock,
+                CreateDatabase = CreateDatabase,
+                DisableForeignKeys = DisableForeignKeys,
+                Copies = Copies.Select(c=>new DisconnectedExportTableDN
+                {
+                    Type = c.Type,
+                    CopyTable = c.CopyTable,
+                    MaxIdInRange = c.MaxIdInRange,
+                    Errors = c.Errors,
+                }).ToMList(),
+                EnableForeignKeys = EnableForeignKeys,
+                ReseedIds = ReseedIds,
+                BackupDatabase = BackupDatabase,
+                DropDatabase = DropDatabase,
+                Total = Total,
+                State = State,
+                Exception = Exception
+            };
+        }
     }
 
     public enum DisconnectedExportState

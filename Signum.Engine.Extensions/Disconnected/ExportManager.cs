@@ -158,6 +158,8 @@ namespace Signum.Engine.Disconnected
                         }
                     }
 
+                    CopyExport(export, newDatabase);
+
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
                         BackupDatabase(machine, export, newDatabase);
 
@@ -190,6 +192,16 @@ namespace Signum.Engine.Disconnected
             runningExports.Add(export, new RunningExports { Task = task, CancelationSource = cancelationSource });
 
             return export;
+        }
+
+        private void CopyExport(Lite<DisconnectedExportDN> export, SqlConnector newDatabase)
+        {
+            var clone = export.Retrieve().Clone();
+
+            using (Connector.Override(newDatabase))
+            {
+                clone.Save();
+            }
         }
 
 
