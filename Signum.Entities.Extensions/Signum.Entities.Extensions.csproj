@@ -114,6 +114,7 @@
     <Compile Include="Chart\IntervalQueryToken.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />
+    <Compile Include="Disconnected\DisconnectedExportRanges.cs" />
     <Compile Include="Disconnected\DisconnectedImportDN.cs" />
     <Compile Include="Disconnected\DisconnectedMachineDN.cs" />
     <Compile Include="Disconnected\DisconnectedExportDN.cs" />

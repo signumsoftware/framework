@@ -290,6 +290,9 @@ namespace Signum.Engine.Disconnected
             this.Download = download;
             this.DownloadSubset = downloadSubset;
 
+            if (typeof(T) == typeof(DisconnectedExportDN) && (download != Download.None || upload != Upload.None))
+                throw new InvalidOperationException("{0} should have DownloadStrategy and UploadStratey = None".Formato(typeof(T).NiceName()));
+
             if (upload == Upload.Subset)
             {
                 if (uploadSubset == null)
@@ -319,40 +322,33 @@ namespace Signum.Engine.Disconnected
         {
             if (DisconnectedLogic.OfflineMode)
             {
-                switch (Upload)
+                if (Upload == Upload.None)
+                    throw new ApplicationException(Resources.NotAllowedToSave0WhileOffline.Formato(ident.GetType().NicePluralName()));
+
+                if (ident.IsNew)
+                    return;
+
+                if (Upload == Upload.Subset)
                 {
-                    case Upload.None: throw new ApplicationException(Resources.NotAllowedToSave0WhileOffline.Formato(ident.GetType().NicePluralName()));
-                    case Upload.New:
-                        if (!ident.IsNew)
-                            throw new ApplicationException(Resources.NotAllowedToModifyExisting0WhileOffline.Formato(ident.GetType().NicePluralName()));
-                        break;
-                    case Upload.Subset:
+                    var de = ((IDisconnectedEntity)ident);
 
-                        if (ident.IsNew)
-                            return;
-
-                        if (DownloadSubset == UploadSubset)
-                            return;
-
-                        var de = (IDisconnectedEntity)ident;
-                        if (de.DisconnectedMachine != null && de.DisconnectedMachine.ToString() != Environment.MachineName)
+                    if (de.DisconnectedMachine != null)
+                    {
+                        if (!de.DisconnectedMachine.Is(DisconnectedMachineDN.Current))
                             throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
-                        break;
-                    default: break;
+
+                    }
                 }
+
+                if (!DisconnectedExportRanges.InModifiableRange(ident.GetType(), ident.Id))
+                    throw new ApplicationException(Resources.NotAllowedToSaveThis0WhileOffline.Formato(ident.GetType().NiceName()));
+
             }
             else
             {
-                switch (Upload)
-                {
-                    case Upload.None: break;
-                    case Upload.New: break;
-                    case Upload.Subset:
-                        if (((IDisconnectedEntity)ident).DisconnectedMachine != null)
-                            throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
-                        break;
-                    default: break;
-                }
+                if (Upload == Upload.Subset && ((IDisconnectedEntity)ident).DisconnectedMachine != null)
+                    throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
+
             }
         }
 

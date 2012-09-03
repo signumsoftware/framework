@@ -120,15 +120,23 @@ namespace Signum.Engine.Disconnected
                     foreach (var tuple in downloadTables)
                     {
                         token.ThrowIfCancellationRequested();
+                        int ms = 0;
+                        using (token.MeasureTime(l => ms = l))
+                        {
+                            tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabase, machine);
+                        }
 
-                        using (token.MeasureTime(l => ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e => 
+                        int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
+
+                        ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e =>
                             new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
                             {
-                                Element = { CopyTable = l }
-                            })))
-                        {
-                            tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabase, machine); 
-                        }
+                                Element =
+                                {
+                                    CopyTable = ms,
+                                    MaxIdInRange = maxId,
+                                }
+                            });
                     }
 
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { EnableForeignKeys = l })))
@@ -149,6 +157,8 @@ namespace Signum.Engine.Disconnected
                             Reseed(machine, table);
                         }
                     }
+
+                    CopyExport(export, newDatabase);
 
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
                         BackupDatabase(machine, export, newDatabase);
@@ -182,6 +192,16 @@ namespace Signum.Engine.Disconnected
             runningExports.Add(export, new RunningExports { Task = task, CancelationSource = cancelationSource });
 
             return export;
+        }
+
+        private void CopyExport(Lite<DisconnectedExportDN> export, SqlConnector newDatabase)
+        {
+            var clone = export.Retrieve().Clone();
+
+            using (Connector.Override(newDatabase))
+            {
+                clone.Save();
+            }
         }
 
 
