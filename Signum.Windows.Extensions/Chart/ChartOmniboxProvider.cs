@@ -48,7 +48,7 @@ namespace Signum.Windows.Chart
 
         public override string GetItemStatus(ChartOmniboxResult result)
         {
-            return "C:" + QueryUtils.GetQueryUniqueKey(result.QueryName);
+            return "C:" + result.QueryName.TryCC(QueryUtils.GetQueryUniqueKey);
         }
     }
 }
