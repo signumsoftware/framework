@@ -224,12 +224,12 @@ namespace Signum.Engine
                     if (selection.NewValue != null)
                     {
                         replacements.Add(selection.OldValue, selection.NewValue);
-                        oldOnly.RemoveAt(0);
+                        oldOnly.Remove(selection.OldValue);
                         newOnly.Remove(selection.NewValue);
                     }
                     else
                     {
-                        oldOnly.RemoveAt(0);
+                        oldOnly.Remove(selection.OldValue);
                     }
 
                     bestSolution = new Solution(null, int.MaxValue);
