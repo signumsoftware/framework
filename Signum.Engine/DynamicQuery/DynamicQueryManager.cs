@@ -236,7 +236,7 @@ namespace Signum.Engine.DynamicQuery
             public PropertyRoute PropertyRoute;
         }
 
-        ConcurrentDictionary<PropertyRoute, ExtensionRouteInfo> metas = new ConcurrentDictionary<PropertyRoute, ExtensionRouteInfo>();
+        ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
 
 
         public ExtensionInfo(Type sourceType, LambdaExpression lambda, Type type, string key, Func<string> niceName)
@@ -260,9 +260,13 @@ namespace Signum.Engine.DynamicQuery
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
-            var info = metas.GetOrAdd(parent.GetPropertyRoute(), pr =>
+            var info = metas.GetOrAdd(parent, p =>
             {
-                Expression e = MetadataVisitor.JustVisit(Lambda, pr);
+                var pr = p.GetPropertyRoute();
+
+                Expression e = pr != null?
+                    MetadataVisitor.JustVisit(Lambda, pr): 
+                    MetadataVisitor.JustVisit(Lambda, new MetaExpression(parent.Type.CleanType(), new DirtyMeta(new Meta[0])));
 
                 MetaExpression me = e as MetaExpression;
 
