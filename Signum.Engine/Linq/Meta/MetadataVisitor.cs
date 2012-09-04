@@ -63,13 +63,13 @@ namespace Signum.Engine.Linq
 
        
 
-        internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
-        {
-            if (route.Type.IsLite())
-                route = route.Add("Entity");
+        //internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
+        //{
+        //    if (route.Type.IsLite())
+        //        route = route.Add("Entity");
 
-            return JustVisit(expression, new MetaExpression(route.Type.UnNullify(), new CleanMeta(new[] { route })));
-        }
+        //    return JustVisit(expression, ));
+        //}
 
         internal static Expression JustVisit(LambdaExpression expression, MetaExpression metaExpression)
         {
