@@ -82,12 +82,18 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
         public int object_id;
 
-
         static Expression<Func<SysViews, IQueryable<SysIndexes>>> IndicesExpression =
             v => Database.View<SysIndexes>().Where(ix => ix.object_id == v.object_id);
         public IQueryable<SysIndexes> Indices()
         {
             return IndicesExpression.Evaluate(this);
+        }
+
+        static Expression<Func<SysViews, IQueryable<SysColumns>>> ColumnsExpression =
+            t => Database.View<SysColumns>().Where(c => c.object_id == t.object_id);
+        public IQueryable<SysColumns> Columns()
+        {
+            return ColumnsExpression.Evaluate(this);
         }
     }
 

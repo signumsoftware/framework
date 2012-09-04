@@ -14,8 +14,6 @@ namespace Signum.Engine
 {
     public static class SchemaSynchronizer
     {
-        static readonly Dictionary<string, DiffViewIndex> defaultIndexes = new Dictionary<string, DiffViewIndex>();
-
         public static Func<Dictionary<string, DiffTable>> GetDatabaseDescription = DefaultGetDatabaseDescription;
 
         public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements)
@@ -23,34 +21,24 @@ namespace Signum.Engine
             Dictionary<string, DiffTable> database = GetDatabaseDescription();
 
             Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables(); 
-                
-               
 
             Dictionary<ITable, Dictionary<string, UniqueIndex>> modelIndices = model.Values.ToDictionary(t => t, t =>t.GeneratUniqueIndexes().ToDictionary(a=>a.IndexName, "Indexes for {0}".Formato(t.Name)));
 
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =
                  Synchronizer.SynchronizeScript(database, model,
-                 (tn, dif) => dif.Indices.Values.Select(dix=> dix.ViewName == null? SqlBuilder.DropIndex(tn, dix.IndexName): 
-                                                                                SqlBuilder.DropViewIndex(dix.ViewName, dix.IndexName)).Concat(
-                              dif.FreeIndices.Select(v=> SqlBuilder.DropIndex(tn, v.IndexName))).Combine(Spacing.Simple),
+                 (tn, dif) => dif.Indices.Values.Select(ix=> SqlBuilder.DropIndex(tn, ix)).Combine(Spacing.Simple),
                  null,
                  (tn, dif, tab) => 
                      {
-                         var removeIndexes = Synchronizer.SynchronizeScript(dif.Indices ?? defaultIndexes, modelIndices[tab],
-                                    (i, dix) => dix.ViewName == null? SqlBuilder.DropIndex(tn, dix.IndexName): 
-                                                                      SqlBuilder.DropViewIndex(dix.ViewName, dix.IndexName), null, null, Spacing.Simple);
+                         List<string> changedColumns = ChangedColumns(dif, tab);
+
+                         var removeIndexes = Synchronizer.SynchronizeScript(dif.Indices, modelIndices[tab],
+                             (i, dix) => dix.IsFreeIndex && !dix.Columns.Any(changedColumns.Contains) ? null : SqlBuilder.DropIndex(tn, dix),
+                             null,
+                             (i, dix, mix) => dix.Columns.Any(changedColumns.Contains) ? SqlBuilder.DropIndex(tn, dix) : null, Spacing.Simple);
                      
-                         List<string> removedOrRenamedColumns = dif.Colums.Keys.Except(tab.Columns.Keys).ToList();
-
-                         var removeFreeIndexes = dif.FreeIndices == null? null : 
-                             (from i in dif.FreeIndices
-                              where i.Columns.Any(c => removedOrRenamedColumns.Contains(c))
-                              select i.Columns.All(c => removedOrRenamedColumns.Contains(c)) ?
-                                 SqlBuilder.DropIndex(tn, i.IndexName) :
-                                 SqlBuilder.DropIndexCommented(tn, i.IndexName)).Combine(Spacing.Simple);
-
-                         return new[] { removeIndexes, removeFreeIndexes }.Combine(Spacing.Double);
+                         return removeIndexes;
                      },
                  Spacing.Double);
 
@@ -91,6 +79,8 @@ namespace Signum.Engine
             if (tableReplacements != null)
                 replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
 
+            SqlPreCommand syncEnums = SynchronizeEnumsScript(replacements);
+
             SqlPreCommand addForeingKeys =
                  Synchronizer.SynchronizeScript(database, model,
                  null,
@@ -109,8 +99,13 @@ namespace Signum.Engine
                  (tn, tab) => SqlBuilder.CreateAllIndices(tab, modelIndices[tab].Values), 
                  (tn, dif, tab) => 
                      {
-                         var createIndexes = Synchronizer.SynchronizeScript(dif.Indices ?? defaultIndexes, modelIndices[tab], null,
-                                    (i, index) => SqlBuilder.CreateUniqueIndex(index), null, Spacing.Simple);
+                         List<string> changedColumns = ChangedColumns(dif, tab);
+
+                         var createIndexes = Synchronizer.SynchronizeScript(dif.Indices, modelIndices[tab],
+                                    null,
+                                    (i, mix) => SqlBuilder.CreateUniqueIndex(mix),
+                                    (i, dix, mix) => dix.Columns.Any(changedColumns.Contains) ?  SqlBuilder.CreateUniqueIndex(mix): null,
+                                    Spacing.Simple);
                          
                          var createFreeIndexes = Synchronizer.SynchronizeScript(dif.Colums, tab.Columns, null, 
                              (cn, col)=>col.ReferenceTable == null? null: SqlBuilder.CreateMultipleIndex(tab, col), null, Spacing.Simple);
@@ -119,7 +114,16 @@ namespace Signum.Engine
                      },
                  Spacing.Double);
 
-            return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, addForeingKeys, addIndices);
+            return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
+        }
+
+        private static List<string> ChangedColumns(DiffTable dif, ITable tab)
+        {
+            List<string> mismatchColumns = (from dc in dif.Colums.Values
+                                            let mc = tab.Columns.TryGetC(dc.Name)
+                                            where mc == null || !dc.Equals(mc)
+                                            select dc.Name).ToList();
+            return mismatchColumns;
         }
 
         public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription()
@@ -128,7 +132,7 @@ namespace Signum.Engine
 
             var database = (from s in Database.View<SysSchemas>()
                             from t in s.Tables()
-                            where !t.ExtendedProperties().Any(a=>a.name == "microsoft_database_tools_support")
+                            where !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")
                             select new DiffTable
                             {
                                 Name = t.name,
@@ -147,32 +151,38 @@ namespace Signum.Engine
                                               Scale = c.scale,
                                               Identity = c.is_identity,
                                               DefaultConstraintName = ctr.name,
-                                              PrimaryKey = t.Indices().Any(i=> i.is_primary_key && i.IndexColumns().Any(ic=>ic.column_id == c.column_id)),
+                                              PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                                               ForeingKey = (from fk in t.ForeignKeys()
                                                             where fk.ForeignKeyColumns().Any(fkc => fkc.parent_column_id == c.column_id)
                                                             join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
-                                                            select fk.name == null ? null: new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).SingleOrDefaultEx(),
+                                                            select fk.name == null ? null : new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).SingleOrDefaultEx(),
                                           }).ToDictionary(a => a.Name),
 
+
                                 Indices = (from i in t.Indices()
-                                           where !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
-                                           select new DiffViewIndex { IndexName = i.name }).ToList().Concat(
+                                           where !i.is_primary_key //&& !(i.is_unique && i.name.StartsWith("IX_"))
+                                           select new DiffIndex
+                                           {
+                                               IsUnique = i.is_unique,
+                                               IndexName = i.name,
+                                               Columns = (from ic in i.IndexColumns()
+                                                          join c in t.Columns() on ic.column_id equals c.column_id
+                                                          select c.name).ToList()
+                                           }).ToList()
+                                           .Concat(
                                            (from v in Database.View<SysViews>()
                                             where v.name.StartsWith("VIX_" + t.name + "_")
                                             from i in v.Indices()
-                                            where !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
-                                            select new DiffViewIndex { IndexName = i.name, ViewName = v.name }).ToList()).ToDictionary(a => a.IndexName),
+                                            select new DiffIndex
+                                            {
+                                                ViewName = v.name,
+                                                IndexName = i.name,
+                                                Columns = (from ic in i.IndexColumns()
+                                                           join c in v.Columns() on ic.column_id equals c.column_id
+                                                           select c.name).ToList()
 
+                                            }).ToList()).ToDictionary(a => a.IndexName),
 
-                                FreeIndices = (from i in t.Indices() 
-                                               where !i.is_primary_key && !(i.is_unique && i.name.StartsWith("IX_"))
-                                               select new DiffFreeIndex
-                                               {
-                                                   IndexName = i.name,
-                                                   Columns = (from ic in i.IndexColumns()
-                                                              join c in t.Columns() on ic.column_id equals c.column_id
-                                                              select c.name).ToList()
-                                               }).ToList()
                             }).ToDictionary(c => c.Name);
 
             return database;
@@ -194,21 +204,8 @@ namespace Signum.Engine
                 Spacing.Double);
         }
 
-        public static SqlPreCommand RenameFreeIndexes()
-        {
-            var indices = (from t in Database.View<SysTables>()
-                           join i in Database.View<SysIndexes>() on t.object_id equals i.object_id
-                           where !i.is_primary_key && !i.is_unique && i.name.StartsWith("IX_")
-                           select new
-                           {
-                               Table = t.name,
-                               Index = i.name,
-                           }).ToList();
-
-            return indices.Select(a => SqlBuilder.RenameIndex(a.Table, a.Index, "F" + a.Index)).Combine(Spacing.Simple);  
-        }
-
-        public static SqlPreCommand SynchronizeEnumsScript(Replacements replacements)
+  
+        static SqlPreCommand SynchronizeEnumsScript(Replacements replacements)
         {
             Schema schema = Schema.Current;
 
@@ -244,32 +241,24 @@ namespace Signum.Engine
         public string Schema;
         public Dictionary<string, DiffColumn> Colums;
 
-        public Dictionary<string, DiffViewIndex> Indices;
-        public List<DiffFreeIndex> FreeIndices;
+        public Dictionary<string, DiffIndex> Indices;
     }
 
-    public class DiffFreeIndex
+    public class DiffIndex
     {
+        public bool IsUnique;
         public string IndexName; 
+        public string ViewName;
         public List<string> Columns;
 
         public override string ToString()
         {
             return "{0} ({1})".Formato(IndexName, Columns.ToString(", "));
         }
-    }
 
-    public class DiffViewIndex
-    {
-        public string IndexName; 
-        public string ViewName;
-
-        public override string ToString()
+        public bool IsFreeIndex
         {
-            if (ViewName == null)
-                return IndexName;
-            else
-                return "{0} + {1}".Formato(ViewName, IndexName); 
+            get { return IsUnique && IndexName.StartsWith("IX_"); }
         }
     }
 

@@ -184,11 +184,6 @@ namespace Signum.Engine
             Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(Connector.Current.DatabaseName(), value));
         }
 
-        public static SqlPreCommand RenameFreeIndexesScript()
-        {
-            return SchemaSynchronizer.RenameFreeIndexes();
-        }
-
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
            where T : IdentifiableEntity
         {

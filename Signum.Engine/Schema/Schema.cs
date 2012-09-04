@@ -384,9 +384,7 @@ namespace Signum.Engine.Maps
             Generating += SchemaGenerator.InsertEnumValuesScript;
             Generating += TypeLogic.Schema_Generating;
 
-
             Synchronizing += SchemaSynchronizer.SynchronizeSchemaScript;
-            Synchronizing += SchemaSynchronizer.SynchronizeEnumsScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;

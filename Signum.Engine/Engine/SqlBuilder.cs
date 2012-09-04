@@ -42,11 +42,12 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("DROP VIEW {0}".Formato(view.SqlScape()));
         }
 
-        public static SqlPreCommand DropViewIndex(string view, string index)
+        static SqlPreCommand DropViewIndex(string view, string index)
         {
             return new[]{
                  DropIndex(view, index),
-                 DropView(view)}.Combine(Spacing.Simple);
+                 DropView(view)
+            }.Combine(Spacing.Simple);
         }
 
         internal static SqlPreCommand AlterTableDropColumn(string table, string columnName)
@@ -146,16 +147,19 @@ namespace Signum.Engine
             return new []{uniqueIndices, freeIndexes}.Combine(Spacing.Simple); 
         }
 
-        internal static SqlPreCommand DropIndex(string table, string indexName)
+        internal static SqlPreCommand DropIndex(string table, DiffIndex index)
+        {
+            if (index.ViewName == null)
+                return DropIndex(table, index.IndexName);
+            else
+                return DropViewIndex(index.ViewName, index.IndexName);
+        }
+
+        static SqlPreCommand DropIndex(string table, string indexName)
         {
             return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(table.SqlScape(), indexName.SqlScape()));
         }
 
-        internal static SqlPreCommand DropIndexCommented(string table, string indexName)
-        {
-            return new SqlPreCommandSimple("-- DROP INDEX {0}.{1}".Formato(table.SqlScape(), indexName.SqlScape()));
-        }
-        
         public static SqlPreCommand CreateMultipleIndex(ITable table, IColumn column)
         {
             string indexName = "FIX_{0}_{1}".Formato(table.Name, column.Name);
