@@ -142,7 +142,7 @@ namespace Signum.Engine
         {
             var uniqueIndices = tableIndexes.Select(ix => CreateUniqueIndex(ix)).Combine(Spacing.Simple); 
 
-            var freeIndexes = t.Columns.Values.Where(c=>c.ReferenceTable != null).Select(c=>CreateMultipleIndex(t, c)).Combine(Spacing.Simple); 
+            var freeIndexes = t.Columns.Values.Where(c=>c.ReferenceTable != null).Select(c=>CreateFreeIndex(t, c)).Combine(Spacing.Simple); 
 
             return new []{uniqueIndices, freeIndexes}.Combine(Spacing.Simple); 
         }
@@ -160,7 +160,26 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(table.SqlScape(), indexName.SqlScape()));
         }
 
-        public static SqlPreCommand CreateMultipleIndex(ITable table, IColumn column)
+        public static SqlPreCommand ReCreateFreeIndex(string oldTable, string table, DiffIndex index, Dictionary<string, string> tableReplacements)
+        {
+            if (!index.IsFreeIndex)
+                throw new InvalidOperationException("The Index is not a free index");
+
+            var onlyColumn = index.Columns.Only();
+
+            string indexName = onlyColumn != null ? "FIX_{0}_{1}".Formato(table, (tableReplacements.TryGetC(onlyColumn) ?? onlyColumn)) :
+                tableReplacements == null ? index.IndexName.Replace(oldTable, table) :
+                index.IndexName.Replace(tableReplacements).Replace(oldTable, table);
+
+            string columns = index.Columns.ToString(c => (tableReplacements.TryGetC(c) ?? c).SqlScape(), ", ");
+
+            return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
+                 indexName,
+                 table.SqlScape(),
+                 columns));
+        }
+
+        public static SqlPreCommand CreateFreeIndex(ITable table, IColumn column)
         {
             string indexName = "FIX_{0}_{1}".Formato(table.Name, column.Name);
 
@@ -261,5 +280,6 @@ namespace Signum.Engine
         {
             return new SqlPreCommandSimple("select @@rowcount;"); 
         }
+
     }
 }
