@@ -386,7 +386,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("You want to export (e), import (i) or exit (nothing) {0}?".Formato(fileName));
+            Console.WriteLine("You want to export (e) or import (i) AuthRules? (nothing to exit)".Formato(fileName));
 
             string answer = Console.ReadLine();
 

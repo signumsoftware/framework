@@ -195,10 +195,8 @@ namespace Signum.Entities.Chart
             }
             else
             {
-                var oldFile = icon.Entity;
-
-                if (oldFile.FileName != newFile.FileName || !AreEqual(oldFile.BinaryFile, newFile.BinaryFile))
-                    Icon = oldFile.ToLiteFat();
+                if (icon == null || icon.Entity.FileName != newFile.FileName || !AreEqual(icon.Entity.BinaryFile, newFile.BinaryFile))
+                    Icon = newFile.ToLiteFat();
             }
         }
 

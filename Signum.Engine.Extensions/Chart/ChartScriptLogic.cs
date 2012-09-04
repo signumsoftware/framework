@@ -11,6 +11,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.IO;
 using System.Xml.Linq;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Chart
 {
@@ -60,6 +61,22 @@ namespace Signum.Engine.Chart
                     CanDelete = c => Database.Query<UserChartDN>().Any(a => a.ChartScript == c) ? "There are {0} in the database using {1}".Formato(typeof(UserChartDN).NicePluralName(), c) : null,
                     Delete = (c, _) => c.Delete(),
                 }.Register();
+            }
+        }
+
+        public static void ImportExportScripts(string folderName)
+        {
+            Console.WriteLine("You want to export (e), import (i) ChartScripts? (nothing to exit)".Formato(folderName));
+
+            string answer = Console.ReadLine();
+
+            if (answer.ToLower() == "e")
+            {
+                ExportAllScripts(folderName);
+            }
+            else if (answer.ToLower() == "i")
+            {
+                ImportAllScripts(folderName);
             }
         }
 
