@@ -22,6 +22,7 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections.Specialized;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace Signum.Windows.Chart
 {
@@ -254,12 +255,26 @@ namespace Signum.Windows.Chart
 
             lvResult.Background = Brushes.White;
 
-            
+            webBrowser.NavigateToString(FullHtml.Value);
 
-            webBrowser.Source
+            //webBrowser.Navigate("http://www.quirksmode.org/js/detect.html");
+
+            //webBrowser
 
             //chartRenderer.DrawChart();
         }
+
+        static string baseResourcePath = "Signum.Windows.Extensions.Chart.Html.";
+
+        static ResetLazy<string> FullHtml = new ResetLazy<string>(() =>
+        {
+            string baseHtml = typeof(ChartRequestWindow).Assembly.ReadResourceStream(baseResourcePath + "ChartContainer.htm");
+
+            return Regex.Replace(baseHtml, @"\<script src=""(?<fileName>.*?)"" \/\>", m =>
+                "<script>\r\n+" +
+                 typeof(ChartRequestWindow).Assembly.ReadResourceStream(baseResourcePath + m.Groups["fileName"].Value) +
+                 "\r\n</script>");
+        }); 
 
         static FilterOption[] GetTokenFilters(QueryToken queryToken, object p)
         {

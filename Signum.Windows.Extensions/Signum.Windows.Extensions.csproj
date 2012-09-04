@@ -799,13 +799,13 @@
     <Resource Include="Images\charts\groupby.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="..\Signum.Web.Extensions\Chart\Scripts\SF_Chart_Utils.js">
+    <EmbeddedResource Include="..\Signum.Web.Extensions\Chart\Scripts\SF_Chart_Utils.js">
       <Link>Chart\Html\SF_Chart_Utils.js</Link>
-    </Resource>
-    <Resource Include="Chart\Html\ChartContainer.htm" />
-    <Resource Include="Chart\Html\d3.v2.min.js" />
-    <Resource Include="Chart\Html\jquery-1.7.2.min.js" />
-    <Resource Include="Chart\Html\underscore-min.js" />
+    </EmbeddedResource>
+    <EmbeddedResource Include="Chart\Html\ChartContainer.htm" />
+    <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
+    <EmbeddedResource Include="Chart\Html\jquery-1.7.2.min.js" />
+    <EmbeddedResource Include="Chart\Html\underscore-min.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

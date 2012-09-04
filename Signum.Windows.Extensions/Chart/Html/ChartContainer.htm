@@ -21,7 +21,7 @@
     <script>
         $(function () 
         {
-            var values = $("ul li").map(function (a) { return a.html(); });
+            var values = $("ul li").map(function (i, a) { return a.html(); });
 
             values = _.filter(values, function (a, i) { return a.length > 2 });
 
