@@ -1,4 +1,8 @@
-﻿SF.Chart.Utils = (function () {
+﻿var SF = SF || {};
+
+SF.Chart = SF.Chart || {};  
+
+SF.Chart.Utils = (function () {
 
     Array.prototype.enterData = function (data, tag, cssClass) {
         return this.selectAll(tag + "." + cssClass).data(data)

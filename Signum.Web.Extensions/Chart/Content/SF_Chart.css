@@ -100,26 +100,6 @@
 {
     shape-rendering: crispEdges;         
 }
-.sf-chart-container line.x-ruler, .sf-chart-container line.y-ruler
-{
-    stroke: #ccc;   
-}
-.sf-chart-container line.x-axis, .sf-chart-container line.y-axis, .sf-chart-container line.x-axis-tick, .sf-chart-container line.y-axis-tick
-{
-    stroke: #000;    
-}
-.sf-chart-container text.x-axis-token-label, .sf-chart-container text.y-axis-token-label, text.sf-chart-strong
-{
-    font-weight: bold;    
-}
-.sf-chart-code-container
-{
-    padding: 5px;    
-}
-.sf-chart-code textarea
-{
-    width: 100%;
-}
 
 .sf-chart-color-table
 {

@@ -218,7 +218,6 @@ SF.Chart = (function () {
                 return;
             }
 
-            var hasError = false;
             try {
                 func(chart, data);
                 this.bindMouseClick($chartContainer);

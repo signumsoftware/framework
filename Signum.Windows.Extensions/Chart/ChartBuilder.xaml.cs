@@ -37,7 +37,7 @@ namespace Signum.Windows.Chart
     {
         public static ChartTypeBackgroundConverter ChartTypeBackground = new ChartTypeBackgroundConverter();
 
-        public List<ChartScriptDN> chartScripts = Server.RetrieveAll<ChartScriptDN>();
+        public List<ChartScriptDN> chartScripts = Server.RetrieveAll<ChartScriptDN>().OrderBy(a => a.Columns.Count).ThenByDescending(a => a.Columns.Count(c => c.IsOptional)).ThenBy(a => a.Name).ToList();
 
         public ObservableCollection<ChartScriptDN> ChartScripts
         {
@@ -68,44 +68,6 @@ namespace Signum.Windows.Chart
         }
     }
 
-    //public class PropertyLabelConverter : IValueConverter
-    //{
-    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    //    {
-    //        ChartType cr = (ChartType)value;
-            
-    //        ChartTokenName pi = ((string)parameter).ToEnum<ChartTokenName>();
-            
-    //        var label = ChartUtils.PropertyLabel(cr, pi);
-
-    //        if (!label.HasValue)
-    //            return "";
-
-    //        return label.Value.NiceToString();
-    //    }
-
-    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    //    {
-    //        throw new NotImplementedException();
-    //    }
-    //}
-
-    //public class GroupByVisibleConverter : IValueConverter
-    //{
-    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    //    {
-    //        ChartResultType cr = (ChartResultType)value;
-
-    //        ChartTokenName pi = ((string)parameter).ToEnum<ChartTokenName>();
-
-    //        return ChartUtils.CanGroupBy(cr, pi) ? Visibility.Visible : Visibility.Collapsed;
-    //    }
-
-    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    //    {
-    //        throw new NotImplementedException();
-    //    }
-    //}
 
     public class ChartTypeBackgroundConverter : IMultiValueConverter
     {

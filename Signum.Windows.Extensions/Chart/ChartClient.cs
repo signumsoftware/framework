@@ -9,6 +9,9 @@ using System.Reflection;
 using Signum.Entities.Reports;
 using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
+using Microsoft.Win32;
+using System.Diagnostics;
+using System.IO;
 
 namespace Signum.Windows.Chart
 {
@@ -16,7 +19,7 @@ namespace Signum.Windows.Chart
     {
         public static void Start()
         {
-            if(Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryClient.Start();
 
@@ -24,8 +27,20 @@ namespace Signum.Windows.Chart
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
 
                 UserChartDN.SetConverters(query => QueryClient.GetQueryName(query.Key), queryname => QueryClient.GetQuery(queryname));
+
+                string processName = Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName);
+
+                Registry.CurrentUser
+                    .OpenSubKey("Software")
+                    .OpenSubKey("Microsoft")
+                    .OpenSubKey("Internet Explorer")
+                    .OpenSubKey("Main")
+                    .OpenSubKey("FeatureControl")
+                    .OpenSubKey("FEATURE_BROWSER_EMULATION", true)
+                    .SetValue(processName, 9999, RegistryValueKind.DWord);
             }
         }
+
 
         static SearchControlMenuItem SearchControl_GetCustomMenuItems(object queryName, Type entityType)
         {

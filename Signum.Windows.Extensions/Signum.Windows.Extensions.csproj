@@ -65,6 +65,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -806,6 +807,11 @@
     <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
     <EmbeddedResource Include="Chart\Html\jquery-1.7.2.min.js" />
     <EmbeddedResource Include="Chart\Html\underscore-min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Framework\Signum.Web\Signum\Content\reset.css">
+      <Link>Chart\Html\reset.css</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

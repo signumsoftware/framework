@@ -23,6 +23,7 @@ using Signum.Utilities.Reflection;
 using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Web.Script.Serialization;
 
 namespace Signum.Windows.Chart
 {
@@ -99,8 +100,23 @@ namespace Signum.Windows.Chart
             qtbFilters.Token = null;
             qtbFilters.SubTokensEvent += new Func<QueryToken, List<QueryToken>>(qtbFilters_SubTokensEvent);
 
-            SetTitle(); 
+            SetTitle();
+
+            webBrowser.NavigateToString(FullHtml.Value);
         }
+
+
+        static string baseResourcePath = "Signum.Windows.Extensions.Chart.Html.";
+
+        static ResetLazy<string> FullHtml = new ResetLazy<string>(() =>
+        {
+            string baseHtml = typeof(ChartRequestWindow).Assembly.ReadResourceStream(baseResourcePath + "ChartContainer.htm");
+
+            return Regex.Replace(baseHtml, @"\<(?<tag>style|script) src=""(?<fileName>.*?)"" \/\>", m =>
+                (m.Groups["tag"].Value == "style" ? "<style type=\"text/css\">\r\n" : "<script>\r\n" )+ 
+                 typeof(ChartRequestWindow).Assembly.ReadResourceStream(baseResourcePath + m.Groups["fileName"].Value) +
+                 (m.Groups["tag"].Value == "style" ? "\r\n</style>" : "\r\n</script>"));
+        }); 
 
         internal void UpdateFiltersOrdersUserInterface()
         {
@@ -255,26 +271,20 @@ namespace Signum.Windows.Chart
 
             lvResult.Background = Brushes.White;
 
-            webBrowser.NavigateToString(FullHtml.Value);
+            var jsonData = ChartUtils.DataJson(Request, resultTable);
 
-            //webBrowser.Navigate("http://www.quirksmode.org/js/detect.html");
+            var json = new JavaScriptSerializer().Serialize(jsonData);
 
-            //webBrowser
+            //string html =  Regex.Replace(FullHtml.Value, @"\<textarea id=""(?<id>.*?)"" \/\>", m =>
+            //    "<textarea id=" + m.Groups["id"].Value + ">\r\n" +
+            //    (m.Groups["id"].Value == "codeHere" ? Request.ChartScript.Script : json) + 
+            //     "\r\n</textarea>");
 
-            //chartRenderer.DrawChart();
+            //webBrowser.InvokeScript("setCode", Request.ChartScript.Script);
+            webBrowser.InvokeScript("reDraw", Request.ChartScript.Script, json);
+
+           // webBrowser.Dispatcher.Invoke((Action)(() => webBrowser.InvokeScript("reDraw", Request.ChartScript.Script, json)));
         }
-
-        static string baseResourcePath = "Signum.Windows.Extensions.Chart.Html.";
-
-        static ResetLazy<string> FullHtml = new ResetLazy<string>(() =>
-        {
-            string baseHtml = typeof(ChartRequestWindow).Assembly.ReadResourceStream(baseResourcePath + "ChartContainer.htm");
-
-            return Regex.Replace(baseHtml, @"\<script src=""(?<fileName>.*?)"" \/\>", m =>
-                "<script>\r\n+" +
-                 typeof(ChartRequestWindow).Assembly.ReadResourceStream(baseResourcePath + m.Groups["fileName"].Value) +
-                 "\r\n</script>");
-        }); 
 
         static FilterOption[] GetTokenFilters(QueryToken queryToken, object p)
         {
