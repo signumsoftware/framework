@@ -60,6 +60,10 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AurelienRibon.Ui.SyntaxHighlightBox, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Chart\SyntaxHighlightBox\AurelienRibon.Ui.SyntaxHighlightBox.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -160,6 +164,9 @@
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
     <Compile Include="Chart\ChartOmniboxProvider.cs" />
+    <Compile Include="Chart\ChartScript.xaml.cs">
+      <DependentUpon>ChartScript.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\UserChart.xaml.cs">
       <DependentUpon>UserChart.xaml</DependentUpon>
     </Compile>
@@ -450,6 +457,10 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Chart\ChartScript.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Chart\UserChart.xaml">
       <SubType>Designer</SubType>
@@ -770,11 +781,6 @@
     <Resource Include="Images\query.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Chart\chartIcon.png" />
-    <Resource Include="Chart\execute.png" />
-    <Resource Include="Chart\query.png" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -796,8 +802,8 @@
     <Resource Include="Images\pptx.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\charts\chartIcon.png" />
-    <Resource Include="Images\charts\groupby.png" />
+    <Resource Include="Images\chartIcon.png" />
+    <Resource Include="Images\groupby.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Signum.Web.Extensions\Chart\Scripts\SF_Chart_Utils.js">

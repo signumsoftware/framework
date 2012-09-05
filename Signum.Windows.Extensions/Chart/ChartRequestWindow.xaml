@@ -39,10 +39,7 @@
                 <TextBox x:Name="tbQueryName" IsReadOnly="True"  Foreground="#ff666666"  BorderThickness="0" FontSize="18" Background="{x:Null}" />
             </StackPanel>
         </Border>
-        <Menu Grid.Row="1">
-            <c:UserChartMenuItem x:Name="userChartMenuItem" />
-        </Menu>
-        <GroupBox Grid.Row="2" Header="Filters" Style="{DynamicResource EntityGroupBox}" Margin="2">
+        <GroupBox Grid.Row="1" Header="Filters" Style="{DynamicResource EntityGroupBox}" Margin="2">
             <Grid Background="{DynamicResource BlueBackground}">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
@@ -55,16 +52,24 @@
                 <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
             </Grid>
         </GroupBox>
-        <c:ChartBuilder Grid.Row="3" x:Name="chartBuilder"/>
+        <c:ChartBuilder Grid.Row="2" x:Name="chartBuilder"/>
+        <StackPanel Grid.Row="3" Orientation="Horizontal">
+            <m:ImageButton x:Name="execute" Image="../images/execute.png" VerticalAlignment="Top" Content="Draw Chart!" Margin="2" Click="execute_Click" />
+            <m:ImageButton x:Name="edit" Image="../images/edit.png" VerticalAlignment="Top" Content="Edit Script" Margin="2" Click="edit_Click" />
+            <Menu Grid.Row="1">
+                <c:UserChartMenuItem x:Name="userChartMenuItem" />
+            </Menu>
+        </StackPanel>
         <Border x:Name="brMultiplications" BorderBrush="#fbdd73" Background="#fff59d" BorderThickness="1" CornerRadius="2" Margin="2,0,2,2" Padding="2" HorizontalAlignment="Stretch" Visibility="Collapsed" Grid.Row="4">
             <TextBlock x:Name="tbMultiplications"/>
         </Border>
+
         <TabControl Grid.Row="5" Margin="2,0,2,2" MinHeight="200" MinWidth="200">
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <Image Width="16" Height="16" Stretch="None" 
-                                       Margin="5,0,5,0" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="chartIcon.png" />
+                                       Margin="5,0,5,0" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="../images/chartIcon.png" />
                         <TextBlock Text="Chart"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -80,7 +85,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <Image Width="16" Height="16" Stretch="None" 
-                                       Margin="5,0,5,0" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="query.png" />
+                                       Margin="5,0,5,0" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="../images/query.png" />
                         <TextBlock Text="Data"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -108,7 +113,5 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <m:ImageButton x:Name="execute" Image="execute.png" VerticalAlignment="Top" Content="Draw Chart!" Margin="180,0,2,0" Grid.Row="5" Click="execute_Click" />
-
     </Grid>
 </Window>

@@ -32,6 +32,11 @@
             var $container = $("#container");
             $container.html("");
 
+            var $win = $(window);
+
+            $container.width($win.width());
+            $container.height($win.height());
+
             var width = $container.width();
             var height = $container.height();
 

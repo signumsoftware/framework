@@ -23,7 +23,12 @@ namespace Signum.Windows.Chart
             {
                 QueryClient.Start();
 
-                Navigator.AddSetting(new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart() });
+                Navigator.AddSettings(new List<EntitySettings>()
+                {
+                    new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart() },
+                    new EntitySettings<ChartScriptDN>(EntityType.Default) { View = e => new ChartScript() }
+                });
+
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
 
                 UserChartDN.SetConverters(query => QueryClient.GetQueryName(query.Key), queryname => QueryClient.GetQuery(queryname));
@@ -61,7 +66,7 @@ namespace Signum.Windows.Chart
         {
             base.OnInitialized(e);
             Header = Signum.Windows.Extensions.Properties.Resources.Chart;
-            Icon = ExtensionsImageLoader.GetImageSortName("charts/chartIcon.png").ToSmallImage();
+            Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png").ToSmallImage();
         }
 
         protected override void OnClick()

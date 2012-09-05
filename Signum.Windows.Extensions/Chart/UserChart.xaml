@@ -33,6 +33,7 @@
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
+        
         <c:ChartBuilder x:Name="chartBuilder"/>
 
         <GroupBox Margin="4" Style="{StaticResource EntityGroupBox}">

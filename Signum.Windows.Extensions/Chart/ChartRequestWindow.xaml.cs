@@ -275,15 +275,7 @@ namespace Signum.Windows.Chart
 
             var json = new JavaScriptSerializer().Serialize(jsonData);
 
-            //string html =  Regex.Replace(FullHtml.Value, @"\<textarea id=""(?<id>.*?)"" \/\>", m =>
-            //    "<textarea id=" + m.Groups["id"].Value + ">\r\n" +
-            //    (m.Groups["id"].Value == "codeHere" ? Request.ChartScript.Script : json) + 
-            //     "\r\n</textarea>");
-
-            //webBrowser.InvokeScript("setCode", Request.ChartScript.Script);
             webBrowser.InvokeScript("reDraw", Request.ChartScript.Script, json);
-
-           // webBrowser.Dispatcher.Invoke((Action)(() => webBrowser.InvokeScript("reDraw", Request.ChartScript.Script, json)));
         }
 
         static FilterOption[] GetTokenFilters(QueryToken queryToken, object p)
@@ -395,6 +387,20 @@ namespace Signum.Windows.Chart
                     SearchOnLoad = true,
                 });
             }
+        }
+
+        ChartScript chartScriptControl;
+
+        private void edit_Click(object sender, RoutedEventArgs e)
+        {
+            chartScriptControl = new ChartScript();
+            chartScriptControl.RequestWindow = this;
+
+            Navigator.Navigate(Request.ChartScript, new NavigateOptions
+            {
+                View = chartScriptControl,
+                Clone = false,
+            }); 
         }
     }
 }
