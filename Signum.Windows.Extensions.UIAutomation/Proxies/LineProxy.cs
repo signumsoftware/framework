@@ -109,13 +109,20 @@ namespace Signum.Windows.UIAutomation
 
         public object Value
         {
-            get { return ReflectionTools.Parse(StringValue, PropertyRoute.Type); }
-            set
-            {
-                StringValue = value == null ? null :
-                    value is IFormattable ? ((IFormattable)value).ToString(ValueControl.Current.ItemStatus ?? Reflector.FormatString(PropertyRoute), null) :
+            get { return GetValue(PropertyRoute.Type); }
+            set { SetValue(value, PropertyRoute.Type); }
+        }
+
+        public object GetValue(Type type)
+        {
+            return ReflectionTools.Parse(StringValue, type);
+        }
+
+        public void SetValue(object value, Type type)
+        {
+            StringValue = value == null ? null :
+                    value is IFormattable ? ((IFormattable)value).ToString(ValueControl.Current.ItemStatus ?? Reflector.FormatString(type), null) :
                     value.ToString();
-            } 
         }
     }
 

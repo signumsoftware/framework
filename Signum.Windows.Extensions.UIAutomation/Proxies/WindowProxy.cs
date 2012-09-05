@@ -83,6 +83,7 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
+       
 
         public static AutomationElement Normalize(AutomationElement element)
         {
