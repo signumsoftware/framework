@@ -569,7 +569,7 @@ namespace Signum.Engine
         }
 
         [MethodExpander(typeof(InDbExpander))]
-        public static R InDB<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IIdentifiable
+        public static R InDBEntity<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IIdentifiable
         {
             return entity.InDB().Select(selector).SingleEx();
         }
