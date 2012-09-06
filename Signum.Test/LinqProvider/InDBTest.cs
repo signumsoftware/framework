@@ -59,7 +59,7 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            Assert.AreEqual(Sex.Female, female.InDB(a => a.Sex));
+            Assert.AreEqual(Sex.Female, female.InDBEntity(a => a.Sex));
             Assert.AreEqual(Sex.Female, female.ToLite().InDB(a => a.Sex));
         }
 
@@ -68,7 +68,7 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var friends = female.InDB(a => a.Friends.ToList());
+            var friends = female.InDBEntity(a => a.Friends.ToList());
             friends = female.ToLite().InDB(a => a.Friends.ToList());
         }
 
@@ -101,7 +101,7 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var list = Database.Query<ArtistDN>().Where(a => a.Sex != female.InDB(a2 => a2.Sex)).ToList();
+            var list = Database.Query<ArtistDN>().Where(a => a.Sex != female.InDBEntity(a2 => a2.Sex)).ToList();
             Assert.IsTrue(list.Count > 0);
             list = Database.Query<ArtistDN>().Where(a => a.Sex != female.ToLite().InDB(a2 => a2.Sex)).ToList();
             Assert.IsTrue(list.Count > 0);
@@ -112,7 +112,7 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var list = Database.Query<ArtistDN>().Where(a => female.InDB(a2 => a2.Friends).Contains(a.ToLite())).ToList();
+            var list = Database.Query<ArtistDN>().Where(a => female.InDBEntity(a2 => a2.Friends).Contains(a.ToLite())).ToList();
             Assert.IsTrue(list.Count > 0);
             list = Database.Query<ArtistDN>().Where(a => female.ToLite().InDB(a2 => a2.Friends).Contains(a.ToLite())).ToList();
             Assert.IsTrue(list.Count > 0);
