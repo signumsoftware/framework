@@ -303,6 +303,13 @@ namespace Signum.Engine.Operations
             var op = Find<IDeleteOperation>(lite.RuntimeType, operationKey);
             op.Delete(entity, args);
         }
+
+        public static void Delete<T>(this T entity, Enum operationKey, params object[] args)
+            where T : class, IIdentifiable
+        {
+            var op = Find<IDeleteOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
+            op.Delete(entity, args);
+        }
         #endregion
 
         #region Construct
