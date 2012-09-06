@@ -334,7 +334,7 @@ namespace Signum.Windows.UIAutomation
             get { return comboBox ?? (comboBox = Element.Child(a => a.Current.ControlType == ControlType.ComboBox)); }
         }
 
-        public EntityComboProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
+        public EntityComboProxy(AutomationElement element, PropertyRoute route)
             : base(element, route)
         {
         }
@@ -392,7 +392,7 @@ namespace Signum.Windows.UIAutomation
             return GetDetailControl();
         }
 
-        public EntityDetailProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
+        public EntityDetailProxy(AutomationElement element, PropertyRoute route)
             : base(element, route)
         {
         }
@@ -406,7 +406,7 @@ namespace Signum.Windows.UIAutomation
             get { return listBox ?? (listBox = Element.Child(a => a.Current.ControlType == ControlType.List)); }
         }
 
-        public EntityListProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
+        public EntityListProxy(AutomationElement element, PropertyRoute route)
             : base(element, route)
         {
         }
@@ -431,7 +431,7 @@ namespace Signum.Windows.UIAutomation
 
     public class EntityRepeaterProxy : EntityBaseProxy
     {
-        public EntityRepeaterProxy(AutomationElement element, PropertyRoute route, WindowProxy window)
+        public EntityRepeaterProxy(AutomationElement element, PropertyRoute route)
             : base(element, route)
         {
         }

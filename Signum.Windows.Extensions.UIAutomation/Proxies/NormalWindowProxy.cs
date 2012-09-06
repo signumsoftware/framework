@@ -60,6 +60,13 @@ namespace Signum.Windows.UIAutomation
             ButtonBar.OkButton.ButtonInvoke();
         }
 
+        public AutomationElement OkCapture()
+        {
+           return Element.CaptureWindow(
+           action: () =>  ButtonBar.OkButton.ButtonInvoke(),
+           actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
+        }
+
         public void Save()
         {
             Element.WaitDataContextChangedAfter(
