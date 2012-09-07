@@ -505,7 +505,8 @@ namespace Signum.Engine.Maps
             if (lambda == null)
                 return null;
 
-            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Type.UnNullify(), new CleanMeta(new[] { route.Parent })));
+            //TODO: mirar con olmo
+            //Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Type.UnNullify(), new CleanMeta(new[] { route.Parent })));
             Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(new[] { route.Parent })));
 
             MetaExpression me = e as MetaExpression;
