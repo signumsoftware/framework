@@ -287,6 +287,21 @@ namespace Signum.Web
                 return html();
             return null;
         }
+
+        public static MvcHtmlString JQueryNotification(this HtmlHelper helper, string strongText, string normalText)
+        { 
+            var pContent = new HtmlTag("span").Class("ui-icon ui-icon-info").Attr("style", "float: left; margin-right: .3em;").ToHtml();
+            
+            if (strongText.HasText())
+                pContent = pContent.Concat(new HtmlTag("strong").SetInnerText(strongText).ToHtml());
+            
+            pContent = pContent.Concat(new MvcHtmlString(normalText));
+
+            return new HtmlTag("div").Class("ui-state-highlight ui-corner-all")
+                .Attr("style", "margin-top: 10px; padding: 0 .7em; padding: 10px;")
+                .InnerHtml(new HtmlTag("p").InnerHtml(pContent).ToHtml())
+                .ToHtml();
+        }
     }
 }
 

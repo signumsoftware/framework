@@ -506,6 +506,7 @@ namespace Signum.Engine.Maps
                 return null;
 
             Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Type.UnNullify(), new CleanMeta(new[] { route.Parent })));
+            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(new[] { route.Parent })));
 
             MetaExpression me = e as MetaExpression;
             if (me == null)
