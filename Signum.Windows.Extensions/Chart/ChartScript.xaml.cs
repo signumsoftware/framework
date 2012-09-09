@@ -16,6 +16,8 @@ using Signum.Entities;
 using Signum.Entities.Chart;
 using Signum.Entities.Files;
 using System.IO;
+using System.ComponentModel;
+using AurelienRibon.Ui.SyntaxHighlightBox;
 
 namespace Signum.Windows.Chart
 {
@@ -40,6 +42,29 @@ namespace Signum.Windows.Chart
         public ChartScript()
         {
             InitializeComponent();
+            box.CurrentHighlighter = HighlighterManager.Instance.Highlighters["JavaScript"];
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(ChartScript_DataContextChanged);
+        }
+
+        void ChartScript_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var oldEntity = e.OldValue as INotifyPropertyChanged;
+            if(oldEntity != null)
+                oldEntity.PropertyChanged -= oldEntity_PropertyChanged;
+
+            
+            var newEntity = e.NewValue as INotifyPropertyChanged;
+            if(newEntity != null)
+                newEntity.PropertyChanged += oldEntity_PropertyChanged;
+            
+        }
+
+        void oldEntity_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var cs = sender as ChartScriptDN;
+
+            if (e.PropertyName == "Script")
+                RequestWindow.SetResults(cs.Script); //If saved, different clone
         }
 
         public ChartRequestWindow RequestWindow { get; set; }

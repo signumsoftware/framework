@@ -245,8 +245,11 @@ namespace Signum.Windows.Chart
 
         Func<ResultRow, List<FilterOption>> getFilters;
 
-        private void SetResults()
+        internal void SetResults(string script = null)
         {
+            if(script == null)
+                script = Request.ChartScript.Script; 
+
             FillGridView();
 
             if (Request.GroupResults)
@@ -275,7 +278,7 @@ namespace Signum.Windows.Chart
 
             var json = new JavaScriptSerializer().Serialize(jsonData);
 
-            webBrowser.InvokeScript("reDraw", Request.ChartScript.Script, json);
+            webBrowser.InvokeScript("reDraw", script, json);
         }
 
         static FilterOption[] GetTokenFilters(QueryToken queryToken, object p)

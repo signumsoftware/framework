@@ -4,6 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:f="clr-namespace:Signum.Windows.Files"
     xmlns:d="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
+    xmlns:cbox="clr-namespace:AurelienRibon.Ui.SyntaxHighlightBox;assembly=AurelienRibon.Ui.SyntaxHighlightBox"
     xmlns:swc ="clr-namespace:Signum.Windows.Chart"
     m:Common.TypeContext="d:ChartScriptDN"
     MinWidth="300">
@@ -49,9 +50,8 @@
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
 
-        <!--xmlns:cbox="clr-namespace:AurelienRibon.Ui.SyntaxHighlightBox;assembly=AurelienRibon.Ui.SyntaxHighlightBox"-->
-        <!--<cbox:SyntaxHighlightBox IsLineNumbersMarginVisible="True" x:Name="box" />-->
+        <cbox:SyntaxHighlightBox Grid.Row="4" Grid.ColumnSpan="2" IsLineNumbersMarginVisible="True" x:Name="box"
+                                 Text="{Binding Script, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True,  NotifyOnValidationError=True}" />
 
-        <m:ValueLine m:Common.Route="Script" Grid.Row="4" Grid.ColumnSpan="2" m:Common.LabelVisible="false" />
     </Grid>
 </UserControl>
