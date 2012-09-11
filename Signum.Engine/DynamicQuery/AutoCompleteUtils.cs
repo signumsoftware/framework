@@ -31,6 +31,7 @@ namespace Signum.Engine.DynamicQuery
         {
             return (from mi in new[] { miLiteStarting, miLiteContaining }
                     from type in types
+                    where Schema.Current.IsAllowed(type) == null
                     from lite in mi.GetInvoker(liteType, type)(subString, count)
                     select lite).Take(count).ToList();
         }
