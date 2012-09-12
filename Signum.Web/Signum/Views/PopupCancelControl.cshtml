@@ -1,0 +1,15 @@
+﻿@model Context
+
+<div id="@Model.Compose("panelPopup")" data-title="@((string)ViewData[ViewDataKeys.Title])">
+    @{ 
+        string partialView = (string)ViewData[ViewDataKeys.PartialViewName]; 
+        if (partialView.HasText())
+        {
+            @Html.Partial(partialView, Model);
+        }    
+        else 
+        {
+            @ViewData[ViewDataKeys.CustomHtml]    
+        }
+    }
+</div>
