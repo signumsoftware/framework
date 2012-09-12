@@ -232,19 +232,18 @@ namespace Signum.Entities
             if (this == obj)
                 return true;
 
-            Lite lite = obj as Lite;
-            if (lite != null)
-            {
-                if (RuntimeType != lite.RuntimeType)
-                    return false;
+            if (GetType() != obj.GetType())
+                return false;
 
-                if (IdOrNull != null && lite.IdOrNull != null)
-                    return Id == lite.Id;
-                else
-                    return object.ReferenceEquals(this.UntypedEntityOrNull, lite.UntypedEntityOrNull);
-            }
+            Lite lite = (Lite)obj as Lite;
 
-            return false;
+            if (RuntimeType != lite.RuntimeType)
+                return false;
+
+            if (IdOrNull != null && lite.IdOrNull != null)
+                return Id == lite.Id;
+            else
+                return object.ReferenceEquals(this.UntypedEntityOrNull, lite.UntypedEntityOrNull);
         }
 
         const int MagicMask = 123456853;
