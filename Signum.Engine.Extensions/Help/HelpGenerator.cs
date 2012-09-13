@@ -24,18 +24,20 @@ namespace Signum.Engine.Help
         {
             string validations = Validator.GetOrCreatePropertyPack(pr).Validators.CommaAnd(v => v.HelpMessage);
 
-            Implementations imp = Schema.Current.FindImplementations(pr); 
-
             if (validations.HasText())
                 validations = Resources.Should + validations;
 
             if (Reflector.IsIIdentifiable(pr.Type))
             {
+                Implementations imp = Schema.Current.FindImplementations(pr); 
+
                 return EntityProperty(pr, pr.Type, imp.TypeLinks(pr.Type)) + validations;
             }
             else if (pr.Type.IsLite())
             {
                 Type cleanType = Lite.Extract(pr.Type);
+
+                Implementations imp = Schema.Current.FindImplementations(pr); 
 
                 return EntityProperty(pr, cleanType, imp.TypeLinks(cleanType)) + validations;
             }
@@ -49,10 +51,14 @@ namespace Signum.Engine.Help
 
                 if (elemType.IsIIdentifiable())
                 {
+                    Implementations imp = Schema.Current.FindImplementations(pr.Add("Item")); 
+
                     return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
                 }
                 else if (elemType.IsLite())
-                {
+                {   
+                    Implementations imp = Schema.Current.FindImplementations(pr.Add("Item"));
+
                     return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(Lite.Extract(elemType))) + validations;
                 }
                 else if (Reflector.IsEmbeddedEntity(elemType))
@@ -200,7 +206,9 @@ namespace Signum.Engine.Help
             string typeDesc = QueryColumnType(kvp);
 
             if (kvp.PropertyRoutes != null)
-                return Resources._0IsA1AndShowsTheProperty2.Formato(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.ToString(pr=>PropertyLink(pr), ", "));
+                return Resources._0IsA1AndShows2.Formato(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.CommaAnd(pr =>
+                    pr.PropertyRouteType == PropertyRouteType.Root ? TypeLink(pr.RootType) :
+                    Resources.TheProperty0.Formato(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent: pr))));
             else
                 return Resources._0IsACalculated1.Formato(kvp.DisplayName(), typeDesc);
         }
