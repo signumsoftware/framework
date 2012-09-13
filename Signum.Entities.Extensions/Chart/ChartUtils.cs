@@ -128,13 +128,27 @@ namespace Signum.Entities.Chart
                 }
 
                 chart.Columns[i].ScriptColumn = chartScript.Columns[i];
-                chart.Columns[i].parentChart = chart; 
+                chart.Columns[i].parentChart = chart;
+
+                if (!result)
+                    result = chart.Columns[i].IntegrityCheck().HasText();
             }
 
             if (chart.Columns.Count > chartScript.Columns.Count)
             {
                 chart.Columns.RemoveRange(chartScript.Columns.Count, chart.Columns.Count - chartScript.Columns.Count);
                 return true;
+            }
+
+            if (chartScript.GroupBy == GroupByChart.Always && chart.GroupResults == false)
+            {
+                chart.GroupResults = true;
+                result = true;
+            }
+            else if (chartScript.GroupBy == GroupByChart.Never && chart.GroupResults == true)
+            {
+                chart.GroupResults = false;
+                result = true;
             }
 
             return result;

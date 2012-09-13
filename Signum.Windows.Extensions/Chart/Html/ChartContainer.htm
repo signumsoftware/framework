@@ -12,7 +12,7 @@
         body
         {
             font:12px/1.5 Arial,'Liberation Sans',FreeSans,sans-serif;
-            background-color #ced5db;
+            overflow: hidden;
         }
             
         #container svg
@@ -22,7 +22,7 @@
         </style>
 </head>
 <body>
-    <div id="container" style="width: 100%; min-height: 400px;">
+    <div id="container">
     </div>
     <script type="text/javascript">
 
@@ -34,8 +34,8 @@
 
             var $win = $(window);
 
-            $container.width($win.width());
-            $container.height($win.height());
+            $container.width($win.width() - 2);
+            $container.height($win.height() - 2);
 
             var width = $container.width();
             var height = $container.height();
