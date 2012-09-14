@@ -298,8 +298,8 @@
   <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
     <value>Has solicitado recientemente una nueva contraseña</value>
   </data>
-  <data name="_0IsA1AndShowsTheProperty2" xml:space="preserve">
-    <value>{0} es un {1} y muestra la propiedad {2}</value>
+  <data name="_0IsA1AndShows2" xml:space="preserve">
+    <value>{0} es un {1} y muestra {2}</value>
   </data>
   <data name="_0IsACalculated1" xml:space="preserve">
     <value>{0} es un {1} calculado</value>
@@ -321,5 +321,8 @@
   </data>
   <data name="YourUsernameIs0" xml:space="preserve">
     <value>Su nombre de usuario es: {0}</value>
+  </data>
+  <data name="TheProperty0" xml:space="preserve">
+    <value>la propiedad {0}</value>
   </data>
 </root>

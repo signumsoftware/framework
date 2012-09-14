@@ -1318,7 +1318,7 @@
     <value>Paquete de actualización</value>
   </data>
   <data name="SMSMessageOperations_CreateSMSMessageFromTemplate" xml:space="preserve">
-    <value>Crear SMSMessage desde plantilla</value>
+    <value>Crear SMS desde plantilla</value>
   </data>
   <data name="SMSMessageOperations_CreateUpdateStatusPackage" xml:space="preserve">
     <value>Crear paquete de actualización de estado</value>
@@ -1339,10 +1339,10 @@
     <value>Num lineas</value>
   </data>
   <data name="SMSProviderOperations_SendSMSMessage" xml:space="preserve">
-    <value>Enviar mensaje SMS</value>
+    <value>Enviar SMS</value>
   </data>
   <data name="SMSProviderOperations_SendSMSMessagesFromTemplate" xml:space="preserve">
-    <value>Enviar mensajes SMS de plantilla</value>
+    <value>Enviar SMS desde plantilla</value>
   </data>
   <data name="SMSSendPackageDN" xml:space="preserve">
     <value>Paquete de envios SMS</value>
