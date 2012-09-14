@@ -250,8 +250,8 @@
   <data name="Any" xml:space="preserve">
     <value>any</value>
   </data>
-  <data name="_0IsA1AndShowsTheProperty2" xml:space="preserve">
-    <value>{0} is a {1} and shows the property {2}</value>
+  <data name="_0IsA1AndShows2" xml:space="preserve">
+    <value>{0} is a {1} and shows {2}</value>
   </data>
   <data name="_0IsACalculated1" xml:space="preserve">
     <value>{0} is a calculated {1}</value>
@@ -288,5 +288,8 @@
   </data>
   <data name="The0WithId12IsLockedBy3" xml:space="preserve">
     <value>The {0} with Id {1} ({2}) is locked by {3}</value>
+  </data>
+  <data name="TheProperty0" xml:space="preserve">
+    <value>the property {0}</value>
   </data>
 </root>
