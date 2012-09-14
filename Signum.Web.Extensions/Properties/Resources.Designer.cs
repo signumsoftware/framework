@@ -331,15 +331,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The provided email address does not belong to any registered used.
-        /// </summary>
-        public static string EmailNotExistsDatabase {
-            get {
-                return ResourceManager.GetString("EmailNotExistsDatabase", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Email sent.
         /// </summary>
         public static string EmailSent {
@@ -912,15 +903,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin {
             get {
                 return ResourceManager.GetString("ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There&apos;s not a registered user with that email address.
-        /// </summary>
-        public static string ThereSNotARegisteredUserWithThatEmailAddress {
-            get {
-                return ResourceManager.GetString("ThereSNotARegisteredUserWithThatEmailAddress", resourceCulture);
             }
         }
         
