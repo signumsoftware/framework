@@ -17,8 +17,7 @@ using Signum.Entities.Chart;
 using Signum.Entities.Files;
 using System.IO;
 using System.ComponentModel;
-using AurelienRibon.Ui.SyntaxHighlightBox;
-
+using Signum.Windows.SyntaxHighlight;
 namespace Signum.Windows.Chart
 {
     /// <summary>
@@ -42,7 +41,14 @@ namespace Signum.Windows.Chart
         public ChartScript()
         {
             InitializeComponent();
-            box.CurrentHighlighter = HighlighterManager.Instance.Highlighters["JavaScript"];
+            var d3Highlighter = HighlighterLibrary.Javascript();
+
+            d3Highlighter.Rules.Insert(2, new WordRule("getColor getLabel getKey getClickKeys attr enterData append data d3 scale domain")
+            {
+                Formatter = new RuleFormatter("#5D4978")
+            });
+
+            box.CurrentHighlighter = d3Highlighter;
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(ChartScript_DataContextChanged);
         }
 
