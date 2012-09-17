@@ -10,12 +10,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Border>
-    <Border.Background>
-        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" MappingMode="RelativeToBoundingBox">
-            <GradientStop Color="#FFd9eaff" Offset="0"/>
-            <GradientStop Color="#FFd2e1f6" Offset="1"/>
-        </LinearGradientBrush>
-    </Border.Background>
+        <StackPanel>
     <Expander Style="{DynamicResource WidgetExpander}" Margin="5" x:Name="expQuickLinks" IsExpanded="True">
         <Expander.Header>
             <Grid HorizontalAlignment="Stretch" MinWidth="100">
@@ -40,5 +35,7 @@
             </ItemsControl>
         </ScrollViewer>
     </Expander>
+            <Separator Margin="0,5,0,0"/>
+        </StackPanel>
         </Border>
 </UserControl>

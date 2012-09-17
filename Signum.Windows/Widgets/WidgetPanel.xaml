@@ -17,17 +17,17 @@
             <GradientStop Color="#d2e1f6" Offset="1"/>
         </LinearGradientBrush>
     </UserControl.Background>
-    <Expander x:Name="expander" ExpandDirection="Right" Style="{DynamicResource LineExpander}" Expanded="expander_Expanded" Collapsed="expander_Collapsed"> 
+    <Expander x:Name="expander" ExpandDirection="Right" Expanded="expander_Expanded" Collapsed="expander_Collapsed">
         <Grid>
         	<Rectangle HorizontalAlignment="Right" Width="50">
         		<Rectangle.Fill>
         			<LinearGradientBrush>
-		             <GradientStop Color="#dae9ff" Offset="0"/>
-		            <GradientStop Color="#d2e1f6" Offset="1"/>
+		                <GradientStop Color="#dae9ff" Offset="0"/>
+		                <GradientStop Color="#d2e1f6" Offset="1"/>
         			</LinearGradientBrush>
         		</Rectangle.Fill>
         	</Rectangle>
-        	<StackPanel x:Name="stackPanel" Margin="0,0,0,0"/>
+        	<StackPanel x:Name="stackPanel" Margin="-22,25,0,0"/>
     	</Grid>
     </Expander>
 </UserControl>
