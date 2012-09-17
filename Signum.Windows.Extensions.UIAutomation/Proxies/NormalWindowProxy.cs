@@ -60,6 +60,13 @@ namespace Signum.Windows.UIAutomation
             ButtonBar.OkButton.ButtonInvoke();
         }
 
+        public AutomationElement OkCapture()
+        {
+           return Element.CaptureWindow(
+           action: () =>  ButtonBar.OkButton.ButtonInvoke(),
+           actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
+        }
+
         public void Save()
         {
             Element.WaitDataContextChangedAfter(
@@ -94,6 +101,15 @@ namespace Signum.Windows.UIAutomation
             Element.WaitDataContextChangedAfter(
             action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
             actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
+        }
+
+        public AutomationElement ExecuteCapture(Enum operationKey, int? timeOut = null)
+        {
+            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
+
+            return Element.CaptureWindow(
+            action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
+            actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), EntityId));
         }
 
 

@@ -37,7 +37,7 @@ namespace Signum.Engine.Cache
             void OnDisabled();
         }
 
-        interface IInstanceController
+        interface ISemiCacheController
         {
             void SetEntities(Type referingType, DirectedGraph<Modifiable> entities);
         }
@@ -52,7 +52,7 @@ namespace Signum.Engine.Cache
             return new Disposable(() => inCache.Value = oldInCache);
         }
 
-        class SemiCacheController<T> : CacheController<T>, ICacheLogicController, IInstanceController
+        class SemiCacheController<T> : CacheController<T>, ICacheLogicController, ISemiCacheController
             where T : IdentifiableEntity
         {
             ConcurrentDictionary<Type, Dictionary<int, T>> cachedEntities = new ConcurrentDictionary<Type, Dictionary<int, T>>();
@@ -144,7 +144,7 @@ namespace Signum.Engine.Cache
                 lites.AddRange(entities.OfType<Lite>().Where(l=>l.RuntimeType == typeof(T)).Select(l=>l.ToLite<T>()));
                 sensibleLites[referingType] = lites;
 
-                var semis = addEntities.TryGetC(typeof(T));
+                var semis = semiControllersFor.TryGetC(typeof(T));
                 if (semis != null)
                 {
                     foreach (var item in semis)
@@ -259,7 +259,7 @@ namespace Signum.Engine.Cache
 
                         List<T> result = Database.Query<T>().ToList();
 
-                        var semis = addEntities.TryGetC(typeof(T));
+                        var semis = semiControllersFor.TryGetC(typeof(T));
                         if (semis != null)
                         {
                             var graph = GraphExplorer.FromRootsIdentifiable(result);
@@ -414,7 +414,7 @@ namespace Signum.Engine.Cache
 
         static DirectedGraph<Type> invalidations = new DirectedGraph<Type>();
 
-        static Dictionary<Type, List<IInstanceController>> addEntities = new Dictionary<Type, List<IInstanceController>>();
+        static Dictionary<Type, List<ISemiCacheController>> semiControllersFor = new Dictionary<Type, List<ISemiCacheController>>();
 
         public static bool GloballyDisabled { get; set; }
 
@@ -501,9 +501,9 @@ namespace Signum.Engine.Cache
                 if (!controllers.ContainsKey(rType))
                     giCacheTable.GetInvoker(rType)(sb); ;
 
-                var ic = controllers[rType] as IInstanceController;
-                if (ic != null)
-                    addEntities.GetOrCreate(type).Add(ic);
+                var ic = controllers[rType] as ISemiCacheController;
+                if (ic != null && rType != type) //Cycles of semis could create StackOverflow, but the only possible cycle is an auto-cycle
+                    semiControllersFor.GetOrCreate(type).Add(ic);
 
                 invalidations.Add(rType, type);
             }

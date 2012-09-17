@@ -80,11 +80,11 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is a {1} and shows the property {2}.
+        ///   Looks up a localized string similar to {0} is a {1} and shows {2}.
         /// </summary>
-        internal static string _0IsA1AndShowsTheProperty2 {
+        internal static string _0IsA1AndShows2 {
             get {
-                return ResourceManager.GetString("_0IsA1AndShowsTheProperty2", resourceCulture);
+                return ResourceManager.GetString("_0IsA1AndShows2", resourceCulture);
             }
         }
         
@@ -490,6 +490,15 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter {
             get {
                 return ResourceManager.GetString("ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to the property {0}.
+        /// </summary>
+        internal static string TheProperty0 {
+            get {
+                return ResourceManager.GetString("TheProperty0", resourceCulture);
             }
         }
         
