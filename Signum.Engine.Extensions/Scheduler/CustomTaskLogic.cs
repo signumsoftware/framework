@@ -104,7 +104,7 @@ namespace Signum.Engine.Scheduler
             }
             catch (Exception ex)
             {
-                if (Transaction.AvoidIndependentTransactions)
+                if (Transaction.InTestTransaction)
                     throw; 
 
                 var exLog = ex.LogException().ToLite();
