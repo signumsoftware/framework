@@ -50,8 +50,9 @@
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
 
-        <swsh:SyntaxHighlightBox Grid.Row="4" Grid.ColumnSpan="2" IsLineNumbersMarginVisible="True" x:Name="box"
+        <m:ShyBorder Vertical="True" Horizontal="True"  MinHeight="300" MinWidth="300" Grid.Row="4" Grid.ColumnSpan="2" >
+            <swsh:SyntaxHighlightBox IsLineNumbersMarginVisible="True" x:Name="box"
                                  Text="{Binding Script, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True,  NotifyOnValidationError=True}" />
-
+        </m:ShyBorder>
     </Grid>
 </UserControl>

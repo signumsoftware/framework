@@ -9,6 +9,8 @@ using System.Windows.Input;
 using System.Collections.Generic;
 using System.Threading;
 
+//From http://syntaxhighlightbox.codeplex.com/
+
 namespace Signum.Windows.SyntaxHighlight
 {
     public partial class SyntaxHighlightBox : TextBox
@@ -86,7 +88,7 @@ namespace Signum.Windows.SyntaxHighlight
 
             TextChanged += (s, e) =>
             {
-                UpdateTotalLineCount();
+                totalLineCount = TextUtilities.GetLineCount(Text);
                 InvalidateBlocks(e.Changes.First().Offset);
                 InvalidateVisual();
             };
@@ -108,11 +110,6 @@ namespace Signum.Windows.SyntaxHighlight
         // -----------------------------------------------------------
         // Updating & Block managing
         // -----------------------------------------------------------
-
-        private void UpdateTotalLineCount()
-        {
-            totalLineCount = TextUtilities.GetLineCount(Text);
-        }
 
         private void UpdateBlocks()
         {
@@ -145,21 +142,13 @@ namespace Signum.Windows.SyntaxHighlight
                 block.RawText = block.GetSubString(Text);
                 block.LineNumbers = GetFormattedLineNumbers(block.LineStartIndex, block.LineEndIndex);
                 blocks.Add(block);
-                FormatBlock(block, blocks.Count > 1 ? blocks[blocks.Count - 2] : null);
+                FormatBlock(block);
             }
         }
 
         private void InvalidateBlocks(int changeOffset)
         {
-            InnerTextBlock blockChanged = null;
-            for (int i = 0; i < blocks.Count; i++)
-            {
-                if (blocks[i].CharStartIndex <= changeOffset && changeOffset <= blocks[i].CharEndIndex + 1)
-                {
-                    blockChanged = blocks[i];
-                    break;
-                }
-            }
+            InnerTextBlock blockChanged = blocks.FirstOrDefault(b=>b.CharStartIndex <= changeOffset && changeOffset <= b.CharEndIndex + 1);
 
             if (blockChanged == null && changeOffset > 0)
                 blockChanged = blocks.Last();
@@ -198,7 +187,7 @@ namespace Signum.Windows.SyntaxHighlight
                             throw new Exception();
 
                     blocks.Add(block);
-                    FormatBlock(block, blocks.Count > 1 ? blocks[blocks.Count - 2] : null);
+                    FormatBlock(block);
                     break;
                 }
                 if (localLineCount > maxLineCountInBlock)
@@ -217,7 +206,7 @@ namespace Signum.Windows.SyntaxHighlight
                             throw new Exception();
 
                     blocks.Add(block);
-                    FormatBlock(block, blocks.Count > 1 ? blocks[blocks.Count - 2] : null);
+                    FormatBlock(block);
 
                     charStart = i + 1;
                     lineStart += maxLineCountInBlock;
@@ -296,14 +285,13 @@ namespace Signum.Windows.SyntaxHighlight
         /// <summary>
         /// Formats and Highlights the text of a block.
         /// </summary>
-        private void FormatBlock(InnerTextBlock currentBlock, InnerTextBlock previousBlock)
+        private void FormatBlock(InnerTextBlock currentBlock)
         {
             currentBlock.FormattedText = GetFormattedText(currentBlock.RawText);
             if (CurrentHighlighter != null)
             {
                 ThreadPool.QueueUserWorkItem(p =>
                 {
-                    int previousCode = previousBlock != null ? previousBlock.Code : -1;
                     CurrentHighlighter.Highlight(currentBlock.FormattedText);
                     currentBlock.Code = -1;
                 });
