@@ -369,18 +369,20 @@ namespace Signum.Windows
 
         static void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            Dispatcher.CurrentDispatcher.BeginInvoke
-            (
-                DispatcherPriority.ContextIdle,
-                new Action
+            var tb = (TextBox)sender;
+            if(!tb.AcceptsReturn && !tb.AcceptsTab)
+                Dispatcher.CurrentDispatcher.BeginInvoke
                 (
-                    () =>
-                    {
-                        (sender as TextBox).SelectAll();
-                        (sender as TextBox).ReleaseMouseCapture();
-                    }
-                )
-            );
+                    DispatcherPriority.ContextIdle,
+                    new Action
+                    (
+                        () =>
+                        {
+                            tb.SelectAll();
+                            tb.ReleaseMouseCapture();
+                        }
+                    )
+                );
         }
 
         public ImageSource DefaultFindIcon = ImageLoader.GetImageSortName("find.png");
