@@ -24,6 +24,8 @@ using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
+using System.Runtime.InteropServices;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.Chart
 {
@@ -102,6 +104,7 @@ namespace Signum.Windows.Chart
 
             SetTitle();
 
+            webBrowser.ObjectForScripting = new ScriptInterface { window = this };
             webBrowser.NavigateToString(FullHtml.Value);
         }
 
@@ -243,7 +246,6 @@ namespace Signum.Windows.Chart
             return true;
         }
 
-        Func<ResultRow, List<FilterOption>> getFilters;
 
         internal void SetResults(string script = null)
         {
@@ -260,10 +262,23 @@ namespace Signum.Windows.Chart
                     .Zip(resultTable.Columns, (t, c) => new { t.Token, Column = c })
                     .Where(a => !(a.Token is AggregateToken)).ToArray();
 
-                getFilters =
-                    rr => keyColunns.SelectMany(t => GetTokenFilters(t.Token, rr[t.Column])).ToList();
+                lastRequest = new LastRequest
+                {
+                    KeyColumns = Request.Columns.Iterate()
+                    .Where(a => a.Value.ScriptColumn.IsGroupKey)
+                    .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token })
+                    .ToList(),
+                    Filters = Request.Filters.Where(a => !(a.Token is AggregateToken)).Select(f => new FilterOption
+                    {
+                        Token = f.Token,
+                        Value = f.Value,
+                        Operation = f.Operation
+                    }).ToList(),
+                    GroupResults = Request.GroupResults,
+                    GetFilter = rr => keyColunns.SelectMany(t => GetTokenFilters(t.Token, rr[t.Column])).ToList()
+                };
             }
-            else getFilters = null;
+            else lastRequest = new LastRequest { GroupResults = false };
 
             lvResult.ItemsSource = resultTable.Rows;
             if (resultTable.Rows.Length > 0)
@@ -277,6 +292,8 @@ namespace Signum.Windows.Chart
             var jsonData = ChartUtils.DataJson(Request, resultTable);
 
             var json = new JavaScriptSerializer().Serialize(jsonData);
+
+           
 
             webBrowser.InvokeScript("reDraw", script, json);
         }
@@ -331,6 +348,8 @@ namespace Signum.Windows.Chart
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;
 
+            lastRequest = null;
+
             var keys = Request.Columns.Select(a => a.Token).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
             OrderOptions.RemoveAll(a => !(a.Token is AggregateToken) && !keys.Contains(a.Token.FullKey()));
         }
@@ -361,6 +380,75 @@ namespace Signum.Windows.Chart
             return dt;
         }
 
+       
+
+        ChartScript chartScriptControl;
+
+        private void edit_Click(object sender, RoutedEventArgs e)
+        {
+            chartScriptControl = new ChartScript();
+            chartScriptControl.RequestWindow = this;
+
+            Navigator.Navigate(Request.ChartScript, new NavigateOptions
+            {
+                View = chartScriptControl,
+                Clone = false,
+            }); 
+        }
+
+        [ComVisible(true)]
+        public class ScriptInterface
+        {
+            internal ChartRequestWindow window;
+
+            public void OpenSubgroup(string dataClicks)
+            {
+                window.OpenSubgroup(dataClicks);
+            }
+        }
+
+        class LastRequest
+        {
+            public List<FilterOption> Filters;
+
+            public bool GroupResults;
+
+            public List<KeyColumn> KeyColumns; 
+
+            public Func<ResultRow, List<FilterOption>> GetFilter; 
+        }
+
+        class KeyColumn
+        {
+            public int Position;
+            public QueryToken Token;
+        }
+
+        LastRequest lastRequest;
+
+        internal void OpenSubgroup(string dataClicks)
+        {
+            var dic = dataClicks.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries).ToDictionary(a => a.Split('=')[0], a => a.Split('=')[1]);
+
+            if (!lastRequest.GroupResults)
+            {
+                var entity = (Lite)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type);
+
+                if (Navigator.IsViewable(EntityType, false))
+                    Navigator.NavigateUntyped(entity, new NavigateOptions { Admin = false });
+            }
+            else
+            {
+                var subFilters = lastRequest.KeyColumns.Select(t=>new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type)));
+
+                Navigator.Explore(new ExploreOptions(Request.QueryName)
+                {
+                    FilterOptions = lastRequest.Filters.Concat(subFilters).ToList(),
+                    SearchOnLoad = true,
+                }); 
+            }
+        }
+
         void lvResult_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ResultRow row = (ResultRow)lvResult.SelectedItem;
@@ -384,26 +472,14 @@ namespace Signum.Windows.Chart
             }
             else
             {
+                var subFilters = lastRequest.GetFilter(row);
+
                 Navigator.Explore(new ExploreOptions(Request.QueryName)
                 {
-                    FilterOptions = getFilters(row),
+                    FilterOptions = lastRequest.Filters.Concat(subFilters).ToList(),
                     SearchOnLoad = true,
                 });
             }
-        }
-
-        ChartScript chartScriptControl;
-
-        private void edit_Click(object sender, RoutedEventArgs e)
-        {
-            chartScriptControl = new ChartScript();
-            chartScriptControl.RequestWindow = this;
-
-            Navigator.Navigate(Request.ChartScript, new NavigateOptions
-            {
-                View = chartScriptControl,
-                Clone = false,
-            }); 
         }
     }
 }

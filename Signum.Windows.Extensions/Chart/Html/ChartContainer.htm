@@ -63,7 +63,7 @@
 
             try {
                 func(chart, data);
-                //this.bindMouseClick($chartContainer);
+                bindMouseClick($container);
             } catch (e) {
                 showError(e, __baseLineNumber__, chart);
             }
@@ -92,7 +92,12 @@
             chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", chart.attr("height") / 2).attr("fill", "red").attr("dy", 5).attr("dx", 4).text(message);
         }
 
-       
+        function bindMouseClick($container) 
+        {
+            $container.find('[data-click]').click(function () {
+                window.external.OpenSubgroup($(this).data("click"));
+            });
+        }
     </script>
 </body>
 </html>
