@@ -1,6 +1,6 @@
 ﻿var SF = SF || {};
 
-SF.Chart = SF.Chart || {};  
+SF.Chart = SF.Chart || {};
 
 SF.Chart.Utils = (function () {
 
@@ -110,86 +110,148 @@ SF.Chart.Utils = (function () {
             return result;
         },
 
-        rule : function(object, totalSize) {
-            function isStar(val)
-            {
-                return typeof val === 'string' & val[val.length-1] == '*';
+        translate: function (x, y) {
+            if (y === undefined)
+                return 'translate(' + x + ')';
+
+            return 'translate(' + x + ',' + y + ')';
+        },
+
+        scale: function (x, y) {
+            if (y === undefined)
+                return 'scale(' + x + ')';
+
+            return 'scale(' + x + ',' + y + ')';
+        },
+
+        rotate: function (angle, x, y) {
+            if (x === undefined || y == undefined)
+                return 'rotate(' + angle + ')';
+
+            return 'rotate(' + angle + ',' + y + ',' + y + ')';
+        },
+
+        skewX: function (angle) {
+            return 'skewX(' + angle + ')';
+        },
+
+        skewY: function (angle) {
+            return 'skewY(' + angle + ')';
+        },
+
+        matrix: function (a, b, c, d, e, f) {
+            return 'matrix(' + a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ')';
+        },
+
+        rule: function (object, totalSize) {
+            function isStar(val) {
+                return typeof val === 'string' & val[val.length - 1] == '*';
             }
 
-            function getStar(val)
-            {
+            function getStar(val) {
+                if (val === '*')
+                    return 1;
+
                 return parseFloat(val.substring(0, val.length - 1));
             }
 
             var fixed = 0;
             var proportional = 0;
-            for(var p in object){
+            for (var p in object) {
                 var value = object[p];
-                if(typeof value === 'number')
+                if (typeof value === 'number')
                     fixed += value;
-                else if(isStar(value))
+                else if (isStar(value))
                     proportional += getStar(value);
-                else 
+                else
                     throw new Error("values should be numbers or *");
             }
 
             var remaining = totalSize - fixed;
-            var star = proportional <= 0? 0: remaining / proportional;
+            var star = proportional <= 0 ? 0 : remaining / proportional;
 
-            var calculated = {};
+            var sizes = {};
 
-            for(var p in object){
-                 var value = object[p];
-                if(typeof value === 'number')
-                    calculated[p] = value;
-                else if(isStar(value))
-                    calculated[p] = getStar(value) * star;
+            for (var p in object) {
+                var value = object[p];
+                if (typeof value === 'number')
+                    sizes[p] = value;
+                else if (isStar(value))
+                    sizes[p] = getStar(value) * star;
             }
 
-            var acumulated = {};
+            var starts = {};
+            var ends = {};
             var acum = 0;
 
-            for(var p in calculated){
-                acumulated[p] = acum;
-                acum += calculated[p]; 
+            for (var p in sizes) {
+                starts[p] = acum;
+                acum += sizes[p];
+                ends[p] = acum;
             }
 
-            acumulated["end"] = acum;
-
             return {
-                to: function(name){
-                    return acumulated[name];
-                },
-                from: function(fromName){
-                    return {
-                        to : function(toName)
-                        {
-                            return acumulated[toName] - acumulated[name];
-                        }
-                    };
-                },
-                
-                debugX : function(chart){
-                  
-                  var keys = _.keys(acumulated);  
 
-                  //paint x-axis rule
-                  chart.append('svg:g').attr('class', 'x-rule-tick')
-                    .enterData(keys, 'line', 'x-rule-tick')
-                      .attr('x1', function (d) { return acumulated[d]; })
-                      .attr('x2', function (d) { return acumulated[d]; })
-                      .attr('y1', 0)
-                      .attr('y2', 100)
-                      .style('stroke', 'DeepPink');
-  
-                  //paint y-axis rule labels
-                  chart.append('svg:g').attr('class', 'x-axis-rule-label').attr('transform', 'rotate(90)')
-                      .enterData(keys, 'text', 'x-axis-rule-label')
-                        .attr('y', 50)
-                        .attr('x', function (d) { return acumulated[d]; })
-                        .attr('fill', 'DarkViolet')
+                size: function (name) {
+                    return sizes[name];
+                },
+
+                start: function (name) {
+                    return starts[name];
+                },
+
+                end: function (name) {
+                    return ends[name];
+                },
+
+                middle: function(name){
+                    return starts[name] + sizes[name] / 2;
+                },
+
+                debugX: function (chart) {
+
+                    var keys = _.keys(sizes);
+
+                    //paint x-axis rule
+                    chart.append('svg:g').attr('class', 'x-rule-tick')
+                        .enterData(keys, 'line', 'x-rule-tick')
+                        .attr('x1', function (d) { return ends[d]; })
+                        .attr('x2', function (d) { return ends[d]; })
+                        .attr('y1', 0)
+                        .attr('y2', 10000)
+                        .style('stroke-width', 2)
+                        .style('stroke', 'Pink');
+
+                    //paint y-axis rule labels
+                    chart.append('svg:g').attr('class', 'x-axis-rule-label')
+                        .enterData(keys, 'text', 'x-axis-rule-label')
+                        .attr('transform', function (d, i) { return º.translate(starts[d] + sizes[d] / 2 - 5, 10 + 100 * (i % 3)) + º.rotate(90); })
+                        .attr('fill', 'DeepPink')
                         .text(function (d) { return d; });
                 },
+
+                debugY: function (chart) {
+
+                    var keys = _.keys(sizes);
+
+                    //paint y-axis rule
+                    chart.append('svg:g').attr('class', 'y-rule-tick')
+                        .enterData(keys, 'line', 'y-rule-tick')
+                        .attr('x1', 0)
+                        .attr('x2', 10000)
+                        .attr('y1', function (d) { return ends[d]; })
+                        .attr('y2', function (d) { return ends[d]; })
+                        .style('stroke-width', 2)
+                        .style('stroke', 'Violet');
+
+                    //paint y-axis rule labels
+                    chart.append('svg:g').attr('class', 'y-axis-rule-label')
+                        .enterData(keys, 'text', 'y-axis-rule-label')
+                        .attr('transform', function (d, i) { return º.translate(100 * (i % 3), starts[d] + sizes[d] / 2 + 4); })
+                        .attr('fill', 'DarkViolet')
+                        .text(function (d) { return d; });
+
+                }
             };
         }
 

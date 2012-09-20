@@ -211,6 +211,12 @@ SF.Chart = (function () {
                 var getKey = SF.Chart.Utils.getKey;
                 var getColor = SF.Chart.Utils.getColor;
                 var getClickKeys = SF.Chart.Utils.getClickKeys;
+                var translate = SF.Chart.Utils.translate;
+                var scale = SF.Chart.Utils.scale;
+                var rotate = SF.Chart.Utils.rotate;
+                var skewX = SF.Chart.Utils.skewX;
+                var skewY = SF.Chart.Utils.skewY;
+                var matrix = SF.Chart.Utils.matrix;
                 __baseLineNumber__ = new Error().lineNumber;
                 func = eval(code);
             } catch (e) {
