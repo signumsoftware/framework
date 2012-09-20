@@ -19,7 +19,7 @@
   var arc = d3.svg.arc().outerRadius(r).innerRadius(rInner);
   var pie = d3.layout.pie().value(function (v) { return getKey(v.c1); });
   
-  chart.append('svg:g').data([data.rows]).attr('class', 'shape').attr('transform', 'translate(' + (width / 2) + ', ' + (height / 2) + ')')
+  chart.append('svg:g').data([data.rows]).attr('class', 'shape').attr('transform', translate(width / 2 ,height / 2))
     .enterData(pie, 'g', 'slice')
       .append('svg:path').attr('class', 'shape')
       .attr('d', arc)
@@ -33,7 +33,7 @@
   var cx = (width / 2),
       cy = (height / 2),
       legendRadius = 1.2;
-  chart.append('svg:g').data([data.rows]).attr('class', 'color-legend').attr('transform', 'translate(' + cx + ', ' + cy + ')')
+  chart.append('svg:g').data([data.rows]).attr('class', 'color-legend').attr('transform', translate(cx , cy))
     .enterData(pie, 'g', 'color-legend')
     .append('svg:text').attr('class', 'color-legend sf-chart-strong')
     .attr('x', function (slice) { var m = (slice.endAngle + slice.startAngle) / 2; return Math.sin(m) * r * legendRadius; })

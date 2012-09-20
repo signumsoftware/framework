@@ -32,124 +32,145 @@
       s.values[i].to += sp.values[i].to;
     }
   }
-//config variables
-var yAxisLabelWidth = 60,
-	fontSize = 10,
-	ticksLength = 4,
-	labelMargin = 5,
-	chartAxisPadding = 5,
-	padding = 5,
-	yAxisLeftPosition = padding + fontSize + (2 * labelMargin) + ticksLength,
-	xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength,
-	color = d3.scale.category20().domain([0, $.map(series, function (s) { return getKey(s.dimension2); })]);
+  
+  
+  var xRule = º.rule({
+    _1 : 5,
+    title : 15,
+    _2 : 10, 
+    ticks: 4,
+    content: '*',
+    _4: 5,
+  }, width);
+  //xRule.debugX(chart)
+  
+  var yRule = º.rule({
+    _1 : 5,
+    legend : 15,
+    _2 : 5,
+    content: '*',
+    ticks: 4,
+    _3 : 5,
+    labels: 10,
+    _4 : 10,
+    title: 15,
+    _5 : 5,
+  }, height);
+  //yRule.debugY(chart);
 
-//x axis scale
-var x = d3.scale.linear()
-	.domain([0, d3.max(series, function(s){ return d3.max(s.values, function(v){return v.to;}); })])
-	.range([0, width - yAxisLeftPosition - padding]);
+  var x = d3.scale.linear()
+      .domain([0, d3.max(series, function(s){ return d3.max(s.values, function(v){return v.to;}); })])
+      .range([0, xRule.size('content')]);
+  
+  var y = d3.scale.ordinal()
+      .domain($.map(dimension1, function (v) { return getKey(v); }))
+      .rangeBands([0, yRule.size('content')]);
 
-//y axis scale
-var y = d3.scale.ordinal()
-	.domain($.map(dimension1, function (v) { return getKey(v); }))
-	.rangeBands([0, xAxisTopPosition - padding - fontSize - labelMargin - (2 * chartAxisPadding)]);
+  var xTicks = x.ticks(width/50);
+  
+  chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+    .enterData(xTicks, 'line', 'y-lines')
+    .attr('x1', function(t) { return x(t); })
+    .attr('x2', function(t) { return x(t); })
+    .attr('y1', yRule.size('content'))
+  	.style('stroke', 'LightGray');
+  
+  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content'), yRule.start('ticks')))
+    .enterData(xTicks, 'line', 'x-tick')
+    .attr('x1', x)
+    .attr('x2', x)
+    .attr('y2', yRule.size('ticks'))
+    .style('stroke', 'Black');
+  
+  chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('labels')))
+    .enterData(xTicks, 'text', 'x-label')
+    .attr('x', x)
+    .attr('text-anchor', 'middle')
+    .text(String);
+  
+  chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
+    .append('svg:text').attr('class', 'x-title')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+  	.text(data.columns.c1.title);
+  
+  
+  chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
+	.enterData(dimension1, 'line', 'y-tick')
+	.attr('x2', xRule.size('ticks'))
+	.attr('y1', function (v) { return -y(getKey(v)); })
+	.attr('y2', function (v) { return -y(getKey(v)); })
+  	.style('stroke', 'Black');
 
-//paint x-axis - ruler
-var xTicks = x.ticks(10);
-chart.append('svg:g').attr('class', 'x-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin) + ')')
-	.enterData(xTicks, 'line', 'x-ruler')
-	.attr('x1', x)
-	.attr('x2', x)
-	.attr('y2', xAxisTopPosition - padding - fontSize - labelMargin);
+  chart.append('svg:g').attr('class', 'y-title').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
+    .append('svg:text').attr('class', 'y-title')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .text(data.columns.c0.title);
 
-//paint x-axis ticks
-chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
-	.enterData(xTicks, 'line', 'x-axis-tick')
-	.attr('y2', ticksLength)
-	.attr('x1', x)
-	.attr('x2', x);
-
-//paint x-axis tick labels
-chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')
-	.enterData(xTicks, 'text', 'x-axis-tick-label')
-	.attr('x', x)
-	.attr('text-anchor', 'middle')
-	.text(String);
-
-//paint x-axis - token label
-chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')
-	.append('svg:text').attr('class', 'x-axis-token-label')
-	.attr('text-anchor', 'middle')
-	.text(data.columns.c2.title);
-
-//paint y-axis - ticks
-chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + (padding + fontSize + labelMargin + chartAxisPadding + (y.rangeBand() / 2)) + ')')
-	.enterData(dimension1, 'line', 'y-axis-tick')
-	.attr('x2', ticksLength)
-	.attr('y1', function (v) { return y(getKey(v)); })
-	.attr('y2', function (v) { return y(getKey(v)); });
-
-//paint y-axis - token label
-chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + ((xAxisTopPosition - fontSize - labelMargin) / 2) + ') rotate(270)')
-	.append('svg:text').attr('class', 'y-axis-token-label')
-	.attr('text-anchor', 'middle')
-	.text(data.columns.c0.title);
-
-//paint graph
-chart.enterData(series, 'g', 'shape-serie').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding) + ')')
-	.enterData(function (s) { return s.values; }, 'rect', 'shape')
+  
+  var color = d3.scale.category20().domain([0, $.map(series, function (s) { return getKey(s.dimension2); })]);
+  
+  //PAINT GRAPH
+  chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+    .enterData(function (s) { return s.values; }, 'rect', 'shape')
     .filter(function (r) {return r.row !== undefined;})
-	.attr('stroke', '#fff')
-	.attr('fill', function (r) { return getColor(r.row.c1, color); })
-	.attr('transform', function (r) { return 'translate(0, ' + y(getKey(r.row.c0)) + ')'; })
-	.attr('height', y.rangeBand())
-	.attr('width', function (r) { return x(getLabel(r.row.c2)); })
-	.attr('x', function (r) { return x(r.from) })
-	.attr('data-click', function (r) { return getClickKeys(r.row, data.columns); })
-	.append('svg:title')
-	.text(function (r) { return getLabel(r.row.c0) + ', ' + getLabel(r.row.c1) + ': ' + getLabel(r.row.c2); });
+    .attr('stroke', '#fff')
+    .attr('fill', function (r) { return getColor(r.row.c1, color); })
+    .attr('transform', function (r) { return translate(0,  y(getKey(r.row.c0))); })
+    .attr('height', y.rangeBand())
+    .attr('width', function (r) { return x(getLabel(r.row.c2)); })
+    .attr('x', function (r) { return x(r.from) })
+    .attr('data-click', function (r) { return getClickKeys(r.row, data.columns); })
+    .append('svg:title')
+    .text(function (r) { return getLabel(r.row.c0) + ', ' + getLabel(r.row.c1) + ': ' + getLabel(r.row.c2); });
 
-//paint y-axis - tick labels
-if (y.rangeBand() > fontSize && series.length > 0) {
-    var xHalf = (width - padding - yAxisLeftPosition) / 2;
-    chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding + (y.rangeBand() / 2) + (fontSize / 2)) + ')')
-	.enterData(_.last(series).values,'text', 'y-axis-tick-label sf-chart-strong')
-	.attr('x', function (v, i) { var posx = x(v.to); return posx >= xHalf ? posx - labelMargin : posx + labelMargin; })
-	.attr('y', function (v) { return y(getKey(v.d1)); })
-	.attr('text-anchor', function (v, i) { var posx = x(v.to); return posx >= xHalf ? 'end' : 'start'; })
-	.attr('fill', function (v, i) { var posx = x(v.to); return posx >= xHalf ? '#fff' : '#000'; })
-	.text(function (v, i) { return getLabel(v.d1); });
-}
+  
+  if (y.rangeBand() > 15 && series.length > 0) {
+    
+    var xHalf = xRule.size('content') / 2;
+    var labelMargin = 10;
+    chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', translate(xRule.start('content'), yRule.start('content') + y.rangeBand() / 2))
+      .enterData(_.last(series).values,'text', 'y-axis-tick-label sf-chart-strong')
+      .attr('x', function (v) { var posx = x(v.to); return posx >= xHalf ? posx - labelMargin : posx + labelMargin; })
+      .attr('y', function (v) { return y(getKey(v.d1)); })
+      .attr('text-anchor', function (v) { var posx = x(v.to); return posx >= xHalf ? 'end' : 'start'; })
+      .attr('fill', function (v) { var posx = x(v.to); return posx >= xHalf ? '#fff' : '#000'; })
+      .attr('dominant-baseline', 'middle')
+      .text(function (v, i) { return getLabel(v.d1); });
+  }
+  
+  var legendScale = d3.scale.ordinal()
+      	.domain($.map(series, function (s, i) { return i; }))
+      	.rangeBands([0, xRule.size('content')]);
+  
+  if (legendScale.rangeBand() > 50) {
+      var legendMargin = yRule.size('legend') + 4;
+      chart.append('svg:g').attr('class', 'color-legend').attr('transform', translate(xRule.start('content'), yRule.start('legend')))
+      .enterData(series, 'rect', 'color-rect')
+      .attr('x', function (e, i) { return legendScale(i); })
+      .attr('width', yRule.size('legend'))
+      .attr('height', yRule.size('legend'))
+      .attr('fill', function (s) { return getColor(s.dimension2, color); });
+  
+      chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
+      .enterData(series, 'text', 'color-text')
+      .attr('x', function (e, i) { return legendScale(i); })
+        .attr('dominant-baseline', 'middle')
+      .text(function (s) { return getLabel(s.dimension2); });
+  }
 
-//paint x-axis
-chart.append('svg:g').attr('class', 'x-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')
-	.append('svg:line')
-	.attr('class', 'x-axis')
-	.attr('x2', width - yAxisLeftPosition - padding);
-
-//paint y-axis
-chart.append('svg:g').attr('class', 'y-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin) + ')')
-	.append('svg:line')
-	.attr('class', 'y-axis')
-	.attr('y2', xAxisTopPosition - padding - fontSize - labelMargin);
-
-//paint color legend
-var legendScale = d3.scale.ordinal().domain($.map(series, function (s, i) { return i; })).rangeBands([0, width - yAxisLeftPosition - padding]),
-	legendRectWidth = 10,
-	legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;
-
-if (legendLabelWidth + labelMargin + legendRectWidth > yAxisLabelWidth * 2) {
-    chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')
-	.enterData(series, 'rect', 'color-rect')
-	.attr('x', function (e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })
-	.attr('width', legendRectWidth).attr('height', fontSize)
-	.attr('fill', function (s) { return getColor(s.dimension2, color); });
-
-    chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')
-	.enterData(series, 'text', 'color-text')
-	.attr('x', function (e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })
-	.text(function (s) { return getLabel(s.dimension2); });
-}
-
+  chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
+     .append('svg:line')
+     .attr('class', 'x-axis')
+     .attr('x2', xRule.size('content'))
+     .style('stroke', 'Black');
+  
+  chart.append('svg:g').attr('class', 'y-axis').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+    .append('svg:line')
+    .attr('class', 'y-axis')
+    .attr('y2', yRule.size('content'))
+    .style('stroke', 'Black');
 }
 ]]></Script>
 </ChartScript>
