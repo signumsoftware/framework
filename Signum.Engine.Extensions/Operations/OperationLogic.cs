@@ -132,8 +132,8 @@ namespace Signum.Engine.Operations
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
             if (ident.Modified == true && IsSaveProtected(ident.GetType()))
-                throw new InvalidOperationException("Saving {0} is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
-                    ident.GetType().NiceName(),
+                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
+                    ident.GetType().Name,
                     operations.GetValue(ident.GetType()).Keys.CommaOr(k => EnumDN.UniqueKey(k))));
         }
 
@@ -184,7 +184,7 @@ namespace Signum.Engine.Operations
         public static void Register(this IOperation operation)
         {
             if (!operation.Type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
+                throw new InvalidOperationException("Type '{0}' has to implement at least {1}".Formato(operation.Type.Name));
 
             operation.AssertIsValid();
 
