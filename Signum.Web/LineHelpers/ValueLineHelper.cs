@@ -87,33 +87,24 @@ namespace Signum.Web
             }
 
             StringBuilder sb = new StringBuilder();
-            List<SelectListItem> items = valueLine.EnumComboItems;
-            if (items == null)
+            IEnumerable<Enum> enums = valueLine.EnumComboItems;
+            if (enums == null)
             {
-                items = new List<SelectListItem>();
+                enums = Enum.GetValues(valueLine.Type.UnNullify()).Cast<Enum>().ToList();
 
                 if (valueLine.UntypedValue == null ||
                     valueLine.Type.IsNullable() && (valueLine.PropertyRoute == null || !Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()))
-                {
-                    items.Add(new SelectListItem() { Text = "-", Value = "" });
-                }
-
-                items.AddRange(
-                    Enum.GetValues(valueLine.Type.UnNullify())
-                        .Cast<Enum>()
-                        .Select(v => new SelectListItem()
-                            {
-                                Text = v.NiceToString(),
-                                Value = v.ToString(),
-                                Selected = object.Equals(value, v),
-                            })
-                    );
+                    enums.PreAnd(null);
             }
-            else
-                if (value != null)
-                    items.Where(e => e.Value == value.ToString()).SingleEx(()=>"Not value present in ValueLine", ()=> "More than one values present in ValueLine").Selected = true;
 
-            return helper.DropDownList(valueLine.ControlID, items, valueLine.ValueHtmlProps);
+            List<SelectListItem> selectListItems = enums.Select(v => new SelectListItem()
+            {
+                Text =  v == null? "-":   v.NiceToString(),
+                Value =  v.TryToString(),
+                Selected = object.Equals(value, v),
+            }).ToList();
+
+            return helper.DropDownList(valueLine.ControlID, selectListItems, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString DateTimePickerTextbox(this HtmlHelper helper, ValueLine valueLine)

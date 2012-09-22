@@ -243,7 +243,7 @@ namespace Signum.Engine
                         var updates = (from t in schema.GetDatabaseTables()
                                        from col in t.Columns.Values
                                        where col.ReferenceTable == table
-                                       select new SqlPreCommandSimple("REVIEW THIS! UPDATE {0} SET {1} = {2} WHERE {1} = {3} -- {4} re-indexed".Formato(
+                                       select new SqlPreCommandSimple("REVIEW UPDATE {0} SET {1} = {2} WHERE {1} = {3} -- {4} re-indexed".Formato(
                                            t.Name, col.Name, s.Id, c.Id, c.toStr)))
                                            .Combine(Spacing.Simple);
 
