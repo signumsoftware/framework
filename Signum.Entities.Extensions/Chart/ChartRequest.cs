@@ -65,6 +65,15 @@ namespace Signum.Entities.Chart
             get { return groupResults; }
             set
             {
+                if (chartScript != null)
+                {
+                    if (chartScript.GroupBy == GroupByChart.Always && value == false)
+                        return;
+
+                    if (chartScript.GroupBy == GroupByChart.Never && value == true)
+                        return;
+                }
+
                 if (Set(ref groupResults, value, () => GroupResults))
                 {
                     NotifyAllColumns();
@@ -141,6 +150,20 @@ namespace Signum.Entities.Chart
         public List<CollectionElementToken> Multiplications
         {
             get { return CollectionElementToken.GetElements(AllTokens().ToHashSet()); }
+        }
+
+        public void CleanOrderColumns()
+        {
+            if (GroupResults)
+            {
+                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token);
+
+                Orders.RemoveAll(o => !(o.Token is AggregateToken) || keys.Contains(o.Token));
+            }
+            else
+            {
+                Orders.RemoveAll(o => o.Token is AggregateToken);
+            }
         }
     }
 }

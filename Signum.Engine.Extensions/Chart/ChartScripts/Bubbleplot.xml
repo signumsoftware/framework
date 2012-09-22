@@ -34,17 +34,13 @@
   //yRule.debugY(chart);
   
   
-  var x = d3.scale.linear()
-      .domain([0, d3.max($.map(data.rows, function (e) { return getKey(e.c1); }))])
-      .range([0, xRule.size('content')]);
+  var x = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, xRule.size('content'));
+  
+  var y = º.scaleFor(data.columns.c2, data.rows.map(function(r){return getKey(r.c2);}), 0, yRule.size('content'));
   
   
-  var y = d3.scale.linear()
-      .domain([0, d3.max($.map(data.rows, function (e) { return getKey(e.c2); }))])
-      .range([0, yRule.size('content')]);
-  
-  
-  var xTicks = x.ticks(width/50);
+  var xTicks = x.ticks(width / 50);
+  var xTickFormat = x.tickFormat(width / 50);
   
   chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
     .enterData(xTicks, 'line', 'y-lines')
@@ -64,7 +60,7 @@
     .enterData(xTicks, 'text', 'x-label')
     .attr('x', x)
     .attr('text-anchor', 'middle')
-    .text(String);
+    .text(xTickFormat);
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
     .append('svg:text').attr('class', 'x-title')
@@ -74,7 +70,7 @@
   
   
   var yTicks = y.ticks(height / 50);
-  
+  var yTickFormat = y.tickFormat(height / 50);
   chart.append('svg:g').attr('class', 'y-lines').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .enterData(yTicks, 'line', 'y-lines')
     .attr('x2', xRule.size('content'))
@@ -94,7 +90,7 @@
     .attr('y', function(t) { return -y(t); })
     .attr('dominant-baseline', 'middle')
     .attr('text-anchor', 'end')
-    .text(String);
+    .text(yTickFormat);
   
   chart.append('svg:g').attr('class', 'y-title').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
     .append('svg:text').attr('class', 'y-title')
@@ -104,9 +100,14 @@
   
   var color = d3.scale.category20().domain($.map(data.rows, function(v) { return getKey(v.c0); }));
   
-   var sizeScale = d3.scale.linear()
-      .domain([0, _.reduce(data.rows, function(memo, p){ return memo + p.c3; }, 0) * 3])
-      .range([0, xRule.size('content') * yRule.size('content')]);
+  var sizeList = data.rows.map(function(r){return getKey(r.c1);});
+      
+  var sizeTemp = º.scaleFor(data.columns.c3, sizeList, 0, 1);
+  
+  var totalSizeTemp = _.reduce(data.rows, function(memo, p){ return memo + sizeTemp(getKey(p.c3)); }, 0);
+  
+  var sizeScale = º.scaleFor(data.columns.c3, sizeList, 0, (xRule.size('content') * yRule.size('content')) / (totalSizeTemp * 3));
+
   
   //PAINT GRAPH
   chart.enterData(_.sortBy(data.rows, function (p){ return -getKey(p.c3);})  , 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))

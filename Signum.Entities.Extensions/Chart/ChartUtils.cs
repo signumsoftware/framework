@@ -137,7 +137,7 @@ namespace Signum.Entities.Chart
             if (chart.Columns.Count > chartScript.Columns.Count)
             {
                 chart.Columns.RemoveRange(chartScript.Columns.Count, chart.Columns.Count - chartScript.Columns.Count);
-                return true;
+                result = true;
             }
 
             if (chartScript.GroupBy == GroupByChart.Always && chart.GroupResults == false)
@@ -181,6 +181,7 @@ namespace Signum.Entities.Chart
             {
                 u.Token = r.Token;
                 u.DisplayName = r.DisplayName;
+                u.Scale = r.Scale;
             });
 
             return result;
@@ -207,6 +208,7 @@ namespace Signum.Entities.Chart
             {
                 r.Token = u.Token;
                 r.DisplayName = u.DisplayName;
+                r.Scale = u.Scale;
             });
 
             return result;
@@ -223,6 +225,8 @@ namespace Signum.Entities.Chart
                 name = "c" + i,
                 title = c.GetTitle(),
                 token = c.TokenString,
+                type = c.TypeName(),
+                scale = c.Scale,
                 isGroupKey = c.IsGroupKey,
                 converter = c.Converter(i)
             }).ToList();
@@ -234,6 +238,8 @@ namespace Signum.Entities.Chart
                     name = "entity",
                     title = "",
                     token = "Entity",
+                    type = "entity",
+                    scale = ColumnScale.Elements,
                     isGroupKey = (bool?)true,
                     converter = new Func<ResultRow, object>(r => r.Entity.Key())
                 });
@@ -241,7 +247,14 @@ namespace Signum.Entities.Chart
 
             return new
             {
-                columns = cols.ToDictionary(a => a.name, a => new { a.title, a.token, a.isGroupKey }),
+                columns = cols.ToDictionary(a => a.name, a => new
+                {
+                    a.title,
+                    a.token,
+                    a.isGroupKey,
+                    a.type,
+                    scale = a.scale.ToString()
+                }),
                 rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter(r))).ToList()
             };
         }
@@ -290,7 +303,7 @@ namespace Signum.Entities.Chart
                         e = e.Value.ToUserInterface();
                     return new
                     {
-                        key = e.TryToString("s"),
+                        key = e,
                         toStr = ct.Token.Format.HasText() ? e.TryToString(ct.Token.Format) : r[columnIndex].TryToString()
                     };
                 };
@@ -298,22 +311,27 @@ namespace Signum.Entities.Chart
             else
                 return r => r[columnIndex];
         }
-    }
 
-    public enum ChartLabel
-    {
-        HorizontalAxis,
-        Height,
-        VerticalAxis,
-        Width,
-        SubGroups,
-        Lines,
-        Areas,
-        XAxis,
-        YAxis,
-        Color,
-        Size,
-        Sections,
-        Angle,
+        private static string TypeName(this ChartColumnDN ct)
+        {
+            if (ct == null || ct.Token == null)
+                return null;
+
+            var type = ct.Token.Type.UnNullify();
+
+            switch (QueryUtils.GetFilterType(type))
+            {
+                case FilterType.Integer: return "integer";
+                case FilterType.Decimal: return "decimal";
+                case FilterType.String: return "string";
+                case FilterType.DateTime: return ct.Token.Format == "d" ? "date" : "datetime";
+                case FilterType.Lite: return "entity";
+                case FilterType.Embedded: return "embedded";
+                case FilterType.Boolean: return "bool";
+                case FilterType.Enum: return "enum";
+                case FilterType.Guid: return "guid";
+                default: return null;
+            }
+        }
     }
 }

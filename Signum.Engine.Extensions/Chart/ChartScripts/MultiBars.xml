@@ -3,7 +3,7 @@
   <Columns>
     <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Sub-bars" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Width" ColumnType="Magnitude" />
+    <Column DisplayName="Width" ColumnType="Positionable" />
   </Columns>
   <Icon FileName="multibars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAsdJREFUeNrsmD1rFUEUhmeuN1Y2USLR1iakEKxSCAoWEbG3u6VdSCPiHxA7axFSmcI/IKQSDFprJwGFNBYWNlYxZuccz9fM7N6sUe/uxC3uwmTOfNydh/fM7L4bj4huyNfIDfyaA/YCOHmwPdiNOI7B/vPLuECtkXfOjxaoELunDu8pHmvsYjyycoaGNQnjxRW3eGvLFwNcWnt44kREoD9gLY4DNa2P4sMvr8sq2AokARgQSq1QVQZMsFV5wAYULZqB6m2F4z6ZL2Bo4wUB08INqKPmGEZAUy2mPfYXBawOpgBVGVk4Lj4FFVVTJY+KAHp+1fFj5tv3H8UfGXdurrrNyXU/k4J319daDorsLlFSRKUOoML9XAdghbkGiYELqQmB+nhuAKt5DNzO7kcG7HaK0cBk3ycgrp2AcDaD9NHiQceDAEECCQaaoEHndduDCUh2nrSzQgZUW5Bho4qi1FS/zoOsOHQErGgReaqZSqqAyylMCplaoMrFNsa0mlpyH9sKaJCdAH+GIDcXINs3af/EdFr6BMiUracQBVzVilno7THzZvf9qZzimQF3tu57N8Brblh724NfX1xB9Xi+V+6zS9fc+dsvfWfAc1c3/uoHf/KF2fFo+2D/VRk/2A4F2TQkX2iGwmCnHU8Rw3qiSo32bxxPLe7PbtVVOuae8bhZjSpFwPR7zGa2V0dNfk4XmgaCVh+YVapBljzF955d6HSjS8sX3ZOVR62nuBfAuh8UR4MuvYOTY6F2VVERoxAs1jmf9j675cd75T47eeuAy9YooFmnoLXABAOjcW5LbOPFH9QhmtKQrRXHVa1I2xSTNmSXUxxQFEFTiA5qBcEAWS2NRckQ0w5mZHFmM/pPgIcMIalU5TSVYKlEA659f6B6x1N7F79996HTjdZvrJYFHKofTIBD+hfc9tOJb3y4zw3rHPA/Xr8EGAASLnxI0iSooQAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -48,9 +48,7 @@
   }, height);
   //yRule.debugY(chart);
 
-  var x = d3.scale.linear()
-      .domain([0, _.max(data.rows, function(r){return r.c2}).c2])
-      .range([0, xRule.size('content')]);
+  var x = º.scaleFor(data.columns.c2, data.rows.map(function (e) { return getKey(e.c2); }), 0, xRule.size('content'));
   
   var y = d3.scale.ordinal()
       .domain($.map(dimension1, function (v) { return getKey(v); }))
@@ -58,7 +56,7 @@
 
   
   var xTicks = x.ticks(width/50);
-  
+  var xTickFormat = x.tickFormat(width / 50);
   chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
     .enterData(xTicks, 'line', 'y-lines')
     .attr('x1', function(t) { return x(t); })
@@ -77,7 +75,7 @@
     .enterData(xTicks, 'text', 'x-label')
     .attr('x', x)
     .attr('text-anchor', 'middle')
-    .text(String);
+    .text(xTickFormat);
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
     .append('svg:text').attr('class', 'x-title')
@@ -123,7 +121,7 @@
     .attr('y', function (r) { return ySubscale(getKey(r.c1)); })
     .attr('transform', function (r) { return 'translate(0, ' + y(getKey(r.c0)) + ')'; })
     .attr('height', ySubscale.rangeBand())
-    .attr('width', function (r) { return x(getLabel(r.c2)); })
+    .attr('width', function (r) { return x(getKey(r.c2)); })
     .attr('data-click', function (r) { return getClickKeys(r, data.columns); })
     .append('svg:title')
     .text(function (r) { return getLabel(r.c0) + ', ' + getLabel(r.c1) + ': ' + getLabel(r.c2); })

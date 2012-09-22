@@ -52,6 +52,10 @@ SF.Chart = (function () {
                 self.updateChartBuilder($this.closest("tr").attr("data-token"));
             });
 
+            $($chartControl).on("change", ".sf-chart-redraw-onchange", function(){
+                self.reDraw();
+            });
+
             $(".sf-chart-draw").live("click", function (e) {
                 e.preventDefault();
                 var $this = $(this);
@@ -77,25 +81,32 @@ SF.Chart = (function () {
                 });
             });
 
+            
+            window.changeTextArea = function (value, runtimeInfo) {
+                if($("#ChartScript_sfRuntimeInfo").val() == runtimeInfo)
+                {
+                    var $textArea = self.element.find("textarea.sf-chart-currentScript");
+
+                    $textArea.val(value);
+                    self.reDraw();
+                }
+            };
+
+            window.getExceptionNumber = function () {
+                if (self.exceptionLine == null || self.exceptionLine == undefined)
+                    return null;
+
+                var temp = self.exceptionLine;
+                self.exceptionLine = null;
+                return temp;
+            };
+
             $(".sf-chart-script-edit").live("click", function (e) {
                 e.preventDefault();
+
                 var $textArea = self.element.find("textarea.sf-chart-currentScript");
 
                 var win = window.open($textArea.data("url"));
-
-                window.changeTextArea = function (value) {
-                    $textArea.val(value);
-                    self.reDraw();
-                };
-
-                window.getExceptionNumber = function () {
-                    if (self.exceptionLine == null || self.exceptionLine == undefined)
-                        return null;
-
-                    var temp = self.exceptionLine;
-                    self.exceptionLine = null;
-                    return temp;
-                }
             });
 
             this.$chartControl.on("sf-new-subtokens-combo", function (event, idSelectedCombo, index) {
@@ -196,6 +207,19 @@ SF.Chart = (function () {
             $chartContainer.html("");
 
             var data = $chartContainer.data("json");
+
+            $(".sf-chart-redraw-onchange", this.$chartControl).each(function(i, element){
+                var $element = $(element);
+                var name = $element.attr("id").split('_');
+                if(name.length  == 3 && name[0] == "Columns"){
+                    var column = data.columns["c" + name[1]];
+                    if(name[2] == "DisplayName")
+                        column.title = $element.val();
+                    else if(name[2] == "Scale")
+                        column.scale = $element.val();
+                }
+            });
+
             var width = $chartContainer.width();
             var height = $chartContainer.height();
 

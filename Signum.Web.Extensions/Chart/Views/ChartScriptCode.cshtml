@@ -88,7 +88,7 @@
     });
 
     function updatePreview() {
-        opener.changeTextArea($textArea.val());
+        opener.changeTextArea($textArea.val(), $("#sfRuntimeInfo").val());
         exceptionDelay = setTimeout(getException, 100);
     }
 

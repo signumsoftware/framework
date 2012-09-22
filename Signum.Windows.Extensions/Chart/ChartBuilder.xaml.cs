@@ -78,7 +78,7 @@ namespace Signum.Windows.Chart
             if (values.Length != 3 || !(values[0] is ChartScriptDN) || !(values[1] is IChartBase) || !(values[2] is bool) || ((bool)values[2]))
                 return null;
 
-            if (((ChartScriptDN)values[0]).IsCompatibleWith(((IChartBase)values[1]).Columns))
+            if (((ChartScriptDN)values[0]).IsCompatibleWith((IChartBase)values[1]))
                 return superLightBlue;
 
             return null;

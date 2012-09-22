@@ -242,9 +242,15 @@ namespace Signum.Entities.Chart
                 throw new FormatException("The columns doesn't match: \r\n" + errors);
         }
 
-        public bool IsCompatibleWith(MList<ChartColumnDN> columns)
+        public bool IsCompatibleWith(IChartBase chartBase)
         {
-            return Columns.ZipOrDefault(columns, (s, c) =>
+            if (GroupBy == GroupByChart.Always && !chartBase.GroupResults)
+                return false;
+
+            if (GroupBy == GroupByChart.Never && chartBase.GroupResults)
+                return false;
+
+            return Columns.ZipOrDefault(chartBase.Columns, (s, c) =>
             {
                 if (s == null)
                     return false;
@@ -324,11 +330,12 @@ namespace Signum.Entities.Chart
         Integer = 4,
         Date = 8,
         String = 16, //Guid
-        Entity = 32, //Enum | Boolean 
+        Entity = 32,
+        Enum = 64, // Boolean 
 
-        Groupable = Integer | Date | String | Entity, 
-        Magnitude = Integer | Decimal,
-        Positionable = Integer | Decimal | Date | DateTime,
-        GroupableAndPositionable  = Integer | Date 
+        Groupable = 0x10000000 | Integer | Date | String | Entity | Enum,
+        Magnitude = 0x10000000 | Integer | Decimal,
+        Positionable = 0x10000000 | Integer | Decimal | Date | DateTime | Enum,
+        GroupableAndPositionable = 0x10000000 | Integer | Date | Enum 
     }
 }

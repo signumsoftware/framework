@@ -22,12 +22,15 @@ SF.Chart.Utils = (function () {
         },
 
         getKey: function (tokenValue) {
-            var result = (tokenValue !== null && tokenValue.key !== undefined ? tokenValue.key : tokenValue);
+            var key = (tokenValue !== null && tokenValue.key !== undefined ? tokenValue.key : tokenValue);
 
-            if (result === null || result === undefined)
+            if (key === null || key === undefined)
                 return "null";
 
-            return result;
+            if (typeof(key) == 'string' && key.indexOf('/Date(') == 0)
+                return new Date(parseInt(key.substr(6))); ;
+
+            return key;
         },
 
         getColor: function (tokenValue, color) {
@@ -143,6 +146,34 @@ SF.Chart.Utils = (function () {
             return 'matrix(' + a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ')';
         },
 
+        scaleFor: function (column, values, minRange, maxRange) {
+           
+            if (column.scale == "Elements")
+                return d3.scale.ordinal()
+                        .domain(values)
+                        .rangeBands([minRange, maxRange]);
+
+            if (column.scale == "ZeroMax")
+                return d3.scale.linear()
+                        .domain([0, d3.max(values)])
+                        .range([minRange, maxRange]);
+
+            if (column.scale == "MinMax")
+                return ((column.type == "date" || column.type == "datetime") ? d3.time.scale() : d3.scale.linear())
+                        .domain([d3.min(values),
+                                 d3.max(values)])
+                        .range([minRange, maxRange]);
+
+
+            if (column.scale == "Logarithmic")
+                return  d3.scale.log()
+                        .domain([d3.min(values),
+                                 d3.max(values)])
+                        .range([minRange, maxRange]);
+
+            throw Error("Unexpected scale: " + column.scale);
+        },
+
         rule: function (object, totalSize) {
             function isStar(val) {
                 return typeof val === 'string' & val[val.length - 1] == '*';
@@ -204,7 +235,7 @@ SF.Chart.Utils = (function () {
                     return ends[name];
                 },
 
-                middle: function(name){
+                middle: function (name) {
                     return starts[name] + sizes[name] / 2;
                 },
 

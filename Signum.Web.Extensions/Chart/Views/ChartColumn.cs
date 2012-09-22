@@ -138,7 +138,7 @@ WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
                 {
                     groupCheck.Attr("disabled", "disabled");
                 }
-                
+
                 bool groupResults = tc.Value.GroupByChecked;
                 if (groupResults)
                 {
@@ -179,9 +179,20 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
              using (Html.FieldInline())
             { 
                 
-           Write(Html.ValueLine(tc, ct => ct.DisplayName));
+           Write(Html.ValueLine(tc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange"));
 
-                                                         
+                                                                                                                        
+                
+           Write(Html.ValueLine(tc, ct => ct.Scale, vl =>
+           {
+               var compatible = tc.Value.CompatibleScales();
+
+               vl.ReadOnly = compatible.Length <= 1;
+               vl.EnumComboItems = compatible.Cast<Enum>();
+               vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange";
+           }));
+
+             
                 if (tc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
                     var type = tc.Value.Token.Type.CleanType();

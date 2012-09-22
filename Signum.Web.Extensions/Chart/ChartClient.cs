@@ -84,7 +84,12 @@ namespace Signum.Web.Chart
 
                 var chartToken = (ChartColumnDN)ctx.Parent.UntypedValue;
 
-                return QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, chartToken.ParentChart.GroupResults));
+                var token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, true /* chartToken.ParentChart.GroupResults*/));
+
+                if (token is AggregateToken && !chartToken.ParentChart.GroupResults)
+                    token = token.Parent;
+
+                return token;
             })
             .SetProperty(ct => ct.DisplayName, ctx =>
             {
@@ -152,8 +157,9 @@ namespace Signum.Web.Chart
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
-            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qt => qt.SubTokensChart(qd.Columns, chartRequest.GroupResults))
-                .Select(fo => fo.ToOrder()).ToList();
+            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, 
+                        qt => qt.SubTokensChart(qd.Columns, true/*chartRequest.GroupResults*/))
+                    .Select(fo => fo.ToOrder()).ToList();
         }
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
@@ -222,11 +228,11 @@ namespace Signum.Web.Chart
                 helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, null), context, 0, false);
         }
 
-        public static string ChartTypeImgClass(MList<ChartColumnDN> columns, ChartScriptDN current, ChartScriptDN script)
+        public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptDN current, ChartScriptDN script)
         {
             string css = "sf-chart-img";
 
-            if (script.IsCompatibleWith(columns))
+            if (script.IsCompatibleWith(chartBase))
                 css += " sf-chart-img-equiv";
 
             if (script.Is(current))

@@ -129,23 +129,23 @@ WriteLiteral("\r\n                </div>\r\n");
 WriteLiteral("                    <div class=\"");
 
 
-                           Write(ChartClient.ChartTypeImgClass(chart.Value.Columns, chart.Value.ChartScript, script));
+                           Write(ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script));
 
 WriteLiteral("\" data-related=\"");
 
 
-                                                                                                                                Write(new RuntimeInfo(script).ToString());
+                                                                                                                        Write(new RuntimeInfo(script).ToString());
 
 WriteLiteral("\"  title=\"");
 
 
-                                                                                                                                                                              Write(script.ToString());
+                                                                                                                                                                      Write(script.ToString());
 
 WriteLiteral("\">\r\n                        <img src=\" ");
 
 
                                Write(script.Icon == null ?
-                        Url.Content("~/Chart/Images/unkwnown.png") :
+                        Url.Content("~/Chart/Images/unknown.png") :
                         Url.Action((Signum.Web.Files.FileController fc) => fc.DownloadFile(script.Icon.Id)));
 
 WriteLiteral("\" />\r\n                    </div>\r\n");

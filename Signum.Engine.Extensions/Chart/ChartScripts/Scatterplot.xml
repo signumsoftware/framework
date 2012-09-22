@@ -32,18 +32,13 @@
   }, height);
   //yRule.debugY(chart);
   
+  var x = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, xRule.size('content'));
   
-  var x = d3.scale.linear()
-      .domain([0, d3.max($.map(data.rows, function (e) { return getKey(e.c1); }))])
-      .range([0, xRule.size('content')]);
-  
-  
-  var y = d3.scale.linear()
-      .domain([0, d3.max($.map(data.rows, function (e) { return getKey(e.c2); }))])
-      .range([0, yRule.size('content')]);
+  var y = º.scaleFor(data.columns.c2, data.rows.map(function(r){return getKey(r.c2);}), 0, yRule.size('content'));
   
   
-  var xTicks = x.ticks(width/50);
+  var xTicks = x.ticks(width / 50);
+  var xTickFormat = x.tickFormat(width / 50);
   
   chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
     .enterData(xTicks, 'line', 'y-lines')
@@ -63,7 +58,7 @@
     .enterData(xTicks, 'text', 'x-label')
     .attr('x', x)
     .attr('text-anchor', 'middle')
-    .text(String);
+    .text(xTickFormat);
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
     .append('svg:text').attr('class', 'x-title')
@@ -73,7 +68,7 @@
   
   
   var yTicks = y.ticks(height / 50);
-  
+  var yTickFormat = y.tickFormat(height / 50);
   chart.append('svg:g').attr('class', 'y-lines').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .enterData(yTicks, 'line', 'y-lines')
     .attr('x2', xRule.size('content'))
@@ -93,7 +88,7 @@
     .attr('y', function(t) { return -y(t); })
     .attr('dominant-baseline', 'middle')
     .attr('text-anchor', 'end')
-    .text(String);
+    .text(yTickFormat);
   
   chart.append('svg:g').attr('class', 'y-title').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
     .append('svg:text').attr('class', 'y-title')

@@ -29,9 +29,9 @@
                 {
                     foreach (var script in group)
                     { 
-                    <div class="@ChartClient.ChartTypeImgClass(chart.Value.Columns, chart.Value.ChartScript, script)" data-related="@(new RuntimeInfo(script).ToString())"  title="@script.ToString()">
+                    <div class="@ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)" data-related="@(new RuntimeInfo(script).ToString())"  title="@script.ToString()">
                         <img src=" @(script.Icon == null ?
-                        Url.Content("~/Chart/Images/unkwnown.png") :
+                        Url.Content("~/Chart/Images/unknown.png") :
                         Url.Action((Signum.Web.Files.FileController fc) => fc.DownloadFile(script.Icon.Id)))" />
                     </div>
                     }

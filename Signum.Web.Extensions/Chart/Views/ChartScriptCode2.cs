@@ -151,36 +151,36 @@ WriteLiteral("\");\r\n    var changedDelay;\r\n   \r\n    var editor = CodeMirro
 "          if(opener != null && opener != undefined)\r\n            {\r\n            " +
 "    clearTimeout(changedDelay);\r\n                changedDelay = setTimeout(updat" +
 "ePreview, 150);\r\n            }\r\n        }\r\n    });\r\n\r\n    function updatePreview" +
-"() {\r\n        opener.changeTextArea($textArea.val());\r\n        exceptionDelay = " +
-"setTimeout(getException, 100);\r\n    }\r\n\r\n    var exceptionDelay;\r\n    var hlLine" +
-";\r\n    function getException(){\r\n      var number = opener.getExceptionNumber();" +
-"\r\n      if(number != null)\r\n      {\r\n         clearTimeout(exceptionDelay);\r\n   " +
-"       if(hlLine != null)\r\n            editor.setLineClass(hlLine, null, null);\r" +
-"\n         if(number != -1) \r\n            hlLine = editor.setLineClass(number -1," +
-" null, \"exceptionLine\");\r\n      }\r\n    }\r\n\r\n    CodeMirror.commands.autocomplete" +
-" = function(cm) {\r\n        CodeMirror.simpleHint(cm, CodeMirror.javascriptHint);" +
-"\r\n    }\r\n\r\n    function getSelectedRange() {\r\n       return { from: editor.getCu" +
-"rsor(true), to: editor.getCursor(false) };\r\n    }\r\n\r\n    CodeMirror.commands.com" +
-"mentSelection = function(cm) {\r\n       var range = getSelectedRange();\r\n       e" +
-"ditor.commentRange(true, range.from, range.to);\r\n    }\r\n\r\n    CodeMirror.command" +
-"s.uncommentSelection = function(cm) {\r\n       var range = getSelectedRange();\r\n " +
-"      editor.commentRange(false, range.from, range.to);\r\n    }\r\n\r\n    CodeMirror" +
-".commands.autoFormatSelection = function(cm) {\r\n        var range = getSelectedR" +
-"ange();\r\n        editor.autoFormatRange(range.from, range.to);\r\n    }\r\n\r\n     fu" +
-"nction isFullScreen(cm) {\r\n      return /\\bCodeMirror-fullscreen\\b/.test(cm.getW" +
-"rapperElement().className);\r\n    }\r\n    function winHeight() {\r\n      return win" +
-"dow.innerHeight || (document.documentElement || document.body).clientHeight;\r\n  " +
-"  }\r\n    function setFullScreen(cm, full) {\r\n      var wrap = cm.getWrapperEleme" +
-"nt(), scroll = cm.getScrollerElement();\r\n      if (full) {\r\n        wrap.classNa" +
-"me += \" CodeMirror-fullscreen\";\r\n        scroll.style.height = winHeight() + \"px" +
-"\";\r\n        document.documentElement.style.overflow = \"hidden\";\r\n      } else {\r" +
-"\n        wrap.className = wrap.className.replace(\" CodeMirror-fullscreen\", \"\");\r" +
-"\n        scroll.style.height = \"\";\r\n        document.documentElement.style.overf" +
-"low = \"\";\r\n      }\r\n      cm.refresh();\r\n    }\r\n    CodeMirror.connect(window, \"" +
-"resize\", function() {\r\n      var showing = document.body.getElementsByClassName(" +
-"\"CodeMirror-fullscreen\")[0];\r\n      if (!showing) return;\r\n      showing.CodeMir" +
-"ror.getScrollerElement().style.height = winHeight() + \"px\";\r\n    });\r\n\r\n    </sc" +
-"ript>\r\n");
+"() {\r\n        opener.changeTextArea($textArea.val(), $(\"#sfRuntimeInfo\").val());" +
+"\r\n        exceptionDelay = setTimeout(getException, 100);\r\n    }\r\n\r\n    var exce" +
+"ptionDelay;\r\n    var hlLine;\r\n    function getException(){\r\n      var number = o" +
+"pener.getExceptionNumber();\r\n      if(number != null)\r\n      {\r\n         clearTi" +
+"meout(exceptionDelay);\r\n          if(hlLine != null)\r\n            editor.setLine" +
+"Class(hlLine, null, null);\r\n         if(number != -1) \r\n            hlLine = edi" +
+"tor.setLineClass(number -1, null, \"exceptionLine\");\r\n      }\r\n    }\r\n\r\n    CodeM" +
+"irror.commands.autocomplete = function(cm) {\r\n        CodeMirror.simpleHint(cm, " +
+"CodeMirror.javascriptHint);\r\n    }\r\n\r\n    function getSelectedRange() {\r\n       " +
+"return { from: editor.getCursor(true), to: editor.getCursor(false) };\r\n    }\r\n\r\n" +
+"    CodeMirror.commands.commentSelection = function(cm) {\r\n       var range = ge" +
+"tSelectedRange();\r\n       editor.commentRange(true, range.from, range.to);\r\n    " +
+"}\r\n\r\n    CodeMirror.commands.uncommentSelection = function(cm) {\r\n       var ran" +
+"ge = getSelectedRange();\r\n       editor.commentRange(false, range.from, range.to" +
+");\r\n    }\r\n\r\n    CodeMirror.commands.autoFormatSelection = function(cm) {\r\n     " +
+"   var range = getSelectedRange();\r\n        editor.autoFormatRange(range.from, r" +
+"ange.to);\r\n    }\r\n\r\n     function isFullScreen(cm) {\r\n      return /\\bCodeMirror" +
+"-fullscreen\\b/.test(cm.getWrapperElement().className);\r\n    }\r\n    function winH" +
+"eight() {\r\n      return window.innerHeight || (document.documentElement || docum" +
+"ent.body).clientHeight;\r\n    }\r\n    function setFullScreen(cm, full) {\r\n      va" +
+"r wrap = cm.getWrapperElement(), scroll = cm.getScrollerElement();\r\n      if (fu" +
+"ll) {\r\n        wrap.className += \" CodeMirror-fullscreen\";\r\n        scroll.style" +
+".height = winHeight() + \"px\";\r\n        document.documentElement.style.overflow =" +
+" \"hidden\";\r\n      } else {\r\n        wrap.className = wrap.className.replace(\" Co" +
+"deMirror-fullscreen\", \"\");\r\n        scroll.style.height = \"\";\r\n        document." +
+"documentElement.style.overflow = \"\";\r\n      }\r\n      cm.refresh();\r\n    }\r\n    C" +
+"odeMirror.connect(window, \"resize\", function() {\r\n      var showing = document.b" +
+"ody.getElementsByClassName(\"CodeMirror-fullscreen\")[0];\r\n      if (!showing) ret" +
+"urn;\r\n      showing.CodeMirror.getScrollerElement().style.height = winHeight() +" +
+" \"px\";\r\n    });\r\n\r\n    </script>\r\n");
 
 
         }

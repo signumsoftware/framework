@@ -242,6 +242,8 @@ namespace Signum.Web.Chart
             var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params["webQueryName"]))
                     .ApplyChanges(ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
 
+            ctx.Value.CleanOrderColumns();
+
             ChartRequest chart = ctx.Value;
             if (lastTokenChanged != null)
                 chart.Columns[lastTokenChanged.Value].TokenChanged();

@@ -2,7 +2,7 @@
 <ChartScript GroupBy="Always">
   <Columns>
     <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Height" ColumnType="Magnitude" />
+    <Column DisplayName="Height" ColumnType="Positionable" />
   </Columns>
   <Icon FileName="lines.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa1JREFUeNpi/P//P8NgBkwMgxwMDQfGFi/+PxqCow4cdeCoA0cdOOpAsgDLYHEIcm22uDeWcTSKBzSKcUUHuWD38bv/DbXlGIqS7BkHXRpcs+vK/wtXHzG0FHox0iSKu2bvI7upNm/t6f+v3nzC6TiyHairIQ2OWhDm4eZgWLXjEsmOnLrsGFhPVpQVI1XTYMvUXf9rst3ghoIsKGhZ/z/MQ4+ktOvjqs8Q7qHHSNVcXNG9GcVxMDChJpBx4qLDJIUiMY4jyYETFx7631Hqi9NQUWFehgXrz/ynWzGDHB0SonwM3RX+eH0c5W3A2DvvAFYH7jlx7/+xM3fIKpKICkFCjoOB4iQHxvzmdSiOXLHt4v+L1x4z1OW4MVI1BMkF7z58hYe+rbkaw9dvP4EOt2ekahRvO3zzv4aKBEN1pitFtQQLMxNDYYIdI1XT4Jqdl/4/ffGBYseBQFKwKSNVMwmowL378DVDZboz2QZTo25GBowxRYvgidrKRJkhM9KKkWEQAZRcPNgcNyTagwyg8UFQNIPowYiHTot6MA3BIZcEjKNDwKMOHHUgfgAQYACzwAoJxqi5QAAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -37,9 +37,7 @@
       .domain($.map(data.rows, function (e) { return getKey(e.c0); }))
       .rangeBands([0, xRule.size('content')]);
   
-  var y = d3.scale.linear()
-      .domain([0, d3.max($.map(data.rows, function (e) { return getKey(e.c1); }))])
-      .range([0, yRule.size('content')]);
+  var y = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, yRule.size('content'));
   
   
   chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.start('ticks')))
@@ -66,7 +64,8 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c0.title);
   
-  var yTicks = y.ticks(10);
+  var yTicks = y.ticks(height / 50);
+  var yTickFormat = y.tickFormat(height / 50);
   chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .enterData(yTicks, 'line', 'y-line')
     .attr('x2', xRule.size('content'))
@@ -86,7 +85,7 @@
     .attr('y', function (t) { return -y(t); })
     .attr('dominant-baseline', 'middle')
     .attr('text-anchor', 'end')
-    .text(String);
+    .text(yTickFormat);
   
   chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
     .append('svg:text').attr('class', 'y-label')

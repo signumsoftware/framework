@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ChartScript GroupBy="Optional">
+  <Columns>
+    <Column DisplayName="Bubble" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Size" ColumnType="Magnitude" />
+  </Columns>
+  <Script><![CDATA[function DrawChart(chart, data){
+  var format = d3.format(",d");
+  var fill = d3.scale.category20c($.map(data.rows, function(v) { return getKey(v.c0); }));
+  
+  var format = d3.format(",d");
+  
+  var bubble = d3.layout.pack()
+     .sort(null)
+     .size([width, height])
+      .padding(2).value(function(r){return r.c1;});
+  
+  var tree = {
+    children: data.rows
+  }
+      
+  
+  var node = chart.selectAll("g.node")
+      .data(bubble.nodes(tree).filter(function(d) { return !d.children; }))
+    .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  node.append("title")
+      .text(function(d) { return getLabel(d.c0) + ": " + format(d.c1); });
+
+  node.append("circle")
+      .attr('shape-rendering', 'initial')
+      .attr("r", function(d) { return d.r; })
+      .style("fill", function(d) { return fill(getKey(d.c0)); })
+      .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
+      .append('svg:title')
+    .text(function(d) { return  getLabel(d.c0) + ': ' + getLabel(d.c1);});
+
+  node.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", ".3em")
+      .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
+      .text(function(d) { return getLabel(d.c0).substring(0, d.r / 4); });
+  
+}]]></Script>
+</ChartScript>
