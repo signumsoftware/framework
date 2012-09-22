@@ -80,7 +80,7 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c0.title);
 
-  var color = d3.scale.category20().domain([0, $.map(data.rows, function (v) { return getKey(v.c0); })]);
+  var color = d3.scale.category20().domain($.map(data.rows, function (v) { return getKey(v.c0); }));
   //PAINT GRAPH
   chart.append('svg:g').attr('class', 'shape').attr('transform', translate(xRule.start('content'), yRule.start('content')))
 	.enterData(data.rows, 'rect', 'shape')
@@ -97,13 +97,14 @@
   {
     var xHalf = xRule.size('content') / 2;
     var labelMargin = 10;
-    chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', translate(xRule.start('content') + labelMargin, yRule.start('content') + y.rangeBand() / 2))
-      .enterData(data.rows, 'text', 'y-axis-tick-label sf-chart-strong')
+    chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.start('content') + labelMargin, yRule.start('content') + y.rangeBand() / 2))
+      .enterData(data.rows, 'text', 'y-label')
       .attr('x', function (v) { var posx = x(getKey(v.c1)); return posx >= xHalf ? 0 : posx; })
       .attr('y', function (v) { return y(getKey(v.c0)); })
       .attr('fill', function (v) { return x(getKey(v.c1)) >= xHalf ? '#fff' : getColor(v.c0, color); })
       .attr('dominant-baseline', 'middle')
-        .text(function (v) { return getLabel(v.c0); });
+      .attr('font-weight', 'bold')
+      .text(function (v) { return getLabel(v.c0); });
   }
   
 

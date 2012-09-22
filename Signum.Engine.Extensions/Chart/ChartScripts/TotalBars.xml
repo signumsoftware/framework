@@ -120,7 +120,7 @@
     .text(data.columns.c0.title);
 
   
-  var color = d3.scale.category20().domain([0, $.map(series, function (s) { return getKey(s.dimension2); })]);
+  var color = d3.scale.category20().domain($.map(series, function (s) { return getKey(s.dimension2); }));
   
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
@@ -143,10 +143,11 @@
     var labelMargin = 10;
     chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.start('content'), yRule.start('content') + y.rangeBand() / 2))
       .enterData(_.last(series).values,'text', 'y-label sf-chart-strong')
-      .attr('x', function (v) { var posx = x(v.to); return posx - labelMargin; })
+      .attr('x', xRule.size('content') / 2)
       .attr('y', function (v) { return y(getKey(v.d1)); })
-      .attr('text-anchor', function (v) { var posx = x(v.to); return 'end'; })
-      .attr('fill', function (v) { var posx = x(v.to); return '#fff'; })
+      .attr('text-anchor', 'middle')
+      .attr('fill',  '#fff')
+      .attr('font-weight', 'bold')
       .attr('dominant-baseline', 'middle')
       .text(function (v, i) { return getLabel(v.d1); });
   }

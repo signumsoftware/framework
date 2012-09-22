@@ -109,7 +109,7 @@
     .text(data.columns.c0.title);
 
   
-  var color = d3.scale.category20().domain([0, $.map(series, function (s) { return getKey(s.dimension2); })]);
+  var color = d3.scale.category20().domain($.map(series, function (s) { return getKey(s.dimension2); }));
   
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
@@ -137,6 +137,7 @@
       .attr('text-anchor', function (v) { var posx = x(v.to); return posx >= xHalf ? 'end' : 'start'; })
       .attr('fill', function (v) { var posx = x(v.to); return posx >= xHalf ? '#fff' : '#000'; })
       .attr('dominant-baseline', 'middle')
+      .attr('font-weight', 'bold')
       .text(function (v, i) { return getLabel(v.d1); });
   }
   
@@ -156,7 +157,7 @@
       chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
       .enterData(series, 'text', 'color-text')
       .attr('x', function (e, i) { return legendScale(i); })
-        .attr('dominant-baseline', 'middle')
+      .attr('dominant-baseline', 'middle')
       .text(function (s) { return getLabel(s.dimension2); });
   }
 

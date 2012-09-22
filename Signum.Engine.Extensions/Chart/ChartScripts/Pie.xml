@@ -38,7 +38,10 @@
     .append('svg:text').attr('class', 'color-legend sf-chart-strong')
     .attr('x', function (slice) { var m = (slice.endAngle + slice.startAngle) / 2; return Math.sin(m) * r * legendRadius; })
     .attr('y', function (slice) { var m = (slice.endAngle + slice.startAngle) / 2; return -Math.cos(m) * r * legendRadius; })
-    .attr('text-anchor', function (slice) { var m = (slice.endAngle + slice.startAngle) / 2; var cuadr = Math.floor(12 * m / (2 * Math.PI)); return (1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'; })
+    .attr('text-anchor', function (slice) { 
+      var m = (slice.endAngle + slice.startAngle) / 2; 
+      var cuadr = Math.floor(12 * m / (2 * Math.PI)); 
+      return (1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'; })
     .attr('fill', function (slice) { return getColor(slice.data.c0, color); })
     .attr('data-click', function (slice) { return getClickKeys(slice.data, data.columns); })
     .text(function (slice) { return ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? getLabel(slice.data.c0) : ''; });

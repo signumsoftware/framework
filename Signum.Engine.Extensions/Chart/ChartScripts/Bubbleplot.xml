@@ -102,7 +102,7 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c2.title);
   
-  var color = d3.scale.category20().domain([0, $.map(data.rows, function(v) { return getKey(v.c0); })]);
+  var color = d3.scale.category20().domain($.map(data.rows, function(v) { return getKey(v.c0); }));
   
    var sizeScale = d3.scale.linear()
       .domain([0, _.reduce(data.rows, function(memo, p){ return memo + p.c3; }, 0) * 3])
