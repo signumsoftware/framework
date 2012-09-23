@@ -308,6 +308,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartScriptColumn.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Chart\Views\ChartScriptParameter.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartScriptParameter.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\Views\UserChartOrder.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1065,6 +1070,10 @@
       <LastGenOutput>ChartScriptCode2.cs</LastGenOutput>
     </Content>
     <Content Include="Chart\Views\ViewPage1.cshtml" />
+    <Content Include="Chart\Views\ChartScriptParameter.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartScriptParameter.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>

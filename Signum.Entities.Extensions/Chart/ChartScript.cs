@@ -10,6 +10,8 @@ using System.Xml.Linq;
 using System.Collections;
 using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
+using System.Reflection;
 
 namespace Signum.Entities.Chart
 {
@@ -136,7 +138,10 @@ namespace Signum.Entities.Chart
                             new XAttribute("DisplayName", c.DisplayName),
                             new XAttribute("ColumnType", c.ColumnType.ToString()),
                             c.IsGroupKey ? new XAttribute("IsGroupKey", true) : null,
-                            c.IsOptional ? new XAttribute("IsOptional", true) : null
+                            c.IsOptional ? new XAttribute("IsOptional", true) : null,
+                            c.Parameter1 != null ? c.Parameter1.ExportXml(1): null,  
+                            c.Parameter2 != null ? c.Parameter2.ExportXml(2): null,  
+                            c.Parameter3 != null ? c.Parameter3.ExportXml(3): null  
                          ))),
                     icon == null ? null :
                     new XElement("Icon",
@@ -158,6 +163,9 @@ namespace Signum.Entities.Chart
                 ColumnType = c.Attribute("ColumnType").Value.ToEnum<ChartColumnType>(),
                 IsGroupKey = c.Attribute("IsGroupKey").Let(a => a != null && a.Value == "true"),
                 IsOptional = c.Attribute("IsOptional").Let(a => a != null && a.Value == "true"),
+                Parameter1 = ChartScriptParameterDN.ImportXml(c, 1),
+                Parameter2 = ChartScriptParameterDN.ImportXml(c, 2),
+                Parameter3 = ChartScriptParameterDN.ImportXml(c, 3)
             }).ToList();
 
             if (!IsNew && !force)
@@ -308,6 +316,7 @@ namespace Signum.Entities.Chart
             set { Set(ref isOptional, value, () => IsOptional); }
         }
      
+        [ForceForeignKey]
         ChartColumnType columnType;
         public ChartColumnType ColumnType
         {
@@ -321,21 +330,417 @@ namespace Signum.Entities.Chart
             get { return isGroupKey; }
             set { Set(ref isGroupKey, value, () => IsGroupKey); }
         }
+
+        ChartScriptParameterDN parameter1;
+        public ChartScriptParameterDN Parameter1
+        {
+            get { return parameter1; }
+            set { Set(ref parameter1, value, () => Parameter1); }
+        }
+
+        ChartScriptParameterDN parameter2;
+        public ChartScriptParameterDN Parameter2
+        {
+            get { return parameter2; }
+            set { Set(ref parameter2, value, () => Parameter2); }
+        }
+
+        ChartScriptParameterDN parameter3;
+        public ChartScriptParameterDN Parameter3
+        {
+            get { return parameter3; }
+            set { Set(ref parameter3, value, () => Parameter3); }
+        }
     }
 
+    [Flags]
     public enum ChartColumnType
     {
-        Decimal = 1,
-        DateTime = 2,
-        Integer = 4,
-        Date = 8,
-        String = 16, //Guid
-        Entity = 32,
-        Enum = 64, // Boolean 
+        [Code("i")] Integer = 1,
+        [Code("r")] Real = 2,
+        [Code("d")] Date = 4,
+        [Code("dt")] DateTime = 8,
+        [Code("s")] String = 16, //Guid
+        [Code("s")] Lite = 32,
+        [Code("e")] Enum = 64, // Boolean 
 
-        Groupable = 0x10000000 | Integer | Date | String | Entity | Enum,
-        Magnitude = 0x10000000 | Integer | Decimal,
-        Positionable = 0x10000000 | Integer | Decimal | Date | DateTime | Enum,
-        GroupableAndPositionable = 0x10000000 | Integer | Date | Enum 
+        [Code("G")] Groupable = ChartColumnTypeUtils.GroupMargin | Integer | Date | String | Lite | Enum,
+        [Code("M")] Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real,
+        [Code("P")] Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | Date | DateTime | Enum
+    }
+
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
+    public sealed class CodeAttribute : Attribute
+    {
+        string code;
+        public CodeAttribute(string code)
+        {
+            this.code = code;
+        }
+
+        public string Code
+        {
+            get { return code; }
+        }
+    }
+
+    public static class ChartColumnTypeUtils
+    {
+       public const int GroupMargin = 0x10000000;
+
+       static Dictionary<ChartColumnType, string> codes = EnumFieldCache.Get(typeof(ChartColumnType)).ToDictionary(
+           a => (ChartColumnType)a.Key,
+           a => a.Value.SingleAttribute<CodeAttribute>().Code);
+
+       public static string GetCode(this ChartColumnType columnType)
+       {
+           return codes[columnType];
+       }
+
+       public static string GetComposedCode(this ChartColumnType columnType)
+       {
+           var result = columnType.GetCode();
+
+           if (result.HasText())
+               return result;
+
+           return EnumExtensions.GetValues<ChartColumnType>()
+               .Where(a => (int)a < ChartColumnTypeUtils.GroupMargin && columnType.HasFlag(a))
+               .ToString(GetCode, ",");
+       }
+
+       static Dictionary<string, ChartColumnType> fromCodes = EnumFieldCache.Get(typeof(ChartColumnType)).ToDictionary(
+           a => a.Value.SingleAttribute<CodeAttribute>().Code,
+           a => (ChartColumnType)a.Key);
+
+       public static string TryParse(string code, out ChartColumnType type)
+       {
+           if(fromCodes.TryGetValue(code, out type))
+               return null;
+                
+           return "{0} is not a valid type code, use {1} instead".Formato(code, fromCodes.Keys.CommaOr());
+       }
+
+       public static string TryParseComposed(string code, out ChartColumnType type)
+       {
+           type = default(ChartColumnType);
+           foreach (var item in code.Split(','))
+	       {
+               ChartColumnType temp;
+                string error = TryParse(item,   out temp);
+
+               if(error.HasText())
+                   return error;
+
+               type |= temp;
+           }
+           return null;
+       }
+
+       //public static string GetDescription(this ChartColumnType columnType)
+       //{
+       //    switch (columnType)
+       //    {
+       //        case ChartColumnType.Integer: return "Number with no fractional part";
+       //        case ChartColumnType.Real: return "Number with fractional part";
+       //        case ChartColumnType.Date: return "Date with no time part";
+       //        case ChartColumnType.DateTime: return "Date with time part";
+       //        case ChartColumnType.String: return "Sequence of characters";
+       //        case ChartColumnType.Lite: return "Reference to an entity";
+       //        case ChartColumnType.Enum: return "Set of pre-defined identifiers";
+       //        case ChartColumnType.Groupable: return "Can be grouped (Integer | Date | String | Lite | Enum)";
+       //        case ChartColumnType.Magnitude: return "Can be added up (Integer | Real)";
+       //        case ChartColumnType.Positionable: return "Can be positioned (Integer | Real | Date | DateTime | Enum)";
+       //        default: throw new ArgumentException("Unexpected columnType");
+       //    }
+       //}
+    }
+
+    public class ChartScriptParameterDN : EmbeddedEntity
+    {
+        [NotNullable, SqlDbType(Size = 50)]
+        string name;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
+        public string Name
+        {
+            get { return name; }
+            set { Set(ref name, value, () => Name); }
+        }
+
+        ChartParameterType type;
+        public ChartParameterType Type
+        {
+            get { return type; }
+            set
+            {
+                if (Set(ref type, value, () => Type))
+                {
+                    ValueDefinition = null;
+                }
+            }
+        }
+
+        [NotNullable, SqlDbType(Size = 150)]
+        string valueDefinition;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 150)]
+        public string ValueDefinition
+        {
+            get { return valueDefinition; }
+            set
+            {
+                if (Set(ref valueDefinition, value, () => ValueDefinition))
+                {
+                    enumValues = null;
+                    numberInterval = null;
+                }
+            }
+        }
+
+       
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Name))
+            {
+                if (!Reflector.ValidIdentifier(Name))
+                    return "{0} should be a vaid interval".Formato(pi.NiceName());
+            }
+
+            if (pi.Is(() => ValueDefinition) && ValueDefinition != null)
+            {
+                if (Type == ChartParameterType.Enum)
+                    return EnumValueList.TryParse(valueDefinition, out enumValues);
+                else
+                    return NumberInterval.TryParse(valueDefinition, out  numberInterval);
+            }
+
+            return base.PropertyValidation(pi);
+        }
+
+        public string DefaultValue(QueryToken token)
+        {
+            switch (Type)
+            {
+                case ChartParameterType.Enum:return GetEnumValues().DefaultValue(token);
+                case ChartParameterType.Number:return GetNumberInterval().DefaultValue.ToString();
+                case ChartParameterType.String: return ValueDefinition;
+                default: throw new InvalidOperationException();
+            }
+        }
+
+
+        public string Valdidate(string parameter, QueryToken token)
+        {
+            switch (Type)
+            {
+                case ChartParameterType.Enum: return GetEnumValues().Validate(parameter, token);
+                case ChartParameterType.Number: return GetNumberInterval().Validate(parameter);
+                case ChartParameterType.String: return null;
+                default: throw new InvalidOperationException();
+            }
+        }
+
+        [Ignore]
+        EnumValueList enumValues;
+        public EnumValueList GetEnumValues()
+        {
+            if (Type != ChartParameterType.Enum)
+                throw new InvalidOperationException("Type is not Enum");
+
+            if (enumValues != null)
+                return enumValues;
+
+            string error = EnumValueList.TryParse(valueDefinition, out enumValues);
+            if (error.HasText())
+                throw new FormatException(error);
+
+            return enumValues;
+        }
+
+        [Ignore]
+        NumberInterval numberInterval;
+        public NumberInterval GetNumberInterval()
+        {
+            if (Type != ChartParameterType.Number)
+                throw new InvalidOperationException("Type is not Number");
+
+            if (numberInterval != null)
+                return numberInterval;
+            string error = NumberInterval.TryParse(valueDefinition, out numberInterval);
+            if (error.HasText())
+                throw new FormatException(error);
+
+            return numberInterval;
+        }
+
+
+        public class NumberInterval
+        {
+            public decimal DefaultValue; 
+            public decimal? MinValue;
+            public decimal? MaxValue;
+
+            public static string TryParse(string valueDefinition, out NumberInterval interval)
+            {
+                interval = null;
+                var m = Regex.Match(valueDefinition, @"^\s*(?<def>.+)\[(?<min>.+)?\s*,\s*(?<max>.+)?\s*\]\s*$");
+
+                if (!m.Success)
+                    return "Invalid number interval, [min?, max?]";
+
+                interval = new NumberInterval();
+
+                if (!ReflectionTools.TryParse<decimal>(m.Groups["def"].Value, out interval.DefaultValue))
+                    return "Invalid default value";
+
+                if (!ReflectionTools.TryParse<decimal?>(m.Groups["min"].Value, out interval.MinValue))
+                    return "Invalid min value";
+
+                if (!ReflectionTools.TryParse<decimal?>(m.Groups["max"].Value, out interval.MaxValue))
+                    return "Invalid max value";
+
+                return null;
+            }
+
+            public override string ToString()
+            {
+                return "{0}[{1},{2}]".Formato(DefaultValue, MinValue, MaxValue);
+            }
+
+            public string Validate(string parameter)
+            {
+                decimal value;
+                if (!decimal.TryParse(parameter, out value))
+                    return "{0} is not a valid number".Formato(parameter);
+
+                if (MinValue.HasValue && value < MinValue)
+                    return "{0} is lesser than the minimum {1}".Formato(value, MinValue);
+
+                if (MaxValue.HasValue && MaxValue < value)
+                    return "{0} is grater than the maximum {1}".Formato(value, MinValue);
+
+                return null;
+            }
+        }
+
+        public class EnumValueList : List<EnumValue> 
+        {
+            public static string TryParse(string valueDefinition, out EnumValueList list)
+            {
+                list = new EnumValueList();
+                foreach (var item in valueDefinition.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    EnumValue val;
+                    string error = EnumValue.TryParse(item, out val);
+                    if (error.HasText())
+                        return error;
+
+                    list.Add(val);
+                }
+                return null;
+            }
+
+            internal string Validate(string parameter, QueryToken token)
+            {
+                var enumValue = this.SingleOrDefault(a=>a.Name == parameter);
+
+                if (enumValue == null)
+                    return "{0} is not in the list".Formato(parameter);
+
+                if (!enumValue.CompatibleWith(token))
+                    return "{0} is not compatible with {1}".Formato(parameter, token.NiceName());
+
+                return null;
+            }
+
+            internal string DefaultValue(QueryToken token)
+            {
+                return this.Where(a => a.CompatibleWith(token)).SingleEx(() => "No default parameter value for {0} found".Formato(token.NiceName())).Name;
+            }
+        }
+
+        public class EnumValue
+        {
+            public string Name;
+            public ChartColumnType? TypeFilter;
+
+            public override string ToString()
+            {
+                if (TypeFilter == null)
+                    return Name;
+
+                return "{0} ({1})".Formato(Name, TypeFilter.Value.GetComposedCode());
+            }
+
+            public static string TryParse(string value, out EnumValue enumValue)
+            {
+                var m = Regex.Match(value, @"^\s*(?<name>[^\]\(]*)\s*(?<filter>\([^\)]*\))?\s*\$");
+
+                if (!m.Success)
+                {
+                    enumValue = null;
+                    return "Invalid ChartSciptParameterValue";
+                }
+
+                enumValue = new EnumValue()
+                {
+                    Name = m.Groups["name"].Value.Trim()
+                };
+
+                if (string.IsNullOrEmpty(enumValue.Name))
+                    return "Parameter has no name";
+
+                string composedCode = m.Groups["filter"].Value;
+                if (!composedCode.HasText())
+                    return null;
+
+                ChartColumnType filter;
+
+                string error = ChartColumnTypeUtils.TryParseComposed(composedCode, out filter);
+                if (error.HasText())
+                    return enumValue.Name + ": " + error;
+
+                enumValue.TypeFilter = filter;
+
+                return null;
+            }
+
+            public bool CompatibleWith(QueryToken token)
+            {
+                return TypeFilter == null || ChartUtils.IsChartColumnType(token, TypeFilter.Value);
+            }
+        }
+
+        internal XElement ExportXml(int index)
+        {
+            return new XElement("Parameter" + index,
+                new XAttribute("Name", Name),
+                new XAttribute("Type", Type),
+                new XAttribute("ValueDefinition", ValueDefinition));
+        }
+
+        internal static ChartScriptParameterDN ImportXml(XElement c, int index)
+        {
+            var element = c.Element("Parameter" + index);
+
+            if (element == null)
+                return null;
+
+            return new ChartScriptParameterDN
+            {
+                Name = c.Attribute("Name").Value,
+                Type = c.Attribute("Type").Value.ToEnum<ChartParameterType>(),
+                ValueDefinition = c.Attribute("ValueDefinition").Value,
+            }; 
+        }
+    }
+
+   
+
+    public enum ChartParameterType
+    {
+        Enum, 
+        Number,
+        String,
     }
 }

@@ -111,7 +111,6 @@ WriteLiteral("\r\n");
         tc.Value = new ChartColumnDN();
     }
     
-    
 
 WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
 
@@ -183,16 +182,17 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
 
                                                                                                                         
                 
-           Write(Html.ValueLine(tc, ct => ct.Scale, vl =>
-           {
-               var compatible = tc.Value.CompatibleScales();
+           Write(Html.ValueLine(tc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter1)));
 
-               vl.ReadOnly = compatible.Length <= 1;
-               vl.EnumComboItems = compatible.Cast<Enum>();
-               vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange";
-           }));
+                                                                                                                                          
+                
+           Write(Html.ValueLine(tc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter2)));
 
-             
+                                                                                                                                          
+                
+           Write(Html.ValueLine(tc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter3)));
+
+                                                                                                                                          
                 if (tc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
                     var type = tc.Value.Token.Type.CleanType();

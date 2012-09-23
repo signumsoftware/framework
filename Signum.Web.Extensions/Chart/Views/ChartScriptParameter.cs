@@ -44,12 +44,12 @@ namespace ASP
     using Signum.Entities.Chart;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartScriptColumn.cshtml")]
-    public class _Page_Chart_Views_ChartScriptColumn_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartScriptParameter.cshtml")]
+    public class _Page_Chart_Views_ChartScriptParameter_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_Chart_Views_ChartScriptColumn_cshtml()
+        public _Page_Chart_Views_ChartScriptParameter_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -63,39 +63,23 @@ namespace ASP
         {
 
 
- using (var cc = Html.TypeContext<ChartScriptColumnDN>())
+ using (var cc = Html.TypeContext<ChartScriptParameterDN>())
 {
     using (Html.FieldInline())
     {
         
-   Write(Html.ValueLine(cc, c => c.DisplayName));
+   Write(Html.ValueLine(cc, c => c.Name));
 
-                                               
+                                        
         
-   Write(Html.ValueLine(cc, c => c.ColumnType));
+   Write(Html.ValueLine(cc, c => c.Type));
 
-                                              
+                                        
         
-   Write(Html.ValueLine(cc, c => c.IsGroupKey));
+   Write(Html.ValueLine(cc, c => c.ValueDefinition));
 
-                                              
-        
-   Write(Html.ValueLine(cc, c => c.IsOptional));
-
-                                              
+                                                   
     }    
-    
-Write(Html.EntityLineDetail(cc, c => c.Parameter1));
-
-                                                 
-    
-Write(Html.EntityLineDetail(cc, c => c.Parameter2));
-
-                                                 
-    
-Write(Html.EntityLineDetail(cc, c => c.Parameter3));
-
-                                                 
 }
 
 

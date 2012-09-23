@@ -47,6 +47,7 @@ namespace Signum.Web.Chart
                     new EmbeddedEntitySettings<ChartRequest>(),
                     new EmbeddedEntitySettings<ChartColumnDN> { PartialViewName = _ => ViewPrefix.Formato("ChartColumn") },
                     new EmbeddedEntitySettings<ChartScriptColumnDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptColumn") },
+                    new EmbeddedEntitySettings<ChartScriptParameterDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptParameter") },
                     new EntitySettings<ChartScriptDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
                 });
 
@@ -267,6 +268,31 @@ namespace Signum.Web.Chart
         public static string ToJS(this QueryOrderDN order)
         {
             return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.FullKey();
+        }
+
+        public static void SetupParameter(ValueLine vl, ChartColumnDN column, ChartScriptParameterDN scriptParameter)
+        {
+            if (scriptParameter.Type == ChartParameterType.Number)
+            {
+                vl.ValueLineType = ValueLineType.Number;
+            }
+            else if (scriptParameter.Type == ChartParameterType.String)
+            {
+                vl.ValueLineType = ValueLineType.TextBox;
+            }
+            else if (scriptParameter.Type == ChartParameterType.Enum)
+            {
+                vl.ValueLineType = ValueLineType.Combo;
+
+                var compatible = scriptParameter.GetEnumValues().Where(a => a.CompatibleWith(column.Token)).ToList();
+                vl.ReadOnly = compatible.Count <= 1;
+                vl.EnumComboItems = compatible.Select(ev => new SelectListItem
+                {
+                    Value = ev.Name,
+                    Text = ev.Name,
+                }).ToList();
+            }
+            vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange";
         }
     }
 }

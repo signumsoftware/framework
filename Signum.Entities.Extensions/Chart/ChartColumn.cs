@@ -35,7 +35,9 @@ namespace Signum.Entities.Chart
         {
             NotifyChange(true);
 
-            Scale = DefaultScale(Token);
+            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
+            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
+            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
 
             if (Token != null)
             {
@@ -57,13 +59,34 @@ namespace Signum.Entities.Chart
             set { if (Set(ref displayName, value, () => DisplayName)) NotifyChange(false); }
         }
 
-        ColumnScale scale;
-        public ColumnScale Scale
+        [SqlDbType(Size = 50)]
+        string parameter1;
+        [StringLengthValidator(Min = 1, Max = 50)]
+        public string Parameter1
         {
-            get { return scale; }
-            set { if (Set(ref scale, value, () => Scale)) NotifyChange(false); }
+            get { return parameter1; }
+            set { Set(ref parameter1, value, () => Parameter1); }
         }
 
+        [SqlDbType(Size = 50)]
+        string parameter2;
+        [StringLengthValidator(Min = 1, Max = 50)]
+        public string Parameter2
+        {
+            get { return parameter2; }
+            set { Set(ref parameter2, value, () => Parameter2); }
+        }
+
+        [SqlDbType(Size = 50)]
+        string parameter3;
+        [StringLengthValidator(Min = 1, Max = 50)]
+        public string Parameter3
+        {
+            get { return parameter3; }
+            set { Set(ref parameter3, value, () => Parameter3); }
+        }
+
+      
         [Ignore]
         internal IChartBase parentChart;
 
@@ -119,7 +142,7 @@ namespace Signum.Entities.Chart
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if(pi.Is(()=>Token))
+            if (pi.Is(() => Token))
             {
                 if (Token is IDataErrorInfo)
                 {
@@ -152,45 +175,34 @@ namespace Signum.Entities.Chart
                     return "{0} is not {1}".Formato(DisplayName, ScriptColumn.ColumnType);
             }
 
-            if (pi.Is(() => Scale) && Token != null)
-            {
-                if (!IsScaleCompatible(Token, Scale))
-                    return "The scale {0} is not compatible with {1}".Formato(Scale.NiceToString(), this.DisplayName);
-            }
+            if (pi.Is(() => Parameter1) && Token != null)
+                return ValidateParameter(pi, Parameter1, scriptColumn.Parameter1);
+
+            if (pi.Is(() => Parameter2) && Token != null)
+                return ValidateParameter(pi, Parameter2, scriptColumn.Parameter2);
+
+            if (pi.Is(() => Parameter3) && Token != null)
+                return ValidateParameter(pi, Parameter3, scriptColumn.Parameter3);
 
             return base.PropertyValidation(pi);
         }
 
-        public ColumnScale[] CompatibleScales()
+        private string ValidateParameter(PropertyInfo pi, string parameter, ChartScriptParameterDN description)
         {
-            return EnumExtensions.GetValues<ColumnScale>().Where(cs => IsScaleCompatible(Token, cs)).ToArray();
-        }
-
-        static bool IsScaleCompatible(QueryToken token, ColumnScale scale)
-        {
-            switch (scale)
+            if (description != null)
             {
-                case ColumnScale.Elements: return token == null || ChartUtils.IsChartColumnType(token, ChartColumnType.Groupable);
-                case ColumnScale.MinMax: return ChartUtils.IsChartColumnType(token, ChartColumnType.Positionable);
-                case ColumnScale.ZeroMax: return ChartUtils.IsChartColumnType(token, ChartColumnType.Magnitude);
-                case ColumnScale.Logarithmic: return ChartUtils.IsChartColumnType(token, ChartColumnType.Magnitude);
-                default: return false;
+                if (parameter == null)
+                    return "{0} should be set".Formato(description.Name);
+
+                return description.Valdidate(parameter, token);
             }
+
+            if (parameter.HasText())
+                return "{0} should be null".Formato(pi.NiceName());
+
+            return null;
         }
 
-        static ColumnScale DefaultScale(QueryToken Token)
-        {
-            if (Token == null)
-                return ColumnScale.Elements;
-
-            if (ChartUtils.IsChartColumnType(Token, ChartColumnType.Magnitude))
-                return ColumnScale.ZeroMax;
-
-            if (ChartUtils.IsChartColumnType(Token, ChartColumnType.Positionable))
-                return ColumnScale.MinMax;
-
-            return ColumnScale.Elements;
-        }
 
         public string GetTitle()
         {
@@ -237,13 +249,5 @@ namespace Signum.Entities.Chart
         {
             return new Column(Token, DisplayName); 
         }
-    }
-
-    public enum ColumnScale
-    {
-        Elements,
-        MinMax,
-        ZeroMax,
-        Logarithmic,
     }
 }
