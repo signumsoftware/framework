@@ -304,12 +304,21 @@ namespace Signum.Entities.Chart
                     return new
                     {
                         key = e,
+                        keyForFilter = e.TryToString("s"),
                         toStr = ct.Token.Format.HasText() ? e.TryToString(ct.Token.Format) : r[columnIndex].TryToString()
                     };
                 };
             }
             else
-                return r => r[columnIndex];
+                return r =>
+                {
+                    object value = r[columnIndex];
+                    return new
+                    {
+                        key = value,
+                        toStr = value,
+                    };
+                };;
         }
 
         private static string TypeName(this ChartColumnDN ct)

@@ -34,10 +34,10 @@
   
   
   var x = d3.scale.ordinal()
-      .domain($.map(data.rows, function (e) { return getKey(e.c0); }))
+      .domain($.map(data.rows, function (e) { return e.c0; }))
       .rangeBands([0, xRule.size('content')]);
   
-  var y = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, yRule.size('content'));
+  var y = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, yRule.size('content'));
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
     .append('svg:text').attr('class', 'x-title')
@@ -75,21 +75,21 @@
     .text(data.columns.c1.title);
   
   
-  var color = d3.scale.category20().domain( $.map(data.rows, function (v) { return getKey(v.c0); }));
+  var color = d3.scale.category20().domain( $.map(data.rows, function (v) { return v.c0; }));
   
   
   //PAINT CHART
   chart.append('svg:g').attr('class', 'shape').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .enterData(data.rows, 'rect', 'shape')
-    .attr('y', function (v) { return -y(getKey(v.c1)); })
-    .attr('height', function (v) { return y(getKey(v.c1)); })
+    .attr('y', function (v) { return -y(v.c1); })
+    .attr('height', function (v) { return y(v.c1); })
     .attr('width', x.rangeBand)
-    .attr('x', function (v) { return x(getKey(v.c0)); })
+    .attr('x', function (v) { return x(v.c0); })
     .attr('fill', function (v) { return getColor(v.c0, color); })
     .attr('stroke', '#fff')
     .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
     .append('svg:title')
-    .text(function (d) { return getLabel(d.c0) + ': ' + getLabel(d.c1); });
+    .text(function (d) { return d.c0.niceToString() + ': ' + d.c1.niceToString(); });
   
   
   var yHalf = yRule.size('content') / 2;
@@ -97,13 +97,13 @@
     
     chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
       .enterData(data.rows, 'text', 'x-label')
-      .attr('transform', function (v){ return translate( x(getKey(v.c0)) + x.rangeBand()/2, -y(v.c1) ) +  rotate(-90);})
+      .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) ) +  rotate(-90);})
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
       .attr('fill', function (v) { return y(v.c1) >= yHalf ? '#fff' : getColor(v.c0, color); })
       .attr('dx', function (v) { return y(v.c1) >= yHalf ? -10 : 10; })
-      .attr('text-anchor', function (v) { return y(getKey(v.c1)) >= yHalf ? 'end' : 'start'; })
-      .text(function (v) { return getLabel(v.c0); });
+      .attr('text-anchor', function (v) { return y(v.c1) >= yHalf ? 'end' : 'start'; })
+      .text(function (v) { return v.c0.niceToString(); });
   }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

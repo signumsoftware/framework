@@ -158,7 +158,7 @@ namespace Signum.Entities.Chart
             {
                 var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token);
 
-                Orders.RemoveAll(o => !(o.Token is AggregateToken) || keys.Contains(o.Token));
+                Orders.RemoveAll(o => !(o.Token is AggregateToken) && !keys.Contains(o.Token));
             }
             else
             {

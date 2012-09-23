@@ -34,28 +34,28 @@
   
   
   var x = d3.scale.ordinal()
-      .domain($.map(data.rows, function (e) { return getKey(e.c0); }))
+      .domain($.map(data.rows, function (e) { return e.c0; }))
       .rangeBands([0, xRule.size('content')]);
   
-  var y = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, yRule.size('content'));
+  var y = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, yRule.size('content'));
   
   
   chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.start('ticks')))
     .enterData(data.rows, 'line', 'x-tick')
       .attr('y2',  function (r, i) { return yRule.start('labels' + (i % 2)) - yRule.start('ticks'); })
-      .attr('x1', function (r) { return x(getKey(r.c0)); })
-      .attr('x2', function (r) { return x(getKey(r.c0)); })
+      .attr('x1', function (r) { return x(r.c0); })
+      .attr('x2', function (r) { return x(r.c0); })
       .style('stroke', 'Black');
   
   if ((x.rangeBand() * 2) > 60) 
   {
     chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.middle('labels0')))
       .enterData(data.rows, 'text', 'x-label')
-        .attr('x', function (r) { return x(getKey(r.c0)); })
+        .attr('x', function (r) { return x(r.c0); })
         .attr('y', function (r, i) { return yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'); })
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle')
-        .text(function (r) { return getLabel(r.c0); });
+        .text(function (r) { return r.c0.niceToString(); });
   }
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
@@ -102,31 +102,31 @@
       .attr('fill', 'none')
       .attr('stroke-width', 3)
       .attr('shape-rendering', 'initial')
-      .attr('d', SF.Chart.Utils.getPathPoints($.map(data.rows, function (v) { return { x: x(getKey(v.c0)), y: -y(getKey(v.c1)) }; })))
+      .attr('d', SF.Chart.Utils.getPathPoints($.map(data.rows, function (v) { return { x: x(v.c0), y: -y(v.c1) }; })))
       
   //paint graph - hover area trigger
   chart.append('svg:g').attr('class', 'hover-trigger').attr('transform', translate(xRule.start('content') + (x.rangeBand() / 2), yRule.end('content')))
     .enterData(data.rows, 'circle', 'hover-trigger')
-      .attr('cx', function (v) { return x(getKey(v.c0)); })
-      .attr('cy', function (v) { return -y(getKey(v.c1)); })
+      .attr('cx', function (v) { return x(v.c0); })
+      .attr('cy', function (v) { return -y(v.c1); })
       .attr('r', 15)
       .attr('fill', '#fff')
       .attr('fill-opacity', 0)
       .attr('stroke', 'none')
       .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
       .append('svg:title')
-      .text(function (v) { return getLabel(v.c0) + ': ' + getLabel(v.c1); })
+      .text(function (v) { return v.c0.niceToString() + ': ' + v.c1.niceToString(); })
       
   //paint graph - points
   chart.append('svg:g').attr('class', 'point').attr('transform', translate(xRule.start('content') + (x.rangeBand() / 2), yRule.end('content')))
     .enterData(data.rows, 'circle', 'point')
       .attr('fill', color)
       .attr('r', 5)
-      .attr('cx', function (v) { return x(getKey(v.c0)); })
-      .attr('cy', function (v) { return -y(getKey(v.c1)); })
+      .attr('cx', function (v) { return x(v.c0); })
+      .attr('cy', function (v) { return -y(v.c1); })
       .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
       .append('svg:title')
-      .text(function (v) { return getLabel(v.c0) + ': ' + getLabel(v.c1); })
+      .text(function (v) { return v.c0.niceToString() + ': ' + v.c1.niceToString(); })
       
    chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .append('svg:line')

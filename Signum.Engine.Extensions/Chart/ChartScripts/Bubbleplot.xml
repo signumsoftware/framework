@@ -34,9 +34,9 @@
   //yRule.debugY(chart);
   
   
-  var x = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, xRule.size('content'));
+  var x = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, xRule.size('content'));
   
-  var y = º.scaleFor(data.columns.c2, data.rows.map(function(r){return getKey(r.c2);}), 0, yRule.size('content'));
+  var y = º.scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, yRule.size('content'));
   
   
   var xTicks = x.ticks(width / 50);
@@ -98,31 +98,31 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c2.title);
   
-  var color = d3.scale.category20().domain($.map(data.rows, function(v) { return getKey(v.c0); }));
+  var color = d3.scale.category20().domain($.map(data.rows, function(v) { return v.c0; }));
   
-  var sizeList = data.rows.map(function(r){return getKey(r.c1);});
+  var sizeList = data.rows.map(function(r){return r.c1;});
       
   var sizeTemp = º.scaleFor(data.columns.c3, sizeList, 0, 1);
   
-  var totalSizeTemp = _.reduce(data.rows, function(memo, p){ return memo + sizeTemp(getKey(p.c3)); }, 0);
+  var totalSizeTemp = _.reduce(data.rows, function(memo, p){ return memo + sizeTemp(p.c3); }, 0);
   
   var sizeScale = º.scaleFor(data.columns.c3, sizeList, 0, (xRule.size('content') * yRule.size('content')) / (totalSizeTemp * 3));
 
   
   //PAINT GRAPH
-  chart.enterData(_.sortBy(data.rows, function (p){ return -getKey(p.c3);})  , 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
+  chart.enterData(_.sortBy(data.rows, function (p){ return -p.c3;})  , 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .append('svg:circle').attr('class', 'shape')
     .attr('stroke', function(p) { return getColor(p.c0, color); })
     .attr('stroke-width', 3)
     .attr('fill', function(p) { return getColor(p.c0, color); })
     .attr('fill-opacity', .5)
     .attr('shape-rendering', 'initial')
-    .attr('r', function(p) { return Math.sqrt(sizeScale(getKey(p.c3))/Math.PI); })
-    .attr('cx', function(p) { return x(getKey(p.c1)); })
-    .attr('cy', function(p) { return -y(getKey(p.c2)); })
+    .attr('r', function(p) { return Math.sqrt(sizeScale(p.c3)/Math.PI); })
+    .attr('cx', function(p) { return x(p.c1); })
+    .attr('cy', function(p) { return -y(p.c2); })
     .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
     .append('svg:title')
-    .text(function(p) { return '(' + getLabel(p.c1) + ', ' + getLabel(p.c2) + ') ' + getLabel(p.c0) + ': ' + getLabel(p.c3); })
+    .text(function(p) { return '(' + p.c1.niceToString() + ', ' + p.c2.niceToString() + ') ' + p.c0.niceToString() + ': ' + p.c3.niceToString(); })
 
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
      .append('svg:line')

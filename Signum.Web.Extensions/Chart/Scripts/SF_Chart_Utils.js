@@ -12,29 +12,57 @@ SF.Chart.Utils = (function () {
 
     var result = {
 
-        getLabel: function (tokenValue) {
-            var result = (tokenValue !== null && tokenValue.toStr !== undefined ? tokenValue.toStr : tokenValue);
+        fillAllTokenValueFuntions: function (data) {
+            for (var i = 0; ; i++) {
+                if (data.columns['c' + i] === undefined)
+                    break;
 
-            if (result === null || result === undefined)
-                return tokenValue.key !== undefined ? "[ no text ]" : "[ null ]";
-
-            return result;
+                for (var j = 0; j < data.rows.length; j++) {
+                    SF.Chart.Utils.makeItTokenValue(data.rows[j]['c' + i]);
+                }
+            }
         },
 
-        getKey: function (tokenValue) {
-            var key = (tokenValue !== null && tokenValue.key !== undefined ? tokenValue.key : tokenValue);
+        makeItTokenValue: function (value) {
 
-            if (key === null || key === undefined)
-                return "null";
+            if (value === null || value === undefined)
+                return;
 
-            if (typeof(key) == 'string' && key.indexOf('/Date(') == 0)
-                return new Date(parseInt(key.substr(6))); ;
+            value.toString = function () {
+                var key = (this.key !== undefined ? this.key : this);
 
-            return key;
+                if (key === null || key === undefined)
+                    return "null";
+
+                return key;
+            };
+
+            value.niceToString = function () {
+                var result = (this.toStr !== undefined ? this.toStr : this);
+
+                if (result === null || result === undefined)
+                    return result.key !== undefined ? "[ no text ]" : "[ null ]";
+
+                return result;
+            };
+
+            value.valueOf = function () {
+                var key = (this.key !== undefined ? this.key : this);
+
+                if (key === null || key === undefined)
+                    return "null";
+
+                if (typeof (key) == 'string' && key.indexOf('/Date(') == 0)
+                    return new Date(parseInt(key.substr(6))).valueOf();
+
+                return key;
+            };
         },
+
 
         getColor: function (tokenValue, color) {
-            return ((tokenValue !== null && tokenValue.color != /*or null*/undefined) ? tokenValue.color : null) || color(SF.Chart.Utils.getKey(tokenValue));
+            return ((tokenValue !== null && tokenValue.color != /*or null*/undefined) ? tokenValue.color : null)
+            || color(tokenValue);
         },
 
         getClickKeys: function (row, columns) {
@@ -42,9 +70,8 @@ SF.Chart.Utils = (function () {
             for (var k in columns) {
                 var col = columns[k];
                 if (col.isGroupKey == true) {
-                    var cell = row[k];
-                    var value = SF.Chart.Utils.getKey(cell);
-                    options += "&" + k + "=" + (value === null ? "" : value);
+                    var tokenValue = row[k];
+                    options += "&" + k + "=" + (tokenValue.keyForFilter || tokenValue.toString());
                 }
             }
 
@@ -147,7 +174,7 @@ SF.Chart.Utils = (function () {
         },
 
         scaleFor: function (column, values, minRange, maxRange) {
-           
+
             if (column.scale == "Elements")
                 return d3.scale.ordinal()
                         .domain(values)
@@ -166,7 +193,7 @@ SF.Chart.Utils = (function () {
 
 
             if (column.scale == "Logarithmic")
-                return  d3.scale.log()
+                return d3.scale.log()
                         .domain([d3.min(values),
                                  d3.max(values)])
                         .range([minRange, maxRange]);

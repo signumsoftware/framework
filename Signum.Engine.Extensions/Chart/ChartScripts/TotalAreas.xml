@@ -12,15 +12,15 @@ function DrawChart(chart, data){
   if(data.columns.c2.scale != "ZeroMax")
     throw new Error("Scale " + data.columns.c2.scale + " not supported");
   
-  var dimension1 = _.uniq(_.map(data.rows, function(r){return r.c0; }), false, function(c) { return getKey(c);});
+  var dimension1 = _.uniq(_.map(data.rows, function(r){return r.c0; }), false, function(c) { return c.toString();});
   
-  var series = _.toArray(º.groupBy(data.rows, function(r){return getKey(r.c1);}, function(list){
+  var series = _.toArray(º.groupBy(data.rows, function(r){return r.c1;}, function(list){
     
-    var obj = º.toObject(list, function(r){return getKey(r.c0); });
+    var obj = º.toObject(list, function(r){return r.c0; });
     
     return {
       dimension2 : _.first(list).c1,
-      values : _.map(dimension1, function(d1){ var row =  obj[getKey(d1)]; return { row: row, d1: d1, from: 0, to: row == undefined? 0 : row.c2}; }),
+      values : _.map(dimension1, function(d1){ var row =  obj[d1]; return { row: row, d1: d1, from: 0, to: row == undefined? 0 : row.c2}; }),
     };
     
   }));
@@ -76,7 +76,7 @@ function DrawChart(chart, data){
   //yRule.debugY(chart);
   
   var x = d3.scale.ordinal()
-      .domain($.map(dimension1, function (d) { return getKey(d); }))
+      .domain($.map(dimension1, function (d) { return d; }))
       .rangeBands([0, xRule.size('content')]);
   
   var y = d3.scale.linear()
@@ -86,19 +86,19 @@ function DrawChart(chart, data){
   chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.start('ticks')))
     .enterData(dimension1, 'line', 'x-tick')
       .attr('y2',  function (d, i) { return yRule.start('labels' + (i % 2)) - yRule.start('ticks'); })
-      .attr('x1', function (d) { return x(getKey(d)); })
-      .attr('x2', function (d) { return x(getKey(d)); })
+      .attr('x1', function (d) { return x(d); })
+      .attr('x2', function (d) { return x(d); })
       .style('stroke', 'Black');
   
   if ((x.rangeBand() * 2) > 60) 
   {
     chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.middle('labels0')))
       .enterData(dimension1, 'text', 'x-label')
-        .attr('x', function (d) { return x(getKey(d)); })
+        .attr('x', function (d) { return x(d); })
         .attr('y', function (d, i) { return yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'); })
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle')
-        .text(function (d) { return getLabel(d); });
+        .text(function (d) { return d.niceToString(); });
   }
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
@@ -136,7 +136,7 @@ function DrawChart(chart, data){
       .attr('dominant-baseline', 'middle')
       .text(data.columns.c2.title);
   
-  var color =  d3.scale.category20().domain($.map(series, function (s) { return getKey(s.dimension2); }));
+  var color =  d3.scale.category20().domain($.map(series, function (s) { return s.dimension2; }));
   
   //paint graph
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content')))
@@ -145,11 +145,11 @@ function DrawChart(chart, data){
       .attr('fill', function (s) { return getColor(s.dimension2, color); })
       .attr('shape-rendering', 'initial')
       .attr('d', function (s) { return º.getPathPoints($.merge(
-        $.map(s.values, function (v) { return { x: x(getKey(v.d1)), y: -y(v.from) }; }).reverse(),
-        $.map(s.values, function (v) { return { x: x(getKey(v.d1)), y: -y(v.to) }; })
+        $.map(s.values, function (v) { return { x: x(v.d1), y: -y(v.from) }; }).reverse(),
+        $.map(s.values, function (v) { return { x: x(v.d1), y: -y(v.to) }; })
       ));})
       .append('svg:title')
-      .text(function (s) { return getLabel(s.dimension2); })
+      .text(function (s) { return s.dimension2.niceToString(); })
       
       var rectRadious = 2; 
   
@@ -157,16 +157,16 @@ function DrawChart(chart, data){
   chart.enterData(series, 'g', 'hover-trigger-serie').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content')))
     .enterData(function(s) { return s.values; }, 'rect', 'point')
       .filter(function(v) {return v.row != undefined;})
-      .attr('x', function(v) { return x(getKey(v.row.c0)) - rectRadious; })
-      .attr('y', function(v) { return -y(getKey(v.to)); })
+      .attr('x', function(v) { return x(v.row.c0) - rectRadious; })
+      .attr('y', function(v) { return -y(v.to); })
       .attr('width', 2 * rectRadious)
-      .attr('height', function(v) { return y(getKey(v.to)) - y(getKey(v.from)); } )
+      .attr('height', function(v) { return y(v.to) - y(v.from); } )
       .attr('fill', '#fff')
       .attr('fill-opacity', .1)
       .attr('stroke', 'none')
       .attr('data-click', function(v) { return getClickKeys(v.row, data.columns); })
       .append('svg:title')
-      .text(function(v) { return  getLabel(v.row.c0) + ', ' + getLabel(v.row.c1) + ': ' + getLabel(v.row.c2); });
+      .text(function(v) { return  v.row.c0.niceToString() + ', ' + v.row.c1.niceToString() + ': ' + v.row.c2.niceToString(); });
   
   var legendScale = d3.scale.ordinal()
       .domain($.map(series, function (s, i) { return i; }))
@@ -187,7 +187,7 @@ function DrawChart(chart, data){
           .enterData(series, 'text', 'color-text')
             .attr('x', function (e, i) { return legendScale(i); })
             .attr('dominant-baseline', 'middle')
-            .text(function (s) { return getLabel(s.dimension2); });
+            .text(function (s) { return s.dimension2.niceToString(); });
       }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

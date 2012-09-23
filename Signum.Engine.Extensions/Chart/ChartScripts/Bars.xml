@@ -30,10 +30,10 @@
   //yRule.debugY(chart);
   
 
-  var x = º.scaleFor(data.columns.c1, data.rows.map(function (e) { return getKey(e.c1); }), 0, xRule.size('content'));
+  var x = º.scaleFor(data.columns.c1, data.rows.map(function (e) { return e.c1; }), 0, xRule.size('content'));
   
   var y = d3.scale.ordinal()
-      .domain($.map(data.rows, function (e) { return getKey(e.c0); }))
+      .domain($.map(data.rows, function (e) { return e.c0; }))
       .rangeBands([0, yRule.size('content')]);
 
   var xTicks = x.ticks(width / 50);
@@ -69,8 +69,8 @@
   chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
 	.enterData(data.rows, 'line', 'y-tick')
 	.attr('x2', xRule.size('ticks'))
-	.attr('y1', function (v) { return -y(getKey(v.c0)); })
-	.attr('y2', function (v) { return -y(getKey(v.c0)); })
+	.attr('y1', function (v) { return -y(v.c0); })
+	.attr('y2', function (v) { return -y(v.c0); })
   	.style('stroke', 'Black');
 
   chart.append('svg:g').attr('class', 'y-title').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
@@ -79,18 +79,18 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c0.title);
 
-  var color = d3.scale.category20().domain($.map(data.rows, function (v) { return getKey(v.c0); }));
+  var color = d3.scale.category20().domain($.map(data.rows, function (v) { return v.c0; }));
   //PAINT GRAPH
   chart.append('svg:g').attr('class', 'shape').attr('transform', translate(xRule.start('content'), yRule.start('content')))
 	.enterData(data.rows, 'rect', 'shape')
-	.attr('width', function (v) { return x(getKey(v.c1)); })
+	.attr('width', function (v) { return x(v.c1); })
 	.attr('height', y.rangeBand)
-	.attr('y', function (v) { return y(getKey(v.c0)); })
+	.attr('y', function (v) { return y(v.c0); })
 	.attr('fill', function (v) { return getColor(v.c0, color); })
 	.attr('stroke', '#fff')
 	.attr('data-click', function (v) { return getClickKeys(v, data.columns); })
 	.append('svg:title')
-	.text(function (d) { return getLabel(d.c0) + ': ' + getLabel(d.c1); });
+	.text(function (d) { return d.c0.niceToString() + ': ' + d.c1.niceToString(); });
 
   if (y.rangeBand() > 15) 
   {
@@ -98,12 +98,12 @@
     var labelMargin = 10;
     chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.start('content') + labelMargin, yRule.start('content') + y.rangeBand() / 2))
       .enterData(data.rows, 'text', 'y-label')
-      .attr('x', function (v) { var posx = x(getKey(v.c1)); return posx >= xHalf ? 0 : posx; })
-      .attr('y', function (v) { return y(getKey(v.c0)); })
-      .attr('fill', function (v) { return x(getKey(v.c1)) >= xHalf ? '#fff' : getColor(v.c0, color); })
+      .attr('x', function (v) { var posx = x(v.c1); return posx >= xHalf ? 0 : posx; })
+      .attr('y', function (v) { return y(v.c0); })
+      .attr('fill', function (v) { return x(v.c1) >= xHalf ? '#fff' : getColor(v.c0, color); })
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
-      .text(function (v) { return getLabel(v.c0); });
+      .text(function (v) { return v.c0.niceToString(); });
   }
   
 

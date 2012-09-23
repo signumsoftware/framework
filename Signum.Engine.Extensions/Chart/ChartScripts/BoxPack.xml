@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Optional">
   <Columns>
-    <Column DisplayName="Bubble" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Color" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Size" ColumnType="Magnitude" />
   </Columns>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -12,8 +12,7 @@
   
   var size = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, 1);
   
-  var bubble = d3.layout.pack()
-     .sort(null)
+  var bubble = d3.layout.treemap()
      .size([width, height])
       .padding(2).value(function(r){return size(getKey(r.c1));});
   
@@ -30,19 +29,22 @@
   node.append("title")
       .text(function(d) { return getLabel(d.c0) + ": " + format(d.c1); });
 
-  node.append("circle")
+  node.append("rect")
       .attr('shape-rendering', 'initial')
-      .attr("r", function(d) { return d.r; })
+      .attr("width", function(d) { return Math.max(0, d.dx - 1); })
+      .attr("height", function(d) { return Math.max(0, d.dy - 1); })
       .style("fill", function(d) { return fill(getKey(d.c0)); })
       .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
       .append('svg:title')
-    .text(function(d) { return  getLabel(d.c0) + ': ' + getLabel(d.c1);});
+      .text(function(d) { return  getLabel(d.c0) + ': ' + getLabel(d.c1);});
 
   node.append("text")
       .attr("text-anchor", "middle")
-      .attr("dy", ".3em")
+      .attr('dominant-baseline', 'middle')
+      .attr("dx",function(d) { return d.dx/2; })
+      .attr("dy",function(d) { return d.dy/2; })
       .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
-      .text(function(d) { return getLabel(d.c0).substring(0, d.r / 4); });
+      .text(function(d) { return getLabel(d.c0).substring(0,d.dy/6); });
   
 }]]></Script>
 </ChartScript>

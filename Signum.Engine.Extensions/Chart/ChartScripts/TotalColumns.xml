@@ -11,15 +11,15 @@
   if(data.columns.c2.scale != "ZeroMax")
     throw new Error("Scale " + data.columns.c2.scale + " not supported");
   
-  var dimension1 = _.uniq(_.map(data.rows, function(r){return r.c0; }), false, function(c) { return getKey(c);});
+  var dimension1 = _.uniq(_.map(data.rows, function(r){return r.c0; }), false, function(c) { return c.toString();});
   
-  var series = _.toArray(º.groupBy(data.rows, function(r){return getKey(r.c1);}, function(list){
+  var series = _.toArray(º.groupBy(data.rows, function(r){return r.c1;}, function(list){
     
-    var obj = º.toObject(list, function(r){return getKey(r.c0); });
+    var obj = º.toObject(list, function(r){return r.c0; });
     
     return {
       dimension2 : _.first(list).c1,
-      values : _.map(dimension1, function(d1){ var row =  obj[getKey(d1)]; return { row: row, d1: d1, from: 0, to: row == undefined? 0 : row.c2}; }),
+      values : _.map(dimension1, function(d1){ var row =  obj[d1]; return { row: row, d1: d1, from: 0, to: row == undefined? 0 : row.c2}; }),
     };
     
   }));
@@ -75,7 +75,7 @@
   
 
   var x = d3.scale.ordinal()
-      .domain($.map(dimension1, function (d) { return getKey(d); }))
+      .domain($.map(dimension1, function (d) { return d; }))
       .rangeBands([0, xRule.size('content')]);
   
   var y = d3.scale.linear()
@@ -118,7 +118,7 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c2.title);
   
-  var color = d3.scale.category20().domain($.map(series, function (s) { return getKey(s.dimension2); }));
+  var color = d3.scale.category20().domain($.map(series, function (s) { return s.dimension2; }));
   
   //PAINT CHART
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
@@ -126,25 +126,25 @@
       .filter(function(r){return r.row !== undefined; })
       .attr('stroke', '#fff')
       .attr('fill', function (r) { return getColor(r.row.c1, color); })
-      .attr('x', function (r) { return x(getKey(r.row.c0)); })
+      .attr('x', function (r) { return x(r.row.c0); })
       .attr('width', x.rangeBand())
       .attr('height', function (r) { return y(r.to - r.from); })
       .attr('y', function (r) { return -y(r.to) })
       .attr('data-click', function (r) { return getClickKeys(r.row, data.columns); })
       .append('svg:title')
-      .text(function (r, i) { return getLabel(r.row.c0) + ', ' + getLabel(r.row.c1) + ': ' + getLabel(r.row.c2); });
+      .text(function (r, i) { return r.row.c0.niceToString() + ', ' + r.row.c1.niceToString() + ': ' + r.row.c2.niceToString(); });
    
 
   if (x.rangeBand() > 50) {
     chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.middle('content')))
       .enterData(_.last(series).values, 'text', 'x-label')
-      .attr('transform', function (r){ return translate( x(getKey(r.row.c0)) + x.rangeBand()/2,0 ) +  rotate(-90);})
+      .attr('transform', function (r){ return translate( x(r.row.c0) + x.rangeBand()/2,0 ) +  rotate(-90);})
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
       .attr('fill', '#fff')
       .attr('dx',  -10 )
       .attr('text-anchor', 'middle')
-      .text(function (r) { return getLabel(r.d1); });
+      .text(function (r) { return r.d1.niceToString(); });
   }
   
   var legendScale = d3.scale.ordinal()
@@ -166,7 +166,7 @@
       .enterData(series, 'text', 'color-text')
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('dominant-baseline', 'middle')
-      .text(function (s) { return getLabel(s.dimension2); });
+      .text(function (s) { return s.dimension2.niceToString(); });
   }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

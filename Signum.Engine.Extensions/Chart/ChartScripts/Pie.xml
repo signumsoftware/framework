@@ -7,14 +7,14 @@
   <Icon FileName="pie.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABalJREFUeNrsmFtsU3Ucx7+nt7XSrWu3dbS7dN2FDbcJzsSY8eLDRDS2BsITkkhiDCaQAAESX0zk1WjUB/UFESUiD0bDGWpACdGQGDFBRYiD3ce2Xrau67bez8X/Oe3pOW1X2m5gSOSf/vs/7fmfnk+/39/vfzkUz/N4mIsKD3l56AE167n45o/vulSLN2hdZAhfBw8gqXcgEo2j1rwBNmsV9rz4BLVeQKqcGPTNDLuCw5egmfyCNhm1UD1mg8pQC1VFNeiJp7GsbkGNuRLhSAyh5QiCwRX4A0sY6G/H7u091AMFHPntS5dm9GO6sroemup2qPQ1QOZaDt/c7kRU2wb7RkvmGuH04lIYM94A7s7M4+WBbuzY1kHdV8CAd8R1Z/Aw3VGfhLamlyhWJ989DcdzHL6904WIrh0NaUDhdzk+3ZKD4OIKxqZ8GJ/04dz7r1D3JUl8UzddnksH6M7mSlQ0DhSEk4DIexacACZUlvQxGg3o6XKga1MT9h4/x68bUFBu7udjtN1WD21dnwhTCA4SmqSYqBonVlZsBcgUqKPJijanHXuOnuXXBTh84Qhtt5pFW0U4ni8IRz6QlwSWXVmpsgSWTbV2Ww2aGq3YeeA0vybA0WtfudqtjKxcVpzmw4nfQameDMeJYFxGQQmy0V4H28Za0FeG+LIA/dPDLjXJVm1tb8lwKXcFKMiKSUAZMA5MTrUSh84OXi9PwYXRn1BpqssZRu4NJ/QTusrqcTKcZC2nbAkgOafXV8BsrsLp89f5kgE1U2doYZxTxlsxOElpwWKljSmQfOUYyXZSTSYjzl/6u3QFTcYKMjNYslQrCpfO4Cy1chJDWZWgOp0OG8gQdPHXUb4o4K3LH7hUBuvqlt4DTvwT6QRhRcV4OTEyKvIK9XgZVLRaj5GJueKLBVXoBq2yWMqGE44pniEZmw0mt7KyDJsdi0IfrU6LyemF4hbrIrfFiT/PUnJzeSxk8+CEokYcLJ9vaaHYU9qv1mjgnQsVV7CC8YBSG4rHWw6cOFDzqSGGUSjDslye1bnqCS0oFRaXoyWsBzNAqrLgxFFQiEE2G4pR2ptjdVYy5YZTIYvjGhtxM1I2nFD6nSG3x+tHPJFc1c7Ud3KiZJQmNZlgUF1pKAHQ0AkuFiwbTigNBi99aNMp3B4aRyLBKuJOqWSuoin1EokE6utMxQG5qh43FwuUDZeKQbIIaO7Aoa7PcGdkktyUyRv/ZPtlOGHmiccTcDRYigP2bD82yIZnS4cTMzwFJx03OdpxdPNpjI3dRSLJZOwUlVQM4FxGQR4JAtjWUlfaTLK4QoaLqL80OFFoGU4qzS2tON79OSYnZpBMMtmJoQDj0nCJeBwv9LdRJQEmHfvc7NLYKnBsSXBSH0eLEwe7aUxPzaYhZWulBYVQY5EIdj2/pfS52Ny+A8tBP9iwNz04c2m47Hi7F5zU53FnFfb3XoFn1oskw2aW/2LlU+rFolG8tuspqmRAe3PnYKLjsDu5cKtgMijjrxCcdK6vVY2DvRcx5/GBYZis1XY0HMa+3c+Uv6Lu7H918K9ZE5Lzf64LTipbW/U4svV7BHw+sIKSRL3Iyopo7+6BzdSa9iQ9Oz90T3jCSAZurgtO+tzbasTxJ2mEAn5ElgkcAfzh5OtFt59F98XXPtnGO216aGu3rA6XmzCrwCn/xPDdEE5cfQ7fnXyjpL1x0YdHjS+dcv8+rkV8+gq46Nya4bjYPOKeq5j1LeGjtwbu/6OPf3751EUNvUdbyB5CU+UkexZLSXBcbAHM0jj8wRhUmw+7u5/dP/jAHh4J5cbFd1zJ4TN0Q3UcarL6psj6UaUzgdIYUnHIRMElQhCmTC46j6lFAyo27XVv2fFmWWBrBlSWPy6c4NXB6+BXxsCIiwyyftObQRmdYKr70Od6+799/PboCesjwP8j4L8CDAD/m85GH03tuQAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
   
-  var size = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, 1);
+  var size = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 1);
  
   var r = d3.min([width / 2, height]) / 3;
-  var color = d3.scale.category20().domain($.map(data.rows, function (v) { return getKey(v.c0); }));
+  var color = d3.scale.category20().domain($.map(data.rows, function (v) { return v.c0; }));
  
   var arc = d3.svg.arc().outerRadius(r);
   
-  var pie = d3.layout.pie().value(function (v) { return size(getKey(v.c1)); });
+  var pie = d3.layout.pie().value(function (v) { return size(v.c1); });
   
   chart.append('svg:g').data([data.rows]).attr('class', 'shape').attr('transform', translate(width / 2 ,height / 2))
     .enterData(pie, 'g', 'slice')
@@ -24,7 +24,7 @@
       .attr('shape-rendering', 'initial')
       .attr('data-click', function (slice) { return getClickKeys(slice.data, data.columns); })
       .append('svg:title')
-      .text(function (slice) { return getLabel(slice.data.c0) + ': ' + getLabel(slice.data.c1); });
+      .text(function (slice) { return slice.data.c0.niceToString() + ': ' + slice.data.c1.niceToString(); });
   
   //paint color legend
   var cx = (width / 2),
@@ -41,6 +41,6 @@
       return (1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'; })
     .attr('fill', function (slice) { return getColor(slice.data.c0, color); })
     .attr('data-click', function (slice) { return getClickKeys(slice.data, data.columns); })
-    .text(function (slice) { return ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? getLabel(slice.data.c0) : ''; });
+    .text(function (slice) { return ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? slice.data.c0.niceToString() : ''; });
 }]]></Script>
 </ChartScript>

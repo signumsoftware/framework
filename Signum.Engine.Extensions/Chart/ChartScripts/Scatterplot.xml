@@ -32,9 +32,9 @@
   }, height);
   //yRule.debugY(chart);
   
-  var x = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, xRule.size('content'));
+  var x = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, xRule.size('content'));
   
-  var y = º.scaleFor(data.columns.c2, data.rows.map(function(r){return getKey(r.c2);}), 0, yRule.size('content'));
+  var y = º.scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, yRule.size('content'));
   
   
   var xTicks = x.ticks(width / 50);
@@ -98,7 +98,7 @@
   
   
   
-  var color = d3.scale.category20().domain( $.map(data.rows, function(v) { return getKey(v.c0); }));
+  var color = d3.scale.category20().domain( $.map(data.rows, function(v) { return v.c0; }));
   
   //PAINT GRAPH
   chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
@@ -107,11 +107,11 @@
     .attr('fill', function(p) { return getColor(p.c0, color); })
     .attr('shape-rendering', 'initial')
     .attr('r', 5)
-    .attr('cx', function(p) { return x(getKey(p.c1)); })
-    .attr('cy', function(p) { return -y(getKey(p.c2)); })
+    .attr('cx', function(p) { return x(p.c1); })
+    .attr('cy', function(p) { return -y(p.c2); })
     .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
     .append('svg:title')
-    .text(function(p) { return getLabel(p.c0) + ': ' + getLabel(p.c1) + ', ' + getLabel(p.c2); })
+    .text(function(p) { return p.c0.niceToString() + ': ' + p.c1 + ', ' + p.c2; })
     
     
     

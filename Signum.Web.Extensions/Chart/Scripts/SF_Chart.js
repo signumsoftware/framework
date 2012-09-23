@@ -207,6 +207,7 @@ SF.Chart = (function () {
             $chartContainer.html("");
 
             var data = $chartContainer.data("json");
+            SF.Chart.Utils.fillAllTokenValueFuntions(data);
 
             $(".sf-chart-redraw-onchange", this.$chartControl).each(function(i, element){
                 var $element = $(element);
@@ -228,11 +229,11 @@ SF.Chart = (function () {
             var chart = d3.select('#' + this.$chartControl.attr("id") + " .sf-chart-container")
                 .append('svg:svg').attr('width', width).attr('height', height);
 
+                
+
             var func;
             var __baseLineNumber__;
             try {
-                var getLabel = SF.Chart.Utils.getLabel;
-                var getKey = SF.Chart.Utils.getKey;
                 var getColor = SF.Chart.Utils.getColor;
                 var getClickKeys = SF.Chart.Utils.getClickKeys;
                 var translate = SF.Chart.Utils.translate;

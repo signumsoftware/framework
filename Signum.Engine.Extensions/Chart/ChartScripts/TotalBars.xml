@@ -11,15 +11,15 @@
   if(data.columns.c2.scale != "ZeroMax")
     throw new Error("Scale " + data.columns.c2.scale + " not supported");
   
-  var dimension1 = _.uniq(_.map(data.rows, function(r){return r.c0; }), false, function(c) { return getKey(c);});
+  var dimension1 = _.uniq(_.map(data.rows, function(r){return r.c0; }), false, function(c) { return c;});
   
-  var series = _.toArray(º.groupBy(data.rows, function(r){return getKey(r.c1);}, function(list){
+  var series = _.toArray(º.groupBy(data.rows, function(r){return r.c1;}, function(list){
     
-    var obj = º.toObject(list, function(r){return getKey(r.c0); });
+    var obj = º.toObject(list, function(r){return r.c0; });
     
     return {
       dimension2 : _.first(list).c1,
-      values : _.map(dimension1, function(d1){ var row =  obj[getKey(d1)]; return { row: row, d1: d1, from: 0, to: row == undefined? 0 : row.c2}; }),
+      values : _.map(dimension1, function(d1){ var row =  obj[d1]; return { row: row, d1: d1, from: 0, to: row == undefined? 0 : row.c2}; }),
     };
     
   }));
@@ -77,7 +77,7 @@
       .range([0, xRule.size('content')]);
   
   var y = d3.scale.ordinal()
-      .domain($.map(dimension1, function (v) { return getKey(v); }))
+      .domain($.map(dimension1, function (v) { return v; }))
       .rangeBands([0, yRule.size('content')]);
 
   var xTicks = x.ticks(width/50);
@@ -112,8 +112,8 @@
   chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
 	.enterData(dimension1, 'line', 'y-tick')
 	.attr('x2', xRule.size('ticks'))
-	.attr('y1', function (v) { return -y(getKey(v)); })
-	.attr('y2', function (v) { return -y(getKey(v)); })
+	.attr('y1', function (v) { return -y(v); })
+	.attr('y2', function (v) { return -y(v); })
   	.style('stroke', 'Black');
 
   chart.append('svg:g').attr('class', 'y-title').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
@@ -123,7 +123,7 @@
     .text(data.columns.c0.title);
 
   
-  var color = d3.scale.category20().domain($.map(series, function (s) { return getKey(s.dimension2); }));
+  var color = d3.scale.category20().domain($.map(series, function (s) { return s.dimension2; }));
   
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
@@ -131,13 +131,13 @@
     .filter(function (r) {return r.row !== undefined;})
     .attr('stroke', '#fff')
     .attr('fill', function (r) { return getColor(r.row.c1, color); })
-    .attr('transform', function (r) { return translate(0,y(getKey(r.row.c0))); })
+    .attr('transform', function (r) { return translate(0,y(r.row.c0)); })
     .attr('height', y.rangeBand())
-    .attr('width', function (r) { return x(getLabel(r.to)) - x(getLabel(r.from)); })
+    .attr('width', function (r) { return x(r.to) - x(r.from); })
     .attr('x', function (r) { return x(r.from) })
     .attr('data-click', function (r) { return getClickKeys(r.row, data.columns); })
     .append('svg:title')
-    .text(function (r) { return getLabel(r.row.c0) + ', ' + getLabel(r.row.c1) + ': ' + getLabel(r.row.c2); });
+    .text(function (r) { return r.row.c0.niceToString() + ', ' + r.row.c1.niceToString() + ': ' + r.row.c2.niceToString(); });
 
   
   if (y.rangeBand() > 15 && series.length > 0) {
@@ -147,12 +147,12 @@
     chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.start('content'), yRule.start('content') + y.rangeBand() / 2))
       .enterData(_.last(series).values,'text', 'y-label sf-chart-strong')
       .attr('x', xRule.size('content') / 2)
-      .attr('y', function (v) { return y(getKey(v.d1)); })
+      .attr('y', function (v) { return y(v.d1); })
       .attr('text-anchor', 'middle')
       .attr('fill',  '#fff')
       .attr('font-weight', 'bold')
       .attr('dominant-baseline', 'middle')
-      .text(function (v, i) { return getLabel(v.d1); });
+      .text(function (v, i) { return v.d1.niceToString(); });
   }
   
   var legendScale = d3.scale.ordinal()
@@ -172,7 +172,7 @@
       .enterData(series, 'text', 'color-text')
       .attr('x', function (e, i) { return legendScale(i); })
         .attr('dominant-baseline', 'middle')
-      .text(function (s) { return getLabel(s.dimension2); });
+      .text(function (s) { return s.dimension2.niceToString(); });
   }
 
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
