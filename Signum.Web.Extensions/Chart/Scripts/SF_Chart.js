@@ -214,10 +214,14 @@ SF.Chart = (function () {
                 var name = $element.attr("id").split('_');
                 if(name.length  == 3 && name[0] == "Columns"){
                     var column = data.columns["c" + name[1]];
-                    if(name[2] == "DisplayName")
-                        column.title = $element.val();
-                    else if(name[2] == "Scale")
-                        column.scale = $element.val();
+                    switch (name[2]) 
+                    {
+                        case "DisplayName": column.title = $element.val(); break;
+                        case "Parameter1":  column.parameter1 = $element.val(); break;
+                        case "Parameter2":  column.parameter2 = $element.val(); break;
+                        case "Parameter3":  column.parameter3 = $element.val(); break;
+                        default: break;
+                    }
                 }
             });
 

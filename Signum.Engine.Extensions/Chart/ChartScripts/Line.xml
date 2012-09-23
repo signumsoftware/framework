@@ -2,7 +2,9 @@
 <ChartScript GroupBy="Always">
   <Columns>
     <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Height" ColumnType="Positionable" />
+    <Column DisplayName="Height" ColumnType="Positionable">
+      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
+    </Column>
   </Columns>
   <Icon FileName="lines.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa1JREFUeNpi/P//P8NgBkwMgxwMDQfGFi/+PxqCow4cdeCoA0cdOOpAsgDLYHEIcm22uDeWcTSKBzSKcUUHuWD38bv/DbXlGIqS7BkHXRpcs+vK/wtXHzG0FHox0iSKu2bvI7upNm/t6f+v3nzC6TiyHairIQ2OWhDm4eZgWLXjEsmOnLrsGFhPVpQVI1XTYMvUXf9rst3ghoIsKGhZ/z/MQ4+ktOvjqs8Q7qHHSNVcXNG9GcVxMDChJpBx4qLDJIUiMY4jyYETFx7631Hqi9NQUWFehgXrz/ynWzGDHB0SonwM3RX+eH0c5W3A2DvvAFYH7jlx7/+xM3fIKpKICkFCjoOB4iQHxvzmdSiOXLHt4v+L1x4z1OW4MVI1BMkF7z58hYe+rbkaw9dvP4EOt2ekahRvO3zzv4aKBEN1pitFtQQLMxNDYYIdI1XT4Jqdl/4/ffGBYseBQFKwKSNVMwmowL378DVDZboz2QZTo25GBowxRYvgidrKRJkhM9KKkWEQAZRcPNgcNyTagwyg8UFQNIPowYiHTot6MA3BIZcEjKNDwKMOHHUgfgAQYACzwAoJxqi5QAAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){

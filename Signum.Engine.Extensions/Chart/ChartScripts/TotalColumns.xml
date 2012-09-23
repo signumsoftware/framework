@@ -3,7 +3,9 @@
   <Columns>
     <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Columns" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Height" ColumnType="Magnitude" />
+    <Column DisplayName="Height" ColumnType="Magnitude">
+      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log" />
+    </Column>
   </Columns>
   <Icon FileName="totalcolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAlVJREFUeNrsmD1LHUEUhs9KqpDOQhHTBPGjthEJNiaNZSoLbSUW0UIsg78gPyJYpLZIbAL5KJJoRLEQCYqxkpB/cHdn5rhn70W8Zueddc5AbnEHlr2zl5l55jlnZj8yZqZeLgPU46UPmARweWO7ZxPxAfrz3ftj/vLzgqx1ZJ0jV535pi7nZ7Pj9HJxJrvb9u3OEX/6cVbb1km9/P386SS9WprNogG/HlzQwvx01zUZwJRHYRzlxtLOh+8C+E/bz3vn9GJhprZNXhjKc0u7H/cFMD4Hy4lCOBnIebYp7jT2wbUKS012OAh4e4/0DeTbRwUcwbVyQ032YGyw00GMBckxBCd19TbDLt6CXEdwrbKuBhSDIQsoxAiulcagC1rwhVjsI7i8SGQwZAEaBHCFSQGosCBtEZxERh9ihQVpi+BMCkAJU6wFiTyCs87p78WS6LEWpsYf0+HRaRVqOepydXJsRAdYJXqkhfWhTXo4t1Rj1snMpXf6u79Vnq90iyQ2ROwMhCO23vv4vRZJfP4whGNryn6UOTgxNkonv3535dHdXJp4MhxGrYGrDGoB1wZX6dHKKhzo8tvrsv6nhspAuKqufie5Zctrgf23SQTHNve2vQdg2II/zzFcO8TaRdLAArbvh5NVrjfYpsQWGNgHcNIvpwkxtgDtIzhX6BeJvCaGLOAJArjynCTE0RY69n1wwck1Mxi2gOxDOE7wwNp+3FNYAHCcwmB7jDgL1pEaroFBjrZQ2VfChTdq0lnQwknJ5Omk1z6/bb9ZzroA+19Y+4D/sVwLMAAe1Sa/GfDcBAAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){

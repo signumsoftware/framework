@@ -67,19 +67,19 @@ namespace ASP
 {
     using (Html.FieldInline())
     {
-        
-   Write(Html.ValueLine(cc, c => c.Name));
+    
+Write(Html.ValueLine(cc, c => c.Name));
 
-                                        
-        
-   Write(Html.ValueLine(cc, c => c.Type));
+                                    
+    
+Write(Html.ValueLine(cc, c => c.Type));
 
-                                        
-        
-   Write(Html.ValueLine(cc, c => c.ValueDefinition));
+                                     
+    
+Write(Html.ValueLine(cc, c => c.ValueDefinition));
 
-                                                   
-    }    
+                                               
+    }
 }
 
 

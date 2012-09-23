@@ -361,7 +361,7 @@ namespace Signum.Entities.Chart
         [Code("d")] Date = 4,
         [Code("dt")] DateTime = 8,
         [Code("s")] String = 16, //Guid
-        [Code("s")] Lite = 32,
+        [Code("l")] Lite = 32,
         [Code("e")] Enum = 64, // Boolean 
 
         [Code("G")] Groupable = ChartColumnTypeUtils.GroupMargin | Integer | Date | String | Lite | Enum,
@@ -438,23 +438,23 @@ namespace Signum.Entities.Chart
            return null;
        }
 
-       //public static string GetDescription(this ChartColumnType columnType)
-       //{
-       //    switch (columnType)
-       //    {
-       //        case ChartColumnType.Integer: return "Number with no fractional part";
-       //        case ChartColumnType.Real: return "Number with fractional part";
-       //        case ChartColumnType.Date: return "Date with no time part";
-       //        case ChartColumnType.DateTime: return "Date with time part";
-       //        case ChartColumnType.String: return "Sequence of characters";
-       //        case ChartColumnType.Lite: return "Reference to an entity";
-       //        case ChartColumnType.Enum: return "Set of pre-defined identifiers";
-       //        case ChartColumnType.Groupable: return "Can be grouped (Integer | Date | String | Lite | Enum)";
-       //        case ChartColumnType.Magnitude: return "Can be added up (Integer | Real)";
-       //        case ChartColumnType.Positionable: return "Can be positioned (Integer | Real | Date | DateTime | Enum)";
-       //        default: throw new ArgumentException("Unexpected columnType");
-       //    }
-       //}
+       public static string GetDescription(this ChartColumnType columnType)
+       {
+           switch (columnType)
+           {
+               case ChartColumnType.Integer: return "Number with no fractional part";
+               case ChartColumnType.Real: return "Number with fractional part";
+               case ChartColumnType.Date: return "Date with no time part";
+               case ChartColumnType.DateTime: return "Date with time part";
+               case ChartColumnType.String: return "Sequence of characters";
+               case ChartColumnType.Lite: return "Reference to an entity";
+               case ChartColumnType.Enum: return "Set of pre-defined identifiers";
+               case ChartColumnType.Groupable: return "Can be grouped (Integer | Date | String | Lite | Enum)";
+               case ChartColumnType.Magnitude: return "Can be added up (Integer | Real)";
+               case ChartColumnType.Positionable: return "Can be positioned (Integer | Real | Date | DateTime | Enum)";
+               default: throw new ArgumentException("Unexpected columnType");
+           }
+       }
     }
 
     public class ChartScriptParameterDN : EmbeddedEntity
@@ -508,10 +508,13 @@ namespace Signum.Entities.Chart
 
             if (pi.Is(() => ValueDefinition) && ValueDefinition != null)
             {
-                if (Type == ChartParameterType.Enum)
-                    return EnumValueList.TryParse(valueDefinition, out enumValues);
-                else
-                    return NumberInterval.TryParse(valueDefinition, out  numberInterval);
+                switch (Type)
+                {
+                    case ChartParameterType.Enum: return EnumValueList.TryParse(valueDefinition, out enumValues);
+                    case ChartParameterType.Number: return NumberInterval.TryParse(valueDefinition, out  numberInterval);
+                    case ChartParameterType.String: return null;
+                    default: throw new InvalidOperationException();
+                }
             }
 
             return base.PropertyValidation(pi);
@@ -637,6 +640,10 @@ namespace Signum.Entities.Chart
 
                     list.Add(val);
                 }
+
+                if (list.Count == 0)
+                    return "No parameter values set";
+
                 return null;
             }
 
@@ -655,7 +662,7 @@ namespace Signum.Entities.Chart
 
             internal string DefaultValue(QueryToken token)
             {
-                return this.Where(a => a.CompatibleWith(token)).SingleEx(() => "No default parameter value for {0} found".Formato(token.NiceName())).Name;
+                return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".Formato(token.NiceName())).Name;
             }
         }
 
@@ -674,12 +681,12 @@ namespace Signum.Entities.Chart
 
             public static string TryParse(string value, out EnumValue enumValue)
             {
-                var m = Regex.Match(value, @"^\s*(?<name>[^\]\(]*)\s*(?<filter>\([^\)]*\))?\s*\$");
+                var m = Regex.Match(value, @"^\s*(?<name>[^\(]*)\s*(\((?<filter>.*?)\))?\s*$");
 
                 if (!m.Success)
                 {
                     enumValue = null;
-                    return "Invalid ChartSciptParameterValue";
+                    return "Invalid EnumValue";
                 }
 
                 enumValue = new EnumValue()

@@ -3,8 +3,8 @@
 {
     using (Html.FieldInline())
     {
-        @Html.ValueLine(cc, c => c.Name)
-        @Html.ValueLine(cc, c => c.Type)
-        @Html.ValueLine(cc, c => c.ValueDefinition)
-    }    
+    @Html.ValueLine(cc, c => c.Name)
+    @Html.ValueLine(cc, c => c.Type) 
+    @Html.ValueLine(cc, c => c.ValueDefinition)
+    }
 }

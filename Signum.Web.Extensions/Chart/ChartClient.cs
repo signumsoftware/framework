@@ -272,6 +272,14 @@ namespace Signum.Web.Chart
 
         public static void SetupParameter(ValueLine vl, ChartColumnDN column, ChartScriptParameterDN scriptParameter)
         {
+            if (scriptParameter == null)
+            {
+                vl.Visible = false;
+                return;
+            }
+
+            vl.LabelText = scriptParameter.Name;
+
             if (scriptParameter.Type == ChartParameterType.Number)
             {
                 vl.ValueLineType = ValueLineType.Number;
@@ -291,7 +299,12 @@ namespace Signum.Web.Chart
                     Value = ev.Name,
                     Text = ev.Name,
                 }).ToList();
+
+                if (!vl.ValueHtmlProps.IsNullOrEmpty())
+                    vl.ValueHtmlProps.Clear();
             }
+
+
             vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange";
         }
     }

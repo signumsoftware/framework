@@ -173,32 +173,34 @@ SF.Chart.Utils = (function () {
             return 'matrix(' + a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ')';
         },
 
-        scaleFor: function (column, values, minRange, maxRange) {
+        scaleFor: function (column, values, minRange, maxRange, scaleName) {
+            if (scaleName == undefined)
+                scaleName = column.parameter1;
 
-            if (column.scale == "Elements")
+            if (scaleName == "Elements")
                 return d3.scale.ordinal()
                         .domain(values)
                         .rangeBands([minRange, maxRange]);
 
-            if (column.scale == "ZeroMax")
+            if (scaleName == "ZeroMax")
                 return d3.scale.linear()
                         .domain([0, d3.max(values)])
                         .range([minRange, maxRange]);
 
-            if (column.scale == "MinMax")
+            if (scaleName == "MinMax")
                 return ((column.type == "date" || column.type == "datetime") ? d3.time.scale() : d3.scale.linear())
                         .domain([d3.min(values),
                                  d3.max(values)])
                         .range([minRange, maxRange]);
 
 
-            if (column.scale == "Logarithmic")
+            if (scaleName == "Log")
                 return d3.scale.log()
                         .domain([d3.min(values),
                                  d3.max(values)])
                         .range([minRange, maxRange]);
 
-            throw Error("Unexpected scale: " + column.scale);
+            throw Error("Unexpected scale: " + scaleName);
         },
 
         rule: function (object, totalSize) {

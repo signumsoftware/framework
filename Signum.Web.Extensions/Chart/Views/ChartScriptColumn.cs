@@ -67,35 +67,44 @@ namespace ASP
 {
     using (Html.FieldInline())
     {
-        
-   Write(Html.ValueLine(cc, c => c.DisplayName));
+    
+Write(Html.ValueLine(cc, c => c.DisplayName));
 
-                                               
-        
-   Write(Html.ValueLine(cc, c => c.ColumnType));
+                                           
+    
+Write(Html.ValueLine(cc, c => c.ColumnType));
 
-                                              
-        
-   Write(Html.ValueLine(cc, c => c.IsGroupKey));
+                                          
+    
+Write(Html.ValueLine(cc, c => c.IsGroupKey));
 
-                                              
-        
-   Write(Html.ValueLine(cc, c => c.IsOptional));
+                                          
+    
+Write(Html.ValueLine(cc, c => c.IsOptional));
 
-                                              
+                                          
     }    
-    
-Write(Html.EntityLineDetail(cc, c => c.Parameter1));
 
-                                                 
-    
-Write(Html.EntityLineDetail(cc, c => c.Parameter2));
+                
+           Write(Html.EntityLineDetail(cc, c => c.Parameter1));
 
-                                                 
-    
-Write(Html.EntityLineDetail(cc, c => c.Parameter3));
+                                                             
+           
+                
+           Write(Html.EntityLineDetail(cc, c => c.Parameter2));
 
-                                                 
+                                                             
+           
+                
+           Write(Html.EntityLineDetail(cc, c => c.Parameter3));
+
+                                                             
+           
+    
+
+WriteLiteral("    </table>\r\n");
+
+
 }
 
 

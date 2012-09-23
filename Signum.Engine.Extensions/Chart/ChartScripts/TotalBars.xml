@@ -3,7 +3,9 @@
   <Columns>
     <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Sub-bars" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Width" ColumnType="Magnitude" />
+    <Column DisplayName="Width" ColumnType="Magnitude">
+      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log" />
+    </Column>
   </Columns>
   <Icon FileName="totalbars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAxhJREFUeNrsmM9rFDEUx19m938Q9VYKFi8iLSiIpR78AR48iAcPxT+i6D8h4g8QxaM9+h8Iop6U9lhEqq2IetCDV3V38vLMS14ymdm1u1lWutAJZJNJZiefee8l77uriAhmuRQw46UFnArg6to6tRZsAfepdENn++Fh6naUH+wAdAS9U9gx5W9TReH7SsGDn49ge+eb7Soo7D2FbVVoa2PFkDmA5aU5uH75hBob8OiZW1lv9u7JFzi/svjPebQJgJAADYE2BjTaqrkilLb/evMTA45vwdxizPCNz4mJq7EfXB2YBSx1ADTQt2Noa5aLRxUieaC0wwADHAPxvLcaupYBS0QPaVs0EwI2QSxKtbrtkzw4zeEkH8zMCyOyWxmmgizFxR4SweRakLAXgSh9OwdqIqAf0jVAhuOYMwEOSayGAiWW1D4WS4nNTMA/DYgAhjVYZ2EyNbfyYlyNXdjBGAHTdUhE7253f7YF9a9BiAhC0XIpXNgIAZBjK7oyxp5vtWwMbXh3m/wYJP27gkhj0LU0aEUAsRq4Rdk6ZXKMhA3BYxgAjXGhwU/LtuDu5rO9U44cqfacdf1jc1fh+YvNPb+j3MEc2qrPB/bFswt5gItr31XOOXivzcUt4EGTW7uPj9A4MovfKV77WXvdhfs/bsP7D1+rnTpCgq2cmocbV06OL7cOnb458Vvyubj16jNcOLfUmPB5yR3oIh44HXKOfvn2IwNOX27VU12Vo1N1Q81MgxQP65BRpia3BoB84q4EBWkHGQBJko8hE1NgChfk13TlVg0oCAhTExQhhRlDCRiKuvEasNQ+X3MKzJdbLgcPs9AwIJ+fo3iQl/Ex5i3m1UsFpFMrOsGaLbd6NZc1LRSFQlQ0NCC/tFgouNRBioIuA+zEMWh6Iy1UG0uVjlz3XXwJoA4u9coGJe4YOIjbfAvWLCSuTgFTS9LgAv1Sx98cNbeK0karzTgE3I+qXBfvvHk6lszyh63MFf5g58N3Yf4abGxsjVwwyK5Ly8f/r9xqlrsHPhfP0l9w63dWozdV+x91C7jP5a8AAwCysWXn90FrmAAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){

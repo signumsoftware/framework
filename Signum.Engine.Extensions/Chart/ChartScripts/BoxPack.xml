@@ -2,19 +2,19 @@
 <ChartScript GroupBy="Optional">
   <Columns>
     <Column DisplayName="Color" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Size" ColumnType="Magnitude" />
+    <Column DisplayName="Size" ColumnType="Magnitude">
+      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log" />
+    </Column>
   </Columns>
   <Script><![CDATA[function DrawChart(chart, data){
-  var format = d3.format(",d");
-  var fill = d3.scale.category20c($.map(data.rows, function(v) { return getKey(v.c0); }));
   
-  var format = d3.format(",d");
+  var fill = d3.scale.category20c($.map(data.rows, function(v) { return v.c0; }));
   
-  var size = º.scaleFor(data.columns.c1, data.rows.map(function(r){return getKey(r.c1);}), 0, 1);
+  var size = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 1);
   
   var bubble = d3.layout.treemap()
      .size([width, height])
-      .padding(2).value(function(r){return size(getKey(r.c1));});
+      .padding(2).value(function(r){return size(r.c1);});
   
   var tree = {
     children: data.rows
@@ -27,16 +27,16 @@
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   node.append("title")
-      .text(function(d) { return getLabel(d.c0) + ": " + format(d.c1); });
+      .text(function(d) { return d.c0.niceToString() + ": " + d.c1.niceToString(); });
 
   node.append("rect")
       .attr('shape-rendering', 'initial')
       .attr("width", function(d) { return Math.max(0, d.dx - 1); })
       .attr("height", function(d) { return Math.max(0, d.dy - 1); })
-      .style("fill", function(d) { return fill(getKey(d.c0)); })
+      .style("fill", function(d) { return fill(d.c0); })
       .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
       .append('svg:title')
-      .text(function(d) { return  getLabel(d.c0) + ': ' + getLabel(d.c1);});
+      .text(function(d) { return  d.c0 + ': ' + d.c1;});
 
   node.append("text")
       .attr("text-anchor", "middle")
@@ -44,7 +44,7 @@
       .attr("dx",function(d) { return d.dx/2; })
       .attr("dy",function(d) { return d.dy/2; })
       .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
-      .text(function(d) { return getLabel(d.c0).substring(0,d.dy/6); });
+      .text(function(d) { return d.c0.niceToString().substring(0,d.dy/6); });
   
 }]]></Script>
 </ChartScript>

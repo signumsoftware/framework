@@ -23,7 +23,11 @@ namespace Signum.Entities.Chart
         public ChartScriptColumnDN ScriptColumn
         {
             get { return scriptColumn; }
-            set { scriptColumn = value; }
+            set
+            {
+                if (Set(ref scriptColumn, value, () => ScriptColumn))
+                    SetDefaultParameters();
+            }
         }
         
         public ChartColumnDN()
@@ -35,9 +39,7 @@ namespace Signum.Entities.Chart
         {
             NotifyChange(true);
 
-            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
-            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
-            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
+            SetDefaultParameters();
 
             if (Token != null)
             {
@@ -52,6 +54,13 @@ namespace Signum.Entities.Chart
             }
         }
 
+        private void SetDefaultParameters()
+        {
+            Parameter1 = token == null ? null: scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
+            Parameter2 = token == null ? null: scriptColumn.Parameter2.TryCC(a => a.DefaultValue(token));
+            Parameter3 = token == null ? null: scriptColumn.Parameter3.TryCC(a => a.DefaultValue(token));
+        }
+
         string displayName;
         public string DisplayName
         {
@@ -61,7 +70,7 @@ namespace Signum.Entities.Chart
 
         [SqlDbType(Size = 50)]
         string parameter1;
-        [StringLengthValidator(Min = 1, Max = 50)]
+        [StringLengthValidator(AllowNulls=true, Max = 50)]
         public string Parameter1
         {
             get { return parameter1; }
@@ -70,7 +79,7 @@ namespace Signum.Entities.Chart
 
         [SqlDbType(Size = 50)]
         string parameter2;
-        [StringLengthValidator(Min = 1, Max = 50)]
+        [StringLengthValidator(AllowNulls = true, Max = 50)]
         public string Parameter2
         {
             get { return parameter2; }
@@ -79,7 +88,7 @@ namespace Signum.Entities.Chart
 
         [SqlDbType(Size = 50)]
         string parameter3;
-        [StringLengthValidator(Min = 1, Max = 50)]
+        [StringLengthValidator(AllowNulls = true, Max = 50)]
         public string Parameter3
         {
             get { return parameter3; }
