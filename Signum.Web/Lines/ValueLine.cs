@@ -17,7 +17,7 @@ namespace Signum.Web
         public string Format { get; set; }
         public string UnitText { get; set; }
                 
-        public IEnumerable<Enum> EnumComboItems { get; set; }
+        public List<SelectListItem> EnumComboItems { get; set; }
         public DatePickerOptions DatePickerOptions { get; set; }
 
         public string RadioButtonLabelTrue = Resources.Yes;
