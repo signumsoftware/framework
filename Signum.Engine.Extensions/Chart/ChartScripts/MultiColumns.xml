@@ -10,18 +10,26 @@
   <Icon FileName="multicolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmpJREFUeNrsmDFLHEEUgGdFAkIqwV+QTmxSB5IioFinicUFEoR0CWKXf5DCxk4sLK5I/oEYiGiRUtKI+A+UBCKEE3Fn3nvOm93B2515d3OLnFvswHIwezv7zfvevJ3djIhUm9uMannrAB8EsLfZpy6CHWAHGG+zk/x5u/+L9o/Pgv7VV4vqU+9F9uiADPf+7eugf+/7TwZsp2JAao/iWMMI4L+DNcr//g76nyw8V/Mr37KpATKcAQz6Ge7p0segf3C6M13FYOFigK3IQc49w4eBdgIioo0gKN3GCEKZe9pYxRqmv4qvDtfJXJ0rQqMUQfGL2p75PARIDjCHNEAe48v5V3Wxvhss++WXi2rjXbzQRwEZbu7Zm/DEYbFyWS3nnjs0JsHxRC8u/6gPa0Wh1/ba65tc/R/cqh9HJwz4MIrB5p6xkdMWMk9YxRULlQpQGOBj4hwkwviNOLo8sM8/Aw40CQ5vg/rpJjqmCsQjSBC9UQFYqNXaQ2ISHEFetcAVwEBTQBQVmVKLBwVJcQ2O3CIL9TZS7AFjitzCKGfPmiTAAK4ErOttFEEeXFKU+/wr4UB68a/B+evrescVemEVk6iIC7OLHkOiPHgAV+ZwXa9ploNGVKShgOPo4Yi9YB3uvgpU9ZomEYzBeUVe76joFYpDOF8FhvU2ArSFUFRkylnjmJ10DM5PcFgvK2+oOK5I2wGTtvkRuPsyNVQFsJFiFBUBgttqJT1/I62ud5yJGSnBJUUIKS9J8gQm0SsCukkJitL00gjAdL0ioDayosTN32jARL3cMv4E3LbPb/2tXlYB7D4edYCP2O4EGADo6x722MhiTAAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
   
-  var dimension1 = _.uniq(_.map(data.rows, function(r){return r.c0; }), false, function(c) { return c.toString();});
-  
-  var series = _.toArray(º.groupBy(data.rows, function(r){return r.c1;}, function(list){
-    
-    var obj = º.toObject(list, function(r){return r.c0; });
-    
-    return {
-      dimension2 : _.first(list).c1,
-      values : _.map(dimension1, function(d1){ return obj[d1]; })
-    };
-    
-  }));
+  var dim0 = d3.nest()
+    .key(function(r){return r.c0.toString(); })
+    .rollup(function(r){return r[0].c0 })
+    .entries(data.rows)
+    .map(function(g){return g.values;});
+
+  var series = d3.nest()
+      .key(function(r){return r.c1; })
+      .rollup(function(list){ 
+        var obj = d3.nest()
+            .key(function(r){return r.c0.toString(); })
+            .rollup(function(r){return r[0] })
+            .map(list);
+        return {
+          dim1 : list[0].c1,
+          values0 : dim0.map(function(d1){ return obj[d1]; })
+        };
+      })
+      .entries(data.rows)
+      .map(function(g){return g.values;}); 
   
   var xRule = º.rule({
     _1 : 5,
@@ -51,13 +59,13 @@
   //yRule.debugY(chart);
   
   var x = d3.scale.ordinal()
-      .domain($.map(dimension1, function (d) { return d; }))
+      .domain($.map(dim0, function (d) { return d; }))
       .rangeBands([0, xRule.size('content')]);
   
   var y = º.scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, yRule.size('content'));
   
   chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.start('ticks')))
-    .enterData(dimension1, 'line', 'x-tick')
+    .enterData(dim0, 'line', 'x-tick')
       .attr('y2',  function (d, i) { return yRule.start('labels' + (i % 2)) - yRule.start('ticks'); })
       .attr('x1', function (d) { return x(d); })
       .attr('x2', function (d) { return x(d); })
@@ -66,7 +74,7 @@
   if ((x.rangeBand() * 2) > 60) 
   {
     chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.middle('labels0')))
-      .enterData(dimension1, 'text', 'x-label')
+      .enterData(dim0, 'text', 'x-label')
         .attr('x', function (d) { return x(d); })
         .attr('y', function (d, i) { return yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'); })
         .attr('dominant-baseline', 'middle')
@@ -112,14 +120,14 @@
   var interMagin = 2;
   
   var xSubscale = d3.scale.ordinal()
-      .domain($.map(series, function (s) { return s.dimension2; }))
+      .domain($.map(series, function (s) { return s.dim1; }))
       .rangeBands([interMagin, x.rangeBand() - interMagin]);
   
-  var color =  d3.scale.category20().domain($.map(series, function (s) { return s.dimension2; }));
+  var color =  d3.scale.category20().domain($.map(series, function (s) { return s.dim1; }));
   
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-    .enterData(function (s) {   return s.values; }, 'rect', 'shape')
+    .enterData(function (s) {   return s.values0; }, 'rect', 'shape')
     .filter(function(r) { return r != undefined; })
     .attr('stroke', function (r) { return '#fff'; })
     .attr('fill', function (r) { return getColor(r.c1, color); })
@@ -145,13 +153,13 @@
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('width', yRule.size('legend'))
       .attr('height', yRule.size('legend'))
-      .attr('fill', function (s) { return getColor(s.dimension2, color); });
+      .attr('fill', function (s) { return getColor(s.dim1, color); });
     
     chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
       .enterData(series, 'text', 'color-text')
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('dominant-baseline', 'middle')
-      .text(function (s) { return s.dimension2.niceToString(); });
+      .text(function (s) { return s.dim1.niceToString(); });
   }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
