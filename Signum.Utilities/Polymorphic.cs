@@ -264,54 +264,64 @@ namespace Signum.Utilities
 
         public static void Invoke<T>(this Polymorphic<Action<T>> polymorphic, T instance)
         {
-            polymorphic.GetValue(instance.GetType())(instance);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance);
         }
 
         public static void Invoke<T, P0>(this Polymorphic<Action<T, P0>> polymorphic, T instance, P0 p0)
         {
-            polymorphic.GetValue(instance.GetType())(instance, p0);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance, p0);
         }
 
         public static void Invoke<T, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, T instance, P0 p0, P1 p1)
         {
-            polymorphic.GetValue(instance.GetType())(instance, p0, p1);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance, p0, p1);
         }
 
         public static void Call<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
         {
-            polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance, p0, p1, p2);
         }
 
         public static void Invoke<T, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3)
         {
-            polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2, p3);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance, p0, p1, p2, p3);
         }
 
 
 
         public static R Invoke<T, R>(this Polymorphic<Func<T, R>> polymorphic, T instance)
         {
-            return polymorphic.GetValue(instance.GetType())(instance);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance);
         }
 
         public static R Invoke<T, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, T instance, P0 p0)
         {
-            return polymorphic.GetValue(instance.GetType())(instance, p0);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance, p0);
         }
 
         public static R Invoke<T, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, T instance, P0 p0, P1 p1)
         {
-            return polymorphic.GetValue(instance.GetType())(instance, p0, p1);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance, p0, p1);
         }
 
         public static R Invoke<T, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
         {
-            return polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance, p0, p1, p2);
         }
 
         public static R Invoke<T, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3)
         {
-            return polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2, p3);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance, p0, p1, p2, p3);
         }
     }
 }
