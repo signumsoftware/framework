@@ -19,10 +19,15 @@ namespace Signum.Entities.Chart
             if (token == null)
                 return false;
 
-            return Flag(ct, token.GetChartColumnType());
+            var type =  token.GetChartColumnType();
+
+            if(type == null)
+                return false;
+
+            return Flag(ct, type.Value);
         }
 
-        public static ChartColumnType GetChartColumnType(this QueryToken token)
+        public static ChartColumnType? GetChartColumnType(this QueryToken token)
         {
             switch (QueryUtils.TryGetFilterType(token.Type))
             {
@@ -42,7 +47,7 @@ namespace Signum.Entities.Chart
                     }
             }
 
-            throw new ArgumentException("Unexcected token type");
+            return null;
         }
 
         public static bool Flag(ChartColumnType ct, ChartColumnType flag)

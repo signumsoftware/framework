@@ -11,8 +11,7 @@
 @Html.ScriptCss("~/Chart/Content/SF_Chart.css")
 @Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
                 "~/Chart/Scripts/SF_Chart_Utils.js",
-                "~/scripts/d3.v2.min.js",
-                "~/scripts/underscore-min.js")
+                "~/scripts/d3.v2.min.js")
 @{ 
     QueryDescription queryDescription =  (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     if (queryDescription == null)

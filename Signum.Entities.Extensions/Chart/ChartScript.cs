@@ -483,7 +483,7 @@ namespace Signum.Entities.Chart
 
         [NotNullable, SqlDbType(Size = 150)]
         string valueDefinition;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 150)]
+        [StringLengthValidator(AllowNulls = false, Max = 150)]
         public string ValueDefinition
         {
             get { return valueDefinition; }
@@ -586,7 +586,7 @@ namespace Signum.Entities.Chart
             public static string TryParse(string valueDefinition, out NumberInterval interval)
             {
                 interval = null;
-                var m = Regex.Match(valueDefinition, @"^\s*(?<def>.+)\[(?<min>.+)?\s*,\s*(?<max>.+)?\s*\]\s*$");
+                var m = Regex.Match(valueDefinition, @"^\s*(?<def>.+)\s*(\[(?<min>.+)?\s*,\s*(?<max>.+)?\s*\])?\s*$");
 
                 if (!m.Success)
                     return "Invalid number interval, [min?, max?]";

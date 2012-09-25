@@ -78,68 +78,6 @@ SF.Chart.Utils = (function () {
             return options;
         },
 
-        getPathPoints: function (points) {
-            var result = "";
-            var jump = true;
-            $.each(points, function (i, p) {
-                if (p.x == null || p.y == null) {
-                    jump = true;
-                }
-                else {
-                    result += (jump ? " M " : " ") + p.x + " " + p.y;
-                    jump = false;
-                }
-            });
-            return result;
-        },
-
-        toObject: function (array, keySelector, valueSelector) {
-            var result = {};
-            var ks = $.isFunction(keySelector) ? keySelector : function (obj) { return obj[keySelector]; };
-            var vs = valueSelector == null ? null : $.isFunction(valueSelector) ? valueSelector : function (obj) { return obj[valueSelector]; };
-            for (var i = 0; i < array.length; i++) {
-                var value = array[i];
-                var key = ks(value, i);
-                if (result[key] !== undefined)
-                    throw new Error("Duplicated key " + key);
-                result[key] = vs == null ? value : vs(value)
-            }
-            return result;
-        },
-
-        groupBy: function (array, keySelector, reducer) {
-            var result = {};
-            var ks = _.isFunction(keySelector) ? keySelector : function (obj) { return obj[keySelector]; };
-            for (var i = 0; i < array.length; i++) {
-                var value = array[i];
-                var key = ks(value, i);
-                (result[key] || (result[key] = [])).push(value);
-            }
-
-            if (reducer != undefined) {
-                for (var a in result)
-                    result[a] = reducer(result[a]);
-            }
-
-            return result;
-        },
-
-
-        distinct: function (array, keySelector) {
-            var set = {};
-            var result = [];
-            var ks = $.isFunction(keySelector) ? keySelector : function (obj) { return obj[keySelector]; };
-            for (var i = 0; i < array.length; i++) {
-                var value = array[i];
-                var key = ks(value, i);
-                if (set[key] === undefined) {
-                    set[key] = true;
-                    result.push(key);
-                }
-            }
-            return result;
-        },
-
         translate: function (x, y) {
             if (y === undefined)
                 return 'translate(' + x + ')';
@@ -188,7 +126,7 @@ SF.Chart.Utils = (function () {
                         .range([minRange, maxRange]);
 
             if (scaleName == "MinMax")
-                return ((column.type == "date" || column.type == "datetime") ? d3.time.scale() : d3.scale.linear())
+                return ((column.type == "Date" || column.type == "DateTime") ? d3.time.scale() : d3.scale.linear())
                         .domain([d3.min(values),
                                  d3.max(values)])
                         .range([minRange, maxRange]);

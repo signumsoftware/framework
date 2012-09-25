@@ -280,11 +280,7 @@ namespace Signum.Web.Chart
 
             vl.LabelText = scriptParameter.Name;
 
-            if (scriptParameter.Type == ChartParameterType.Number)
-            {
-                vl.ValueLineType = ValueLineType.Number;
-            }
-            else if (scriptParameter.Type == ChartParameterType.String)
+            if (scriptParameter.Type == ChartParameterType.Number ||scriptParameter.Type == ChartParameterType.String)
             {
                 vl.ValueLineType = ValueLineType.TextBox;
             }
