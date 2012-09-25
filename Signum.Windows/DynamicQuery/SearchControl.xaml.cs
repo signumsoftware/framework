@@ -445,7 +445,7 @@ namespace Signum.Windows
 
         void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (resultTable != null)
+            if (hasBeenLoaded)
             {
                 Search();
             }
@@ -544,6 +544,9 @@ namespace Signum.Windows
             Search();
         }
 
+
+        bool hasBeenLoaded = false;
+
         public void Search()
         {
             ClearResults();
@@ -555,6 +558,8 @@ namespace Signum.Windows
             DynamicQueryBachRequest.Enqueue(request,          
                 obj =>
                 {
+                    hasBeenLoaded = true;
+
                     resultTable = (ResultTable)obj;
 
                     if (resultTable != null)
