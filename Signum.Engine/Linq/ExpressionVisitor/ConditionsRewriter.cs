@@ -213,7 +213,7 @@ namespace Signum.Engine.Linq
                 var result = cex.Whens.Select(a => Expression.And(MakeSqlCondition(Visit(a.Condition)), MakeSqlCondition(Visit(a.Value)))).AggregateOr();
 
                 if (cex.DefaultValue == null)
-                    return null;
+                    return result;
 
                 return Expression.Or(result, MakeSqlCondition(Visit(cex.DefaultValue)));
             }
