@@ -132,11 +132,6 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateExtensions.cs" />
     <Compile Include="ButtonBar\ToolBarButton.cs" />
-    <Compile Include="Signum\Views\ChooserPopup.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ChooserPopup.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Signum\Views\Error.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -161,6 +156,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Pagination.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Views\PopupCancelControl1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PopupCancelControl.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Signum\Views\PopupControl.cs">
       <AutoGen>True</AutoGen>
@@ -288,9 +288,9 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchPage.cs</LastGenOutput>
     </None>
-    <None Include="Signum\Views\ChooserPopup.cshtml">
+    <None Include="Signum\Views\PopupCancelControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ChooserPopup.cs</LastGenOutput>
+      <LastGenOutput>PopupCancelControl1.cs</LastGenOutput>
     </None>
     <None Include="Signum\Views\PopupControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

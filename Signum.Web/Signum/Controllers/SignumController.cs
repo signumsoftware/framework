@@ -356,7 +356,7 @@ namespace Signum.Web.Controllers
             ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
             ViewData[ViewDataKeys.Title] = Resources.ChooseAType;
 
-            return PartialView(Navigator.Manager.ChooserPopupView);
+            return PartialView(Navigator.Manager.PopupCancelControlView);
         }
 
         [HttpPost]
@@ -383,7 +383,7 @@ namespace Signum.Web.Controllers
             if (title.HasText())
                 ViewData[ViewDataKeys.Title] = title;
 
-            return PartialView(Navigator.Manager.ChooserPopupView);
+            return PartialView(Navigator.Manager.PopupCancelControlView);
         }
 
         public static HtmlHelper CreateHtmlHelper(Controller c)
