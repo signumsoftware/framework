@@ -385,27 +385,37 @@ namespace Signum.Web
     {
         abstract class PropertyMapping
         {
+            public readonly PropertyPack PropertyPack;
+
+            protected PropertyMapping(PropertyPack pp)
+            {
+                this.PropertyPack = pp;
+            }
+
             public static PropertyMapping Create(PropertyPack pp)
             {
                 return (PropertyMapping)Activator.CreateInstance(typeof(PropertyMapping<>).MakeGenericType(typeof(T), pp.PropertyInfo.PropertyType), pp);
             }
 
             public abstract void SetProperty(MappingContext<T> parent);
+
+            public override string ToString()
+            {
+                return PropertyPack.PropertyInfo.PropertyName();
+            }
         }
 
         class PropertyMapping<P> : PropertyMapping
         {
             public readonly Func<T, P> GetValue;
             public readonly Action<T, P> SetValue;
-            public readonly PropertyPack PropertyPack;
 
             public Mapping<P> Mapping { get; set; }
 
-            public PropertyMapping(PropertyPack pp)
+            public PropertyMapping(PropertyPack pp)  : base( pp)
             {
                 GetValue = ReflectionTools.CreateGetter<T, P>(pp.PropertyInfo);
                 SetValue = ReflectionTools.CreateSetter<T, P>(pp.PropertyInfo);
-                PropertyPack = pp;
                 Mapping = Signum.Web.Mapping.New<P>();
             }
 
