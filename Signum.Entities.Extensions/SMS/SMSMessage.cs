@@ -57,7 +57,7 @@ namespace Signum.Entities.SMS
             set { Set(ref message, value, () => Message); }
         }
 
-        bool editableMessage;
+        bool editableMessage = true;
         public bool EditableMessage
         {
             get { return editableMessage; }
