@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ChartScript GroupBy="Always">
+  <Columns>
+    <Column DisplayName="Date" ColumnType="Date" IsGroupKey="true" />
+    <Column DisplayName="Color" ColumnType="Magnitude" />
+  </Columns>
+  <Script><![CDATA[ function DrawChart(chart, data)
+{
+  
+  var xRule = º.rule({
+    _1:2,
+    title: 10,
+    _2: 2,
+    conten: '*'
+  }, width);
+  
+  var cellSize = (width - 4)  / 53;
+ 
+   var day = d3.time.format("%w"),
+    week = d3.time.format("%U"),
+    format = d3.time.format("%Y-%m-%d");
+
+  
+  var minValue = d3.min(data.rows, function(r){return r.c1.valueOf() });
+  var maxValue = d3.max(data.rows, function(r){return r.c1.valueOf() });
+  
+var color = d3.scale.linear()
+    .domain([minValue, (minValue+maxValue)/3, maxValue])
+    .range(["#FFF", "#0F0", "#F00"])
+    .interpolate(d3.interpolateRgb);
+  
+  var minDate = new Date(d3.min(data.rows, function(r){return r.c0.valueOf() }));
+  var maxDate = new Date(d3.max(data.rows, function(r){return r.c0.valueOf() }));
+   
+var svg = chart.append('svg:g')
+    .enterData(d3.range(minDate.getFullYear(), maxDate.getFullYear() + 1), "g")
+    .attr("transform", function(yr){ return translate(2,2+(yr - minDate.getFullYear()) * (cellSize * (7 + 1)));});
+
+svg.append("text")
+    .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
+    .attr("text-anchor", "middle")
+    .text(String);
+
+   var groups = d3.nest()
+    .key(function(r) { return r.c0.valueOf(); })
+    .rollup(function(r) { return r[0].c1.key; })
+    .map(data.rows);
+   
+  
+var rect = svg.selectAll("rect.day")
+    .data(function(d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+  .enter().append("rect")
+    .attr("stroke","#ccc")
+    .attr("fill",function(d) { 
+  
+       var val = groups[d.valueOf()];
+                              return val == undefined ? "#fff":
+                                color(val);})
+    .attr("width", cellSize)
+    .attr("height", cellSize)
+    .attr("x", function(d) { return week(d) * cellSize; })
+    .attr("y", function(d) { return day(d) * cellSize; })
+    .datum(format);
+
+rect.append("title")
+    .text(function(d) { return d; });
+
+svg.selectAll("path.month")
+    .data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+  .enter().append("path")
+    .attr("class", "month")
+    .attr("stroke","#666")
+    .attr("stroke-width", 1)
+    .attr("fill","none")
+    .attr("d", monthPath);
+  
+  
+
+/*d3.csv("dji.csv", function(csv) {
+  var data = d3.nest()
+    .key(function(d) { return d.Date; })
+    .rollup(function(d) { return (d[0].Close - d[0].Open) / d[0].Open; })
+    .map(csv);
+
+  rect.filter(function(d) { return d in data; })
+      .attr("class", function(d) { return "day q" + color(data[d]) + "-9"; })
+    .select("title")
+      .text(function(d) { return d + ": " + percent(data[d]); });
+});*/
+
+  
+function monthPath(t0) {
+  var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
+      d0 = +day(t0), w0 = +week(t0),
+      d1 = +day(t1), w1 = +week(t1);
+  return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
+      + "H" + w0 * cellSize + "V" + 7 * cellSize
+      + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
+      + "H" + (w1 + 1) * cellSize + "V" + 0
+      + "H" + (w0 + 1) * cellSize + "Z";
+  
+  }
+}]]></Script>
+</ChartScript>
