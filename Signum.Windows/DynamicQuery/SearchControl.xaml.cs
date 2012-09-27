@@ -445,7 +445,7 @@ namespace Signum.Windows
 
         void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (hasBeenLoaded)
+            if (hasBeenLoaded && e.NewValue != null)
             {
                 Search();
             }
