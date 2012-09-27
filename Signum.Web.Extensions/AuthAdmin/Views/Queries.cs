@@ -116,7 +116,7 @@ WriteLiteral("\r\n                </th>\r\n            </tr>\r\n        </thead>
 WriteLiteral("            <tr>\r\n                <td>\r\n                    ");
 
 
-               Write(Html.Span(null, item.Value.Resource.DisplayName));
+               Write(Html.Span(null, item.Value.Resource.Name));
 
 WriteLiteral("\r\n                    ");
 

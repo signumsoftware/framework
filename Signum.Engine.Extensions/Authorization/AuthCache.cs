@@ -250,10 +250,10 @@ namespace Signum.Entities.Authorization
                 var current = Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
                 var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
-                Synchronizer.Synchronize(current, should,
-                    (p, pr) => pr.Delete(),
-                    (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(),
-                    (p, pr, ar) =>
+                Synchronizer.Synchronize(should, current, 
+                    (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(), 
+                    (p, pr) => pr.Delete(), 
+                    (p, ar, pr) =>
                     {
                         pr.Allowed = ar.Allowed;
                         if (pr.SelfModified)
@@ -389,8 +389,7 @@ namespace Signum.Entities.Authorization
 
             Table table = Schema.Current.Table(typeof(RT));
 
-            return Synchronizer.SynchronizeScript(current, should,
-                (role, listRules) => listRules.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
+            return Synchronizer.SynchronizeScript(should, current, 
                 (role, x) =>
                 {
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
@@ -408,31 +407,34 @@ namespace Signum.Entities.Authorization
                     }, Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
-                },
-                (role, list, x) =>
+                }, 
+                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple), 
+                (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, def, max, role);
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
-                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
-                        x.Elements(elementName).ToDictionary(a => toResource(a.Attribute("Resource").Value)),
-                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
+                        x.Elements(elementName).ToDictionary(a => toResource(a.Attribute("Resource").Value)), 
+                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), 
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
                             return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, Comment(role, r, a));
-                        },
-                        (r, pr, xr) =>
+                        }, 
+                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
+                        (r, xr, rt) =>
                         {
-                            var oldA = pr.Allowed;
-                            pr.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.UpdateSqlSync(pr, Comment(role, r, oldA, pr.Allowed));
-                        }, Spacing.Simple);
+                            var oldA = rt.Allowed;
+                            rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
+                            return table.UpdateSqlSync(rt, Comment(role, r, oldA, rt.Allowed));
+                        }, 
+                        Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
-                }, Spacing.Double);
+                }, 
+                Spacing.Double);
         }
 
 

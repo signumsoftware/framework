@@ -135,17 +135,16 @@ namespace Signum.Engine.Mailing
 
             Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacements(old, EmailTemplates);
 
-            return Synchronizer.SynchronizeScript(
-                current,
-                should,
-                (tn, c) => table.DeleteSqlSync(c),
-                (tn, s) => table.InsertSqlSync(s),
-                (tn, c, s) =>
+            return Synchronizer.SynchronizeScript(should, current, 
+                (tn, s) => table.InsertSqlSync(s), 
+                (tn, c) => table.DeleteSqlSync(c), 
+                (tn, s, c) =>
                 {
                     c.FullClassName = s.FullClassName;
                     c.FriendlyName = s.FriendlyName;
                     return table.UpdateSqlSync(c);
-                }, Spacing.Double);
+                }, 
+                Spacing.Double);
         }
 
         static SqlPreCommand Schema_Generating()

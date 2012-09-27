@@ -141,14 +141,14 @@ WriteLiteral("\">\r\n\r\n");
 
                                                                
             
-       Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
+       Write(Html.Hidden(query.Compose("DisplayName"), query.Value.Name));
 
                                                                                
 
             
        Write(Html.Field("Query", Navigator.IsFindable(queryName) ?
-                new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.DisplayName.EncodeHtml()).ToHtml() :
-                Html.Span("spanQuery", query.Value.DisplayName, "sf-value-line")));
+                new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
+                Html.Span("spanQuery", query.Value.Name, "sf-value-line")));
 
                                                                                  
 

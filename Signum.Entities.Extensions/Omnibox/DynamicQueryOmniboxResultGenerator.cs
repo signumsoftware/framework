@@ -19,7 +19,7 @@ namespace Signum.Entities.Omnibox
 
         public DynamicQueryOmniboxResultGenerator(IEnumerable<object> queryNames)
         {
-            queries = queryNames.ToDictionary(OmniboxParser.Manager.CleanQueryName);
+            queries = queryNames.ToDictionary(QueryUtils.GetCleanName);
         }
 
 
@@ -437,7 +437,7 @@ namespace Signum.Entities.Omnibox
 
         public override string ToString()
         {
-            string queryName = OmniboxParser.Manager.CleanQueryName(QueryName);
+            string queryName = QueryUtils.GetCleanName(QueryName);
 
             string filters = Filters.ToString(" ");
 
