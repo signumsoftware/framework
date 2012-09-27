@@ -85,17 +85,18 @@ namespace Signum.Engine
                 Administrator.TryRetrieveAll<TypeDN>(replacements).ToDictionary(c => c.TableName), Replacements.KeyTables);
 
             return Synchronizer.SynchronizeScript(
-                current,
-                should,
-                (tn, c) => table.DeleteSqlSync(c),
-                (tn, s) => table.InsertSqlSync(s),
-                (tn, c, s) =>
+                should, 
+                current, 
+                (tn, s) => table.InsertSqlSync(s), 
+                (tn, c) => table.DeleteSqlSync(c), 
+                (tn, s, c) =>
                 {
+                    var originalName = c.FullClassName;
+
                     c.FullClassName = s.FullClassName;
                     c.TableName = s.TableName;
-                    c.FriendlyName = s.FriendlyName;
-                    c.CleanName = s.CleanName; 
-                    return table.UpdateSqlSync(c);
+                    c.CleanName = s.CleanName;
+                    return table.UpdateSqlSync(c, originalName);
                 }, Spacing.Double);
         }
 
@@ -115,7 +116,6 @@ namespace Signum.Engine
                          {
                              FullClassName = type.FullName,
                              TableName = tab.Name,
-                             FriendlyName = type.NiceName(), 
                              CleanName = Reflector.CleanTypeName(type)
                          }).ToList();
             return lista;

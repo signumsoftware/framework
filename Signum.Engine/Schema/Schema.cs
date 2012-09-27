@@ -537,11 +537,15 @@ namespace Signum.Engine.Maps
             return tables.Values.ToString(t => t.Type.TypeName(), "\r\n\r\n");
         }
 
-        internal Dictionary<string, ITable> GetDatabaseTables()
+        internal IEnumerable<ITable> GetDatabaseTables()
         {
-            return Schema.Current.Tables.Values
-                .SelectMany(t => t.RelationalTables().Cast<ITable>().PreAnd(t))
-                .ToDictionary(a => a.Name);
+            foreach (var table in Schema.Current.Tables.Values)
+            {
+                yield return table;
+
+                foreach (var subTable in table.RelationalTables().Cast<ITable>())
+                    yield return subTable;
+            }
         }
 
         public DirectedEdgedGraph<Table, bool> ToDirectedGraph()

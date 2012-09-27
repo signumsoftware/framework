@@ -32,7 +32,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return ((Enum)(object)ToEnum()).NiceToString(); 
+            return ToEnum().ToString(); 
         }
 
         public bool Equals(EnumProxy<T> other)

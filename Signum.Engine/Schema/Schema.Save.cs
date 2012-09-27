@@ -536,9 +536,6 @@ namespace Signum.Engine.Maps
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
         {   
-            if(comment == null)
-                comment = ident.ToString();
-
             bool dirty = false;
             ident.PreSaving(ref dirty);
             if (SetToStrField(ident)) 
