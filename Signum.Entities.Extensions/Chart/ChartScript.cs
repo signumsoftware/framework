@@ -481,9 +481,9 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotNullable, SqlDbType(Size = 150)]
+        [NotNullable, SqlDbType(Size = 200)]
         string valueDefinition;
-        [StringLengthValidator(AllowNulls = false, Max = 150)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string ValueDefinition
         {
             get { return valueDefinition; }

@@ -2,39 +2,61 @@
 <ChartScript GroupBy="Always">
   <Columns>
     <Column DisplayName="Date" ColumnType="Date" IsGroupKey="true" />
-    <Column DisplayName="Color" ColumnType="Magnitude" />
+    <Column DisplayName="Color" ColumnType="Magnitude">
+      <Parameter1 Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+      <Parameter2 Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log10" />
+    </Column>
   </Columns>
   <Script><![CDATA[ function DrawChart(chart, data)
 {
   
+  var colorSet = data.columns.c1.parameter1;
+  var scale = data.columns.c1.parameter2;
+ 
   var xRule = º.rule({
     _1:2,
-    title: 10,
-    _2: 2,
-    conten: '*'
+    title: 15,
+    _2: 4,
+    content: '*',
+    _4: 4,
   }, width);
   
-  var cellSize = (width - 4)  / 53;
- 
-   var day = d3.time.format("%w"),
+  var day = d3.time.format("%w"),
     week = d3.time.format("%U"),
     format = d3.time.format("%Y-%m-%d");
-
-  
+   
   var minValue = d3.min(data.rows, function(r){return r.c1.valueOf() });
   var maxValue = d3.max(data.rows, function(r){return r.c1.valueOf() });
   
-var color = d3.scale.linear()
-    .domain([minValue, (minValue+maxValue)/3, maxValue])
-    .range(["#FFF", "#0F0", "#F00"])
-    .interpolate(d3.interpolateRgb);
+  //var colorScale = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0,100, scale);
+ 
+  var scaleFunc = 
+      scale == "Log10" ? d3.scale.log().domain([minValue,maxValue]) : 
+      scale == "Sqrt" ? d3.scale.pow().exponent(.5).domain([minValue,maxValue]):
+      scale == "ZeroMax" ? d3.scale.linear().domain([0,maxValue]) :
+      scale == "MinMax" ? d3.scale.linear().domain([minValue,maxValue]): null;
+      
+
+  
+   scaleFunc = scaleFunc.range([0, 100]);
+        
+  var colorQuantizer = d3.scale.quantize()
+    .domain([0, 100])
+    .range(colorbrewer[colorSet][9]);
+  
+  var color = function(v){return colorQuantizer(scaleFunc(v)); }
+  
   
   var minDate = new Date(d3.min(data.rows, function(r){return r.c0.valueOf() }));
   var maxDate = new Date(d3.max(data.rows, function(r){return r.c0.valueOf() }));
    
+  
+  var cellSize =  Math.min((xRule.size("content"))  / 53,
+                            height / ((maxDate.getFullYear() - minDate.getFullYear() + 1) * (7 + 1)));
+  
 var svg = chart.append('svg:g')
     .enterData(d3.range(minDate.getFullYear(), maxDate.getFullYear() + 1), "g")
-    .attr("transform", function(yr){ return translate(2,2+(yr - minDate.getFullYear()) * (cellSize * (7 + 1)));});
+    .attr("transform", function(yr){ return translate(xRule.start("content"), 2+(yr - minDate.getFullYear()) * (cellSize * (7 + 1)));});
 
 svg.append("text")
     .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
@@ -59,11 +81,11 @@ var rect = svg.selectAll("rect.day")
     .attr("width", cellSize)
     .attr("height", cellSize)
     .attr("x", function(d) { return week(d) * cellSize; })
-    .attr("y", function(d) { return day(d) * cellSize; })
-    .datum(format);
+    .attr("y", function(d) { return (6-day(d)) * cellSize; })
+   ;
 
 rect.append("title")
-    .text(function(d) { return d; });
+    .text(function(d) { return format(d) + "("+groups[d.valueOf()]+")"; });
 
 svg.selectAll("path.month")
     .data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
@@ -75,29 +97,15 @@ svg.selectAll("path.month")
     .attr("d", monthPath);
   
   
-
-/*d3.csv("dji.csv", function(csv) {
-  var data = d3.nest()
-    .key(function(d) { return d.Date; })
-    .rollup(function(d) { return (d[0].Close - d[0].Open) / d[0].Open; })
-    .map(csv);
-
-  rect.filter(function(d) { return d in data; })
-      .attr("class", function(d) { return "day q" + color(data[d]) + "-9"; })
-    .select("title")
-      .text(function(d) { return d + ": " + percent(data[d]); });
-});*/
-
-  
 function monthPath(t0) {
   var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
       d0 = +day(t0), w0 = +week(t0),
       d1 = +day(t1), w1 = +week(t1);
-  return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
-      + "H" + w0 * cellSize + "V" + 7 * cellSize
-      + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
-      + "H" + (w1 + 1) * cellSize + "V" + 0
-      + "H" + (w0 + 1) * cellSize + "Z";
+  return "M" + (w0) * cellSize + "," + (7-d0) * cellSize
+      + "H" + (w0 + 1) * cellSize + "V" + 7 * cellSize
+      + "H" + (w1 + 1) * cellSize + "V" + (7 - d1 - 1) * cellSize
+      + "H" + (w1) * cellSize + "V" + 0
+      + "H" + (w0) * cellSize + "Z";
   
   }
 }]]></Script>
