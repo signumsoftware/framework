@@ -208,7 +208,7 @@ SF.Chart.Utils = (function () {
 
                 debugX: function (chart) {
 
-                    var keys = _.keys(sizes);
+                    var keys = d3.keys(sizes);
 
                     //paint x-axis rule
                     chart.append('svg:g').attr('class', 'x-rule-tick')
@@ -230,7 +230,7 @@ SF.Chart.Utils = (function () {
 
                 debugY: function (chart) {
 
-                    var keys = _.keys(sizes);
+                    var keys = d3.keys(sizes);
 
                     //paint y-axis rule
                     chart.append('svg:g').attr('class', 'y-rule-tick')
