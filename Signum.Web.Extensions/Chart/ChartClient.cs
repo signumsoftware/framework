@@ -24,6 +24,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Reflection;
 using System.Diagnostics;
 using System.Text;
+using Signum.Entities.Files;
 
 namespace Signum.Web.Chart
 {
@@ -38,6 +39,9 @@ namespace Signum.Web.Chart
 
         public static void Start()
         {
+            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(FileDN)))
+                throw new InvalidOperationException("Call FileDN first"); 
+
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(ChartClient));

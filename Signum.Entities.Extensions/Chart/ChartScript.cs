@@ -58,6 +58,15 @@ namespace Signum.Entities.Chart
             set { Set(ref columns, value, () => Columns); }
         }
 
+        [NotNullable, SqlDbType(Size = 100)]
+        string columnsStructure;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string ColumnsStructure
+        {
+            get { return columnsStructure; }
+            set { Set(ref columnsStructure, value, () => ColumnsStructure); }
+        }
+
         static Expression<Func<ChartScriptDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
@@ -115,6 +124,11 @@ namespace Signum.Entities.Chart
         protected override void PreSaving(ref bool graphModified)
         {
             Columns.ForEach((c, i) => c.Index = i);
+
+            string from = Columns.Where(a => a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
+            string to = Columns.Where(a => !a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
+
+            ColumnsStructure = "{0} -> {1}".Formato(from, to);
 
             base.PreSaving(ref graphModified);
         }
@@ -500,12 +514,6 @@ namespace Signum.Entities.Chart
        
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Name))
-            {
-                if (!Reflector.ValidIdentifier(Name))
-                    return "{0} should be a vaid interval".Formato(pi.NiceName());
-            }
-
             if (pi.Is(() => ValueDefinition) && ValueDefinition != null)
             {
                 switch (Type)
@@ -714,7 +722,7 @@ namespace Signum.Entities.Chart
 
             public bool CompatibleWith(QueryToken token)
             {
-                return TypeFilter == null || ChartUtils.IsChartColumnType(token, TypeFilter.Value);
+                return TypeFilter == null || token != null && ChartUtils.IsChartColumnType(token, TypeFilter.Value);
             }
         }
 
