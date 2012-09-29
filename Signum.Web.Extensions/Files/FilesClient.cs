@@ -58,22 +58,19 @@ namespace Signum.Web.Files
                         {
                             if (runtimeInfo.IsNew)
                             {
-                                string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
-
-                                string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
                                 if (hpf != null)
                                 {
-                                    fp.FileName = Path.GetFileName(hpf.FileName);
-                                    fp.BinaryFile = hpf.InputStream.ReadAllBytes();
-
-                                    return fp;
+                                    string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                    return new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
+                                    {
+                                        FileName = Path.GetFileName(hpf.FileName),
+                                        BinaryFile = hpf.InputStream.ReadAllBytes(),
+                                    };
                                 }
                                 else
                                 {
-                                    FilePathDN filePathInSession = (FilePathDN)ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
-                                    return filePathInSession;
+                                    return (FilePathDN)GetSessionFile(ctx);
                                 }
                             }
                         }
@@ -82,6 +79,10 @@ namespace Signum.Web.Files
                     };
 
                     es.MappingAdmin = es.MappingDefault;
+
+                    var lm = new LiteMapping<FilePathDN>();
+                    lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
+                    Mapping.RegisterValue<Lite<FilePathDN>>(lm.GetValue);
                 }
 
                 if (file)
@@ -100,28 +101,29 @@ namespace Signum.Web.Files
                         {
                             if (runtimeInfo.IsNew)
                             {
-                                var result = new FileDN();
-
-                                string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
 
                                 if (hpf != null)
                                 {
-                                    result.FileName = Path.GetFileName(hpf.FileName);
-                                    result.BinaryFile = hpf.InputStream.ReadAllBytes();
-
-                                    return result;
+                                    return new FileDN
+                                    {
+                                        FileName = Path.GetFileName(hpf.FileName),
+                                        BinaryFile = hpf.InputStream.ReadAllBytes()
+                                    };
                                 }
                                 else
                                 {
-                                    FileDN fileInSession = (FileDN)ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
-                                    return fileInSession;
+                                    return (FileDN)GetSessionFile(ctx);
                                 }
                             }
                         }
 
                         return baseMapping(ctx);
                     };
+
+                    var lm = new LiteMapping<FileDN>();
+                    lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
+                    Mapping.RegisterValue<Lite<FileDN>>(lm.GetValue);
                 }
 
                 if (embeddedFile)
@@ -142,8 +144,7 @@ namespace Signum.Web.Files
                             {
                                 var result = new EmbeddedFileDN();
 
-                                string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
 
                                 if (hpf.ContentLength != 0)
                                 {
@@ -186,6 +187,18 @@ namespace Signum.Web.Files
 
         }
 
+        private static object GetSessionFile(MappingContext ctx)
+        {
+            return ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
+        }
+
+        private static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
+        {
+            string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
+            HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+            return hpf;
+        }
+
         static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
             fp => new WebImage { FullWebPath = fp.FullWebPath };
         public static WebImage WebImage(this FilePathDN fp)
@@ -201,7 +214,7 @@ namespace Signum.Web.Files
         }
 
         static Expression<Func<FileDN, WebImage>> WebImageFileExpression =
-            f => new WebImage { FullWebPath = DownloadFileUrl(f.Id) };
+            f => new WebImage { FullWebPath = DownloadFileUrl(f.ToLite()) };
         [ExpressionField("WebImageFileExpression")]
         public static WebImage WebImage(this FileDN f)
         {
@@ -209,19 +222,19 @@ namespace Signum.Web.Files
         }
 
         static Expression<Func<FileDN, WebDownload>> WebDownloadFileExpression =
-           f => new WebDownload { FullWebPath = DownloadFileUrl(f.Id)};
+           f => new WebDownload { FullWebPath = DownloadFileUrl(f.ToLite()) };
         [ExpressionField("WebDownloadFileExpression")]
         public static WebDownload WebDownload(this FileDN f)
         {
             return WebDownloadFileExpression.Evaluate(f);
         }
 
-        static string DownloadFileUrl(int? id)
+        static string DownloadFileUrl(Lite<FileDN> file)
         {
-            if (id == null)
+            if (file == null)
                 return null;
 
-            return RouteHelper.New().Action((FileController fc) => fc.DownloadFile(id)); 
+            return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(file).ToString())); 
         }
     }
 

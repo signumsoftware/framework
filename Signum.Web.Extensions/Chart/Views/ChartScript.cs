@@ -95,7 +95,7 @@ WriteLiteral("\r\n        </div>\r\n");
 WriteLiteral("            <div style=\"float: left\">\r\n                <img src=\"");
 
 
-                     Write(Url.Action((FileController fc) => fc.DownloadFile(cc.Value.Icon.Id)));
+                     Write(Url.Action((FileController fc) => fc.Download(new RuntimeInfo(cc.Value.Icon).ToString())));
 
 WriteLiteral("\" />\r\n            </div>\r\n");
 

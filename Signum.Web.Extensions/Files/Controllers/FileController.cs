@@ -161,24 +161,25 @@ namespace Signum.Web.Files
             return Content(sb.ToString());
         }
 
-        public FileResult Download(int? filePathID)
+        public ActionResult Download(string file)
         {
-            if (filePathID == null)
-                throw new ArgumentException("filePathID");
+            if (file == null)
+                throw new ArgumentException("file");
 
-            FilePathDN fp = Database.Retrieve<FilePathDN>(filePathID.Value);
+            RuntimeInfo ri = RuntimeInfo.FromFormValue(file);
 
-            return File(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath), fp.FileName);
-        }
+            if (ri.RuntimeType == typeof(FilePathDN))
+            {
+                FilePathDN fp = Database.Retrieve<FilePathDN>(ri.IdOrNull.Value);
 
-        public ActionResult DownloadFile(int? fileID)
-        {
-            if (fileID == null)
-                throw new ArgumentNullException("fileID");
+                return File(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath), fp.FileName);
+            }
+            else
+            {
+                FileDN f = Database.Retrieve<FileDN>(ri.IdOrNull.Value);
 
-            FileDN file = Database.Retrieve<FileDN>(fileID.Value);
-
-            return new StaticContentResult(file.BinaryFile, file.FileName);
+                return new StaticContentResult(f.BinaryFile, f.FileName);
+            }
         }
     }
 }

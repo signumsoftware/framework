@@ -77,12 +77,12 @@ SF.registerModule("Files", function () {
             },
 
             download: function () {
-                var id = this.runtimeInfo().id();
-                if (SF.isEmpty(id)) {
+                var info = this.runtimeInfo();
+                if (SF.isEmpty(info.id)) {
                     return;
                 }
                 var url = this.options.downloadUrl || SF.Urls.downloadFile;
-                window.open(url + "?filePathID=" + id);
+                window.open(url + "?file=" + info.value());
             },
 
             removeSpecific: function () {
