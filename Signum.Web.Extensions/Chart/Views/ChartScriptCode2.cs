@@ -88,53 +88,31 @@ Write(Html.ScriptsJs(
         "~/Scripts/CodeMirror/dialog.js"
         ));
 
-WriteLiteral(@"
-  
-    <style type=""text/css"">
-      .CodeMirror {
-        border: 1px solid #eee;
-      }
-      
-      
-      span.CodeMirror-matchhighlight 
-      { 
-          background: #efefef
-      }
-      .CodeMirror-focused span.CodeMirror-matchhighlight 
-      { 
-          background: #efe7ff; !important 
-      }
-      
-      .exceptionLine {background: #FFFF00 !important;}
-      
-      .CodeMirror-fullscreen {
-        display: block;
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        z-index: 9999;
-        background: white;
-      }
-    </style>
-    <pre style=""color: Green"">
-//var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
-//var data = { 
-//              ""columns"": { ""c0"": { ""title"":""Product"", ""token"":""Product"", ""isGroupKey"":true}, 
-                            ""c1"": { ""title"":""Count"", ""token"":""Count"", ""isGroupKey"":true} 
-                          },
-//              ""rows"": [ { ""c0"": { ""key"": ""Product;1"", ""toStr"": ""Apple"", ""color"": null }, ""c1"": 153 },
-//                        { ""c0"": { ""key"": ""Product;2"", ""toStr"": ""Orange"", ""color"": null }, ""c1"": 179 },
-//                      ]
-//           }
-// DrawChart(chart, data);
-// All yours!...
- </pre>
-    ");
+WriteLiteral("\r\n  \r\n    <style type=\"text/css\">\r\n      .CodeMirror {\r\n        border: 1px solid" +
+" #eee;\r\n      }\r\n      \r\n      \r\n      span.CodeMirror-matchhighlight \r\n      { " +
+"\r\n          background: #efefef\r\n      }\r\n      .CodeMirror-focused span.CodeMir" +
+"ror-matchhighlight \r\n      { \r\n          background: #efe7ff; !important \r\n     " +
+" }\r\n      \r\n      .exceptionLine {background: #FFFF00 !important;}\r\n      \r\n    " +
+"  .CodeMirror-fullscreen {\r\n        display: block;\r\n        position: absolute;" +
+"\r\n        top: 0; left: 0;\r\n        width: 100%;\r\n        z-index: 9999;\r\n      " +
+"  background: white;\r\n      }\r\n    </style>\r\n    <pre style=\"color: Green\">\r\n//v" +
+"ar chart = d3.select(\'#sfChartControl .sf-chart-container\').append(\'svg:svg\').at" +
+"tr(\'width\', width).attr(\'height\', height))\r\n//var data = { \r\n//              \"co" +
+"lumns\": { \"c0\": { \"title\":\"Product\", \"token\":\"Product\", \"isGroupKey\":true, ... }" +
+", \r\n                             \"c1\": { \"title\":\"Count\", \"token\":\"Count\", \"isGr" +
+"oupKey\":true, ...} \r\n                          },\r\n//              \"rows\": [ { \"" +
+"c0\": { \"key\": \"Product;1\", \"toStr\": \"Apple\", \"color\": null }, \"c1\": { \"key\": \"14" +
+"0\", \"toStr\": \"140\" } },\r\n//                        { \"c0\": { \"key\": \"Product;2\"," +
+" \"toStr\": \"Orange\", \"color\": null }, \"c1\": { \"key\": \"179\", \"toStr\": \"179\" } }, ." +
+"..\r\n//                      ]\r\n//           }\r\n// DrawChart(chart, data);\r\n// \r\n" +
+"// Visit: http://d3js.org/\r\n// Other functions defined in: \\Chart\\Scripts\\SF_Cha" +
+"rt_Utils.js\r\n// use \'debugger\' keyword or just throw JSON.stringify(myVariable)\r" +
+"\n// All yours!...\r\n </pre>\r\n    ");
 
 
 Write(Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.LabelVisible = false; }));
 
-WriteLiteral("\r\n    <pre>}</pre>\r\n    <script>\r\n    var $textArea = $(\"#");
+WriteLiteral("\r\n \r\n    <script>\r\n    var $textArea = $(\"#");
 
 
                     Write(Model.Compose("Script"));

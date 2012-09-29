@@ -35,6 +35,8 @@ namespace Signum.Engine.Chart
                 ChartColorLogic.Start(sb, dqm);
                 ChartScriptLogic.Start(sb, dqm);
                 UserChartLogic.Start(sb, dqm);
+
+                ChartUtils.RemoveNotNullValidators();
             }
         }
 
@@ -132,7 +134,7 @@ namespace Signum.Engine.Chart
         static GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>> miExecuteChart = new GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQuery<int>)dq));
         static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQuery<T> dq)
         {
-            List<Column> columns = request.Columns.Select(t => t.CreateColumn()).ToList();
+            List<Column> columns = request.Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
 
             var multiplications = request.Multiplications;;
 

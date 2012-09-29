@@ -214,8 +214,7 @@ SF.Chart = (function () {
                 var name = $element.attr("id").split('_');
                 if(name.length  == 3 && name[0] == "Columns"){
                     var column = data.columns["c" + name[1]];
-                    switch (name[2]) 
-                    {
+                    switch (name[2]){
                         case "DisplayName": column.title = $element.val(); break;
                         case "Parameter1":  column.parameter1 = $element.val(); break;
                         case "Parameter2":  column.parameter2 = $element.val(); break;

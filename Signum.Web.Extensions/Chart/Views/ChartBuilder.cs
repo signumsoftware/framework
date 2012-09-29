@@ -121,8 +121,8 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </div>\r\n");
 
 
-                 foreach (var group in ChartScriptLogic.Scripts.Value.OrderBy(a => a.Id).GroupsOf(4))
-                {
+                 foreach (var group in ChartUtils.PackInGroups(ChartScriptLogic.Scripts.Value, 4))
+                {   
                     foreach (var script in group)
                     { 
 
@@ -131,22 +131,21 @@ WriteLiteral("                    <div class=\"");
 
                            Write(ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script));
 
-WriteLiteral("\" data-related=\"");
+WriteLiteral("\" \r\n                    data-related=\"");
 
 
-                                                                                                                        Write(new RuntimeInfo(script).ToString());
+                              Write(new RuntimeInfo(script).ToString());
 
 WriteLiteral("\"  title=\"");
 
 
-                                                                                                                                                                      Write(script.ToString());
+                                                                             Write(script.ToString() + "\r\n" + script.ColumnsStructure);
 
 WriteLiteral("\">\r\n                        <img src=\" ");
 
 
-                               Write(script.Icon == null ?
-                        Url.Content("~/Chart/Images/unknown.png") :
-                        Url.Action((Signum.Web.Files.FileController fc) => fc.DownloadFile(script.Icon.Id)));
+                               Write(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
+                        Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())));
 
 WriteLiteral("\" />\r\n                    </div>\r\n");
 

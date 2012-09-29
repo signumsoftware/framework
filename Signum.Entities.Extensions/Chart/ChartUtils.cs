@@ -231,7 +231,7 @@ namespace Signum.Entities.Chart
                 name = "c" + i,
                 title = c.GetTitle(),
                 token = c.TokenString,
-                type =   c.Token.GetChartColumnType().ToString(),
+                type =  c.Token == null? null: c.Token.GetChartColumnType().ToString(),
                 parameter1 = c.Parameter1,
                 parameter2 = c.Parameter2,
                 parameter3 = c.Parameter3,
@@ -267,13 +267,13 @@ namespace Signum.Entities.Chart
                     parameter2 = a.parameter2,
                     parameter3 = a.parameter3,
                 }),
-                rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter(r))).ToList()
+                rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter == null? null: a.converter(r))).ToList()
             };
         }
 
         private static Func<ResultRow, object> Converter(this ChartColumnDN ct, int columnIndex)
         {
-            if (ct == null)
+            if (ct == null || ct.Token == null)
                 return null;
 
             var type = ct.Token.Type.UnNullify();
@@ -331,6 +331,54 @@ namespace Signum.Entities.Chart
                         toStr = value,
                     };
                 };;
+        }
+
+        public static List<List<ChartScriptDN>> PackInGroups(List<ChartScriptDN> scripts, int rowWidth)
+        {
+            var heigth = (scripts.Count() + rowWidth - 1) / rowWidth; //round-up division
+
+            var result = 0.To(heigth).Select(a => new List<ChartScriptDN>()).ToList();
+
+            var groups = scripts
+                .OrderBy(a => a.Name)
+                .GroupBy(a => a.ColumnsStructure)
+                .OrderByDescending(a => a.Count())
+                .ThenBy(a => a.Key)
+                .ToList();
+
+            foreach (var gr in groups)
+            {
+                var count = gr.Count();
+                var list = result.FirstOrDefault(ls => ls.Count + count <= rowWidth);
+                if (list != null)
+                {
+                    list.AddRange(gr);
+                }
+                else
+                {
+                    var remaining = gr.ToList();
+                    foreach (var ls in result)
+                    {
+                        var available = Math.Min(rowWidth - ls.Count, remaining.Count);
+                        if (available > 0)
+                        {
+                            var range = remaining.GetRange(0, available);
+                            remaining.RemoveRange(0, available);
+                            ls.AddRange(range);
+                            if (remaining.IsEmpty())
+                                break;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public static void RemoveNotNullValidators()
+        {
+            Validator.GetOrCreatePropertyPack((ChartColumnDN c) => c.Token).Validators.RemoveAll(a => a is NotNullValidatorAttribute);
+            Validator.GetOrCreatePropertyPack((ChartColumnDN c) => c.TokenString).Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
         }
     }
 }

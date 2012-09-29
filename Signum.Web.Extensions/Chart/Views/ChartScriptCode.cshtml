@@ -47,18 +47,22 @@
     <pre style="color: Green">
 //var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
 //var data = { 
-//              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true}, 
-                            "c1": { "title":"Count", "token":"Count", "isGroupKey":true} 
+//              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true, ... }, 
+                             "c1": { "title":"Count", "token":"Count", "isGroupKey":true, ...} 
                           },
-//              "rows": [ { "c0": { "key": "Product;1", "toStr": "Apple", "color": null }, "c1": 153 },
-//                        { "c0": { "key": "Product;2", "toStr": "Orange", "color": null }, "c1": 179 },
+//              "rows": [ { "c0": { "key": "Product;1", "toStr": "Apple", "color": null }, "c1": { "key": "140", "toStr": "140" } },
+//                        { "c0": { "key": "Product;2", "toStr": "Orange", "color": null }, "c1": { "key": "179", "toStr": "179" } }, ...
 //                      ]
 //           }
 // DrawChart(chart, data);
+// 
+// Visit: http://d3js.org/
+// Other functions defined in: \Chart\Scripts\SF_Chart_Utils.js
+// use 'debugger' keyword or just throw JSON.stringify(myVariable)
 // All yours!...
  </pre>
     @Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.LabelVisible = false; })
-    <pre>}</pre>
+ 
     <script>
     var $textArea = $("#@(Model.Compose("Script"))");
     var changedDelay;

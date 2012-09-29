@@ -119,13 +119,13 @@ namespace Signum.Engine.Chart
                 catch (FormatException f)
                 {
                     SafeConsole.WriteLineColor(ConsoleColor.Yellow, f.Message);
-                    if (AskYNA("Foce {0}? (*yes, no, all)".Formato(name), ref forceAll))
+                    if (AskYesNoAll("Foce {0}? (*yes, no, all)".Formato(name), ref forceAll))
                         script.ImportXml(XDocument.Load(item), name, true);
                 }
 
                 if (previous != null)
                 {
-                    if (previous.HasChanges() && AskYNA("Override {0}? (*yes, no, all)".Formato(name), ref overriteAll))
+                    if (previous.HasChanges() && AskYesNoAll("Override {0}? (*yes, no, all)".Formato(name), ref overriteAll))
                     {
                         previous.Save();
                         Console.WriteLine("{0} overriden.".Formato(name));
@@ -139,9 +139,8 @@ namespace Signum.Engine.Chart
             }
         }
 
-        private static bool AskYNA(string message, ref bool all)
+        private static bool AskYesNoAll(string message, ref bool all)
         {
-
             if (all)
                 return true;
 
@@ -166,5 +165,7 @@ namespace Signum.Engine.Chart
 
             }
         }
+
+     
     }
 }

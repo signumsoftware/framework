@@ -56,9 +56,9 @@ namespace Signum.Entities.Chart
 
         private void SetDefaultParameters()
         {
-            Parameter1 = token == null ? null: scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
-            Parameter2 = token == null ? null: scriptColumn.Parameter2.TryCC(a => a.DefaultValue(token));
-            Parameter3 = token == null ? null: scriptColumn.Parameter3.TryCC(a => a.DefaultValue(token));
+            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
+            Parameter2 = scriptColumn.Parameter2.TryCC(a => a.DefaultValue(token));
+            Parameter3 = scriptColumn.Parameter3.TryCC(a => a.DefaultValue(token));
         }
 
         string displayName;
@@ -153,6 +153,9 @@ namespace Signum.Entities.Chart
         {
             if (pi.Is(() => Token))
             {
+                if (Token == null)
+                    return !scriptColumn.IsOptional ? "{0} is not optional".Formato(scriptColumn.DisplayName) : null;
+
                 if (Token is IDataErrorInfo)
                 {
                     var err = ((IDataErrorInfo)Token).Error;
