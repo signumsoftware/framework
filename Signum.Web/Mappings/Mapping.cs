@@ -593,6 +593,8 @@ namespace Signum.Web
         public LiteMapping()
         {
             EntityMapping = Mapping.New<S>();
+
+            EntityHasChanges = AnyNonSpecialImput; 
         }
 
         public Lite<S> GetValue(MappingContext<Lite<S>> ctx)
@@ -637,24 +639,31 @@ namespace Signum.Web
             return TryModifyEntity(ctx, Database.RetrieveLite<S>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
         }
 
-        public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> newLite)
+        public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> lite)
         {
             //commented out because of Lite<FileDN/FilePathDN>
-            if (!ctx.Inputs.Keys.Except(Mapping.specialProperties).Any())
-                return newLite; // If form does not contains changes to the entity
+            if (!EntityHasChanges(ctx))
+                return lite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
-                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(newLite.TryToString()));
+                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(lite.TryToString()));
 
-            var sc = new SubContext<S>(ctx.ControlID, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = newLite.Retrieve() };
+            var sc = new SubContext<S>(ctx.ControlID, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = lite.Retrieve() };
             sc.Value = EntityMapping(sc);
 
             ctx.AddChild(sc);
 
             if (sc.SupressChange)
-                return newLite;
+                return lite;
 
             return sc.Value.ToLite(sc.Value.IsNew);
+        }
+
+        public Func<MappingContext<Lite<S>>, bool> EntityHasChanges;
+
+        private static bool AnyNonSpecialImput(MappingContext<Lite<S>> ctx)
+        {
+            return ctx.Inputs.Keys.Except(Mapping.specialProperties).Any();
         }
     }
 
