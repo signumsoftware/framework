@@ -39,9 +39,6 @@ namespace Signum.Entities.Chart
 
             if (Token != null)
             {
-                if (Token is IntervalQueryToken)
-                    ((IntervalQueryToken)Token).PropertyChanged += (s, e) => NotifyChange(true);
-
                 DisplayName = Token.NiceName();
             }
             else
@@ -239,16 +236,6 @@ namespace Signum.Entities.Chart
         public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
             var result = token.SubTokensChart(columnDescriptions, this.IsGroupKey == false);
-
-            if (this.parentChart.GroupResults && ScriptColumn.IsGroupKey && token != null)
-            {
-                FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
-
-                if (ft == FilterType.Integer || ft == FilterType.Decimal)
-                {
-                    result.Add(new IntervalQueryToken(token));
-                }
-            }
 
             return result;
         }

@@ -113,7 +113,6 @@
     <Compile Include="Chart\ChartScriptParameter.cs" />
     <Compile Include="Chart\ChartUtils.cs" />
     <Compile Include="Chart\IChartServer.cs" />
-    <Compile Include="Chart\IntervalQueryToken.cs" />
     <Compile Include="Chart\UserChart.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />

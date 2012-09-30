@@ -36,7 +36,6 @@
                 <m:QueryTokenBuilder  Style="{StaticResource toolTip}"  x:Name="token"
                              Token="{Binding Token, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                               SubTokensEvent="token_SubTokensEvent"/>
-                <TextBox Visibility="{Binding Token, Converter={x:Static swc:ChartColumn.IsInterval}}" Text="{Binding Token.Intervals, ValidatesOnDataErrors=true, NotifyOnValidationError=true }" VerticalAlignment="Center"/>
             </StackPanel>
 
             <Expander Grid.Row="1" Style="{StaticResource LineExpander}" Grid.ColumnSpan="3">

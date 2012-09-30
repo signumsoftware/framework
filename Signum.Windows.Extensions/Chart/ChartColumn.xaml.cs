@@ -23,8 +23,7 @@ namespace Signum.Windows.Chart
     public partial class ChartColumn : UserControl, IPreLoad
     {
         public event EventHandler PreLoad;
-        public static IValueConverter IsInterval = ConverterFactory.New((QueryToken t) => t is IntervalQueryToken ? Visibility.Visible : Visibility.Hidden);
-
+      
         public static readonly DependencyProperty GroupResultsProperty =
             DependencyProperty.Register("GroupResults", typeof(bool), typeof(ChartColumn), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (e, o) =>
                 {
