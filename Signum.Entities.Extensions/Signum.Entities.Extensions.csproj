@@ -110,6 +110,7 @@
     <Compile Include="Chart\ChartScript.cs" />
     <Compile Include="Chart\ChartColumn.cs" />
     <Compile Include="Chart\ChartRequest.cs" />
+    <Compile Include="Chart\ChartScriptParameter.cs" />
     <Compile Include="Chart\ChartUtils.cs" />
     <Compile Include="Chart\IChartServer.cs" />
     <Compile Include="Chart\IntervalQueryToken.cs" />

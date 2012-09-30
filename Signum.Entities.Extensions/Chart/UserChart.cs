@@ -63,7 +63,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value, () => ChartScript))
                 {
-                    chartScript.SyncronizeColumns(this);
+                    chartScript.SyncronizeColumns(this, changeParameters: true);
                     NotifyAllColumns();
                 }
             }
@@ -160,7 +160,7 @@ namespace Signum.Entities.Chart
 
         protected override void PostRetrieving()
         {
-            chartScript.SyncronizeColumns(this);
+            chartScript.SyncronizeColumns(this, changeParameters: false);
         }
 
         public void InvalidateResults(bool needNewQuery)

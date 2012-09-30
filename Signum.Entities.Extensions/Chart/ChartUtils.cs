@@ -111,7 +111,7 @@ namespace Signum.Entities.Chart
             return result;
         }
         
-        public static bool SyncronizeColumns(this ChartScriptDN chartScript, IChartBase chart)
+        public static bool SyncronizeColumns(this ChartScriptDN chartScript, IChartBase chart, bool changeParameters)
         {
             bool result = false;
 
@@ -130,6 +130,8 @@ namespace Signum.Entities.Chart
                 }
 
                 chart.Columns[i].ScriptColumn = chartScript.Columns[i];
+                if (changeParameters)
+                    chart.Columns[i].SetDefaultParameters();
                 chart.Columns[i].parentChart = chart;
 
                 if (!result)
@@ -301,7 +303,7 @@ namespace Signum.Entities.Chart
                     Enum e = (Enum)r[columnIndex];
                     return new
                     {
-                        key = e.TryToString(),
+                        key = Convert.ToInt32(e),
                         toStr = e.TryCC(en => en.NiceToString()),
                         color = e == null ? "#555" : GetChartColor(enumProxy, Convert.ToInt32(e)).TryToHtml(),
                     };
@@ -343,7 +345,8 @@ namespace Signum.Entities.Chart
             var groups = scripts
                 .OrderBy(a => a.Name)
                 .GroupBy(a => a.ColumnsStructure)
-                .OrderByDescending(a => a.Count())
+                .OrderBy(a => a.Key.Length)
+                .ThenByDescending(a => a.Count())
                 .ThenBy(a => a.Key)
                 .ToList();
 

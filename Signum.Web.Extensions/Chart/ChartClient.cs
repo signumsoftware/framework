@@ -298,6 +298,7 @@ namespace Signum.Web.Chart
                 {
                     Value = ev.Name,
                     Text = ev.Name,
+                    Selected = ((string)vl.UntypedValue) == ev.Name
                 }).ToList();
 
                 if (!vl.ValueHtmlProps.IsNullOrEmpty())

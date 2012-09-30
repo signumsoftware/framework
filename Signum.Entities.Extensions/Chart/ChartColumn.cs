@@ -23,11 +23,7 @@ namespace Signum.Entities.Chart
         public ChartScriptColumnDN ScriptColumn
         {
             get { return scriptColumn; }
-            set
-            {
-                if (Set(ref scriptColumn, value, () => ScriptColumn))
-                    SetDefaultParameters();
-            }
+            set { Set(ref scriptColumn, value, () => ScriptColumn); }
         }
         
         public ChartColumnDN()
@@ -54,7 +50,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        private void SetDefaultParameters()
+        public void SetDefaultParameters()
         {
             Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
             Parameter2 = scriptColumn.Parameter2.TryCC(a => a.DefaultValue(token));
@@ -235,7 +231,7 @@ namespace Signum.Entities.Chart
 
         public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
         {
-            Token = QueryUtils.Parse(tokenString, subTokens);
+            token = QueryUtils.Parse(tokenString, subTokens);
 
             CleanSelfModified();
         }
