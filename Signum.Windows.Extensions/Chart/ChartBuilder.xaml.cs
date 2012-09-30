@@ -46,6 +46,9 @@ namespace Signum.Windows.Chart
 
         public static IValueConverter ChartTypeToImage = ConverterFactory.New((Lite<FileDN> ct) =>
         {
+            if (ct == null)
+                return null;
+
             BitmapImage image = new BitmapImage();
             image.BeginInit();
             image.StreamSource = new MemoryStream(ct.Retrieve().BinaryFile);

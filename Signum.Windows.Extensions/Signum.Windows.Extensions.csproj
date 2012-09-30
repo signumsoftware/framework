@@ -819,7 +819,6 @@
     <EmbeddedResource Include="Chart\Html\ChartContainer.htm" />
     <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
     <EmbeddedResource Include="Chart\Html\jquery-1.7.2.min.js" />
-    <EmbeddedResource Include="Chart\Html\underscore-min.js" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Framework\Signum.Web\Signum\Content\reset.css">

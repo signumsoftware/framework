@@ -92,6 +92,7 @@
                     </Border>
                     <WebBrowser x:Name="webBrowser"  Visibility="{Binding NeedNewQuery, Converter={x:Static m:Converters.NotBoolToVisibility}}" >
                     </WebBrowser>
+                    <TextBlock Foreground="Red" x:Name="errorLine"/>
                 </Grid>
             </TabItem>
             <TabItem>

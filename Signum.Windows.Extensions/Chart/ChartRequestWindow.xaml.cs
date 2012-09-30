@@ -249,6 +249,9 @@ namespace Signum.Windows.Chart
 
         internal void SetResults(string script = null)
         {
+            if (resultTable == null)
+                return;
+
             if(script == null)
                 script = Request.ChartScript.Script; 
 
@@ -275,7 +278,7 @@ namespace Signum.Windows.Chart
                         Operation = f.Operation
                     }).ToList(),
                     GroupResults = Request.GroupResults,
-                    GetFilter = rr => keyColunns.SelectMany(t => GetTokenFilters(t.Token, rr[t.Column])).ToList()
+                    GetFilter = rr => keyColunns.Select(t => GetTokenFilters(t.Token, rr[t.Column])).ToList()
                 };
             }
             else lastRequest = new LastRequest { GroupResults = false };
@@ -293,21 +296,24 @@ namespace Signum.Windows.Chart
 
             var json = new JavaScriptSerializer().Serialize(jsonData);
 
-           
 
-            webBrowser.InvokeScript("reDraw", script, json);
+            try
+            {
+                webBrowser.InvokeScript("reDraw", script, json);
+            }
+            catch (Exception e)
+            {
+                errorLine.Text = e.Message;
+                errorLine.Visibility = System.Windows.Visibility.Visible;
+            }
+
+            errorLine.Text = null;
+            errorLine.Visibility = System.Windows.Visibility.Collapsed;
         }
 
-        static FilterOption[] GetTokenFilters(QueryToken queryToken, object p)
+        static FilterOption GetTokenFilters(QueryToken queryToken, object p)
         {
-            if (queryToken is IntervalQueryToken)
-            {
-                var filters = miGetIntervalFilters.GetInvoker(queryToken.Type.GetGenericArguments())(queryToken.Parent, p);
-
-                return filters.ToArray();
-            }
-            else
-                return new[] { new FilterOption(queryToken.FullKey(), p) };
+            return new FilterOption(queryToken.FullKey(), p);
         }
 
         static GenericInvoker<Func<QueryToken, object, IEnumerable<FilterOption>>> miGetIntervalFilters = new GenericInvoker<Func<QueryToken, object, IEnumerable<FilterOption>>>(
