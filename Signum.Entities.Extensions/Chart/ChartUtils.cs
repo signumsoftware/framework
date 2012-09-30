@@ -226,6 +226,7 @@ namespace Signum.Entities.Chart
         //Manual Json printer for performance and pretty print
         public static object DataJson(ChartRequest request, ResultTable resultTable)
         {
+            int index = 0;
             var cols = request.Columns.Select((c, i) => new
             {
                 name = "c" + i,
@@ -236,7 +237,7 @@ namespace Signum.Entities.Chart
                 parameter2 = c.Parameter2,
                 parameter3 = c.Parameter3,
                 isGroupKey = c.IsGroupKey,
-                converter = c.Converter(i)
+                converter = c.Token == null ? null : c.Converter(index++)
             }).ToList();
 
             if (!request.GroupResults)

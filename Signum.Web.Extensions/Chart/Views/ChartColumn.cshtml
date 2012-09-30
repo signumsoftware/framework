@@ -25,7 +25,7 @@
     }
     
     <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnDN>)tc.Parent).Index)">
-        <td>@tc.Value.PropertyLabel
+        <td>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional?"?":""))
         </td>
         <td>
             @if (tc.Value.GroupByVisible)

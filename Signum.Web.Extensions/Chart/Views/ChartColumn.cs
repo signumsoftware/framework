@@ -120,7 +120,7 @@ WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
 WriteLiteral("\">\r\n        <td>");
 
 
-       Write(tc.Value.PropertyLabel);
+        Write(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional?"?":""));
 
 WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
 

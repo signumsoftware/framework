@@ -138,6 +138,12 @@ SF.Chart.Utils = (function () {
                                  d3.max(values)])
                         .range([minRange, maxRange]);
 
+            if (scaleName == "Sqrt")
+                return d3.scale.pow().exponent(.5)
+                        .domain([d3.min(values),
+                                 d3.max(values)])
+                        .range([minRange, maxRange]);
+
             throw Error("Unexpected scale: " + scaleName);
         },
 
