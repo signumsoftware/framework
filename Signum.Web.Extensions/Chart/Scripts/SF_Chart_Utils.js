@@ -43,7 +43,7 @@ SF.Chart.Utils = (function () {
                 if (result === null || result === undefined)
                     return result.key !== undefined ? "[ no text ]" : "[ null ]";
 
-                return result;
+                return result.toString();
             };
 
             value.valueOf = function () {
