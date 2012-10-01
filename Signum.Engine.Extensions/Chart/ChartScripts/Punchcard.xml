@@ -29,7 +29,7 @@
     .entries(data.rows)
     .map(function(g){return g.values;});
 
-  var xRule = º.rule({
+  var xRule = rule({
     _1 : 5,
     title : 15,
     _2 : 10, 
@@ -41,7 +41,7 @@
   }, width);
   //xRule.debugX(chart)
   
-  var yRule = º.rule({
+  var yRule = rule({
     _1 : 5,
     content: '*',
     ticks: 4,
@@ -63,12 +63,12 @@
   
   var circleSize = Math.min(x.rangeBand(), y.rangeBand()) * 0.45;
 
-  var area = data.columns.c2.token == null? null : º.scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, circleSize * circleSize);
+  var area = data.columns.c2.token == null? null : scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, circleSize * circleSize);
   
   var color = null;
   if(data.columns.c3.token != null)
   {
-    var scaleFunc = º.scaleFor(data.columns.c3, data.rows.map(function(r){return r.c3;}), 0, 100, colorScale);
+    var scaleFunc = scaleFor(data.columns.c3, data.rows.map(function(r){return r.c3;}), 0, 100, colorScale);
     
     var colorQuantizer = d3.scale.quantize()
         .domain([0, 100])

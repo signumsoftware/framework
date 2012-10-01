@@ -21,7 +21,7 @@
   var minValue = d3.min(data.rows, function(r){return r.c1.valueOf() });
   var maxValue = d3.max(data.rows, function(r){return r.c1.valueOf() });
   
-  var scaleFunc = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
+  var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
 
   var colorQuantizer = d3.scale.quantize()
     .domain([0, 100])
@@ -44,7 +44,7 @@
   
   
   
-  var yRule = º.rule({
+  var yRule = rule({
     _1: '*',
     title: 14,
     _2: 4,
@@ -53,7 +53,7 @@
   }, height);
   //yRule.debugY(chart);
   
-  var xRule = º.rule({
+  var xRule = rule({
     _1: '*',
     title: 14,
     _2: 4,

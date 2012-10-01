@@ -198,7 +198,7 @@
   var scale = data.columns.c1.parameter2;
  
 
-  var scaleFunc = º.scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
+  var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
 
   var colorQuantizer = d3.scale.quantize()
     .domain([0, 100])
