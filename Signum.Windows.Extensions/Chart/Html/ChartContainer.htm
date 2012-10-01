@@ -6,6 +6,7 @@
     <script src="jquery-1.7.2.min.js" />
     <script src="d3.v2.min.js" />
     <script src="SF_Chart_Utils.js" />
+    <script src="colorbrewer.js" />
     <style src="reset.css" />
     <style type="text/css">
         body
@@ -57,6 +58,8 @@
                 var skewX = SF.Chart.Utils.skewX;
                 var skewY = SF.Chart.Utils.skewY;
                 var matrix = SF.Chart.Utils.matrix;
+                var scaleFor = SF.Chart.Utils.scaleFor;
+                var rule = SF.Chart.Utils.rule; 
                 __baseLineNumber__ = new Error().lineNumber;
                 func = eval(code);
             } catch (e) {

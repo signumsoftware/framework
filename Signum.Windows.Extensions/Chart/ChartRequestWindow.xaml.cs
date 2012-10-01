@@ -69,6 +69,7 @@ namespace Signum.Windows.Chart
 
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(ChartBuilder_DataContextChanged);
             this.Loaded += new RoutedEventHandler(ChartWindow_Loaded);
+            webBrowser.HideScriptErrors(true);
 
             userChartMenuItem.ChartWindow = this;
         }
@@ -296,7 +297,7 @@ namespace Signum.Windows.Chart
 
             var json = new JavaScriptSerializer().Serialize(jsonData);
 
-
+            
             try
             {
                 webBrowser.InvokeScript("reDraw", script, json);
@@ -486,6 +487,21 @@ namespace Signum.Windows.Chart
                     SearchOnLoad = true,
                 });
             }
+        }
+    }
+
+    public static class WebBrowserHacks
+    {
+        public static void HideScriptErrors(this WebBrowser wb, bool hide)
+        {
+            wb.Navigated += (s, args) =>
+            {
+                FieldInfo fiComWebBrowser = typeof(WebBrowser).GetField("_axIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (fiComWebBrowser == null) return;
+                object objComWebBrowser = fiComWebBrowser.GetValue(wb);
+                if (objComWebBrowser == null) return;
+                objComWebBrowser.GetType().InvokeMember("Silent", BindingFlags.SetProperty, null, objComWebBrowser, new object[] { hide });
+            };
         }
     }
 }

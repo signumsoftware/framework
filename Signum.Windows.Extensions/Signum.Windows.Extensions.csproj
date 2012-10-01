@@ -163,6 +163,9 @@
     <Compile Include="Chart\ChartScript.xaml.cs">
       <DependentUpon>ChartScript.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Chart\ChartScriptParameter.xaml.cs">
+      <DependentUpon>ChartScriptParameter.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\UserChart.xaml.cs">
       <DependentUpon>UserChart.xaml</DependentUpon>
     </Compile>
@@ -462,6 +465,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Chart\ChartScript.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Chart\ChartScriptParameter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -817,13 +824,18 @@
       <Link>Chart\Html\SF_Chart_Utils.js</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="Chart\Html\ChartContainer.htm" />
-    <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
     <EmbeddedResource Include="Chart\Html\jquery-1.7.2.min.js" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Framework\Signum.Web\Signum\Content\reset.css">
       <Link>Chart\Html\reset.css</Link>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\colorbrewer.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

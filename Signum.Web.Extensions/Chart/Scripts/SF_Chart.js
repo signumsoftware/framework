@@ -245,6 +245,8 @@ SF.Chart = (function () {
                 var skewX = SF.Chart.Utils.skewX;
                 var skewY = SF.Chart.Utils.skewY;
                 var matrix = SF.Chart.Utils.matrix;
+                var scaleFor = SF.Chart.Utils.scaleFor;
+                var rule = SF.Chart.Utils.rule;
                 __baseLineNumber__ = new Error().lineNumber;
                 func = eval(code);
             } catch (e) {

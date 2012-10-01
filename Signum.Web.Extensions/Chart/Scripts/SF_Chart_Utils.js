@@ -229,7 +229,7 @@ SF.Chart.Utils = (function () {
                     //paint y-axis rule labels
                     chart.append('svg:g').attr('class', 'x-axis-rule-label')
                         .enterData(keys, 'text', 'x-axis-rule-label')
-                        .attr('transform', function (d, i) { return º.translate(starts[d] + sizes[d] / 2 - 5, 10 + 100 * (i % 3)) + º.rotate(90); })
+                        .attr('transform', function (d, i) { return SF.Chart.Utils.translate(starts[d] + sizes[d] / 2 - 5, 10 + 100 * (i % 3)) + SF.Chart.Utils.rotate(90); })
                         .attr('fill', 'DeepPink')
                         .text(function (d) { return d; });
                 },
@@ -251,7 +251,7 @@ SF.Chart.Utils = (function () {
                     //paint y-axis rule labels
                     chart.append('svg:g').attr('class', 'y-axis-rule-label')
                         .enterData(keys, 'text', 'y-axis-rule-label')
-                        .attr('transform', function (d, i) { return º.translate(100 * (i % 3), starts[d] + sizes[d] / 2 + 4); })
+                        .attr('transform', function (d, i) { return SF.Chart.Utils.translate(100 * (i % 3), starts[d] + sizes[d] / 2 + 4); })
                         .attr('fill', 'DarkViolet')
                         .text(function (d) { return d; });
 
@@ -260,8 +260,6 @@ SF.Chart.Utils = (function () {
         }
 
     };
-
-    º = result;
 
     return result;
 
