@@ -94,6 +94,9 @@ namespace Signum.Utilities
 
         public static IEnumerable<Enum> UntypedGetValues(Type type)
         {
+            if (!type.IsEnum)
+                return Enumerable.Empty<Enum>();
+
             return Enum.GetValues(type).Cast<Enum>();
         }
     }
