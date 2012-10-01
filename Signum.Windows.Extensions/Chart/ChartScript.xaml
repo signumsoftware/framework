@@ -31,7 +31,7 @@
         <m:EntityRepeater m:Common.Route="Columns" Grid.IsSharedSizeScope="true" Margin="4" MinHeight="100" Grid.Row="3" Grid.ColumnSpan="2">
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>
-                    <Grid>
+                    <Grid HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="A"/>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="B"/>
@@ -40,11 +40,18 @@
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <m:ValueLine m:Common.Route="DisplayName" Grid.Column="0" />
                         <m:ValueLine m:Common.Route="ColumnType" Grid.Column="1"/>
                         <m:ValueLine m:Common.Route="IsGroupKey" Grid.Column="2"/>
-                        <m:ValueLine m:Common.Route="IsOptional" Grid.Column="3"/>
+                        <m:ValueLine m:Common.Route="IsOptional" Grid.Column="3"/> 
+                        
+                        <m:EntityDetail m:Common.Route="Parameter1" Grid.Row="1" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
+                        <m:EntityDetail m:Common.Route="Parameter2" Grid.Row="2" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
+                        <m:EntityDetail m:Common.Route="Parameter3" Grid.Row="3" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
                     </Grid>
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>

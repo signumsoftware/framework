@@ -26,7 +26,8 @@ namespace Signum.Windows.Chart
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
                     new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart() },
-                    new EntitySettings<ChartScriptDN>(EntityType.Default) { View = e => new ChartScript() }
+                    new EntitySettings<ChartScriptDN>(EntityType.Default) { View = e => new ChartScript() },
+                    new EmbeddedEntitySettings<ChartScriptParameterDN> { View = (e,p) => new ChartScriptParameter(p) }
                 });
 
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
@@ -43,6 +44,8 @@ namespace Signum.Windows.Chart
                     .OpenSubKey("FeatureControl")
                     .OpenSubKey("FEATURE_BROWSER_EMULATION", true)
                     .SetValue(processName, 9999, RegistryValueKind.DWord);
+
+                ChartUtils.RemoveNotNullValidators();
             }
         }
 

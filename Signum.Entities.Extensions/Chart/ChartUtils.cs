@@ -129,11 +129,11 @@ namespace Signum.Entities.Chart
                     result = true;
                 }
 
+                chart.Columns[i].parentChart = chart;
                 chart.Columns[i].ScriptColumn = chartScript.Columns[i];
                 if (changeParameters)
                     chart.Columns[i].SetDefaultParameters();
-                chart.Columns[i].parentChart = chart;
-
+             
                 if (!result)
                     result = chart.Columns[i].IntegrityCheck().HasText();
             }

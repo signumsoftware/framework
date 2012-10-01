@@ -39,9 +39,13 @@
             </StackPanel>
 
             <Expander Grid.Row="1" Style="{StaticResource LineExpander}" Grid.ColumnSpan="3">
-                <Grid m:Common.MinLabelWidth="70">
+                <StackPanel Orientation="Horizontal" m:Common.MinLabelWidth="70" x:Name="sp">
                     <m:ValueLine m:Common.Route="DisplayName" MinWidth="200"/>
-                </Grid>
+                    
+                    <m:ValueLine m:Common.Route="Parameter1" x:Name="param1" />
+                    <m:ValueLine m:Common.Route="Parameter2" x:Name="param2" />
+                    <m:ValueLine m:Common.Route="Parameter3" x:Name="param3" />
+                </StackPanel>
             </Expander>
         </Grid>
 

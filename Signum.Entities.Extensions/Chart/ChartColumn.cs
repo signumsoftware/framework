@@ -67,7 +67,7 @@ namespace Signum.Entities.Chart
         public string Parameter1
         {
             get { return parameter1; }
-            set { Set(ref parameter1, value, () => Parameter1); }
+            set { if (Set(ref parameter1, value, () => Parameter1))NotifyChange(false); }
         }
 
         [SqlDbType(Size = 50)]
@@ -76,7 +76,7 @@ namespace Signum.Entities.Chart
         public string Parameter2
         {
             get { return parameter2; }
-            set { Set(ref parameter2, value, () => Parameter2); }
+            set { if (Set(ref parameter2, value, () => Parameter2))NotifyChange(false); }
         }
 
         [SqlDbType(Size = 50)]
@@ -85,7 +85,7 @@ namespace Signum.Entities.Chart
         public string Parameter3
         {
             get { return parameter3; }
-            set { Set(ref parameter3, value, () => Parameter3); }
+            set { if (Set(ref parameter3, value, () => Parameter3))NotifyChange(false); }
         }
 
       
