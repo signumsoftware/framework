@@ -46,7 +46,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ValueLineTypeProperty =
-            DependencyProperty.Register("ValueLineType", typeof(ValueLineType), typeof(ValueLine), new UIPropertyMetadata(ValueLineType.String));
+            DependencyProperty.Register("ValueLineType", typeof(ValueLineType), typeof(ValueLine), new UIPropertyMetadata(ValueLineType.String, (s,e)=>((ValueLine)s).ValueLineChanged(e)));
         public ValueLineType ValueLineType
         {
             get { return (ValueLineType)GetValue(ValueLineTypeProperty); }
@@ -62,7 +62,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ItemSourceProperty =
-            DependencyProperty.Register("ItemSource", typeof(IEnumerable), typeof(ValueLine), new UIPropertyMetadata(null));
+            DependencyProperty.Register("ItemSource", typeof(IEnumerable), typeof(ValueLine), new UIPropertyMetadata((s, e) => ((ValueLine)s).ValueLineChanged(e)));
         public IEnumerable ItemSource
         {
             get { return (IEnumerable)GetValue(ItemSourceProperty); }
@@ -89,36 +89,58 @@ namespace Signum.Windows
             this.label.Target = this.ValueControl;
         }
 
+        private void ValueLineChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (this.ValueControl != null)
+            {
+                this.ValueControl = this.CreateControl();
+                this.label.Target = this.ValueControl;
+            }
+        }
+
         protected internal override DependencyProperty CommonRouteValue()
         {
             return ValueProperty;
         }
 
-        public static ValueLineConfigurator Configurator = new ValueLineConfigurator(); 
+        public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
-   
+
+        Binding valueBinding;
+
+        public Binding GetValueBinding()
+        {
+            if (valueBinding != null)
+                return valueBinding;
+
+            BindingExpression bindingExpression = BindingOperations.GetBindingExpression(this, ValueProperty);
+            valueBinding = bindingExpression.ParentBinding;
+            Validation.ClearInvalid(bindingExpression);
+
+            return valueBinding;
+        }
+
         private Control CreateControl()
         {
             Control control = Configurator.constructor[ValueLineType](this);
             if(Configurator.SetToolTipStyle(this))
               control.Style = (Style)FindResource("toolTip"); 
             
-            Binding b; 
-            BindingExpression bindingExpression = BindingOperations.GetBindingExpression(this, ValueProperty);
-            if (bindingExpression != null) // is something is binded to ValueProperty, bind the new control to there
+            Binding b;
+
+            var vBinding = GetValueBinding();
+            if (vBinding != null) // is something is binded to ValueProperty, bind the new control to there
             {
-                Binding binding = bindingExpression.ParentBinding;
-                Validation.ClearInvalid(bindingExpression);
                 Validation.SetErrorTemplate(this, null);
                 BindingOperations.ClearBinding(this, ValueProperty);
-                b = new Binding(binding.Path.Path)
+                b = new Binding(vBinding.Path.Path)
                 {
                     UpdateSourceTrigger =  Configurator.GetUpdateSourceTrigger(this),
-                    Mode = binding.Mode,
+                    Mode = vBinding.Mode,
                     ValidatesOnExceptions = true,
                     ValidatesOnDataErrors = true,
                     NotifyOnValidationError = true,
-                    Converter = binding.Converter,
+                    Converter = vBinding.Converter,
                 };
             }
             else //otherwise bind to value property

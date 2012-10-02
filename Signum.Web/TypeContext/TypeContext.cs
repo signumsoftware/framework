@@ -202,7 +202,7 @@ namespace Signum.Web
         }
 
         public TypeContext(T value, string controlID)
-            : base(null, controlID, PropertyRoute.Root(typeof(T)))
+            : base(null, controlID, PropertyRoute.Root(value.GetType()))
         {
             Value = value;
         }

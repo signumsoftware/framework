@@ -138,7 +138,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
-            var orderBys = rowNumber.OrderBy.NewIfChange(o => IsConstant(o.Expression) ? null : Visit(o.Expression).Map(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
+            var orderBys = rowNumber.OrderBy.NewIfChange(o => IsConstant(o.Expression) ? null : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
             if (orderBys != rowNumber.OrderBy)
                 return new RowNumberExpression(orderBys);
             return rowNumber;

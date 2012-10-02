@@ -85,16 +85,16 @@ namespace Signum.Engine
                 Administrator.TryRetrieveAll<TypeDN>(replacements).ToDictionary(c => c.TableName), Replacements.KeyTables);
 
             return Synchronizer.SynchronizeScript(
-                current,
-                should,
-                (tn, c) => table.DeleteSqlSync(c),
-                (tn, s) => table.InsertSqlSync(s),
+                should, 
+                current, 
+                (tn, s) => table.InsertSqlSync(s), 
+                (tn, c) => table.DeleteSqlSync(c), 
                 (tn, c, s) =>
                 {
                     c.FullClassName = s.FullClassName;
                     c.TableName = s.TableName;
                     c.FriendlyName = s.FriendlyName;
-                    c.CleanName = s.CleanName; 
+                    c.CleanName = s.CleanName;
                     return table.UpdateSqlSync(c);
                 }, Spacing.Double);
         }
