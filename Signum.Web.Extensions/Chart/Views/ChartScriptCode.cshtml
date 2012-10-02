@@ -1,0 +1,161 @@
+﻿@using Signum.Entities.Chart
+@using Signum.Web.Files
+@using Signum.Engine
+@model TypeContext<ChartScriptDN>
+@Html.ScriptCss(
+    "~/Content/CodeMirror/codemirror.css",
+    "~/Content/CodeMirror/dialog.css",
+    "~/Content/CodeMirror/simple-hint.css")
+@Html.ScriptsJs(
+        "~/Scripts/CodeMirror/codemirror.js",
+        "~/Scripts/CodeMirror/javascript.js",
+        "~/Scripts/CodeMirror/formatting.js",
+        "~/Scripts/CodeMirror/searchcursor.js",
+        "~/Scripts/CodeMirror/simple-hint.js",
+        "~/Scripts/CodeMirror/javascript-hint.js",
+        "~/Scripts/CodeMirror/match-highlighter.js",
+        "~/Scripts/CodeMirror/search.js",
+        "~/Scripts/CodeMirror/dialog.js"
+        )
+  
+    <style type="text/css">
+      .CodeMirror {
+        border: 1px solid #eee;
+      }
+      
+      
+      span.CodeMirror-matchhighlight 
+      { 
+          background: #efefef
+      }
+      .CodeMirror-focused span.CodeMirror-matchhighlight 
+      { 
+          background: #efe7ff; !important 
+      }
+      
+      .exceptionLine {background: #FFFF00 !important;}
+      
+      .CodeMirror-fullscreen {
+        display: block;
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        z-index: 9999;
+        background: white;
+      }
+    </style>
+    <pre style="color: Green">
+//var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
+//var data = { 
+//              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true, ... }, 
+                             "c1": { "title":"Count", "token":"Count", "isGroupKey":true, ...} 
+                          },
+//              "rows": [ { "c0": { "key": "Product;1", "toStr": "Apple", "color": null }, "c1": { "key": "140", "toStr": "140" } },
+//                        { "c0": { "key": "Product;2", "toStr": "Orange", "color": null }, "c1": { "key": "179", "toStr": "179" } }, ...
+//                      ]
+//           }
+// DrawChart(chart, data);
+// 
+// Visit: http://d3js.org/
+// Other functions defined in: \Chart\Scripts\SF_Chart_Utils.js
+// use 'debugger' keyword or just throw JSON.stringify(myVariable)
+// All yours!...
+ </pre>
+    @Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.LabelVisible = false; })
+ 
+    <script>
+    var $textArea = $("#@(Model.Compose("Script"))");
+    var changedDelay;
+   
+    var editor = CodeMirror.fromTextArea($textArea[0], {
+        lineNumbers: true,
+        matchBrackets: true,
+        mode: "javascript",
+        extraKeys: {
+            "Ctrl-Space": "autocomplete",
+            "Ctrl-K": "commentSelection",
+            "Ctrl-U": "uncommentSelection",
+            "Ctrl-I": "autoFormatSelection",
+            "F11": function(cm) { setFullScreen(cm, !isFullScreen(cm)); },
+            "Esc": function(cm) { if (isFullScreen(cm)) setFullScreen(cm, false); } },
+        onCursorActivity: function () {
+            editor.matchHighlight("CodeMirror-matchhighlight");
+        },
+        onChange : function(){
+            editor.save();
+            if(opener != null && opener != undefined)
+            {
+                clearTimeout(changedDelay);
+                changedDelay = setTimeout(updatePreview, 150);
+            }
+        }
+    });
+
+    function updatePreview() {
+        opener.changeTextArea($textArea.val(), $("#sfRuntimeInfo").val());
+        exceptionDelay = setTimeout(getException, 100);
+    }
+
+    var exceptionDelay;
+    var hlLine;
+    function getException(){
+      var number = opener.getExceptionNumber();
+      if(number != null)
+      {
+         clearTimeout(exceptionDelay);
+          if(hlLine != null)
+            editor.setLineClass(hlLine, null, null);
+         if(number != -1) 
+            hlLine = editor.setLineClass(number -1, null, "exceptionLine");
+      }
+    }
+
+    CodeMirror.commands.autocomplete = function(cm) {
+        CodeMirror.simpleHint(cm, CodeMirror.javascriptHint);
+    }
+
+    function getSelectedRange() {
+       return { from: editor.getCursor(true), to: editor.getCursor(false) };
+    }
+
+    CodeMirror.commands.commentSelection = function(cm) {
+       var range = getSelectedRange();
+       editor.commentRange(true, range.from, range.to);
+    }
+
+    CodeMirror.commands.uncommentSelection = function(cm) {
+       var range = getSelectedRange();
+       editor.commentRange(false, range.from, range.to);
+    }
+
+    CodeMirror.commands.autoFormatSelection = function(cm) {
+        var range = getSelectedRange();
+        editor.autoFormatRange(range.from, range.to);
+    }
+
+     function isFullScreen(cm) {
+      return /\bCodeMirror-fullscreen\b/.test(cm.getWrapperElement().className);
+    }
+    function winHeight() {
+      return window.innerHeight || (document.documentElement || document.body).clientHeight;
+    }
+    function setFullScreen(cm, full) {
+      var wrap = cm.getWrapperElement(), scroll = cm.getScrollerElement();
+      if (full) {
+        wrap.className += " CodeMirror-fullscreen";
+        scroll.style.height = winHeight() + "px";
+        document.documentElement.style.overflow = "hidden";
+      } else {
+        wrap.className = wrap.className.replace(" CodeMirror-fullscreen", "");
+        scroll.style.height = "";
+        document.documentElement.style.overflow = "";
+      }
+      cm.refresh();
+    }
+    CodeMirror.connect(window, "resize", function() {
+      var showing = document.body.getElementsByClassName("CodeMirror-fullscreen")[0];
+      if (!showing) return;
+      showing.CodeMirror.getScrollerElement().style.height = winHeight() + "px";
+    });
+
+    </script>

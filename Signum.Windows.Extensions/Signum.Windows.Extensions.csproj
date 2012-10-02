@@ -65,6 +65,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -159,14 +160,20 @@
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
     <Compile Include="Chart\ChartOmniboxProvider.cs" />
+    <Compile Include="Chart\ChartScript.xaml.cs">
+      <DependentUpon>ChartScript.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartScriptParameter.xaml.cs">
+      <DependentUpon>ChartScriptParameter.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\UserChart.xaml.cs">
       <DependentUpon>UserChart.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Chart\ChartToken.xaml.cs">
-      <DependentUpon>ChartToken.xaml</DependentUpon>
+    <Compile Include="Chart\ChartColumn.xaml.cs">
+      <DependentUpon>ChartColumn.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Chart\ChartWindow.xaml.cs">
-      <DependentUpon>ChartWindow.xaml</DependentUpon>
+    <Compile Include="Chart\ChartRequestWindow.xaml.cs">
+      <DependentUpon>ChartRequestWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
@@ -251,6 +258,13 @@
     <Compile Include="SMS\SMSUpdatePackage.xaml.cs">
       <DependentUpon>SMSUpdatePackage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SynthaxHighlight\DrawingControl.cs" />
+    <Compile Include="SynthaxHighlight\Highlighter.cs" />
+    <Compile Include="SynthaxHighlight\HighlighterLibrary.cs" />
+    <Compile Include="SynthaxHighlight\SyntaxHighlightBox.xaml.cs">
+      <DependentUpon>SyntaxHighlightBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SynthaxHighlight\TextUtilities.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxProvider.cs" />
     <Compile Include="UserQueries\UserQueryClient.cs" />
     <Compile Include="UserQueries\UserQueryMenuItem.cs" />
@@ -321,7 +335,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="Images\charts.psd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -451,19 +464,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Chart\ChartScript.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Chart\ChartScriptParameter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Chart\UserChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Chart\ChartToken.xaml">
+    <Page Include="Chart\ChartColumn.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Chart\ChartWindow.xaml">
+    <Page Include="Chart\ChartRequestWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
@@ -572,6 +593,10 @@
     <Page Include="SMS\SMSUpdatePackage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SynthaxHighlight\SyntaxHighlightBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UserQueries\UserQuery.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -770,35 +795,6 @@
     <Resource Include="Images\query.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\charts\bars.png" />
-    <Resource Include="Images\charts\bubbles.png" />
-    <Resource Include="Images\charts\columns.png" />
-    <Resource Include="Images\charts\doughnout.png" />
-    <Resource Include="Images\charts\multibars.png" />
-    <Resource Include="Images\charts\multicolumns.png" />
-    <Resource Include="Images\charts\pie.png" />
-    <Resource Include="Images\charts\points.png" />
-    <Resource Include="Images\charts\stackedbars.png" />
-    <Resource Include="Images\charts\stackedcolumns.png" />
-    <Resource Include="Images\charts\totalbars.png" />
-    <Resource Include="Images\charts\totalcolumns.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\charts\chartIcon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\charts\groupby.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Chart\chartIcon.png" />
-    <Resource Include="Chart\execute.png" />
-    <Resource Include="Chart\query.png" />
-    <Resource Include="Images\charts\lines.png" />
-    <Resource Include="Images\charts\multilines.png" />
-    <Resource Include="Images\charts\stackedareas.png" />
-    <Resource Include="Images\charts\totalareas.png" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -819,7 +815,28 @@
     <Resource Include="Images\ppt.png" />
     <Resource Include="Images\pptx.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\chartIcon.png" />
+    <Resource Include="Images\groupby.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Signum.Web.Extensions\Chart\Scripts\SF_Chart_Utils.js">
+      <Link>Chart\Html\SF_Chart_Utils.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Chart\Html\ChartContainer.htm" />
+    <EmbeddedResource Include="Chart\Html\jquery-1.7.2.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Framework\Signum.Web\Signum\Content\reset.css">
+      <Link>Chart\Html\reset.css</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\colorbrewer.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"

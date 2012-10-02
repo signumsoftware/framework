@@ -149,4 +149,13 @@ namespace Signum.Entities.Chart
             return null;
         }
     }
+
+    public enum AggregateFunction
+    {
+        Count,
+        Average,
+        Sum,
+        Min,
+        Max,
+    }
 }

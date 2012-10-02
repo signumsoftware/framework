@@ -474,4 +474,7 @@
   <data name="Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
+  <data name="ChartScript_Edit" xml:space="preserve">
+    <value>Edit Script</value>
+  </data>
 </root>

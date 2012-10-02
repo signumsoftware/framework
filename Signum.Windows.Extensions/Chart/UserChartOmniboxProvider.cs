@@ -37,7 +37,7 @@ namespace Signum.Windows.Chart
 
             using (UserChartMenuItem.AutoSet(uq))
             {
-                ChartWindow cw = new ChartWindow()
+                ChartRequestWindow cw = new ChartRequestWindow()
                 {
                     DataContext = new ChartRequest(query)
                 };

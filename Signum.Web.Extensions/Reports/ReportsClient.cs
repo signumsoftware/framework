@@ -48,7 +48,7 @@ namespace Signum.Web.Reports
                         }
                     });
 
-                    FilesClient.Start(false, true);
+                    FilesClient.Start(false, false, true);
 
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                         Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));

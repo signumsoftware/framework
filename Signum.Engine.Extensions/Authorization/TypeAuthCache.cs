@@ -269,9 +269,9 @@ namespace Signum.Entities.Authorization
                 var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
                 var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
-                Synchronizer.Synchronize(current, should,
-                    (type, pr) => pr.Delete(),
-                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
+                Synchronizer.Synchronize(should, current, 
+                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(), 
+                    (type, pr) => pr.Delete(), 
                     (type, pr, ar) =>
                     {
                         pr.Allowed = ar.Allowed.Fallback;
@@ -431,8 +431,7 @@ namespace Signum.Entities.Authorization
 
             Table table = Schema.Current.Table(typeof(RuleTypeDN));
 
-            return Synchronizer.SynchronizeScript(current, should,
-                (role, listRules) => listRules.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
+            return Synchronizer.SynchronizeScript(should, current, 
                 (role, x) =>
                 {
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
@@ -451,29 +450,25 @@ namespace Signum.Entities.Authorization
                         Resource = kvp.Key,
                         Role = role,
                         Allowed = kvp.Value.Allowed,
-                        Conditions =  kvp.Value.Condition
+                        Conditions = kvp.Value.Condition
                     }, Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
-                },
+                }, 
+                (role, listRules) => listRules.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple), 
                 (role, list, x) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, def, max, role);
 
-                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(
-                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
-                        x.Elements("Type").ToDictionary(a => TypeLogic.TypeToDN[TypeLogic.GetType(a.Attribute("Resource").Value)], "Type rules for {0}".Formato(role)),
-                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
-                        (r, xr) =>
+                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(x.Elements("Type").ToDictionary(a => TypeLogic.TypeToDN[TypeLogic.GetType(a.Attribute("Resource").Value)], "Type rules for {0}".Formato(role)), list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), (r, xr) =>
                         {
                             var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
                             var conditions = Conditions(xr);
 
-                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions}, Comment(role, r, a));
-                        },
-                        (r, pr, xr) =>
+                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions }, Comment(role, r, a));
+                        }, (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), (r, pr, xr) =>
                         {
                             var oldA = pr.Allowed;
                             pr.Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
@@ -483,7 +478,8 @@ namespace Signum.Entities.Authorization
                                 pr.Conditions = conditions;
 
                             return table.UpdateSqlSync(pr, Comment(role, r, oldA, pr.Allowed));
-                        }, Spacing.Simple);
+                        }, 
+                        Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 }, Spacing.Double);
