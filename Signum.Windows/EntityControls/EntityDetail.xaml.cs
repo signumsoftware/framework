@@ -70,7 +70,22 @@ namespace Signum.Windows
 
         void ChangeEntity(object sender, ChangeDataContextEventArgs e)
         {
-            this.Entity = e.NewDataContext;
+            if (e.Refresh)
+            {
+                var lite = (Entity as IIdentifiable).ToLite();
+
+                if (lite != null)
+                {
+                    this.Entity = null;
+                    this.Entity = lite.Retrieve();
+                }
+            }
+            else
+            {
+                this.Entity = null;
+                this.Entity = e.NewDataContext;
+            }
+          
             e.Handled = true;
         }
 

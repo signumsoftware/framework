@@ -47,14 +47,14 @@ namespace Signum.Windows
 
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(NormalWindow_DataContextChanged);
 
-            Common.AddChangeDataContextHandler(this, ChangeDataContext_DataContextChanged);
+            Common.AddChangeDataContextHandler(this, ChangeDataContext_Handler);
 
             RefreshEnabled();
 
             this.Loaded += new RoutedEventHandler(NormalWindow_Loaded);
         }
 
-        void ChangeDataContext_DataContextChanged(object sender, ChangeDataContextEventArgs e)
+        void ChangeDataContext_Handler(object sender, ChangeDataContextEventArgs e)
         {
             if (e.Refresh)
             {
@@ -220,6 +220,8 @@ namespace Signum.Windows
         {
             this.entityTitle.SetTitleText(text);
         }
+
+        public ChangeDataContextHandler ChangeDataContext { get; set; }
     }
 
     public enum AllowErrors

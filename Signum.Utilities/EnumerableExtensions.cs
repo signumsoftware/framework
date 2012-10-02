@@ -543,6 +543,24 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static string[,] ToStringTable(this DataTable table)
+        {
+            string[,] result = new string[table.Columns.Count, table.Rows.Count + 1];
+
+            for (int i = 0; i < table.Columns.Count; i++)
+                result[i, 0] = table.Columns[i].ColumnName;
+
+            int j = 1;
+            foreach (DataRow row in table.Rows)
+            {
+                for (int i = 0; i < table.Columns.Count; i++)
+                    result[i, j] = row[i].TryCC(a => a.ToString()) ?? "";
+                j++;
+            }
+
+            return result;
+        }
+
         public static string FormatTable(this string[,] table)
         {
             return FormatTable(table, true);
