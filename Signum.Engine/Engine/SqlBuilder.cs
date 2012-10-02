@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -130,21 +130,21 @@ namespace Signum.Engine
         public static SqlPreCommand AlterTableForeignKeys(ITable t)
         {
             return t.Columns.Values.Select(c =>
-                c.ReferenceTable == null? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
+                c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand CreateAllIndices(ITable t)
         {
-            return CreateAllIndices(t, t.GeneratUniqueIndexes()); 
+            return CreateAllIndices(t, t.GeneratUniqueIndexes());
         }
 
         public static SqlPreCommand CreateAllIndices(ITable t, IEnumerable<UniqueIndex> tableIndexes)
         {
-            var uniqueIndices = tableIndexes.Select(ix => CreateUniqueIndex(ix)).Combine(Spacing.Simple); 
+            var uniqueIndices = tableIndexes.Select(ix => CreateUniqueIndex(ix)).Combine(Spacing.Simple);
 
-            var freeIndexes = t.Columns.Values.Where(c=>c.ReferenceTable != null).Select(c=>CreateFreeIndex(t, c)).Combine(Spacing.Simple); 
+            var freeIndexes = t.Columns.Values.Where(c => c.ReferenceTable != null).Select(c => CreateFreeIndex(t, c)).Combine(Spacing.Simple);
 
-            return new []{uniqueIndices, freeIndexes}.Combine(Spacing.Simple); 
+            return new[] { uniqueIndices, freeIndexes }.Combine(Spacing.Simple);
         }
 
         internal static SqlPreCommand DropIndex(string table, DiffIndex index)
@@ -211,7 +211,7 @@ namespace Signum.Engine
                 SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
                     .Formato(index.IndexName, viewName.SqlScape(), index.Columns.ToString(c => c.Name.SqlScape(), ", ")));
 
-                return SqlPreCommand.Combine(Spacing.Simple , viewSql, indexSql);
+                return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
             }
             else
             {
@@ -278,7 +278,7 @@ namespace Signum.Engine
 
         internal static SqlPreCommandSimple SelectRowCount()
         {
-            return new SqlPreCommandSimple("select @@rowcount;"); 
+            return new SqlPreCommandSimple("select @@rowcount;");
         }
 
     }
