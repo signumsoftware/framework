@@ -30,6 +30,7 @@ namespace Signum.Web
         public string PopupViewPrefix { get; set; }
         public WriteQueryName WriteQueryName { get; set; }
         public string QueryLabelText { get; set; }
+        public string Href { get; set; }
     }
 
     public enum WriteQueryName
@@ -101,7 +102,7 @@ namespace Signum.Web
             {
                 sb.Add(new HtmlTag("a")
                     .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
-                    .Attr("href", foptions.FindOptions.ToString())
+                    .Attr("href", options.Href.HasText() ? options.Href : foptions.FindOptions.ToString())
                     .SetInnerText(count.ToString()));
             }
             else
