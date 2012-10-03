@@ -12,6 +12,11 @@ namespace Signum.Entities.DynamicQuery
         public object QueryName { get; set; }
 
         public List<Filter> Filters { get; set; }
+
+        public override string ToString()
+        {
+            return "{0} {1}".Formato(GetType().Name, QueryName);
+        }
     }
 
     [Serializable]

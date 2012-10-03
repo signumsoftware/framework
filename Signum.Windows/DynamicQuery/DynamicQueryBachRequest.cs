@@ -19,6 +19,11 @@ namespace Signum.Windows
             public BaseQueryRequest Request;
             public Action<object> OnResult;
             public Action Finally;
+
+            public override string ToString()
+            {
+                return Request.ToString();
+            }
         }
 
         static List<RequestTuple> tuples = new List<RequestTuple>(); 
@@ -54,6 +59,7 @@ namespace Signum.Windows
                 Async.Do(() =>
                     {
                         results = Server.Return((IDynamicQueryServer dqs) => dqs.BatchExecute(tup.Select(a => a.Request).ToArray()));
+                        results = results;
                     },
                     () =>
                     {

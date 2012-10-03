@@ -565,6 +565,7 @@ namespace Signum.Windows
             {
                 if (f.Token == null && f.Path.HasText())
                     f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
+
                 f.RefreshRealValue();
             }
         }

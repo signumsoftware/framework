@@ -296,7 +296,6 @@ namespace Signum.Windows
             OrderOptions = new ObservableCollection<OrderOption>();
             ColumnOptions = new ObservableCollection<ColumnOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
-            this.DataContextChanged += new DependencyPropertyChangedEventHandler(SearchControl_DataContextChanged);
         }
 
         public static readonly DependencyProperty HideIfNotFindableProperty =
@@ -416,8 +415,12 @@ namespace Signum.Windows
             UpdateVisibility();
 
             AutomationProperties.SetItemStatus(this, QueryUtils.GetQueryUniqueKey(QueryName));
-        }
 
+            foreach (var item in FilterOptions)
+            {
+                item.BindingValueChanged += new DependencyPropertyChangedEventHandler(item_BindingValueChanged);
+            }
+        }
 
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -443,14 +446,13 @@ namespace Signum.Windows
             filterBuilder.AddFilter(tokenBuilder.Token);
         }
 
-        void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        void item_BindingValueChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (hasBeenLoaded && e.NewValue != null)
             {
                 Search();
             }
         }
-
 
         void SearchControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
