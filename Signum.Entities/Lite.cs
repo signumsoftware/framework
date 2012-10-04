@@ -114,12 +114,6 @@ namespace Signum.Entities
             this.id = entidad.IdOrNull;
         }
 
-        public int RefreshId()
-        {
-            if (UntypedEntityOrNull != null)
-                id = UntypedEntityOrNull.Id;
-            return id.Value;
-        }
 
         public Type RuntimeType
         {
@@ -158,7 +152,12 @@ namespace Signum.Entities
             this.UntypedEntityOrNull = ei;
             if (ei != null && this.toStr == null)
                 this.toStr = ei.ToString();
-        } 
+        }
+
+        public void RefreshId()
+        {
+            id = UntypedEntityOrNull.Id;
+        }
 
         public void ClearEntity()
         {
