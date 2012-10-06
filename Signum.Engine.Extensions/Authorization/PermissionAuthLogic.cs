@@ -84,7 +84,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsAuthorized(this Enum permissionKey)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode || cache == null)
                 return true;
 
             return cache.GetAllowed(RoleDN.Current.ToLite(), permissionKey);
