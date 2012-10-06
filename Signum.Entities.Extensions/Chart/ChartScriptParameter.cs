@@ -289,9 +289,9 @@ namespace Signum.Entities.Chart
 
             return new ChartScriptParameterDN
             {
-                Name = c.Attribute("Name").Value,
-                Type = c.Attribute("Type").Value.ToEnum<ChartParameterType>(),
-                ValueDefinition = c.Attribute("ValueDefinition").Value,
+                Name = element.Attribute("Name").Value,
+                Type = element.Attribute("Type").Value.ToEnum<ChartParameterType>(),
+                ValueDefinition = element.Attribute("ValueDefinition").Value,
             };
         }
     }
