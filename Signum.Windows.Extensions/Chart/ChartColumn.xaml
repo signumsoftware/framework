@@ -38,7 +38,7 @@
                               SubTokensEvent="token_SubTokensEvent"/>
             </StackPanel>
 
-            <Expander Grid.Row="1" Style="{StaticResource LineExpander}" Grid.ColumnSpan="3">
+            <Expander Grid.Row="1" Grid.ColumnSpan="3">
                 <StackPanel Orientation="Horizontal" m:Common.MinLabelWidth="70" x:Name="sp">
                     <m:ValueLine m:Common.Route="DisplayName" MinWidth="200"/>
                     
