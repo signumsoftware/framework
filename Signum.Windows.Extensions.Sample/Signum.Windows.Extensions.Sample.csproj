@@ -164,10 +164,6 @@
       <Project>{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D}</Project>
       <Name>Signum.Windows.Extensions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Windows.Visifire\Signum.Windows.Visifire.csproj">
-      <Project>{FCC8FE70-1452-4860-9062-8F570B59DCA3}</Project>
-      <Name>Signum.Windows.Visifire</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Page Include="App.xaml">
