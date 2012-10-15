@@ -65,7 +65,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> 
     {
-        [ValidateChildProperty]
+        [ValidateChildProperty, NotNullable]
         MList<RuleTypeConditionDN> conditions = new MList<RuleTypeConditionDN>();
         public MList<RuleTypeConditionDN> Conditions
         {
