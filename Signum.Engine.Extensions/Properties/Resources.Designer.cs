@@ -296,6 +296,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not allowed to save this {0} while offline.
+        /// </summary>
+        internal static string NotAllowedToSaveThis0WhileOffline {
+            get {
+                return ResourceManager.GetString("NotAllowedToSaveThis0WhileOffline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not authorized to {0} {1}.
         /// </summary>
         internal static string NotAuthorizedTo01 {
@@ -499,6 +508,15 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string ThereAreNoResultsToWrite {
             get {
                 return ResourceManager.GetString("ThereAreNoResultsToWrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There&apos;s not a registered user with that email address.
+        /// </summary>
+        internal static string ThereSNotARegisteredUserWithThatEmailAddress {
+            get {
+                return ResourceManager.GetString("ThereSNotARegisteredUserWithThatEmailAddress", resourceCulture);
             }
         }
         

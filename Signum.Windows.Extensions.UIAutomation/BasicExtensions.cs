@@ -7,7 +7,6 @@ using Signum.Utilities;
 using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Windows.UIAutomation.Proxies;
 
 namespace Signum.Windows.UIAutomation
 {

@@ -35,9 +35,9 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<PropertyDN>();
 
-            return Synchronizer.SynchronizeScript(
-                current, should,
-                null, null,
+            return Synchronizer.SynchronizeScript(should, current,
+                null,
+                null,
                 (tn, dicCurr, dicShould) =>
                     Synchronizer.SynchronizeReplacing(replacements, FieldsForKey.Formato(tn),
                         dicCurr,
@@ -49,8 +49,8 @@ namespace Signum.Engine.Basics
                             c.Path = s.Path;
                             return table.UpdateSqlSync(c);
                         },
-                        Spacing.Simple),
-                 Spacing.Double);
+                        Spacing.Simple), 
+                Spacing.Double);
         }
 
         public static List<PropertyDN> RetrieveOrGenerateProperties(TypeDN typeDN)

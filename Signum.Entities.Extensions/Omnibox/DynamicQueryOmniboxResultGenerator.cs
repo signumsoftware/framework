@@ -210,8 +210,8 @@ namespace Signum.Entities.Omnibox
             var ft = QueryUtils.GetFilterType(queryToken.Type);
             switch (ft)
             {
-                case FilterType.Number:
-                case FilterType.DecimalNumber: return new[] { new ValueTuple { Value = Activator.CreateInstance(queryToken.Type.UnNullify()), Match = null } };
+                case FilterType.Integer:
+                case FilterType.Decimal: return new[] { new ValueTuple { Value = Activator.CreateInstance(queryToken.Type.UnNullify()), Match = null } };
                 case FilterType.String: return new[] { new ValueTuple { Value = "", Match = null } };
                 case FilterType.DateTime: return new[] { new ValueTuple { Value = DateTime.Today, Match = null } };
                 case FilterType.Lite:
@@ -234,8 +234,8 @@ namespace Signum.Entities.Omnibox
             var ft = QueryUtils.GetFilterType(queryToken.Type);
             switch (ft)
             {
-                case FilterType.Number:
-                case FilterType.DecimalNumber:
+                case FilterType.Integer:
+                case FilterType.Decimal:
                     if (omniboxToken.Type == OmniboxTokenType.Number)
                     {
                         object result;
@@ -412,8 +412,8 @@ namespace Signum.Entities.Omnibox
 
             switch (QueryUtils.GetFilterType(p.GetType()))
             {
-                case FilterType.Number:
-                case FilterType.DecimalNumber: return p.ToString();
+                case FilterType.Integer:
+                case FilterType.Decimal: return p.ToString();
 
                 case FilterType.String: return "\"" + p.ToString() + "\"";
                 case FilterType.DateTime: return "'" + p.ToString() + "'";

@@ -76,5 +76,16 @@ namespace Signum.Engine.Authorization
                 Link = urlGenerator(rpr),
             }.Send();
         }
+
+        public static Func<string, UserDN> GetUserByEmail = (email) =>
+        {
+            UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx();
+
+            if (user == null)
+                throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
+
+            return user;
+        };
+
     }
 }

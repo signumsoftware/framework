@@ -120,11 +120,11 @@ namespace Signum.Windows.UIAutomation
             return null;
         }
 
-        public static MessageBoxProxy WaitMessageBoxChild(this AutomationElement element)
+        public static MessageBoxProxy WaitMessageBoxChild(this AutomationElement element, int? timeOut = null)
         {
             var parentWin = WindowProxy.Normalize(element);
 
-            var win = parentWin.WaitChild(a => a.Current.ControlType == ControlType.Window && a.Current.ClassName == "#32770");
+            var win = parentWin.WaitChild(a => a.Current.ControlType == ControlType.Window && a.Current.ClassName == "#32770", timeOut);
 
             return new MessageBoxProxy(win);
         }

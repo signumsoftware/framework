@@ -127,18 +127,6 @@ namespace Signum.Entities.Files
         }
     }
 
-    [Serializable, ForceLocalization]
-    public class WebImage
-    {
-        public string FullWebPath;
-    }
-
-    [Serializable, ForceLocalization]
-    public class WebDownload
-    {
-        public string FullWebPath;
-    }
-
     public class HttpFilePathUtils
     {
         public static string UrlPathEncode(string value)

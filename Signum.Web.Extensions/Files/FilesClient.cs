@@ -17,6 +17,9 @@ using System.IO;
 using Signum.Engine.Basics;
 using Signum.Engine.Files;
 using Signum.Engine;
+using System.Linq.Expressions;
+using Signum.Engine.DynamicQuery;
+using Signum.Utilities.ExpressionTrees;
 #endregion
 
 namespace Signum.Web.Files
@@ -25,7 +28,7 @@ namespace Signum.Web.Files
     {
         public static string ViewPrefix = "~/Files/Views/{0}.cshtml";
 
-        public static void Start(bool filePath, bool embeddedFile)
+        public static void Start(bool filePath, bool file, bool embeddedFile)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -55,22 +58,19 @@ namespace Signum.Web.Files
                         {
                             if (runtimeInfo.IsNew)
                             {
-                                string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
-
-                                string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
                                 if (hpf != null)
                                 {
-                                    fp.FileName = Path.GetFileName(hpf.FileName);
-                                    fp.BinaryFile = hpf.InputStream.ReadAllBytes();
-
-                                    return fp;
+                                    string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                    return new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
+                                    {
+                                        FileName = Path.GetFileName(hpf.FileName),
+                                        BinaryFile = hpf.InputStream.ReadAllBytes(),
+                                    };
                                 }
                                 else
                                 {
-                                    FilePathDN filePathInSession = (FilePathDN)ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
-                                    return filePathInSession;
+                                    return (FilePathDN)GetSessionFile(ctx);
                                 }
                             }
                         }
@@ -79,6 +79,51 @@ namespace Signum.Web.Files
                     };
 
                     es.MappingAdmin = es.MappingDefault;
+
+                    var lm = new LiteMapping<FilePathDN>();
+                    lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
+                    Mapping.RegisterValue<Lite<FilePathDN>>(lm.GetValue);
+                }
+
+                if (file)
+                {
+                    var es = new EntitySettings<FileDN>(EntityType.Default);
+                    Navigator.AddSetting(es);
+
+                    var baseMapping = (Mapping<FileDN>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+
+                    es.MappingDefault = ctx =>
+                    {
+                        RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                        if (runtimeInfo.RuntimeType == null)
+                            return null;
+                        else
+                        {
+                            if (runtimeInfo.IsNew)
+                            {
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
+
+                                if (hpf != null)
+                                {
+                                    return new FileDN
+                                    {
+                                        FileName = Path.GetFileName(hpf.FileName),
+                                        BinaryFile = hpf.InputStream.ReadAllBytes()
+                                    };
+                                }
+                                else
+                                {
+                                    return (FileDN)GetSessionFile(ctx);
+                                }
+                            }
+                        }
+
+                        return baseMapping(ctx);
+                    };
+
+                    var lm = new LiteMapping<FileDN>();
+                    lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
+                    Mapping.RegisterValue<Lite<FileDN>>(lm.GetValue);
                 }
 
                 if (embeddedFile)
@@ -99,8 +144,7 @@ namespace Signum.Web.Files
                             {
                                 var result = new EmbeddedFileDN();
 
-                                string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
 
                                 if (hpf.ContentLength != 0)
                                 {
@@ -116,7 +160,14 @@ namespace Signum.Web.Files
                     };
                 }
 
+                var dqm = DynamicQueryManager.Current;
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
+
+                dqm.RegisterExpression((FileDN f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FileDN f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
+            
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebImage),
                        col => (help, obj) => ((WebImage)obj).FullWebPath == null ? null :
@@ -135,5 +186,67 @@ namespace Signum.Web.Files
             }
 
         }
+
+        private static object GetSessionFile(MappingContext ctx)
+        {
+            return ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
+        }
+
+        private static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
+        {
+            string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
+            HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+            return hpf;
+        }
+
+        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
+            fp => new WebImage { FullWebPath = fp.FullWebPath };
+        public static WebImage WebImage(this FilePathDN fp)
+        {
+            return WebImageExpression.Evaluate(fp);
+        }
+
+        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
+           fp => new WebDownload { FullWebPath = fp.FullWebPath };
+        public static WebDownload WebDownload(this FilePathDN fp)
+        {
+            return WebDownloadExpression.Evaluate(fp);
+        }
+
+        static Expression<Func<FileDN, WebImage>> WebImageFileExpression =
+            f => new WebImage { FullWebPath = DownloadFileUrl(f.ToLite()) };
+        [ExpressionField("WebImageFileExpression")]
+        public static WebImage WebImage(this FileDN f)
+        {
+            return WebImageFileExpression.Evaluate(f);
+        }
+
+        static Expression<Func<FileDN, WebDownload>> WebDownloadFileExpression =
+           f => new WebDownload { FullWebPath = DownloadFileUrl(f.ToLite()) };
+        [ExpressionField("WebDownloadFileExpression")]
+        public static WebDownload WebDownload(this FileDN f)
+        {
+            return WebDownloadFileExpression.Evaluate(f);
+        }
+
+        static string DownloadFileUrl(Lite<FileDN> file)
+        {
+            if (file == null)
+                return null;
+
+            return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(file).ToString())); 
+        }
+    }
+
+    [Serializable, ForceLocalization]
+    public class WebImage
+    {
+        public string FullWebPath;
+    }
+
+    [Serializable, ForceLocalization]
+    public class WebDownload
+    {
+        public string FullWebPath;
     }
 }

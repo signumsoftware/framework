@@ -14,12 +14,12 @@ namespace Signum.Windows.Extensions.Sample.Test
 {
     class Common
     {
-        public static WindowProxy StartAndLogin()
+        public static MainWindowProxy StartAndLogin()
         {
             return StartAndLogin("su", "su");
         }
 
-        public static WindowProxy StartAndLogin(string userName, string password)
+        public static MainWindowProxy StartAndLogin(string userName, string password)
         {
             int pid = 0;
             using (WindowProxy login = new WindowProxy(FindOrStartWindow()))
@@ -31,7 +31,7 @@ namespace Signum.Windows.Extensions.Sample.Test
                 login.Element.ChildById("btLogin").ButtonInvoke();
             }
 
-            return new WindowProxy(AutomationElement.RootElement.WaitChild(a => a.Current.Name == "Music Database" && a.Current.ProcessId == pid, 20 * 1000));
+            return new MainWindowProxy(AutomationElement.RootElement.WaitChild(a => a.Current.Name == "Music Database" && a.Current.ProcessId == pid, 20 * 1000));
         }
 
         private static AutomationElement FindOrStartWindow()

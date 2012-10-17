@@ -107,13 +107,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Chart\ChartPermissions.cs" />
-    <Compile Include="Chart\ChartToken.cs" />
+    <Compile Include="Chart\ChartScript.cs" />
+    <Compile Include="Chart\ChartColumn.cs" />
     <Compile Include="Chart\ChartRequest.cs" />
+    <Compile Include="Chart\ChartScriptParameter.cs" />
     <Compile Include="Chart\ChartUtils.cs" />
     <Compile Include="Chart\IChartServer.cs" />
-    <Compile Include="Chart\IntervalQueryToken.cs" />
+    <Compile Include="Chart\UserChart.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />
+    <Compile Include="Disconnected\DisconnectedExportRanges.cs" />
     <Compile Include="Disconnected\DisconnectedImportDN.cs" />
     <Compile Include="Disconnected\DisconnectedMachineDN.cs" />
     <Compile Include="Disconnected\DisconnectedExportDN.cs" />

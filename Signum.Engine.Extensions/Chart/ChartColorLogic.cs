@@ -133,12 +133,9 @@ namespace Signum.Engine.Chart
             };
         }
 
-        public static Color? ColorFor(Lite lite)
+        public static Color? ColorFor(Type type, int id)
         {
-            if (lite == null)
-                return null;
-
-            return Colors.Value.TryGetC(lite.RuntimeType).TryGetS(lite.Id);
+            return Colors.Value.TryGetC(type).TryGetS(id);
         }
     }
 }

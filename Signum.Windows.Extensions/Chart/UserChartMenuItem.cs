@@ -32,7 +32,7 @@ namespace Signum.Windows.Chart
             set { SetValue(CurrentUserChartProperty, value); }
         }
 
-        public ChartWindow ChartWindow { get; set; }
+        public ChartRequestWindow ChartWindow { get; set; }
 
         public UserChartMenuItem()
         {
@@ -159,7 +159,7 @@ namespace Signum.Windows.Chart
         {
             CurrentUserChart = uc;
 
-            this.ChartRequest = UserChartDN.ToRequest(CurrentUserChart);
+            this.ChartRequest = CurrentUserChart.ToRequest();
 
             this.ChartWindow.UpdateFiltersOrdersUserInterface();
 
@@ -170,7 +170,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            UserChartDN userChart = UserChartDN.FromRequest(ChartRequest);
+            UserChartDN userChart = ChartRequest.ToUserChart();
 
             userChart = Navigator.View(userChart, new ViewOptions
             {

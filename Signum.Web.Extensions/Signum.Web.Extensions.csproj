@@ -258,17 +258,30 @@
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
     <Compile Include="Chart\ChartOmniboxProvider.cs" />
+    <Compile Include="Chart\ChartColorClient.cs" />
     <Compile Include="Chart\Controllers\ChartController.cs" />
+    <Compile Include="Chart\Controllers\ColorChartController.cs" />
+    <Compile Include="Chart\UserChartClient.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
     <Compile Include="Chart\Views\ChartBuilder.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartBuilder.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Chart\Views\ChartControl1.cs">
+    <Compile Include="Chart\Views\ChartColumn.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ChartControl.cshtml</DependentUpon>
+      <DependentUpon>ChartColumn.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartRequest.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartRequest.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartRequest1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartRequest.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Chart\Views\ChartPalette1.cs">
       <AutoGen>True</AutoGen>
@@ -280,10 +293,25 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartResults.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Chart\Views\ChartToken1.cs">
+    <Compile Include="Chart\Views\ChartScript.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ChartToken.cshtml</DependentUpon>
+      <DependentUpon>ChartScript.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartScriptCode2.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartScriptCode.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartScriptColumn.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartScriptColumn.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartScriptParameter.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartScriptParameter.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Chart\Views\UserChartOrder.cs">
       <AutoGen>True</AutoGen>
@@ -839,8 +867,9 @@
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
     <Content Include="Chart\Content\SF_Chart.css" />
-    <Content Include="Chart\Images\chartType.png" />
+    <Content Include="Chart\Images\unknown.png" />
     <Content Include="Chart\Scripts\SF_Chart.js" />
+    <Content Include="Chart\Scripts\SF_Chart_Utils.js" />
     <Content Include="ControlPanel\Content\SF_FlowTable.css" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
     <Content Include="ControlPanel\Scripts\SF_FlowTable.js" />
@@ -928,19 +957,18 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PanelParts.cs</LastGenOutput>
     </Content>
-    <Content Include="Chart\Views\ChartControl.cshtml">
+    <Content Include="Chart\Views\ChartRequest.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ChartControl1.cs</LastGenOutput>
+      <LastGenOutput>ChartRequest.cs</LastGenOutput>
     </Content>
     <Content Include="Chart\Views\ChartBuilder.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartBuilder.cs</LastGenOutput>
     </Content>
-    <Content Include="Chart\Views\ChartToken.cshtml">
+    <Content Include="Chart\Views\ChartColumn.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ChartToken1.cs</LastGenOutput>
+      <LastGenOutput>ChartColumn.cs</LastGenOutput>
     </Content>
-    <None Include="Chart\Images\chartType.psd" />
     <Content Include="Chart\Views\ChartResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartResults.cs</LastGenOutput>
@@ -1029,6 +1057,23 @@
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
     <Content Include="Files\Views\Web.config" />
+    <Content Include="Chart\Views\ChartScript.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartScript.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartScriptColumn.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartScriptColumn.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartScriptCode.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartScriptCode2.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ViewPage1.cshtml" />
+    <Content Include="Chart\Views\ChartScriptParameter.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartScriptParameter.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>

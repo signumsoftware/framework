@@ -234,12 +234,8 @@ namespace Signum.Web.Auth
 
             using (AuthLogic.Disable())
             {
-                //Check the email belongs to a user
-                UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx(() => Resources.EmailNotExistsDatabase);
 
-                if (user == null)
-                    throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
-
+                var user = ResetPasswordRequestLogic.GetUserByEmail(email);
                 //since this is an url sent by email, it should contain the domain name
                 ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, rpr =>
                     Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));

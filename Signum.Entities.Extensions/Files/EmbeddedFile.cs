@@ -7,7 +7,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Files
 {
-    public interface IFile
+    public interface IFile 
     {
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }

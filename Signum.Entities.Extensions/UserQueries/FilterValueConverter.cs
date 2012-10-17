@@ -63,8 +63,10 @@ namespace Signum.Entities.UserQueries
         {
             object result;
             string error = TryParse(stringValue, type, out result);
+            if (error.HasText())
+                throw new FormatException(error);
 
-            throw new FormatException(error);
+            return result;
         }
 
         public static string TryParse(string stringValue, Type type, out object result)

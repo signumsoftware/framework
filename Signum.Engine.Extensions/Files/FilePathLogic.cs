@@ -31,7 +31,7 @@ namespace Signum.Engine.Files
                 EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
-                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete +=new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
+                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete += new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
 
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
                                                  select new
@@ -65,25 +65,10 @@ namespace Signum.Engine.Files
 
                 sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
 
-                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
         }
 
-        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
-            fp => new WebImage { FullWebPath = fp.FullWebPath }; 
-        public static WebImage WebImage(this FilePathDN fp)
-        {
-            return WebImageExpression.Evaluate(fp);
-        }
-
-        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
-           fp => new WebDownload { FullWebPath = fp.FullWebPath };
-        public static WebDownload WebDownload(this FilePathDN fp)
-        {
-            return WebDownloadExpression.Evaluate(fp);
-        }
-
+        
         static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
         {
             var list = query.Select(a => a.FullPhysicalPath).ToList();

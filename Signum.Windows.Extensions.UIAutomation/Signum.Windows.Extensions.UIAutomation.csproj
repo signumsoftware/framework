@@ -82,7 +82,6 @@
     <Compile Include="ConditionBuilder.cs" />
     <Compile Include="Proxies\ValueLineWindowProxy.cs" />
     <Compile Include="Proxies\LineContainer.cs" />
-    <Compile Include="Proxies\MainWindowProxy.cs" />
     <Compile Include="Proxies\MessageBoxProxy.cs" />
     <Compile Include="Proxies\OmniBoxProxy.cs" />
     <Compile Include="Proxies\SelectWindoProxy.cs" />

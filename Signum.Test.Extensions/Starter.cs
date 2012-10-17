@@ -21,6 +21,7 @@ using Signum.Entities.UserQueries;
 using Signum.Entities.Basics;
 using Signum.Engine.Chart;
 using Signum.Engine.Cache;
+using Signum.Engine.Files;
 
 namespace Signum.Test.Extensions
 {
@@ -83,10 +84,12 @@ namespace Signum.Test.Extensions
                 ControlPanelLogic.Start(sb, dqm);
                 ControlPanelLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
                 ControlPanelLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
+                
                 ChartLogic.Start(sb, dqm);
-                ChartLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
-                ChartLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
+                //ChartLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
+                //ChartLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
 
+                FilePathLogic.Start(sb, dqm);
                 ReportsLogic.Start(sb, dqm, true);
 
                 Signum.Test.Starter.StartMusic(sb, dqm);
@@ -208,10 +211,10 @@ namespace Signum.Test.Extensions
                         new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
                         new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
 
-            TypeAuthLogic.Manual.SetAllowed(role, typeof(UserChartDN),
-                new TypeAllowedAndConditions(TypeAllowed.None,
-                        new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
-                        new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
+            //TypeAuthLogic.Manual.SetAllowed(role, typeof(UserChartDN),
+            //    new TypeAllowedAndConditions(TypeAllowed.None,
+            //            new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
+            //            new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
 
             TypeAuthLogic.Manual.SetAllowed(role, typeof(LinkListPartDN),
               new TypeAllowedAndConditions(TypeAllowed.None,

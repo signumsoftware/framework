@@ -39,6 +39,5 @@ namespace Signum.Windows.UIAutomation.Proxies
         {
             return OmniBox.SelectCapture(autoCompleteText, itemsStatus, timeOut);
         }
-
     }
 }
