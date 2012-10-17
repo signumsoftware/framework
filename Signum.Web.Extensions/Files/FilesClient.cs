@@ -121,6 +121,8 @@ namespace Signum.Web.Files
                         return baseMapping(ctx);
                     };
 
+                    FileLogic.DownloadFileUrl = DownloadFileUrl;
+
                     var lm = new LiteMapping<FileDN>();
                     lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
                     Mapping.RegisterValue<Lite<FileDN>>(lm.GetValue);
@@ -161,13 +163,7 @@ namespace Signum.Web.Files
                 }
 
                 var dqm = DynamicQueryManager.Current;
-                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
-
-
-                dqm.RegisterExpression((FileDN f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                dqm.RegisterExpression((FileDN f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
-            
+               
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebImage),
                        col => (help, obj) => ((WebImage)obj).FullWebPath == null ? null :
@@ -185,6 +181,8 @@ namespace Signum.Web.Files
 
             }
 
+            
+
         }
 
         private static object GetSessionFile(MappingContext ctx)
@@ -199,35 +197,6 @@ namespace Signum.Web.Files
             return hpf;
         }
 
-        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
-            fp => new WebImage { FullWebPath = fp.FullWebPath };
-        public static WebImage WebImage(this FilePathDN fp)
-        {
-            return WebImageExpression.Evaluate(fp);
-        }
-
-        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
-           fp => new WebDownload { FullWebPath = fp.FullWebPath };
-        public static WebDownload WebDownload(this FilePathDN fp)
-        {
-            return WebDownloadExpression.Evaluate(fp);
-        }
-
-        static Expression<Func<FileDN, WebImage>> WebImageFileExpression =
-            f => new WebImage { FullWebPath = DownloadFileUrl(f.ToLite()) };
-        [ExpressionField("WebImageFileExpression")]
-        public static WebImage WebImage(this FileDN f)
-        {
-            return WebImageFileExpression.Evaluate(f);
-        }
-
-        static Expression<Func<FileDN, WebDownload>> WebDownloadFileExpression =
-           f => new WebDownload { FullWebPath = DownloadFileUrl(f.ToLite()) };
-        [ExpressionField("WebDownloadFileExpression")]
-        public static WebDownload WebDownload(this FileDN f)
-        {
-            return WebDownloadFileExpression.Evaluate(f);
-        }
 
         static string DownloadFileUrl(Lite<FileDN> file)
         {
@@ -238,15 +207,4 @@ namespace Signum.Web.Files
         }
     }
 
-    [Serializable, ForceLocalization]
-    public class WebImage
-    {
-        public string FullWebPath;
-    }
-
-    [Serializable, ForceLocalization]
-    public class WebDownload
-    {
-        public string FullWebPath;
-    }
 }

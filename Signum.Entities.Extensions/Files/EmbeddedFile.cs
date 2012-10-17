@@ -14,6 +14,19 @@ namespace Signum.Entities.Files
         string FullWebPath { get; }
     }
 
+
+    [Serializable, ForceLocalization]
+    public class WebImage
+    {
+        public string FullWebPath;
+    }
+
+    [Serializable, ForceLocalization]
+    public class WebDownload
+    {
+        public string FullWebPath;
+    }
+
     [Serializable]
     public class EmbeddedFileDN : EmbeddedEntity, IFile
     {

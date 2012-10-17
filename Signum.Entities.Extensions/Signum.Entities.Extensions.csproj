@@ -194,7 +194,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Authorization\Authorization.cd" />
-    <None Include="Files\Files.cd" />
     <None Include="Scheduler\Scheduler.cd" />
   </ItemGroup>
   <ItemGroup>

@@ -17,9 +17,22 @@ using System.Linq.Expressions;
 
 namespace Signum.Engine.Files
 {
-
     public static class FilePathLogic
     {
+        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
+            fp => new WebImage { FullWebPath = fp.FullWebPath };
+        public static WebImage WebImage(this FilePathDN fp)
+        {
+            return WebImageExpression.Evaluate(fp);
+        }
+
+        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
+           fp => new WebDownload { FullWebPath = fp.FullWebPath };
+        public static WebDownload WebDownload(this FilePathDN fp)
+        {
+            return WebDownloadExpression.Evaluate(fp);
+        }
+
         static Dictionary<Enum, FileTypeAlgorithm> fileTypes = new Dictionary<Enum, FileTypeAlgorithm>();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -64,6 +77,9 @@ namespace Signum.Engine.Files
                                            }).ToDynamic();
 
                 sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
+
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
             }
         }
