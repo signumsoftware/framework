@@ -89,13 +89,14 @@ namespace Signum.Engine
                 current, 
                 (tn, s) => table.InsertSqlSync(s), 
                 (tn, c) => table.DeleteSqlSync(c), 
-                (tn, c, s) =>
+                (tn, s, c) =>
                 {
+                    var originalName = c.FullClassName;
+
                     c.FullClassName = s.FullClassName;
                     c.TableName = s.TableName;
-                    c.FriendlyName = s.FriendlyName;
                     c.CleanName = s.CleanName;
-                    return table.UpdateSqlSync(c);
+                    return table.UpdateSqlSync(c, originalName);
                 }, Spacing.Double);
         }
 
@@ -115,7 +116,6 @@ namespace Signum.Engine
                          {
                              FullClassName = type.FullName,
                              TableName = tab.Name,
-                             FriendlyName = type.NiceName(), 
                              CleanName = Reflector.CleanTypeName(type)
                          }).ToList();
             return lista;

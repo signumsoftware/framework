@@ -14,14 +14,18 @@ namespace Signum.Entities.DynamicQuery
 {
     public static class QueryUtils
     {
-        public static string GetQueryUniqueKey(object queryKey)
+        public static string GetQueryUniqueKey(object queryName)
         {
             return
-                queryKey is Type ? ((Type)queryKey).FullName :
-                queryKey is Enum ? "{0}.{1}".Formato(queryKey.GetType().Name, queryKey.ToString()) :
-                queryKey.ToString();
+                queryName is Type ? ((Type)queryName).FullName :
+                queryName is Enum ? "{0}.{1}".Formato(queryName.GetType().Name, queryName.ToString()) :
+                queryName.ToString();
         }
 
+        public static string GetCleanName(object queryName)
+        {
+            return (queryName is Type ? Reflector.CleanTypeName((Type)queryName) : queryName.ToString());
+        }
 
         public static string GetNiceName(object queryName)
         {
