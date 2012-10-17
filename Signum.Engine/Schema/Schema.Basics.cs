@@ -287,6 +287,7 @@ namespace Signum.Engine.Maps
     public interface IFieldReference
     {
         bool IsLite { get; }
+        bool ClearEntityOnSaving { get; set; }
         Type FieldType { get; }
     }
 
@@ -465,7 +466,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
 
-        public bool IsLite { get; set; }
+        public bool IsLite { get; internal set; }
 
         public FieldReference(Type fieldType) : base(fieldType) { }
 
@@ -487,6 +488,21 @@ namespace Signum.Engine.Maps
         internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
         {
             yield return KVP.Create(ReferenceTable, IsLite); 
+        }
+
+        bool clearEntityOnSaving;
+        public bool ClearEntityOnSaving
+        {
+            get
+            {
+                this.AssertIsLite();
+                return this.clearEntityOnSaving;
+            }
+            set
+            {
+                this.AssertIsLite();
+                this.clearEntityOnSaving = value;
+            }
         }
     }
 
@@ -514,7 +530,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedBy : Field, IFieldReference
     {
-        public bool IsLite { get; set; }
+        public bool IsLite { get; internal set; }
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }
 
@@ -534,11 +550,26 @@ namespace Signum.Engine.Maps
         {
             return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, IsLite)).ToList();
         }
+
+        bool clearEntityOnSaving;
+        public bool ClearEntityOnSaving
+        {
+            get
+            {
+                this.AssertIsLite();
+                return this.clearEntityOnSaving;
+            }
+            set
+            {
+                this.AssertIsLite();
+                this.clearEntityOnSaving = value;
+            }
+        }
     }
 
     public partial class FieldImplementedByAll : Field, IFieldReference
     {
-        public bool IsLite { get; set; }
+        public bool IsLite { get; internal set; }
         public ImplementationColumn Column { get; set; }
         public ImplementationColumn ColumnTypes { get; set; }
 
@@ -552,6 +583,21 @@ namespace Signum.Engine.Maps
         internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
         {
             return Enumerable.Empty<KeyValuePair<Table, bool>>();
+        }
+
+        bool clearEntityOnSaving;
+        public bool ClearEntityOnSaving
+        {
+            get
+            {
+                this.AssertIsLite();
+                return this.clearEntityOnSaving;
+            }
+            set
+            {
+                this.AssertIsLite();
+                this.clearEntityOnSaving = value;
+            }
         }
     }
 
@@ -665,12 +711,12 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public Field GetField(MemberInfo mi)
+        public Field GetField(MemberInfo member)
         {
-            Field result = TryGetField(mi); 
+            Field result = TryGetField(member); 
 
             if(result  == null)
-                throw new InvalidOperationException("'{0}' not found".Formato(mi.Name));
+                throw new InvalidOperationException("'{0}' not found".Formato(member.Name));
 
             return result;
         }
