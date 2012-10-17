@@ -97,7 +97,7 @@ namespace Signum.Engine.Basics
                 return new QueryDN
                 {
                     Key = QueryUtils.GetQueryUniqueKey(queryName),
-                    Name = QueryUtils.GetNiceName(queryName)
+                    Name = QueryUtils.GetCleanName(queryName)
                 };
             }
         }
