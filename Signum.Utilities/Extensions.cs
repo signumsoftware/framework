@@ -248,7 +248,7 @@ namespace Signum.Utilities
         }
 
         #region Map Try Do TryDo
-        public static R Map<T, R>(this T t, Func<T, R> func)
+        public static R Let<T, R>(this T t, Func<T, R> func)
         {
             return func(t);
         }

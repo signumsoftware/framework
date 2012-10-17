@@ -12,7 +12,7 @@ namespace Signum.Engine
     {
         public static SqlPreCommand CreateTablesScript()
         {
-            IEnumerable<ITable> tables = Schema.Current.GetDatabaseTables().Values;
+            List<ITable> tables = Schema.Current.GetDatabaseTables().ToList();
 
             SqlPreCommand createTables = tables.Select(t => SqlBuilder.CreateTableSql(t)).Combine(Spacing.Double);
 

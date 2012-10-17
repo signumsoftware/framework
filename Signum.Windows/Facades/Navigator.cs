@@ -339,7 +339,7 @@ namespace Signum.Windows
             {
                 //Looking for a better place to do this
                 PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
-                QueryToken.EntityExtensions = (type, parent) => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(type, parent));
+                QueryToken.EntityExtensions = parent => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(parent));
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
@@ -369,18 +369,20 @@ namespace Signum.Windows
 
         static void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            Dispatcher.CurrentDispatcher.BeginInvoke
-            (
-                DispatcherPriority.ContextIdle,
-                new Action
+            var tb = (TextBox)sender;
+            if(!tb.AcceptsReturn && !tb.AcceptsTab)
+                Dispatcher.CurrentDispatcher.BeginInvoke
                 (
-                    () =>
-                    {
-                        (sender as TextBox).SelectAll();
-                        (sender as TextBox).ReleaseMouseCapture();
-                    }
-                )
-            );
+                    DispatcherPriority.ContextIdle,
+                    new Action
+                    (
+                        () =>
+                        {
+                            tb.SelectAll();
+                            tb.ReleaseMouseCapture();
+                        }
+                    )
+                );
         }
 
         public ImageSource DefaultFindIcon = ImageLoader.GetImageSortName("find.png");

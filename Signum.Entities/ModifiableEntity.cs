@@ -274,7 +274,11 @@ namespace Signum.Entities
 
         public string IntegrityCheck()
         {
-            return Validator.GetPropertyPacks(GetType()).Select(k => PropertyCheck(k.Value)).NotNull().ToString("\r\n");
+            var packs = Validator.GetPropertyPacks(GetType());
+
+            var result = packs.Select(k => PropertyCheck(k.Value)).NotNull().ToString("\r\n");
+
+            return result;
         }
 
         //override for per-property checks

@@ -312,7 +312,7 @@ namespace Signum.Windows
         private static bool IsTrivial(FrameworkElement fe)
         {
             return fe is ContentPresenter && VisualTreeHelper.GetChildrenCount(fe) == 1 &&
-                VisualTreeHelper.GetChild(fe, 0).Map(a => a is AccessText || a is TextBlock);
+                VisualTreeHelper.GetChild(fe, 0).Let(a => a is AccessText || a is TextBlock);
         }
     }
 

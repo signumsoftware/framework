@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.IO.Compression;
 using Signum.Utilities;
+using System.Net.Mime;
 
 namespace Signum.Web.PortableAreas
 {
@@ -16,9 +17,11 @@ namespace Signum.Web.PortableAreas
         public TimeSpan CacheDuration = TimeSpan.FromDays(10);
         public byte[] Compressed { get; private set; }
         public byte[] Uncompressed { get; private set; }
+        public string FileName { get; private set; }
         
         public StaticContentResult(byte[] uncompressedContent, string fileName)
         {
+            this.FileName = fileName;
             this.ContentType = MimeType.FromFileName(fileName);
             this.Uncompressed = uncompressedContent;
         }
@@ -28,6 +31,7 @@ namespace Signum.Web.PortableAreas
             HttpResponseBase response = context.HttpContext.Response;
             HttpRequestBase request = context.HttpContext.Request;
 
+            response.AddHeader("Content-Disposition", new ContentDisposition { FileName = FileName }.ToString());
             response.AppendHeader("Vary", "Accept-Encoding");
             response.Cache.SetCacheability(HttpCacheability.Public);
             response.Cache.SetMaxAge(CacheDuration);

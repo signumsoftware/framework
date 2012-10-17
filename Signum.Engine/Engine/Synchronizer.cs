@@ -12,32 +12,31 @@ namespace Signum.Engine
     public static class Synchronizer
     {
         public static SqlPreCommand SynchronizeScript<K, O, N>(
-            Dictionary<K, O> oldDictionary,
-            Dictionary<K, N> newDictionary,
-            Func<K, O, SqlPreCommand> removeOld,
-            Func<K, N, SqlPreCommand> createNew,
-            Func<K, O, N, SqlPreCommand> merge,
-            Spacing spacing)
+            Dictionary<K, N> newDictionary, 
+            Dictionary<K, O> oldDictionary, 
+            Func<K, N, SqlPreCommand> createNew, 
+            Func<K, O, SqlPreCommand> removeOld, 
+            Func<K, O, N, SqlPreCommand> merge, Spacing spacing)
             where O : class
             where N : class
         {
-            return oldDictionary.OuterJoinDictionaryCC(newDictionary, (key, oldVal, newVal) =>
+            return newDictionary.OuterJoinDictionaryCC(oldDictionary, (key, newVal, oldVal) =>
             {
-                if (oldVal == null)
-                    return createNew == null ? null : createNew(key, newVal);
-
                 if (newVal == null)
                     return removeOld == null ? null : removeOld(key, oldVal);
+
+                if (oldVal == null)
+                    return createNew == null ? null : createNew(key, newVal);
 
                 return merge == null ? null : merge(key, oldVal, newVal);
             }).Values.Combine(spacing);
         }
 
         public static void Synchronize<K, O, N>(
-            Dictionary<K, O> oldDictionary,
-            Dictionary<K, N> newDictionary,
-            Action<K, O> removeOld,
-            Action<K, N> createNew,
+            Dictionary<K, N> newDictionary, 
+            Dictionary<K, O> oldDictionary, 
+            Action<K, N> createNew, 
+            Action<K, O> removeOld, 
             Action<K, O, N> merge)
             where O : class
             where N : class
@@ -224,12 +223,12 @@ namespace Signum.Engine
                     if (selection.NewValue != null)
                     {
                         replacements.Add(selection.OldValue, selection.NewValue);
-                        oldOnly.RemoveAt(0);
+                        oldOnly.Remove(selection.OldValue);
                         newOnly.Remove(selection.NewValue);
                     }
                     else
                     {
-                        oldOnly.RemoveAt(0);
+                        oldOnly.Remove(selection.OldValue);
                     }
 
                     bestSolution = new Solution(null, int.MaxValue);

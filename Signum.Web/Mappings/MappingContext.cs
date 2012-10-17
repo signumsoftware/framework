@@ -32,7 +32,7 @@ namespace Signum.Web
         internal readonly PropertyPack PropertyPack;
         internal readonly PropertyRoute PropertyRoute; 
 
-        internal void AddChild(MappingContext context)
+        public void AddChild(MappingContext context)
         {
             Debug.Assert(context.Parent == this && context.Next == null);
 

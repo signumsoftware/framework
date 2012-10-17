@@ -912,6 +912,38 @@ namespace Signum.Utilities
             }
         }
 
+        public static IEnumerable<R> ZipOrDefault<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> resultSelector)
+        {
+            bool okA = true, okB = true;
+
+            using (var enumA = colA.GetEnumerator())
+            using (var enumB = colB.GetEnumerator())
+            {
+                while (okA & (okA = enumA.MoveNext()) | okB & (okB = enumB.MoveNext()))
+                {
+                    yield return resultSelector(
+                        okA ? enumA.Current : default(A),
+                        okB ? enumB.Current : default(B));
+                }
+            }
+        }
+
+        public static IEnumerable<Tuple<A, B>> ZipOrDefault<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
+        {
+            bool okA = true, okB = true;
+
+            using (var enumA = colA.GetEnumerator())
+            using (var enumB = colB.GetEnumerator())
+            {
+                while ((okA &= enumA.MoveNext()) || (okB &= enumB.MoveNext()))
+                {
+                    yield return new Tuple<A, B>(
+                        okA ? enumA.Current : default(A),
+                        okB ? enumB.Current : default(B));
+                }
+            }
+        }
+
         public static void ZipForeach<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB, Action<A, B> actions)
         {
             using (var enumA = colA.GetEnumerator())
@@ -1064,7 +1096,7 @@ namespace Signum.Utilities
                 if (lacking.Count != 0)
                     throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, lacking.ToString(", ")));
 
-            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
+           return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
 
 

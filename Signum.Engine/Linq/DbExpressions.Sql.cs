@@ -426,7 +426,7 @@ namespace Signum.Engine.Linq
                 IsDistinct ? "DISTINCT " : "",
                 Top.TryCC(t => "TOP {0} ".Formato(t.NiceToString())),
                 Columns.TryCC(c => c.ToString(", ")),
-                From.TryCC(f=>f.ToString().Map(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
+                From.TryCC(f=>f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
                 Where.TryCC(a => "WHERE " + a.NiceToString() + "\r\n"),
                 OrderBy.TryCC(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
                 GroupBy.TryCC(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),

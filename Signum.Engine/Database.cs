@@ -562,10 +562,16 @@ namespace Signum.Engine
             }
         }
 
-        public static IQueryable<S> InDB<S>(this S entity)
-            where S : IIdentifiable
+        public static IQueryable<E> InDB<E>(this E entity)
+             where E : class, IIdentifiable
         {
-            return (IQueryable<S>)giInDB.GetInvoker(typeof(S), entity.GetType()).Invoke(entity);
+            return (IQueryable<E>)giInDB.GetInvoker(typeof(E), entity.GetType()).Invoke(entity);
+        }
+
+        [MethodExpander(typeof(InDbExpander))]
+        public static R InDBEntity<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IIdentifiable
+        {
+            return entity.InDB().Select(selector).SingleEx();
         }
 
         static GenericInvoker<Func<IIdentifiable, IQueryable>> giInDB =
@@ -580,16 +586,27 @@ namespace Signum.Engine
             if (entity.IsNew)
                 throw new ArgumentException("entity is new");
 
-            return Database.Query<RT>().Where(rt => rt == entity).Select(rt => (S)rt);
+            var result = Database.Query<RT>().Where(rt => rt == entity);
+
+            if (typeof(S) == typeof(RT))
+                return result;
+
+            return result.Select(rt => (S)rt);
         }
 
-        public static IQueryable<S> InDB<S>(this Lite<S> lite)
-           where S : class, IIdentifiable
+        public static IQueryable<E> InDB<E>(this Lite<E> lite)
+           where E : class, IIdentifiable
         {
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            return (IQueryable<S>)giInDBLite.GetInvoker(typeof(S), lite.RuntimeType).Invoke(lite);
+            return (IQueryable<E>)giInDBLite.GetInvoker(typeof(E), lite.RuntimeType).Invoke(lite);
+        }
+
+        [MethodExpander(typeof(InDbExpander))]
+        public static R InDB<E, R>(this Lite<E> lite, Expression<Func<E, R>> selector) where E : class, IIdentifiable
+        {
+            return lite.InDB().Select(selector).SingleEx();
         }
 
         static GenericInvoker<Func<Lite, IQueryable>> giInDBLite =
@@ -601,8 +618,41 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            return Database.Query<RT>().Where(rt => rt.ToLite() == lite.ToLite<RT>()).Select(rt => (S)rt);
+            var result = Database.Query<RT>().Where(rt => rt.ToLite() == lite.ToLite<RT>());
+
+            if (typeof(S) == typeof(RT))
+                return result;
+
+            return result.Select(rt => (S)rt);
         }
+
+        public class InDbExpander : IMethodExpander
+        {
+            static MethodInfo miSelect = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null).Select(a => a)).GetGenericMethodDefinition();
+            static MethodInfo miSingleEx = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null).SingleEx()).GetGenericMethodDefinition();
+
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                var value = ExpressionEvaluator.Eval(arguments[0]);
+
+                var genericArguments = mi.GetGenericArguments();
+
+                var staticType = genericArguments[0];
+                var isLite = arguments[0].Type.IsLite();
+                var runtimeType = isLite ? ((Lite)value).RuntimeType : value.GetType();
+
+                Expression query = !isLite ?
+                    giInDB.GetInvoker(staticType, runtimeType)((IIdentifiable)value).Expression :
+                    giInDBLite.GetInvoker(staticType, runtimeType)((Lite)value).Expression;
+
+                var select = Expression.Call(miSelect.MakeGenericMethod(genericArguments), query, arguments[1]);
+
+                var single = Expression.Call(miSingleEx.MakeGenericMethod(genericArguments[1]), select);
+
+                return single;
+            }
+        }
+
 
         public static IQueryable<T> View<T>()
             where T : IView

@@ -384,9 +384,7 @@ namespace Signum.Engine.Maps
             Generating += SchemaGenerator.InsertEnumValuesScript;
             Generating += TypeLogic.Schema_Generating;
 
-
             Synchronizing += SchemaSynchronizer.SynchronizeSchemaScript;
-            Synchronizing += SchemaSynchronizer.SynchronizeEnumsScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
@@ -507,7 +505,9 @@ namespace Signum.Engine.Maps
             if (lambda == null)
                 return null;
 
-            Expression e = MetadataVisitor.JustVisit(lambda, route.Parent);
+            //TODO: mirar con olmo
+            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Type.UnNullify(), new CleanMeta(new[] { route.Parent })));
+            //Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(new[] { route.Parent })));
 
             MetaExpression me = e as MetaExpression;
             if (me == null)
@@ -539,11 +539,15 @@ namespace Signum.Engine.Maps
             return tables.Values.ToString(t => t.Type.TypeName(), "\r\n\r\n");
         }
 
-        internal Dictionary<string, ITable> GetDatabaseTables()
+        internal IEnumerable<ITable> GetDatabaseTables()
         {
-            return Schema.Current.Tables.Values
-                .SelectMany(t => t.RelationalTables().Cast<ITable>().PreAnd(t))
-                .ToDictionary(a => a.Name);
+            foreach (var table in Schema.Current.Tables.Values)
+            {
+                yield return table;
+
+                foreach (var subTable in table.RelationalTables().Cast<ITable>())
+                    yield return subTable;
+            }
         }
 
         public DirectedEdgedGraph<Table, bool> ToDirectedGraph()

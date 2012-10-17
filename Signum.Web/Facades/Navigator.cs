@@ -266,14 +266,14 @@ namespace Signum.Web
         public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin) where T : IRootEntity
         {
             SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
-            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Map(s => admin ? s.UntypedMappingAdmin : s.UntypedMappingDefault);
+            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Let(s => admin ? s.UntypedMappingAdmin : s.UntypedMappingDefault);
 
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
         }
 
         public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin, SortedList<string, string> inputs) where T : IRootEntity
         {
-            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Map(s => admin ? s.UntypedMappingAdmin : s.UntypedMappingDefault);
+            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Let(s => admin ? s.UntypedMappingAdmin : s.UntypedMappingDefault);
 
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
         }
@@ -434,7 +434,7 @@ namespace Signum.Web
         public string NormalControlView = ViewPrefix.Formato("NormalControl");
         public string PopupControlView = ViewPrefix.Formato("PopupControl");
         public string PopupOkControlView = ViewPrefix.Formato("PopupOkControl");
-        public string ChooserPopupView = ViewPrefix.Formato("ChooserPopup");
+        public string PopupCancelControlView = ViewPrefix.Formato("PopupCancelControl");
         public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
         public string SearchPageView = ViewPrefix.Formato("SearchPage");
         public string SearchControlView = ViewPrefix.Formato("SearchControl");

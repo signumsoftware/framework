@@ -384,12 +384,13 @@ namespace Signum.Windows
                     SearchOnLoad = true;
             }
 
+            if (this.NotSet(EntityBase.ViewProperty) && View)
+                View = Implementations.IsByAll ? true :
+                       Implementations.Types.Any(t => Navigator.IsViewable(t, IsAdmin));
 
-            if (this.NotSet(ViewProperty) && View && entityColumn.Implementations == null)
-                View = Navigator.IsViewable(EntityType, IsAdmin);
-
-            if (this.NotSet(CreateProperty) && Create && entityColumn.Implementations == null)
-                Create = Navigator.IsCreable(EntityType, IsAdmin);
+            if (this.NotSet(EntityBase.CreateProperty) && Create)
+                Create = Implementations.IsByAll ? false :
+                         Implementations.Types.Any(t => Navigator.IsCreable(t, IsAdmin));
 
             GenerateListViewColumns();
 

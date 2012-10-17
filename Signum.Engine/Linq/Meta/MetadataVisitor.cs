@@ -61,11 +61,21 @@ namespace Signum.Engine.Linq
             });
         }
 
-        internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
+       
+
+        //internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
+        //{
+        //    if (route.Type.IsLite())
+        //        route = route.Add("Entity");
+
+        //    return JustVisit(expression, ));
+        //}
+
+        internal static Expression JustVisit(LambdaExpression expression, MetaExpression metaExpression)
         {
             var cleaned = MetaEvaluator.Clean(expression);
 
-            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, new MetaExpression(route.Type, new CleanMeta(new[] { route }))));
+            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, metaExpression));
 
             return new MetadataVisitor().Visit(replaced);
         }

@@ -67,9 +67,18 @@ namespace Signum.Engine.Linq
             this.Meta = meta;
         }
 
+
         public override string ToString()
         {
             return "Exp({0})".Formato(Meta);
+        }
+
+        internal static MetaExpression FromRoute(Type type, PropertyRoute pr)
+        {
+            if (pr == null)
+                return new MetaExpression(type.UnNullify().CleanType(), new DirtyMeta(new Meta[0]));
+
+            return new MetaExpression(type.UnNullify().CleanType(), new CleanMeta(new[] { pr }));
         }
     }
 }

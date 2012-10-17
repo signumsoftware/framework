@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Threading;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine
 {
@@ -103,7 +104,7 @@ namespace Signum.Engine
             ee.PreUnsafeDelete += q => action();
         }
 
-        static Dictionary<IResetLazy, Type[]> registeredLazyList = new Dictionary<IResetLazy, Type[]>();
+        static ConcurrentDictionary<IResetLazy, Type[]> registeredLazyList = new ConcurrentDictionary<IResetLazy, Type[]>();
         public static ResetLazy<T> Create<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T:class
         {
             var result = new ResetLazy<T>(() =>
@@ -122,7 +123,7 @@ namespace Signum.Engine
                 }
             }, mode);
 
-            registeredLazyList.Add(result, null);
+            registeredLazyList.GetOrAdd(result, (Type[])null);
 
             return result;
         }
@@ -130,9 +131,9 @@ namespace Signum.Engine
         public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T:class
         {
             if (!registeredLazyList.ContainsKey(lazy))
-                throw new InvalidOperationException("The lazy is not a GlobalLazy");
+                throw new InvalidOperationException("The lazy of type '{0}', declared in '{1}' not a GlobalLazy".Formato(typeof(T).TypeName(), lazy.DeclaredType.TypeName()));
 
-            registeredLazyList[lazy] = types;
+            registeredLazyList.AddOrUpdate(lazy, types, (k, v) => types);
 
             if (initialized)
                 AttachInvalidations(Schema.Current, lazy, types);

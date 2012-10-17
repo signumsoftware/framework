@@ -77,7 +77,7 @@ namespace Signum.Entities.Reflection
 
         public static string Integrity(DirectedGraph<Modifiable> graph)
         {
-            if (graph.OfType<IdentifiableEntity>().Any())
+            if (graph.OfType<IdentifiableEntity>().Any() && !graph.OfType<ModelEntity>().Any())
             {
                 var problems = (from m in graph.OfType<IdentifiableEntity>()
                                 group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
