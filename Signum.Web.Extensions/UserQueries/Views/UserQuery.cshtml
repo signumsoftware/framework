@@ -28,11 +28,11 @@
         @Html.HiddenRuntimeInfo(query)
         
         @Html.Hidden(query.Compose("Key"), query.Value.Key)
-        @Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)
+        @Html.Hidden(query.Compose("Name"), query.Value.Name)
 
         @Html.Field("Query", Navigator.IsFindable(queryName) ?
-            new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.DisplayName.EncodeHtml()).ToHtml() :
-            Html.Span("spanQuery", query.Value.DisplayName, "sf-value-line"))
+                 new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
+                 Html.Span("spanQuery", query.Value.Name, "sf-value-line"))
 
         <div class="clearall"></div>
     }

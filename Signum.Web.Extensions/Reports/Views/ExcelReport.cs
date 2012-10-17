@@ -82,7 +82,7 @@ WriteLiteral("\r\n");
 
                                       
         
-   Write(Html.ValueLine(query, f => f.DisplayName, f => { f.ReadOnly = true; f.LabelText = "Query"; }));
+   Write(Html.ValueLine(query, f => f.Name, f => { f.ReadOnly = true; f.LabelText = "Query"; }));
 
                                                                                                       
         
@@ -90,7 +90,7 @@ WriteLiteral("\r\n");
 
                                                            
         
-   Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
+   Write(Html.Hidden(query.Compose("DisplayName"), query.Value.Name));
 
                                                                            
     }

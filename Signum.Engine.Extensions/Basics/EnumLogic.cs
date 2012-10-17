@@ -65,29 +65,29 @@ namespace Signum.Engine.Basics
             Table table = Schema.Current.Table<T>();
 
             List<T> current = Administrator.TryRetrieveAll<T>(replacements);
-            List<T> should = GenerateEntities(); 
+            List<T> should = GenerateEntities();
 
-            return Synchronizer.SynchronizeReplacing(replacements, typeof(T).Name,
-                current.ToDictionary(c => c.Key),
-                should.ToDictionary(s => s.Key),
-                (k, c) => table.DeleteSqlSync(c),
-                (k, s) => table.InsertSqlSync(s),
-                (k, c, s) =>
+            return Synchronizer.SynchronizeReplacing(replacements, typeof(T).Name, 
+                should.ToDictionary(s => s.Key), 
+                current.ToDictionary(c => c.Key), 
+                (k, s) => table.InsertSqlSync(s), 
+                (k, c) => table.DeleteSqlSync(c), 
+                (k, s, c) =>
                 {
+                    var originalName = c.Name;
                     c.Name = s.Name;
                     c.Key = s.Key;
-                    return table.UpdateSqlSync(c);
+                    return table.UpdateSqlSync(c, originalName);
                 }, Spacing.Double);
         }
 
-    
 
         static List<T> GenerateEntities()
         {
             return getKeys().Select(k => new T
             {
                 Key = EnumDN.UniqueKey(k),
-                Name = k.NiceToString(),
+                Name = k.ToString(),
             }).ToList();
         }
 

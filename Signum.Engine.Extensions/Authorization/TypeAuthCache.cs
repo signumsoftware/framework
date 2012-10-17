@@ -271,8 +271,8 @@ namespace Signum.Entities.Authorization
 
                 Synchronizer.Synchronize(should, current, 
                     (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(), 
-                    (type, pr) => pr.Delete(), 
-                    (type, pr, ar) =>
+                    (type, pr) => pr.Delete(),
+                    (type, ar, pr) =>
                     {
                         pr.Allowed = ar.Allowed.Fallback;
 
@@ -450,25 +450,30 @@ namespace Signum.Entities.Authorization
                         Resource = kvp.Key,
                         Role = role,
                         Allowed = kvp.Value.Allowed,
-                        Conditions = kvp.Value.Condition
+                        Conditions =  kvp.Value.Condition
                     }, Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
-                }, 
-                (role, listRules) => listRules.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple), 
-                (role, list, x) =>
+                },
+                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
+                (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, def, max, role);
 
-                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(x.Elements("Type").ToDictionary(a => TypeLogic.TypeToDN[TypeLogic.GetType(a.Attribute("Resource").Value)], "Type rules for {0}".Formato(role)), list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), (r, xr) =>
+                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(
+                        x.Elements("Type").ToDictionary(a => TypeLogic.TypeToDN[TypeLogic.GetType(a.Attribute("Resource").Value)], "Type rules for {0}".Formato(role)), 
+                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), 
+                        (r, xr) =>
                         {
                             var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
                             var conditions = Conditions(xr);
 
-                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions }, Comment(role, r, a));
-                        }, (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), (r, pr, xr) =>
+                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions}, Comment(role, r, a));
+                        }, 
+                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
+                        (r, xr, pr) =>
                         {
                             var oldA = pr.Allowed;
                             pr.Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();

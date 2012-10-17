@@ -60,7 +60,7 @@ namespace Signum.Entities.Chart
 
         public override string ToString()
         {
-            return Resources.ColorsFor0.Formato(type.FriendlyName);
+            return Resources.ColorsFor0.Formato(type.CleanName);
         }
     }
 }

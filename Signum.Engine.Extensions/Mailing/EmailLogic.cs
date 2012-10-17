@@ -138,7 +138,7 @@ namespace Signum.Engine.Mailing
             return Synchronizer.SynchronizeScript(should, current, 
                 (tn, s) => table.InsertSqlSync(s), 
                 (tn, c) => table.DeleteSqlSync(c), 
-                (tn, c, s) =>
+                (tn, s, c) =>
                 {
                     c.FullClassName = s.FullClassName;
                     c.FriendlyName = s.FriendlyName;

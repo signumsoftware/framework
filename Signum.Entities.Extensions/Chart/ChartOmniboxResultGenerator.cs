@@ -17,7 +17,7 @@ namespace Signum.Entities.Chart
         static Dictionary<string, object> queries;
         public ChartOmniboxResultGenerator(IEnumerable<object> queryNames)
         {
-            queries = queryNames.ToDictionary(OmniboxParser.Manager.CleanQueryName);
+            queries = queryNames.ToDictionary(QueryUtils.GetCleanName);
         }
 
         public string Keyword = "Chart";
@@ -71,7 +71,7 @@ namespace Signum.Entities.Chart
             if (QueryName == null)
                 return KeywordMatch.Value.ToString();
 
-            return "{0} {1}".Formato(KeywordMatch.Value, OmniboxParser.Manager.CleanQueryName(QueryName));
+            return "{0} {1}".Formato(KeywordMatch.Value, QueryUtils.GetCleanName(QueryName));
         }
     }
 }

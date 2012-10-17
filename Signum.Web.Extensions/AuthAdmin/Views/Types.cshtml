@@ -66,7 +66,7 @@
                         <span class="sf-auth-namespace-name">@iter.Value.Key</span> </a>
                 </td>
             </tr>
-            foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.FriendlyName).Iterate())
+            foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.CleanName).Iterate())
             {
                 var item = iter2.Value;
             <tr class="sf-auth-type" data-ns="@iter.Value.Key" @Html.Raw(item.Value.AvailableConditions.Any() ? ("data-type=\"" + item.Value.Resource.ClassName  + "\"") : "")>
@@ -81,7 +81,7 @@
                         </a>
                         <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(EnumDN.UniqueKey(ac), ac.NiceToString()), ",")" />
                     }
-                    <span class="sf-auth-label">@item.Value.Resource.FriendlyName</span>
+                    <span class="sf-auth-label">@item.Value.Resource.ToType().NiceName()</span>
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(EnumDN.UniqueKey(a.ConditionName), a.Allowed.ToStringParts()), ";"))))
                 </td>

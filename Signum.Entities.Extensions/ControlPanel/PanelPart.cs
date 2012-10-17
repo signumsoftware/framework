@@ -132,6 +132,13 @@ namespace Signum.Entities.ControlPanel
             get { return userQuery; }
             set { Set(ref userQuery, value, () => UserQuery); }
         }
+
+        string href;
+        public string Href
+        {
+            get { return href; }
+            set { Set(ref href, value, () => Href); }
+        }
     }
 
     [Serializable]

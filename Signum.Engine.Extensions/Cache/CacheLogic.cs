@@ -255,7 +255,7 @@ namespace Signum.Engine.Cache
                     using (SetInCache())
                     using (HeavyProfiler.Log("CACHE"))
                     {
-                        DisabledTypesDuringTransaction().Add(typeof(T));
+                        DisabledTypesDuringTransaction().Add(typeof(T)); //do not raise Disabled event
 
                         List<T> result = Database.Query<T>().ToList();
 
@@ -309,6 +309,15 @@ namespace Signum.Engine.Cache
                 }
             }
 
+
+            void DisableAndInvalidate()
+            {
+                DisableTypeInTransaction(typeof(T));
+                Transaction.PostRealCommit += ud => Invalidate(false);
+            }
+
+          
+
             private void DisableAndInvalidateAllConnected()
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
@@ -345,11 +354,6 @@ namespace Signum.Engine.Cache
             public override event Action Invalidation;
             public override event Action Disabled;
 
-            void DisableAndInvalidate()
-            {
-                DisabledTypesDuringTransaction().Add(typeof(T));
-                Transaction.PostRealCommit += ud => Invalidate(false);
-            }
 
             public void Invalidate(bool isClean)
             {
@@ -448,6 +452,13 @@ namespace Signum.Engine.Cache
             HashSet<Type> disabledTypes = Transaction.UserData.TryGetC(DisabledCachesKey) as HashSet<Type>;
 
             return disabledTypes != null && disabledTypes.Contains(type);
+        }
+
+        private static void DisableTypeInTransaction(Type type)
+        {
+            DisabledTypesDuringTransaction().Add(type);
+
+            controllers[type].OnDisabled();
         }
 
         private static void DisableAllConnectedTypesInTransaction(Type type)

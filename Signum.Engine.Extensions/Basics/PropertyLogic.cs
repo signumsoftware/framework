@@ -38,18 +38,17 @@ namespace Signum.Engine.Basics
             return Synchronizer.SynchronizeScript(should, current,
                 null,
                 null,
-                (tn, dicCurr, dicShould) =>
+                (tn, dicShould, dicCurr) =>
                     Synchronizer.SynchronizeReplacing(replacements, FieldsForKey.Formato(tn),
-                        dicCurr,
-                        dicShould,
-                        (fn, c) => table.DeleteSqlSync(c),
-                        null,
-                        (fn, c, s) =>
-                        {
-                            c.Path = s.Path;
-                            return table.UpdateSqlSync(c);
-                        },
-                        Spacing.Simple), 
+                    dicShould,
+                    dicCurr,
+                    null,
+                    (fn, c) => table.DeleteSqlSync(c),
+                    (fn, s, c) =>
+                    {
+                        c.Path = s.Path;
+                        return table.UpdateSqlSync(c);
+                    }, Spacing.Simple),
                 Spacing.Double);
         }
 

@@ -177,6 +177,14 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryOrderDN : QueryTokenDN
     {
+        public QueryOrderDN() {}
+
+        public QueryOrderDN(string columnName, OrderType type)
+        {
+            this.TokenString = columnName;
+            orderType = type;
+        }
+
         int index;
         public int Index
         {
@@ -204,10 +212,15 @@ namespace Signum.Entities.UserQueries
     {
         public QueryColumnDN(){}
 
+        public QueryColumnDN(string columnName)
+        {
+            this.TokenString = columnName;
+        }
+
         public QueryColumnDN(Column col)
         {
             Token = col.Token;
-            if(col.DisplayName != col.Token.NiceName())
+            if (col.DisplayName != col.Token.NiceName())
                 DisplayName = col.DisplayName;
         }
 
