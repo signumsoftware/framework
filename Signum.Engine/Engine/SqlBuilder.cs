@@ -162,19 +162,19 @@ namespace Signum.Engine
 
         public static SqlPreCommand ReCreateFreeIndex(string oldTable, string table, DiffIndex index, Dictionary<string, string> tableReplacements)
         {
-            if (!index.IsFreeIndex)
+            if (index.IsControlledIndex)
                 throw new InvalidOperationException("The Index is not a free index");
 
             var onlyColumn = index.Columns.Only();
 
-            string indexName = onlyColumn != null ? "FIX_{0}_{1}".Formato(table, (tableReplacements.TryGetC(onlyColumn) ?? onlyColumn)) :
+            string indexName = onlyColumn != null && index.IndexName.StartsWith("FIX_") ? "FIX_{0}_{1}".Formato(table, (tableReplacements.TryGetC(onlyColumn) ?? onlyColumn)) :
                 tableReplacements == null ? index.IndexName.Replace(oldTable, table) :
                 index.IndexName.Replace(tableReplacements).Replace(oldTable, table);
 
             string columns = index.Columns.ToString(c => (tableReplacements.TryGetC(c) ?? c).SqlScape(), ", ");
 
             return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
-                 indexName,
+                 indexName.SqlScape(),
                  table.SqlScape(),
                  columns));
         }
@@ -184,7 +184,7 @@ namespace Signum.Engine
             string indexName = "FIX_{0}_{1}".Formato(table.Name, column.Name);
 
             return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
-                 indexName,
+                 indexName.SqlScape(),
                  table.Name.SqlScape(),
                  column.Name.SqlScape()));
         }
