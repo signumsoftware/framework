@@ -103,6 +103,7 @@
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
     <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
+    <Compile Include="Engine\ProgressExtensions.cs" />
     <Compile Include="Engine\SchemaGenerator.cs" />
     <Compile Include="Engine\SqlUtils.cs" />
     <Compile Include="Exceptions.cs" />
