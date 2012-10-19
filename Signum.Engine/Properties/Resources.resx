@@ -136,7 +136,7 @@
     <value>Concurrency error on the databe, Table = {0}, Id = {1}</value>
   </data>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
-    <value>'{0}' has been renamed in {1}?</value>
+    <value>     '{0}' has been renamed in {1}?</value>
   </data>
   <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
     <value>There are '{0}' that refer to this entity</value>

@@ -11,12 +11,12 @@ namespace Signum.Engine
 {
     public static class Synchronizer
     {
-        public static SqlPreCommand SynchronizeScript<K, O, N>(
+        public static SqlPreCommand SynchronizeScript<K, N, O>(
             Dictionary<K, N> newDictionary, 
             Dictionary<K, O> oldDictionary, 
             Func<K, N, SqlPreCommand> createNew, 
-            Func<K, O, SqlPreCommand> removeOld, 
-            Func<K, O, N, SqlPreCommand> merge, Spacing spacing)
+            Func<K, O, SqlPreCommand> removeOld,
+            Func<K, N, O, SqlPreCommand> merge, Spacing spacing)
             where O : class
             where N : class
         {
@@ -28,16 +28,16 @@ namespace Signum.Engine
                 if (oldVal == null)
                     return createNew == null ? null : createNew(key, newVal);
 
-                return merge == null ? null : merge(key, oldVal, newVal);
+                return merge == null ? null : merge(key, newVal, oldVal);
             }).Values.Combine(spacing);
         }
 
-        public static void Synchronize<K, O, N>(
+        public static void Synchronize<K, N, O>(
             Dictionary<K, N> newDictionary, 
             Dictionary<K, O> oldDictionary, 
             Action<K, N> createNew, 
             Action<K, O> removeOld, 
-            Action<K, O, N> merge)
+            Action<K, N, O> merge)
             where O : class
             where N : class
         {
@@ -59,18 +59,19 @@ namespace Signum.Engine
                 }
                 else
                 {
-                    if (merge != null) merge(key, oldVal, newVal);
+                    if (merge != null) merge(key, newVal, oldVal);
                 }
             }
         }
 
-        public static SqlPreCommand SynchronizeReplacing<O, N>(
-            Replacements replacements, string replacementsKey,
-            Dictionary<string, O> oldDictionary,
-            Dictionary<string, N> newDictionary,
-            Func<string, O, SqlPreCommand> removeOld,
-            Func<string, N, SqlPreCommand> createNew,
-            Func<string, O, N, SqlPreCommand> merge,
+        public static SqlPreCommand SynchronizeReplacing<N, O>(
+            Replacements replacements, 
+            string replacementsKey, 
+            Dictionary<string, N> newDictionary, 
+            Dictionary<string, O> oldDictionary, 
+            Func<string, N, SqlPreCommand> createNew, 
+            Func<string, O, SqlPreCommand> removeOld, 
+            Func<string, N, O, SqlPreCommand> merge, 
             Spacing spacing)
             where O : class
             where N : class
@@ -79,7 +80,7 @@ namespace Signum.Engine
 
             var repOldDictionary = replacements.ApplyReplacements(oldDictionary, replacementsKey);
 
-            return repOldDictionary.OuterJoinDictionaryCC(newDictionary, (key, oldVal, newVal) =>
+            return newDictionary.OuterJoinDictionaryCC(repOldDictionary, (key, newVal, oldVal) =>
             {
                 if (oldVal == null)
                     return createNew == null ? null : createNew(key, newVal);
@@ -87,7 +88,7 @@ namespace Signum.Engine
                 if (newVal == null)
                     return removeOld == null ? null : removeOld(key, oldVal);
 
-                return merge == null ? null : merge(key, oldVal, newVal);
+                return merge == null ? null : merge(key, newVal, oldVal);
             }).Values.Combine(spacing);
         }
 
@@ -146,108 +147,46 @@ namespace Signum.Engine
 
             StringDistance sd = new StringDistance();
 
-            Dictionary<string, Dictionary<string, float>> distances = oldOnly.ToDictionary(a => a, a => newOnly.ToDictionary(b => b, b =>
+            Dictionary<string, Dictionary<string, float>> distances = oldOnly.ToDictionary(o => o, o => newOnly.ToDictionary(n => n, n =>
             {
-                int lcs = sd.LongestCommonSubsequence(a, b);
+                int lcs = sd.LongestCommonSubsequence(o, n);
 
-                int max = Math.Max(a.Length, b.Length);
+                int max = Math.Max(o.Length, n.Length);
 
-                return max / (lcs + 0.1f);
+                return max / (lcs + 4f);
             }));
-
-            Dictionary<string, float> minDistances = distances.SelectDictionary(a => a, dic => dic.Values.Min());
-            {
-                int extra = oldOnly.Count - newOnly.Count;
-
-                if (extra > 0)
-                {
-                    var toRemove = minDistances.OrderByDescending(a => a.Value).Take(extra).Select(a => a.Key).ToList();
-                    minDistances.SetRange(toRemove, a => a, a => 0);
-                }
-            }
-
-            Solution bestSolution = new Solution(null, int.MaxValue);
-            Action<int, Solution> findMinimumPermutation = null;
-
-            findMinimumPermutation = (pos, current) =>
-            {
-                if (pos == oldOnly.Count)
-                {
-                    if (bestSolution.Sum > current.Sum)
-                        bestSolution = current;
-
-                    return;
-                }
-                else
-                {
-                    if (bestSolution.Sum < current.Sum)
-                        return;
-
-                    string old = oldOnly[pos];
-                    var dist = distances[old];
-
-                    var list = (from n in newOnly
-                                where !current.Selections.Any(a => a.NewValue == n)
-                                let d = dist[n]
-                                orderby d
-                                select new { n, d }).ToList();
-
-                    float sum = current.Sum - minDistances[old];
-
-                    foreach (var item in list)
-                    {
-                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, item.n)), sum + item.d));
-                    }
-
-                    if ((oldOnly.Count - pos) > (newOnly.Count - current.Selections.Take(pos).Count(a => a.NewValue != null)))
-                        findMinimumPermutation(pos + 1, new Solution(current.Selections.Push(new Selection(old, (string)null)), sum));
-                }
-            };
-
-            var min = new Solution(ImmutableStack<Selection>.Empty, minDistances.Values.Sum());
-
-            findMinimumPermutation(0, min);
 
             Dictionary<string, string> replacements = new Dictionary<string, string>();
 
-            if (Interactive)
+            while (oldOnly.Count > 0 && newOnly.Count > 0)
             {
-                while (oldOnly.Count > 0 && newOnly.Count > 0)
+                var old = distances.WithMin(kvp=>kvp.Value.Values.Min());
+
+                Selection selection = !Interactive ? new Selection(old.Key, old.Value.WithMin(a => a.Value).Key) :
+                                        SelectInteractive(old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), old.Key, replacementsKey);
+
+                oldOnly.Remove(selection.OldValue);
+                distances.Remove(selection.OldValue);
+
+                if (selection.NewValue != null)
                 {
-                    Selection defaultSelection = bestSolution.Selections.Last(a => a.NewValue != null);
+                    replacements.Add(selection.OldValue, selection.NewValue);
 
-                    List<string> sms = newOnly.OrderBy(n => distances[defaultSelection.OldValue][n]).ToList();
+                    newOnly.Remove(selection.NewValue);
 
-                    Selection selection = SelectInteractive(sms, defaultSelection, replacementsKey);
-
-                    if (selection.NewValue != null)
-                    {
-                        replacements.Add(selection.OldValue, selection.NewValue);
-                        oldOnly.Remove(selection.OldValue);
-                        newOnly.Remove(selection.NewValue);
-                    }
-                    else
-                    {
-                        oldOnly.Remove(selection.OldValue);
-                    }
-
-                    bestSolution = new Solution(null, int.MaxValue);
-                    findMinimumPermutation(0, min);
+                    foreach (var dic in distances.Values)
+                        dic.Remove(selection.NewValue);
                 }
-            }
-            else
-            {
-                replacements.AddRange(bestSolution.Selections.Where(a => a.NewValue != null).Select(a => KVP.Create(a.OldValue, a.NewValue)));
             }
 
             if (replacements.Count != 0)
                 this.Add(replacementsKey, replacements);
         }
 
-        private static Selection SelectInteractive(List<string> sms, Selection selection, string replacementsKey)
+        private static Selection SelectInteractive(List<string> newValues, string oldValue, string replacementsKey)
         {
-            Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(selection.OldValue, replacementsKey));
-            sms.Select((s, i) => "-{0}{1}: {2} ".Formato(s == selection.NewValue ? ">" : " ", i, s)).ToConsole();
+            Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(oldValue, replacementsKey));
+            newValues.Select((s, i) => "-{0}{1,2}: {2} ".Formato(i == 0 ? ">" : " ", i, s)).ToConsole();
             Console.WriteLine();
             Console.WriteLine(Properties.Resources.NNone);
 
@@ -256,28 +195,16 @@ namespace Signum.Engine
                 string answer = Console.ReadLine().ToLower();
                 int option = 0;
                 if (answer == "n")
-                    return new Selection(selection.OldValue, null);
+                    return new Selection(oldValue, null);
 
                 if (answer == "")
-                    return selection;
+                    return new Selection(oldValue, newValues[0]);
 
                 if (int.TryParse(answer, out option))
-                    return new Selection(selection.OldValue, sms[option]);
+                    return new Selection(oldValue, newValues[option]);
 
                 Console.WriteLine("Error");
             }
-        }
-
-        public struct Solution
-        {
-            public Solution(ImmutableStack<Selection> selections, float sum)
-            {
-                this.Selections = selections;
-                this.Sum = sum;
-            }
-
-            public readonly ImmutableStack<Selection> Selections;
-            public readonly float Sum;
         }
 
         public struct Selection

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
-    <value>¿Se ha renombrado '{0}' en {1}??</value>
+    <value>    ¿'{0}' se ha renombrado en {1}??</value>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
     <value>Error de concurrencia en la base de datos, Tabla = {0}, Id = {1}</value>

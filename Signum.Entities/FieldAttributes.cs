@@ -78,7 +78,7 @@ namespace Signum.Entities
             Implementations? imp = TryFromAttributes(t, fieldAttributes, route);
 
             if (imp == null)
-                throw new InvalidOperationException(Error(t) + " se implementations for {0}".Formato(route));
+                throw new InvalidOperationException(Error(t) + ". Set implementations for {0}".Formato(route));
 
             return imp.Value;
         }

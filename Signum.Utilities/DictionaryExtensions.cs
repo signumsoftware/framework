@@ -7,6 +7,7 @@ using System.Collections.Specialized;
 using Signum.Utilities.Properties;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 
 namespace Signum.Utilities
 {
@@ -65,6 +66,11 @@ namespace Signum.Utilities
                 dictionary.Add(key, result);
             }
             return result;
+        }
+
+        public static V GetOrAdd<K, V>(this ConcurrentDictionary<K, V> dictionary, K key) where V : new()
+        {
+            return dictionary.GetOrAdd(key, k => new V());
         }
 
         public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, V value)

@@ -524,6 +524,16 @@ namespace Signum.Engine
             }
         }
 
+        public static string CurrentStatus()
+        {
+            return GetCurrent().FollowC(a => a.Parent).ToString(t => "{0} Started : {1} Rollbacked: {2} Connection: {3} Transaction: {4}".Formato(
+                t.GetType().Name,
+                t.Started,
+                t.IsRolledback,
+                t.Connection == null ? "null" : t.Connection.State.ToString(),
+                t.Transaction == null ? "null" : "set"), "\r\n");
+        }
+
         public T Commit<T>(T returnValue)
         {
             Commit();

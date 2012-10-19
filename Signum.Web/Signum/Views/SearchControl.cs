@@ -202,7 +202,7 @@ WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n    \r\n");
     }
 
 
-     if (Model.ControlID.HasText() && findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
+     if (findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
     { 
         
    Write(Html.Href(Model.Compose("sfFullScreen"),
