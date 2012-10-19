@@ -34,16 +34,7 @@ namespace Signum.Entities
             set { Set(ref cleanName, value, () => CleanName); }
         }
 
-        [NotNullable]
-        string friendlyName;
-        [StringLengthValidator(Min=1)]
-        public string FriendlyName
-        {
-            get { return friendlyName; }
-            set { Set(ref friendlyName, value, () => FriendlyName); }
-        }
-
-        static Expression<Func<TypeDN, string>> ToStringExpression = e => e.friendlyName;
+        static Expression<Func<TypeDN, string>> ToStringExpression = e => e.CleanName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

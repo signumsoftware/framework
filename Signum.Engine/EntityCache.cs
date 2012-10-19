@@ -34,7 +34,10 @@ namespace Signum.Engine
                 if (ident == null)
                     dic.Add(tuple, ie);
                 else if (ident != ie)
-                   throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".Formato(ie.GetType().Name, ie.id));
+                {
+                    //Odd but allowed
+                    //throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".Formato(ie.GetType().Name, ie.id));
+                }
             }
 
             public bool Contains(Type type, int id)

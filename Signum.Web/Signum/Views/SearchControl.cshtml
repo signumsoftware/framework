@@ -91,7 +91,7 @@
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 })
     }
-    @if (Model.ControlID.HasText() && findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
+    @if (findOptions.FilterMode != FilterMode.OnlyResults && (bool?)ViewData[ViewDataKeys.InPopup] != true)
     { 
         @Html.Href(Model.Compose("sfFullScreen"),
             "Full Screen",

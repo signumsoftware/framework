@@ -22,30 +22,30 @@ namespace Signum.Engine
 
             Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.Name);
 
-            Dictionary<ITable, Dictionary<string, UniqueIndex>> modelIndices = model.Values.ToDictionary(t => t, t =>t.GeneratUniqueIndexes().ToDictionary(a=>a.IndexName, "Indexes for {0}".Formato(t.Name)));
+            Dictionary<ITable, Dictionary<string, UniqueIndex>> modelIndices = model.Values.ToDictionary(t => t, t => t.GeneratUniqueIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".Formato(t.Name)));
 
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =
                 Synchronizer.SynchronizeScript(model, database,
                  null,
-                 (tn, dif) => dif.Indices.Values.Select(ix=> SqlBuilder.DropIndex(tn, ix)).Combine(Spacing.Simple),
+                   (tn, dif) => dif.Indices.Values.Select(ix => SqlBuilder.DropIndex(tn, ix)).Combine(Spacing.Simple),
                 (tn, tab, dif) =>
-                     {
+                    {
                     Dictionary<string, UniqueIndex> modelIxs = modelIndices[tab];
 
-                         var changedColumns = ChangedColumns(dif, tab, null);
+                        var changedColumns = ChangedColumns(dif, tab, null);
 
                     var controlledIndices = Synchronizer.SynchronizeScript(modelIxs, dif.Indices.Where(kvp => kvp.Value.IsControlledIndex).ToDictionary(),
                             null,  
                         (i, dix) => SqlBuilder.DropIndex(tn, dix),
                         (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ?  SqlBuilder.DropIndex(tn, dix) : null, 
                         Spacing.Simple);
-                        
+
                     var freeIndexes = dif.Indices.Values.Where(dix => !dix.IsControlledIndex && dix.Columns.Any(a => changedColumns[a] != ColumnAction.Equals))
                          .Select(dix => SqlBuilder.DropIndex(tn, dix)).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, controlledIndices, freeIndexes);
-                     },
+                    },
                  Spacing.Double);
 
             SqlPreCommand dropForeignKeys = Synchronizer.SynchronizeScript(
@@ -56,11 +56,11 @@ namespace Signum.Engine
                  (tn, tab, dif) => Synchronizer.SynchronizeScript(
                      tab.Columns,
                      dif.Colums,
-                 null,
+                     null,
                      (cn, colDb) => colDb.ForeingKey != null ? SqlBuilder.AlterTableDropConstraint(tn, colDb.ForeingKey.Name) : null,
                      (cn, colModel, colDb) => colDb.ForeingKey == null || colDb.ForeingKey.EqualForeignKey(tn, colModel) ? null :
                         SqlBuilder.AlterTableDropConstraint(tn, colDb.ForeingKey.Name), Spacing.Simple),
-                 Spacing.Double);
+                        Spacing.Double);
 
             SqlPreCommand tables =
                 Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyTables,
@@ -75,8 +75,8 @@ namespace Signum.Engine
                         tab.Columns,
                     dif.Colums,
                         (cn, tabCol) => SqlBuilder.AlterTableAddColumn(tn, tabCol),
-                    (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple, 
-                                    difCol.DefaultConstraintName.HasText() ?  SqlBuilder.AlterTableDropConstraint(tn, difCol.DefaultConstraintName) : null, 
+                    (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
+                                    difCol.DefaultConstraintName.HasText() ? SqlBuilder.AlterTableDropConstraint(tn, difCol.DefaultConstraintName) : null,
                                     SqlBuilder.AlterTableDropColumn(tn, cn)),
                         (cn, tabCol, difCol) => SqlPreCommand.Combine(Spacing.Simple,
                             difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tn, difCol.Name, tabCol.Name),
@@ -109,12 +109,12 @@ namespace Signum.Engine
             SqlPreCommand addIndices =
                 Synchronizer.SynchronizeScript(model, database,
                  (tn, tab) => SqlBuilder.CreateAllIndices(tab, modelIndices[tab].Values),
-                 null,
+                 null, 
                 (tn, tab, dif) =>
-                     {
-                         var columnReplacements =  replacements.TryGetC(Replacements.KeyColumnsForTable(tn));
+                 {
+                     var columnReplacements = replacements.TryGetC(Replacements.KeyColumnsForTable(tn));
 
-                         var changedColumns = ChangedColumns(dif, tab,columnReplacements);
+                     var changedColumns = ChangedColumns(dif, tab, columnReplacements);
 
                     Dictionary<string, UniqueIndex> modelIxs = modelIndices[tab];
 
@@ -122,8 +122,8 @@ namespace Signum.Engine
                          (i, mix) => SqlBuilder.CreateUniqueIndex(mix),
                         null,
                         (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.CreateUniqueIndex(mix) : null, 
-                                    Spacing.Simple);
-                         
+                                Spacing.Simple);
+
                     var recreatedFreeIndexes = dif.Indices.Values.Where(dix => !dix.IsControlledIndex &&
                         dix.Columns.Any(a => changedColumns[a] != ColumnAction.Equals) &&
                         !dix.Columns.Any(a => changedColumns[a] == ColumnAction.Removed))
@@ -135,7 +135,7 @@ namespace Signum.Engine
                         null,
                         null,
                         Spacing.Simple);
-                             
+
                     return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes, recreatedFreeIndexes, newFreeIndexes);
                 }, Spacing.Double);
 
@@ -243,7 +243,7 @@ namespace Signum.Engine
         static SqlPreCommand SynchronizeEnumsScript(Replacements replacements)
         {
             Schema schema = Schema.Current;
-
+            
             List<SqlPreCommand> commands = new List<SqlPreCommand>();
 
             foreach (var table in schema.Tables.Values)
@@ -312,7 +312,7 @@ namespace Signum.Engine
     public class DiffIndex
     {
         public bool IsUnique;
-        public string IndexName; 
+        public string IndexName;
         public string ViewName;
         public List<string> Columns;
 

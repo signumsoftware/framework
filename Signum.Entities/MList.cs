@@ -165,6 +165,31 @@ namespace Signum.Entities
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
+        public void ResetRange(IEnumerable<T> newItems)
+        {
+            var list = newItems.ToList();
+
+            if (list.Count == innerList.Count)
+            {
+                foreach (var item in list)
+                {
+                    if (!innerList.Remove(item))
+                    {
+                        selfModified = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                selfModified = true;
+            }
+
+            innerList = list;
+
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
+        }
+
         public void Clear()
         {
             innerList.Clear();
