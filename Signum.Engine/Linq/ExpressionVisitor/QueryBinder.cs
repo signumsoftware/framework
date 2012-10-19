@@ -297,7 +297,7 @@ namespace Signum.Engine.Linq
 
         private Expression BindAggregate(Type resultType, AggregateFunction aggregateFunction, Expression source, LambdaExpression selector, bool isRoot)
         {
-            bool coalesceTrick = !resultType.IsNullable() && aggregateFunction == AggregateFunction.Sum;
+            Type enumType = ExtractEnum(ref resultType, aggregateFunction);
 
             ProjectionExpression projection = this.VisitCastProjection(source);
             Expression exp =
@@ -307,23 +307,33 @@ namespace Signum.Engine.Linq
 
             projection = ApplyExpansions(projection);
 
-            if (coalesceTrick)
-                exp = Expression.Convert(exp, resultType.Nullify());
+            Expression aggregate;
+            if (!resultType.IsNullable() && aggregateFunction == AggregateFunction.Sum)
+            {
+                var nominated = DbExpressionNominator.FullNominate(Expression.Convert(exp, resultType.Nullify()));
 
-            exp = DbExpressionNominator.FullNominate(exp);
-
-            Alias alias = NextSelectAlias();
-            var aggregate = !coalesceTrick ? new AggregateExpression(resultType, exp, aggregateFunction) :
-                (Expression)Expression.Coalesce(
+                aggregate = (Expression)Expression.Coalesce(
                     new AggregateExpression(resultType.Nullify(), exp, aggregateFunction),
                     new SqlConstantExpression(Activator.CreateInstance(resultType), resultType));
+            }
+            else
+            {
+                var nominated = DbExpressionNominator.FullNominate(exp);
+
+                aggregate = new AggregateExpression(resultType, exp, aggregateFunction);
+            }
+
+
+            Alias alias = NextSelectAlias();
 
             ColumnDeclaration cd = new ColumnDeclaration("a", aggregate);
 
             SelectExpression select = new SelectExpression(alias, false, false, null, new[] { cd }, projection.Select, null, null, null);
 
             if (isRoot)
-                return new ProjectionExpression(select, ColumnProjector.SingleProjection(cd, alias, resultType), UniqueFunction.Single, resultType);
+                return new ProjectionExpression(select,
+                   RestoreEnum(ColumnProjector.SingleProjection(cd, alias, resultType), enumType),
+                   UniqueFunction.Single, enumType ?? resultType);
 
             ScalarExpression subquery = new ScalarExpression(resultType, select);
 
@@ -335,12 +345,39 @@ namespace Signum.Engine.Linq
                      selector != null ? MapAndVisitExpand(selector, ref info.Projection) :
                      info.Projection.Projector;
 
-                exp2 = DbExpressionNominator.FullNominate(exp2);
+                var nominated2 = DbExpressionNominator.FullNominate(exp2);
 
-                return new AggregateSubqueryExpression(info.GroupAlias, new AggregateExpression(resultType, exp2, aggregateFunction), subquery);
+                var result = new AggregateSubqueryExpression(info.GroupAlias,
+                    new AggregateExpression(resultType, nominated2, aggregateFunction),
+                    subquery);
+
+                return RestoreEnum(result, enumType);
             }
 
-            return subquery;
+            return RestoreEnum(subquery, enumType);
+        }
+
+        static Type ExtractEnum(ref Type resultType, AggregateFunction aggregateFunction)
+        {
+            if (resultType.UnNullify().IsEnum)
+            {
+                if (aggregateFunction != AggregateFunction.Min && aggregateFunction != AggregateFunction.Max)
+                    throw new InvalidOperationException("{0} is not allowed for {1}".Formato(aggregateFunction, resultType));
+
+                Type result = resultType;
+                resultType = typeof(int);
+                return result;
+            }
+
+            return resultType;
+        }
+
+        static Expression RestoreEnum(Expression expression, Type enumType)
+        {
+            if (enumType == null)
+                return expression;
+
+            return Expression.Convert(expression, enumType);
         }
 
 

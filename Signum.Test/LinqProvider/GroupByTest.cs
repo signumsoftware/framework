@@ -268,6 +268,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void MinEnum()
+        {
+            var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex).Select(gr => gr.Min(a => a.Status));
+            var list2 = Database.Query<ArtistDN>().GroupBy(a => a.Sex).Select(gr => gr.Where(a => a.Id > 10).Min(a => a.Status));
+            var minSex = Database.Query<ArtistDN>().Min(a => a.Sex);
+        }
+
+
+        [TestMethod]
         public void RootMinException()
         {
             Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
