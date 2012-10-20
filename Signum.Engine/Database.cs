@@ -695,17 +695,34 @@ namespace Signum.Engine
         }
 
         /// <param name="updateConstructor">Use a object initializer to make the update (no entity will be created)</param>
-        public static int UnsafeUpdate<T>(this IQueryable<T> query, Expression<Func<T, T>> updateConstructor)
-            where T : IdentifiableEntity
+        public static int UnsafeUpdate<E>(this IQueryable<E> query, Expression<Func<E, E>> updateConstructor)
+            where E : IdentifiableEntity
         {
             if (query == null)
                 throw new ArgumentNullException("query");
 
             using (Transaction tr = new Transaction())
             {
-                Schema.Current.OnPreUnsafeUpdate<T>(query);
+                Schema.Current.OnPreUnsafeUpdate<E>(query);
 
-                int rows = DbQueryProvider.Single.Update(query, updateConstructor, cm => cm.ExecuteScalar());
+                int rows = DbQueryProvider.Single.Update(query, null, updateConstructor, cm => cm.ExecuteScalar());
+
+                return tr.Commit(rows);
+            }
+        }
+
+        /// <param name="updateConstructor">Use a object initializer to make the update (no entity will be created)</param>
+        public static int UnsafeUpdatePart<T, E>(this IQueryable<T> query, Expression<Func<T, E>> entitySelector, Expression<Func<T, E>> updateConstructor)
+            where E : IdentifiableEntity
+        {
+            if (query == null)
+                throw new ArgumentNullException("query");
+
+            using (Transaction tr = new Transaction())
+            {
+                Schema.Current.OnPreUnsafeUpdate<E>(query.Select(entitySelector));
+
+                int rows = DbQueryProvider.Single.Update(query, entitySelector, updateConstructor, cm => cm.ExecuteScalar());
 
                 return tr.Commit(rows);
             }
@@ -722,7 +739,7 @@ namespace Signum.Engine
             {
                 Schema.Current.OnPreUnsafeUpdate<E>(query.Select(q => q.Parent));
 
-                int rows = DbQueryProvider.Single.Update(query, updateConstructor, cm => cm.ExecuteScalar());
+                int rows = DbQueryProvider.Single.Update(query, null, updateConstructor, cm => cm.ExecuteScalar());
 
                 return tr.Commit(rows);
             }

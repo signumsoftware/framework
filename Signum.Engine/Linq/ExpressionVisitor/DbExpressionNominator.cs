@@ -627,16 +627,16 @@ namespace Signum.Engine.Linq
 
                 if (u.NodeType == ExpressionType.Convert)
                 {
-                    var untu = u.Type.UnNullify(); 
-                    var optu = u.Operand.Type.UnNullify();
+                    var untu = u.Type.UnNullify();
+                    var optu = operand.Type.UnNullify();
 
                     if ((optu == typeof(bool) || optu == typeof(int) || optu == typeof(long)) &&
                         (untu == typeof(double) || untu == typeof(float) || untu == typeof(decimal)))
-                        return Add(new SqlCastExpression(u.Type, u.Operand));
+                        return Add(new SqlCastExpression(u.Type, operand));
 
                     if (optu == typeof(bool) &&
                        (untu == typeof(int) || untu == typeof(long)))
-                        return Add(new SqlCastExpression(u.Type, u.Operand));
+                        return Add(new SqlCastExpression(u.Type, operand));
 
                     if (IsFullNominate || isAggressive && optu == untu)
                         return Add(result);

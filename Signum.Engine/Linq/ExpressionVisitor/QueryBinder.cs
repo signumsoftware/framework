@@ -313,14 +313,14 @@ namespace Signum.Engine.Linq
                 var nominated = DbExpressionNominator.FullNominate(Expression.Convert(exp, resultType.Nullify()));
 
                 aggregate = (Expression)Expression.Coalesce(
-                    new AggregateExpression(resultType.Nullify(), exp, aggregateFunction),
+                    new AggregateExpression(resultType.Nullify(), nominated, aggregateFunction),
                     new SqlConstantExpression(Activator.CreateInstance(resultType), resultType));
             }
             else
             {
                 var nominated = DbExpressionNominator.FullNominate(exp);
 
-                aggregate = new AggregateExpression(resultType, exp, aggregateFunction);
+                aggregate = new AggregateExpression(resultType, nominated, aggregateFunction);
             }
 
 
@@ -1391,35 +1391,55 @@ namespace Signum.Engine.Linq
             return new CommandAggregateExpression(commands);
         }
 
-        internal CommandExpression BindUpdate(Expression source, LambdaExpression set)
+        internal CommandExpression BindUpdate(Expression source, LambdaExpression entitySelector, LambdaExpression updateConstructor)
         {
             ProjectionExpression pr = VisitCastProjection(source);
 
-            ParameterExpression param = set.Parameters[0];
+            Expression entity = pr.Projector;
+            if (entitySelector == null)
+                entity = pr.Projector;
+            else
+            {
+                var cleanedSelector = (LambdaExpression)DbQueryProvider.Clean(entitySelector, false, null);
+                entity = MapAndVisitExpand(cleanedSelector, ref pr);
+            }
+
+            ITable table = entity is EntityExpression ? 
+                (ITable)((EntityExpression)entity).Table : 
+                (ITable)((MListElementExpression)entity).Table;
+
+            Alias alias = Alias.Raw(table.Name);
+
+            Expression toUpdate = table is Table ? 
+                ((Table)table).GetProjectorExpression(alias, this) : 
+                ((RelationalTable)table).GetProjectorExpression(alias, this);
+
+            ParameterExpression param = updateConstructor.Parameters[0];
+            ParameterExpression toUpdateParam = Expression.Parameter(toUpdate.Type, "toUpdate");
 
             List<ColumnAssignment> assignments = new List<ColumnAssignment>();
-
             map.Add(param, pr.Projector);
-            FillColumnAssigments(assignments, param, set.Body);
+            map.Add(toUpdateParam, toUpdate);
+            FillColumnAssigments(assignments, toUpdateParam, updateConstructor.Body);
+            map.Remove(toUpdateParam);
             map.Remove(param);
 
             pr = ApplyExpansions(pr);
 
-            ITable table;
             Expression condition;
 
-            if (pr.Projector is EntityExpression)
+            if (entity is EntityExpression)
             {
-                EntityExpression ee = (EntityExpression)pr.Projector;
+                EntityExpression ee = (EntityExpression)entity;
 
                 Expression id = ee.Table.GetIdExpression(Alias.Raw(ee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
                 table = ee.Table;
             }
-            else if (pr.Projector is MListElementExpression)
+            else if (entity is MListElementExpression)
             {
-                MListElementExpression mlee = (MListElementExpression)pr.Projector;
+                MListElementExpression mlee = (MListElementExpression)entity;
 
                 Expression id = mlee.Table.RowIdExpression(Alias.Raw(mlee.Table.Name));
 
@@ -1427,7 +1447,7 @@ namespace Signum.Engine.Linq
                 table = mlee.Table;
             }
             else
-                throw new InvalidOperationException("Update not supported for {0}".Formato(pr.Projector.GetType().TypeName()));
+                throw new InvalidOperationException("Update not supported for {0}".Formato(entity.GetType().TypeName()));
 
             return new CommandAggregateExpression(new CommandExpression[]
             { 
@@ -1482,7 +1502,7 @@ namespace Signum.Engine.Linq
                 MemberAssignment ma = (MemberAssignment)m;
                 Expression colExpression = Visit(Expression.MakeMemberAccess(obj, ma.Member));
                 Expression cleaned = DbQueryProvider.Clean(ma.Expression, true, null);
-                Expression expression = Visit(cleaned);
+                Expression expression = DbExpressionNominator.FullNominate(Visit(cleaned));
                 return Assign(colExpression, expression);
             }
             else if (m is MemberMemberBinding)

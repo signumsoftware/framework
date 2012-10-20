@@ -121,7 +121,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        internal R Update<T, R>(IQueryable<T> query, Expression<Func<T, T>> set, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
+        internal R Update<R>(IQueryable query, LambdaExpression entitySelector, LambdaExpression updateConstructor, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
         {
             using (Alias.NewGenerator())
             {
@@ -132,7 +132,7 @@ namespace Signum.Engine.Linq
                     Expression cleaned = Clean(query.Expression, true, log);
                     var binder = new QueryBinder();
                     log.Switch("Bind");
-                    CommandExpression update = binder.BindUpdate(cleaned, set);
+                    CommandExpression update = binder.BindUpdate(cleaned, entitySelector, updateConstructor);
                     CommandExpression updateOptimized = (CommandExpression)Optimize(update, binder, log);
                     CommandExpression updateSimplified = UpdateDeleteSimplifier.Simplify(updateOptimized, removeSelectRowCount);
                     log.Switch("TR");
