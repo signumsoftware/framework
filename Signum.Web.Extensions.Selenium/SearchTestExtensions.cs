@@ -62,16 +62,6 @@ namespace Signum.Web.Selenium
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}lblddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0 + 1)));
         }
 
-        public static void ExpandTokens(this ISelenium selenium, int tokenSelectorIndexBase0)
-        {
-            ExpandTokens(selenium, tokenSelectorIndexBase0, "");
-        }
-
-        public static void ExpandTokens(this ISelenium selenium, int tokenSelectorIndexBase0, string prefix)
-        {
-            selenium.Click("jq=#{0}lblddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0));
-        }
-
         public static string FilterOperationSelector(int filterIndexBase0)
         {
             return FilterOperationSelector(filterIndexBase0, "");

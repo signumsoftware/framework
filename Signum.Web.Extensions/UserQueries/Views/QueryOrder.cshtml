@@ -1,5 +1,6 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.UserQueries
+@using Signum.Entities.DynamicQuery
 
 @using (var e = Html.TypeContext<QueryOrderDN>())
 {
@@ -7,7 +8,7 @@
     {
         style.OnlyValue = true;
     <div style="float: left">
-        @Html.QueryTokenCombo(e.Value.Token, ViewData[ViewDataKeys.QueryName], e)
+        @Html.QueryTokenBuilder(e.Value.Token, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
     </div>
         @Html.ValueLine(style, f => f.OrderType)
     }

@@ -157,7 +157,7 @@ WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query
 "      ");
 
 
-           Write(Html.ChartTokenCombo(tc.Value, tc.Value.ParentChart, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], tc));
+           Write(Html.ChartTokenBuilder(tc.Value, tc.Value.ParentChart, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], tc));
 
 WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
 

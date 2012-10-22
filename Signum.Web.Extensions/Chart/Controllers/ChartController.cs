@@ -86,16 +86,8 @@ namespace Signum.Web.Chart
 
             QueryToken token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
 
-            List<QueryToken> subtokens = token.SubTokensChart(qd.Columns, request.GroupResults);
-
-            if (subtokens.IsEmpty())
-                return Content("");
-
-            var tokenOptions = SearchControlHelper.TokensCombo(subtokens, null);
-
-            return Content(
-                SearchControlHelper.TokenOptionsCombo(
-                    SignumController.CreateHtmlHelper(this), request.QueryName, tokenOptions, new Context(null, prefix), index + 1, true).ToHtmlString());
+            return Content(SignumController.CreateHtmlHelper(this).QueryTokenCombo(token, null,
+                new Context(null, prefix), index + 1, qd.QueryName, t => token.SubTokensChart(qd.Columns, request.GroupResults)).ToHtmlString());
         }
 
         [HttpPost]
