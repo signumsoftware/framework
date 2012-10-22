@@ -369,7 +369,7 @@ namespace Signum.Engine.Linq
                 return result;
             }
 
-            return resultType;
+            return null;
         }
 
         static Expression RestoreEnum(Expression expression, Type enumType)
