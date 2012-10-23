@@ -47,7 +47,7 @@ namespace Signum.Entities.Chart
 
                 bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-                foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase))
+                foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
                 {
                     var queryName = match.Value;
                     if (OmniboxParser.Manager.AllowedQuery(queryName))
@@ -56,6 +56,19 @@ namespace Signum.Entities.Chart
                     }
                 }
             }
+        }
+
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(ChartOmniboxResult);
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult 
+                { 
+                    ToStr = "Chart {0}".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_Query), 
+                    OmniboxResultType = resultType 
+                }
+            };
         }
     }
 

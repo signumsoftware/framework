@@ -36,6 +36,19 @@ namespace Signum.Entities.Chart
                 };
             }
         }
+
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(UserChartOmniboxResult);
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult 
+                { 
+                    ToStr = "'{0}'".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_UserChart), 
+                    OmniboxResultType = resultType 
+                }
+            };
+        }
     }
 
     public class UserChartOmniboxResult : OmniboxResult

@@ -50,7 +50,7 @@ namespace Signum.Entities.Omnibox
 
             List<FilterSyntax> syntaxSequence = null;
 
-            foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase))
+            foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
             {
                 var queryName = match.Value;
                 if (OmniboxParser.Manager.AllowedQuery(queryName))
@@ -427,6 +427,21 @@ namespace Signum.Entities.Omnibox
             throw new InvalidOperationException("Unexpected value type {0}".Formato(p.GetType()));
         }
 
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(DynamicQueryOmniboxResult);
+
+            var queryName = Signum.Entities.Extensions.Properties.Resources.Omnibox_Query;
+            var field = Signum.Entities.Extensions.Properties.Resources.Omnibox_Field;
+            var value = Signum.Entities.Extensions.Properties.Resources.Omnibox_Value;
+
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult { ToStr = "{0}".Formato(queryName), OmniboxResultType = resultType },
+                new HelpOmniboxResult { ToStr = "{0} {1}='{2}'".Formato(queryName, field, value), OmniboxResultType = resultType },
+                new HelpOmniboxResult { ToStr = "{0} {1}1='{2}1' {1}2='{2}2'".Formato(queryName, field, value), OmniboxResultType = resultType },
+            };
+        }
     }
 
     public class DynamicQueryOmniboxResult : OmniboxResult
