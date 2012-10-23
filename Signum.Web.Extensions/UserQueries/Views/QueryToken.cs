@@ -43,6 +43,8 @@ namespace ASP
     using System.Xml.Linq;
     using Signum.Engine;
     using Signum.Entities.UserQueries;
+    using Signum.Web.UserQueries;
+    using Signum.Entities.DynamicQuery;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/UserQueries/Views/QueryToken.cshtml")]
@@ -64,15 +66,16 @@ namespace ASP
         {
 
 
+
 WriteLiteral("\r\n");
 
 
  using (var e = Html.TypeContext<QueryTokenDN>())
 {
     
-Write(Html.QueryTokenCombo(e.Value.Token, ViewData[ViewDataKeys.QueryName], e));
+Write(Html.QueryTokenDNBuilder(e.Value, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
 
-                                                                             
+                                                                                                    
 }
 
 

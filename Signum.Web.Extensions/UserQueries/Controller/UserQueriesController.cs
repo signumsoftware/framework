@@ -66,12 +66,25 @@ namespace Signum.Web.UserQueries
             return Redirect(Navigator.FindRoute(queryName));
         }
 
-        public RedirectResult Save()
+        public ActionResult Save()
         {
-            var context = this.ExtractEntity<UserQueryDN>().ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
+            UserQueryDN userQuery = null;
+            
+            try
+            {
+                userQuery = this.ExtractEntity<UserQueryDN>();
+            }
+            catch(Exception ex){}
 
-            var userQuery = context.Value.Save();
+            var context = userQuery.ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
 
+            if (context.GlobalErrors.Any())
+            {
+                ModelState.FromContext(context);
+                return JsonAction.ModelState(ModelState);
+            }
+
+            userQuery = context.Value.Save();
             return Redirect(Navigator.ViewRoute(userQuery.ToLite()));
         }
     }

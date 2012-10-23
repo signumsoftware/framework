@@ -78,7 +78,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        <div style=\"float: left\">\r\n            ");
 
 
-       Write(Html.QueryTokenCombo(e.Value.Token, ViewData[ViewDataKeys.QueryName], e));
+       Write(Html.QueryTokenDNBuilder(e.Value, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
 
 WriteLiteral("\r\n        </div>\r\n");
 

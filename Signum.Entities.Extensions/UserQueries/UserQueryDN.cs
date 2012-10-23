@@ -149,16 +149,35 @@ namespace Signum.Entities.UserQueries
 
         [Ignore]
         protected QueryToken token;
-        [NotNullValidator]
+        [HiddenProperty]
         public QueryToken Token
+        {
+            get
+            {
+                if (parseException != null)
+                    throw parseException;
+                return token;
+            }
+            set { if (Set(ref token, value, () => Token)) TokenChanged(); }
+        }
+
+        public QueryToken TryToken
         {
             get { return token; }
             set { if (Set(ref token, value, () => Token)) TokenChanged(); }
         }
 
+        [Ignore]
+        protected Exception parseException;
+        [HiddenProperty]
+        public Exception ParseException
+        {
+            get { return parseException; }
+        }
+
         public virtual void TokenChanged()
         {
-
+            parseException = null;
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -166,12 +185,22 @@ namespace Signum.Entities.UserQueries
             tokenString = token.FullKey();
         }
 
-        public void ParseData(QueryDescription desc)
+        public virtual void ParseData(QueryDescription desc)
         {
-            ParseData(t => QueryUtils.SubTokens(t, desc.Columns)); 
+            ParseData(t => QueryUtils.SubTokens(t, desc.Columns));
         }
 
         public abstract void ParseData(Func<QueryToken, List<QueryToken>> subTokens);
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Token) && parseException != null)
+            {
+                return parseException.Message;
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 
     [Serializable]
@@ -201,7 +230,14 @@ namespace Signum.Entities.UserQueries
 
         public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
         {
-            Token = QueryUtils.Parse(tokenString, subTokens);
+            try
+            {
+                Token = QueryUtils.Parse(tokenString, subTokens);
+            }
+            catch (Exception e)
+            {
+                parseException = e; 
+            }
             CleanSelfModified();
         }
 
@@ -236,7 +272,14 @@ namespace Signum.Entities.UserQueries
 
         public override void ParseData(Func<QueryToken,List<QueryToken>> subTokens)
         {
-            Token = QueryUtils.Parse(tokenString, subTokens);
+            try
+            {
+                Token = QueryUtils.Parse(tokenString, subTokens);
+            }
+            catch (Exception e)
+            {
+                parseException = e;
+            }
             CleanSelfModified();
         }
     }
@@ -284,23 +327,33 @@ namespace Signum.Entities.UserQueries
 
         public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
         {
-            Token = QueryUtils.Parse(tokenString, subTokens);
-
-            if (value != null)
+            try
             {
-                if (valueString.HasText())
-                    throw new InvalidOperationException("Value and ValueString defined at the same time");
-
-                ValueString = FilterValueConverter.ToString(value, Token.Type);
+                Token = QueryUtils.Parse(tokenString, subTokens);
             }
-            else
+            catch (Exception e)
             {
-                object val;
-                string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
-                if (string.IsNullOrEmpty(error))
-                    Value = val; //Executed on server only
+                parseException = e;
+            }
 
-                CleanSelfModified();
+            if (token != null)
+            {
+                if (value != null)
+                {
+                    if (valueString.HasText())
+                        throw new InvalidOperationException("Value and ValueString defined at the same time");
+
+                    ValueString = FilterValueConverter.ToString(value, Token.Type);
+                }
+                else
+                {
+                    object val;
+                    string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
+                    if (string.IsNullOrEmpty(error))
+                        Value = val; //Executed on server only
+
+                    CleanSelfModified();
+                }
             }
         }
 
@@ -308,11 +361,13 @@ namespace Signum.Entities.UserQueries
         {
             Notify(() => Operation);
             Notify(() => ValueString);
+
+            base.TokenChanged();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (Token != null)
+            if (token != null)
             {
                 FilterType filterType = QueryUtils.GetFilterType(Token.Type);
 

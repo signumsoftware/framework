@@ -381,8 +381,8 @@ namespace Signum.Entities.Chart
 
         public static void RemoveNotNullValidators()
         {
-            Validator.GetOrCreatePropertyPack((ChartColumnDN c) => c.Token).Validators.RemoveAll(a => a is NotNullValidatorAttribute);
-            Validator.GetOrCreatePropertyPack((ChartColumnDN c) => c.TokenString).Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
+            Validator.GetOrCreatePropertyPack((ChartColumnDN c) => c.TokenString)
+                .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
         }
     }
 }
