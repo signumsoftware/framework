@@ -35,7 +35,7 @@ namespace Signum.Entities.Omnibox
             }).ToList();
         }
          
-        Regex regex = new Regex(@"^I(?<filter>(?<token>I(\.I)*)(\.|((?<op>=)(?<val>(I;N)|[NSI])?))?)*$", RegexOptions.ExplicitCapture);
+        Regex regex = new Regex(@"^I(?<filter>(?<token>I(\.I)*)(\.|((?<op>=)(?<val>[ENSI])?))?)*$", RegexOptions.ExplicitCapture);
        
         public override IEnumerable<DynamicQueryOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {   
@@ -264,6 +264,13 @@ namespace Signum.Entities.Omnibox
                         var result = OmniboxParser.Manager.AutoComplete(queryToken.Type.CleanType(), queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
 
                         return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();  
+                    }
+                    else if (omniboxToken.Type == OmniboxTokenType.Entity)
+                    {
+                        Lite lite;
+                        var error = Lite.TryParseLite(queryToken.Type.CleanType(), omniboxToken.Value, out lite);
+                        if(string.IsNullOrEmpty(error))
+                            return new []{new ValueTuple { Value = lite }}; 
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Number)
                     {
