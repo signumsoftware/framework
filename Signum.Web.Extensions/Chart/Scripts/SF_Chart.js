@@ -208,13 +208,18 @@ SF.Chart = (function () {
 
             var data = $chartContainer.data("json");
             SF.Chart.Utils.fillAllTokenValueFuntions(data);
-
+        
+            var self = this;
             $(".sf-chart-redraw-onchange", this.$chartControl).each(function(i, element){
                 var $element = $(element);
-                var name = $element.attr("id").split('_');
-                if(name.length  == 3 && name[0] == "Columns"){
-                    var column = data.columns["c" + name[1]];
-                    switch (name[2]){
+                var name = $element.attr("id");
+                if (!SF.isEmpty(self.options.prefix)) {
+                    name = name.substring(self.options.prefix.length + 1, name.length);
+                }
+                var nameParts = name.split('_');
+                if(nameParts.length == 3 && nameParts[0] == "Columns"){
+                    var column = data.columns["c" + nameParts[1]];
+                    switch (nameParts[2]){
                         case "DisplayName": column.title = $element.val(); break;
                         case "Parameter1":  column.parameter1 = $element.val(); break;
                         case "Parameter2":  column.parameter2 = $element.val(); break;
