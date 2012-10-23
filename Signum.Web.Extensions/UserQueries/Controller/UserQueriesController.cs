@@ -85,7 +85,7 @@ namespace Signum.Web.UserQueries
             }
 
             userQuery = context.Value.Save();
-            return Redirect(Navigator.ViewRoute(userQuery.ToLite()));
+            return JsonAction.Redirect(Navigator.ViewRoute(userQuery.ToLite()));
         }
     }
 }
