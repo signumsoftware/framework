@@ -43,6 +43,7 @@ namespace ASP
     using System.Xml.Linq;
     using Signum.Engine;
     using Signum.Entities.UserQueries;
+    using Signum.Web.UserQueries;
     using Signum.Entities.DynamicQuery;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
@@ -67,6 +68,7 @@ namespace ASP
 
 
 
+
  using (var e = Html.TypeContext<QueryColumnDN>())
 {
     using (var style = e.SubContext())
@@ -80,7 +82,7 @@ namespace ASP
 WriteLiteral("        <div style=\"float: left\">\r\n            ");
 
 
-       Write(Html.QueryTokenBuilder(e.Value.Token, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
+       Write(Html.QueryTokenDNBuilder(e.Value, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
 
 WriteLiteral("\r\n        </div>\r\n");
 

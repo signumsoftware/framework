@@ -25,6 +25,7 @@ using Signum.Entities.Reflection;
 using System.Diagnostics;
 using System.Text;
 using Signum.Entities.Files;
+using Signum.Web.UserQueries;
 
 namespace Signum.Web.Chart
 {
@@ -66,7 +67,7 @@ namespace Signum.Web.Chart
         }
 
         public static EntityMapping<ChartColumnDN> MappingChartColumn = new EntityMapping<ChartColumnDN>(true)
-            .SetProperty(ct => ct.Token, ctx =>
+            .SetProperty(ct => ct.TryToken, ctx =>
             {
                 var tokenName = "";
 
@@ -195,21 +196,19 @@ namespace Signum.Web.Chart
                 };
         }
 
-
         public static MvcHtmlString ChartTokenBuilder(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, QueryDescription qd, Context context)
         {
             bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.IsGroupKey == false) ?? true;
 
-            return helper.QueryTokenBuilder(chartToken.TryCC(ct => ct.Token), context, qd.QueryName, t =>
-                t.SubTokensChart(qd.Columns, chart.GroupResults && canAggregate)
-            );
+            return helper.QueryTokenDNBuilder(chartToken, context, qd.QueryName,
+                t => t.SubTokensChart(qd.Columns, chart.GroupResults && canAggregate));
         }
 
         public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptDN current, ChartScriptDN script)
         {
             string css = "sf-chart-img";
 
-            if (script.IsCompatibleWith(chartBase))
+            if (!chartBase.Columns.Any(a=>a.ParseException != null) && script.IsCompatibleWith(chartBase))
                 css += " sf-chart-img-equiv";
 
             if (script.Is(current))

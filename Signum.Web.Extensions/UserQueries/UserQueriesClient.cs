@@ -62,7 +62,7 @@ namespace Signum.Web.UserQueries
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
                             .CreateProperty(a=>a.Operation)
                             .CreateProperty(a=>a.ValueString)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.TryToken, qtMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryColumnDN>()
@@ -70,7 +70,7 @@ namespace Signum.Web.UserQueries
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
                             .CreateProperty(a=>a.DisplayName)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.TryToken, qtMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryOrderDN>()
@@ -78,7 +78,7 @@ namespace Signum.Web.UserQueries
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)
                             .CreateProperty(a=>a.OrderType)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.TryToken, qtMapping)
                     },
                 });
                 
@@ -96,8 +96,12 @@ namespace Signum.Web.UserQueries
                         { 
                             Id = TypeContextUtilities.Compose(ctx.Prefix, "ebUserQuerySave"),
                             Text = Signum.Web.Properties.Resources.Save, 
-                            OnClick = JsValidator.EntityIsValid(ctx.Prefix, 
-                                Js.Submit(RouteHelper.New().Action<UserQueriesController>(uqc => uqc.Save()))).ToJS()
+                            OnClick = Js.AjaxCall<UserQueriesController>(uqc => uqc.Save(), "$(':input').serialize()", new JsFunction("result"){
+                                "if (typeof result.ModelState != 'undefined') { " +
+                                "var modelState = result.ModelState;" + 
+                                "returnValue = new SF.Validator().showErrors(modelState, true);" + 
+                                "SF.Notify.error(lang.signum.error, 2000); }"
+                            }).ToJS()
                         }
                     };
 

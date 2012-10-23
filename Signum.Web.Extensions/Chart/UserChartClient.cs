@@ -57,13 +57,13 @@ namespace Signum.Web.Chart
                                 ElementMapping = new EntityMapping<QueryFilterDN>(false)
                                     .CreateProperty(a=>a.Operation)
                                     .CreateProperty(a=>a.ValueString)
-                                    .SetProperty(a=>a.Token, qtMapping)
+                                    .SetProperty(a=>a.TryToken, qtMapping)
                             })
                             .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
                             {
                                 ElementMapping = new EntityMapping<QueryOrderDN>(false)
                                     .CreateProperty(a=>a.OrderType)
-                                    .SetProperty(a=>a.Token, qtMapping)
+                                    .SetProperty(a=>a.TryToken, qtMapping)
                             })
                     }
                 });

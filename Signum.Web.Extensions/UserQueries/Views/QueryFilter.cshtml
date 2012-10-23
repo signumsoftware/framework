@@ -9,7 +9,7 @@
     {
         style.OnlyValue = true;
         <div style="float: left">
-            @Html.QueryTokenBuilder(e.Value.Token, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
+            @Html.QueryTokenDNBuilder(e.Value, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
         </div>
         @Html.ValueLine(style, f => f.Operation)
         @Html.ValueLine(style, f => f.ValueString, vl => vl.ValueHtmlProps["size"] = 20)
