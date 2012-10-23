@@ -323,11 +323,39 @@ namespace Signum.Engine.Mailing
                 if (message != null)
                 {
                     SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder(emailMessage);
-                    client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
 
                     emailMessage.Sent = null;
                     emailMessage.Received = null;
                     emailMessage.Save();
+
+                    client.SafeSendMailAsync(message, args =>
+                    {
+                        Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
+                        if (args.Error != null)
+                        {
+                            var exLog = args.Error.LogException().ToLite();
+                            updater = em => new EmailMessageDN
+                            {
+                                Exception = exLog,
+                                State = EmailState.SentError
+                            };
+                        }
+                        else
+                            updater = em => new EmailMessageDN
+                            {
+                                State = EmailState.Sent,
+                                Sent = TimeZoneManager.Now
+                            };
+
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (emailMessage.InDB().UnsafeUpdate(updater) > 0)
+                                return;
+
+                            if (i != 3)
+                                Thread.Sleep(3000);
+                        }
+                    }); 
 
                     client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
                 }
@@ -357,37 +385,25 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
+        public static void SafeSendMailAsync(this SmtpClient client, MailMessage message, Action<AsyncCompletedEventArgs> onComplete)
         {
-            EmailUser emailUser = (EmailUser)e.UserState;
-            using (AuthLogic.UserSession(emailUser.User))
+            client.SendCompleted += (object sender, AsyncCompletedEventArgs e) =>
             {
-                Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
-                if (e.Error != null)
+                client.Dispose();
+                message.Dispose();
+                using (AuthLogic.Disable())
                 {
-                    var exLog = e.Error.LogException().ToLite();
-                    updater = em => new EmailMessageDN
+                    try
                     {
-                        Exception = exLog,
-                        State = EmailState.SentError
-                    };
-                }
-                else
-                    updater = em => new EmailMessageDN
+                        onComplete(e);
+                    }
+                    catch (Exception ex)
                     {
-                        State = EmailState.Sent,
-                        Sent = TimeZoneManager.Now
-                    };
-
-                for (int i = 0; i < 4; i++)
-                {
-                    if (emailUser.EmailMessage.InDB().UnsafeUpdate(updater) > 0)
-                        return;
-
-                    if (i != 3)
-                        Thread.Sleep(3000);
+                        ex.LogException();
+                    }
                 }
-            }
+            };
+            client.SendAsync(message, null);
         }
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
