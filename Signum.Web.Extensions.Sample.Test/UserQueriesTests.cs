@@ -59,7 +59,6 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.PopupOk("value_1_");
 
             //add user column
-            selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "label=Owner", true);
             selenium.AddColumn("Label.Owner");
 
@@ -126,9 +125,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(prefix + "DisplayName"));
             selenium.Type(prefix + "DisplayName", "Label owner's country");
             selenium.FilterSelectToken(0, "value=Label", true, prefix);
-            selenium.ExpandTokens(1, prefix);
             selenium.FilterSelectToken(1, "value=Owner", true, prefix);
-            selenium.ExpandTokens(2, prefix);
             selenium.FilterSelectToken(2, "value=Country", true, prefix);
 
             //save it

@@ -63,7 +63,6 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Filter from the combo with Subtokens
             selenium.FilterSelectToken(0, "label=Label", true);
-            selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "label=Name", false);
             selenium.AddFilter(1);
             selenium.Type("value_1", "virgin");
@@ -82,9 +81,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Filter from the combo with subtokens of a MList
             selenium.FilterSelectToken(0, "label=Album", true);
-            selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "label=Songs", true);
-            selenium.ExpandTokens(2);
             selenium.FilterSelectToken(2, "value=Count", false);
             selenium.AddFilter(2);
             selenium.FilterSelectOperation(2, "value=GreaterThan");
@@ -163,7 +160,6 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Filter from the combo with Subtokens
             selenium.FilterSelectToken(0, "label=Artist", true, prefix);
-            selenium.ExpandTokens(1, prefix);
             selenium.FilterSelectToken(1, "label=Name", false, prefix);
             selenium.AddFilter(2, prefix);
             selenium.FilterSelectOperation(2, "value=EndsWith", prefix);
@@ -281,7 +277,6 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Add 2 user columns
             selenium.FilterSelectToken(0, "label=Label", true);
-            selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "label=Id", false);
             selenium.AddColumn("Label.Id");
 
@@ -355,9 +350,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             selenium.DeleteFilter(0);
             selenium.FilterSelectToken(0, "value=Entity", true);
-            selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "value=(Artist)", true);
-            selenium.ExpandTokens(2);
             selenium.FilterSelectToken(2, "Id", false);
             selenium.AddFilter(0);
             selenium.Type("value_0", "1"); 
@@ -383,13 +376,11 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.FilterSelectToken(0, "label=Artist", true);
             selenium.CheckAddFilterEnabled(true);
             selenium.CheckAddColumnEnabled(true);
-            selenium.ExpandTokens(1);
             selenium.CheckAddFilterEnabled(true);
             selenium.CheckAddColumnEnabled(true);
             selenium.FilterSelectToken(1, "label=Friends", true);
             selenium.CheckAddFilterEnabled(false);
             selenium.CheckAddColumnEnabled(false);
-            selenium.ExpandTokens(2);
             selenium.FilterSelectToken(2, "value=Count", false);
             selenium.CheckAddFilterEnabled(true);
             selenium.CheckAddColumnEnabled(true);
@@ -442,7 +433,6 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.AssertMultiplyMessage(false);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
-            selenium.ExpandTokens(3);
             selenium.FilterSelectToken(3, "value=Name", false);
             selenium.AddFilter(1);
             selenium.Type("value_1", "i");
@@ -469,7 +459,6 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.AssertMultiplyMessage(false);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
 
-            selenium.ExpandTokens(3);
             selenium.FilterSelectToken(3, "value=Name", false);
             selenium.AddFilter(1);
             selenium.Type("value_1", "Corgan");
