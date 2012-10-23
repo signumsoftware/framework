@@ -59,7 +59,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Select("{0}ddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0), itemSelector);
             if (willExpand)
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}lblddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0 + 1)));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}ddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0 + 1)));
         }
 
         public static void ExpandTokens(this ISelenium selenium, int tokenSelectorIndexBase0)

@@ -1563,4 +1563,31 @@
   <data name="TypeAllowed_DBReadUINone" xml:space="preserve">
     <value>DBRead UINone</value>
   </data>
+  <data name="Omnibox_DatabaseAccess" xml:space="preserve">
+    <value>Buscar entre 'comillas' hace consultas en base de datos</value>
+  </data>
+  <data name="Omnibox_Field" xml:space="preserve">
+    <value>Campo</value>
+  </data>
+  <data name="Omnibox_Help" xml:space="preserve">
+    <value>Ayuda</value>
+  </data>
+  <data name="Omnibox_MatchingOptions" xml:space="preserve">
+    <value>Puedes buscar por (ini)cio, mi(ta)d o (L)etras(M)ayusculas</value>
+  </data>
+  <data name="Omnibox_Query" xml:space="preserve">
+    <value>Consulta</value>
+  </data>
+  <data name="Omnibox_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="Omnibox_UserChart" xml:space="preserve">
+    <value>GraficoUsuario</value>
+  </data>
+  <data name="Omnibox_UserQuery" xml:space="preserve">
+    <value>ConsultaUsuario</value>
+  </data>
+  <data name="Omnibox_Value" xml:space="preserve">
+    <value>Valor</value>
+  </data>
 </root>
