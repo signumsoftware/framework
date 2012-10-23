@@ -107,7 +107,7 @@ namespace Signum.Web.Extensions.Sample
             UserQueriesClient.Start();
             ControlPanelClient.Start();
 
-            FilesClient.Start(true, true, false);
+            FilesClient.Start(true, true, true);
             ChartClient.Start();
             ReportsClient.Start(true, true);
 
