@@ -193,7 +193,7 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
            Write(Html.ValueLine(tc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter3)));
 
                                                                                                                                           
-                if (tc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                if (tc.Value.TryToken!= null && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
                 {
                     var type = tc.Value.Token.Type.CleanType();
 

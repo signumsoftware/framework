@@ -37,9 +37,9 @@ namespace Signum.Entities.Chart
 
             SetDefaultParameters();
 
-            if (Token != null)
+            if (token != null)
             {
-                DisplayName = Token.NiceName();
+                DisplayName =token.NiceName();
             }
             else
             {
@@ -180,13 +180,13 @@ namespace Signum.Entities.Chart
                     return "{0} is not {1}".Formato(DisplayName, ScriptColumn.ColumnType);
             }
 
-            if (pi.Is(() => Parameter1) && Token != null)
+            if (pi.Is(() => Parameter1) && token != null)
                 return ValidateParameter(pi, Parameter1, scriptColumn.Parameter1);
 
-            if (pi.Is(() => Parameter2) && Token != null)
+            if (pi.Is(() => Parameter2) && token != null)
                 return ValidateParameter(pi, Parameter2, scriptColumn.Parameter2);
 
-            if (pi.Is(() => Parameter3) && Token != null)
+            if (pi.Is(() => Parameter3) && token != null)
                 return ValidateParameter(pi, Parameter3, scriptColumn.Parameter3);
 
             return base.PropertyValidation(pi);
@@ -221,14 +221,21 @@ namespace Signum.Entities.Chart
             tokenString = token == null ? null : token.FullKey();
         }
 
-        internal new void ParseData(QueryDescription description)
+        public override void ParseData(QueryDescription description)
         {
             ParseData(t => SubTokensChart(t, description.Columns));
         }
 
         public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
         {
-            token = QueryUtils.Parse(tokenString, subTokens);
+            try
+            {
+                token = QueryUtils.Parse(tokenString, subTokens);
+            }
+            catch (Exception e)
+            {
+                parseException = e;
+            }
 
             CleanSelfModified();
         }

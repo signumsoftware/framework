@@ -25,6 +25,7 @@ using Signum.Entities.Reflection;
 using System.Diagnostics;
 using System.Text;
 using Signum.Entities.Files;
+using Signum.Web.UserQueries;
 
 namespace Signum.Web.Chart
 {
@@ -66,7 +67,7 @@ namespace Signum.Web.Chart
         }
 
         public static EntityMapping<ChartColumnDN> MappingChartColumn = new EntityMapping<ChartColumnDN>(true)
-            .SetProperty(ct => ct.Token, ctx =>
+            .SetProperty(ct => ct.TryToken, ctx =>
             {
                 var tokenName = "";
 
@@ -175,6 +176,8 @@ namespace Signum.Web.Chart
             return new[] { ChartQueryButton(ctx.Prefix) };
         }
 
+
+
         public static ToolBarButton ChartQueryButton(string prefix)
         {
             if (!ChartPermissions.ViewCharting.IsAuthorized())
@@ -193,51 +196,19 @@ namespace Signum.Web.Chart
                 };
         }
 
-        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, QueryDescription qd, Context context)
+        public static MvcHtmlString ChartTokenBuilder(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, QueryDescription qd, Context context)
         {
-            var tokenPath = chartToken.Token.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
-
-            QueryToken queryToken = chartToken.Token;
-            if (tokenPath.Count > 0)
-                queryToken = tokenPath[0];
-
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-
             bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.IsGroupKey == false) ?? true;
 
-            var rootTokens = ChartUtils.SubTokensChart(null, qd.Columns, chart.GroupResults && canAggregate);
-
-            sb.AddLine(SearchControlHelper.TokenOptionsCombo(
-                helper, qd.QueryName, SearchControlHelper.TokensCombo(rootTokens, queryToken), context, 0, false));
-            
-            for (int i = 0; i < tokenPath.Count; i++)
-            {
-                QueryToken t = tokenPath[i];
-                List<QueryToken> subtokens = t.SubTokensChart(qd.Columns, canAggregate);
-                if (!subtokens.IsEmpty())
-                {
-                    bool moreTokens = i + 1 < tokenPath.Count;
-                    sb.AddLine(SearchControlHelper.TokenOptionsCombo(
-                        helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
-                }
-            }
-            
-            return sb.ToHtml();
-        }
-
-        public static MvcHtmlString ChartRootTokens(this HtmlHelper helper, IChartBase chart, QueryDescription qd, Context context)
-        {
-            var subtokens = ChartUtils.SubTokensChart(null, qd.Columns, chart.GroupResults);
-
-            return SearchControlHelper.TokenOptionsCombo(
-                helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, null), context, 0, false);
+            return helper.QueryTokenDNBuilder(chartToken, context, qd.QueryName,
+                t => t.SubTokensChart(qd.Columns, chart.GroupResults && canAggregate));
         }
 
         public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptDN current, ChartScriptDN script)
         {
             string css = "sf-chart-img";
 
-            if (script.IsCompatibleWith(chartBase))
+            if (!chartBase.Columns.Any(a=>a.ParseException != null) && script.IsCompatibleWith(chartBase))
                 css += " sf-chart-img-equiv";
 
             if (script.Is(current))
