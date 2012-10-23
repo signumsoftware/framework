@@ -39,15 +39,7 @@ namespace Signum.Entities.Omnibox
 
             if (tokens.Count == 1)
             {
-                foreach (var match in matches)
-                {
-                    yield return new EntityOmniboxResult
-                    {
-                        Type = (Type)match.Value,
-                        TypeMatch = match,
-                        Distance = match.Distance,
-                    };
-                }
+                yield break;
             }
             else if (tokens[1].Type == OmniboxTokenType.Number)
             {
@@ -55,7 +47,7 @@ namespace Signum.Entities.Omnibox
                 if (!int.TryParse(tokens[1].Value, out id))
                     yield break;
 
-                foreach (var match in matches)
+                foreach (var match in matches.OrderBy(ma => ma.Distance))
                 {
                     Lite lite = OmniboxParser.Manager.RetrieveLite((Type)match.Value, id);
 
@@ -73,7 +65,7 @@ namespace Signum.Entities.Omnibox
             {
                 string pattern = OmniboxUtils.CleanCommas(tokens[1].Value);
 
-                foreach (var match in matches)
+                foreach (var match in matches.OrderBy(ma => ma.Distance))
                 {
                     var autoComplete = OmniboxParser.Manager.AutoComplete((Type)match.Value, pattern, AutoCompleteLimit);
 
@@ -83,15 +75,16 @@ namespace Signum.Entities.Omnibox
                         {
                             OmniboxMatch distance = OmniboxUtils.Contains(lite, lite.ToString(), pattern);
 
-                            yield return new EntityOmniboxResult
-                            {
-                                Type = (Type)match.Value,
-                                TypeMatch = match,
-                                ToStr = pattern,
-                                Lite = lite,
-                                Distance = match.Distance + distance.Distance,
-                                ToStrMatch = distance,
-                            };
+                            if (distance != null)
+                                yield return new EntityOmniboxResult
+                                {
+                                    Type = (Type)match.Value,
+                                    TypeMatch = match,
+                                    ToStr = pattern,
+                                    Lite = lite,
+                                    Distance = match.Distance + distance.Distance,
+                                    ToStrMatch = distance,
+                                };
                         }
                     }
                     else
@@ -109,6 +102,17 @@ namespace Signum.Entities.Omnibox
             }
         }
 
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(EntityOmniboxResult);
+            var entityTypeName = Signum.Entities.Extensions.Properties.Resources.Omnibox_Type;
+
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult { ToStr = "{0} Id".Formato(entityTypeName), OmniboxResultType = resultType },
+                new HelpOmniboxResult { ToStr = "{0} 'ToStr'".Formato(entityTypeName), OmniboxResultType = resultType }
+            };
+        }
     }
 
     public class EntityOmniboxResult : OmniboxResult

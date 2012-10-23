@@ -37,6 +37,15 @@ namespace Signum.Entities.UserQueries
             }
         }
 
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(UserQueryOmniboxResult);
+            var userQuery = Signum.Entities.Extensions.Properties.Resources.Omnibox_UserQuery;
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult { ToStr = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }
+            };
+        }
     }
 
     public class UserQueryOmniboxResult : OmniboxResult

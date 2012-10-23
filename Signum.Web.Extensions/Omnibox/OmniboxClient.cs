@@ -16,7 +16,7 @@ namespace Signum.Web.Omnibox
 {
     public static class OmniboxClient
     {
-        public static Polymorphic<Func<OmniboxResult, MvcHtmlString>> RenderHtml = new Polymorphic<Func<OmniboxResult, MvcHtmlString>>();
+        static Dictionary<Type, OmniboxProviderBase> Providers = new Dictionary<Type, OmniboxProviderBase>();
 
         public static void Start()
         {
@@ -31,7 +31,28 @@ namespace Signum.Web.Omnibox
         public static void Register<T>(this OmniboxProvider<T> provider) where T : OmniboxResult
         {
             OmniboxParser.Generators.Add(provider.CreateGenerator());
-            RenderHtml.Register(new Func<T, MvcHtmlString>(provider.RenderHtml));
+            Providers[typeof(T)] = provider;
+        }
+
+        public static MvcHtmlString Render(OmniboxResult result)
+        {
+            var helpResult = result as HelpOmniboxResult;
+            if (helpResult != null)
+            {
+                var innerHtml = MvcHtmlString.Create(helpResult.ToStr);
+                
+                if (helpResult.OmniboxResultType != null)
+                {
+                    var icon = Providers[helpResult.OmniboxResultType].Icon();
+                    innerHtml = innerHtml.Concat(icon);
+                }
+
+                return new HtmlTag("span").InnerHtml(innerHtml)
+                    .Attr("style", "color: gray; font-style: italic; padding: .2em .4em; line-height: 1.6em;")
+                    .ToHtml();
+            }
+            else
+                return Providers[result.GetType()].RenderHtmlBase(result);
         }
 
         public static MvcHtmlString ToHtml(this OmniboxMatch match)
@@ -46,14 +67,28 @@ namespace Signum.Web.Omnibox
             return html;
         }
 
-        public abstract class OmniboxProvider<T> where T : OmniboxResult
+        public abstract class OmniboxProviderBase
+        {
+            public abstract MvcHtmlString Icon();
+
+            public abstract MvcHtmlString RenderHtmlBase(OmniboxResult result);
+            
+            public MvcHtmlString ColoredSpan(string text, string colorName)
+            { 
+                return new HtmlTag("span")
+                    .InnerHtml(new MvcHtmlString(text))
+                    .Attr("style", "color:{0}; padding: .2em .4em; line-height: 1.6em;".Formato(colorName)).ToHtml(); 
+            }
+        }
+
+        public abstract class OmniboxProvider<T>: OmniboxProviderBase where T : OmniboxResult
         {
             public abstract OmniboxResultGenerator<T> CreateGenerator();
             public abstract MvcHtmlString RenderHtml(T result);
-
-            public MvcHtmlString ColoredSpan(string text, string colorName)
-            { 
-                return new HtmlTag("span").InnerHtml(new MvcHtmlString(text)).Attr("style", "color:{0}".Formato(colorName)).ToHtml(); 
+            
+            public override MvcHtmlString RenderHtmlBase(OmniboxResult result)
+            {
+                return RenderHtml((T)result);
             }
         }
 

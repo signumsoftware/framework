@@ -82,13 +82,18 @@ namespace Signum.Web.Omnibox
                 }                
             } 
 
-            html = html.Concat(ColoredSpan(" ({0})".Formato(typeof(QueryDN).NiceName()), "orange"));
+            html = html.Concat(Icon());
 
             html = new HtmlTag("a")
                     .Attr("href", findOptions.ToString())
                     .InnerHtml(html).ToHtml();
 
             return html;
+        }
+        
+        public override MvcHtmlString Icon()
+        {
+            return ColoredSpan(" ({0})".Formato(typeof(QueryDN).NiceName()), "orange");
         }
     }
 }
