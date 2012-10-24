@@ -61,13 +61,6 @@
 {
     padding: 2px 5px;    
 }
-.sf-subtokens-expander 
-{
-    cursor:pointer;
-    display: inline-block;
-    margin: .5em 5px 0;
-    vertical-align: top;
-}
 .sf-query-fullscreen
 {
     float: right;    

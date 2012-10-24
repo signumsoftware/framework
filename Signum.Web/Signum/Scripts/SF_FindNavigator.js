@@ -938,11 +938,7 @@ SF.registerModule("FindNavigator", function () {
             return tokenName;
         };
 
-        $(".sf-subtokens-expander").live("click", function () {
-            var $this = $(this);
-            $this.next().show().focus().click();
-            $this.remove();
-        });
+        
 
         var deleteFilter = function (elem) {
             var $tr = $(elem).closest("tr");
