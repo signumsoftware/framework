@@ -10,7 +10,8 @@
 @model PanelPart
 @Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
                 "~/Chart/Scripts/SF_Chart_Utils.js",
-                "~/scripts/d3.v2.min.js")
+                "~/scripts/d3.v2.min.js",
+                "~/scripts/colorbrewer.js")
 @Html.ScriptCss("~/Chart/Content/SF_Chart.css")
 @{ 
     UserChartDN uc = ((UserChartPartDN)Model.Content).UserChart;
