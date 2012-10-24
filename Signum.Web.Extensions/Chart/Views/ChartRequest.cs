@@ -141,7 +141,7 @@ WriteLiteral("\r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n       
 "filters-body\">\r\n                    ");
 
 
-               Write(Html.ChartRootTokens(Model.Value, queryDescription, Model));
+               Write(Html.ChartTokenBuilder(null, Model.Value, queryDescription, Model));
 
 WriteLiteral("\r\n                    ");
 

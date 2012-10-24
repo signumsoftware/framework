@@ -2,6 +2,7 @@
 @using Signum.Entities.UserQueries
 @using Signum.Entities.Basics
 @using Signum.Engine.Basics
+@using Signum.Engine.DynamicQuery
 
 <style type="text/css">
 .sf-user-query-edit .sf-repeater-element
@@ -19,7 +20,7 @@
 @using (var e = Html.TypeContext<UserQueryDN>())
 {
     object queryName = QueryLogic.ToQueryName(e.Value.Query.Key);
-    ViewData[ViewDataKeys.QueryName] = queryName; //To be use inside Repeaters
+    ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside Repeaters
     
     @Html.EntityLine(e, f => f.Related, el => el.Create = false)
     

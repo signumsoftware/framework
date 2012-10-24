@@ -52,7 +52,7 @@
         </td>
         <td>
             <div class="sf-query-token">
-                @Html.ChartTokenCombo(tc.Value, tc.Value.ParentChart, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], tc)
+                @Html.ChartTokenBuilder(tc.Value, tc.Value.ParentChart, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], tc)
             </div>
             <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
         </td>

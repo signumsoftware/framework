@@ -39,7 +39,7 @@
         <div class="sf-fields-list">
             <div class="ui-widget sf-filters">
                 <div class="ui-widget-header ui-corner-top sf-filters-body">
-                    @Html.ChartRootTokens(Model.Value, queryDescription, Model)
+                    @Html.ChartTokenBuilder(null, Model.Value, queryDescription, Model)
                     @Html.Href(
                             Model.Compose("btnAddFilter"),
                             Signum.Web.Properties.Resources.FilterBuilder_AddFilter,

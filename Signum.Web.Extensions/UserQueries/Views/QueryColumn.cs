@@ -82,7 +82,7 @@ namespace ASP
 WriteLiteral("        <div style=\"float: left\">\r\n            ");
 
 
-       Write(Html.QueryTokenDNBuilder(e.Value, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
+       Write(Html.QueryTokenBuilder(e.Value.Token, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
 
 WriteLiteral("\r\n        </div>\r\n");
 

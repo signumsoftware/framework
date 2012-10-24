@@ -47,7 +47,7 @@ namespace Signum.Windows.Authorization
         void Test_Loaded(object sender, RoutedEventArgs e)
         {
             Load();
-            this.Title = "Property Rules for {0}".Formato(Type.FriendlyName);
+            this.Title = "Property Rules for {0}".Formato(Type.ClassName);
         }
 
         private void Load()
