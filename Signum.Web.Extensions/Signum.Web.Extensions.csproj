@@ -273,20 +273,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartColumn.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Chart\Views\ChartRequest.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ChartRequest.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Chart\Views\ChartRequest1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ChartRequest.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Chart\Views\ChartPalette1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartPalette.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartRequest.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartRequest.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Chart\Views\ChartResults.cs">
       <AutoGen>True</AutoGen>

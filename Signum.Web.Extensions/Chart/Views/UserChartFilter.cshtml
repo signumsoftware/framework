@@ -10,7 +10,7 @@
     {
         style.OnlyValue = true;
         <div style="float: left">
-            @Html.ChartTokenCombo(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], e)
+            @Html.ChartTokenBuilder(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], e)
         </div>
         @Html.ValueLine(style, f => f.Operation)
         @Html.ValueLine(style, f => f.ValueString, vl => vl.ValueHtmlProps["size"] = 20)

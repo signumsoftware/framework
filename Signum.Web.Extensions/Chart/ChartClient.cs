@@ -196,6 +196,7 @@ namespace Signum.Web.Chart
                 };
         }
 
+
         public static MvcHtmlString ChartTokenBuilder(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, QueryDescription qd, Context context)
         {
             bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.IsGroupKey == false) ?? true;

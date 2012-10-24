@@ -81,7 +81,7 @@ namespace ASP
 WriteLiteral("        <div style=\"float: left\">\r\n            ");
 
 
-       Write(Html.ChartTokenCombo(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], e));
+       Write(Html.ChartTokenBuilder(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], e));
 
 WriteLiteral("\r\n        </div>\r\n");
 
