@@ -1590,4 +1590,7 @@
   <data name="Omnibox_Value" xml:space="preserve">
     <value>Valor</value>
   </data>
+  <data name="Omnibox_Disambiguate" xml:space="preserve">
+    <value>Con Shift+Enter desambiguas tu consulta</value>
+  </data>
 </root>

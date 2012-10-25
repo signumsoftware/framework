@@ -340,6 +340,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to With Shift+Enter you disambiguate you query.
+        /// </summary>
+        public static string Omnibox_Disambiguate {
+            get {
+                return ResourceManager.GetString("Omnibox_Disambiguate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Field.
         /// </summary>
         public static string Omnibox_Field {

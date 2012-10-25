@@ -29,7 +29,8 @@ namespace Signum.Entities.Omnibox
         public static List<IOmniboxResultGenerator> Generators = new List<IOmniboxResultGenerator>();
 
         static readonly Regex tokenizer = new Regex(
-@"(?<space>\s+)|
+@"(?<entity>[a-zA-Z_][a-zA-Z0-9_]*;\d+)|
+(?<space>\s+)|
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
@@ -69,6 +70,9 @@ namespace Signum.Entities.Omnibox
                 string databaseAccess = Signum.Entities.Extensions.Properties.Resources.Omnibox_DatabaseAccess;
                 result.Add(new HelpOmniboxResult { ToStr = databaseAccess });
 
+                string disambiguate = Signum.Entities.Extensions.Properties.Resources.Omnibox_Disambiguate;
+                result.Add(new HelpOmniboxResult { ToStr = disambiguate });
+
                 return result.ToList();
             }
             else
@@ -86,7 +90,7 @@ namespace Signum.Entities.Omnibox
                     AddTokens(tokens, m, "comparer", OmniboxTokenType.Comparer);
                     AddTokens(tokens, m, "number", OmniboxTokenType.Number);
                     AddTokens(tokens, m, "string", OmniboxTokenType.String);
-                    AddTokens(tokens, m, "date", OmniboxTokenType.String);
+                    AddTokens(tokens, m, "entity", OmniboxTokenType.Entity);
                 }
 
                 tokens.Sort(a => a.Index);
@@ -125,6 +129,7 @@ namespace Signum.Entities.Omnibox
                 case OmniboxTokenType.Comparer: return '=';
                 case OmniboxTokenType.Number: return 'N';
                 case OmniboxTokenType.String: return 'S';
+                case OmniboxTokenType.Entity: return 'E';
                 default: return '?';
             }
         }
@@ -219,5 +224,6 @@ namespace Signum.Entities.Omnibox
         Comparer,
         Number,
         String,
+        Entity,
     }
 }
