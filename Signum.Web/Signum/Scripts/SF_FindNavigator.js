@@ -73,7 +73,7 @@ SF.registerModule("FindNavigator", function () {
                         return false;
                     }
 
-                    var $this = $(this);
+                    var $this = $(this).closest("td");
                     var index = $this.index();
                     var $th = $this.closest("table").find("th").eq(index);
                     if ($th.hasClass('th-col-selection')) {
@@ -204,7 +204,7 @@ SF.registerModule("FindNavigator", function () {
             },
 
             entityContextMenu: function (e) {
-                var $td = $(e.target);
+                var $td = $(e.target).closest("td");
                 $td.addClass("sf-ctxmenu-active");
 
                 var $menu = this.createCtxMenu($td);
