@@ -160,6 +160,10 @@ namespace Signum.Engine.Disconnected
 
                     CopyExport(export, newDatabase);
 
+                    machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+                    using(SqlConnector.Override(newDatabase))
+                        machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
                         BackupDatabase(machine, export, newDatabase);
 
@@ -169,10 +173,6 @@ namespace Signum.Engine.Disconnected
                     token.ThrowIfCancellationRequested();
 
                     export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
-
-                    machine.IsOffline = true;
-                    using (OperationLogic.AllowSave<DisconnectedMachineDN>())
-                        machine.Save();
                 }
                 catch (Exception e)
                 {

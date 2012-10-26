@@ -29,7 +29,7 @@ namespace Signum.Engine.Disconnected
         public static string BackupFolder = @"C:\Backups";
         public static string BackupNetworkFolder = @"C:\Backups";
 
-        static Dictionary<Type, IDisconnectedStrategy> strategies = new Dictionary<Type, IDisconnectedStrategy>();
+        internal static Dictionary<Type, IDisconnectedStrategy> strategies = new Dictionary<Type, IDisconnectedStrategy>();
 
         public static ExportManager ExportManager = new ExportManager();
         public static ImportManager ImportManager = new ImportManager();
@@ -48,7 +48,7 @@ namespace Signum.Engine.Disconnected
                                                       {
                                                           Entity = dm,
                                                           dm.MachineName,
-                                                          dm.IsOffline,
+                                                          dm.State,
                                                           dm.SeedMin,
                                                           dm.SeedMax,
                                                       }).ToDynamic();
@@ -86,14 +86,59 @@ namespace Signum.Engine.Disconnected
                 {
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (dm, _) => UnsafeUnlock(dm.ToLite())
-                }.Register();
+                    Execute = (dm, _) =>
+                    {
+                        ImportManager.UnlockTables(dm.ToLite());
+                        dm.State = DisconnectedMachineState.Connected;
+                    }
+                }.Register(); ;
+
+
 
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertDisconnectedStrategies;
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<IdentifiableEntity>(EntityEventsGlobal_Saving);
 
                 sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+            }
+        }
+
+        class MachineGraph : Graph<DisconnectedMachineDN, DisconnectedMachineState>
+        {
+            public static void Register()
+            {
+                GetState = dm => dm.State;
+
+                new Execute(DisconnectedMachineOperations.Save)
+                {
+                    FromStates = new []{ DisconnectedMachineState.Connected },
+                    ToState = DisconnectedMachineState.Connected,
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (dm, _) => { }
+                }.Register();
+
+                new Execute(DisconnectedMachineOperations.UnsafeUnlock)
+                {
+                    FromStates = new []{ DisconnectedMachineState.Disconnected },
+                    ToState = DisconnectedMachineState.Connected,
+                    Execute = (dm, _) =>
+                    {
+                        ImportManager.UnlockTables(dm.ToLite());
+                        dm.State = DisconnectedMachineState.Connected;
+                    }
+                }.Register();
+
+                new Execute(DisconnectedMachineOperations.AbortFaultedImport)
+                {
+                    FromStates = new[] { DisconnectedMachineState.Faulted },
+                    ToState = DisconnectedMachineState.Disconnected,
+                    Execute = (dm, _) =>
+                    {
+                        dm.State = DisconnectedMachineState.Disconnected;
+                    }
+                }.Register();
+
             }
         }
 
@@ -108,21 +153,6 @@ namespace Signum.Engine.Disconnected
         }    
   
 
-        public static void UnsafeUnlock(Lite<DisconnectedMachineDN> machine)
-        {
-            foreach (var kvp in strategies)
-            {
-                if (kvp.Value.Upload == Upload.Subset)
-                    miUnsafeUnlock.MakeGenericMethod(kvp.Key).Invoke(null, new[] { machine });
-            }
-        }
-
-        static readonly MethodInfo miUnsafeUnlock = typeof(DisconnectedLogic).GetMethod("UnsafeUnlock", BindingFlags.NonPublic | BindingFlags.Static);
-        static int UnsafeUnlock<T>(Lite<DisconnectedMachineDN> machine) where T : IdentifiableEntity, IDisconnectedEntity, new()
-        {
-            using (Schema.Current.GlobalMode())
-                return Database.Query<T>().Where(a => a.DisconnectedMachine == machine).UnsafeUpdate(a => new T { DisconnectedMachine = null, LastOnlineTicks = null });
-        }
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
@@ -336,7 +366,8 @@ namespace Signum.Engine.Disconnected
                     {
                         if (!de.DisconnectedMachine.Is(DisconnectedMachineDN.Current))
                             throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
-
+                        else
+                            return;
                     }
                 }
 

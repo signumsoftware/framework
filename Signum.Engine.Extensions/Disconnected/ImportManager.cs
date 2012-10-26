@@ -164,7 +164,7 @@ namespace Signum.Engine.Disconnected
                         }
 
                         using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { EnableForeignKeys = l })))
-                            DisconnectedLogic.UnsafeUnlock(machine.ToLite());
+                            UnlockTables(machine.ToLite());
                     }
                     finally
                     {
@@ -182,9 +182,7 @@ namespace Signum.Engine.Disconnected
 
                     import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { State = DisconnectedImportState.Completed, Total = s.CalculateTotal() });
 
-                    machine.IsOffline = false;
-                    using (OperationLogic.AllowSave<DisconnectedMachineDN>())
-                        machine.Save();
+                    machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Connected });
                 }
                 catch (Exception e)
                 {
@@ -204,6 +202,13 @@ namespace Signum.Engine.Disconnected
             runningExports.Add(import, new RunningImports { Task = task, CancelationSource = cancelationSource });
 
             return import;
+        }
+
+        public virtual void SkipExport(Lite<DisconnectedMachineDN> machine)
+        {
+            UnlockTables(machine);
+
+            machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Connected });
         }
 
         protected virtual void StartImporting(DisconnectedMachineDN machine)
@@ -284,6 +289,22 @@ namespace Signum.Engine.Disconnected
         private IQueryable<MListElement<DisconnectedImportDN, DisconnectedImportTableDN>> ImportTableQuery(Lite<DisconnectedImportDN> import, TypeDN type)
         {
             return Database.MListQuery((DisconnectedImportDN s) => s.Copies).Where(dst => dst.Parent.ToLite() == import && dst.Element.Type.RefersTo(type));
+        }
+
+        public void UnlockTables(Lite<DisconnectedMachineDN> machine)
+        {
+            foreach (var kvp in DisconnectedLogic.strategies)
+            {
+                if (kvp.Value.Upload == Upload.Subset)
+                    miUnlockTable.MakeGenericMethod(kvp.Key).Invoke(null, new[] { machine });
+            }
+        }
+
+        static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static);
+        static int UnlockTable<T>(Lite<DisconnectedMachineDN> machine) where T : IdentifiableEntity, IDisconnectedEntity, new()
+        {
+            using (Schema.Current.GlobalMode())
+                return Database.Query<T>().Where(a => a.DisconnectedMachine == machine).UnsafeUpdate(a => new T { DisconnectedMachine = null, LastOnlineTicks = null });
         }
     }
 

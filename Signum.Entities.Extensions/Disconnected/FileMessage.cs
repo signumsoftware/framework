@@ -100,5 +100,8 @@ namespace Signum.Entities.Disconnected
 
         [OperationContract, NetDataContractAttribute]
         Dictionary<Type, StrategyPair> GetStrategyPairs();
+
+        [OperationContract, NetDataContractAttribute]
+        void SkipExport(Lite<DisconnectedMachineDN> machine);
     }
 }
