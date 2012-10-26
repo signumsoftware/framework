@@ -701,6 +701,22 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumDN>().Select(a => a.ToStringProperty).ToList();
         }
+
+        [TestMethod]
+        public void SelectConditionFormat()
+        {
+            var list = Database.Query<AlbumDN>().Select(a =>
+                new
+                {
+                    Wrong = a.Author.GetType() == typeof(BandDN) ?
+                        "Band {0}".Formato(((BandDN)a.Author).ToString()) :
+                        "Artist {0}".Formato(((ArtistDN)a.Author).ToString()),
+
+                    Right = a.Author is BandDN ?
+                          "Band {0}".Formato(((BandDN)a.Author).ToString()) :
+                          "Artist {0}".Formato(((ArtistDN)a.Author).ToString()),
+                }).ToList();
+        }
     }
 
     public static class AuthorExtensions

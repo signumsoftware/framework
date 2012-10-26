@@ -257,8 +257,8 @@
                             <Setter Property="Background" TargetName="InnerBorder">
                                 <Setter.Value>
                                     <LinearGradientBrush EndPoint="0.505,0.489" StartPoint="0.512,-0.004">
-                                      <GradientStop Color="#FFc9e4ff" Offset="0"/>
-                                      <GradientStop Color="#FFf7fbff" Offset="1"/>
+                                        <GradientStop Color="#FFc9e4ff" Offset="0"/>
+                                        <GradientStop Color="#FFf7fbff" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Setter.Value>
                             </Setter>
@@ -399,8 +399,8 @@
                             <Setter Property="Background" TargetName="InnerBorder">
                                 <Setter.Value>
                                     <LinearGradientBrush EndPoint="0.505,0.489" StartPoint="0.512,-0.004">
-                                      <GradientStop Color="#FFc9e4ff" Offset="0"/>
-                                      <GradientStop Color="#FFf7fbff" Offset="1"/>
+                                        <GradientStop Color="#FFc9e4ff" Offset="0"/>
+                                        <GradientStop Color="#FFf7fbff" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Setter.Value>
                             </Setter>
@@ -513,7 +513,7 @@
                                     <ContentPresenter Margin="2,0,0,0" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" ContentSource="Header" RecognizesAccessKey="True"/>
                                 </Border>
                                 <Border Grid.RowSpan="2" Grid.Row="1">
-                                	<ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
                                 		Margin="{TemplateBinding Padding}"  />
                                 </Border>
                             </Grid>
@@ -523,7 +523,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style x:Key="{x:Type TextBox}" TargetType="{x:Type TextBox}"
                BasedOn="{StaticResource {x:Type TextBox}}">
         <Setter Property="Template">
@@ -559,27 +559,33 @@
     </Style>
 
     <Style x:Key="GrayGroupBox" TargetType="{x:Type GroupBox}">
+        <Setter Property="Background" Value="#CCC" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GroupBox}">
-                    <Border CornerRadius="3" BorderThickness="1" BorderBrush="#FFA2ABAB" Margin="0,0,0,0">
+                    <Border CornerRadius="3" BorderThickness="1" BorderBrush="{TemplateBinding Background}" Margin="0,0,0,0">
                         <StackPanel>
-                            <Border BorderBrush="#FFA2ABAB" BorderThickness="0,0,0,1" CornerRadius="2,2,0,0">
-                                <Border.Background>
-                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                        <GradientStop Color="#FFCED6DB" Offset="1"/>
-                                        <GradientStop Color="#FFE9EAEA"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                                <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" ContentSource="Header" RecognizesAccessKey="True"/>
+                            <Border BorderBrush="{TemplateBinding Background}" Background="{TemplateBinding Background}" BorderThickness="0,0,0,1" CornerRadius="2,2,0,0">
+                                <Border >
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1" >
+                                            <GradientStop Color="#88FFFFFF" Offset="0"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="0.6" />
+                                            <GradientStop Color="#33000000" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" ContentSource="Header" RecognizesAccessKey="True"  />
+                                </Border>
                             </Border>
-                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Margin="{TemplateBinding Padding}"  />
+
+                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Margin="{TemplateBinding Padding}"  Grid.Row="1"/>
                         </StackPanel>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
+
     <Style x:Key="WidgetExpander" TargetType="{x:Type Expander}">
         <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
         <Setter Property="Background" Value="Transparent"/>

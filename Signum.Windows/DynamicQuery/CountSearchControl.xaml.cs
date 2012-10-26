@@ -109,6 +109,16 @@ namespace Signum.Windows
             ColumnOptions = new ObservableCollection<ColumnOption>();
             OrderOptions = new ObservableCollection<OrderOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(CountSearchControl_DataContextChanged);
+        }
+
+
+        void CountSearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (IsLoaded && e.NewValue != null)
+            {
+                Search();
+            }
         }
 
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
