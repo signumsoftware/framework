@@ -352,12 +352,28 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex).SelectMany(a => a).ToList();
         }
 
-        
+        [TestMethod]
+        public void SumSum()
+        {
+            var first = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => m.Id));
+        }
 
-        //[TestMethod]
-        //public void SumSum()
-        //{
-        //    var songsAlbum = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => m.Id));
-        //}
+        [TestMethod]
+        public void SumGroupbySum()
+        {
+            var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => m.Id)));
+        }
+
+        [TestMethod]
+        public void MinMax()
+        {
+            var first = Database.Query<BandDN>().Min(b => b.Members.Max(m => m.Id));
+        }
+
+        [TestMethod]
+        public void MinGroupByMax()
+        {
+            var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Min(b => b.Friends.Max(m => m.Id)));
+        }
     }
 }

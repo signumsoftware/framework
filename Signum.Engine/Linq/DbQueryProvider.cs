@@ -78,25 +78,27 @@ namespace Signum.Engine.Linq
 
         internal static Expression Optimize(Expression binded, QueryBinder binder, HeavyProfiler.Tracer log)
         {
-            log.Switch("AggRew");
+            log.Switch("Aggregate");
             Expression rewrited = AggregateRewriter.Rewrite(binded);
-            log.Switch("EnCom");
+            log.Switch("EntityCompleter");
             Expression completed = EntityCompleter.Complete(rewrited, binder);
-            log.Switch("AlPrRe");
+            log.Switch("AliasReplacer");
             Expression replaced = AliasProjectionReplacer.Replace(completed);
-            log.Switch("OrBtRw");
+            log.Switch("OrderBy");
             Expression orderRewrited = OrderByRewriter.Rewrite(replaced);
-            log.Switch("QuRb");
+            log.Switch("Rebinder");
             Expression rebinded = QueryRebinder.Rebind(orderRewrited);
-            log.Switch("UnClRmv");
+            log.Switch("UnusedColumn");
             Expression columnCleaned = UnusedColumnRemover.Remove(rebinded);
-            log.Switch("RwNmbFlr");
+            log.Switch("RowNumber");
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
-            log.Switch("RdnSqRm");
+            log.Switch("Redundant");
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(rowFilled);
-            log.Switch("CndRwr");
+            log.Switch("Condition");
             Expression rewriteConditions = ConditionsRewriter.Rewrite(subqueryCleaned);
-            return rewriteConditions;
+            log.Switch("Scalar");
+            Expression scalar = ScalarSubqueryRewriter.Rewrite(rewriteConditions);
+            return scalar;
         }
 
         internal R Delete<R>(IQueryable query, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
