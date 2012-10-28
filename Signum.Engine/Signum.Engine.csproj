@@ -149,6 +149,7 @@
     <Compile Include="Linq\Meta\MetaExpression.cs" />
     <Compile Include="Linq\ProjectionReader.cs" />
     <Compile Include="Linq\Meta\MetadataVisitor.cs" />
+    <Compile Include="Linq\ExpressionVisitor\ScalarSubqueryRewriter.cs" />
     <Compile Include="Linq\TranslateResult.cs" />
     <Compile Include="Engine\Saver.cs">
       <SubType>Code</SubType>
