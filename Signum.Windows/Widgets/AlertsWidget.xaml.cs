@@ -47,7 +47,8 @@ namespace Signum.Windows.Widgets
 
         private void AlertsWidget_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            ReloadAlerts();
+            if (e.NewValue != null)
+                ReloadAlerts();
         }
 
         private void Alert_MouseDown(object sender, RoutedEventArgs e)

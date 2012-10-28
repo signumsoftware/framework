@@ -255,6 +255,8 @@ namespace Signum.Engine.DynamicQuery
         public bool IsProjection;
         public bool Inherit = true;
 
+        public Implementations? AllImplementations;
+
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
 
@@ -281,7 +283,7 @@ namespace Signum.Engine.DynamicQuery
                     var cleanType = me.Type.CleanType();
 
                     result.PropertyRoute = cm.PropertyRoutes.Only();
-                    result.Implementations = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
+                    result.Implementations = AllImplementations ?? ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
                     result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }

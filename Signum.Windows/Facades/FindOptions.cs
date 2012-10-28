@@ -8,6 +8,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Windows.DynamicQuery;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Signum.Windows
 {
@@ -203,7 +204,9 @@ namespace Signum.Windows
         public FilterOperation Operation { get; set; }
 
         public static readonly DependencyProperty ValueProperty =
-             DependencyProperty.Register("Value", typeof(object), typeof(FilterOption), new UIPropertyMetadata((d, e) => ((FilterOption)d).RefreshRealValue()));
+             DependencyProperty.Register("Value", typeof(object), typeof(FilterOption), new UIPropertyMetadata((d, e) => ((FilterOption)d).ValueChanged(e)));
+
+       
         public object Value
         {
             get { return (object)GetValue(ValueProperty); }
@@ -218,7 +221,15 @@ namespace Signum.Windows
             set { SetValue(RealValueProperty, value); }
         }
 
-        //public event EventHandler ValueChanged;
+        public event DependencyPropertyChangedEventHandler BindingValueChanged;
+
+        private void ValueChanged(DependencyPropertyChangedEventArgs args)
+        {
+            RefreshRealValue();
+
+            if (BindingValueChanged != null && BindingOperations.GetBindingExpression(this, ValueProperty) != null)
+                BindingValueChanged(this, args);
+        }
 
         public void RefreshRealValue()
         {
@@ -226,9 +237,7 @@ namespace Signum.Windows
 
             if(!object.Equals(newRealValue, RealValue))
             {
-                RealValue = newRealValue; 
-                //if (ValueChanged != null)
-                //    ValueChanged(this, EventArgs.Empty);
+                RealValue = newRealValue;
             }
         }
 
