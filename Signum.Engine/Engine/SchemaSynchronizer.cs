@@ -198,8 +198,8 @@ namespace Signum.Engine
                                               ForeingKey = (from fk in t.ForeignKeys()
                                                             where fk.ForeignKeyColumns().Any(fkc => fkc.parent_column_id == c.column_id)
                                                             join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
-                                                            select fk.name == null ? null : new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).SingleOrDefaultEx(),
-                                          }).ToDictionary(a => a.Name),
+                                                            select fk.name == null ? null : new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).FirstOrDefault(),
+                                          }).ToDictionary(a => a.Name, "columns"),
 
                                 SimpleIndices = (from i in t.Indices()
                                                  where !i.is_primary_key //&& !(i.is_unique && i.name.StartsWith("IX_"))
