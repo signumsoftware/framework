@@ -39,6 +39,10 @@ namespace Signum.Engine
             set { connectionString = value; }
         }
 
+
+        public override bool SupportsScalarSubquery { get { return false; } }
+        public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
+
         SqlCeConnection EnsureConnection()
         {
             if (Transaction.HasTransaction)

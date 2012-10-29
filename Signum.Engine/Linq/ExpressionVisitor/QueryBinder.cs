@@ -297,7 +297,7 @@ namespace Signum.Engine.Linq
 
         private Expression BindAggregate(Type resultType, AggregateFunction aggregateFunction, Expression source, LambdaExpression selector, bool isRoot)
         {
-            bool coalesceTrick = !resultType.IsNullable() && aggregateFunction == AggregateFunction.Sum;
+            Type enumType = ExtractEnum(ref resultType, aggregateFunction);
 
             ProjectionExpression projection = this.VisitCastProjection(source);
             Expression exp =
@@ -307,23 +307,33 @@ namespace Signum.Engine.Linq
 
             projection = ApplyExpansions(projection);
 
-            if (coalesceTrick)
-                exp = Expression.Convert(exp, resultType.Nullify());
+            Expression aggregate;
+            if (!resultType.IsNullable() && aggregateFunction == AggregateFunction.Sum)
+            {
+                var nominated = DbExpressionNominator.FullNominate(Expression.Convert(exp, resultType.Nullify()));
 
-            exp = DbExpressionNominator.FullNominate(exp);
+                aggregate = (Expression)Expression.Coalesce(
+                    new AggregateExpression(resultType.Nullify(), nominated, aggregateFunction),
+                    new SqlConstantExpression(Activator.CreateInstance(resultType), resultType));
+            }
+            else
+            {
+                var nominated = DbExpressionNominator.FullNominate(exp);
+
+                aggregate = new AggregateExpression(resultType, nominated, aggregateFunction);
+            }
+
 
             Alias alias = NextSelectAlias();
-            var aggregate = !coalesceTrick ? new AggregateExpression(resultType, exp, aggregateFunction) :
-                (Expression)Expression.Coalesce(
-                    new AggregateExpression(resultType.Nullify(), exp, aggregateFunction),
-                    new SqlConstantExpression(Activator.CreateInstance(resultType), resultType));
 
             ColumnDeclaration cd = new ColumnDeclaration("a", aggregate);
 
             SelectExpression select = new SelectExpression(alias, false, false, null, new[] { cd }, projection.Select, null, null, null);
 
             if (isRoot)
-                return new ProjectionExpression(select, ColumnProjector.SingleProjection(cd, alias, resultType), UniqueFunction.Single, resultType);
+                return new ProjectionExpression(select,
+                   RestoreEnum(ColumnProjector.SingleProjection(cd, alias, resultType), enumType),
+                   UniqueFunction.Single, enumType ?? resultType);
 
             ScalarExpression subquery = new ScalarExpression(resultType, select);
 
@@ -335,12 +345,39 @@ namespace Signum.Engine.Linq
                      selector != null ? MapAndVisitExpand(selector, ref info.Projection) :
                      info.Projection.Projector;
 
-                exp2 = DbExpressionNominator.FullNominate(exp2);
+                var nominated2 = DbExpressionNominator.FullNominate(exp2);
 
-                return new AggregateSubqueryExpression(info.GroupAlias, new AggregateExpression(resultType, exp2, aggregateFunction), subquery);
+                var result = new AggregateSubqueryExpression(info.GroupAlias,
+                    new AggregateExpression(resultType, nominated2, aggregateFunction),
+                    subquery);
+
+                return RestoreEnum(result, enumType);
             }
 
-            return subquery;
+            return RestoreEnum(subquery, enumType);
+        }
+
+        static Type ExtractEnum(ref Type resultType, AggregateFunction aggregateFunction)
+        {
+            if (resultType.UnNullify().IsEnum)
+            {
+                if (aggregateFunction != AggregateFunction.Min && aggregateFunction != AggregateFunction.Max)
+                    throw new InvalidOperationException("{0} is not allowed for {1}".Formato(aggregateFunction, resultType));
+
+                Type result = resultType;
+                resultType = typeof(int);
+                return result;
+            }
+
+            return null;
+        }
+
+        static Expression RestoreEnum(Expression expression, Type enumType)
+        {
+            if (enumType == null)
+                return expression;
+
+            return Expression.Convert(expression, enumType);
         }
 
 
@@ -1354,35 +1391,55 @@ namespace Signum.Engine.Linq
             return new CommandAggregateExpression(commands);
         }
 
-        internal CommandExpression BindUpdate(Expression source, LambdaExpression set)
+        internal CommandExpression BindUpdate(Expression source, LambdaExpression entitySelector, LambdaExpression updateConstructor)
         {
             ProjectionExpression pr = VisitCastProjection(source);
 
-            ParameterExpression param = set.Parameters[0];
+            Expression entity = pr.Projector;
+            if (entitySelector == null)
+                entity = pr.Projector;
+            else
+            {
+                var cleanedSelector = (LambdaExpression)DbQueryProvider.Clean(entitySelector, false, null);
+                entity = MapAndVisitExpand(cleanedSelector, ref pr);
+            }
+
+            ITable table = entity is EntityExpression ? 
+                (ITable)((EntityExpression)entity).Table : 
+                (ITable)((MListElementExpression)entity).Table;
+
+            Alias alias = Alias.Raw(table.Name);
+
+            Expression toUpdate = table is Table ? 
+                ((Table)table).GetProjectorExpression(alias, this) : 
+                ((RelationalTable)table).GetProjectorExpression(alias, this);
+
+            ParameterExpression param = updateConstructor.Parameters[0];
+            ParameterExpression toUpdateParam = Expression.Parameter(toUpdate.Type, "toUpdate");
 
             List<ColumnAssignment> assignments = new List<ColumnAssignment>();
-
             map.Add(param, pr.Projector);
-            FillColumnAssigments(assignments, param, set.Body);
+            map.Add(toUpdateParam, toUpdate);
+            FillColumnAssigments(assignments, toUpdateParam, updateConstructor.Body);
+            map.Remove(toUpdateParam);
             map.Remove(param);
 
             pr = ApplyExpansions(pr);
 
-            ITable table;
             Expression condition;
 
-            if (pr.Projector is EntityExpression)
+            if (entity is EntityExpression)
             {
-                EntityExpression ee = (EntityExpression)pr.Projector;
+                EntityExpression ee = (EntityExpression)entity;
 
                 Expression id = ee.Table.GetIdExpression(Alias.Raw(ee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
                 table = ee.Table;
             }
-            else if (pr.Projector is MListElementExpression)
+            else if (entity is MListElementExpression)
             {
-                MListElementExpression mlee = (MListElementExpression)pr.Projector;
+                MListElementExpression mlee = (MListElementExpression)entity;
 
                 Expression id = mlee.Table.RowIdExpression(Alias.Raw(mlee.Table.Name));
 
@@ -1390,7 +1447,7 @@ namespace Signum.Engine.Linq
                 table = mlee.Table;
             }
             else
-                throw new InvalidOperationException("Update not supported for {0}".Formato(pr.Projector.GetType().TypeName()));
+                throw new InvalidOperationException("Update not supported for {0}".Formato(entity.GetType().TypeName()));
 
             return new CommandAggregateExpression(new CommandExpression[]
             { 

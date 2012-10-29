@@ -103,6 +103,7 @@
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
     <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
+    <Compile Include="Engine\ProgressExtensions.cs" />
     <Compile Include="Engine\SchemaGenerator.cs" />
     <Compile Include="Engine\SqlUtils.cs" />
     <Compile Include="Exceptions.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="Linq\Meta\MetaExpression.cs" />
     <Compile Include="Linq\ProjectionReader.cs" />
     <Compile Include="Linq\Meta\MetadataVisitor.cs" />
+    <Compile Include="Linq\ExpressionVisitor\ScalarSubqueryRewriter.cs" />
     <Compile Include="Linq\TranslateResult.cs" />
     <Compile Include="Engine\Saver.cs">
       <SubType>Code</SubType>

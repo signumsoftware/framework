@@ -344,9 +344,23 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = null });
                 //tr.Commit();
             }
-
         }
 
+
+        [TestMethod]
+        public void UpdateWith()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>()
+                    .Select(a => new { a.Label, Album = a })
+                    .UnsafeUpdatePart(a => a.Label, a => new LabelDN { Name = a.Label.Name + "/" + a.Album.Id });
+
+                var list = Database.Query<LabelDN>().Select(a => a.Name);
+                //tr.Commit();
+            }
+
+        }
 
         [TestMethod]
         public void UpdateMListLite()

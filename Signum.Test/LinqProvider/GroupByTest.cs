@@ -268,6 +268,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void MinEnum()
+        {
+            var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex).Select(gr => gr.Min(a => a.Status));
+            var list2 = Database.Query<ArtistDN>().GroupBy(a => a.Sex).Select(gr => gr.Where(a => a.Id > 10).Min(a => a.Status));
+            var minSex = Database.Query<ArtistDN>().Min(a => a.Sex);
+        }
+
+
+        [TestMethod]
         public void RootMinException()
         {
             Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
@@ -343,12 +352,28 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex).SelectMany(a => a).ToList();
         }
 
-        
+        [TestMethod]
+        public void SumSum()
+        {
+            var first = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => m.Id));
+        }
 
-        //[TestMethod]
-        //public void SumSum()
-        //{
-        //    var songsAlbum = Database.Query<BandDN>().Sum(b => b.Members.Sum(m => m.Id));
-        //}
+        [TestMethod]
+        public void SumGroupbySum()
+        {
+            var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => m.Id)));
+        }
+
+        [TestMethod]
+        public void MinMax()
+        {
+            var first = Database.Query<BandDN>().Min(b => b.Members.Max(m => m.Id));
+        }
+
+        [TestMethod]
+        public void MinGroupByMax()
+        {
+            var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Min(b => b.Friends.Max(m => m.Id)));
+        }
     }
 }

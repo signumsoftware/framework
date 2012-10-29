@@ -294,10 +294,10 @@ namespace Signum.Entities
             return null;
         }
 
-        public static string TryParse<T>(Type staticType, string liteKey, out Lite<T> lite) where T : class, IIdentifiable
+        public static string TryParse<T>(string liteKey, out Lite<T> lite) where T : class, IIdentifiable
         {
             Lite untypedLite;
-            var result = Lite.TryParseLite(staticType, liteKey, out untypedLite);
+            var result = Lite.TryParseLite(typeof(T), liteKey, out untypedLite);
             lite = (Lite<T>)untypedLite;
             return result;
         }

@@ -162,5 +162,13 @@ namespace Signum.Test.LinqProvider
         {
             BandDN sigur = Database.Query<BandDN>().SingleEx(b => b.Name.StartsWith("Sigur"));
         }
+
+        [TestMethod]
+        public void ArtistsAny()
+        {
+            List<Lite<ArtistDN>> artists = Database.Query<ArtistDN>().Where(a=>a.Sex == Sex.Male).Select(a => a.ToLite()).ToList();
+
+            var query = Database.Query<ArtistDN>().Where(a => artists.Any(b => b.RefersTo(a)));
+        }
     }
 }

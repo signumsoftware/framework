@@ -119,7 +119,12 @@ namespace Signum.Engine
         public abstract void CleanDatabase();
 
         public abstract bool AllowsMultipleQueries { get; }
+
+        public abstract bool SupportsScalarSubquery { get; }
+        public abstract bool SupportsScalarSubqueryInAggregates { get; }
     }
+
+  
 
     public abstract class ParameterBuilder
     {
