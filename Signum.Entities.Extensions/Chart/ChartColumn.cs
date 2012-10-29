@@ -230,7 +230,7 @@ namespace Signum.Entities.Chart
         {
             try
             {
-                token = QueryUtils.Parse(tokenString, subTokens);
+                token = string.IsNullOrEmpty(tokenString) ? null : QueryUtils.Parse(tokenString, subTokens);
             }
             catch (Exception e)
             {

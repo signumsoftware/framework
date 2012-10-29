@@ -1068,7 +1068,6 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartScriptCode2.cs</LastGenOutput>
     </Content>
-    <Content Include="Chart\Views\ViewPage1.cshtml" />
     <Content Include="Chart\Views\ChartScriptParameter.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartScriptParameter.cs</LastGenOutput>
