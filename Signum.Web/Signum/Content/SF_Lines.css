@@ -11,6 +11,7 @@
 {
     display: inline-block;
     margin-right: 1px; /*IE8 fix for inline-block*/
+    vertical-align: top;
 }
 .sf-unit-line {
     float:left;
@@ -139,7 +140,8 @@ a.sf-value-line, span.sf-value-line{
 .sf-line-button 
 {
     border: 0 !important;
-    background:transparent !important;
+    background:transparent !important;    
+    cursor: pointer !important;
 }
 
 .sf-line-button.ui-button-icon-only
