@@ -325,4 +325,13 @@
   <data name="TheProperty0" xml:space="preserve">
     <value>la propiedad {0}</value>
   </data>
+  <data name="ResetPasswordRequestMail" xml:space="preserve">
+    <value>&lt;p&gt;Has solicitado recientemente una nueva contrase&amp;#241;a&lt;/p&gt;
+&lt;p&gt;Tu nombre de usuario es: @[User.UserName]&lt;/p&gt;
+&lt;p&gt;Puedes crear una nueva contrase&amp;#241;a haciendo click en el siguiente enlace:&lt;/p&gt;
+&lt;a href="@global[UrlPrefix]/Auth/ResetPasswordCode?email=@[User.Email]&amp;code=@[Code]"&gt;&lt;/a&gt;</value>
+  </data>
+  <data name="ResetPasswordRequestSubject" xml:space="preserve">
+    <value>Solicitud de recordar contraseña</value>
+  </data>
 </root>

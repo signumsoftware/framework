@@ -431,6 +431,27 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;p&gt;You recently requested a new password&lt;/p&gt;
+        ///&lt;p&gt;Your username is @[User.UserName]&lt;/p&gt;
+        ///&lt;p&gt;You can reset your password by following the link below&lt;/p&gt;
+        ///&lt;a href=&quot;@global[UrlPrefix]/Auth/ResetPasswordCode?email=@[User.Email]&amp;code=@[Code]&quot;&gt;&lt;/a&gt;.
+        /// </summary>
+        internal static string ResetPasswordRequestMail {
+            get {
+                return ResourceManager.GetString("ResetPasswordRequestMail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset password request.
+        /// </summary>
+        internal static string ResetPasswordRequestSubject {
+            get {
+                return ResourceManager.GetString("ResetPasswordRequestSubject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to . Should  .
         /// </summary>
         internal static string Should {

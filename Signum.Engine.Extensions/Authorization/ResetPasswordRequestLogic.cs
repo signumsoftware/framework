@@ -10,6 +10,8 @@ using Signum.Entities;
 using Signum.Engine.Mailing;
 using Signum.Engine.Extensions.Properties;
 using Signum.Utilities;
+using Signum.Entities.Mailing;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Authorization
 {
@@ -39,28 +41,28 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailLogic.RegisterSystemTemplate(AuthorizationSystemTemplateMail.ResetPassword);
-
-                //TODO: 777 luis - seguir aquí
-                //EmailLogic.RegisterTemplate<ResetPasswordRequestMail>(model =>
-                //{
-                //    return new EmailContent
-                //    {
-                //        Subject = Resources.ResetPasswordCode,
-                //        Body = EmailRenderer.Replace(typeof(AuthLogic).Assembly.ReadResourceStream("Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
-                //               model, null, Resources.ResourceManager)
-                //    };
-                //});
+                EmailLogic.RegisterSystemTemplate(AuthorizationMail.ResetPasswordRequest, tc => new EmailTemplateDN
+                {
+                    Active = true,
+                    IsBodyHtml = true,
+                    AssociatedType = typeof(ResetPasswordRequestDN).ToTypeDN(),
+                    Recipient = new TemplateQueryTokenDN { TokenString = "User" },
+                    Messages = tc.CreateMessages(() => new EmailTemplateMessageDN
+                    { 
+                        Text = Resources.ResetPasswordRequestMail, 
+                        Subject = Resources.ResetPasswordRequestSubject
+                    })
+                });
             }
         }
 
-        public enum AuthorizationSystemTemplateMail
-        { 
-            ResetPassword
+        public enum AuthorizationMail
+        {
+            ResetPasswordRequest
         }
 
         public static ResetPasswordRequestDN ResetPasswordRequest(UserDN user)
-        { 
+        {
             //Remove old previous requests
             Database.Query<ResetPasswordRequestDN>()
                 .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
@@ -78,11 +80,13 @@ namespace Signum.Engine.Authorization
         {
             var rpr = ResetPasswordRequest(user);
 
-            new ResetPasswordRequestMail
-            {
-                To = user,
-                Link = urlGenerator(rpr),
-            }.Send();
+            rpr.SendMail(AuthorizationMail.ResetPasswordRequest);
+
+            //new ResetPasswordRequestMail
+            //{
+            //    To = user,
+            //    Link = urlGenerator(rpr),
+            //}.Send();
         }
 
         public static Func<string, UserDN> GetUserByEmail = (email) =>

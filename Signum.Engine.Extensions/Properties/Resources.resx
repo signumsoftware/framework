@@ -313,4 +313,13 @@
   <data name="TheTemplateIsAlreadyInactive" xml:space="preserve">
     <value>The template is already inactive</value>
   </data>
+  <data name="ResetPasswordRequestMail" xml:space="preserve">
+    <value>&lt;p&gt;You recently requested a new password&lt;/p&gt;
+&lt;p&gt;Your username is @[User.UserName]&lt;/p&gt;
+&lt;p&gt;You can reset your password by following the link below&lt;/p&gt;
+&lt;a href="@global[UrlPrefix]/Auth/ResetPasswordCode?email=@[User.Email]&amp;code=@[Code]"&gt;&lt;/a&gt;</value>
+  </data>
+  <data name="ResetPasswordRequestSubject" xml:space="preserve">
+    <value>Reset password request</value>
+  </data>
 </root>
