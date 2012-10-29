@@ -269,7 +269,7 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception e)
             {
-                if (Transaction.InTestTransaction)
+                if (Transaction.AvoidIndependentTransactions)
                     throw;
 
                 var exLog = e.LogException().ToLite();
@@ -371,7 +371,7 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception ex)
             {
-                if (Transaction.InTestTransaction)
+                if (Transaction.AvoidIndependentTransactions)
                     throw;
 
                 var exLog = ex.LogException().ToLite();
