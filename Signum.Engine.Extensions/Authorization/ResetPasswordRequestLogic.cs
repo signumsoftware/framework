@@ -15,10 +15,10 @@ using Signum.Engine.Basics;
 
 namespace Signum.Engine.Authorization
 {
-    public class ResetPasswordRequestMail : EmailModel<UserDN>
-    {
-        public string Link;
-    }
+    //public class ResetPasswordRequestMail : EmailModel<UserDN>
+    //{
+    //    public string Link;
+    //}
 
     public static class ResetPasswordRequestLogic
     {
@@ -41,7 +41,7 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailLogic.RegisterEmailModel(AuthorizationMail.ResetPasswordRequest, tc => new EmailTemplateDN
+                EmailLogic.RegisterEmailModel <ResetPasswordRequestMail>(tc => new EmailTemplateDN
                 {
                     Name = "Reset Password Request",
                     Active = true,
@@ -49,18 +49,15 @@ namespace Signum.Engine.Authorization
                     AssociatedType = typeof(ResetPasswordRequestDN).ToTypeDN(),
                     Recipient = new TemplateQueryTokenDN { TokenString = "User" },
                     Messages = tc.CreateMessages(() => new EmailTemplateMessageDN
-                    { 
-                        Text = Resources.ResetPasswordRequestMail, 
+                    {
+                        Text = Resources.ResetPasswordRequestMail,
                         Subject = Resources.ResetPasswordRequestSubject
                     })
                 });
             }
         }
 
-        public enum AuthorizationMail
-        {
-            ResetPasswordRequest
-        }
+        public class ResetPasswordRequestMail : EmailModel<ResetPasswordRequestDN> { }
 
         public static ResetPasswordRequestDN ResetPasswordRequest(UserDN user)
         {
@@ -80,8 +77,7 @@ namespace Signum.Engine.Authorization
         public static void ResetPasswordRequestAndSendEmail(UserDN user)
         {
             var rpr = ResetPasswordRequest(user);
-
-            rpr.SendMail(AuthorizationMail.ResetPasswordRequest);
+            new ResetPasswordRequestMail { Entity = rpr }.SendMailAsync();
         }
 
         public static Func<string, UserDN> GetUserByEmail = (email) =>

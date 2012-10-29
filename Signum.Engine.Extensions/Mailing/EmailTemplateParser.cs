@@ -19,18 +19,6 @@ namespace Signum.Engine.Mailing
     {
         public static Dictionary<string, Func<GlobalDispatcher, string>> GlobalVariables = new Dictionary<string, Func<GlobalDispatcher, string>>();
 
-        public static Lite<IEmailOwnerDN> GetRecipient(EmailTemplateDN template, IEmailModel model, IIdentifiable entity, 
-            ResultTable table, List<Column> columns)
-        {
-            if (model != null && model.Recipient != null)
-                return model.Recipient;
-
-            if (template.Recipient != null)
-                return ((Lite)table.Rows.DistinctSingle(table.Columns[0])).ToLite<IEmailOwnerDN>();
-
-            return (entity as IEmailOwnerDN).ToLite();
-        }
-
         static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
             return rows.Select(r => r[column]).Distinct().SingleEx(() =>
@@ -355,6 +343,11 @@ namespace Signum.Engine.Mailing
             return errors;
         }
 
+
+        internal static Lite<IEmailOwnerDN> GetRecipient(ResultTable table, ResultColumn column)
+        {
+            return ((Lite)table.Rows.DistinctSingle(column)).ToLite<IEmailOwnerDN>();
+        }
     }
 
     public class EmailTemplateParameters

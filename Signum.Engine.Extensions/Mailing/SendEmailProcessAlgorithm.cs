@@ -56,7 +56,8 @@ namespace Signum.Engine.Mailing
 
                     try
                     {
-                        EmailLogic.SendMail(ml);
+                        //TODO: 777 Luis - seguir aquí
+                        //EmailLogic.SendMail(ml);
                     }
                     catch (Exception)
                     {

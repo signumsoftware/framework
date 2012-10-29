@@ -63,7 +63,7 @@ namespace Signum.Engine.Mailing
             string text =
                 prefix == 'X' ? GetValue(extendedData.ThrowIfNullC("extendedData is null"), literal) :
                 prefix == 'M' ? GetValue(model, literal) :
-                prefix == 'T' ? GetValue(model.To, literal) :
+                //prefix == 'T' ? GetValue(model.To, literal) :
                 prefix == 'R' ? GetResource(resourceManager, literal) : null;
 
             char separator = m.Groups["separator"].Value[0];

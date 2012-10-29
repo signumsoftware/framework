@@ -43,7 +43,11 @@ namespace Signum.Engine.Mailing
     public interface IEmailModel
     {
         IdentifiableEntity UntypedEntity { get; }
-        Lite<IEmailOwnerDN> Recipient;
+    }
+
+    public interface IEmailModelWithRecipient : IEmailModel
+    {
+        Lite<IEmailOwnerDN> Recipient { get; set; }
     }
 
     public class EmailModel<T> : IEmailModel
@@ -55,8 +59,6 @@ namespace Signum.Engine.Mailing
         {
             get { return Entity; }
         }
-
-        public Lite<IEmailOwnerDN> Recipient;
     }
 
     public static class EmailLogic
@@ -220,6 +222,12 @@ namespace Signum.Engine.Mailing
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
 
             List<QueryToken> list = new List<QueryToken>();
+
+            if (!(typeof(IEmailModelWithRecipient).IsAssignableFrom(template.Model.ToType())))
+            {
+                list.Add(QueryUtils.Parse(".".Combine("Entity", template.Recipient.TokenString), qd));
+            }
+
             foreach (var message in template.Messages)
             {
                 EmailTemplateParser.Parse(message.Text, s => QueryUtils.Parse("Entity." + s, qd), template.Model.ToType()).FillQueryTokens(list);
@@ -628,11 +636,6 @@ namespace Signum.Engine.Mailing
 
             var columns = template.Tokens.Select(qt => new Column(QueryUtils.Parse("Entity." + qt.TokenString, qd), null)).ToList();
 
-            if (template.Recipient != null)
-            {
-                columns.Insert(0, new Column(QueryUtils.Parse("Entity." + template.Recipient.TokenString, qd), null));
-            }
-
             var entityToken = QueryUtils.Parse("Entity", qd);
 
             var table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
@@ -651,8 +654,18 @@ namespace Signum.Engine.Mailing
                 }
             });
 
-            var recipient = EmailTemplateParser.GetRecipient(template, model, entity, table, columns);
-            
+            var dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
+
+            Lite<IEmailOwnerDN> recipient = null;
+
+            if (model != null && model is IEmailModelWithRecipient)
+                recipient = ((IEmailModelWithRecipient)model).Recipient;
+            else
+            {
+                recipient = EmailTemplateParser.GetRecipient(table, 
+                    dicTokenColumn[QueryUtils.Parse("Entity." + template.Recipient.TokenString, qd)]);
+            }
+
             var email = new EmailMessageDN
             {
                 Recipient = recipient,
@@ -665,9 +678,8 @@ namespace Signum.Engine.Mailing
                 Template = template.ToLite(),
             };
 
-            var dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
 
-            var recipientCI = recipient.InDB().Select(io => io.CultureInfo).SingleOrDefault();
+            var recipientCI = recipient.InDB(io => io.CultureInfo);
             var cultureInfo = recipientCI.HasText() ? CultureInfo.GetCultureInfo(recipientCI) : CultureInfo.InvariantCulture;
 
             var message = template.Messages.SingleOrDefault(tm => tm.GetCultureInfo == cultureInfo) ??
@@ -891,7 +903,7 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception ex)
             {
-                if (Transaction.AvoidIndependentTransactions) //Transaction.IsTestTransaction
+                if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
                     throw;
 
                 var exLog = ex.LogException().ToLite();
@@ -962,7 +974,7 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception ex)
             {
-                if (Transaction.AvoidIndependentTransactions) //Transaction.InTestTransaction
+                if (Transaction.InTestTransaction) //Transaction.InTestTransaction
                     throw;
 
                 var exLog = ex.LogException().ToLite();

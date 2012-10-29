@@ -32,7 +32,7 @@ namespace Signum.Engine.Mailing
                 Construct = (e, args) =>
                 {
                     var template = args.GetArg<Lite<EmailTemplateDN>>(0);
-                    return EmailLogic.CreateEmailMessage(e, template.Retrieve());
+                    return EmailLogic.CreateEmailMessage(template.Retrieve(), e);
                 }
             }.Register();
 
