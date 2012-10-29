@@ -210,16 +210,16 @@ namespace Signum.Entities
             return result;
         }
 
-        public static Lite Create(Type type, IdentifiableEntity entidad)
+        public static Lite Create(Type type, IIdentifiable entity)
         {
-            if (entidad == null)
-                throw new ArgumentNullException("entidad");
+            if (entity == null)
+                throw new ArgumentNullException("entity");
 
             BindingFlags bf = BindingFlags.Default | BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic;
 
             ConstructorInfo ci = Generate(type).GetConstructor(bf, null, new[] { type }, null);
 
-            Lite result = (Lite)ci.Invoke(new[] { entidad });
+            Lite result = (Lite)ci.Invoke(new[] { entity });
             return result;
         }
 
