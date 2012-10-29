@@ -39,16 +39,24 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailLogic.RegisterTemplate<ResetPasswordRequestMail>(model =>
-                {
-                    return new EmailContent
-                    {
-                        Subject = Resources.ResetPasswordCode,
-                        Body = EmailRenderer.Replace(typeof(AuthLogic).Assembly.ReadResourceStream("Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
-                               model, null, Resources.ResourceManager)
-                    };
-                });
+                EmailLogic.RegisterSystemTemplate(AuthorizationSystemTemplateMail.ResetPassword);
+
+                //TODO: 777 luis - seguir aquí
+                //EmailLogic.RegisterTemplate<ResetPasswordRequestMail>(model =>
+                //{
+                //    return new EmailContent
+                //    {
+                //        Subject = Resources.ResetPasswordCode,
+                //        Body = EmailRenderer.Replace(typeof(AuthLogic).Assembly.ReadResourceStream("Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
+                //               model, null, Resources.ResourceManager)
+                //    };
+                //});
             }
+        }
+
+        public enum AuthorizationSystemTemplateMail
+        { 
+            ResetPassword
         }
 
         public static ResetPasswordRequestDN ResetPasswordRequest(UserDN user)

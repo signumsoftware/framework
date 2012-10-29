@@ -31,9 +31,9 @@ namespace Signum.Engine.Mailing
             {
                 Package = package.ToLite(),
                 Recipient = m.Recipient,
-                Body = m.Body,
+                Text = m.Text,
                 Subject = m.Subject,
-                TemplateOld = m.TemplateOld,
+                //TemplateOld = m.TemplateOld,
                 State = EmailState.Created
             }).SaveList();
 

@@ -1,0 +1,43 @@
+﻿@using Signum.Entities.Mailing
+@using (var ec = Html.TypeContext<EmailTemplateDN>())
+{
+    @Html.ValueLine(ec, e => e.Name)
+    @Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true)
+    <fieldset>
+        <legend>Properties</legend>
+        @Html.EntityLine(ec, e => e.AssociatedType)
+        @Html.ValueLine(ec, e => e.Recipient)
+        @Html.EntityLine(ec, e => e.SystemTemplate)
+    </fieldset>
+    <fieldset>
+        <legend>Active</legend>
+        @Html.ValueLine(ec, e => e.Active, vl => vl.ReadOnly = true)
+        @Html.ValueLine(ec, e => e.StartDate)
+        @Html.ValueLine(ec, e => e.EndDate)
+    </fieldset>
+    <fieldset>
+        <legend>From/Copies</legend>
+        @Html.ValueLine(ec, e => e.From)
+        @Html.ValueLine(ec, e => e.DisplayFrom)
+        @Html.ValueLine(ec, e => e.Bcc)
+        @Html.ValueLine(ec, e => e.Cc)
+    </fieldset>
+    @Html.EntityLine(ec, e => e.SMTPConfiguration)
+    <fieldset>
+        <legend>Text</legend>
+        @Html.EntityLine(ec, e => e.MasterTemplate)
+        @Html.ValueLine(ec, e => e.IsBodyHtml)
+        @Html.ValueLine(ec, e => e.EditableMessage)
+        <div class="sf-tabs">
+            @foreach (var message in ec.Value.Messages.OrderBy(m => m.CultureInfo))
+            {
+                <fieldset id="etTabMain">
+                    <legend>@message.CultureInfo</legend>
+                    
+                </fieldset>
+            }
+        </div>
+    </fieldset>
+    @Html.EntityList(ec, e => e.Tokens)
+    @Html.EntityList(ec, e => e.Messages)
+}

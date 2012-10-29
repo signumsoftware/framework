@@ -360,4 +360,13 @@
   <data name="TheTextMustContaintThe0IndicatingReplacementPoint" xml:space="preserve">
     <value>The text must contain the '{0}' tag indicating the replamecent point</value>
   </data>
+  <data name="OneOfTheMessagesMustBeSetFor0" xml:space="preserve">
+    <value>One of the messages must be set for {0}</value>
+  </data>
+  <data name="ThereAreMoreThanOneMessageForTheSameLanguage" xml:space="preserve">
+    <value>There are more than one message for the same language</value>
+  </data>
+  <data name="ThereIsNotAnyMessageForTheTemplate" xml:space="preserve">
+    <value>There is not any message for the template</value>
+  </data>
 </root>

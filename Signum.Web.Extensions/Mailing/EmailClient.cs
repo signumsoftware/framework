@@ -33,9 +33,12 @@ namespace Signum.Web.Mailing
                 Navigator.RegisterArea(typeof(MailingClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
-                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
-                    new EntitySettings<EmailTemplateOldDN>(EntityType.ServerOnly),
+                    new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailMessage") },
+                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailPackage") },
+                    new EntitySettings<EmailMasterTemplateDN>(EntityType.AdminNotSaving){ PartialViewName =  e => ViewPrefix.Formato("EmailMasterTemplate") },
+                    //new EmbeddedEntitySettings<EmailTemplateMessageDN>(){ PartialViewName = e => ViewPrefix.Formato("EmailTemplateMessage") },
+                    //new EntitySettings<EmailTemplateDN>(EntityType.AdminNotSaving){ PartialViewName = e => ViewPrefix.Formato("EmailTemplate") },
+                    //new EntitySettings<EmailTemplateOldDN>(EntityType.ServerOnly),
                 });
 
                 if (smtpConfig)

@@ -410,6 +410,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\Views\EmailMasterTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailMasterTemplate.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\EmailTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailTemplate.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\EmailTemplateMessage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailTemplateMessage.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Views\Newsletter.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1072,6 +1087,18 @@
     <Content Include="Chart\Views\ChartScriptParameter.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartScriptParameter.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailMasterTemplate.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>EmailMasterTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailTemplate.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>EmailTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailTemplateMessage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>EmailTemplateMessage.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

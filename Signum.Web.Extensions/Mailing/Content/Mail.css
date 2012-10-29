@@ -30,3 +30,9 @@
 {
     display: none;
 }
+
+.sf-email-message-previewcontentbutton .sf-email-message-editcontentbutton
+{
+    margin-left: 110px;
+    margin-bottom: 10px;        
+}

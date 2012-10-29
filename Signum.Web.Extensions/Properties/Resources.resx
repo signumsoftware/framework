@@ -477,4 +477,31 @@
   <data name="ChartScript_Edit" xml:space="preserve">
     <value>Edit Script</value>
   </data>
+  <data name="EditContent" xml:space="preserve">
+    <value>Edit content</value>
+  </data>
+  <data name="PreviewContent" xml:space="preserve">
+    <value>Preview content</value>
+  </data>
+  <data name="InsertMessageContent" xml:space="preserve">
+    <value>Insert message content</value>
+  </data>
+  <data name="Signum_TheTokenIsNull" xml:space="preserve">
+    <value>The token is null</value>
+  </data>
+  <data name="InsertInSubject" xml:space="preserve">
+    <value>Insert in subject</value>
+  </data>
+  <data name="InsertInText" xml:space="preserve">
+    <value>Insert in text</value>
+  </data>
+  <data name="InsertIterationInSubject" xml:space="preserve">
+    <value>Insert iteration in subject</value>
+  </data>
+  <data name="InsertIterationInText" xml:space="preserve">
+    <value>Insert iteration in text</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
 </root>

@@ -13,32 +13,32 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable]
-    public class EmailTemplateOldDN : IdentifiableEntity
-    {
-        [NotNullable, UniqueIndex]
-        string fullClassName;
-        public string FullClassName
-        {
-            get { return fullClassName; }
-            set { Set(ref fullClassName, value, () => FullClassName); }
-        }
+    //[Serializable]
+    //public class EmailTemplateOldDN : IdentifiableEntity
+    //{
+    //    [NotNullable, UniqueIndex]
+    //    string fullClassName;
+    //    public string FullClassName
+    //    {
+    //        get { return fullClassName; }
+    //        set { Set(ref fullClassName, value, () => FullClassName); }
+    //    }
 
-        [NotNullable]
-        string friendlyName;
-        [StringLengthValidator(Min = 1)]
-        public string FriendlyName
-        {
-            get { return friendlyName; }
-            set { Set(ref friendlyName, value, () => FriendlyName); }
-        }
+    //    [NotNullable]
+    //    string friendlyName;
+    //    [StringLengthValidator(Min = 1)]
+    //    public string FriendlyName
+    //    {
+    //        get { return friendlyName; }
+    //        set { Set(ref friendlyName, value, () => FriendlyName); }
+    //    }
 
-        static readonly Expression<Func<EmailTemplateOldDN, string>> ToStringExpression = e => e.friendlyName;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-    }
+    //    static readonly Expression<Func<EmailTemplateOldDN, string>> ToStringExpression = e => e.friendlyName;
+    //    public override string ToString()
+    //    {
+    //        return ToStringExpression.Evaluate(this);
+    //    }
+    //}
 
     public enum EmailTemplateState
     {
@@ -207,7 +207,7 @@ namespace Signum.Entities.Mailing
                     return Resources.EndDateMustBeHigherThanStartDate;
             }
 
-            if (pi.Is(() => Recipient) && AssociatedType != null && !AssociatedTypeIsEmailOwner(AssociatedType))
+            if (pi.Is(() => Recipient) && AssociatedType != null && !AssociatedTypeIsEmailOwner(AssociatedType) && Recipient==null)
             {
                 return Resources.RouteToGetRecipientNotSet;
             }
@@ -215,10 +215,14 @@ namespace Signum.Entities.Mailing
             if (pi.Is(() => Messages))
             {
                 if (Messages == null || !Messages.Any())
-                    return "There is not any message for the template";
+                    return Resources.ThereIsNotAnyMessageForTheTemplate;
                 if (!Messages.Any(m => m.GetCultureInfo == CultureInfo.InvariantCulture))
                 {
-                    return "One of the messages must be set for the default language";
+                    return Resources.OneOfTheMessagesMustBeSetFor0.Formato(CultureInfo.InvariantCulture.DisplayName);
+                }
+                if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
+                {
+                    return Resources.ThereAreMoreThanOneMessageForTheSameLanguage;
                 }
             }
 
@@ -269,7 +273,6 @@ namespace Signum.Entities.Mailing
             get { return subject; }
             set { Set(ref subject, value, () => Subject); }
         }
-
     }
 
     [Serializable]

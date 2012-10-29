@@ -11,8 +11,14 @@
     @Html.EntityLine(e, f => f.Package, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.Subject)
     <h3>
-        Message:</h3>
+        @Signum.Web.Extensions.Properties.Resources.Message:</h3>
     <div>
-        @Html.Raw(e.Value.Body)
+        @if (e.Value.IsBodyHtml)
+        {
+            @Html.Raw(e.Value.Text)
+        } else
+        {
+          @Html.Raw(HttpUtility.HtmlEncode(e.Value.Text))
+        }
     </div>
 }

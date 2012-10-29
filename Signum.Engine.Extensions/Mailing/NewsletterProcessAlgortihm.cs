@@ -24,7 +24,7 @@ namespace Signum.Engine.Mailing
     {
         class SendLine
         {
-            public ResultRow Row; 
+            public ResultRow Row;
             public Lite<NewsletterDeliveryDN> Send;
             public string Email;
             public Exception Error;
@@ -46,12 +46,12 @@ namespace Signum.Engine.Mailing
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             var newsletterDeliveryElementToken = QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd);
             var newsletterToken = QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd);
-            var emailToken = QueryUtils.Parse("Entity.Email", qd); 
+            var emailToken = QueryUtils.Parse("Entity.Email", qd);
 
             var tokens = new List<QueryToken>();
             tokens.Add(newsletterDeliveryElementToken);
-            tokens.Add(emailToken); 
-            tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject)); 
+            tokens.Add(emailToken);
+            tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject));
             tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.HtmlBody));
 
             tokens = tokens.Distinct().ToList();
@@ -71,17 +71,17 @@ namespace Signum.Engine.Mailing
                 Orders = new List<Order>(),
                 Columns = tokens.Select(t => new Column(t, t.NiceName())).ToList(),
                 ElementsPerPage = QueryRequest.AllElements,
-            }); 
+            });
 
-            var lines = resultTable.Rows.Select(r => 
-                new SendLine 
+            var lines = resultTable.Rows.Select(r =>
+                new SendLine
                 {
-                    Send = (Lite<NewsletterDeliveryDN>)r[0],  
-                    Email = (string)r[1],  
+                    Send = (Lite<NewsletterDeliveryDN>)r[0],
+                    Email = (string)r[1],
                     Row = r,
                 }).ToList();
 
-            var dic = tokens.Select((t,i)=>KVP.Create(t.FullKey(), i)).ToDictionary();
+            var dic = tokens.Select((t, i) => KVP.Create(t.FullKey(), i)).ToDictionary();
 
             string overrideEmail = EmailLogic.OverrideEmailAddress();
 
@@ -125,33 +125,33 @@ namespace Signum.Engine.Mailing
                 }
 
 
-                    if (numErrors != 0)
-                        newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
+                if (numErrors != 0)
+                    newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
 
-                    var failed = group.Extract(sl => sl.Error != null).GroupBy(sl => sl.Error, sl => sl.Send);
-                    foreach (var f in failed)
-                    {
-                        var exLog = f.Key.LogException().ToLite();
+                var failed = group.Extract(sl => sl.Error != null).GroupBy(sl => sl.Error, sl => sl.Send);
+                foreach (var f in failed)
+                {
+                    var exLog = f.Key.LogException().ToLite();
 
-                        Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
-                            .UnsafeUpdate(nd => new NewsletterDeliveryDN
-                            {
-                                Sent = true,
-                                SendDate = TimeZoneManager.Now.TrimToSeconds(),
-                                Exception = exLog
-                            });
-                    }
+                    Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
+                        .UnsafeUpdate(nd => new NewsletterDeliveryDN
+                        {
+                            Sent = true,
+                            SendDate = TimeZoneManager.Now.TrimToSeconds(),
+                            Exception = exLog
+                        });
+                }
 
-                    if (group.Any())
-                    {
-                        var sent = group.Select(sl => sl.Send).ToList();
-                        Database.Query<NewsletterDeliveryDN>().Where(nd => sent.Contains(nd.ToLite()))
-                            .UnsafeUpdate(nd => new NewsletterDeliveryDN
-                            {
-                                Sent = true,
-                                SendDate = TimeZoneManager.Now.TrimToSeconds(),
-                            });
-                    }
+                if (group.Any())
+                {
+                    var sent = group.Select(sl => sl.Send).ToList();
+                    Database.Query<NewsletterDeliveryDN>().Where(nd => sent.Contains(nd.ToLite()))
+                        .UnsafeUpdate(nd => new NewsletterDeliveryDN
+                        {
+                            Sent = true,
+                            SendDate = TimeZoneManager.Now.TrimToSeconds(),
+                        });
+                }
 
                 executingProcess.ProgressChanged(processed, lines.Count);
             }

@@ -421,6 +421,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to One of the messages must be set for {0}.
+        /// </summary>
+        public static string OneOfTheMessagesMustBeSetFor0 {
+            get {
+                return ResourceManager.GetString("OneOfTheMessagesMustBeSetFor0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New Execution.
         /// </summary>
         public static string ProcessOperation_FromProcess {
@@ -714,6 +723,24 @@ namespace Signum.Entities.Extensions.Properties {
         public static string ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter {
             get {
                 return ResourceManager.GetString("ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are more than one message for the same language.
+        /// </summary>
+        public static string ThereAreMoreThanOneMessageForTheSameLanguage {
+            get {
+                return ResourceManager.GetString("ThereAreMoreThanOneMessageForTheSameLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is not any message for the template.
+        /// </summary>
+        public static string ThereIsNotAnyMessageForTheTemplate {
+            get {
+                return ResourceManager.GetString("ThereIsNotAnyMessageForTheTemplate", resourceCulture);
             }
         }
         

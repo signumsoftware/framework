@@ -71,12 +71,12 @@ namespace Signum.Entities.Mailing
             set { Set(ref template, value, () => Template); }
         }
 
-        Lite<EmailTemplateOldDN> templateOld;
-        public Lite<EmailTemplateOldDN> TemplateOld
-        {
-            get { return templateOld; }
-            set { Set(ref templateOld, value, () => TemplateOld); }
-        }
+        //Lite<EmailTemplateOldDN> templateOld;
+        //public Lite<EmailTemplateOldDN> TemplateOld
+        //{
+        //    get { return templateOld; }
+        //    set { Set(ref templateOld, value, () => TemplateOld); }
+        //}
 
         DateTime creationTime = TimeZoneManager.Now;
         public DateTime CreationTime
@@ -109,12 +109,12 @@ namespace Signum.Entities.Mailing
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string body;
+        string text;
         [StringLengthValidator(AllowNulls = false, Min = 3)]
-        public string Body
+        public string Text
         {
-            get { return body; }
-            set { Set(ref body, value, () => Body); }
+            get { return text; }
+            set { Set(ref text, value, () => Text); }
         }
 
         bool isBodyHtml = false;

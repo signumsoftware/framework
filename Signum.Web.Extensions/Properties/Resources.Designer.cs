@@ -331,6 +331,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Edit content.
+        /// </summary>
+        public static string EditContent {
+            get {
+                return ResourceManager.GetString("EditContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The email must have a value.
         /// </summary>
         public static string EmailMustHaveAValue {
@@ -502,6 +511,51 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Insert in subject.
+        /// </summary>
+        public static string InsertInSubject {
+            get {
+                return ResourceManager.GetString("InsertInSubject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insert in text.
+        /// </summary>
+        public static string InsertInText {
+            get {
+                return ResourceManager.GetString("InsertInText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insert iteration in subject.
+        /// </summary>
+        public static string InsertIterationInSubject {
+            get {
+                return ResourceManager.GetString("InsertIterationInSubject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insert iteration in text.
+        /// </summary>
+        public static string InsertIterationInText {
+            get {
+                return ResourceManager.GetString("InsertIterationInText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insert message content.
+        /// </summary>
+        public static string InsertMessageContent {
+            get {
+                return ResourceManager.GetString("InsertMessageContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Introduce your username and password.
         /// </summary>
         public static string IntroduceYourUserNameAndPassword {
@@ -525,6 +579,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string Key0NotFound {
             get {
                 return ResourceManager.GetString("Key0NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        public static string Language {
+            get {
+                return ResourceManager.GetString("Language", resourceCulture);
             }
         }
         
@@ -709,6 +772,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Preview content.
+        /// </summary>
+        public static string PreviewContent {
+            get {
+                return ResourceManager.GetString("PreviewContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Modify.
         /// </summary>
         public static string PropertiesAscx_Modify {
@@ -867,6 +939,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string Search_CtxMenuItem_Operations {
             get {
                 return ResourceManager.GetString("Search_CtxMenuItem_Operations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The token is null.
+        /// </summary>
+        public static string Signum_TheTokenIsNull {
+            get {
+                return ResourceManager.GetString("Signum_TheTokenIsNull", resourceCulture);
             }
         }
         

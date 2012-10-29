@@ -40,7 +40,7 @@ namespace Signum.Engine.Mailing
                 Construct = (m, _) => new EmailMessageDN 
                 {
                     Bcc = m.Bcc,
-                    Body = m.Body,
+                    Text = m.Text,
                     Cc = m.Cc,
                     DisplayFrom = m.DisplayFrom,
                     EditableMessage = m.EditableMessage,

@@ -17,8 +17,12 @@
                 @Html.Hidden("htmlBodyContent", nc.Value.HtmlBody)
                 <fieldset>
                     <legend>Message</legend>
-                    <iframe id="newsBodyContent" name="frameNewImage" src="about:blank" class="sf-email-htmlbody" frameborder="0">
-                    </iframe>
+                    @*<iframe id="newsBodyContent" name="frameNewImage" src="about:blank" class="sf-email-htmlbody" frameborder="0">
+                    </iframe>*@
+                    <div class="sf-email-htmlbody">
+                        @Html.Raw(nc.Value.HtmlBody)
+                    </div>
+                    
                 </fieldset>
             }
             else

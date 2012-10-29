@@ -1,0 +1,29 @@
+﻿@using Signum.Entities.Mailing
+@using (var ec = Html.TypeContext<EmailMasterTemplateDN>())
+{
+    @Html.ValueLine(ec, e => e.Name)
+    @Html.ValueLine(ec, e => e.State)
+
+    <div id="messageEditContent">
+        @Html.ValueLine(ec, e => e.Text, vl =>
+               {
+                   vl.ValueLineType = ValueLineType.TextArea;
+                   vl.ValueHtmlProps["cols"] = "30";
+                   vl.ValueHtmlProps["rows"] = "6";
+                   vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
+               })
+        <br />
+        <input type="button" class="sf-button" id="insertMasterTemplateTokenButton" value="@Signum.Web.Extensions.Properties.Resources.InsertMessageContent" />
+        <input type="button" class="sf-button" id="messagePreviewContentButton" value="@Signum.Web.Extensions.Properties.Resources.PreviewContent" />
+    </div>
+    <div id="messagePreviewContent">
+        <fieldset>
+            <legend>Message</legend>
+            <iframe id="messageBodyContentPreview" name="frameNewImage" src="about:blank" class="sf-email-htmlbody"
+                frameborder="0"></iframe>
+            <br />
+            <input type="button" class="sf-button" id="messageEditContentButton" value="@Signum.Web.Extensions.Properties.Resources.EditContent" />
+        </fieldset>
+    </div>
+}
+@Html.ScriptsJs("~/Mailing/Scripts/SF_Mail.js")
