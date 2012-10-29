@@ -684,6 +684,12 @@ namespace Signum.Utilities.Reflection
                     return Convert.ChangeType(value, utype);
             }
         }
+
+        public static bool IsStatic(this PropertyInfo pi)
+        {
+            return (pi.CanRead && pi.GetGetMethod().IsStatic) ||
+                  (pi.CanWrite && pi.GetSetMethod().IsStatic);
+        }
     }
 
 
