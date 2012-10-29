@@ -72,7 +72,7 @@ Write(Html.EntityLine(e, f => f.Recipient));
 
                                          
     
-Write(Html.EntityLine(e, f => f.Template, f => f.ReadOnly = true));
+Write(Html.EntityLine(e, f => f.TemplateOld, f => f.ReadOnly = true));
 
                                                                 
     

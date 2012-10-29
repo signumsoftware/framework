@@ -15,6 +15,11 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailMessageDN : Entity
     {
+        public EmailMessageDN()
+        {
+            this.UniqueIdentifier = Guid.NewGuid();
+        }
+
         [ImplementedBy(typeof(UserDN))]
         Lite<IEmailOwnerDN> recipient;
         [NotNullValidator]
@@ -22,6 +27,27 @@ namespace Signum.Entities.Mailing
         {
             get { return recipient; }
             set { Set(ref recipient, value, () => Recipient); }
+        }
+
+        string from;
+        public string From
+        {
+            get { return from; }
+            set { Set(ref from, value, () => From); }
+        }
+
+        string displayFrom;
+        public string DisplayFrom
+        {
+            get { return displayFrom; }
+            set { Set(ref displayFrom, value, () => DisplayFrom); }
+        }
+
+        string to;
+        public string To
+        {
+            get { return to; }
+            set { Set(ref to, value, () => To); }
         }
 
         string bcc;
@@ -38,13 +64,18 @@ namespace Signum.Entities.Mailing
             set { Set(ref cc, value, () => Cc); }
         }
 
-
         Lite<EmailTemplateDN> template;
-        [NotNullValidator]
         public Lite<EmailTemplateDN> Template
         {
             get { return template; }
             set { Set(ref template, value, () => Template); }
+        }
+
+        Lite<EmailTemplateOldDN> templateOld;
+        public Lite<EmailTemplateOldDN> TemplateOld
+        {
+            get { return templateOld; }
+            set { Set(ref templateOld, value, () => TemplateOld); }
         }
 
         DateTime creationTime = TimeZoneManager.Now;
@@ -86,6 +117,13 @@ namespace Signum.Entities.Mailing
             set { Set(ref body, value, () => Body); }
         }
 
+        bool isBodyHtml = false;
+        public bool IsBodyHtml
+        {
+            get { return isBodyHtml; }
+            set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
+        }
+
         Lite<ExceptionDN> exception;
         public Lite<ExceptionDN> Exception
         {
@@ -98,6 +136,20 @@ namespace Signum.Entities.Mailing
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
+        }
+
+        Guid uniqueIdentifier;
+        public Guid UniqueIdentifier
+        {
+            get { return uniqueIdentifier; }
+            set { Set(ref uniqueIdentifier, value, () => UniqueIdentifier); }
+        }
+
+        bool editableMessage = true;
+        public bool EditableMessage
+        {
+            get { return editableMessage; }
+            set { Set(ref editableMessage, value, () => EditableMessage); }
         }
 
         Lite<EmailPackageDN> package;

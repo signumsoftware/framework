@@ -6,11 +6,13 @@ using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Extensions.Properties;
+using Signum.Entities.UserQueries;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable]
-    public class EmailTemplateDN : IdentifiableEntity
+    public class EmailTemplateOldDN : IdentifiableEntity
     {
         [NotNullable, UniqueIndex]
         string fullClassName;
@@ -29,15 +31,27 @@ namespace Signum.Entities.Mailing
             set { Set(ref friendlyName, value, () => FriendlyName); }
         }
 
-        static readonly Expression<Func<EmailTemplateDN, string>> ToStringExpression = e => e.friendlyName;
+        static readonly Expression<Func<EmailTemplateOldDN, string>> ToStringExpression = e => e.friendlyName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
     }
 
+    public enum EmailTemplateState
+    {
+        Created,
+        Modified
+    }
+
+    public enum EmailTemplateOperations
+    {
+        Crear,
+        Modificar
+    }
+
     [Serializable]
-    public class EmailMessageTemplateDN : Entity
+    public class EmailTemplateDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -48,20 +62,27 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        public static bool AllowEditMessages = true;
-
-        bool editableMessage = AllowEditMessages;
+        bool editableMessage = true;
         public bool EditableMessage
         {
             get { return editableMessage; }
             set { Set(ref editableMessage, value, () => EditableMessage); }
         }
 
+        [NotNullable]
         TypeDN associatedType;
+        [NotNullValidator]
         public TypeDN AssociatedType
         {
             get { return associatedType; }
             set { Set(ref associatedType, value, () => AssociatedType); }
+        }
+
+        TemplateQueryTokenDN recipient;
+        public TemplateQueryTokenDN Recipient
+        {
+            get { return recipient; }
+            set { Set(ref recipient, value, () => Recipient); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -73,14 +94,33 @@ namespace Signum.Entities.Mailing
             set { Set(ref text, value, () => Text); }
         }
 
-        public static string DefaultFrom;
+        bool isBodyHtml = true;
+        public bool IsBodyHtml
+        {
+            get { return isBodyHtml; }
+            set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
+        }
 
-        string from = DefaultFrom;
+        MList<TemplateQueryTokenDN> replacements;
+        public MList<TemplateQueryTokenDN> Replacements
+        {
+            get { return replacements; }
+            set { Set(ref replacements, value, () => Replacements); }
+        }
+
+        string from;
         [StringLengthValidator(AllowNulls = false)]
         public string From
         {
             get { return from; }
             set { Set(ref from, value, () => From); }
+        }
+
+        string displayFrom;
+        public string DisplayFrom
+        {
+            get { return displayFrom; }
+            set { Set(ref displayFrom, value, () => DisplayFrom); }
         }
 
         string bcc;
@@ -106,15 +146,29 @@ namespace Signum.Entities.Mailing
             set { Set(ref subject, value, () => Subject); }
         }
 
-        Lite<VirtualEmailMessageTemplateDN> virtualTemplate;
-        public Lite<VirtualEmailMessageTemplateDN> VirtualTemplate
+        Lite<MasterEmailTemplateDN> masterTemplate;
+        public Lite<MasterEmailTemplateDN> MasterTemplate
         {
-            get { return virtualTemplate; }
-            set { Set(ref virtualTemplate, value, () => VirtualTemplate); }
+            get { return masterTemplate; }
+            set { Set(ref masterTemplate, value, () => MasterTemplate); }
         }
 
-        EmailMessageTemplateStates state = EmailMessageTemplateStates.Created;
-        public EmailMessageTemplateStates State
+        Lite<SMTPConfigurationDN> smtpConfiguration;
+        public Lite<SMTPConfigurationDN> SMTPConfiguration
+        {
+            get { return smtpConfiguration; }
+            set { Set(ref smtpConfiguration, value, () => SMTPConfiguration); }
+        }
+
+        EnumDN systemTemplate;
+        public EnumDN SystemTemplate
+        {
+            get { return systemTemplate; }
+            set { Set(ref systemTemplate, value, () => SystemTemplate); }
+        }
+
+        EmailTemplateState state = EmailTemplateState.Created;
+        public EmailTemplateState State
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
@@ -143,12 +197,14 @@ namespace Signum.Entities.Mailing
             set { Set(ref endDate, value, () => EndDate); }
         }
 
-        static Expression<Func<EmailMessageTemplateDN, bool>> IsActiveNowExpression =
+        static Expression<Func<EmailTemplateDN, bool>> IsActiveNowExpression =
             (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
         {
             return IsActiveNowExpression.Evaluate(this);
         }
+
+        public static Func<TypeDN, bool> AssociatedTypeIsEmailOwner;
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
@@ -158,40 +214,32 @@ namespace Signum.Entities.Mailing
                     return Resources.EndDateMustBeHigherThanStartDate;
             }
 
+            if (pi.Is(() => Recipient) && AssociatedType != null && !AssociatedTypeIsEmailOwner(AssociatedType))
+            {
+                return Resources.RouteToGetRecipientNotSet;
+            }
+
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<EmailMessageTemplateDN, string>> ToStringExpression = e => e.Name;
+        static readonly Expression<Func<EmailTemplateDN, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
-
-        public static Func<EmailMessageTemplateDN, object, string> ComposeText;
-
-        public EmailMessageDN CreateEmailMessage(Lite<IEmailOwnerDN> recipient, object arg)
-        {
-            return new EmailMessageDN 
-            {
-                Template = null,
-                Subject = this.Subject,
-                Bcc = this.Bcc,
-                Cc = this.Cc,
-                //From
-                Recipient = recipient,
-                Body = ComposeText(this, arg) //compose + virtual
-            };
-        }
-    }
-
-    public enum EmailMessageTemplateStates
-    { 
-        Created,
-        Modified
     }
 
     [Serializable]
-    public class VirtualEmailMessageTemplateDN : Entity
+    public class TemplateQueryTokenDN : QueryTokenDN
+    {
+        public override void ParseData(Func<DynamicQuery.QueryToken, List<DynamicQuery.QueryToken>> subTokens)
+        {
+            throw new InvalidOperationException("ParseData is ambiguous on {0}".Formato(GetType().NiceName()));
+        }
+    }
+
+    [Serializable]
+    public class MasterEmailTemplateDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -211,14 +259,14 @@ namespace Signum.Entities.Mailing
             set { Set(ref text, value, () => Text); }
         }
 
-        EmailMessageTemplateStates state = EmailMessageTemplateStates.Created;
-        public EmailMessageTemplateStates State
+        EmailTemplateState state = EmailTemplateState.Created;
+        public EmailTemplateState State
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
         }
 
-        static Expression<Func<VirtualEmailMessageTemplateDN, string>> ToStringExpression = e => e.name;
+        static Expression<Func<MasterEmailTemplateDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

@@ -298,4 +298,7 @@
   <data name="TheProperty0" xml:space="preserve">
     <value>the property {0}</value>
   </data>
+  <data name="IterationForToken0IsNotClosed" xml:space="preserve">
+    <value>The iteration for the token {0} in the template text is not closed</value>
+  </data>
 </root>

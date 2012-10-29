@@ -354,4 +354,7 @@
   <data name="Omnibox_Disambiguate" xml:space="preserve">
     <value>With Shift+Enter you disambiguate you query</value>
   </data>
+  <data name="RouteToGetRecipientNotSet" xml:space="preserve">
+    <value>The route to get the recipient of the message is not set</value>
+  </data>
 </root>

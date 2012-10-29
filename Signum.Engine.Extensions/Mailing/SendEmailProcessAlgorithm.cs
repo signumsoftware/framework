@@ -33,7 +33,7 @@ namespace Signum.Engine.Mailing
                 Recipient = m.Recipient,
                 Body = m.Body,
                 Subject = m.Subject,
-                Template = m.Template,
+                TemplateOld = m.TemplateOld,
                 State = EmailState.Created
             }).SaveList();
 
