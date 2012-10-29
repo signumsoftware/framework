@@ -36,14 +36,16 @@ namespace Signum.Windows.Chart
 
                 string processName = Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName);
 
-                Registry.CurrentUser
+                var main = Registry.CurrentUser
                     .OpenSubKey("Software")
                     .OpenSubKey("Microsoft")
                     .OpenSubKey("Internet Explorer")
-                    .OpenSubKey("Main")
-                    .OpenSubKey("FeatureControl")
-                    .OpenSubKey("FEATURE_BROWSER_EMULATION", true)
-                    .SetValue(processName, 9999, RegistryValueKind.DWord);
+                    .OpenSubKey("Main");
+
+                var fbe = main.OpenSubKey("FeatureControl").OpenSubKey("FEATURE_BROWSER_EMULATION", true) ??
+                     main.OpenSubKey("FeatureControl", true).CreateSubKey("FEATURE_BROWSER_EMULATION");
+
+                fbe.SetValue(processName, 9999, RegistryValueKind.DWord);
 
                 ChartUtils.RemoveNotNullValidators();
             }
