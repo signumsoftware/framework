@@ -42,8 +42,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Extensions.Sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows.Extensions.Sample", "Signum.Windows.Extensions.Sample\Signum.Windows.Extensions.Sample.csproj", "{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows.Visifire", "Signum.Windows.Visifire\Signum.Windows.Visifire.csproj", "{FCC8FE70-1452-4860-9062-8F570B59DCA3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows.Extensions.UIAutomation", "Signum.Windows.Extensions.UIAutomation\Signum.Windows.Extensions.UIAutomation.csproj", "{8BEE9C27-E196-4087-A531-128BBB5D0CBF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows.Extensions.Sample.Test", "Signum.Windows.Extensions.Sample.Test\Signum.Windows.Extensions.Sample.Test.csproj", "{754D3A2B-2E78-472F-BFA4-939031D2FFE1}"
@@ -219,18 +217,6 @@ Global
 		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Release|x86.ActiveCfg = Release|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Debug|x86.Build.0 = Debug|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Partial|Any CPU.ActiveCfg = Release|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Partial|Any CPU.Build.0 = Release|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Partial|x86.ActiveCfg = Release|x86
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Partial|x86.Build.0 = Release|x86
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Release|x86.ActiveCfg = Release|x86
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Release|x86.Build.0 = Release|x86
 		{8BEE9C27-E196-4087-A531-128BBB5D0CBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8BEE9C27-E196-4087-A531-128BBB5D0CBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BEE9C27-E196-4087-A531-128BBB5D0CBF}.Debug|x86.ActiveCfg = Debug|x86
@@ -269,6 +255,5 @@ Global
 		{7D851227-5294-4BEB-990E-56B4FBB7A148} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 		{86EE7792-96CF-4420-997B-8C811E2B166D} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 		{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D} = {A5D15760-64E5-4522-B298-0249AAE6E124}
-		{FCC8FE70-1452-4860-9062-8F570B59DCA3} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 	EndGlobalSection
 EndGlobal

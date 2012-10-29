@@ -324,7 +324,4 @@
   <data name="Chart" xml:space="preserve">
     <value>Chart</value>
   </data>
-  <data name="MessageLenghtExceeded" xml:space="preserve">
-    <value>Message length exceeded</value>
-  </data>
 </root>

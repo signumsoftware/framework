@@ -304,15 +304,6 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Message length exceeded.
-        /// </summary>
-        public static string MessageLenghtExceeded {
-            get {
-                return ResourceManager.GetString("MessageLenghtExceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to no.
         /// </summary>
         public static string No {

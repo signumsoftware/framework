@@ -108,7 +108,7 @@ namespace Signum.Windows.Extensions.Sample
             });
 
             UserQueryClient.Start();
-            ChartClient.Start(() => new ChartRendererVisifire());
+            //ChartClient.Start(() => new ChartRendererVisifire());
 
             Navigator.AddSettings(new List<EntitySettings>()
             {

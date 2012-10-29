@@ -132,13 +132,6 @@ namespace Signum.Entities.SMS
                     return Resources.EndDateMustBeHigherThanStartDate;
             }
 
-            if (pi.Is(() => Message) 
-                && Message.Length > SMSCharacters.TripleSMSMaxTextLength
-                && MessageLengthExceeded == SMS.MessageLengthExceeded.NotAllowed)
-            {
-                    return Resources.MessageLenghtExceeded;
-            }
-
             return base.PropertyValidation(pi);
         }
 
