@@ -301,4 +301,7 @@
   <data name="IterationForToken0IsNotClosed" xml:space="preserve">
     <value>The iteration for the token {0} in the template text is not closed</value>
   </data>
+  <data name="IterationForToken0IsNotOpened" xml:space="preserve">
+    <value>The iteration for the token {0} in the template text is not opened</value>
+  </data>
 </root>

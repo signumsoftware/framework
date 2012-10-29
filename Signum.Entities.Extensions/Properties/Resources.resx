@@ -357,4 +357,7 @@
   <data name="RouteToGetRecipientNotSet" xml:space="preserve">
     <value>The route to get the recipient of the message is not set</value>
   </data>
+  <data name="TheTextMustContaintThe0IndicatingReplacementPoint" xml:space="preserve">
+    <value>The text must contain the '{0}' tag indicating the replamecent point</value>
+  </data>
 </root>

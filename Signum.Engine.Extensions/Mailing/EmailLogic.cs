@@ -29,6 +29,7 @@ using Signum.Engine.Exceptions;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Signum.Engine.Mailing
 {
@@ -82,6 +83,8 @@ namespace Signum.Engine.Mailing
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<EmailMessageDN>();
+                sb.Include<EmailTemplateDN>();
+                sb.Include<EmailMasterTemplateDN>();
 
                 dqm[typeof(EmailTemplateOldDN)] = (from e in Database.Query<EmailTemplateOldDN>()
                                                    select new
@@ -91,6 +94,29 @@ namespace Signum.Engine.Mailing
                                                        e.FullClassName,
                                                        e.FriendlyName,
                                                    }).ToDynamic();
+
+                dqm[typeof(EmailMasterTemplateDN)] = (from t in Database.Query<EmailMasterTemplateDN>()
+                                                      select new 
+                                                      {
+                                                         Entity = t,
+                                                         t.Id,
+                                                         t.Name,
+                                                         t.State
+                                                      }).ToDynamic();
+
+                dqm[typeof(EmailTemplateDN)] = (from t in Database.Query<EmailTemplateDN>()
+                                                select new
+                                                {
+                                                    Entity = t,
+                                                    t.Id,
+                                                    t.Subject,
+                                                    t.From,
+                                                    t.DisplayFrom,
+                                                    t.Bcc,
+                                                    t.Cc,
+                                                    Active = t.IsActiveNow(),
+                                                    t.IsBodyHtml
+                                                }).ToDynamic();
 
                 dqm[typeof(EmailMessageDN)] = (from e in Database.Query<EmailMessageDN>()
                                                select new
@@ -111,6 +137,38 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
+
+                sb.Schema.EntityEvents<EmailTemplateDN>().PreSaving += new PreSavingEventHandler<EmailTemplateDN>(EmailTemplate_PreSaving);
+            }
+        }
+
+        static HashSet<SystemTemplateDN> systemTemplates = new HashSet<SystemTemplateDN>();
+
+        public static void RegisterSystemTemplate(SystemTemplateDN systemTemplate)
+        {
+            if (!SystemTemplates.Contains(systemTemplate))
+                systemTemplates.Add(systemTemplate);
+        }
+
+        static void EmailTemplate_PreSaving(EmailTemplateDN template, ref bool graphModified)
+        {
+            Type query = template.AssociatedType.GetType();
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
+
+            var tokensString = TokenRegex.Matches(template.Text).Cast<Match>().Select(m => m.Groups["token"].Value).ToList();
+            tokensString.AddRange(TokenRegex.Matches(template.Subject).Cast<Match>().Select(m => m.Groups["token"].Value).ToList());
+            var tokens = tokensString.Select(t => QueryUtils.Parse(t, qd)).Distinct().ToList();
+            
+            var tokensRemoved = template.Tokens.Extract(t => !tokens.Contains(t.Token));
+
+            var tokensToAdd = tokens.Where(t =>
+                !template.Tokens.Any(tt => tt.Token == t))
+                .Select(t => new TemplateQueryTokenDN { Token = t });
+            
+            if (tokensRemoved.Any() || tokensToAdd.Any())
+            {
+                template.Tokens.AddRange(tokensToAdd);
+                graphModified = true;
             }
         }
 
@@ -503,12 +561,6 @@ namespace Signum.Engine.Mailing
 
 
         #region nuevo
-        public static void Start2()
-        {
-            EmailTemplateDN.AssociatedTypeIsEmailOwner = t => t.ToType() is IEmailOwnerDN;
-
-        }
-
         public static EmailSenderManager SenderManager = new EmailSenderManager();
 
         static HashSet<EnumDN> SystemTemplates = new HashSet<EnumDN>();
@@ -539,7 +591,7 @@ namespace Signum.Engine.Mailing
             Type query = template.AssociatedType.GetType();
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
 
-            var columns = template.Replacements.Select(qt => new Column(QueryUtils.Parse("Entity." + qt.TokenString, qd), null)).ToList();
+            var columns = template.Tokens.Select(qt => new Column(QueryUtils.Parse("Entity." + qt.TokenString, qd), null)).ToList();
 
             if (template.Recipient != null)
             {
@@ -564,11 +616,13 @@ namespace Signum.Engine.Mailing
                 }
             });
 
+            var recipient = template.Recipient == null
+                    ? (entity as IEmailOwnerDN).ToLite()
+                    : ((Lite)table.Rows.DistinctSingle(table.Columns[0])).ToLite<IEmailOwnerDN>();
+
             var email = new EmailMessageDN
             {
-                Recipient = template.Recipient == null
-                    ? (entity as IEmailOwnerDN).ToLite()
-                    : ((Lite)table.Rows.DistinctSingle(table.Columns[0])).ToLite<IEmailOwnerDN>(),
+                Recipient = recipient,
                 From = template.From,
                 DisplayFrom = template.DisplayFrom,
                 Cc = template.Cc,
@@ -578,18 +632,17 @@ namespace Signum.Engine.Mailing
                 Template = template.ToLite(),
             };
 
-            var tokensString = TokenRegex.Matches(template.Text).Cast<Match>().Select(m => m.Groups["token"].Value).ToList();
-            tokensString.AddRange(TokenRegex.Matches(template.Subject).Cast<Match>().Select(m => m.Groups["token"].Value).ToList());
-            var tokens = tokensString.Select(t => QueryUtils.Parse(t, qd)).Distinct().ToList();
-            var dicTokenColumn = tokens.Select((t, i) => KVP.Create(t.FullKey(), i)).ToDictionary();
+            var dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token.FullKey().Substring("Entity.".Length));
 
-            email.Subject = ComposeText(template.Subject, table, table.Rows, dicTokenColumn, false);
-            var text = ComposeText(template.Text, table, table.Rows, dicTokenColumn, template.IsBodyHtml);
+            var cultureInfo = CultureInfo.GetCultureInfo(recipient.InDB().Select(io => io.CultureInfo).Single());
+
+            email.Subject = ParseTemplate(template.Subject).Print(table.Rows, dicTokenColumn, false, cultureInfo);
+            var body = ParseTemplate(template.Text).Print(table.Rows, dicTokenColumn, template.IsBodyHtml, cultureInfo);
 
             if (template.MasterTemplate != null)
-                text = MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => text);
+                body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => body);
 
-            email.Body = text;
+            email.Body = body;
 
             return email;
         }
@@ -602,91 +655,332 @@ namespace Signum.Engine.Mailing
 
         public static readonly Regex TokenRegex = new Regex(@"\@(?<special>(foreach|endforeach|))\[(?<token>[^\]]*)\]");
 
+        abstract class TextNode
+        {
+            public abstract void PrintList(StringBuilder sb, IEnumerable<ResultRow> rows, Dictionary<string, ResultColumn> dic, bool isHtml, CultureInfo ci);
+        }
+
+        class LiteralNode : TextNode
+        {
+            public string Text;
+
+            public override void PrintList(StringBuilder sb, IEnumerable<ResultRow> rows, Dictionary<string, ResultColumn> dic, bool isHtml, CultureInfo ci)
+            {
+                sb.Append(Text);
+            }
+        }
+
+        class TokenNode : TextNode
+        {
+            public string Token;
+
+            public override void PrintList(StringBuilder sb, IEnumerable<ResultRow> rows, Dictionary<string, ResultColumn> dic, bool isHtml, CultureInfo ci)
+            {
+                var column = dic[Token];
+                object obj = rows.DistinctSingle(dic[Token]);
+                var text = obj is IFormattable ? ((IFormattable)obj).ToString(column.Column.Token.Format, ci) : obj.TryToString();
+                sb.Append(isHtml ? HttpUtility.HtmlEncode(text) : text);
+            }
+        }
+
+        class IterationNode : TextNode
+        {
+            public string Token;
+            public List<TextNode> Nodes = new List<TextNode>();
+
+            public string Print(IEnumerable<ResultRow> rows, Dictionary<string, ResultColumn> dic, bool isHtml, CultureInfo ci)
+            {
+                StringBuilder sb = new StringBuilder();
+                this.PrintList(sb, rows, dic, isHtml, ci);
+                return sb.ToString();
+            }
+
+            public override void PrintList(StringBuilder sb, IEnumerable<ResultRow> rows, Dictionary<string, ResultColumn> dic, bool isHtml, CultureInfo ci)
+            {
+                if (Token == null)
+                    foreach (var node in Nodes)
+                    {
+                        node.PrintList(sb, rows, dic, isHtml, ci);
+                    }
+                else
+                {
+                    var groups = rows.GroupBy(r => rows.DistinctSingle(dic[Token])).ToList();
+                    if (groups.Count == 1 && groups[0].Key == null)
+                        return;
+                    foreach (var group in groups)
+                    {
+                        foreach (var node in Nodes)
+                        {
+                            node.PrintList(sb, group, dic, isHtml, ci);
+                        }
+                    }
+                }
+            }
+        }
+
+        static IterationNode ParseTemplate(string text)
+        {
+            IterationNode node;
+            var error = TryParseTemplate(text, out node);
+            if (error.HasText())
+                throw new FormatException(error);
+            return node;
+        }
+
+        static string TryParseTemplate(string text, out IterationNode iterationNode)
+        {
+            var matches = TokenRegex.Matches(text);
+
+            Stack<IterationNode> stack = new Stack<IterationNode>();
+            iterationNode = new IterationNode();
+            stack.Push(iterationNode);
+
+            int index = 0;
+            foreach (Match match in matches)
+            {
+                if (index < match.Index)
+                {
+                    stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
+                }
+                var token = match.Groups["token"].Value;
+                switch (match.Groups["special"].Value)
+                {
+                    case "":
+                        stack.Peek().Nodes.Add(new TokenNode { Token = token });
+                        break;
+                    case "foreach":
+                        stack.Push(new IterationNode { Nodes = new List<TextNode>(), Token = token });
+                        break;
+                    case "endforeach":
+                        if (stack.Count() <= 1)
+                            return Resources.IterationForToken0IsNotOpened.Formato(token);
+                        var n = stack.Pop();
+                        if (match.Groups["token"].Value != n.Token)
+                            return Resources.IterationForToken0IsNotOpened.Formato(token);
+                        stack.Peek().Nodes.Add(n);
+                        break;
+                    default:
+                        break;
+                }
+                index = match.Index + match.Length;
+            }
+            if (stack.Count != 1)
+                return Resources.IterationForToken0IsNotClosed.Formato(stack.Peek().Token);
+            var lastM = matches.Cast<Match>().LastOrDefault();
+            if (lastM != null && lastM.Index + lastM.Length < text.Length)
+                stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(lastM.Index + lastM.Length) });
+            stack.Pop();
+            return null;
+        }
+
         internal class ReplacementIreration
         {
             public string Token;
-           
-            public int Index;
+            public int Start;
             public int Length;
             public List<ReplacementIreration> SubIterations;
         }
 
+        static string ComposeText(string text, ResultTable table, Dictionary<string, ResultColumn> dic, bool isHtml)
+        {
+            var matches = TokenRegex.Matches(text).Cast<Match>();
+            if (!matches.Any())
+                return text;
+            int index = -1;
+            var iterations = CreateIterations(matches.Where(m => m.Groups["special"].Value.HasText()), null, ref index);
+            var sb = new StringBuilder();
+            index = -1;
+            ComposeText(text, table.Rows, dic, sb, isHtml, matches, iterations, ref index);
+            return sb.ToString();
+        }
+
+        static void ComposeText(string text, IEnumerable<ResultRow> rows, Dictionary<string, ResultColumn> dicTokenColumn, StringBuilder sb,
+            bool isHtml, IEnumerable<Match> matches, List<ReplacementIreration> iterations, ref int lastIndex)
+        {
+            var index = lastIndex;
+            while (lastIndex < text.Length)
+            {
+                var match = matches.FirstOrDefault(m => m.Index > index);
+                if (match == null)
+                {
+                    sb.Append(text.Substring(lastIndex, text.Length - lastIndex));
+                    return;
+                }
+                sb.Append(text.Substring(lastIndex, match.Index));
+                switch (match.Groups["special"].Value)
+                {
+                    case "":
+                        var column = dicTokenColumn[match.Groups["token"].Value];
+                        var value = rows.DistinctSingle(column).TryToString();
+                        if (isHtml)
+                            sb.Append(HttpUtility.HtmlEncode(value));
+                        else
+                            sb.Append(value);
+                        lastIndex = match.Index + match.Length;
+                        break;
+                    case "foreach":
+                        var subRows = rows.GroupBy(r => r[dicTokenColumn[match.Groups["token"].Value]]);
+                        var iteration = iterations.SingleEx(i => i.Start == match.Index && i.Token == match.Groups["token"].Value);
+                        lastIndex = match.Index + match.Length;
+                        foreach (var gr in subRows)
+                        {
+                            if (gr.Key == null)
+                                break;
+                            while (lastIndex < iteration.Start + iteration.Length)
+                            {
+                                ComposeText(text, rows, dicTokenColumn, sb, isHtml, matches, iterations, ref lastIndex);
+                            }
+                        }
+                        break;
+                    default:
+                        throw new ApplicationException("The special attribute {0} for the token {1} is invalid".Formato(
+                            match.Groups["special"].Value, match.Groups["token"].Value));
+                }
+            }
+            foreach (var match in matches.Where(m => m.Index > index))
+            {
+                var textBefore = text.Substring(lastIndex, match.Index);
+                if (textBefore.HasText())
+                    sb.Append(textBefore);
+
+            }
+        }
+
+
+        static List<ReplacementIreration> CreateIterations(IEnumerable<Match> matches, ReplacementIreration parent, ref int lastIndex)
+        {
+            var list = new List<ReplacementIreration>();
+            if (matches.Any())
+            {
+                var index = lastIndex;
+                foreach (var match in matches.Where(m => m.Index > index).OrderBy(m => m.Index))
+                {
+                    if (match.Groups["special"].Value == "foreach")
+                    {
+                        ReplacementIreration iteration = null;
+                        iteration = new ReplacementIreration
+                        {
+                            Token = match.Groups["token"].Value,
+                            Start = match.Index
+                        };
+                        list.Add(iteration);
+                        lastIndex = match.Index;
+                        iteration.SubIterations = CreateIterations(matches, iteration, ref lastIndex);
+                        continue;
+                    }
+                    if (match.Groups["special"].Value == "endforeach")
+                    {
+                        if (parent == null)
+                            throw new ApplicationException(Resources.IterationForToken0IsNotOpened.Formato(match.Groups["token"].Value));
+                        parent.Length = parent.Start - match.Index + match.Length;
+                        lastIndex = match.Index;
+                        return list;
+                    }
+                }
+            }
+            if (parent != null && parent.Length == 0)
+                throw new ApplicationException(Resources.IterationForToken0IsNotClosed.Formato(parent.Token));
+            return list;
+        }
+
+        //------
 
 
         //public static readonly Regex TokenRegex = new Regex(@"\@\[(?<token>[^\]]*)\]");
-        public static readonly Regex StartIterationRegex = new Regex(@"\@foreach\[(?<token>[^\]]*)\]");
-        public static readonly Regex EndIterationRegex = new Regex(@"\@endforeach\[(?<token>[^\]]*)\]");
-        public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
+        //public static readonly Regex StartIterationRegex = new Regex(@"\@foreach\[(?<token>[^\]]*)\]");
+        //public static readonly Regex EndIterationRegex = new Regex(@"\@endforeach\[(?<token>[^\]]*)\]");
 
 
-        private static string ComposeText(string text, ResultTable table, IEnumerable<ResultRow> rows,
-            Dictionary<string, int> dicTokenColumn, bool isHtml)
+        //private static string ComposeText(string text, ResultTable table, IEnumerable<ResultRow> rows,
+        //    Dictionary<string, int> dicTokenColumn, bool isHtml)
+        //{
+        //    text = ProcessIterations(text, table, rows, dicTokenColumn, isHtml);
+
+        //    TokenRegex.Replace(text, m =>
+        //    {
+        //        var index = dicTokenColumn[m.Groups["token"].Value];
+        //        var value = table.Rows[index].TryToString();
+        //        if (isHtml)
+        //            return HttpUtility.HtmlEncode(value);
+        //        else
+        //            return value;
+        //    });
+
+        //    return text;
+        //}
+
+        //static string ProcessIterations(string text, ResultTable table, IEnumerable<ResultRow> rows,
+        //    Dictionary<string, int> dicTokenColumn, bool isHtml)
+        //{
+        //    Match matchStart;
+        //    while ((matchStart = StartIterationRegex.Match(text)).Success)
+        //    {
+        //        var tokenName = matchStart.Groups["token"].Value;
+
+        //        var matchesEnd = EndIterationRegex.Matches(text, matchStart.Index + matchStart.Length).Cast<Match>().Where(m =>
+        //            m.Groups["token"].Value == tokenName).OrderBy(m => m.Index);
+
+        //        if (!matchesEnd.Any())
+        //            throw new FormatException(Resources.IterationForToken0IsNotClosed.Formato(tokenName));
+
+        //        int indexSearch = matchStart.Index + matchStart.Length;
+        //        Match matchEnd = null;
+        //        foreach (var match in matchesEnd)
+        //        {
+        //            if (StartIterationRegex.Matches(text.Substring(indexSearch, match.Index - indexSearch)).Cast<Match>().Any(m =>
+        //                m.Groups["token"].Value == tokenName))
+        //            {
+        //                indexSearch = match.Index + match.Length;
+        //            }
+        //            else
+        //            {
+        //                matchEnd = match;
+        //                break;
+        //            }
+        //        }
+
+        //        if (matchEnd == null)
+        //            throw new FormatException(Resources.IterationForToken0IsNotClosed.Formato(tokenName));
+
+        //        string beforeIterationText = text.Left(matchStart.Index);
+        //        string iterationText = text.Substring(matchStart.Index + matchStart.Length, matchStart.Index - 1);
+        //        string afterIterationText = text.Right(text.Length - (matchEnd.Index + matchEnd.Length));
+
+        //        StringBuilder sb = new StringBuilder();
+        //        sb.Append(beforeIterationText);
+        //        var groupedRows = rows.GroupBy(r => r[dicTokenColumn[tokenName]]);
+        //        foreach (var gr in groupedRows)
+        //        {
+        //            sb.Append(ComposeText(iterationText, table, gr, dicTokenColumn, isHtml));
+        //        }
+        //        sb.Append(afterIterationText);
+
+        //        text = sb.ToString();
+        //    }
+        //    return text;
+        //}
+
+        public static void SafeSendMailAsync(this SmtpClient client, MailMessage message, Action<AsyncCompletedEventArgs> onComplete)
         {
-            text = ProcessIterations(text, table, rows, dicTokenColumn, isHtml);
-
-            TokenRegex.Replace(text, m =>
+            client.SendCompleted += (object sender, AsyncCompletedEventArgs e) =>
             {
-                var index = dicTokenColumn[m.Groups["token"].Value];
-                var value = table.Rows[index].TryToString();
-                if (isHtml)
-                    return HttpUtility.HtmlEncode(value);
-                else
-                    return value;
-            });
-
-            return text;
-        }
-
-        static string ProcessIterations(string text, ResultTable table, IEnumerable<ResultRow> rows,
-            Dictionary<string, int> dicTokenColumn, bool isHtml)
-        {
-            Match matchStart;
-            while ((matchStart = StartIterationRegex.Match(text)).Success)
-            {
-                var tokenName = matchStart.Groups["token"].Value;
-
-                var matchesEnd = EndIterationRegex.Matches(text, matchStart.Index + matchStart.Length).Cast<Match>().Where(m =>
-                    m.Groups["token"].Value == tokenName).OrderBy(m => m.Index);
-
-                if (!matchesEnd.Any())
-                    throw new FormatException(Resources.IterationForToken0IsNotClosed.Formato(tokenName));
-
-                int indexSearch = matchStart.Index + matchStart.Length;
-                Match matchEnd = null;
-                foreach (var match in matchesEnd)
+                //client.Dispose();
+                message.Dispose();
+                using (AuthLogic.Disable())
                 {
-                    if (StartIterationRegex.Matches(text.Substring(indexSearch, match.Index - indexSearch)).Cast<Match>().Any(m =>
-                        m.Groups["token"].Value == tokenName))
+                    try
                     {
-                        indexSearch = match.Index + match.Length;
+                        onComplete(e);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        matchEnd = match;
-                        break;
+                        ex.LogException();
                     }
                 }
-
-                if (matchEnd == null)
-                    throw new FormatException(Resources.IterationForToken0IsNotClosed.Formato(tokenName));
-
-                string beforeIterationText = text.Left(matchStart.Index);
-                string iterationText = text.Substring(matchStart.Index + matchStart.Length, matchStart.Index - 1);
-                string afterIterationText = text.Right(text.Length - (matchEnd.Index + matchEnd.Length));
-
-                StringBuilder sb = new StringBuilder();
-                sb.Append(beforeIterationText);
-                var groupedRows = rows.GroupBy(r => r[dicTokenColumn[tokenName]]);
-                foreach (var gr in groupedRows)
-                {
-                    sb.Append(ComposeText(iterationText, table, gr, dicTokenColumn, isHtml));
-                }
-                sb.Append(afterIterationText);
-
-                text = sb.ToString();
-            }
-            return text;
+            };
+            client.SendAsync(message, null);
         }
+
 
         #endregion
     }
@@ -712,7 +1006,7 @@ namespace Signum.Engine.Mailing
 
     public virtual class EmailSenderManager
     {
-        MailMessage CreateMailMessage(EmailMessageDN email)
+        protected MailMessage CreateMailMessage(EmailMessageDN email)
         {
             email.To = GetRecipient(email, null);
 
@@ -732,12 +1026,12 @@ namespace Signum.Engine.Mailing
             return message;
         }
 
-        internal virtual string GetRecipient(EmailMessageDN email, object[] args)
+        protected virtual string GetRecipient(EmailMessageDN email, object[] args)
         {
             return email.Recipient.InDB().Select(r => r.Email).SingleEx();
         }
 
-        internal virtual void Send(EmailMessageDN email)
+        protected virtual void Send(EmailMessageDN email)
         {
             try
             {
@@ -754,7 +1048,7 @@ namespace Signum.Engine.Mailing
             }
             catch (Exception ex)
             {
-                if (Transaction.AvoidIndependentTransactions)
+                if (Transaction.AvoidIndependentTransactions) //Transaction.IsTestTransaction
                     throw;
 
                 var exLog = ex.LogException().ToLite();
@@ -785,12 +1079,11 @@ namespace Signum.Engine.Mailing
             public UserDN User;
         }
 
-        internal virtual void SendAsync(EmailMessageDN email)
+        protected virtual void SendAsync(EmailMessageDN email)
         {
             try
             {
                 SmtpClient client = CreateSmtpClient(email);
-                client.SendCompleted += new SendCompletedEventHandler(SendCompleted);
 
                 MailMessage message = CreateMailMessage(email);
 
@@ -798,11 +1091,38 @@ namespace Signum.Engine.Mailing
                 email.Received = null;
                 email.Save();
 
-                client.SendAsync(message, new EmailUser { EmailMessage = email, User = UserDN.Current });
+                client.SafeSendMailAsync(message, args =>
+                {
+                    Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
+                    if (args.Error != null)
+                    {
+                        var exLog = args.Error.LogException().ToLite();
+                        updater = em => new EmailMessageDN
+                        {
+                            Exception = exLog,
+                            State = EmailState.SentError
+                        };
+                    }
+                    else
+                        updater = em => new EmailMessageDN
+                        {
+                            State = EmailState.Sent,
+                            Sent = TimeZoneManager.Now
+                        };
+
+                    for (int i = 0; i < 4; i++) //to allow main thread to save email
+                    {
+                        if (email.InDB().UnsafeUpdate(updater) > 0)
+                            return;
+
+                        if (i != 3)
+                            Thread.Sleep(3000);
+                    }
+                });
             }
             catch (Exception ex)
             {
-                if (Transaction.AvoidIndependentTransactions)
+                if (Transaction.AvoidIndependentTransactions) //Transaction.InTestTransaction
                     throw;
 
                 var exLog = ex.LogException().ToLite();
@@ -819,39 +1139,6 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        internal virtual void SendCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            EmailUser emailUser = (EmailUser)e.UserState;
-            using (AuthLogic.UserSession(emailUser.User))
-            {
-                Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
-                if (e.Error != null)
-                {
-                    var exLog = e.Error.LogException().ToLite();
-                    updater = em => new EmailMessageDN
-                    {
-                        Exception = exLog,
-                        State = EmailState.SentError
-                    };
-                }
-                else
-                    updater = em => new EmailMessageDN
-                    {
-                        State = EmailState.Sent,
-                        Sent = TimeZoneManager.Now
-                    };
-
-                //to allow main thread to insert the emailMessageDN into DB
-                for (int i = 0; i < 4; i++)
-                {
-                    if (emailUser.EmailMessage.InDB().UnsafeUpdate(updater) > 0)
-                        return;
-
-                    if (i != 3)
-                        Thread.Sleep(3000);
-                }
-            }
-        }
     }
 
 

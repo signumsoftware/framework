@@ -287,6 +287,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The iteration for the token {0} in the template text is not opened.
+        /// </summary>
+        internal static string IterationForToken0IsNotOpened {
+            get {
+                return ResourceManager.GetString("IterationForToken0IsNotOpened", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not allowed to modify existing {0} while offline.
         /// </summary>
         internal static string NotAllowedToModifyExisting0WhileOffline {

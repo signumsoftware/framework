@@ -718,6 +718,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The text must contain the &apos;{0}&apos; tag indicating the replamecent point.
+        /// </summary>
+        public static string TheTextMustContaintThe0IndicatingReplacementPoint {
+            get {
+                return ResourceManager.GetString("TheTextMustContaintThe0IndicatingReplacementPoint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The user state must be disabled.
         /// </summary>
         public static string TheUserStateMustBeDisabled {

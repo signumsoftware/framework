@@ -8,6 +8,8 @@ using Signum.Utilities;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
 using Signum.Entities.DynamicQuery;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Mailing
 {
@@ -101,11 +103,11 @@ namespace Signum.Entities.Mailing
             set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
         }
 
-        MList<TemplateQueryTokenDN> replacements;
-        public MList<TemplateQueryTokenDN> Replacements
+        MList<TemplateQueryTokenDN> tokens;
+        public MList<TemplateQueryTokenDN> Tokens
         {
-            get { return replacements; }
-            set { Set(ref replacements, value, () => Replacements); }
+            get { return tokens; }
+            set { Set(ref tokens, value, () => Tokens); }
         }
 
         string from;
@@ -146,8 +148,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref subject, value, () => Subject); }
         }
 
-        Lite<MasterEmailTemplateDN> masterTemplate;
-        public Lite<MasterEmailTemplateDN> MasterTemplate
+        Lite<EmailMasterTemplateDN> masterTemplate;
+        public Lite<EmailMasterTemplateDN> MasterTemplate
         {
             get { return masterTemplate; }
             set { Set(ref masterTemplate, value, () => MasterTemplate); }
@@ -160,11 +162,23 @@ namespace Signum.Entities.Mailing
             set { Set(ref smtpConfiguration, value, () => SMTPConfiguration); }
         }
 
-        EnumDN systemTemplate;
-        public EnumDN SystemTemplate
+        SystemTemplateDN systemTemplate;
+        public SystemTemplateDN SystemTemplate
         {
             get { return systemTemplate; }
             set { Set(ref systemTemplate, value, () => SystemTemplate); }
+        }
+
+        string cultureInfo;
+        public string CultureInfo
+        {
+            get { return cultureInfo; }
+            set { Set(ref cultureInfo, value, () => CultureInfo); }
+        }
+
+        public CultureInfo GetCultureInfo
+        {
+            get { return CultureInfo.HasText() ? new CultureInfo(CultureInfo) : System.Globalization.CultureInfo.InvariantCulture; }
         }
 
         EmailTemplateState state = EmailTemplateState.Created;
@@ -230,6 +244,11 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
+    public class SystemTemplateDN : EnumDN
+    {
+    }
+
+    [Serializable]
     public class TemplateQueryTokenDN : QueryTokenDN
     {
         public override void ParseData(Func<DynamicQuery.QueryToken, List<DynamicQuery.QueryToken>> subTokens)
@@ -239,7 +258,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class MasterEmailTemplateDN : Entity
+    public class EmailMasterTemplateDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -266,10 +285,23 @@ namespace Signum.Entities.Mailing
             set { Set(ref state, value, () => State); }
         }
 
-        static Expression<Func<MasterEmailTemplateDN, string>> ToStringExpression = e => e.name;
+        static Expression<Func<EmailMasterTemplateDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        [Ignore]
+        public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
+
+        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        {
+            if (pi.Is(() => Text) && !MasterTemplateContentRegex.IsMatch(Text))
+            {
+                throw new ApplicationException(Resources.TheTextMustContaintThe0IndicatingReplacementPoint.Formato("@[content]"));
+            }
+
+            return base.PropertyValidation(pi);
         }
     }
 }
