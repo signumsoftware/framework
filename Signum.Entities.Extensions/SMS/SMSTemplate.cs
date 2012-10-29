@@ -58,7 +58,7 @@ namespace Signum.Entities.SMS
         }
 
         string message;
-        [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.TripleSMSMaxTextLength)]
+        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)] // Max = SMSCharacters.TripleSMSMaxTextLength)]
         public string Message
         {
             get { return message; }
@@ -130,6 +130,13 @@ namespace Signum.Entities.SMS
             {
                 if (EndDate != null && EndDate >= StartDate)
                     return Resources.EndDateMustBeHigherThanStartDate;
+            }
+
+            if (pi.Is(() => Message) 
+                && Message.Length > SMSCharacters.TripleSMSMaxTextLength
+                && MessageLengthExceeded == SMS.MessageLengthExceeded.NotAllowed)
+            {
+                    return Resources.MessageLenghtExceeded;
             }
 
             return base.PropertyValidation(pi);
