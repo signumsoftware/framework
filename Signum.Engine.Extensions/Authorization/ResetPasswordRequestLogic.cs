@@ -43,6 +43,7 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.RegisterSystemTemplate(AuthorizationMail.ResetPasswordRequest, tc => new EmailTemplateDN
                 {
+                    Name = "Reset Password Request",
                     Active = true,
                     IsBodyHtml = true,
                     AssociatedType = typeof(ResetPasswordRequestDN).ToTypeDN(),
@@ -76,17 +77,11 @@ namespace Signum.Engine.Authorization
             }.Save();
         }
 
-        public static void ResetPasswordRequestAndSendEmail(UserDN user, Func<ResetPasswordRequestDN, string> urlGenerator)
+        public static void ResetPasswordRequestAndSendEmail(UserDN user)
         {
             var rpr = ResetPasswordRequest(user);
 
             rpr.SendMail(AuthorizationMail.ResetPasswordRequest);
-
-            //new ResetPasswordRequestMail
-            //{
-            //    To = user,
-            //    Link = urlGenerator(rpr),
-            //}.Send();
         }
 
         public static Func<string, UserDN> GetUserByEmail = (email) =>

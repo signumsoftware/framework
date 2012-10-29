@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities.Mailing;
 using Signum.Engine.Operations;
 using Signum.Engine.Extensions.Properties;
+using Signum.Utilities;
 
 namespace Signum.Engine.Mailing
 {
@@ -20,7 +21,13 @@ namespace Signum.Engine.Mailing
             new Construct(EmailTemplateOperations.Create)
             {
                 ToState = EmailTemplateState.Created,
-                Construct = _ => new EmailTemplateDN { State = EmailTemplateState.Created }
+                Construct = _ => new EmailTemplateDN 
+                { 
+                    State = EmailTemplateState.Created,
+                    From = EmailLogic.SenderManager.TryCC(m => m.DefaultFrom),
+                    DisplayFrom = EmailLogic.SenderManager.TryCC(m => m.DefaultDisplayFrom),
+                    SMTPConfiguration = EmailLogic.SenderManager.TryCC(m => m.DefaultSMTPConfiguration)
+                }
             }.Register();
 
             new Execute(EmailTemplateOperations.Save)

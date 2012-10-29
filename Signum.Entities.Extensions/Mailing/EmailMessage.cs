@@ -194,7 +194,8 @@ namespace Signum.Entities.Mailing
         Send,
         ReSend,
         ReSendEmails,
-        CreateMailFromTemplate
+        CreateMailFromTemplate,
+        CreateMail
     }
 
     [Serializable]

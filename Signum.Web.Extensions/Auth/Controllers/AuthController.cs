@@ -225,7 +225,6 @@ namespace Signum.Web.Auth
         [HttpPost]
         public ActionResult ResetPassword(string email)
         {
-
             if (string.IsNullOrEmpty(email))
             {
                 ModelState.AddModelError("email", Resources.EmailMustHaveAValue);
@@ -234,11 +233,8 @@ namespace Signum.Web.Auth
 
             using (AuthLogic.Disable())
             {
-
                 var user = ResetPasswordRequestLogic.GetUserByEmail(email);
-                //since this is an url sent by email, it should contain the domain name
-                ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, rpr =>
-                    Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
+                ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user);
             }
 
             ViewData["email"] = email;

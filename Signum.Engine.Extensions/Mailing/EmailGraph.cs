@@ -16,6 +16,16 @@ namespace Signum.Engine.Mailing
         {
             GetState = m => m.State;
 
+            new BasicConstruct<EmailMessageDN>(EmailOperations.CreateMail)
+            {
+                Construct = _ => new EmailMessageDN 
+                {
+                    State = EmailState.Created,
+                    From = EmailLogic.SenderManager.TryCC(m => m.DefaultFrom),
+                    DisplayFrom = EmailLogic.SenderManager.TryCC(m => m.DefaultDisplayFrom),
+                }
+            }.Register();
+
             new BasicConstructFrom<IIdentifiable, EmailMessageDN>(EmailOperations.CreateMailFromTemplate)
             {
                 AllowsNew = false,

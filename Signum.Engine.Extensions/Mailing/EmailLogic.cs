@@ -72,10 +72,11 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, TemplateCultures cultures, string urlPrefix)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, TemplateCultures cultures, string urlPrefix, 
+            string defaultFrom, string defaultDisplayFrom, string defaultBcc)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -137,7 +138,7 @@ namespace Signum.Engine.Mailing
 
                 EmailCultures = cultures;
 
-                SenderManager = new EmailSenderManager(urlPrefix);
+                SenderManager = new EmailSenderManager(urlPrefix, defaultFrom, defaultDisplayFrom, defaultBcc);
             }
         }
 
@@ -791,7 +792,7 @@ namespace Signum.Engine.Mailing
         {
             client.SendCompleted += (object sender, AsyncCompletedEventArgs e) =>
             {
-                //client.Dispose();
+                //client.Dispose(); -> the client can be used later by other messages
                 message.Dispose();
                 using (AuthLogic.Disable())
                 {
@@ -868,10 +869,17 @@ namespace Signum.Engine.Mailing
 
     public class EmailSenderManager
     {
-        public EmailSenderManager(string urlPrefix)
+        public EmailSenderManager(string urlPrefix, string defaultFrom, string defaultDisplayFrom, string defaultBcc)
         {
             GlobalTokens.Add("UrlPrefix", _ => urlPrefix);
+            DefaultFrom = defaultFrom;
+            DefaultDisplayFrom = defaultDisplayFrom;
+            DefaultBcc = defaultBcc;
         }
+
+        public string DefaultFrom;
+        public string DefaultDisplayFrom;
+        public string DefaultBcc;
 
         public Dictionary<string, Func<GlobalDispatcher, string>> GlobalTokens = new Dictionary<string, Func<GlobalDispatcher, string>>();
 
@@ -934,11 +942,14 @@ namespace Signum.Engine.Mailing
             }
         }
 
+        public Lite<SMTPConfigurationDN> DefaultSMTPConfiguration;
+
         SmtpClient CreateSmtpClient(EmailMessageDN email)
         {
             return email.Template != null
                 ? email.Template.InDB().Select(t => t.SMTPConfiguration).SingleOrDefault().TryCC(c => c.GenerateSmtpClient(true))
                 : null
+                ?? DefaultSMTPConfiguration.TryCC(c => c.GenerateSmtpClient(true))
                 ?? EmailLogic.SafeSmtpClient();
         }
 
