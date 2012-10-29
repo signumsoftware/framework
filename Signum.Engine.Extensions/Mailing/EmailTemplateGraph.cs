@@ -1,0 +1,54 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Signum.Entities.Mailing;
+using Signum.Engine.Operations;
+using Signum.Engine.Extensions.Properties;
+
+namespace Signum.Engine.Mailing
+{
+    public class EmailTemplateGraph : Graph<EmailTemplateDN, EmailTemplateState>
+    {
+        static bool registered;
+        public static bool Registered { get { return registered; } }
+
+        public static void Register()
+        {
+            GetState = t => t.State;
+
+            new Construct(EmailTemplateOperations.Create)
+            {
+                ToState = EmailTemplateState.Created,
+                Construct = _ => new EmailTemplateDN { State = EmailTemplateState.Created }
+            }.Register();
+
+            new Execute(EmailTemplateOperations.Save)
+            {
+                ToState = EmailTemplateState.Modified,
+                AllowsNew = true,
+                Lite = false,
+                FromStates = new[] { EmailTemplateState.Created, EmailTemplateState.Modified },
+                Execute = (t, _) => t.State = EmailTemplateState.Modified
+            }.Register();
+
+            new Execute(EmailTemplateOperations.Enable) 
+            {
+                ToState = EmailTemplateState.Modified,
+                FromStates = new[] { EmailTemplateState.Modified },
+                CanExecute = t => t.Active ? Resources.TheTemplateIsAlreadyActive : null,
+                Execute = (t, _) => t.Active = true
+            }.Register();
+
+            new Execute(EmailTemplateOperations.Disable) 
+            {
+                ToState = EmailTemplateState.Modified,
+                FromStates = new[] { EmailTemplateState.Modified },
+                CanExecute = t => !t.Active ? Resources.TheTemplateIsAlreadyInactive : null,
+                Execute = (t, _) => t.Active = false
+            }.Register();
+
+            registered = true;
+        }
+    }
+}

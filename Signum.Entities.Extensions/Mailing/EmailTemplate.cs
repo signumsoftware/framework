@@ -48,8 +48,10 @@ namespace Signum.Entities.Mailing
 
     public enum EmailTemplateOperations
     {
-        Crear,
-        Modificar
+        Create,
+        Save,
+        Enable,
+        Disable
     }
 
     [Serializable]
@@ -87,15 +89,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref recipient, value, () => Recipient); }
         }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string text;
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
-        public string Text
-        {
-            get { return text; }
-            set { Set(ref text, value, () => Text); }
-        }
-
         bool isBodyHtml = true;
         public bool IsBodyHtml
         {
@@ -108,6 +101,13 @@ namespace Signum.Entities.Mailing
         {
             get { return tokens; }
             set { Set(ref tokens, value, () => Tokens); }
+        }
+
+        MList<EmailTemplateMessageDN> messages;
+        public MList<EmailTemplateMessageDN> Messages
+        {
+            get { return messages; }
+            set { Set(ref messages, value, () => Messages); }
         }
 
         string from;
@@ -139,15 +139,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref cc, value, () => Cc); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
-        string subject;
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
-        public string Subject
-        {
-            get { return subject; }
-            set { Set(ref subject, value, () => Subject); }
-        }
-
         Lite<EmailMasterTemplateDN> masterTemplate;
         public Lite<EmailMasterTemplateDN> MasterTemplate
         {
@@ -167,18 +158,6 @@ namespace Signum.Entities.Mailing
         {
             get { return systemTemplate; }
             set { Set(ref systemTemplate, value, () => SystemTemplate); }
-        }
-
-        string cultureInfo;
-        public string CultureInfo
-        {
-            get { return cultureInfo; }
-            set { Set(ref cultureInfo, value, () => CultureInfo); }
-        }
-
-        public CultureInfo GetCultureInfo
-        {
-            get { return CultureInfo.HasText() ? new CultureInfo(CultureInfo) : System.Globalization.CultureInfo.InvariantCulture; }
         }
 
         EmailTemplateState state = EmailTemplateState.Created;
@@ -233,6 +212,16 @@ namespace Signum.Entities.Mailing
                 return Resources.RouteToGetRecipientNotSet;
             }
 
+            if (pi.Is(() => Messages))
+            {
+                if (Messages == null || !Messages.Any())
+                    return "There is not any message for the template";
+                if (!Messages.Any(m => m.GetCultureInfo == CultureInfo.InvariantCulture))
+                {
+                    return "One of the messages must be set for the default language";
+                }
+            }
+
             return base.PropertyValidation(pi);
         }
 
@@ -249,12 +238,53 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
+    public class EmailTemplateMessageDN : EmbeddedEntity
+    {
+        string cultureInfo;
+        public string CultureInfo
+        {
+            get { return cultureInfo; }
+            set { Set(ref cultureInfo, value, () => CultureInfo); }
+        }
+
+        public CultureInfo GetCultureInfo
+        {
+            get { return CultureInfo.HasText() ? new CultureInfo(CultureInfo) : System.Globalization.CultureInfo.InvariantCulture; }
+        }
+
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        string text;
+        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
+        public string Text
+        {
+            get { return text; }
+            set { Set(ref text, value, () => Text); }
+        }
+
+        [SqlDbType(Size = 200)]
+        string subject;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        public string Subject
+        {
+            get { return subject; }
+            set { Set(ref subject, value, () => Subject); }
+        }
+
+    }
+
+    [Serializable]
     public class TemplateQueryTokenDN : QueryTokenDN
     {
         public override void ParseData(Func<DynamicQuery.QueryToken, List<DynamicQuery.QueryToken>> subTokens)
         {
             throw new InvalidOperationException("ParseData is ambiguous on {0}".Formato(GetType().NiceName()));
         }
+    }
+
+    public enum EmailMasterTemplateOperations
+    {
+        Create,
+        Save
     }
 
     [Serializable]

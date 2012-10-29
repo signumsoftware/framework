@@ -485,6 +485,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The email message can not be send from state {0}.
+        /// </summary>
+        internal static string TheEmailMessageCanNotBeSendFromState0 {
+            get {
+                return ResourceManager.GetString("TheEmailMessageCanNotBeSendFromState0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The entity {0} is new.
         /// </summary>
         internal static string TheEntity0IsNew {
@@ -535,6 +544,24 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string ThereSNotARegisteredUserWithThatEmailAddress {
             get {
                 return ResourceManager.GetString("ThereSNotARegisteredUserWithThatEmailAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The template is already active.
+        /// </summary>
+        internal static string TheTemplateIsAlreadyActive {
+            get {
+                return ResourceManager.GetString("TheTemplateIsAlreadyActive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The template is already inactive.
+        /// </summary>
+        internal static string TheTemplateIsAlreadyInactive {
+            get {
+                return ResourceManager.GetString("TheTemplateIsAlreadyInactive", resourceCulture);
             }
         }
         

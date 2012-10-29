@@ -109,7 +109,7 @@ namespace Signum.Engine.Mailing
                                                 {
                                                     Entity = t,
                                                     t.Id,
-                                                    t.Subject,
+                                                    t.Name,
                                                     t.From,
                                                     t.DisplayFrom,
                                                     t.Bcc,
@@ -139,6 +139,11 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 sb.Schema.EntityEvents<EmailTemplateDN>().PreSaving += new PreSavingEventHandler<EmailTemplateDN>(EmailTemplate_PreSaving);
+
+                EmailTemplateGraph.Register();
+                EmailMasterTemplateGraph.Register();
+
+                
             }
         }
 
@@ -155,8 +160,10 @@ namespace Signum.Engine.Mailing
             Type query = template.AssociatedType.GetType();
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
 
-            var tokensString = TokenRegex.Matches(template.Text).Cast<Match>().Select(m => m.Groups["token"].Value).ToList();
-            tokensString.AddRange(TokenRegex.Matches(template.Subject).Cast<Match>().Select(m => m.Groups["token"].Value).ToList());
+            var tokensString = template.Messages.SelectMany(tm => 
+                TokenRegex.Matches(tm.Text).Cast<Match>().Select(m => m.Groups["token"].Value)).ToList();
+            tokensString.AddRange(template.Messages.SelectMany(tm => 
+                TokenRegex.Matches(tm.Subject).Cast<Match>().Select(m => m.Groups["token"].Value)).ToList());
             var tokens = tokensString.Select(t => QueryUtils.Parse(t, qd)).Distinct().ToList();
             
             var tokensRemoved = template.Tokens.Extract(t => !tokens.Contains(t.Token));
@@ -580,9 +587,11 @@ namespace Signum.Engine.Mailing
                 SystemTemplates.Remove(systemTemplate);
         }
 
-        public static EmailMessageDN CreateEmailMessage(this Entity entity, EnumDN systemTemplate)
+        public static EmailMessageDN CreateEmailMessage(this IIdentifiable entity, SystemTemplateDN systemTemplate)
         {
-            var template = Database.Query<EmailTemplateDN>().SingleEx(t => t.IsActiveNow() == true && t.SystemTemplate == systemTemplate);
+            var template = Database.Query<EmailTemplateDN>().SingleEx(t => 
+                t.IsActiveNow() == true && 
+                t.SystemTemplate == systemTemplate);
             return CreateEmailMessage(entity, template);
         }
 
@@ -634,10 +643,13 @@ namespace Signum.Engine.Mailing
 
             var dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token.FullKey().Substring("Entity.".Length));
 
-            var cultureInfo = CultureInfo.GetCultureInfo(recipient.InDB().Select(io => io.CultureInfo).Single());
+            var recipientCI = recipient.InDB().Select(io => io.CultureInfo).SingleOrDefault();
+            var cultureInfo = recipientCI.HasText() ? CultureInfo.GetCultureInfo(recipientCI) : CultureInfo.InvariantCulture;
 
-            email.Subject = ParseTemplate(template.Subject).Print(table.Rows, dicTokenColumn, false, cultureInfo);
-            var body = ParseTemplate(template.Text).Print(table.Rows, dicTokenColumn, template.IsBodyHtml, cultureInfo);
+            var message = template.Messages.Single(tm => tm.GetCultureInfo == cultureInfo);
+
+            email.Subject = ParseTemplate(message.Subject).Print(table.Rows, dicTokenColumn, false, cultureInfo);
+            var body = ParseTemplate(message.Text).Print(table.Rows, dicTokenColumn, template.IsBodyHtml, cultureInfo);
 
             if (template.MasterTemplate != null)
                 body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => body);
@@ -773,193 +785,6 @@ namespace Signum.Engine.Mailing
             return null;
         }
 
-        internal class ReplacementIreration
-        {
-            public string Token;
-            public int Start;
-            public int Length;
-            public List<ReplacementIreration> SubIterations;
-        }
-
-        static string ComposeText(string text, ResultTable table, Dictionary<string, ResultColumn> dic, bool isHtml)
-        {
-            var matches = TokenRegex.Matches(text).Cast<Match>();
-            if (!matches.Any())
-                return text;
-            int index = -1;
-            var iterations = CreateIterations(matches.Where(m => m.Groups["special"].Value.HasText()), null, ref index);
-            var sb = new StringBuilder();
-            index = -1;
-            ComposeText(text, table.Rows, dic, sb, isHtml, matches, iterations, ref index);
-            return sb.ToString();
-        }
-
-        static void ComposeText(string text, IEnumerable<ResultRow> rows, Dictionary<string, ResultColumn> dicTokenColumn, StringBuilder sb,
-            bool isHtml, IEnumerable<Match> matches, List<ReplacementIreration> iterations, ref int lastIndex)
-        {
-            var index = lastIndex;
-            while (lastIndex < text.Length)
-            {
-                var match = matches.FirstOrDefault(m => m.Index > index);
-                if (match == null)
-                {
-                    sb.Append(text.Substring(lastIndex, text.Length - lastIndex));
-                    return;
-                }
-                sb.Append(text.Substring(lastIndex, match.Index));
-                switch (match.Groups["special"].Value)
-                {
-                    case "":
-                        var column = dicTokenColumn[match.Groups["token"].Value];
-                        var value = rows.DistinctSingle(column).TryToString();
-                        if (isHtml)
-                            sb.Append(HttpUtility.HtmlEncode(value));
-                        else
-                            sb.Append(value);
-                        lastIndex = match.Index + match.Length;
-                        break;
-                    case "foreach":
-                        var subRows = rows.GroupBy(r => r[dicTokenColumn[match.Groups["token"].Value]]);
-                        var iteration = iterations.SingleEx(i => i.Start == match.Index && i.Token == match.Groups["token"].Value);
-                        lastIndex = match.Index + match.Length;
-                        foreach (var gr in subRows)
-                        {
-                            if (gr.Key == null)
-                                break;
-                            while (lastIndex < iteration.Start + iteration.Length)
-                            {
-                                ComposeText(text, rows, dicTokenColumn, sb, isHtml, matches, iterations, ref lastIndex);
-                            }
-                        }
-                        break;
-                    default:
-                        throw new ApplicationException("The special attribute {0} for the token {1} is invalid".Formato(
-                            match.Groups["special"].Value, match.Groups["token"].Value));
-                }
-            }
-            foreach (var match in matches.Where(m => m.Index > index))
-            {
-                var textBefore = text.Substring(lastIndex, match.Index);
-                if (textBefore.HasText())
-                    sb.Append(textBefore);
-
-            }
-        }
-
-
-        static List<ReplacementIreration> CreateIterations(IEnumerable<Match> matches, ReplacementIreration parent, ref int lastIndex)
-        {
-            var list = new List<ReplacementIreration>();
-            if (matches.Any())
-            {
-                var index = lastIndex;
-                foreach (var match in matches.Where(m => m.Index > index).OrderBy(m => m.Index))
-                {
-                    if (match.Groups["special"].Value == "foreach")
-                    {
-                        ReplacementIreration iteration = null;
-                        iteration = new ReplacementIreration
-                        {
-                            Token = match.Groups["token"].Value,
-                            Start = match.Index
-                        };
-                        list.Add(iteration);
-                        lastIndex = match.Index;
-                        iteration.SubIterations = CreateIterations(matches, iteration, ref lastIndex);
-                        continue;
-                    }
-                    if (match.Groups["special"].Value == "endforeach")
-                    {
-                        if (parent == null)
-                            throw new ApplicationException(Resources.IterationForToken0IsNotOpened.Formato(match.Groups["token"].Value));
-                        parent.Length = parent.Start - match.Index + match.Length;
-                        lastIndex = match.Index;
-                        return list;
-                    }
-                }
-            }
-            if (parent != null && parent.Length == 0)
-                throw new ApplicationException(Resources.IterationForToken0IsNotClosed.Formato(parent.Token));
-            return list;
-        }
-
-        //------
-
-
-        //public static readonly Regex TokenRegex = new Regex(@"\@\[(?<token>[^\]]*)\]");
-        //public static readonly Regex StartIterationRegex = new Regex(@"\@foreach\[(?<token>[^\]]*)\]");
-        //public static readonly Regex EndIterationRegex = new Regex(@"\@endforeach\[(?<token>[^\]]*)\]");
-
-
-        //private static string ComposeText(string text, ResultTable table, IEnumerable<ResultRow> rows,
-        //    Dictionary<string, int> dicTokenColumn, bool isHtml)
-        //{
-        //    text = ProcessIterations(text, table, rows, dicTokenColumn, isHtml);
-
-        //    TokenRegex.Replace(text, m =>
-        //    {
-        //        var index = dicTokenColumn[m.Groups["token"].Value];
-        //        var value = table.Rows[index].TryToString();
-        //        if (isHtml)
-        //            return HttpUtility.HtmlEncode(value);
-        //        else
-        //            return value;
-        //    });
-
-        //    return text;
-        //}
-
-        //static string ProcessIterations(string text, ResultTable table, IEnumerable<ResultRow> rows,
-        //    Dictionary<string, int> dicTokenColumn, bool isHtml)
-        //{
-        //    Match matchStart;
-        //    while ((matchStart = StartIterationRegex.Match(text)).Success)
-        //    {
-        //        var tokenName = matchStart.Groups["token"].Value;
-
-        //        var matchesEnd = EndIterationRegex.Matches(text, matchStart.Index + matchStart.Length).Cast<Match>().Where(m =>
-        //            m.Groups["token"].Value == tokenName).OrderBy(m => m.Index);
-
-        //        if (!matchesEnd.Any())
-        //            throw new FormatException(Resources.IterationForToken0IsNotClosed.Formato(tokenName));
-
-        //        int indexSearch = matchStart.Index + matchStart.Length;
-        //        Match matchEnd = null;
-        //        foreach (var match in matchesEnd)
-        //        {
-        //            if (StartIterationRegex.Matches(text.Substring(indexSearch, match.Index - indexSearch)).Cast<Match>().Any(m =>
-        //                m.Groups["token"].Value == tokenName))
-        //            {
-        //                indexSearch = match.Index + match.Length;
-        //            }
-        //            else
-        //            {
-        //                matchEnd = match;
-        //                break;
-        //            }
-        //        }
-
-        //        if (matchEnd == null)
-        //            throw new FormatException(Resources.IterationForToken0IsNotClosed.Formato(tokenName));
-
-        //        string beforeIterationText = text.Left(matchStart.Index);
-        //        string iterationText = text.Substring(matchStart.Index + matchStart.Length, matchStart.Index - 1);
-        //        string afterIterationText = text.Right(text.Length - (matchEnd.Index + matchEnd.Length));
-
-        //        StringBuilder sb = new StringBuilder();
-        //        sb.Append(beforeIterationText);
-        //        var groupedRows = rows.GroupBy(r => r[dicTokenColumn[tokenName]]);
-        //        foreach (var gr in groupedRows)
-        //        {
-        //            sb.Append(ComposeText(iterationText, table, gr, dicTokenColumn, isHtml));
-        //        }
-        //        sb.Append(afterIterationText);
-
-        //        text = sb.ToString();
-        //    }
-        //    return text;
-        //}
-
         public static void SafeSendMailAsync(this SmtpClient client, MailMessage message, Action<AsyncCompletedEventArgs> onComplete)
         {
             client.SendCompleted += (object sender, AsyncCompletedEventArgs e) =>
@@ -1004,7 +829,7 @@ namespace Signum.Engine.Mailing
     }
 
 
-    public virtual class EmailSenderManager
+    public class EmailSenderManager
     {
         protected MailMessage CreateMailMessage(EmailMessageDN email)
         {
@@ -1031,7 +856,7 @@ namespace Signum.Engine.Mailing
             return email.Recipient.InDB().Select(r => r.Email).SingleEx();
         }
 
-        protected virtual void Send(EmailMessageDN email)
+        public virtual void Send(EmailMessageDN email)
         {
             try
             {
@@ -1073,13 +898,13 @@ namespace Signum.Engine.Mailing
                 ?? EmailLogic.SafeSmtpClient();
         }
 
-        class EmailUser
-        {
-            public EmailMessageDN EmailMessage;
-            public UserDN User;
-        }
+        //class EmailUser
+        //{
+        //    public EmailMessageDN EmailMessage;
+        //    public UserDN User;
+        //}
 
-        protected virtual void SendAsync(EmailMessageDN email)
+        public virtual void SendAsync(EmailMessageDN email)
         {
             try
             {

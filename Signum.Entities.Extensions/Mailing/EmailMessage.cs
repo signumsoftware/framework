@@ -191,7 +191,10 @@ namespace Signum.Entities.Mailing
 
     public enum EmailOperations
     {
-        ReSendEmails
+        Send,
+        ReSend,
+        ReSendEmails,
+        CreateMailFromTemplate
     }
 
     [Serializable]
