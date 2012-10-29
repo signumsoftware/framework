@@ -40,12 +40,11 @@ namespace Signum.Windows.Chart
                     .OpenSubKey("Software")
                     .OpenSubKey("Microsoft")
                     .OpenSubKey("Internet Explorer")
-                    .OpenSubKey("Main");
+                    .OpenSubKey("Main", true)
+                    .CreateSubKey("FeatureControl")
+                    .CreateSubKey("FEATURE_BROWSER_EMULATION");
 
-                var fbe = main.OpenSubKey("FeatureControl").OpenSubKey("FEATURE_BROWSER_EMULATION", true) ??
-                     main.OpenSubKey("FeatureControl", true).CreateSubKey("FEATURE_BROWSER_EMULATION");
-
-                fbe.SetValue(processName, 9999, RegistryValueKind.DWord);
+                main.SetValue(processName, 9999, RegistryValueKind.DWord);
 
                 ChartUtils.RemoveNotNullValidators();
             }
