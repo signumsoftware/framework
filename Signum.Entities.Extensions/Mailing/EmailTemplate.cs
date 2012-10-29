@@ -10,6 +10,7 @@ using Signum.Entities.UserQueries;
 using Signum.Entities.DynamicQuery;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Collections.Specialized;
 
 namespace Signum.Entities.Mailing
 {
@@ -103,11 +104,31 @@ namespace Signum.Entities.Mailing
             set { Set(ref tokens, value, () => Tokens); }
         }
 
+        [NotifyCollectionChanged]
         MList<EmailTemplateMessageDN> messages;
         public MList<EmailTemplateMessageDN> Messages
         {
             get { return messages; }
             set { Set(ref messages, value, () => Messages); }
+        }
+
+        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            if (sender == messages)
+            {
+                foreach (var item in args.OldItems.Cast<EmailTemplateMessageDN>())
+                    item.Template = null;
+
+                foreach (var item in args.NewItems.Cast<EmailTemplateMessageDN>())
+                    item.Template = this;
+            }
+        }
+
+        protected override void PreSaving(ref bool graphModified)
+        {
+            base.PreSaving(ref graphModified);
+
+            messages.ForEach(e => e.Template = this);
         }
 
         string from;
@@ -153,11 +174,11 @@ namespace Signum.Entities.Mailing
             set { Set(ref smtpConfiguration, value, () => SMTPConfiguration); }
         }
 
-        SystemTemplateDN systemTemplate;
-        public SystemTemplateDN SystemTemplate
+        EmailModelDN model;
+        public EmailModelDN Model
         {
-            get { return systemTemplate; }
-            set { Set(ref systemTemplate, value, () => SystemTemplate); }
+            get { return model; }
+            set { Set(ref model, value, () => Model); }
         }
 
         EmailTemplateState state = EmailTemplateState.Created;
@@ -207,7 +228,8 @@ namespace Signum.Entities.Mailing
                     return Resources.EndDateMustBeHigherThanStartDate;
             }
 
-            if (pi.Is(() => Recipient) && AssociatedType != null && !AssociatedTypeIsEmailOwner(AssociatedType) && Recipient==null)
+            if (pi.Is(() => Recipient) && AssociatedType != null && !AssociatedTypeIsEmailOwner(AssociatedType) 
+                && Recipient == null && Model == null)
             {
                 return Resources.RouteToGetRecipientNotSet;
             }
@@ -226,6 +248,12 @@ namespace Signum.Entities.Mailing
                 }
             }
 
+            if (pi.Is(() => Model) || pi.Is(() => AssociatedType))
+            {
+                if (Model != null && AssociatedType != null && Model.FullClassName != AssociatedType.FullClassName)
+                    return Resources.TheAssociatedTypeAndTheModelDoNotMatch;
+            }
+
             return base.PropertyValidation(pi);
         }
 
@@ -237,13 +265,39 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class SystemTemplateDN : EnumDN
+    public class EmailModelDN : IdentifiableEntity
     {
+        [NotNullable, UniqueIndex]
+        string fullClassName;
+        public string FullClassName
+        {
+            get { return fullClassName; }
+            set { Set(ref fullClassName, value, () => FullClassName); }
+        }
+
+        [NotNullable]
+        string friendlyName;
+        [StringLengthValidator(Min = 1)]
+        public string FriendlyName
+        {
+            get { return friendlyName; }
+            set { Set(ref friendlyName, value, () => FriendlyName); }
+        }
+
+        static readonly Expression<Func<EmailModelDN, string>> ToStringExpression = e => e.FriendlyName;
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
+
 
     [Serializable]
     public class EmailTemplateMessageDN : EmbeddedEntity
     {
+        [Ignore]
+        internal EmailTemplateDN Template;
+
         string cultureInfo;
         public string CultureInfo
         {
@@ -262,8 +316,15 @@ namespace Signum.Entities.Mailing
         public string Text
         {
             get { return text; }
-            set { Set(ref text, value, () => Text); }
+            set
+            {
+                if (Set(ref text, value, () => Text))
+                    TextParsedNode = null;
+            }
         }
+
+        [Ignore]
+        internal object TextParsedNode;
 
         [SqlDbType(Size = 200)]
         string subject;
@@ -271,8 +332,15 @@ namespace Signum.Entities.Mailing
         public string Subject
         {
             get { return subject; }
-            set { Set(ref subject, value, () => Subject); }
+            set
+            {
+                if (Set(ref subject, value, () => Subject))
+                    SubjectParsedNode = null;
+            }
         }
+
+        [Ignore]
+        internal object SubjectParsedNode;
     }
 
     [Serializable]

@@ -41,7 +41,7 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailLogic.RegisterSystemTemplate(AuthorizationMail.ResetPasswordRequest, tc => new EmailTemplateDN
+                EmailLogic.RegisterEmailModel(AuthorizationMail.ResetPasswordRequest, tc => new EmailTemplateDN
                 {
                     Name = "Reset Password Request",
                     Active = true,

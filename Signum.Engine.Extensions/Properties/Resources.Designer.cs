@@ -533,6 +533,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The model {0} does not have any field with the token {1}.
+        /// </summary>
+        internal static string TheModel0DoesNotHaveAnyFieldWithTheToken1 {
+            get {
+                return ResourceManager.GetString("TheModel0DoesNotHaveAnyFieldWithTheToken1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter.
         /// </summary>
         internal static string ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter {

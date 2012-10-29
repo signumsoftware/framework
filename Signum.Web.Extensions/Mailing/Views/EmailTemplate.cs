@@ -87,7 +87,7 @@ WriteLiteral("\r\n        ");
 WriteLiteral("\r\n        ");
 
 
-   Write(Html.EntityLine(ec, e => e.SystemTemplate));
+   Write(Html.EntityLine(ec, e => e.Model));
 
 WriteLiteral("\r\n    </fieldset>\r\n");
 

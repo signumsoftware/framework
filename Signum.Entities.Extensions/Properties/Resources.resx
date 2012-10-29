@@ -369,4 +369,7 @@
   <data name="ThereIsNotAnyMessageForTheTemplate" xml:space="preserve">
     <value>There is not any message for the template</value>
   </data>
+  <data name="TheAssociatedTypeAndTheModelDoNotMatch" xml:space="preserve">
+    <value>The Associated Type and the Model do not match</value>
+  </data>
 </root>
