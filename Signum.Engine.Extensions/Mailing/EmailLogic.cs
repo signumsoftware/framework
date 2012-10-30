@@ -50,6 +50,11 @@ namespace Signum.Engine.Mailing
         Lite<IEmailOwnerDN> Recipient { get; set; }
     }
 
+    public interface IEmailModelWithCC : IEmailModel
+    {
+        List<string> CCRecipients { get; set; }
+    }
+
     public class EmailModel<T> : IEmailModel
         where T : IdentifiableEntity
     {
@@ -678,6 +683,10 @@ namespace Signum.Engine.Mailing
                 Template = template.ToLite(),
             };
 
+            if (template.Model != null && template.Model is IEmailModelWithCC)
+            {
+                email.Cc = ",".Combine(email.Cc, ((IEmailModelWithCC)template.Model).CCRecipients.ToString(","));
+            }
 
             var recipientCI = recipient.InDB(io => io.CultureInfo);
             var cultureInfo = recipientCI.HasText() ? CultureInfo.GetCultureInfo(recipientCI) : CultureInfo.InvariantCulture;
