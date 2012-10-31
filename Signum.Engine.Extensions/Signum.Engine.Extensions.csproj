@@ -106,6 +106,7 @@
     <Compile Include="Authorization\FacadeMethodAuthLogic.cs" />
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
+    <Compile Include="Basics\CultureInfoLogic.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
     <Compile Include="Basics\EnumLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />

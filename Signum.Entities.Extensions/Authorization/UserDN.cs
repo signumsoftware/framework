@@ -12,6 +12,8 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Mailing;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Signum.Entities.Basics;
+using System.Globalization;
 
 namespace Signum.Entities.Authorization
 {
@@ -108,9 +110,9 @@ namespace Signum.Entities.Authorization
             set { Set(ref state, value, () => State); }
         }
 
-        public static Expression<Func<UserDN, string>> CultureInfoExpression =
+        public static Expression<Func<UserDN, CultureInfo>> CultureInfoExpression =
             u => null;
-        public string CultureInfo
+        public CultureInfo CultureInfo
         {
             get { return CultureInfoExpression.Evaluate(this); }
         }
@@ -139,6 +141,7 @@ namespace Signum.Entities.Authorization
             get { return CurrentUserVariable.Value; }
             set { CurrentUserVariable.Value = value; }
         }
+
     }
 
 

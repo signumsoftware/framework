@@ -41,18 +41,18 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailLogic.RegisterEmailModel <ResetPasswordRequestMail>(tc => new EmailTemplateDN
+                EmailLogic.RegisterEmailModel <ResetPasswordRequestMail>(() => new EmailTemplateDN
                 {
                     Name = "Reset Password Request",
                     Active = true,
                     IsBodyHtml = true,
                     AssociatedType = typeof(ResetPasswordRequestDN).ToTypeDN(),
                     Recipient = new TemplateQueryTokenDN { TokenString = "User" },
-                    Messages = tc.CreateMessages(() => new EmailTemplateMessageDN
+                    Messages = CultureInfoLogic.ForEachCulture(() => new EmailTemplateMessageDN
                     {
                         Text = Resources.ResetPasswordRequestMail,
                         Subject = Resources.ResetPasswordRequestSubject
-                    })
+                    }).ToMList()
                 });
             }
         }

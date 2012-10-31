@@ -238,7 +238,7 @@ namespace Signum.Entities.Mailing
             {
                 if (Messages == null || !Messages.Any())
                     return Resources.ThereIsNotAnyMessageForTheTemplate;
-                if (!Messages.Any(m => m.GetCultureInfo == CultureInfo.InvariantCulture))
+                if (!Messages.Any(m => m.CultureInfo.CultureInfo == CultureInfo.InvariantCulture))
                 {
                     return Resources.OneOfTheMessagesMustBeSetFor0.Formato(CultureInfo.InvariantCulture.DisplayName);
                 }
@@ -298,17 +298,19 @@ namespace Signum.Entities.Mailing
         [Ignore]
         internal EmailTemplateDN Template;
 
-        string cultureInfo;
-        public string CultureInfo
+        [NotNullable]
+        CultureInfoDN cultureInfo;
+        [NotNullValidator]
+        public CultureInfoDN CultureInfo
         {
             get { return cultureInfo; }
             set { Set(ref cultureInfo, value, () => CultureInfo); }
         }
 
-        public CultureInfo GetCultureInfo
-        {
-            get { return CultureInfo.HasText() ? new CultureInfo(CultureInfo) : System.Globalization.CultureInfo.InvariantCulture; }
-        }
+        //public CultureInfo GetCultureInfo
+        //{
+        //    get { return CultureInfo.HasText() ? new CultureInfo(CultureInfo) : System.Globalization.CultureInfo.InvariantCulture; }
+        //}
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string text;

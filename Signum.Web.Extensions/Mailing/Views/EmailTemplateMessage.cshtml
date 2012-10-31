@@ -1,14 +1,20 @@
 ﻿@using Signum.Entities.Mailing
+@using Signum.Engine.Basics
 @using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
 {
     <div class="sf-email-messageContainer">
-        <input type="hidden" class="sf-email-culture" value="@(ec.Value.GetCultureInfo.DisplayName)" />
+        <input type="hidden" class="sf-email-culture" value="@(ec.Value.CultureInfo.CultureInfo.DisplayName)" />
         @Html.ValueLine(ec, e => e.CultureInfo, vl =>
         {
             vl.ValueLineType = ValueLineType.Combo;
-            vl.EnumComboItems = System.Globalization.CultureInfo.GetCultures(System.Globalization.CultureTypes.AllCultures).OrderBy(
+            vl.EnumComboItems = CultureInfoLogic.ApplicationCultures.OrderBy(
                 ci => ci.Name).ThenBy(ci => ci.IsNeutralCulture).Select(ci =>
-                    new SelectListItem { Text = ci.DisplayName, Value = ci.Name, Selected = ci.Name == ec.Value.CultureInfo }).ToList();
+                    new SelectListItem 
+                    { 
+                        Text = ci.DisplayName, 
+                        Value = ci.Name, 
+                        Selected = ci.Name == ec.Value.CultureInfo.CultureInfo.Name 
+                    }).ToList();           
         })
         <fieldset>
             <legend>Replacement</legend>

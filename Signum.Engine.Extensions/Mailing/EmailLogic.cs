@@ -79,11 +79,13 @@ namespace Signum.Engine.Mailing
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, TemplateCultures cultures, string urlPrefix,
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, CultureInfoDN defaultCulture, string urlPrefix,
             string defaultFrom, string defaultDisplayFrom, string defaultBcc)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                CultureInfoLogic.AssertStarted(sb);
+
                 sb.Include<EmailMessageDN>();
                 sb.Include<EmailTemplateDN>();
                 sb.Include<EmailMasterTemplateDN>();
@@ -145,7 +147,7 @@ namespace Signum.Engine.Mailing
                 EmailTemplateDN.AssociatedTypeIsEmailOwner = t =>
                     typeof(IEmailOwnerDN).IsAssignableFrom(t.ToType());
 
-                EmailCultures = cultures;
+                DefaultCulture = defaultCulture;
 
                 SenderManager = new EmailSenderManager(defaultFrom, defaultDisplayFrom, defaultBcc);
 
@@ -203,20 +205,20 @@ namespace Signum.Engine.Mailing
             return EmailTemplateParser.Parse(text, s => QueryUtils.Parse("Entity." + s, qd), message.Template.Model.ToType());
         }
 
-        public static TemplateCultures EmailCultures;
+        public static CultureInfoDN DefaultCulture;
 
-        static Dictionary<Type, Func<TemplateCultures, EmailTemplateDN>> emailModels =
-            new Dictionary<Type, Func<TemplateCultures, EmailTemplateDN>>();
+        static Dictionary<Type, Func<EmailTemplateDN>> emailModels =
+            new Dictionary<Type, Func<EmailTemplateDN>>();
         static Dictionary<Type, EmailModelDN> emailModelToDN;
         static Dictionary<EmailModelDN, Type> emailModelToType;
 
-        public static void RegisterEmailModel<T>(Func<TemplateCultures, EmailTemplateDN> defaultTemplateConstructor = null)
+        public static void RegisterEmailModel<T>(Func<EmailTemplateDN> defaultTemplateConstructor = null)
             where T : IEmailModel
         {
             RegisterEmailModel(typeof(T), defaultTemplateConstructor);
         }
 
-        public static void RegisterEmailModel(Type model, Func<TemplateCultures, EmailTemplateDN> defaultTemplateConstructor = null)
+        public static void RegisterEmailModel(Type model, Func<EmailTemplateDN> defaultTemplateConstructor = null)
         {
             emailModels[model] = defaultTemplateConstructor;
         }
@@ -262,8 +264,8 @@ namespace Signum.Engine.Mailing
             var dbTemplates = Database.RetrieveAll<EmailModelDN>();
 
             emailModelToDN = EnumerableExtensions.JoinStrict(
-                dbTemplates, emailModels.Keys, t => t.FullClassName, t => t.FullName,
-                (typeDN, type) => new { typeDN, type }, "caching EmailTemplates").ToDictionary(a => a.type, a => a.typeDN);
+                dbTemplates, emailModels.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
+                (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates").ToDictionary();
 
             emailModelToType = emailModelToDN.Inverse();
         }
@@ -625,7 +627,7 @@ namespace Signum.Engine.Mailing
                 t.IsActiveNow() == true &&
                 t.Model == systemTemplate);
             if (template == null)
-                template = emailModels[systemTemplate.GetType()](EmailCultures);
+                template = emailModels[systemTemplate.GetType()]();
             return CreateEmailMessage(template, model.UntypedEntity, model);
         }
 
@@ -689,11 +691,11 @@ namespace Signum.Engine.Mailing
             }
 
             var recipientCI = recipient.InDB(io => io.CultureInfo);
-            var cultureInfo = recipientCI.HasText() ? CultureInfo.GetCultureInfo(recipientCI) : CultureInfo.InvariantCulture;
+            var cultureInfo = recipientCI ?? DefaultCulture.CultureInfo;
 
-            var message = template.Messages.SingleOrDefault(tm => tm.GetCultureInfo == cultureInfo) ??
-                template.Messages.SingleOrDefault(tm => tm.GetCultureInfo == cultureInfo.Parent) ??
-                template.Messages.SingleOrDefault(tm => tm.GetCultureInfo == CultureInfo.InvariantCulture);
+            var message = template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == cultureInfo) ??
+                template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == cultureInfo.Parent) ??
+                template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == DefaultCulture.CultureInfo);
 
             Func<string, QueryToken> parseToken = str => QueryUtils.Parse("Entity." + str, qd);
 
@@ -797,29 +799,11 @@ namespace Signum.Engine.Mailing
                 ServicePoint = { MaxIdleTime = 2 }
             };
         }
-    }
 
-    public class TemplateCultures
-    {
-        public TemplateCultures(string defaultCulture, params string[] otherCultures)
-        {
-            Default = CultureInfo.GetCultureInfo(defaultCulture);
-            OtherCultures = new List<CultureInfo>();
-            if (otherCultures != null)
-                OtherCultures.AddRange(otherCultures.Select(s => CultureInfo.GetCultureInfo(s)));
-        }
-
-        public CultureInfo Default;
-        public List<CultureInfo> OtherCultures;
-
-        public MList<EmailTemplateMessageDN> CreateMessages(Func<EmailTemplateMessageDN> func)
+        public static MList<EmailTemplateMessageDN> CreateMessages(Func<EmailTemplateMessageDN> func)
         {
             var list = new MList<EmailTemplateMessageDN>();
-            using (Sync.ChangeBothCultures(Default))
-            {
-                list.Add(func());
-            }
-            foreach (var ci in OtherCultures)
+            foreach (var ci in CultureInfoLogic.ApplicationCultures)
             {
                 using (Sync.ChangeBothCultures(ci))
                 {
@@ -830,31 +814,6 @@ namespace Signum.Engine.Mailing
         }
     }
 
-
-    //public struct Link
-    //{
-    //    public readonly string Url;
-    //    public readonly string Content;
-
-    //    public Link(string url, string content)
-    //    {
-    //        this.Url = url;
-    //        this.Content = content;
-    //    }
-
-    //    public override string ToString()
-    //    {
-    //        return @"<a href='{0}'>{1}</a>".Formato(Url, HttpUtility.HtmlEncode(Content));
-    //    }
-
-    //}
-
-    public class GlobalDispatcher
-    {
-        public IIdentifiable Entity;
-        public CultureInfo Culture;
-        public bool IsHtml;
-    }
 
     public class EmailSenderManager
     {

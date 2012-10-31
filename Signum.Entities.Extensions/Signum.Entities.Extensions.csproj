@@ -93,6 +93,7 @@
     <Compile Include="Authorization\RoleDN.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\UserDN.cs" />
+    <Compile Include="Basics\CultureInfoDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
     <Compile Include="Basics\TypeConditionDN.cs" />

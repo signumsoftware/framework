@@ -15,9 +15,16 @@ using Signum.Entities.Mailing;
 
 namespace Signum.Engine.Mailing
 {
+    public class GlobalVarDispatcher
+    {
+        public IIdentifiable Entity;
+        public CultureInfo Culture;
+        public bool IsHtml;
+    }
+
     public static class EmailTemplateParser
     {
-        public static Dictionary<string, Func<GlobalDispatcher, string>> GlobalVariables = new Dictionary<string, Func<GlobalDispatcher, string>>();
+        public static Dictionary<string, Func<GlobalVarDispatcher, string>> GlobalVariables = new Dictionary<string, Func<GlobalVarDispatcher, string>>();
 
         static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
@@ -73,7 +80,7 @@ namespace Signum.Engine.Mailing
 
         public class GlobalNode : TextNode
         {
-            Func<GlobalDispatcher, string> globalFunc;
+            Func<GlobalVarDispatcher, string> globalFunc;
 
             public GlobalNode(string globalKey, List<string> errors)
             {
@@ -84,7 +91,7 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                var text = globalFunc(new GlobalDispatcher { Entity = p.Entity, Culture = p.CultureInfo, IsHtml = p.IsHtml });
+                var text = globalFunc(new GlobalVarDispatcher { Entity = p.Entity, Culture = p.CultureInfo, IsHtml = p.IsHtml });
                 p.StringBuilder.Append(text);
             }
 

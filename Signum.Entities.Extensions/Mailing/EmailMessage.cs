@@ -9,6 +9,8 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Mailing;
 using Signum.Entities.Exceptions;
+using Signum.Entities.Basics;
+using System.Globalization;
 
 namespace Signum.Entities.Mailing
 {
@@ -181,7 +183,7 @@ namespace Signum.Entities.Mailing
     public interface IEmailOwnerDN : IIdentifiable
     {
         string Email { get; }
-        string CultureInfo { get; }
+        CultureInfo CultureInfo { get; }
     }
 
     public enum EmailProcesses

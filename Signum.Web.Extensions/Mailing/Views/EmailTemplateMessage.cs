@@ -42,6 +42,7 @@ namespace ASP
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
     using Signum.Entities.Mailing;
+    using Signum.Engine.Basics;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailTemplateMessage.cshtml")]
@@ -63,6 +64,7 @@ namespace ASP
         {
 
 
+
  using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
 {
 
@@ -70,7 +72,7 @@ WriteLiteral("    <div class=\"sf-email-messageContainer\">\r\n        <input ty
 "sf-email-culture\" value=\"");
 
 
-                                                         Write(ec.Value.GetCultureInfo.DisplayName);
+                                                         Write(ec.Value.CultureInfo.CultureInfo.DisplayName);
 
 WriteLiteral("\" />\r\n        ");
 
@@ -78,9 +80,14 @@ WriteLiteral("\" />\r\n        ");
    Write(Html.ValueLine(ec, e => e.CultureInfo, vl =>
         {
             vl.ValueLineType = ValueLineType.Combo;
-            vl.EnumComboItems = System.Globalization.CultureInfo.GetCultures(System.Globalization.CultureTypes.AllCultures).OrderBy(
+            vl.EnumComboItems = CultureInfoLogic.ApplicationCultures.OrderBy(
                 ci => ci.Name).ThenBy(ci => ci.IsNeutralCulture).Select(ci =>
-                    new SelectListItem { Text = ci.DisplayName, Value = ci.Name, Selected = ci.Name == ec.Value.CultureInfo }).ToList();
+                    new SelectListItem 
+                    { 
+                        Text = ci.DisplayName, 
+                        Value = ci.Name, 
+                        Selected = ci.Name == ec.Value.CultureInfo.CultureInfo.Name 
+                    }).ToList();           
         }));
 
 WriteLiteral("\r\n        <fieldset>\r\n            <legend>Replacement</legend>\r\n            <text" +
