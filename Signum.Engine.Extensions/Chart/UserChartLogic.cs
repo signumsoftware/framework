@@ -20,8 +20,10 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                sb.Settings.OverrideAttributes((UserChartDN uc) => uc.Columns.First().TokenString, new Attribute[0]);
 
                 sb.Include<UserChartDN>();
+
 
                 dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()
                                             select new

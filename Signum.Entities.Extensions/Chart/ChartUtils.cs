@@ -233,7 +233,7 @@ namespace Signum.Entities.Chart
             {
                 name = "c" + i,
                 title = c.GetTitle(),
-                token = c.TokenString,
+                token = c.Token == null? null: c.Token.FullKey(),
                 type =  c.Token == null? null: c.Token.GetChartColumnType().ToString(),
                 parameter1 = c.Parameter1,
                 parameter2 = c.Parameter2,
