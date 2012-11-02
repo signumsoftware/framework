@@ -11,7 +11,7 @@
 @{ 
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
     bool viewable = (bool)ViewData[ViewDataKeys.View];
-    var formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
+    var formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
 }
 @if (queryResult == null)
 { 
@@ -72,8 +72,11 @@ else
                         <tr>
                             @foreach (var col in queryResult.Columns)
                             {
-                                <td>
-                                    @formatters[col.Index](Html, row[col])
+                                CellFormatter ft = formatters[col.Index];
+                                var value = row[col];
+                                <td @ft.WriteDataAttribute(value)>
+                                    @ft.
+                                    Item2(Html, row[col])
                                 </td>
                             }
                         </tr>
@@ -90,8 +93,10 @@ else
                             }
                             @foreach (var col in queryResult.Columns)
                             {
-                                <td>
-                                    @formatters[col.Index](Html, row[col])
+                                var value = row[col];
+                                var ft = formatters[col.Index];
+                                <td @ft.WriteDataAttribute(value)>
+                                    @ft.Formatter(Html, value)
                                 </td>
                             }
                         </tr>
