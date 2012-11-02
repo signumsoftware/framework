@@ -23,8 +23,6 @@ namespace Signum.Web
 
             if (string.IsNullOrEmpty(lite.ToString()))
                 Database.FillToString(lite);
-
-            string key = lite.Key();
             MvcHtmlString result = Navigator.IsViewable(lite.RuntimeType, admin ? EntitySettingsContext.Admin : EntitySettingsContext.Default) ?
                 helper.Href("",
                     lite.ToString(),
@@ -32,8 +30,8 @@ namespace Signum.Web
                     HttpUtility.HtmlEncode(Resources.View),
                     "", null) :
                 lite.ToString().EncodeHtml();
-            
-            return result.Concat(helper.HiddenAnonymous(key, new { @class = "sf-data" }));
+
+            return result;
         }
     }
 }

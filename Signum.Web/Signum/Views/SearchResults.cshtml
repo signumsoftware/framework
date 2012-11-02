@@ -15,7 +15,7 @@
    FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
    
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-   Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
+   Dictionary<int, CellFormatter> formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
 
    int columnsCount = queryResult.Columns.Count() + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0);
 }
@@ -60,8 +60,11 @@
         }
         @foreach (var col in queryResult.Columns)
         {
-            <td>
-                @formatters[col.Index](Html, row[col])
+            var value = row[col];
+            var ft = formatters[col.Index];
+            
+            <td @ft.WriteDataAttribute(value)>
+                @ft.Formatter(Html, value)
             </td>
         }
     </tr>

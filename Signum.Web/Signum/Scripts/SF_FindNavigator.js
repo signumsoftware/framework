@@ -685,19 +685,9 @@ SF.registerModule("FindNavigator", function () {
             },
 
             quickFilterCell: function ($elem) {
-                var value;
-                var data = $elem.children(".sf-data");
-                if (data.length == 0) {
-                    var cb = $elem.find("input:checkbox");
-                    if (cb.length == 0) {
-                        value = $elem.html().trim();
-                    }
-                    else {
-                        value = cb.filter(":checked").length > 0;
-                    }
-                }
-                else {
-                    value = data.val();
+                var value = $elem.data("value");
+                if (typeof value == "undefined") {
+                    value = $elem.html().trim()
                 }
 
                 var cellIndex = $elem[0].cellIndex;
