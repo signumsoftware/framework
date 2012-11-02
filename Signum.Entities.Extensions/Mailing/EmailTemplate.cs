@@ -219,6 +219,7 @@ namespace Signum.Entities.Mailing
         }
 
         public static Func<TypeDN, bool> AssociatedTypeIsEmailOwner;
+        public static Func<CultureInfoDN> DefaultCulture;
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
@@ -238,9 +239,9 @@ namespace Signum.Entities.Mailing
             {
                 if (Messages == null || !Messages.Any())
                     return Resources.ThereIsNotAnyMessageForTheTemplate;
-                if (!Messages.Any(m => m.CultureInfo.CultureInfo == CultureInfo.InvariantCulture))
+                if (!Messages.Any(m => m.CultureInfo.Is(DefaultCulture())))
                 {
-                    return Resources.OneOfTheMessagesMustBeSetFor0.Formato(CultureInfo.InvariantCulture.DisplayName);
+                    return Resources.OneOfTheMessagesMustBeSetFor0.Formato(DefaultCulture().DisplayName);
                 }
                 if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
                 {
@@ -306,11 +307,6 @@ namespace Signum.Entities.Mailing
             get { return cultureInfo; }
             set { Set(ref cultureInfo, value, () => CultureInfo); }
         }
-
-        //public CultureInfo GetCultureInfo
-        //{
-        //    get { return CultureInfo.HasText() ? new CultureInfo(CultureInfo) : System.Globalization.CultureInfo.InvariantCulture; }
-        //}
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string text;

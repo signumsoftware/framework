@@ -148,6 +148,7 @@ namespace Signum.Engine.Mailing
                     typeof(IEmailOwnerDN).IsAssignableFrom(t.ToType());
 
                 DefaultCulture = defaultCulture;
+                EmailTemplateDN.DefaultCulture = () => DefaultCulture;
 
                 SenderManager = new EmailSenderManager(defaultFrom, defaultDisplayFrom, defaultBcc);
 
