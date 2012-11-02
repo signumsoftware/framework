@@ -53,9 +53,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Accessibility">
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
