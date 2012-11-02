@@ -365,7 +365,7 @@ namespace Signum.Engine.Linq
                     throw new InvalidOperationException("{0} is not allowed for {1}".Formato(aggregateFunction, resultType));
 
                 Type result = resultType;
-                resultType = typeof(int);
+                resultType = resultType.IsNullable() ? typeof(int?) : typeof(int);
                 return result;
             }
 
