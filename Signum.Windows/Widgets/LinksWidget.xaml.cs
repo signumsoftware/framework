@@ -125,6 +125,8 @@ namespace Signum.Windows
 
         public abstract void Execute();
 
+
+        void Never() { PropertyChanged(null, null); }
         public event PropertyChangedEventHandler PropertyChanged;
     }
 

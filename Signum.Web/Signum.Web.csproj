@@ -184,7 +184,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControl.cshtml</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Signum\Views\SearchPopupControl.cs">
       <AutoGen>True</AutoGen>
@@ -269,14 +268,14 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum\Views\PopupOkControl.cshtml">
+    <None Include="Signum\Views\PopupOkControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PopupOkControl1.cs</LastGenOutput>
-    </Content>
-    <Content Include="Signum\Views\Pagination.cshtml">
+    </None>
+    <None Include="Signum\Views\Pagination.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Pagination.cs</LastGenOutput>
-    </Content>
+    </None>
     <None Include="Signum\Views\SearchResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchResults.cs</LastGenOutput>
@@ -287,11 +286,10 @@
     </None>
     <Content Include="Signum\Content\SF_Widgets.css" />
     <Content Include="Signum\Scripts\SF_Widgets.js" />
-    <Content Include="Signum\Views\SearchControl.cshtml">
+    <None Include="Signum\Views\SearchControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchControl.cs</LastGenOutput>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <None Include="Signum\Views\SearchPage.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchPage.cs</LastGenOutput>
@@ -314,10 +312,10 @@
     <Content Include="Signum\Content\SF_Notify.css" />
     <Content Include="Signum\Content\SF_Search.css" />
     <Content Include="Signum\Scripts\SF_Slider.js" />
-    <Content Include="Signum\Views\_ViewStart.cshtml">
+    <None Include="Signum\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
-    </Content>
+    </None>
     <Content Include="Signum\Images\calendar.png" />
     <Content Include="Signum\Scripts\SF_Utils.js" />
     <Content Include="Signum\Views\Widgets\Note.cshtml">
