@@ -114,6 +114,9 @@ namespace Signum.Windows
                 return valueBinding;
 
             BindingExpression bindingExpression = BindingOperations.GetBindingExpression(this, ValueProperty);
+            if (bindingExpression == null)
+                return null;
+
             valueBinding = bindingExpression.ParentBinding;
             Validation.ClearInvalid(bindingExpression);
 
