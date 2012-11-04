@@ -108,9 +108,8 @@ namespace Signum.Entities.Disconnected
 
             double result = 0;
 
-            if (!RestoreDatabase.HasValue)
-                return result;
-            result += (orientative.RestoreDatabase.Value) / total;
+            if ((RestoreDatabase.HasValue || SynchronizeSchema.HasValue) && orientative.RestoreDatabase.HasValue) //Optional
+                result += (orientative.RestoreDatabase.Value) / total;
 
             if (!SynchronizeSchema.HasValue)
                 return result;

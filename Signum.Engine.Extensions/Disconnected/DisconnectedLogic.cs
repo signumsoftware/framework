@@ -91,24 +91,8 @@ namespace Signum.Engine.Disconnected
                 dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Imports());
                 dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Exports());
 
-                new BasicExecute<DisconnectedMachineDN>(DisconnectedMachineOperations.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (dm, _) => { }
-                }.Register();
 
-                new BasicExecute<DisconnectedMachineDN>(DisconnectedMachineOperations.UnsafeUnlock)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (dm, _) =>
-                    {
-                        ImportManager.UnlockTables(dm.ToLite());
-                        dm.State = DisconnectedMachineState.Connected;
-                    }
-                }.Register(); ;
-
+                MachineGraph.Register();
 
 
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertDisconnectedStrategies;
@@ -136,7 +120,7 @@ namespace Signum.Engine.Disconnected
 
                 new Execute(DisconnectedMachineOperations.UnsafeUnlock)
                 {
-                    FromStates = new []{ DisconnectedMachineState.Disconnected },
+                    FromStates = new[] { DisconnectedMachineState.Disconnected, DisconnectedMachineState.Faulted, DisconnectedMachineState.Fixed  },
                     ToState = DisconnectedMachineState.Connected,
                     Execute = (dm, _) =>
                     {
@@ -145,16 +129,14 @@ namespace Signum.Engine.Disconnected
                     }
                 }.Register();
 
-                new Execute(DisconnectedMachineOperations.AbortFaultedImport)
+                new BasicConstructFrom<DisconnectedMachineDN, DisconnectedImportDN>(DisconnectedMachineOperations.FixImport)
                 {
-                    FromStates = new[] { DisconnectedMachineState.Faulted },
-                    ToState = DisconnectedMachineState.Disconnected,
-                    Execute = (dm, _) =>
+                    CanConstruct = dm => dm.State.InState(DisconnectedMachineOperations.FixImport, DisconnectedMachineState.Faulted),
+                    Construct = (dm, _) =>
                     {
-                        dm.State = DisconnectedMachineState.Disconnected;
+                        return ImportManager.BeginImportDatabase(dm, null).Retrieve();
                     }
                 }.Register();
-
             }
         }
 
