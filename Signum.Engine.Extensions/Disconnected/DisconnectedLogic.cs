@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
-using System.Windows;
 using System.Linq.Expressions;
 using Signum.Entities.Authorization;
 using Signum.Engine.DynamicQuery;
@@ -34,6 +33,20 @@ namespace Signum.Engine.Disconnected
         public static ExportManager ExportManager = new ExportManager();
         public static ImportManager ImportManager = new ImportManager();
         public static LocalBackupManager LocalBackupManager = new LocalBackupManager();
+
+        static Expression<Func<DisconnectedMachineDN, IQueryable<DisconnectedImportDN>>> ImportsExpression =
+                m => Database.Query<DisconnectedImportDN>().Where(di => di.Machine.RefersTo(m));
+        public static IQueryable<DisconnectedImportDN> Imports(this DisconnectedMachineDN m)
+        {
+            return ImportsExpression.Evaluate(m);
+        }
+
+        static Expression<Func<DisconnectedMachineDN, IQueryable<DisconnectedImportDN>>> ExportsExpression =
+               m => Database.Query<DisconnectedImportDN>().Where(di => di.Machine.RefersTo(m));
+        public static IQueryable<DisconnectedImportDN> Exports(this DisconnectedMachineDN m)
+        {
+            return ExportsExpression.Evaluate(m);
+        }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -74,6 +87,9 @@ namespace Signum.Engine.Disconnected
                                                          dm.Total,
                                                          dm.Exception,
                                                      }).ToDynamic();
+
+                dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Imports());
+                dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Exports());
 
                 new BasicExecute<DisconnectedMachineDN>(DisconnectedMachineOperations.Save)
                 {

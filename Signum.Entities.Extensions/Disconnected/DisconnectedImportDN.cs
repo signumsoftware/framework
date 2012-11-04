@@ -231,13 +231,5 @@ namespace Signum.Entities.Disconnected
             get { return order; }
             set { Set(ref order, value, () => Order); }
         }
-
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string errors;
-        public string Errors
-        {
-            get { return errors; }
-            set { Set(ref errors, value, () => Errors); }
-        }
     }
 }

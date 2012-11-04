@@ -54,6 +54,10 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BoC.Web.Mvc.PrecompiledViews">
+      <HintPath>C:\Users\Olmo.SIGNUMS\AppData\Local\Microsoft\VisualStudio\11.0\Extensions\40jputqm.v4s\BoC.Web.Mvc.PrecompiledViews.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Web.PageInspector.Loader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
@@ -77,6 +81,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Web.WebPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System.WorkflowServices" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
@@ -388,6 +393,22 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Disconnected\DisconnectedClient.cs" />
+    <Compile Include="Disconnected\Views\DisconnectedExport.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DisconnectedExport.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Disconnected\Views\DisconnectedImport.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DisconnectedImport.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Disconnected\Views\DisconnectedMachine.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DisconnectedMachine.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Exception\ExceptionClient.cs" />
     <Compile Include="Exception\Views\ExceptionLog1.cs">
@@ -1072,6 +1093,19 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartScriptParameter.cs</LastGenOutput>
     </Content>
+    <Content Include="Disconnected\Views\DisconnectedExport.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DisconnectedExport.cs</LastGenOutput>
+    </Content>
+    <EmbeddedResource Include="Disconnected\Views\DisconnectedImport.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DisconnectedImport.cs</LastGenOutput>
+    </EmbeddedResource>
+    <Content Include="Disconnected\Views\DisconnectedMachine.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DisconnectedMachine.cs</LastGenOutput>
+    </Content>
+    <Content Include="Disconnected\Views\Web.config" />
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>

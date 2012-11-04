@@ -105,7 +105,9 @@ namespace Signum.Engine.Disconnected
             {
                 Statics.ImportThreadContext(threadContext);
 
-                StartImporting(machine);
+                OnStartImporting(machine);
+
+                DisconnectedMachineDN.Current = machine.ToLite();
 
                 try
                 {
@@ -189,12 +191,18 @@ namespace Signum.Engine.Disconnected
                     var ex = e.LogException();
 
                     import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { Exception = ex.ToLite(), State = DisconnectedImportState.Error });
+
+                    machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Faulted });
+
+                    OnImportingError(machine, import, e);
                 }
                 finally
                 {
                     runningExports.Remove(import);
 
-                    EndImporting();
+                    DisconnectedMachineDN.Current = null;
+
+                    OnEndImporting();
                 }
             });
 
@@ -211,14 +219,21 @@ namespace Signum.Engine.Disconnected
             machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Connected });
         }
 
-        protected virtual void StartImporting(DisconnectedMachineDN machine)
+        public virtual void ConnectAfterFix(Lite<DisconnectedMachineDN> machine)
         {
-            DisconnectedMachineDN.Current = machine.ToLite();
+            machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Connected });
         }
 
-        protected virtual void EndImporting()
+        protected virtual void OnStartImporting(DisconnectedMachineDN machine)
         {
-            DisconnectedMachineDN.Current = null;
+        }
+
+        protected virtual void OnEndImporting()
+        {
+        }
+
+        protected virtual void OnImportingError(DisconnectedMachineDN machine, Lite<DisconnectedImportDN> import, Exception exception)
+        {
         }
 
         private void DropDatabaseIfExists(DisconnectedMachineDN machine)
@@ -306,6 +321,8 @@ namespace Signum.Engine.Disconnected
             using (Schema.Current.GlobalMode())
                 return Database.Query<T>().Where(a => a.DisconnectedMachine == machine).UnsafeUpdate(a => new T { DisconnectedMachine = null, LastOnlineTicks = null });
         }
+
+  
     }
 
     public interface ICustomImporter
