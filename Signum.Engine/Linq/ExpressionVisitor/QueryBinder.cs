@@ -809,7 +809,7 @@ namespace Signum.Engine.Linq
         {
             Expression source = m.Method.IsExtensionMethod() ? m.Arguments[0]: m.Object;
 
-            if (source == null)
+            if (source == null || m.Method.Name == "InSql")
                 return m;
 
             if (source.NodeType == ExpressionType.Conditional)
