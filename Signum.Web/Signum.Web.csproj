@@ -140,67 +140,67 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateExtensions.cs" />
     <Compile Include="ButtonBar\ToolBarButton.cs" />
-    <Compile Include="Signum\Views\Error.cs">
+    <Compile Include="Signum\Views\Error.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Error.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\FilterBuilder.cs">
+    <Compile Include="Signum\Views\FilterBuilder.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>FilterBuilder.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\NormalControl.cs">
+    <Compile Include="Signum\Views\NormalControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>NormalControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\NormalPage.cs">
+    <Compile Include="Signum\Views\NormalPage.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>NormalPage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\Pagination.cs">
+    <Compile Include="Signum\Views\Pagination.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Pagination.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\PopupCancelControl1.cs">
+    <Compile Include="Signum\Views\PopupCancelControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PopupCancelControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\PopupControl.cs">
+    <Compile Include="Signum\Views\PopupControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PopupControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\PopupOkControl1.cs">
+    <Compile Include="Signum\Views\PopupOkControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PopupOkControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\SearchControl.cs">
+    <Compile Include="Signum\Views\SearchControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\SearchPopupControl.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SearchPopupControl.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Signum\Views\SearchResults.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SearchResults.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Signum\Views\SearchPage.cs">
+    <Compile Include="Signum\Views\SearchPage.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchPage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\ValueLineBox.cs">
+    <Compile Include="Signum\Views\SearchPopupControl.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SearchPopupControl.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Views\SearchResults.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SearchResults.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Views\ValueLineBox.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ValueLineBox.cshtml</DependentUpon>
@@ -215,10 +215,10 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Signum\Views\_ViewStart.cs">
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    <Compile Include="Signum\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="TypeContext\TypeContext.cs" />
     <Compile Include="TypeContext\TypeContextExpression.cs" />
@@ -269,42 +269,51 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Signum\Views\PopupOkControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>PopupOkControl1.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PopupOkControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\Pagination.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Pagination.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Pagination.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\SearchResults.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchResults.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SearchResults.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\FilterBuilder.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>FilterBuilder.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>FilterBuilder.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Content\SF_Widgets.css" />
     <Content Include="Signum\Scripts\SF_Widgets.js" />
     <None Include="Signum\Views\SearchControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchControl.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SearchControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\SearchPage.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchPage.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SearchPage.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\PopupCancelControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>PopupCancelControl1.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PopupCancelControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\PopupControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>PopupControl.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PopupControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\NormalPage.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>NormalPage.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>NormalPage.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Content\reset.css" />
     <Content Include="Signum\Content\SF_Lines.css" />
@@ -313,8 +322,9 @@
     <Content Include="Signum\Content\SF_Search.css" />
     <Content Include="Signum\Scripts\SF_Slider.js" />
     <None Include="Signum\Views\_ViewStart.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Images\calendar.png" />
     <Content Include="Signum\Scripts\SF_Utils.js" />
@@ -355,12 +365,14 @@
     <Content Include="Signum\Images\sign_error.gif" />
     <Content Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.js" />
     <None Include="Signum\Views\NormalControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>NormalControl.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>NormalControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\ValueLineBox.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ValueLineBox.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ValueLineBox.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Scripts\SF_FindNavigator.js" />
     <Content Include="Signum\Scripts\SF_Lines.js" />
@@ -368,8 +380,9 @@
     <Content Include="Signum\Scripts\SF_Validator.js" />
     <Content Include="Signum\Scripts\SF_ViewNavigator.js" />
     <None Include="Signum\Views\Error.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Error.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Error.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <EmbeddedResource Include="Properties\Resources.es.resx">
       <SubType>Designer</SubType>
@@ -382,8 +395,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Signum\Views\SearchPopupControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchPopupControl.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SearchPopupControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <EmbeddedResource Include="Properties\Resources.de.resx" />
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
