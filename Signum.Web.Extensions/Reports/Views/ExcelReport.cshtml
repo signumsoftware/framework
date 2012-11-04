@@ -9,9 +9,9 @@
     using (var query = e.SubContext(f => f.Query))
     {
         @Html.HiddenRuntimeInfo(query)
-        @Html.ValueLine(query, f => f.DisplayName, f => { f.ReadOnly = true; f.LabelText = "Query"; })
+        @Html.ValueLine(query, f => f.Name, f => { f.ReadOnly = true; f.LabelText = "Query"; })
         @Html.Hidden(query.Compose("Key"), query.Value.Key)
-        @Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)
+        @Html.Hidden(query.Compose("DisplayName"), query.Value.Name)
     }
 
     @Html.ValueLine(e, f => f.DisplayName)
