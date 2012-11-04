@@ -701,6 +701,17 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumDN>().Select(a => a.ToStringProperty).ToList();
         }
+
+
+        [TestMethod]
+        public void SelectConditionEnum()
+        {
+            var results = from b in Database.Query<BandDN>()
+                      let ga = (GrammyAwardDN)b.LastAward
+                      select (AwardResult?)(ga.Result < ga.Result ? (int)ga.Result : (int)ga.Result).InSql();
+
+            results.ToList();
+        }
     }
 
     public static class AuthorExtensions
