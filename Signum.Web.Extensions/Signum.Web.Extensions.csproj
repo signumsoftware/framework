@@ -54,10 +54,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BoC.Web.Mvc.PrecompiledViews">
-      <HintPath>C:\Users\Olmo.SIGNUMS\AppData\Local\Microsoft\VisualStudio\11.0\Extensions\40jputqm.v4s\BoC.Web.Mvc.PrecompiledViews.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.Web.PageInspector.Loader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
