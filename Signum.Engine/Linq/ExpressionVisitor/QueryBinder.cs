@@ -365,7 +365,7 @@ namespace Signum.Engine.Linq
                     throw new InvalidOperationException("{0} is not allowed for {1}".Formato(aggregateFunction, resultType));
 
                 Type result = resultType;
-                resultType = typeof(int);
+                resultType = resultType.IsNullable() ? typeof(int?) : typeof(int);
                 return result;
             }
 
@@ -809,7 +809,7 @@ namespace Signum.Engine.Linq
         {
             Expression source = m.Method.IsExtensionMethod() ? m.Arguments[0]: m.Object;
 
-            if (source == null)
+            if (source == null || m.Method.Name == "InSql")
                 return m;
 
             if (source.NodeType == ExpressionType.Conditional)

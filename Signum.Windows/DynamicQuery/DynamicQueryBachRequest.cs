@@ -59,7 +59,6 @@ namespace Signum.Windows
                 Async.Do(() =>
                     {
                         results = Server.Return((IDynamicQueryServer dqs) => dqs.BatchExecute(tup.Select(a => a.Request).ToArray()));
-                        results = results;
                     },
                     () =>
                     {
