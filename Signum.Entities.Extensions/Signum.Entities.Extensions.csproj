@@ -129,6 +129,7 @@
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
+    <Compile Include="Mailing\EmailConfiguration.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />

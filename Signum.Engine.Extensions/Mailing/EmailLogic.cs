@@ -76,11 +76,10 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, CultureInfoDN defaultCulture, string urlPrefix,
-            string defaultFrom, string defaultDisplayFrom, string defaultBcc)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -147,13 +146,16 @@ namespace Signum.Engine.Mailing
                 EmailTemplateDN.AssociatedTypeIsEmailOwner = t =>
                     typeof(IEmailOwnerDN).IsAssignableFrom(t.ToType());
 
-                DefaultCulture = defaultCulture;
-                EmailTemplateDN.DefaultCulture = () => DefaultCulture;
-
-                SenderManager = new EmailSenderManager(defaultFrom, defaultDisplayFrom, defaultBcc);
-
-                EmailTemplateParser.GlobalVariables.Add("UrlPrefix", _ => urlPrefix);
             }
+        }
+
+        public static void Configure(IEmailLogicConfiguration config)
+        {
+            
+            DefaultCulture = config.DefaultCulture;
+            EmailTemplateDN.DefaultCulture = () => DefaultCulture;
+            EmailTemplateParser.GlobalVariables.Add("UrlPrefix", _ => config.UrlPrefix);
+            SenderManager = new EmailSenderManager(config.DefaultFrom, config.DefaultDisplayFrom, config.DefaultBCC);
         }
 
         static string EmailTemplateMessageText_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
@@ -670,7 +672,7 @@ namespace Signum.Engine.Mailing
                 recipient = ((IEmailModelWithRecipient)model).Recipient;
             else
             {
-                recipient = EmailTemplateParser.GetRecipient(table, 
+                recipient = EmailTemplateParser.GetRecipient(table,
                     dicTokenColumn[QueryUtils.Parse("Entity." + template.Recipient.TokenString, qd)]);
             }
 
