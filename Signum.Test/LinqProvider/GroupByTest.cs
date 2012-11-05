@@ -275,11 +275,24 @@ namespace Signum.Test.LinqProvider
             var minSex = Database.Query<ArtistDN>().Min(a => a.Sex);
         }
 
+        [TestMethod]
+        public void MinEnumNullable()
+        {
+            var minSex = Database.Query<ArtistDN>().Where(a => false).Min(a => (Sex?)a.Sex);
+            var minSexs = Database.Query<BandDN>().Select(b => b.Members.Where(a => false).Min(a => (Sex?)a.Sex));
+        }
+
 
         [TestMethod]
         public void RootMinException()
         {
             Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
+        }
+
+        [TestMethod]
+        public void RootMinNullable()
+        {
+            var min = Database.Query<ArtistDN>().Where(a => false).Min(a => (int?)a.Name.Length);
         }
 
         [TestMethod]
