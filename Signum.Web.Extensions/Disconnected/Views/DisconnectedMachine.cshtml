@@ -1,0 +1,10 @@
+﻿@using Signum.Entities.Disconnected
+
+@using (var dc = Html.TypeContext<DisconnectedMachineDN>()) 
+{
+	@Html.ValueLine(dc, d => d.CreationDate)
+	@Html.ValueLine(dc, d => d.MachineName)
+	@Html.ValueLine(dc, d => d.State, vl=>vl.ReadOnly= true)
+	@Html.ValueLine(dc, d => d.SeedMin)
+	@Html.ValueLine(dc, d => d.SeedMax)
+}

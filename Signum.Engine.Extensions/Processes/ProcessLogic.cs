@@ -196,6 +196,7 @@ namespace Signum.Engine.Processes
             if (running)
                 throw new InvalidOperationException("ProcessLogic is running");
 
+            using (Schema.Current.GlobalMode())
             using (new EntityCache(true))
             {
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()
@@ -220,7 +221,7 @@ namespace Signum.Engine.Processes
 
                     var po = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism, CancellationToken = CancelNewProcesses.Token };
                     try
-                {
+                    {
                         Parallel.ForEach(queue.GetConsumingEnumerable(CancelNewProcesses.Token), po, ep =>
                         {
                             try
@@ -236,7 +237,7 @@ namespace Signum.Engine.Processes
                             {
                                 ExecutingProcess rubish;
                                 executing.TryRemove(ep.Execution.Id, out rubish);
-                }
+                            }
                         });
                     }
                     catch (OperationCanceledException oc)

@@ -108,9 +108,8 @@ namespace Signum.Entities.Disconnected
 
             double result = 0;
 
-            if (!RestoreDatabase.HasValue)
-                return result;
-            result += (orientative.RestoreDatabase.Value) / total;
+            if ((RestoreDatabase.HasValue || SynchronizeSchema.HasValue) && orientative.RestoreDatabase.HasValue) //Optional
+                result += (orientative.RestoreDatabase.Value) / total;
 
             if (!SynchronizeSchema.HasValue)
                 return result;
@@ -230,14 +229,6 @@ namespace Signum.Entities.Disconnected
         {
             get { return order; }
             set { Set(ref order, value, () => Order); }
-        }
-
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string errors;
-        public string Errors
-        {
-            get { return errors; }
-            set { Set(ref errors, value, () => Errors); }
         }
     }
 }
