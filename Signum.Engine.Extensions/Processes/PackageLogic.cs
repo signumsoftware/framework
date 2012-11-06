@@ -101,7 +101,7 @@ namespace Signum.Engine.Processes
         }
 
 
-        public void Execute(IExecutingProcess executingProcess)
+        public virtual void Execute(IExecutingProcess executingProcess)
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
