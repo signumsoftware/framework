@@ -97,7 +97,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="nuevoFiltro">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="newFilter">
                 <m:QueryTokenBuilder x:Name="tokenBuilder" />
                 <m:ImageButton Image="..\Images\newFilter.png" Content="{m:Loc NewFilter}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
                 <m:ImageButton Image="..\Images\newColumn.png" Content="{m:Loc NewColumn}" x:Name="btCreateColumn" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateColumn_Click" ToolTipService.ShowOnDisabled="True"
@@ -130,7 +130,7 @@
                 </StackPanel>
             </Button>
             <Button x:Name="btCreate" Content="{DynamicResource Create}" Click="btCreate_Click" ToolTip="{m:Loc CreateNew}" Style="{StaticResource big}"/>
-            <Button x:Name="btView" Content="{DynamicResource View}" Click="btView_Click" ToolTip="{m:Loc ViewSelected}" Style="{StaticResource big}"/>
+            <Button x:Name="btNavigate" Content="{DynamicResource Navigate}" Click="btView_Click" ToolTip="{m:Loc ViewSelected}" Style="{StaticResource big}"/>
             <Button x:Name="btRemove" Content="{DynamicResource Remove}" Click="btRemove_Click" ToolTip="{m:Loc Remove}" Style="{StaticResource big}"/>
             <Menu IsMainMenu="False" x:Name="menu" VerticalAlignment="Center" Background="Transparent"/>
         </StackPanel>
@@ -148,6 +148,9 @@
                   AllowDrop="{Binding AllowChangeColumns, ElementName=me}"
                   DragOver="lvResult_DragOver"
                   Drop="lvResult_Drop">
+            <ListView.ContextMenu>
+                <ContextMenu x:Name="contextMenu" Opened="contextMenu_Opened"/>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView x:Name="gvResults" AllowsColumnReorder="True">
                     <GridView.ColumnHeaderContainerStyle>

@@ -7,12 +7,12 @@ SF.registerModule("FindNavigator", function () {
 
             options: {
                 allowChangeColumns: true,
-                allowMultiple: null,
+                allowMultiple: true,
                 columnMode: "Add",
                 columns: null, //List of column names "token1,displayName1;token2,displayName2"
                 create: true,
                 elems: null,
-                entityContextMenu: true,
+                selectedItemsContextMenu: true,
                 filterMode: "Visible",
                 filters: null, //List of filter names "token1,operation1,value1;token2,operation2,value2"
                 openFinderUrl: null,
@@ -42,7 +42,7 @@ SF.registerModule("FindNavigator", function () {
             _create: function () {
                 var self = this;
 
-                var closeMyOpenedCtxMenu = function (target) {
+                var closeMyOpenedCtxMenu = function () {
                     if (self.element.find(".sf-search-ctxmenu-overlay").length > 0) {
                         $('.sf-search-ctxmenu-overlay').remove();
                         return false;
@@ -51,7 +51,7 @@ SF.registerModule("FindNavigator", function () {
                 };
 
                 var $tblResults = self.element.find(".sf-search-results-container");
-                $tblResults.on("click", "th:not(.th-col-entity):not(.th-col-selection),th:not(.th-col-entity):not(.th-col-selection) span,th:not(.th-col-entity):not(.th-col-selection) .sf-header-droppable", function (e) {
+                $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection),th:not(.sf-th-entity):not(.sf-th-selection) span,th:not(.sf-th-entity):not(.sf-th-selection) .sf-header-droppable", function (e) {
                     if (e.target != this) {
                         return;
                     }
@@ -60,8 +60,8 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $tblResults.on("contextmenu", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
-                    if (!closeMyOpenedCtxMenu(e.target)) {
+                $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
+                    if (!closeMyOpenedCtxMenu()) {
                         return false;
                     }
                     self.headerContextMenu(e);
@@ -69,18 +69,23 @@ SF.registerModule("FindNavigator", function () {
                 });
 
                 $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
-                    if (!closeMyOpenedCtxMenu(e.target)) {
+                    if (!closeMyOpenedCtxMenu()) {
                         return false;
                     }
 
-                    var $this = $(this).closest("td");
-                    var index = $this.index();
-                    var $th = $this.closest("table").find("th").eq(index);
-                    if ($th.hasClass('th-col-selection')) {
-                        return false;
+                    var $td = $(this).closest("td");
+
+                    var $tr = $td.closest("tr");
+                    var $currentRowSelector = $tr.find(".sf-td-selection");
+                    if ($currentRowSelector.filter(":checked").length == 0) {
+                        self.changeRowSelection($(self.pf("sfSearchControl .sf-td-selection:checked")), false);
+                        self.changeRowSelection($currentRowSelector, true);
                     }
-                    if ($th.hasClass('th-col-entity')) {
-                        if (self.options.entityContextMenu == true) {
+
+                    var index = $td.index();
+                    var $th = $td.closest("table").find("th").eq(index);
+                    if ($th.hasClass('sf-th-selection') || $th.hasClass('sf-th-entity')) {
+                        if (self.options.selectedItemsContextMenu == true) {
                             self.entityContextMenu(e);
                         }
                     }
@@ -133,6 +138,10 @@ SF.registerModule("FindNavigator", function () {
                     }
                 });
 
+                $tblResults.on("change", ".sf-td-selection", function () {
+                    self.changeRowSelection($(this), $(this).filter(":checked").length > 0);
+                });
+
                 $(this.pf("sfFullScreen")).on("mousedown", function (e) {
                     e.preventDefault();
                     self.fullScreen(e);
@@ -140,7 +149,7 @@ SF.registerModule("FindNavigator", function () {
 
                 this.createMoveColumnDragDrop();
 
-                $tblResults.on("selectstart", "th:not(.th-col-entity):not(.th-col-selection)", function (e) {
+                $tblResults.on("selectstart", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
                     return false;
                 });
 
@@ -148,16 +157,34 @@ SF.registerModule("FindNavigator", function () {
                     self.newSubTokensComboAdded($("#" + idSelectedCombo));
                 });
 
+                this.element.find(".sf-tm-selected").click(function () {
+                    if (!closeMyOpenedCtxMenu()) {
+                        return false;
+                    }
+
+                    self.ctxMenuInDropdown($(this).closest(".sf-dropdown"));
+                });
+
                 if (this.options.searchOnLoad) {
                     this.searchOnLoad();
                 }
+            },
+
+            changeRowSelection: function ($rowSelectors, select) {
+                $rowSelectors.attr("checked", select);
+                $rowSelectors.closest("tr").toggleClass("ui-state-active", select);
+
+                var $control = $(this.pf("sfSearchControl"));
+
+                var selected = $control.find(".sf-td-selection:checked").length;
+                $control.find(".sf-tm-selected > .ui-button-text").html(lang.signum.searchControlMenuSelected + " (" + selected + ")");
             },
 
             createCtxMenu: function ($rightClickTarget) {
                 var left = $rightClickTarget.position().left + ($rightClickTarget.outerWidth() / 2);
                 var top = $rightClickTarget.position().top + ($rightClickTarget.outerHeight() / 2);
 
-                var $cmenu = $("<div class='sf-search-ctxmenu'></div>");
+                var $cmenu = $("<div class='ui-state-default sf-search-ctxmenu'></div>");
                 $cmenu.css({
                     left: left,
                     top: top,
@@ -165,7 +192,6 @@ SF.registerModule("FindNavigator", function () {
                 });
 
                 var $ctxMenuOverlay = $('<div class="sf-search-ctxmenu-overlay"></div>').click(function (e) {
-                    SF.log("contextmenu click");
                     var $clickTarget = $(e.target);
                     if ($clickTarget.hasClass("sf-search-ctxitem") || $clickTarget.parent().hasClass("sf-search-ctxitem"))
                         $cmenu.hide();
@@ -203,6 +229,15 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             },
 
+            requestDataForContextMenu: function () {
+                return {
+                    liteKeys: this.element.find(".sf-td-selection:checked").closest("tr").map(function () { return $(this).data("entity"); }).toArray().join(","),
+                    webQueryName: this.options.webQueryName,
+                    prefix: this.options.prefix,
+                    implementationsKey: $(this.pf("sfEntityTypeNames")).val()
+                };
+            },
+
             entityContextMenu: function (e) {
                 var $td = $(e.target).closest("td");
                 $td.addClass("sf-ctxmenu-active");
@@ -210,15 +245,9 @@ SF.registerModule("FindNavigator", function () {
                 var $menu = this.createCtxMenu($td);
                 var $itemContainer = $menu.find(".sf-search-ctxmenu");
 
-                var requestData = {
-                    lite: $td.parent().data('entity'),
-                    webQueryName: this.options.webQueryName,
-                    prefix: this.options.prefix
-                };
-
                 $.ajax({
-                    url: SF.Urls.entityContextMenu,
-                    data: requestData,
+                    url: SF.Urls.selectedItemsContextMenu,
+                    data: this.requestDataForContextMenu(),
                     success: function (items) {
                         $itemContainer.html(items);
                         $td.append($menu);
@@ -227,6 +256,29 @@ SF.registerModule("FindNavigator", function () {
                 });
 
                 return false;
+            },
+
+            ctxMenuInDropdown: function ($dropdown) {
+                if ($dropdown.hasClass("sf-open")) {
+                    var requestData = this.requestDataForContextMenu();
+                    if (SF.isEmpty(requestData.implementationsKey)) {
+                        return;
+                    }
+
+                    var loadingClass = "sf-tm-selected-loading";
+
+                    var $ul = $dropdown.children(".sf-menu-button");
+                    $ul.html($("<li></li>").addClass(loadingClass).html($("<span></span>").addClass("sf-query-button").html(lang.signum.loading)));
+
+                    $.ajax({
+                        url: SF.Urls.selectedItemsContextMenu,
+                        data: requestData,
+                        success: function (items) {
+                            $ul.find("li").removeClass(loadingClass).html(items);
+                            SF.triggerNewContent($ul);
+                        }
+                    });
+                }
             },
 
             fullScreen: function (evt) {
@@ -278,15 +330,20 @@ SF.registerModule("FindNavigator", function () {
             },
 
             requestDataForSearchInUrl: function () {
-                return "?elems=" + $(this.pf(this.keys.elems)).val() +
+                var url = "?elems=" + $(this.pf(this.keys.elems)).val() +
                     "&page=" + $(this.pf(this.keys.page)).val() +
-                    "&allowMultiple=" + this.options.allowMultiple +
                     "&filters=" + this.serializeFilters() +
                     "&filterMode=Visible" +
                     "&orders=" + this.serializeOrders() +
                     "&columns=" + this.serializeColumns() +
                     "&columnMode=Replace" +
                     "&view=" + this.options.view;
+
+                if (!this.options.allowMultiple) {
+                    url += "&allowMultiple=" + this.options.allowMultiple;
+                }
+
+                return url;
             },
 
             serializeFilters: function () {
@@ -337,7 +394,7 @@ SF.registerModule("FindNavigator", function () {
             serializeColumns: function () {
                 var result = "";
                 var self = this;
-                $(this.pf("tblResults thead tr th:not(.th-col-entity):not(.th-col-selection)")).each(function () {
+                $(this.pf("tblResults thead tr th:not(.sf-th-entity):not(.sf-th-selection)")).each(function () {
                     var $this = $(this);
                     var token = $this.find("input:hidden").val();
                     var displayName = $this.text().trim();
@@ -383,7 +440,7 @@ SF.registerModule("FindNavigator", function () {
 
             selectedItems: function () {
                 var items = [];
-                var selected = $("input:radio[name=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked, input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
+                var selected = $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
                 if (selected.length == 0)
                     return items;
 
@@ -518,7 +575,7 @@ SF.registerModule("FindNavigator", function () {
             },
 
             createMoveColumnDragDrop: function ($draggables, $droppables) {
-                $draggables = $draggables || $(this.pf("tblResults") + " th:not(.th-col-entity):not(.th-col-selection)");
+                $draggables = $draggables || $(this.pf("tblResults") + " th:not(.sf-th-entity):not(.sf-th-selection)");
                 $droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
 
                 $draggables.draggable({
@@ -738,7 +795,7 @@ SF.registerModule("FindNavigator", function () {
 
             viewOptionsForSearchPopupCreate: function (viewOptions) {
                 return $.extend({
-                    controllerUrl: SF.Urls.popupCreate,
+                    controllerUrl: SF.Urls.popupNavigate,
                     requestExtraJsonData: this.requestDataForSearchPopupCreate()
                 }, viewOptions);
             },
@@ -752,8 +809,7 @@ SF.registerModule("FindNavigator", function () {
 
             toggleSelectAll: function () {
                 var select = $(this.pf("cbSelectAll:checked"));
-                $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]")
-                    .attr('checked', (select.length > 0) ? true : false);
+                $(this.pf("sfSearchControl .sf-td-selection")).attr('checked', (select.length > 0) ? true : false);
             },
 
             searchOnLoadFinished: false,
@@ -928,7 +984,7 @@ SF.registerModule("FindNavigator", function () {
             return tokenName;
         };
 
-        
+
 
         var deleteFilter = function (elem) {
             var $tr = $(elem).closest("tr");

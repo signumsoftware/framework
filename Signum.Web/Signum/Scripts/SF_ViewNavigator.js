@@ -35,6 +35,9 @@ SF.registerModule("ViewNavigator", function () {
             if (this.isLoaded()) {
                 return this.showViewOk(null);
             }
+            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
+                this.viewOptions.controllerUrl = SF.Urls.popupView;
+            }
             var self = this;
             this.callServer(function (controlHtml) { self.showViewOk(controlHtml); });
         },
@@ -42,6 +45,9 @@ SF.registerModule("ViewNavigator", function () {
         createOk: function () {
             if (!SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "ContainerDiv cannot be specified to Navigator on createOk mode";
+            }
+            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
+                this.viewOptions.controllerUrl = SF.Urls.popupView;
             }
             var self = this;
             this.callServer(function (controlHtml) { self.showCreateOk(controlHtml); });
@@ -85,6 +91,9 @@ SF.registerModule("ViewNavigator", function () {
                 if (SF.isEmpty(this.viewOptions.type) && new SF.RuntimeInfo(this.viewOptions.prefix).find().length == 0) {
                     throw "Type must be specified to Navigator on viewSave mode";
                 }
+                if (SF.isEmpty(this.viewOptions.controllerUrl)) {
+                    this.viewOptions.controllerUrl = SF.Urls.popupNavigate;
+                }
                 var self = this;
                 this.callServer(function (controlHtml) { self.showViewSave(controlHtml); });
             }
@@ -98,6 +107,9 @@ SF.registerModule("ViewNavigator", function () {
                 throw "Type must be specified to Navigator on createSave mode";
             }
             this.viewOptions.prefix = SF.compose("New", this.viewOptions.prefix);
+            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
+                this.viewOptions.controllerUrl = SF.Urls.popupNavigate;
+            }
             var self = this;
             this.callServer(function (controlHtml) { self.showCreateSave(controlHtml); });
         },

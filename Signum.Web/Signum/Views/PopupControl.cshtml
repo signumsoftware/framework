@@ -1,17 +1,18 @@
 ﻿@using Signum.Entities.Reflection
 @using Signum.Web.Properties
 @model TypeContext
-<div id="@Model.Compose("panelPopup")">
+@{ var modifiable = (ModifiableEntity)Model.UntypedValue; }
+<div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.ControlID">
     <span class="sf-popup-title">
     <span style="float:left; display:block">
-    @Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)
+    @Navigator.Manager.GetTypeTitle(modifiable)
     </span>
       @{
             var ident = Model.UntypedValue as IdentifiableEntity;
 
-            if (ident != null && !ident.IsNew && Navigator.IsViewable(ident, EntitySettingsContext.Admin))
+            if (ident != null && !ident.IsNew && Navigator.IsNavigable(ident))
             {
-                <a href="@Navigator.ViewRoute(ident)" class="sf-popup-fullscreen">
+                <a href="@Navigator.NavigateRoute(ident)" class="sf-popup-fullscreen">
                 <span class="ui-icon ui-icon-extlink">fullscreen</span>
                 </a>
             }
@@ -19,12 +20,13 @@
     </span>
     <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString()) </span>
     <div class="sf-button-bar">
+        @{ var saveProtected = Navigator.Manager.OnSaveProtected(Model.UntypedValue.GetType()); }
         @if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
         {  
-            <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
+            <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
                 OK</button>                
         }
-        @if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible] && Navigator.Manager.ShowSave(Model.UntypedValue.GetType()))
+        @if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible] && !saveProtected)
         {  
             <button id="@Model.Compose("ebSave")" class="sf-entity-button sf-save" @(ViewData[ViewDataKeys.OnSave] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnSave] + "\"") : null)>
                 @Resources.Save</button>                
@@ -35,11 +37,13 @@
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
             Prefix = Model.ControlID
-        }, (ModifiableEntity)Model.UntypedValue).ToString(Html)
+        }, modifiable).ToString(Html)
     </div>
     @Html.ValidationSummaryAjax(Model)
     @Html.PopupHeader()
-    <div id="@Model.Compose("divMainControl")" class="sf-main-control" data-prefix="@Model.ControlID">
+    <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable.SelfModified ? " sf-changed" : "")" 
+        data-prefix="@Model.ControlID" 
+        data-runtimeinfo="@Model.RuntimeInfo().ToString()">
         @{ 
             ViewData[ViewDataKeys.InPopup] = true;
             Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);

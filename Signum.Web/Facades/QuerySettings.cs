@@ -15,31 +15,18 @@ namespace Signum.Web
 {
     public class QuerySettings
     {
-        public QuerySettings(object queryName)
-        {
-            this.QueryName = queryName; 
-        }
-
         public object QueryName { get; private set; }
 
         public Func<string> Title { get; set; }
         public int? ElementsPerPage { get; set; }
         public string WebQueryName { get; set; }
 
-        public bool? AllowMultiple { get; set; }
+        public bool IsFindable { get; set; }
 
-        public Func<object, bool> IsFindable;
-
-        public bool OnIsFindable()
+        public QuerySettings(object queryName)
         {
-            if (IsFindable != null)
-                foreach (Func<object, bool> item in IsFindable.GetInvocationList())
-                {
-                    if (!item(QueryName))
-                        return false;
-                }
-
-            return true;
+            this.QueryName = queryName;
+            this.IsFindable = true;
         }
 
         public static List<FormatterRule> FormatRules { get; set; }
@@ -105,8 +92,8 @@ namespace Signum.Web
             {
                 new EntityFormatterRule(l => true, (h,l) => 
                 {
-                    if (Navigator.IsViewable(l.RuntimeType, EntitySettingsContext.Admin))
-                        return h.Href(Navigator.ViewRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
+                    if (Navigator.IsNavigable(l.RuntimeType, isSearchEntity: true ))
+                        return h.Href(Navigator.NavigateRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
                     else
                         return MvcHtmlString.Empty;
                 }),

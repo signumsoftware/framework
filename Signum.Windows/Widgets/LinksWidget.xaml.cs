@@ -213,7 +213,7 @@ namespace Signum.Windows
             FindUniqueOptions = options;
             Label = typeof(T).NiceName();
             Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
-            IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsViewable(typeof(T), false);
+            IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearchEntity: false);
         }
 
         public override void Execute()

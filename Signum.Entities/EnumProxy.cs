@@ -9,17 +9,17 @@ using Signum.Entities.Reflection;
 namespace Signum.Entities
 {
     [Serializable]
-    public class EnumProxy<T> : IdentifiableEntity, IEquatable<EnumProxy<T>>
+    public class EnumEntity<T> : IdentifiableEntity, IEquatable<EnumEntity<T>>
         where T: struct
     {
-        public EnumProxy()
+        public EnumEntity()
         {
             CleanSelfModified();
         }
 
-        public static EnumProxy<T> FromEnum(T t)
+        public static EnumEntity<T> FromEnum(T t)
         {
-            return new EnumProxy<T>()
+            return new EnumEntity<T>()
             {
                 id = Convert.ToInt32(t),
             };
@@ -35,23 +35,23 @@ namespace Signum.Entities
             return ToEnum().ToString(); 
         }
 
-        public bool Equals(EnumProxy<T> other)
+        public bool Equals(EnumEntity<T> other)
         {
             return EqualityComparer<T>.Default.Equals(ToEnum(), other.ToEnum()); 
         }
 
-        public static implicit operator EnumProxy<T>(T enumerable)
+        public static implicit operator EnumEntity<T>(T enumerable)
         {
             return FromEnum(enumerable);
         }
 
-        public static explicit operator T(EnumProxy<T> enumProxy)
+        public static explicit operator T(EnumEntity<T> enumEntity)
         {
-            return enumProxy.ToEnum();
+            return enumEntity.ToEnum();
         }
     }
 
-    public static class EnumProxy
+    public static class EnumEntity
     {
         public static IdentifiableEntity FromEnum(Enum value)
         {
@@ -72,9 +72,9 @@ namespace Signum.Entities
             return (Enum)Enum.ToObject(enumType, ident.id);
         }
 
-        public static bool IsEnumProxy(this Type type)
+        public static bool IsEnumEntity(this Type type)
         {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(EnumProxy<>);
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(EnumEntity<>);
         }
 
         public static IEnumerable<Enum> GetValues(Type enumType)
@@ -89,13 +89,13 @@ namespace Signum.Entities
 
         public static Type Generate(Type enumType)
         {
-            return typeof(EnumProxy<>).MakeGenericType(enumType);
+            return typeof(EnumEntity<>).MakeGenericType(enumType);
         }
 
-        public static Type Extract(Type enumProxyType)
+        public static Type Extract(Type enumEntityType)
         {
-            if (enumProxyType.IsGenericType && enumProxyType.GetGenericTypeDefinition() == typeof(EnumProxy<>))
-                return enumProxyType.GetGenericArguments()[0];
+            if (enumEntityType.IsGenericType && enumEntityType.GetGenericTypeDefinition() == typeof(EnumEntity<>))
+                return enumEntityType.GetGenericArguments()[0];
             return null;
         }
 

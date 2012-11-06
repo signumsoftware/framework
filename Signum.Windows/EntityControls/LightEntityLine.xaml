@@ -11,7 +11,7 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</UserControl.Resources>
-	<Button x:Name="btView" 
+	<Button x:Name="btNavigate" 
 	Style="{StaticResource LinkButtonStyle}"
     Focusable="{Binding Focusable, ElementName=me}"
 	Content="{Binding Path=Entity, ElementName=me, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.ToStringConverter}}"

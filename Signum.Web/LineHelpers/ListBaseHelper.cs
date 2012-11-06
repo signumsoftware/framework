@@ -28,13 +28,10 @@ namespace Signum.Web
 
             Type type = listBase.ElementType.CleanType();
 
-            if (listBase.ViewMode == ViewMode.Navigate && (!Navigator.IsViewable(type, EntitySettingsContext.Admin) || !type.IsIIdentifiable()))
-                return MvcHtmlString.Empty;
-
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", listBase.GetCreating() },
-                { "data-icon", listBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-plus" : "ui-icon-plusthick" },
+                { "data-icon", "ui-icon-circle-plus" },
                 { "data-text", false}
             };
 
@@ -57,7 +54,7 @@ namespace Signum.Web
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", listBase.GetViewing() },
-                { "data-icon", listBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-arrow-e" : "ui-icon-arrowthick-1-e" },
+                { "data-icon", "ui-icon-circle-arrow-e" },
                 { "data-text", false}
             };
 
@@ -66,6 +63,26 @@ namespace Signum.Web
                   "",
                   Resources.LineButton_View,
                   "sf-line-button sf-view",
+                  htmlAttr);
+        }
+
+        public static MvcHtmlString NavigateButton(HtmlHelper helper, EntityListBase listBase)
+        {
+            if (!listBase.View)
+                return MvcHtmlString.Empty;
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetViewing() },
+                { "data-icon", "ui-icon-arrowthick-1-e" },
+                { "data-text", false}
+            };
+
+            return helper.Href(listBase.Compose("btnNavigate"),
+                  Resources.LineButton_Navigate,
+                  "",
+                  Resources.LineButton_Navigate,
+                  "sf-line-button sf-navigate",
                   htmlAttr);
         }
 

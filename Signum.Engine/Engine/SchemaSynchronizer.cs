@@ -249,10 +249,10 @@ namespace Signum.Engine
 
             foreach (var table in schema.Tables.Values)
             {
-                Type enumType = EnumProxy.Extract(table.Type);
+                Type enumType = EnumEntity.Extract(table.Type);
                 if (enumType != null)
                 {
-                    var should = EnumProxy.GetEntities(enumType);
+                    var should = EnumEntity.GetEntities(enumType);
                     var shouldByName = should.ToDictionary(a => a.ToString());
 
                     var current = Administrator.TryRetrieveAll(table.Type, replacements);

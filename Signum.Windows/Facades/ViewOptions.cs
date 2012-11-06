@@ -15,11 +15,9 @@ namespace Signum.Windows
 
         public bool? ReadOnly { get; set; }
 
-        public bool Admin { get; set; }
-
         public Control View { get; set; }
 
-        internal abstract ViewButtons GetViewButtons();
+        public abstract ViewButtons ViewButtons { get; set; }
     }
 
     public class ViewOptions: ViewOptionsBase
@@ -27,25 +25,24 @@ namespace Signum.Windows
         public ViewOptions()
         {
             Clone = true;
+            ViewButtons = Windows.ViewButtons.Ok;
         }
 
         public PropertyRoute TypeContext { get; set; }
 
         public AllowErrors AllowErrors { get; set; }
 
-        internal override ViewButtons GetViewButtons()
-        {
-            return ViewButtons.Ok;
-        }
+        public override ViewButtons ViewButtons { get; set; }
     }
 
     public class NavigateOptions: ViewOptionsBase
     {
         public EventHandler Closed { get; set; }
 
-        internal override ViewButtons GetViewButtons()
+        public override ViewButtons ViewButtons
         {
-            return ViewButtons.Save;
+            get { return ViewButtons.Save; }
+            set { throw new InvalidOperationException("ViewButtons is always Save in NavigateOptions"); }
         }
     }
 }

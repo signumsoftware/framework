@@ -17,7 +17,11 @@ namespace Signum.Web.Widgets
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<AlertDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("Alert"), IsCreable = _ => false });
+                Navigator.AddSetting(new EntitySettings<AlertDN>(EntityType.Main) 
+                { 
+                    PartialViewName = _ => ViewPrefix.Formato("Alert"), 
+                    IsCreable = EntityWhen.Never,
+                });
             }
 
             WidgetsHelper.GetWidgetsForView += 

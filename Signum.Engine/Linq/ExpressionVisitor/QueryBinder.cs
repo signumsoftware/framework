@@ -129,7 +129,7 @@ namespace Signum.Engine.Linq
                     return MakeLite(m.Type, converted, toStr);
                 }
             }
-            else if (m.Method.DeclaringType.IsInstantiationOf(typeof(EnumProxy<>)) && m.Method.Name == "ToEnum")
+            else if (m.Method.DeclaringType.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
             {
                 EntityExpression fi = (EntityExpression)Visit(m.Object);
 

@@ -24,7 +24,7 @@ namespace Signum.Web
         public const string ManualToolbarButtons = "sfManualToolbarButtons";
         public const string FindOptions = "sfFindOptions";
         public const string FilterOptions = "sfFilterOptions";
-        public const string View = "sfView";
+        public const string Navigate = "sfNavigate";
         public const string AllowMultiple = "sfAllowMultiple";
         public const string FilterMode = "sfFilterMode";
         public const string ElementsPerPage = "sfElementsPerPage";

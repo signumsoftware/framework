@@ -47,12 +47,30 @@ namespace Signum.Web.Views
         {
 
 
+
+            
+            #line 3 "..\..\Signum\Views\PopupOkControl.cshtml"
+   ModifiableEntity modifiable = Model.UntypedValue as ModifiableEntity; 
+
+            
+            #line default
+            #line hidden
 WriteLiteral("<div id=\"");
 
 
             
-            #line 3 "..\..\Signum\Views\PopupOkControl.cshtml"
+            #line 4 "..\..\Signum\Views\PopupOkControl.cshtml"
     Write(Model.Compose("panelPopup"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" class=\"sf-popup-control\" data-prefix=\"");
+
+
+            
+            #line 4 "..\..\Signum\Views\PopupOkControl.cshtml"
+                                                                        Write(Model.ControlID);
 
             
             #line default
@@ -61,8 +79,8 @@ WriteLiteral("\" data-title=\"");
 
 
             
-            #line 3 "..\..\Signum\Views\PopupOkControl.cshtml"
-                                              Write(Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity));
+            #line 4 "..\..\Signum\Views\PopupOkControl.cshtml"
+                                                                                                      Write(Navigator.Manager.GetTypeTitle(modifiable));
 
             
             #line default
@@ -71,7 +89,7 @@ WriteLiteral("\">\r\n    <h2><span class=\"sf-entity-title\">");
 
 
             
-            #line 4 "..\..\Signum\Views\PopupOkControl.cshtml"
+            #line 5 "..\..\Signum\Views\PopupOkControl.cshtml"
                                   Write(ViewBag.Title ?? Model.UntypedValue.TryToString());
 
             
@@ -81,7 +99,7 @@ WriteLiteral("</span></h2>\r\n    <div class=\"sf-button-bar\">\r\n        <butt
 
 
             
-            #line 6 "..\..\Signum\Views\PopupOkControl.cshtml"
+            #line 7 "..\..\Signum\Views\PopupOkControl.cshtml"
                Write(Model.Compose("btnOk"));
 
             
@@ -91,7 +109,7 @@ WriteLiteral("\" class=\"sf-entity-button sf-ok-button\" ");
 
 
             
-            #line 6 "..\..\Signum\Views\PopupOkControl.cshtml"
+            #line 7 "..\..\Signum\Views\PopupOkControl.cshtml"
                                                                                Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
 
             
@@ -101,7 +119,7 @@ WriteLiteral(">\r\n                OK</button>                \r\n    </div>\r\n
 
 
             
-            #line 9 "..\..\Signum\Views\PopupOkControl.cshtml"
+            #line 10 "..\..\Signum\Views\PopupOkControl.cshtml"
 Write(Html.ValidationSummaryAjax(Model));
 
             
@@ -111,7 +129,7 @@ WriteLiteral("\r\n    ");
 
 
             
-            #line 10 "..\..\Signum\Views\PopupOkControl.cshtml"
+            #line 11 "..\..\Signum\Views\PopupOkControl.cshtml"
 Write(Html.PopupHeader());
 
             
@@ -121,17 +139,27 @@ WriteLiteral("\r\n    <div id=\"");
 
 
             
-            #line 11 "..\..\Signum\Views\PopupOkControl.cshtml"
+            #line 12 "..\..\Signum\Views\PopupOkControl.cshtml"
         Write(Model.Compose("divMainControl"));
 
             
             #line default
             #line hidden
-WriteLiteral("\" class=\"sf-main-control\">\r\n");
+WriteLiteral("\" class=\"sf-main-control");
 
 
             
             #line 12 "..\..\Signum\Views\PopupOkControl.cshtml"
+                                                                 Write(modifiable != null && modifiable.SelfModified ? " sf-changed" : "");
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\">\r\n");
+
+
+            
+            #line 13 "..\..\Signum\Views\PopupOkControl.cshtml"
            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
 
             

@@ -61,12 +61,6 @@ namespace Signum.Web
 
         public JsInstruction JsCreate(JsViewOptions viewOptions)
         {
-            if (ViewMode == ViewMode.Navigate)
-            {
-                viewOptions.Navigate = true;
-                viewOptions.ControllerUrl = Navigator.ViewRoute(Type.CleanType(), null);
-            }
-            
             return new JsInstruction(() => "{0}.create({1})".Formato(
                 this.ToJS(), 
                 viewOptions.TryCC(v => v.ToJS()) ?? ""));

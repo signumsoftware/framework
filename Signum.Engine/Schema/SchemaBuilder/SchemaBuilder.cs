@@ -147,7 +147,7 @@ namespace Signum.Engine.Maps
 
                 schema.Tables.Add(type, result);
 
-                string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumProxy.Extract(type) ?? type);
+                string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
                     throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName)); 
@@ -163,7 +163,7 @@ namespace Signum.Engine.Maps
         void Complete(Table table)
         {
             Type type = table.Type;
-            table.Identity = EnumProxy.Extract(type) == null;
+            table.Identity = EnumEntity.Extract(type) == null;
             table.Name = GenerateTableName(type);
             table.CleanTypeName = GenerateCleanTypeName(type);
             table.Fields = GenerateFields(PropertyRoute.Root(type), Contexts.Normal, table, NameSequence.Void, false);
@@ -334,7 +334,7 @@ namespace Signum.Engine.Maps
         {
             Type cleanEnum = route.Type.UnNullify();
 
-            var table = Include(EnumProxy.Generate(cleanEnum), route);
+            var table = Include(EnumEntity.Generate(cleanEnum), route);
 
             return new FieldEnum(route.Type)
             {
@@ -462,7 +462,7 @@ namespace Signum.Engine.Maps
         protected static Type CleanType(Type type)
         {
             type = Lite.Extract(type) ?? type;
-            type = EnumProxy.Extract(type) ?? type;
+            type = EnumEntity.Extract(type) ?? type;
             return type;
         }
 

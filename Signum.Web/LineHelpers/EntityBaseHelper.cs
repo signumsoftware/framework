@@ -91,13 +91,13 @@ namespace Signum.Web
 
         public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.View || (entityBase is EntityLine && entityBase.ViewMode == ViewMode.Navigate))
+            if (!entityBase.View)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", new MvcHtmlString(entityBase.GetViewing()) },
-                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-arrow-e" : "ui-icon-arrowthick-1-e" },
+                { "data-icon",  "ui-icon-circle-arrow-e" },
                 { "data-text", false}
             };
 
@@ -112,6 +112,29 @@ namespace Signum.Web
                   htmlAttr);
         }
 
+        public static MvcHtmlString NavigateButton(HtmlHelper helper, EntityBase entityBase)
+        {
+            if (!entityBase.Navigate)
+                return MvcHtmlString.Empty;
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", new MvcHtmlString(entityBase.GetViewing()) },
+                { "data-icon", "ui-icon-arrowthick-1-e" },
+                { "data-text", false}
+            };
+
+            if (entityBase.UntypedValue == null)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(entityBase.Compose("btnView"),
+                  Resources.LineButton_Navigate,
+                  "",
+                  Resources.LineButton_Navigate,
+                  "sf-line-button sf-view",
+                  htmlAttr);
+        }
+
         public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.Create)
@@ -119,13 +142,10 @@ namespace Signum.Web
 
             Type type = entityBase.Type.CleanType();
 
-            if (entityBase.ViewMode == ViewMode.Navigate && (!Navigator.IsViewable(type, EntitySettingsContext.Admin) || !type.IsIIdentifiable()))
-                return MvcHtmlString.Empty;
-
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.GetCreating() },
-                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-plus" : "ui-icon-plusthick" },
+                { "data-icon", "ui-icon-circle-plus" },
                 { "data-text", false}
             };
 
@@ -202,18 +222,20 @@ namespace Signum.Web
 
         public static void ConfigureEntityButtons(EntityBase eb, Type cleanType)
         {
-            bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
-            eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
-
-            eb.Create &= 
-                cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, eb.EntitySettingsContext) :
+           eb.Create &= 
+                cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, isSearchEntity: false) :
                 eb.Implementations.Value.IsByAll ? false :
-                eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, eb.EntitySettingsContext));
+                eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: false));
                 
             eb.View &=
-                cleanType.IsEmbeddedEntity() ? Navigator.IsViewable(cleanType, eb.EntitySettingsContext) :
+                cleanType.IsEmbeddedEntity() ? Navigator.IsViewable(cleanType) :
                 eb.Implementations.Value.IsByAll ? true :
-                eb.Implementations.Value.Types.Any(t => Navigator.IsViewable(t, eb.EntitySettingsContext));
+                eb.Implementations.Value.Types.Any(t => Navigator.IsViewable(t));
+
+            eb.Navigate &=
+              cleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(cleanType, isSearchEntity: false) :
+              eb.Implementations.Value.IsByAll ? true :
+              eb.Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: false));
 
             eb.Find &=
                 cleanType.IsEmbeddedEntity() ? false :

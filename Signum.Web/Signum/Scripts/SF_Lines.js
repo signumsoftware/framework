@@ -37,13 +37,19 @@ SF.registerModule("Lines", function () {
                     id: (info.find().length !== 0) ? info.id() : ''
                 });
                 var validator = new SF.PartialValidator(validatorOptions);
-                var result = validator.validate();
-                if (!result.isValid) {
-                    if (!confirm(lang.signum.popupErrors)) return false;
-                    validator.showErrors(result.modelState, true);
+                var validatorResult = validator.validate();
+                if (!validatorResult.isValid) {
+                    if (!confirm(lang.signum.popupErrors)) {
+                        $.extend(validatorResult, { acceptChanges: false });
+                        return validatorResult;
+                    }
+                    else {
+                        validator.showErrors(validatorResult.modelState, true);
+                    }
                 }
-                this.updateLinks(result.newToStr, result.newLink);
-                return true;
+                this.updateLinks(validatorResult.newToStr, validatorResult.newLink);
+                $.extend(validatorResult, { acceptChanges: true });
+                return validatorResult;
             },
 
             updateLinks: function (newToStr, newLink) {
@@ -208,8 +214,7 @@ SF.registerModule("Lines", function () {
                 var valOptions = $.extend(validatorOptions || {}, {
                     type: this.runtimeInfo().runtimeType()
                 });
-                var acceptChanges = this.checkValidation(valOptions);
-                return acceptChanges;
+                return this.checkValidation(valOptions).acceptChanges;
             },
 
             viewOptionsForCreating: function (_viewOptions) {
@@ -222,22 +227,45 @@ SF.registerModule("Lines", function () {
                 }, _viewOptions);
             },
 
-            newEntity: function (clonedElements, runtimeType) {
+            newEntity: function (clonedElements, item) {
                 var info = this.runtimeInfo();
-                info.setEntity(runtimeType, '');
-                info.find().after(SF.hiddenDiv(SF.compose(this.options.prefix, this.keys.entity), ""));
+                if (typeof item.runtimeInfo != "undefined") {
+                    info.find().val(item.runtimeInfo);
+                }
+                else {
+                    info.setEntity(item.type, item.id || '');
+                }
+
+                if ($(this.pf(this.keys.entity)).length == 0) {
+                    info.find().after(SF.hiddenDiv(SF.compose(this.options.prefix, this.keys.entity), ""));
+                }
                 $(this.pf(this.keys.entity)).append(clonedElements);
+
+                $(this.pf(SF.Keys.toStr)).val(''); //Clean
+                if (typeof item.toStr != "undefined" && typeof item.link != "undefined") {
+                    $(this.pf(SF.Keys.link)).html(item.toStr).attr('href', item.link);
+                }
             },
 
             onCreatingOk: function (clonedElements, validatorOptions, runtimeType) {
                 var valOptions = $.extend(validatorOptions || {}, {
                     type: runtimeType
                 });
-                var acceptChanges = this.checkValidation(valOptions);
-                if (acceptChanges) {
-                    this.newEntity(clonedElements, runtimeType);
+                var validatorResult = this.checkValidation(valOptions);
+                if (validatorResult.acceptChanges) {
+                    var runtimeInfo;
+                    var $mainControl = $(".sf-main-control[data-prefix=" + this.options.prefix + "]");
+                    if ($mainControl.length > 0) {
+                        runtimeInfo = $mainControl.data("runtimeinfo");
+                    }
+                    this.newEntity(clonedElements, {
+                        runtimeInfo: runtimeInfo,
+                        type: runtimeType,
+                        toStr: validatorResult.newToStr,
+                        link: validatorResult.newLink
+                    });
                 }
-                return acceptChanges;
+                return validatorResult.acceptChanges;
             },
 
             createFindOptions: function (_findOptions) {
@@ -245,21 +273,16 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     prefix: this.options.prefix,
                     onOk: function (selectedItems) { return self.onFindingOk(selectedItems); },
-                    onOkClosed: function () { self.fireOnEntityChanged(true); },
-                    allowMultiple: false
+                    onOkClosed: function () { self.fireOnEntityChanged(true); }
                 }, _findOptions);
             },
 
             onFindingOk: function (selectedItems) {
                 if (selectedItems == null || selectedItems.length != 1) {
-                    throw "No item or more than one item was returned from Find Window";
+                    window.alert(lang.signum.onlyOneElement);
+                    return false;
                 }
-                var info = this.runtimeInfo();
-                info.setEntity(selectedItems[0].type, selectedItems[0].id);
-                if ($(this.pf(this.keys.entity)).length == 0)
-                    info.find().after(SF.hiddenDiv(SF.compose(this.options.prefix, this.keys.entity), ""));
-                $(this.pf(SF.Keys.toStr)).val(''); //Clean
-                $(this.pf(SF.Keys.link)).html(selectedItems[0].toStr).attr('href', selectedItems[0].link);
+                this.newEntity('', selectedItems[0]);
                 return true;
             },
 
@@ -432,15 +455,16 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     prefix: this.options.prefix,
                     onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-                    onOkClosed: function () { self.fireOnEntityChanged(true); },
-                    allowMultiple: false
+                    onOkClosed: function () { self.fireOnEntityChanged(true); }
                 }, _findOptions);
             },
 
             onFindingOk: function (selectedItems, _viewOptions) {
                 if (selectedItems == null || selectedItems.length != 1) {
-                    throw "No item or more than one item was returned from Find Window";
+                    window.alert(lang.signum.onlyOneElement);
+                    return false;
                 }
+
                 this.runtimeInfo().setEntity(selectedItems[0].type, selectedItems[0].id);
 
                 //View result in the detailDiv
@@ -606,17 +630,30 @@ SF.registerModule("Lines", function () {
                 });
                 var validatorResult = this.checkValidation(valOptions, itemPrefix);
                 if (validatorResult.acceptChanges) {
-                    this.newListItem(clonedElements, itemPrefix, { type: runtimeType, toStr: validatorResult.newToStr });
+                    var runtimeInfo;
+                    var $mainControl = $(".sf-main-control[data-prefix=" + this.options.prefix + "]");
+                    if ($mainControl.length > 0) {
+                        runtimeInfo = $mainControl.data("runtimeinfo");
+                    }
+                    this.newListItem(clonedElements, itemPrefix, { runtimeInfo: runtimeInfo, type: runtimeType, toStr: validatorResult.newToStr });
                 }
                 return validatorResult.acceptChanges;
             },
 
             newListItem: function (clonedElements, itemPrefix, item) {
                 var listInfo = this.staticInfo();
-                var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o');
-                listInfo.find().after(SF.hiddenInput(SF.compose(itemPrefix, this.keys.indexes), ";" + (this.getLastNewIndex() + 1).toString()))
-                    .after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue))
+                var $listInfo = listInfo.find();
+                if (typeof item.runtimeInfo != "undefined") {
+                    $listInfo.after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), item.runtimeInfo));
+                }
+                else {
+                    var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o');
+                    $listInfo.after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue));
+                }
+
+                $listInfo.after(SF.hiddenInput(SF.compose(itemPrefix, this.keys.indexes), ";" + (this.getLastNewIndex() + 1).toString()))
                     .after(SF.hiddenDiv(SF.compose(itemPrefix, this.keys.entity), ""));
+
                 $('#' + SF.compose(itemPrefix, this.keys.entity)).append(clonedElements);
 
                 var select = $(this.pf(this.keys.list));
@@ -679,8 +716,7 @@ SF.registerModule("Lines", function () {
                 var self = this;
                 return $.extend({
                     prefix: itemPrefix,
-                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems); },
-                    allowMultiple: true
+                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems); }
                 }, _findOptions);
             },
 
@@ -904,8 +940,7 @@ SF.registerModule("Lines", function () {
                 var self = this;
                 return $.extend({
                     prefix: itemPrefix,
-                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-                    allowMultiple: true
+                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); }
                 }, _findOptions);
             },
 
@@ -1079,8 +1114,7 @@ SF.registerModule("Lines", function () {
                 var self = this;
                 return $.extend({
                     prefix: itemPrefix,
-                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-                    allowMultiple: true
+                    onOk: function (selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); }
                 }, _findOptions);
             },
 

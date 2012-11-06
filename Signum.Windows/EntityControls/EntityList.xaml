@@ -68,7 +68,8 @@
 			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{DynamicResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
 			<Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{DynamicResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
 			<Button Focusable="False" x:Name="btView" Style="{DynamicResource RoundButton}" Click="btView_Click" Content="{DynamicResource View}" ToolTip="{m:Loc View}"/>
-			<Button Focusable="False" x:Name="btRemove" Style="{DynamicResource RoundButton}" Click="btRemove_Click" Content="{DynamicResource Remove}" ToolTip="{m:Loc Remove}"/>
+            <Button Focusable="False" x:Name="btNavigate" Style="{StaticResource RoundButton}" Click="btNavigate_Click"  Content="{StaticResource Navigate}" ToolTip="{m:Loc Navigate}"/>
+            <Button Focusable="False" x:Name="btRemove" Style="{DynamicResource RoundButton}" Click="btRemove_Click" Content="{DynamicResource Remove}" ToolTip="{m:Loc Remove}"/>
 			<Button Focusable="False" x:Name="btUp" Style="{DynamicResource RoundButton}" Click="btUp_Click"  Content="{DynamicResource Up}" ToolTip="{m:Loc MoveUp}"/>
 			<Button Focusable="False" x:Name="btDown" Style="{DynamicResource RoundButton}" Click="btDown_Click"  Content="{DynamicResource Down}" ToolTip="{m:Loc MoveDown}"/>
 		</StackPanel>

@@ -50,12 +50,22 @@ WriteLiteral("\r\n<div id=\"");
             
             #line default
             #line hidden
+WriteLiteral("\" class=\"sf-popup-control\" data-prefix=\"");
+
+
+            
+            #line 3 "..\..\Signum\Views\PopupCancelControl.cshtml"
+                                                                        Write(Model.ControlID);
+
+            
+            #line default
+            #line hidden
 WriteLiteral("\" data-title=\"");
 
 
             
             #line 3 "..\..\Signum\Views\PopupCancelControl.cshtml"
-                                               Write((string)ViewData[ViewDataKeys.Title]);
+                                                                                                       Write((string)ViewData[ViewDataKeys.Title]);
 
             
             #line default

@@ -52,7 +52,7 @@ namespace Signum.Engine
             List<TypeDN> types = Database.RetrieveAll<TypeDN>();
 
             var dict = EnumerableExtensions.JoinStrict(
-                types, current.Tables.Keys, t => t.FullClassName, t => (EnumProxy.Extract(t) ?? t).FullName,
+                types, current.Tables.Keys, t => t.FullClassName, t => (EnumEntity.Extract(t) ?? t).FullName,
                 (typeDN, type) => new { typeDN, type },
                 "caching types table from {0}".Formato(current.Table(typeof(TypeDN)).Name)
                 ).ToDictionary(a => a.type, a => a.typeDN);
@@ -72,7 +72,7 @@ namespace Signum.Engine
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
         {
             return (from dn in Administrator.TryRetrieveAll<TypeDN>(replacements)
-                    join t in Schema.Current.Tables.Keys on dn.FullClassName equals (EnumProxy.Extract(t) ?? t).FullName
+                    join t in Schema.Current.Tables.Keys on dn.FullClassName equals (EnumEntity.Extract(t) ?? t).FullName
                     select new { dn, t }).ToDictionary(a => a.dn, a => a.t);
         }
 
@@ -111,7 +111,7 @@ namespace Signum.Engine
         internal static List<TypeDN> GenerateSchemaTypes()
         {
             var lista = (from tab in Schema.Current.Tables.Values
-                         let type = EnumProxy.Extract(tab.Type) ?? tab.Type
+                         let type = EnumEntity.Extract(tab.Type) ?? tab.Type
                          select new TypeDN
                          {
                              FullClassName = type.FullName,

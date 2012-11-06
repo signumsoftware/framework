@@ -55,7 +55,7 @@ namespace Signum.Web
 
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
             Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
-            Navigator.SetViewableAndCreable(findOptions);
+            Navigator.SetSearchViewableAndCreable(findOptions);
 
             var viewData = new ViewDataDictionary(context);
             viewData[ViewDataKeys.FindOptions] = findOptions;

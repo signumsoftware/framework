@@ -111,12 +111,11 @@ namespace Signum.Windows
         {
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
-            var list = this.itemsControl.Children<Button>().Where(a => a.Name == "btCreate").ToList();
 
-            var vis = this.CanRemove().ToVisibility();
-
-            foreach (var item in list)
-                item.Visibility = vis;
+            var remove = this.CanRemove().ToVisibility();
+            var buttons = this.itemsControl.Children<Button>().Where(a => a.Name == "btRemove").ToList();
+            foreach (var bt in buttons)
+                bt.Visibility = remove;
         }
 
         protected override bool CanRemove()

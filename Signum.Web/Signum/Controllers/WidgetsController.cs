@@ -21,7 +21,7 @@ namespace Signum.Web.Controllers
             ViewData[ViewDataKeys.WriteSFInfo] = true;
 
             TypeContext tc = TypeContextUtilities.UntypedNew(NoteWidgetHelper.CreateNote(entity), prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc));
+            return this.PopupOpen(new PopupNavigateOptions(tc));
         }
 
         public ContentResult NotesCount()
@@ -40,7 +40,7 @@ namespace Signum.Web.Controllers
             ViewData[ViewDataKeys.WriteSFInfo] = true;
 
             TypeContext tc = TypeContextUtilities.UntypedNew(AlertWidgetHelper.CreateAlert(entity), prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc));
+            return this.PopupOpen(new PopupNavigateOptions(tc));
         }
 
         public JsonResult AlertsCount()

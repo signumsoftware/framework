@@ -35,17 +35,12 @@
 }
 .sf-dropdown a
 {
-    white-space: nowrap;
-    text-overflow:ellipsis;
-    max-width:200px;
     text-align:right;
     font-weight:bold;
+    text-decoration: none;
+    white-space: nowrap;
+    zoom: 1;
 }
-/*.sf-dropdown .sf-menu-button
-{
-    margin-left: -1em;
-    margin-top: 0.4em;
-}*/
 .sf-dropdown .sf-menu-button > li
 {
 	margin-left:0px !important;

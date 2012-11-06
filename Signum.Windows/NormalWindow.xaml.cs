@@ -99,28 +99,49 @@ namespace Signum.Windows
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            string errors = this.GetErrors();
-
-            if (errors.HasText())
+            if (Navigator.Manager.OnSaveProtected(this.DataContext.GetType()))
             {
-                Type type = DataContext.GetType();
-
-                switch (AllowErrors)
+                if (!this.HasChanges())
+                    DialogResult = true;
+                else
                 {
-                    case AllowErrors.Yes: break;
-                    case AllowErrors.No:
-                        MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), Properties.Resources.FixErrors,
-                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    var answer = MessageBox.Show(
+                        Properties.Resources.ThereAreChangesContinue,
+                        Properties.Resources.ThereAreChanges,
+                        MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
+
+                    if (answer != MessageBoxResult.OK)
                         return;
-                    case AllowErrors.Ask:
-                        if (MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) +"\r\n" +  Properties.Resources.ContinueAnyway, Properties.Resources.ContinueWithErrors,
-                            MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.None) == MessageBoxResult.No)
-                            return;
-                        break;
+
+                    DialogResult = false;
+
                 }
             }
+            else
+            {
+                string errors = this.GetErrors();
 
-            base.DialogResult = true;
+                if (errors.HasText())
+                {
+                    Type type = DataContext.GetType();
+
+                    switch (AllowErrors)
+                    {
+                        case AllowErrors.Yes: break;
+                        case AllowErrors.No:
+                            MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), Properties.Resources.FixErrors,
+                                MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            return;
+                        case AllowErrors.Ask:
+                            if (MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway, Properties.Resources.ContinueWithErrors,
+                                MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.None) == MessageBoxResult.No)
+                                return;
+                            break;
+                    }
+                }
+
+                base.DialogResult = true;
+            }
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -156,7 +177,7 @@ namespace Signum.Windows
 
             MoveFocus();
 
-            if (buttonBar.ViewButtons== ViewButtons.Save && this.HasChanges())
+            if (this.HasChanges())
             {
                 if (buttonBar.SaveVisible)
                 {

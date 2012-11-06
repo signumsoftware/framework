@@ -76,7 +76,7 @@ namespace Signum.Windows.Widgets
 
         private void ViewAlert(IAlertDN alert)
         {
-            Navigator.Navigate(alert, new NavigateOptions
+            Navigator.Navigate(alert, new NavigateOptions()
             {
                 Closed = (o, e) => ReloadAlerts(),
             });

@@ -288,9 +288,6 @@
   <data name="AConnectionWithTheServerIsNecessaryToContinue" xml:space="preserve">
     <value>A connection with the server is necessary to continue</value>
   </data>
-  <data name="EntitiesOfType0AreNotVisibleFromA1Window" xml:space="preserve">
-    <value>Entities of type {0} are not visible from a {1} window</value>
-  </data>
   <data name="Call0First" xml:space="preserve">
     <value>Call {0} first</value>
   </data>
@@ -358,5 +355,11 @@ Lose changes?</value>
   </data>
   <data name="Loading0" xml:space="preserve">
     <value>Loading {0}...</value>
+  </data>
+  <data name="Navigate" xml:space="preserve">
+    <value>Navigate</value>
+  </data>
+  <data name="NoActionsFound" xml:space="preserve">
+    <value>No actions found</value>
   </data>
 </root>

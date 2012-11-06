@@ -192,11 +192,8 @@ namespace Signum.Windows
             return (T)Manager.View(entity, options);
         }
 
-        public static EntitySettings GetEntitySettings(Type type)
-        {
-            return Manager.GetEntitySettings(type);
-        }
 
+ 
         public static QuerySettings GetQuerySettings(object queryName)
         {
             return Manager.GetQuerySettings(queryName);
@@ -204,25 +201,7 @@ namespace Signum.Windows
 
         public static DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
         {
-            if (entityType.IsLite())
-            {
-                DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
-                if (template != null)
-                    return template;
-            }
-
-            if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
-            {
-                DataTemplate template = GetEntitySettings(entityType).TryCC(ess => ess.DataTemplate);
-                if (template != null)
-                    return template;
-
-                template = (DataTemplate)element.FindResource(typeof(ModifiableEntity));
-                if (template != null)
-                    return template;
-            }
-
-            return null;
+            return Manager.FindDataTemplate(element, entityType);
         }
 
         public static Type SelectType(Window parent, IEnumerable<Type> implementations)
@@ -232,32 +211,42 @@ namespace Signum.Windows
 
         public static bool IsFindable(object queryName)
         {
-            return Manager.IsFindable(queryName);
+            return Manager.OnIsFindable(queryName);
         }
 
-        public static bool IsCreable(Type type, bool admin)
+        public static bool IsCreable(Type type, bool isSearchEntity = false)
         {
-            return Manager.IsCreable(type, admin);
+            return Manager.OnIsCreable(type, isSearchEntity);
         }
 
-        public static bool IsReadOnly(Type type, bool admin)
+        public static bool IsReadOnly(Type type)
         {
-            return Manager.IsReadOnly(type, admin);
+            return Manager.OnIsReadOnly(type, null);
         }
 
-        public static bool IsReadOnly(ModifiableEntity entity, bool admin)
+        public static bool IsReadOnly(ModifiableEntity entity)
         {
-            return Manager.IsReadOnly(entity, admin);
+            return Manager.OnIsReadOnly(entity.GetType(), entity);
         }
 
-        public static bool IsViewable(Type type, bool admin)
+        public static bool IsViewable(Type type)
         {
-            return Manager.IsViewable(type, admin);
+            return Manager.OnIsViewable(type, null);
         }
 
-        public static bool IsViewable(ModifiableEntity entity, bool admin)
+        public static bool IsViewable(ModifiableEntity entity)
         {
-            return Manager.IsViewable(entity, admin);
+            return Manager.OnIsViewable(entity.GetType(), entity);
+        }
+
+        public static bool IsNavigable(Type type, bool isSearchEntity = false)
+        {
+            return Manager.OnIsNavigable(type, null, isSearchEntity);
+        }
+
+        public static bool IsNavigable(IIdentifiable entity, bool isSearchEntity = false)
+        {
+            return Manager.OnIsNavigable(entity.GetType(), entity, isSearchEntity);
         }
 
         public static void AddSettings(List<EntitySettings> settings)
@@ -288,30 +277,24 @@ namespace Signum.Windows
         public static EntitySettings<T> EntitySettings<T>()
             where T : IdentifiableEntity
         {
-            return (EntitySettings<T>)Manager.EntitySettings[typeof(T)];
+            return (EntitySettings<T>)EntitySettings(typeof(T));
         }
 
         public static EmbeddedEntitySettings<T> EmbeddedEntitySettings<T>()
             where T : EmbeddedEntity
         {
-            return (EmbeddedEntitySettings<T>)Manager.EntitySettings[typeof(T)];
+            return (EmbeddedEntitySettings<T>)EntitySettings(typeof(T));
         }
+
+        public static EntitySettings EntitySettings(Type type)
+        {
+            return Manager.EntitySettings.GetOrThrow(type, "No EntitySettings for type {0} found");
+        } 
+
 
         public static Implementations FindImplementations(PropertyRoute pr)
         {
-            if (typeof(ModelEntity).IsAssignableFrom(pr.RootType))
-            {
-                EntitySettings es = Navigator.GetEntitySettings(pr.RootType);
-
-                if (es != null) //Not mandatory, on windows it's usual not to register model entities. 
-                    return es.FindImplementations(pr);
-
-                return ModelEntity.GetImplementations(pr); 
-            }
-            else
-            {
-                return Server.FindImplementations(pr);
-            }
+            return Manager.FindImplementations(pr);
         }
     }
 
@@ -622,8 +605,7 @@ namespace Signum.Windows
             NormalWindow win = CreateNormalWindow();
             win.SetTitleText(Resources.Loading0.Formato(type.NiceName()));
             win.Show();
-
-
+            
             try
             {
                 ModifiableEntity entity = entityOrLite as ModifiableEntity;
@@ -633,8 +615,9 @@ namespace Signum.Windows
                     entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
                 }
 
-                AssertViewable(entity, true);
-                EntitySettings es = EntitySettings[entity.GetType()];
+                EntitySettings es = AssertViewableEntitySettings(entity);
+                if (!es.OnIsNavigable(true))
+                    throw new Exception("{0} is not navigable".Formato(entity));
 
                 if (entity is EmbeddedEntity)
                     throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
@@ -666,9 +649,10 @@ namespace Signum.Windows
                 entity = Server.Retrieve((Lite)entityOrLite);
             }
 
-            AssertViewable(entity, false);
-            EntitySettings es = EntitySettings[entity.GetType()];
-
+            EntitySettings es = AssertViewableEntitySettings(entity);
+            if (!es.OnIsViewable())
+                throw new Exception("{0} is not viewable".Formato(entity));
+            
             Control ctrl = options.View ?? es.CreateView(entity, options.TypeContext);
 
             NormalWindow win = CreateNormalWindow();
@@ -700,13 +684,13 @@ namespace Signum.Windows
         {
             Type entityType = entity.GetType();
 
-            ViewButtons buttons = options.GetViewButtons();
+            ViewButtons buttons = options.ViewButtons;
 
-            bool isReadOnly = options.ReadOnly ?? es.OnIsReadOnly(entity, options.Admin);
+            bool isReadOnly = options.ReadOnly ?? OnIsReadOnly(entity.GetType(), entity);
 
             win.MainControl = ctrl;
             win.ButtonBar.ViewButtons = buttons;
-            win.ButtonBar.SaveVisible = buttons == ViewButtons.Save && es.OnShowSave() && !isReadOnly;
+            win.ButtonBar.SaveVisible = buttons == ViewButtons.Save  && !isReadOnly && !OnSaveProtected(entity.GetType());
             win.ButtonBar.OkVisible = buttons == ViewButtons.Ok;
             win.DataContext = options.Clone ? ((ICloneable)entity).Clone() : entity;
 
@@ -719,77 +703,131 @@ namespace Signum.Windows
             return win;
         }
 
-        internal protected virtual bool IsCreable(Type type, bool isAdmin)
+        public event Func<Type, bool> IsCreable;
+
+        internal protected virtual bool OnIsCreable(Type type, bool isSearchEntity)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es == null)
                 return true;
 
-            return es.OnIsCreable(isAdmin);
-        }
-
-        internal protected virtual bool IsReadOnly(Type type, bool isAdmin)
-        {
-            EntitySettings es = EntitySettings.TryGetC(type);
-            if (es == null)
+            if (!es.OnIsCreable(isSearchEntity))
                 return false;
 
-            return es.OnIsReadOnly(null, isAdmin);
-        }
 
-        internal protected virtual bool IsReadOnly(ModifiableEntity entity, bool isAdmin)
-        {
-            EntitySettings es = EntitySettings.TryGetC(entity.GetType());
-            if (es == null)
-                return false;
-
-            return es.OnIsReadOnly(entity, isAdmin);
-        }
-
-        internal protected virtual bool IsViewable(Type type, bool isAdmin)
-        {
-            EntitySettings es = EntitySettings.TryGetC(type);
-            if (es == null)
-                return false;
-
-            return es.OnIsViewable(null, isAdmin);
-        }
-
-        internal protected virtual bool IsViewable(ModifiableEntity entity, bool isAdmin)
-        {
-            EntitySettings es = EntitySettings.TryGetC(entity.GetType());
-            if (es == null)
-                return false;
-
-            return es.OnIsViewable(entity, isAdmin);
-        }
-
-        internal protected virtual void AssertViewable(ModifiableEntity entity, bool isAdmin)
-        {
-            EntitySettings es = EntitySettings.TryGetC(entity.GetType());
-            if (es == null)
-                throw new InvalidOperationException("No EntitySettings for type {0}".Formato(entity.GetType().NiceName()));
-
-            if (!es.OnIsViewable(entity, isAdmin))
-                throw new InvalidOperationException(Resources.EntitiesOfType0AreNotVisibleFromA1Window.Formato(entity.GetType().NiceName(), isAdmin ? "admin" : "normal"));
-        }
-
-        internal protected virtual bool ShowSave(Type type)
-        {
-            EntitySettings es = EntitySettings.TryGetC(type);
-            if (es != null)
-                return es.OnShowSave();
+            if (IsCreable != null)
+                foreach (Func<Type, bool> isCreable in IsCreable.GetInvocationList())
+                {
+                    if (!isCreable(type))
+                        return false;
+                }
 
             return true;
         }
 
-        internal protected virtual bool IsFindable(object queryName)
+        public event Func<Type, ModifiableEntity, bool> IsReadOnly;
+
+        internal protected virtual bool OnIsReadOnly(Type type, ModifiableEntity entity)
+        {
+            EntitySettings es = EntitySettings.TryGetC(type);
+            if (es != null)
+            {
+                if (es.OnIsReadonly())
+                    return true;
+            }
+
+            if (IsReadOnly != null)
+                foreach (Func<Type, ModifiableEntity, bool> isReadOnly in IsReadOnly.GetInvocationList())
+                {
+                    if (isReadOnly(type, entity))
+                        return true;
+                }
+
+            return false;
+        }
+      
+        public event Func<Type, ModifiableEntity, bool> IsViewable;
+
+        protected virtual bool IsViewableBase(Type type, ModifiableEntity entity)
+        {
+            if (IsViewable != null)
+                foreach (Func<Type, ModifiableEntity, bool> isViewable in IsViewable.GetInvocationList())
+                {
+                    if (!isViewable(type, entity))
+                        return false;
+                }
+
+            return true;
+        }
+
+        internal protected virtual EntitySettings AssertViewableEntitySettings(ModifiableEntity entity)
+        {
+            EntitySettings es = EntitySettings.TryGetC(entity.GetType());
+            if (es == null)
+                throw new InvalidOperationException("No EntitySettings for type {0}".Formato(entity.GetType().Name));
+
+            if (!es.HasView())
+                throw new InvalidOperationException("No view has been set in the EntitySettings for {0}".Formato(entity.GetType().Name));
+
+            if (!IsViewableBase(entity.GetType(), entity))
+                throw new InvalidOperationException("Entities of type {0} are not viewable".Formato(entity.GetType().Name));
+
+            return es;
+        }
+
+        internal protected virtual bool OnIsNavigable(Type type, IIdentifiable entity, bool isSearchEntity)
+        {
+            EntitySettings es = EntitySettings.TryGetC(type);
+
+            return
+                es != null &&
+                es.HasView() &&
+                IsViewableBase(type, (ModifiableEntity)entity) &&
+                es.OnIsNavigable(isSearchEntity);
+        }
+
+        internal protected virtual bool OnIsViewable(Type type, ModifiableEntity entity)
+        {
+            EntitySettings es = EntitySettings.TryGetC(type);
+
+            return
+                es != null &&
+                es.HasView() &&
+                IsViewableBase(type, entity) &&
+                es.OnIsViewable();
+        }
+
+
+        public event Func<Type, bool> SaveProtected;
+
+        public bool OnSaveProtected(Type type)
+        {
+            if (SaveProtected != null)
+                foreach (Func<Type, bool> sp in SaveProtected.GetInvocationList())
+                {
+                    if (sp(type))
+                        return true;
+                }
+
+            return false;
+        }
+
+        public event Func<object, bool> IsFindable;
+
+        internal protected virtual bool OnIsFindable(object queryName)
         {
             QuerySettings es = QuerySettings.TryGetC(queryName);
-            if (es == null)
+            if (es == null || !es.IsFindable)
                 return false;
 
-            return es.OnIsFindable(); 
+            if (IsFindable != null)
+                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
+                {
+                    if (!isFindable(queryName))
+                        return false;
+                }
+
+            return true;
         }
 
         internal protected virtual void AssertFindable(object queryName)
@@ -798,7 +836,7 @@ namespace Signum.Windows
             if (es == null)
                 throw new InvalidOperationException(Properties.Resources.Query0NotRegistered.Formato(queryName));
 
-            if (!es.OnIsFindable())
+            if (!OnIsFindable(queryName))
                 throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
         }
 
@@ -846,6 +884,44 @@ namespace Signum.Windows
                 throw new InvalidOperationException(Resources.Call0First.Formato(name));
         }
 
- 
+        public virtual DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
+        {
+            if (entityType.IsLite())
+            {
+                DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
+                if (template != null)
+                    return template;
+            }
+
+            if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
+            {
+                DataTemplate template = EntitySettings.TryGetC(entityType).TryCC(ess => ess.DataTemplate);
+                if (template != null)
+                    return template;
+
+                template = (DataTemplate)element.FindResource(typeof(ModifiableEntity));
+                if (template != null)
+                    return template;
+            }
+
+            return null;
+        }
+
+        protected internal virtual Implementations FindImplementations(PropertyRoute pr)
+        {
+            if (typeof(ModelEntity).IsAssignableFrom(pr.RootType))
+            {
+                EntitySettings es = EntitySettings.TryGetC(pr.RootType);
+
+                if (es != null) //Not mandatory, on windows it's usual not to register model entities. 
+                    return es.FindImplementations(pr);
+
+                return ModelEntity.GetImplementations(pr);
+            }
+            else
+            {
+                return Server.FindImplementations(pr);
+            }
+        }
     }
 }

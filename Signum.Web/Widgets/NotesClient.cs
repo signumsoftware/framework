@@ -17,7 +17,11 @@ namespace Signum.Web.Widgets
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<NoteDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("Note"), IsCreable = _ => false });
+                Navigator.AddSetting(new EntitySettings<NoteDN>(EntityType.Main) 
+                {
+                    PartialViewName = _ => ViewPrefix.Formato("Note"), 
+                    IsCreable = EntityWhen.Never
+                });
             }
 
             WidgetsHelper.GetWidgetsForView += 

@@ -333,4 +333,17 @@
   <data name="Signum_entityRepeater_moveUp" xml:space="preserve">
     <value>Move up</value>
   </data>
+  <data name="LineButton_Navigate" xml:space="preserve">
+    <value>Navigate</value>
+  </data>
+  <data name="Signum_loseChanges" xml:space="preserve">
+    <value>There are changes that haven't been saved. 
+Lose changes?</value>
+  </data>
+  <data name="Signum_onlyOneElement" xml:space="preserve">
+    <value>You can select only one element</value>
+  </data>
+  <data name="Signum_searchControlMenuSelected" xml:space="preserve">
+    <value>selected</value>
+  </data>
 </root>

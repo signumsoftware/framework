@@ -135,7 +135,7 @@ namespace Signum.Windows
 
                 if (type.UnNullify().IsEnum)
                 {
-                    vl.ItemSource = EnumProxy.GetValues(type.UnNullify()).PreAndNull(type.IsNullable()).ToObservableCollection();
+                    vl.ItemSource = EnumEntity.GetValues(type.UnNullify()).PreAndNull(type.IsNullable()).ToObservableCollection();
                 }
 
                 vl.SetBinding(ValueLine.ValueProperty, new Binding

@@ -12,10 +12,6 @@
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations.Value;
-    if (findOptions.AllowMultiple == null && findOptions.FilterMode != FilterMode.OnlyResults)
-    {
-        findOptions.AllowMultiple = Navigator.QuerySettings(findOptions.QueryName).AllowMultiple;
-    }
     findOptions.ElementsPerPage = findOptions.ElementsPerPage ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage) ?? FindOptions.DefaultElementsPerPage;
     
     ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -132,18 +128,15 @@
         <table id="@Model.Compose("tblResults")" class="sf-search-results">
             <thead class="ui-widget-header ui-corner-top">
                 <tr>
-                    @if (findOptions.AllowMultiple.HasValue)
+                    @if (findOptions.AllowMultiple)
                     {
-                        <th class="ui-state-default th-col-selection">
-                            @if (findOptions.AllowMultiple.Value)
-                            {
-                                @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "{0}.toggleSelectAll()".Formato(jsFindNavigator.ToJS()) })
-                            }
+                        <th class="ui-state-default sf-th-selection">
+                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "{0}.toggleSelectAll()".Formato(jsFindNavigator.ToJS()) })
                         </th>
                     }
-                    @if (findOptions.View)
+                    @if (findOptions.Navigate)
                     {
-                        <th class="ui-state-default th-col-entity">
+                        <th class="ui-state-default sf-th-entity">
                         </th>
                     }
                     @{List<Column> columns = findOptions.MergeColumns(); }
@@ -165,7 +158,7 @@
                 </tr>
             </thead>
             <tbody class="ui-widget-content">
-                @{ int columnsCount = columns.Count + (findOptions.View ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0); }
+                @{ int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowMultiple ? 1 : 0); }
                 <tr>
                     <td colspan="@columnsCount">@Resources.Signum_noResults</td>
                 </tr>
