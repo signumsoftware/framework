@@ -127,7 +127,7 @@
     <None Include="otCharts.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="otoperations_ctxmenu.orderedtest">
+    <None Include="otoperationsCtx.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="otWidgets.orderedtest">

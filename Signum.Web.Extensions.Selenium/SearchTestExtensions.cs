@@ -401,7 +401,12 @@ namespace Signum.Web.Selenium
 
         public static void EntityClick(this ISelenium selenium, string liteKey, string prefix)
         {
-            selenium.Click("{0} > td:first > a".Formato(EntityRowSelector(liteKey, prefix)));
+            EntityClick(selenium, liteKey, prefix, true);
+        }
+
+        public static void EntityClick(this ISelenium selenium, string liteKey, string prefix, bool allowMultiple)
+        {
+            selenium.Click("{0} > td:nth-child({1}) > a".Formato(EntityRowSelector(liteKey, prefix), allowMultiple ? 2 : 1));
         }
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1)
