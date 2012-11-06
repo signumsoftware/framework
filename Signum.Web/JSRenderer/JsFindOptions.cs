@@ -67,14 +67,19 @@ namespace Signum.Web
             return new JsInstruction(() => "{0}.selectedItems()".Formato(this.ToJS()));
         }
 
+        public JsInstruction hasSelectedItem(JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "{0}.hasSelectedItem({1})".Formato(this.ToJS(), onSuccess.ToJS()));
+        }
+
         public JsInstruction hasSelectedItems(JsFunction onSuccess)
         {
             return new JsInstruction(() => "{0}.hasSelectedItems({1})".Formato(this.ToJS(), onSuccess.ToJS()));
         }
 
-        public JsInstruction splitSelectedIds()
+        public JsInstruction splitSelectedKeys()
         {
-            return new JsInstruction(() => "{0}.splitSelectedIds()".Formato(this.ToJS()));
+            return new JsInstruction(() => "{0}.splitSelectedKeys()".Formato(this.ToJS()));
         }
 
         public JsInstruction requestData()

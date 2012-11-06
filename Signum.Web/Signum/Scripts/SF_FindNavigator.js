@@ -438,6 +438,19 @@ SF.registerModule("FindNavigator", function () {
                 onSuccess(items);
             },
 
+            hasSelectedItem: function (onSuccess) {
+                var items = this.selectedItems();
+                if (items.length == 0) {
+                    SF.Notify.info(lang.signum.noElementsSelected);
+                    return;
+                }
+                else if (items.length > 1) {
+                    SF.Notify.info(lang.signum.onlyOneElement);
+                    return;
+                }
+                onSuccess(items[0]);
+            },
+
             selectedItems: function () {
                 var items = [];
                 var selected = $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
@@ -450,6 +463,7 @@ SF.registerModule("FindNavigator", function () {
                     var item = {
                         id: parts[0],
                         type: parts[1],
+                        key: parts[1] + ";" + parts[0],
                         toStr: parts[2],
                         link: $(this).parent().next().children('a').attr('href')
                     };
@@ -459,19 +473,14 @@ SF.registerModule("FindNavigator", function () {
                 return items;
             },
 
-            splitSelectedIds: function () {
-                SF.log("FindNavigator splitSelectedIds");
+            splitSelectedKeys: function () {
                 var selected = this.selectedItems();
-                var result = [];
-                for (var i = 0, l = selected.length; i < l; i++) {
-                    result.push(selected[i].id + ",");
+                if (selected.length < 1) {
+                    return '';
                 }
-
-                if (result.length) {
-                    var result2 = result.join('');
-                    return result2.substring(0, result2.length - 1);
+                else {
+                    return selected.map(function (item) { return item.key; }).join(',');
                 }
-                return '';
             },
 
             newSortOrder: function ($th, multiCol) {
