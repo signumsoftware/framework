@@ -62,11 +62,10 @@ namespace Signum.Web.SMS
         public PartialViewResult CreateSMSMessageFromTemplate(string prefix)
         {
             var jsFindNavigator = JsFindNavigator.GetFor(prefix);
-            ViewData[ViewDataKeys.OnOk] = jsFindNavigator.hasSelectedItems(new JsFunction() 
-                {
-                       Js.Submit(RouteHelper.New().Action("CreateMessageFromTemplate", "SMS"),
-                        "function() {{ return {{ smsTemplateID: {0} }} }}".Formato(jsFindNavigator.splitSelectedIds().ToJS()))
-                }).ToJS();
+            ViewData[ViewDataKeys.OnOk] = jsFindNavigator.hasSelectedItem(new JsFunction("item") 
+            {
+                Js.Submit(Url.Action<SMSController>(sc => sc.CreateMessageFromTemplate()), "{ template: item.key }")
+            }).ToJS();
 
             var ie = this.ExtractEntity<IdentifiableEntity>(null);
 
@@ -78,17 +77,17 @@ namespace Signum.Web.SMS
                 { 
                     { new FilterOption("IsActive", true) { Frozen = true } },
                     { new FilterOption("AssociatedType", TypeLogic.ToTypeDN(ie.GetType()).ToLite()) }
-                },
-                AllowMultiple = false
+                }
             }, prefix);
         }
 
         [HttpPost]
-        public ActionResult CreateMessageFromTemplate(string smsTemplateID)
+        public ActionResult CreateMessageFromTemplate()
         {
             var ie = this.ExtractLite<IdentifiableEntity>(null);
-            var template = Database.Retrieve<SMSTemplateDN>(int.Parse(smsTemplateID));
-            var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate, template);
+            var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
+
+            var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate, template.Retrieve());
             return Navigator.NormalPage(this, message);
         }
 
@@ -101,12 +100,12 @@ namespace Signum.Web.SMS
 
             prefix = Js.NewPrefix(prefix);
             var jsFindNavigator = JsFindNavigator.GetFor(prefix);
-            ViewData[ViewDataKeys.OnOk] = jsFindNavigator.hasSelectedItems(new JsFunction() 
-                {
-                       Js.Submit(RouteHelper.New().Action("SendMultipleMessagesFromTemplate", "SMS"),
-                        "function() {{ return {{ smsTemplateID: {0}, idProviders: '{1}', webTypeName: '{2}' }} }}"
-                        .Formato(jsFindNavigator.splitSelectedIds().ToJS(), ids.ToString(","), webTypeName))
-                }).ToJS();
+            ViewData[ViewDataKeys.OnOk] = jsFindNavigator.hasSelectedItem(new JsFunction("item") 
+            {
+                Js.Submit(Url.Action("SendMultipleMessagesFromTemplate", "SMS"),
+                    "function() {{ return {{ smsTemplate: item.key, idProviders: '{0}', webTypeName: '{1}' }} }}"
+                        .Formato(ids.ToString(","), webTypeName))
+            }).ToJS();
 
             ViewData[ViewDataKeys.Title] = "Select the template";
 
@@ -116,13 +115,12 @@ namespace Signum.Web.SMS
                 { 
                     { new FilterOption("IsActive", true) { Frozen = true } },
                     { new FilterOption("AssociatedType", TypeLogic.ToTypeDN(entitiesType).ToLite()) }
-                },
-                AllowMultiple = false
+                }
             }, prefix);
         }
 
         [HttpPost]
-        public ActionResult SendMultipleMessagesFromTemplate(string idProviders, string smsTemplateID, string webTypeName)
+        public ActionResult SendMultipleMessagesFromTemplate(string idProviders, Lite<SMSTemplateDN> smsTemplate, string webTypeName)
         {
             Type entitiesType = Navigator.ResolveType(webTypeName);
 
@@ -130,7 +128,7 @@ namespace Signum.Web.SMS
                 Database.RetrieveListLite(entitiesType, idProviders.Split(',').Select(id => int.Parse(id)).ToList()),
                 entitiesType,
                 SMSProviderOperations.SendSMSMessagesFromTemplate,
-                Database.Retrieve<SMSTemplateDN>(int.Parse(smsTemplateID)));
+                smsTemplate.Retrieve());
 
             return Redirect(Navigator.NavigateRoute(process));
         }
