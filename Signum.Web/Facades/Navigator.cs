@@ -315,17 +315,9 @@ namespace Signum.Web
             return (Lite<T>)Manager.ExtractLite<T>(controller, prefix);
         }
 
-        public static List<Lite<T>> ExtractLitesList<T>(string commaSeparatedIds, bool retrieve) where T : IdentifiableEntity
+        public static List<Lite<T>> ParseLiteKeys<T>(string commaSeparatedLites) where T : class, IIdentifiable
         {
-            if (!commaSeparatedIds.HasText())
-                return new List<Lite<T>>();
-
-            var ids = commaSeparatedIds.Split(new[]{','},StringSplitOptions.RemoveEmptyEntries );
-            if (retrieve)
-                return Database.RetrieveListLite<T>(ids.Select(i => int.Parse(i)).ToList());
-
-            else
-                return ids.Select(i => new Lite<T>(int.Parse(i))).ToList();
+            return commaSeparatedLites.Split(',').Select(Lite.Parse<T>).ToList();
         }
 
         public static string ResolveWebTypeName(Type type)
@@ -417,16 +409,6 @@ namespace Signum.Web
         public static void Initialize()
         {
             Manager.Initialize();
-        }
-
-        public static List<Lite<T>> ParseLiteKeys<T>(string commaSeparatedLites) where T : class, IIdentifiable
-        {
-            return commaSeparatedLites.Split(',').Select(Lite.Parse<T>).ToList();
-        }
-
-        public static List<Lite<T>> ParseLiteIds<T>(string commaSeparatedLites) where T : IdentifiableEntity
-        {
-            return commaSeparatedLites.Split(',').Select(str => new Lite<T>(int.Parse(str))).ToList();
         }
     }
     
