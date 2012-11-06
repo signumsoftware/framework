@@ -502,7 +502,7 @@ namespace Signum.Engine.Cache
         private static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
             List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
-                .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumProxy<>)))
+                .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumEntity<>)))
                 .Select(t => t.Key.Type).ToList();
 
             invalidations.Add(type); 
@@ -605,7 +605,7 @@ namespace Signum.Engine.Cache
 
         static Color GetColor(Type type, Func<Type, bool> cacheHint)
         {
-            if (type.IsEnumProxy())
+            if (type.IsEnumEntity())
                 return Color.Red;
 
             var ct = CacheLogic.GetCacheType(type);
@@ -615,7 +615,7 @@ namespace Signum.Engine.Cache
             if (ct == CacheType.Semi)
                 return Color.Pink;
 
-            if (typeof(EnumDN).IsAssignableFrom(type))
+            if (typeof(MultiEnumDN).IsAssignableFrom(type))
                 return Color.Orange;
 
             if (cacheHint != null && cacheHint(type))

@@ -73,55 +73,13 @@ Write(Html.ValueLine(e, f => f.Name));
             #line hidden
             
             #line 6 "..\..\Processes\Views\Package.cshtml"
-Write(Html.EntityLine(e, f => f.Operation, f => f.ReadOnly = true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 6 "..\..\Processes\Views\Package.cshtml"
-                                                                 
-    
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Processes\Views\Package.cshtml"
-Write(Html.ValueLine(e, f => f.NumLines, f => f.ReadOnly = true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Processes\Views\Package.cshtml"
-                                                               
-    
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Processes\Views\Package.cshtml"
-Write(Html.ValueLine(e, f => f.NumErrors, f => f.ReadOnly = true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Processes\Views\Package.cshtml"
-                                                                
-    
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Processes\Views\Package.cshtml"
 Write(Html.ValueLine(e, f => f.IdOrNull, f => f.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Processes\Views\Package.cshtml"
+            #line 6 "..\..\Processes\Views\Package.cshtml"
                                                                
 
             
@@ -131,12 +89,8 @@ WriteLiteral("    <fieldset>\r\n        <legend>Lines</legend>\r\n        ");
 
 
             
-            #line 12 "..\..\Processes\Views\Package.cshtml"
-   Write(Html.SearchControl(new FindOptions(typeof(PackageLineDN), "Package", e.Value)
-          {
-              Create = false,
-              View = false
-          }, e));
+            #line 9 "..\..\Processes\Views\Package.cshtml"
+   Write(Html.SearchControl(new FindOptions(typeof(PackageLineDN), "Package", e.Value), e));
 
             
             #line default
@@ -145,7 +99,7 @@ WriteLiteral("\r\n    </fieldset>\r\n");
 
 
             
-            #line 18 "..\..\Processes\Views\Package.cshtml"
+            #line 11 "..\..\Processes\Views\Package.cshtml"
 }
             
             #line default

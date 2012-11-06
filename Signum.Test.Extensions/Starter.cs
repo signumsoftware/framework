@@ -22,6 +22,8 @@ using Signum.Entities.Basics;
 using Signum.Engine.Chart;
 using Signum.Engine.Cache;
 using Signum.Engine.Files;
+using Signum.Engine.Processes;
+using Signum.Entities.Processes;
 
 namespace Signum.Test.Extensions
 {
@@ -69,10 +71,15 @@ namespace Signum.Test.Extensions
                 sb.Settings.OverrideAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
                 sb.Settings.OverrideAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
 
+                sb.Schema.Settings.OverrideAttributes((ProcessExecutionDN cp) => cp.ProcessData, new ImplementedByAttribute(typeof(PackageDN), typeof(PackageOperationDN)));
+                sb.Schema.Settings.OverrideAttributes((PackageLineDN cp) => cp.Package, new ImplementedByAttribute(typeof(PackageDN), typeof(PackageOperationDN)));
+
                 AuthLogic.Start(sb, dqm, "System", "Anonymous");
                 UserTicketLogic.Start(sb, dqm);
                 OperationLogic.Start(sb, dqm);
-
+                
+                ProcessLogic.Start(sb, dqm, 1);
+                PackageLogic.Start(sb, dqm, true, true);
                 CacheLogic.Start(sb);
 
                 AuthLogic.StartAllModules(sb, dqm, typeof(IServerSample));

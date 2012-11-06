@@ -89,7 +89,7 @@ namespace Signum.Web.SMS
             var ie = this.ExtractLite<IdentifiableEntity>(null);
             var template = Database.Retrieve<SMSTemplateDN>(int.Parse(smsTemplateID));
             var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate, template);
-            return Navigator.View(this, message);
+            return Navigator.NormalPage(this, message);
         }
 
         [HttpPost]
@@ -132,7 +132,7 @@ namespace Signum.Web.SMS
                 SMSProviderOperations.SendSMSMessagesFromTemplate,
                 Database.Retrieve<SMSTemplateDN>(int.Parse(smsTemplateID)));
 
-            return Redirect(Navigator.ViewRoute(process));
+            return Redirect(Navigator.NavigateRoute(process));
         }
 
         [HttpPost]
@@ -170,7 +170,7 @@ namespace Signum.Web.SMS
                 SMSProviderOperations.SendSMSMessage,
                 cp);
 
-            return JsonAction.Redirect(Navigator.ViewRoute(process));
+            return JsonAction.Redirect(Navigator.NavigateRoute(process));
         }
     }
 }

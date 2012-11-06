@@ -16,46 +16,48 @@
     @Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    @Html.ValueLine(e, f => f.Progress, f => f.ReadOnly = true)
     
-    if (e.Value.State == ProcessState.Executing)
+    if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
     {
     @:Progress:
     <br />
     <br />
     <div class="progressContainer">
-        <div class="progressBar" id="progressBar" style="height: 100%; width: @Math.Round((double)e.Value.Progress, 0)%;">
+        <div class="progressBar" id="progressBar" style="height: 100%; width: @Math.Round((double?)e.Value.Progress ?? 0, 0)%;">
         </div>
     </div>
 
     <script type="text/javascript">
     $(function() {
         var idProcess = '@e.Value.Id';
-        var idPrefix = '@e.ControlID';
+        var prefix = '@e.ControlID';
 
-        refreshUpdate(idProcess,idPrefix);
+        refreshUpdate(idProcess, prefix);
     })
 
-    function refreshUpdate(idProcess, idPrefix) {
+    function refreshUpdate(idProcess, prefix) {
         setTimeout(function() {
-
-            $.post("@Url.Action("GetProgressExecution", "Process")", { id: idProcess },
-            function(data) {
+            $.post("@Url.Action("GetProgressExecution", "Process")", { id: idProcess }, function(data) {
                 $("#progressBar").width(data + '%');
                 if (data < 100) {
-                    refreshUpdate(idProcess, idPrefix);
+                    refreshUpdate(idProcess, prefix);
                 }
                 else {
-                    if (SF.isEmpty(idPrefix)) {
+                    if (SF.isEmpty(prefix)) {
                         /*SF.reloadEntity("@Url.Action("FinishProcessNormalPage", "Process")", idPrefix);*/
                     }
                     else {
-                        $("#" + idPrefix.compose("externalPopupDiv")).remove();
+                        var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
+                        var tempDivId = oldViewNav.tempDivId();
+                    
+                        SF.closePopup(prefix);
+
                         new SF.ViewNavigator({
-                            type: "ProcessExecutionDN",
+                            type: "ProcessExecution",
                             id: idProcess,
-                            prefix: idPrefix
-                        }).createOk();
+                            prefix: prefix,
+                            containerDiv: tempDivId
+                        }).viewSave();
                     }
                 }
             });

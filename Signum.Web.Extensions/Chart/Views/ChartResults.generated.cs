@@ -105,8 +105,8 @@ namespace Signum.Web.Extensions.Chart.Views
             #line 11 "..\..\Chart\Views\ChartResults.cshtml"
    
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-    bool viewable = (bool)ViewData[ViewDataKeys.View];
-    var formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
+    bool navigate = (bool)ViewData[ViewDataKeys.Navigate];
+    var formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
 
 
             
@@ -195,14 +195,14 @@ WriteLiteral("\" class=\"sf-search-results\">\r\n                <thead class=\"
 
             
             #line 35 "..\..\Chart\Views\ChartResults.cshtml"
-                         if (!Model.Value.GroupResults && viewable)
+                         if (!Model.Value.GroupResults && navigate)
                         {
 
             
             #line default
             #line hidden
-WriteLiteral("                            <th class=\"ui-state-default th-col-entity\">\r\n        " +
-"                    </th>\r\n");
+WriteLiteral("                            <th class=\"ui-state-default sf-th-entity\">\r\n         " +
+"                   </th>\r\n");
 
 
             
@@ -287,7 +287,7 @@ WriteLiteral("                        <tr>\r\n                            <td co
 
             
             #line 62 "..\..\Chart\Views\ChartResults.cshtml"
-                                     Write(queryResult.Columns.Count() + (viewable ? 1 : 0));
+                                     Write(queryResult.Columns.Count() + (navigate ? 1 : 0));
 
             
             #line default
@@ -325,25 +325,38 @@ WriteLiteral("                        <tr>\r\n");
             #line 73 "..\..\Chart\Views\ChartResults.cshtml"
                              foreach (var col in queryResult.Columns)
                             {
+                                CellFormatter ft = formatters[col.Index];
+                                var value = row[col];
 
             
             #line default
             #line hidden
-WriteLiteral("                                <td>\r\n                                    ");
+WriteLiteral("                                <td ");
 
 
             
-            #line 76 "..\..\Chart\Views\ChartResults.cshtml"
-                               Write(formatters[col.Index](Html, row[col]));
+            #line 77 "..\..\Chart\Views\ChartResults.cshtml"
+                               Write(ft.WriteDataAttribute(value));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                                </td>\r\n");
+WriteLiteral(">\r\n                                    ");
 
 
             
             #line 78 "..\..\Chart\Views\ChartResults.cshtml"
+                               Write(ft);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(".\r\n                                    Item2(Html, row[col])\r\n                   " +
+"             </td>\r\n");
+
+
+            
+            #line 81 "..\..\Chart\Views\ChartResults.cshtml"
                             }
 
             
@@ -353,7 +366,7 @@ WriteLiteral("                        </tr>\r\n");
 
 
             
-            #line 80 "..\..\Chart\Views\ChartResults.cshtml"
+            #line 83 "..\..\Chart\Views\ChartResults.cshtml"
                             }
                             else
                             {
@@ -366,7 +379,7 @@ WriteLiteral("                        <tr data-entity=\"");
 
 
             
-            #line 84 "..\..\Chart\Views\ChartResults.cshtml"
+            #line 87 "..\..\Chart\Views\ChartResults.cshtml"
                                     Write(entityField.Key());
 
             
@@ -376,8 +389,8 @@ WriteLiteral("\">\r\n");
 
 
             
-            #line 85 "..\..\Chart\Views\ChartResults.cshtml"
-                             if (entityField != null && viewable)
+            #line 88 "..\..\Chart\Views\ChartResults.cshtml"
+                             if (entityField != null && navigate)
                             {
 
             
@@ -387,7 +400,7 @@ WriteLiteral("                                <td>\r\n                          
 
 
             
-            #line 88 "..\..\Chart\Views\ChartResults.cshtml"
+            #line 91 "..\..\Chart\Views\ChartResults.cshtml"
                                Write(QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField));
 
             
@@ -397,7 +410,7 @@ WriteLiteral("\r\n                                </td>\r\n");
 
 
             
-            #line 90 "..\..\Chart\Views\ChartResults.cshtml"
+            #line 93 "..\..\Chart\Views\ChartResults.cshtml"
                             }
 
             
@@ -405,19 +418,31 @@ WriteLiteral("\r\n                                </td>\r\n");
             #line hidden
 
             
-            #line 91 "..\..\Chart\Views\ChartResults.cshtml"
+            #line 94 "..\..\Chart\Views\ChartResults.cshtml"
                              foreach (var col in queryResult.Columns)
                             {
+                                var value = row[col];
+                                var ft = formatters[col.Index];
 
             
             #line default
             #line hidden
-WriteLiteral("                                <td>\r\n                                    ");
+WriteLiteral("                                <td ");
 
 
             
-            #line 94 "..\..\Chart\Views\ChartResults.cshtml"
-                               Write(formatters[col.Index](Html, row[col]));
+            #line 98 "..\..\Chart\Views\ChartResults.cshtml"
+                               Write(ft.WriteDataAttribute(value));
+
+            
+            #line default
+            #line hidden
+WriteLiteral(">\r\n                                    ");
+
+
+            
+            #line 99 "..\..\Chart\Views\ChartResults.cshtml"
+                               Write(ft.Formatter(Html, value));
 
             
             #line default
@@ -426,7 +451,7 @@ WriteLiteral("\r\n                                </td>\r\n");
 
 
             
-            #line 96 "..\..\Chart\Views\ChartResults.cshtml"
+            #line 101 "..\..\Chart\Views\ChartResults.cshtml"
                             }
 
             
@@ -436,7 +461,7 @@ WriteLiteral("                        </tr>\r\n");
 
 
             
-            #line 98 "..\..\Chart\Views\ChartResults.cshtml"
+            #line 103 "..\..\Chart\Views\ChartResults.cshtml"
                             }
                         }
                     }
@@ -449,7 +474,7 @@ WriteLiteral("                </tbody>\r\n                <tfoot>\r\n           
 
 
             
-            #line 107 "..\..\Chart\Views\ChartResults.cshtml"
+            #line 112 "..\..\Chart\Views\ChartResults.cshtml"
 }
 
             

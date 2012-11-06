@@ -13,6 +13,7 @@ using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Entities.Reports;
 using Signum.Entities.Basics;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.UserQueries
 {
@@ -39,6 +40,19 @@ namespace Signum.Engine.UserQueries
                                             }).ToDynamic(); 
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += UserQueryLogic_Retrieved;
+
+                new BasicExecute<UserQueryDN>(UserQueryOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (uq, _) => { }
+                }.Register();
+
+                new BasicDelete<UserQueryDN>(UserQueryOperation.Delete)
+                {
+                    Lite = true,
+                    Delete = (uq, _) => uq.Delete()
+                }.Register();
             }
         }
 
@@ -53,7 +67,7 @@ namespace Signum.Engine.UserQueries
 
             userQuery.ParseData(description);
 
-            return userQuery.Save();
+            return userQuery.Execute(UserQueryOperation.Save);
         }
 
 

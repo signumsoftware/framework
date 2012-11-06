@@ -23,6 +23,7 @@ using Signum.Engine.Basics;
 using Signum.Entities.Authorization;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
+using Signum.Engine.Operations;
 #endregion
 
 namespace Signum.Web.UserQueries
@@ -47,7 +48,7 @@ namespace Signum.Web.UserQueries
 
             userQuery.Related = UserDN.Current.ToLite<IdentifiableEntity>();
 
-            return Navigator.View(this, userQuery);
+            return Navigator.NormalPage(this, userQuery);
         }
 
         public static UserQueryDN ToUserQuery(QueryRequest request)
@@ -57,15 +58,7 @@ namespace Signum.Web.UserQueries
                 QueryLogic.RetrieveOrGenerateQuery(request.QueryName), FindOptions.DefaultElementsPerPage);
         }
 
-        public ActionResult Delete(Lite<UserQueryDN> lite)
-        {
-            var queryName = QueryLogic.ToQueryName(lite.InDB().Select(uq => uq.Query.Key).FirstEx());
-
-            Database.Delete<UserQueryDN>(lite);
-
-            return Redirect(Navigator.FindRoute(queryName));
-        }
-
+        [HttpPost]
         public ActionResult Save()
         {
             UserQueryDN userQuery = null;
@@ -84,8 +77,20 @@ namespace Signum.Web.UserQueries
                 return JsonAction.ModelState(ModelState);
             }
 
-            userQuery = context.Value.Save();
-            return JsonAction.Redirect(Navigator.ViewRoute(userQuery.ToLite()));
+            userQuery = context.Value.Execute(UserQueryOperation.Save);
+            return JsonAction.Redirect(Navigator.NavigateRoute(userQuery.ToLite()));
+        }
+
+        [HttpPost]
+        public ActionResult Delete(string prefix)
+        {
+            var userQuery = this.ExtractLite<UserQueryDN>(prefix);
+            
+            var queryName = QueryLogic.ToQueryName(userQuery.InDB().Select(uq => uq.Query.Key).SingleEx());
+
+            userQuery.Delete();
+
+            return JsonAction.Redirect(Navigator.FindRoute(queryName));
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Signum.Entities.Chart
             {
                 new HelpOmniboxResult 
                 { 
-                    ToStr = "Chart {0}".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_Query), 
+                    Text = "Chart {0}".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_Query), 
                     OmniboxResultType = resultType 
                 }
             };

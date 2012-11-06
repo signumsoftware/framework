@@ -33,12 +33,12 @@ namespace Signum.Web.SMS
                 Navigator.RegisterArea(typeof(SMSClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMSMessageDN>(EntityType.AdminNotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSMessage")},
-                    new EntitySettings<SMSTemplateDN>(EntityType.AdminNotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
-                    new EntitySettings<SMSSendPackageDN>(EntityType.ServerOnly){ PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
-                    new EntitySettings<SMSUpdatePackageDN>(EntityType.ServerOnly){ PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
+                    new EntitySettings<SMSMessageDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("SMSMessage")},
+                    new EntitySettings<SMSTemplateDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
+                    new EntitySettings<SMSSendPackageDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
+                    new EntitySettings<SMSUpdatePackageDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
 
-                    new EmbeddedEntitySettings<MultipleSMSModel>() { PartialViewName = e => ViewPrefix.Formato("MultipleSMS"), ShowSave = false},
+                    new EmbeddedEntitySettings<MultipleSMSModel>() { PartialViewName = e => ViewPrefix.Formato("MultipleSMS") },
                 });
 
                 OperationsClient.AddSettings(new List<OperationSettings> 
@@ -49,14 +49,14 @@ namespace Signum.Web.SMS
                         .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
                     },
 
-                    new QueryOperationSettings(SMSProviderOperations.SendSMSMessagesFromTemplate)
+                    new ContextualOperationSettings(SMSProviderOperations.SendSMSMessagesFromTemplate)
                     {
                         RequestExtraJsonData = "function(){ return { providerWebQueryName: SF.FindNavigator.getFor('').options.webQueryName }; }",
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessagesFromTemplate","SMS"))
                                 .ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                     },
 
-                    new QueryOperationSettings(SMSProviderOperations.SendSMSMessage)
+                    new ContextualOperationSettings(SMSProviderOperations.SendSMSMessage)
                     {
                         RequestExtraJsonData = "function(){ return { providerWebQueryName: SF.FindNavigator.getFor('').options.webQueryName }; }",
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessages","SMS"))

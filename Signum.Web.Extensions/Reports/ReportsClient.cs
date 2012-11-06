@@ -41,17 +41,17 @@ namespace Signum.Web.Reports
                 {
                     string viewPrefix = "~/Reports/Views/{0}.cshtml";
                     Navigator.AddSettings(new List<EntitySettings>{
-                        new EntitySettings<ExcelReportDN>(EntityType.AdminNotSaving) 
+                        new EntitySettings<ExcelReportDN>(EntityType.Main) 
                         { 
                             PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
-                            MappingAdmin = new ExcelReportMapping()
+                            MappingMain = new ExcelReportMapping()
                         }
                     });
 
                     FilesClient.Start(false, false, true);
 
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
-                        Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
+                        Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.SystemString));
 
                     ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((ctx, entity) =>
                     {

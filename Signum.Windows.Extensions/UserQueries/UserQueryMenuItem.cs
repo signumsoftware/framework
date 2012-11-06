@@ -21,173 +21,171 @@ using Signum.Windows.Authorization;
 
 namespace Signum.Windows.UserQueries
 {
-    public class UserQueryMenuItem : SearchControlMenuItem
+    public static class UserQueryMenuItemConsturctor
     {
-        public UserQueryMenuItem()
-        {
-        }
+        static IValueConverter notNullAndEditable = ConverterFactory.New((UserQueryDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
 
-        public static readonly DependencyProperty CurrentUserQueryProperty =
-            DependencyProperty.Register("CurrentUserQuery", typeof(UserQueryDN), typeof(UserQueryMenuItem), new UIPropertyMetadata((d, e) => ((UserQueryMenuItem)d).UpdateCurrent((UserQueryDN)e.NewValue)));
-        public UserQueryDN CurrentUserQuery
+        public static MenuItem Construct(SearchControl sc)
         {
-            get { return (UserQueryDN)GetValue(CurrentUserQueryProperty); }
-            set { SetValue(CurrentUserQueryProperty, value); }
-        }
+            List<Lite<UserQueryDN>> userQueries = null;
+            UserQueryDN current = null;
 
-        private void UpdateCurrent(UserQueryDN current)
-        {
-            Header = new TextBlock
+            MenuItem miResult = new MenuItem
             {
-                Inlines = 
-                { 
-                    new Run(
-                    current == null ? Prop.Resources.MyQueries : current.DisplayName), 
-                    UserQueries == null || UserQueries.Count==0 ? (Inline)new Run():  new Bold(new Run(" (" + UserQueries.Count + ")")) 
+                Icon = ExtensionsImageLoader.GetImageSortName("favorite.png").ToSmallImage()
+            };
+
+            Action updateCurrent = () =>
+            {
+                miResult.Header = new TextBlock
+                {
+                    Inlines = 
+                    { 
+                        new Run(
+                        current == null ? Prop.Resources.MyQueries : current.DisplayName), 
+                        userQueries.IsNullOrEmpty() ? (Inline)new Run():  new Bold(new Run(" (" + userQueries.Count + ")")) 
+                    }
+                };
+
+                foreach (var item in miResult.Items.OfType<MenuItem>().Where(mi => mi.IsCheckable))
+                {
+                    item.IsChecked = ((Lite<UserQueryDN>)item.Tag).RefersTo(current);
                 }
             };
 
-            foreach (var item in this.Items.OfType<MenuItem>().Where(mi => mi.IsCheckable))
+            Action initialize = null;
+
+            RoutedEventHandler new_Clicked = (object sender, RoutedEventArgs e) =>
             {
-                item.IsChecked = ((Lite<UserQueryDN>)item.Tag).RefersTo(current);
-            }
-        }
+                e.Handled = true;
 
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
-            Icon = ExtensionsImageLoader.GetImageSortName("favorite.png").ToSmallImage();
-        }
+                UserQueryDN userQuery = UserQueryClient.FromSearchControl(sc);
 
-        List<Lite<UserQueryDN>> UserQueries; 
-
-        public override void Initialize()
-        {
-            Items.Clear();
-
-            this.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Clicked));
-
-            UserQueries = Server.Return((IUserQueryServer s) => s.GetUserQueries(SearchControl.QueryName));
-            
-            UpdateCurrent(CurrentUserQuery);
-
-            if (UserQueries.Count > 0)
-            {
-                foreach (Lite<UserQueryDN> report in UserQueries)
+                userQuery = Navigator.View(userQuery, new ViewOptions
                 {
-                    MenuItem mi = new MenuItem()
-                    {
-                        IsCheckable = true,
-                        Header = report.ToString(),
-                        Tag = report,
-                    };
-                    Items.Add(mi);
+                    AllowErrors = AllowErrors.No,
+                    View = new UserQuery { QueryDescription = sc.Description }
+                });
+
+                if (userQuery != null)
+                {
+                    userQuery.Save();
+
+                    initialize();
+
+                    current = userQuery;
                 }
-            }
+            };
 
-            Items.Add(new Separator());
-
-            if (Navigator.IsCreable(typeof(UserQueryDN), true))
+            RoutedEventHandler edit_Clicked = (object sender, RoutedEventArgs e) =>
             {
-                Items.Add(new MenuItem()
+                e.Handled = true;
+
+                Navigator.Navigate(current, new NavigateOptions()
                 {
-                    Header = Signum.Windows.Extensions.Properties.Resources.Create,
-                    Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
-                }.Handle(MenuItem.ClickEvent, New_Clicked));
-            }
-            
-            Items.Add(new MenuItem()
-            {
-                Header = Signum.Windows.Extensions.Properties.Resources.Edit, 
-                Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
-            }.Handle(MenuItem.ClickEvent, Edit_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", notNullAndEditable));
+                    View = new UserQuery { QueryDescription = sc.Description },
+                    Closed = (s, args) => initialize()
+                });
+            };
 
-            Items.Add(new MenuItem()
+            RoutedEventHandler remove_Clicked = (object sender, RoutedEventArgs e) =>
             {
-                Header = Signum.Windows.Extensions.Properties.Resources.Remove, 
-                Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
-            }.Handle(MenuItem.ClickEvent, Remove_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", notNullAndEditable));
+                e.Handled = true;
+
+                if (MessageBox.Show(Prop.Resources.AreYouSureToRemove0.Formato(current), Prop.Resources.RemoveUserQuery,
+                    MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
+                {
+                    Server.Execute((IUserQueryServer s) => s.RemoveUserQuery(current.ToLite()));
+
+                    current = null;
+
+                    initialize();
+                }
+            };
+
+            RoutedEventHandler menuItem_Clicked = (object sender, RoutedEventArgs e) =>
+            {
+                e.Handled = true;
+
+                if (e.OriginalSource is MenuItem)
+                {
+                    MenuItem b = (MenuItem)e.OriginalSource;
+                    Lite<UserQueryDN> userQuery = (Lite<UserQueryDN>)b.Tag;
+
+                    var uq = userQuery.Retrieve();
+
+                    UserQueryClient.ToSearchControl(uq, sc);
+
+                    current = uq;
+
+                    sc.Search();
+                }
+            };
+
+            initialize = () =>
+            {
+                miResult.Items.Clear();
+
+                userQueries = Server.Return((IUserQueryServer s) => s.GetUserQueries(sc.QueryName));
+
+                updateCurrent();
+
+                if (userQueries.Count > 0)
+                {
+                    foreach (Lite<UserQueryDN> report in userQueries)
+                    {
+                        MenuItem mi = new MenuItem()
+                        {
+                            IsCheckable = true,
+                            Header = report.ToString(),
+                            Tag = report,
+                        };
+                        mi.Click += menuItem_Clicked;
+                        miResult.Items.Add(mi);
+                    }
+                }
+
+                miResult.Items.Add(new Separator());
+
+                if (Navigator.IsCreable(typeof(UserQueryDN), true))
+                {
+                    miResult.Items.Add(new MenuItem()
+                    {
+                        Header = Signum.Windows.Extensions.Properties.Resources.Create,
+                        Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
+                    }.Handle(MenuItem.ClickEvent, new_Clicked));
+                }
+
+                miResult.Items.Add(new MenuItem()
+                {
+                    Header = Signum.Windows.Extensions.Properties.Resources.Edit,
+                    Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
+                }.Handle(MenuItem.ClickEvent, edit_Clicked)
+                .Bind(MenuItem.IsEnabledProperty, miResult, "CurrentUserQuery", notNullAndEditable));
+
+                miResult.Items.Add(new MenuItem()
+                {
+                    Header = Signum.Windows.Extensions.Properties.Resources.Remove,
+                    Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
+                }.Handle(MenuItem.ClickEvent, remove_Clicked)
+                .Bind(MenuItem.IsEnabledProperty, miResult, "CurrentUserQuery", notNullAndEditable));
+
+
+            };
+
+            initialize();
 
             if (autoSet != null)
-                SetUserQuery(autoSet);
-        }
-
-        static IValueConverter notNullAndEditable = ConverterFactory.New((UserQueryDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
-
-        private void MenuItem_Clicked(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true;
-
-            if (e.OriginalSource is MenuItem)
             {
-                MenuItem b = (MenuItem)e.OriginalSource;
-                Lite<UserQueryDN> userQuery = (Lite<UserQueryDN>)b.Tag;
+                UserQueryClient.ToSearchControl(autoSet, sc);
 
-                var uq = userQuery.Retrieve();
+                current = autoSet;
 
-                SetUserQuery(uq);
+                sc.Search();
             }
+
+            return miResult;
         }
-
-        private void SetUserQuery(UserQueryDN uq)
-        {
-            UserQueryClient.ToSearchControl(uq, SearchControl);
-
-            CurrentUserQuery = uq;
-
-            SearchControl.Search();
-        }
-
-        private void New_Clicked(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true;
-
-            UserQueryDN userQuery = UserQueryClient.FromSearchControl(this.SearchControl);
-
-            userQuery = Navigator.View(userQuery, new ViewOptions
-            {
-                AllowErrors = AllowErrors.No,
-                View = new UserQuery { QueryDescription = SearchControl.Description }
-            });
-
-            if (userQuery != null)
-            {
-                userQuery.Save();
-
-                Initialize();
-
-                CurrentUserQuery = userQuery;
-            }
-        }
-
-        private void Edit_Clicked(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true;
-
-            Navigator.Navigate(CurrentUserQuery, new NavigateOptions
-            {
-                View = new UserQuery { QueryDescription = SearchControl.Description },
-                Closed = (s, args) => Initialize()
-            });
-        }
-
-        private void Remove_Clicked(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true;
-
-            if (MessageBox.Show(Prop.Resources.AreYouSureToRemove0.Formato(CurrentUserQuery), Prop.Resources.RemoveUserQuery,
-                MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
-            {
-                Server.Execute((IUserQueryServer s) => s.RemoveUserQuery(CurrentUserQuery.ToLite()));
-
-                CurrentUserQuery = null;
-
-                Initialize();
-            }
-        }
-
 
         [ThreadStatic]
         static UserQueryDN autoSet;
@@ -195,7 +193,7 @@ namespace Signum.Windows.UserQueries
         {
             var old = autoSet;
             autoSet = uq;
-            return new Disposable(() => autoSet = old); 
+            return new Disposable(() => autoSet = old);
         }
     }
 }

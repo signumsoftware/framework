@@ -208,6 +208,7 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Basic\BasicClient.cs" />
+    <Compile Include="Basic\QueryClient.cs" />
     <Compile Include="Basic\Views\DateSpan.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -457,6 +458,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Search.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\PackageOperation.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PackageOperation.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Help\Views\ViewAppendix.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1053,6 +1059,10 @@
     <Content Include="Disconnected\Views\DisconnectedExport.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DisconnectedExport.generated.cs</LastGenOutput>
+    </Content>
+   <Content Include="Processes\Views\PackageOperation.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PackageOperation.generated.cs</LastGenOutput>
     </Content>
     <EmbeddedResource Include="Disconnected\Views\DisconnectedImport.cshtml">
       <Generator>RazorGenerator</Generator>

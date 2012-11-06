@@ -33,7 +33,11 @@ namespace Signum.Windows.Chart
                 lines.AddMatch(result.QueryNameMatch);
             }
 
-            lines.Add(new Run(" ({0})".Formato(Signum.Windows.Extensions.Properties.Resources.Chart)) { Foreground = Brushes.Violet });
+        }
+
+        public override Run GetIcon()
+        {
+            return new Run(" ({0})".Formato(Signum.Windows.Extensions.Properties.Resources.Chart)) { Foreground = Brushes.Violet };
         }
 
         public override void OnSelected(ChartOmniboxResult result, Window window)

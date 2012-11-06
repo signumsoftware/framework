@@ -15,11 +15,10 @@ namespace Signum.Services
         List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity lite);
 
         [OperationContract, NetDataContract]
-        List<OperationInfo> GetQueryOperationInfos(Type entityType);
+        List<OperationInfo> GetOperationInfos(Type entityType);
 
         [OperationContract, NetDataContract]
-        List<OperationInfo> GetConstructorOperationInfos(Type entityType);
-
+        bool GetSaveProtected(Type entityType);
 
         [OperationContract, NetDataContract]
         IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args);
@@ -45,5 +44,8 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         IIdentifiable ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args);
+
+        [OperationContract, NetDataContract]
+        Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys);
     }
 }

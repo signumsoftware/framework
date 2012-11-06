@@ -33,7 +33,7 @@ namespace Signum.Web.Exceptions
             {
                 Navigator.RegisterArea(typeof(ExceptionClient));
 
-                    Navigator.AddSetting(new EntitySettings<ExceptionDN>(EntityType.ServerOnly) 
+                    Navigator.AddSetting(new EntitySettings<ExceptionDN>(EntityType.System) 
                     { PartialViewName = e => ViewPrefix.Formato("ExceptionLog") });
              
             }

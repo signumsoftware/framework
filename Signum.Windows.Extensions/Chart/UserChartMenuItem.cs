@@ -36,7 +36,7 @@ namespace Signum.Windows.Chart
 
         public UserChartMenuItem()
         {
-            if (!Navigator.IsViewable(typeof(UserChartDN), true))
+            if (!Navigator.IsViewable(typeof(UserChartDN)))
                 Visibility = System.Windows.Visibility.Hidden;
 
             this.Loaded += new RoutedEventHandler(UserChartMenuItem_Loaded);
@@ -192,7 +192,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            Navigator.Navigate(CurrentUserChart, new NavigateOptions
+            Navigator.Navigate(CurrentUserChart, new NavigateOptions()
             {
                 View = new UserChart { QueryDescription = Description },
                 Closed = (s, args) => Initialize()

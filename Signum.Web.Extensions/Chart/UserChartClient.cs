@@ -18,6 +18,8 @@ using Signum.Engine;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Signum.Engine.Chart;
+using Signum.Web.Basic;
+using Signum.Web.Operations;
 
 namespace Signum.Web.Chart
 {
@@ -27,6 +29,8 @@ namespace Signum.Web.Chart
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                QueryClient.Start();
+
                 Mapping<QueryToken> qtMapping = ctx =>
                 {
                     string tokenStr = "";
@@ -46,10 +50,10 @@ namespace Signum.Web.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserChartDN>(EntityType.Default) 
+                    new EntitySettings<UserChartDN>(EntityType.Main) 
                     { 
                         PartialViewName = _ => ChartClient.ViewPrefix.Formato("UserChart"),
-                        MappingAdmin = new EntityMapping<UserChartDN>(true)
+                        MappingMain = new EntityMapping<UserChartDN>(true)
                         
                             .SetProperty(cb=>cb.Columns, new ChartClient.MListCorrelatedOrDefaultMapping<ChartColumnDN>(ChartClient.MappingChartColumn))
                             .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterDN>
@@ -71,33 +75,20 @@ namespace Signum.Web.Chart
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });
 
-                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname => QueryLogic.RetrieveOrGenerateQuery(queryname));
+                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname => 
+                    QueryLogic.RetrieveOrGenerateQuery(queryname));
 
-                ButtonBarEntityHelper.RegisterEntityButtons<UserChartDN>((ctx, entity) =>
-                {
-                    var buttons = new List<ToolBarButton> { };
-                    
-                    if (!entity.IsNew)
-                    {
-                        buttons.Add(new ToolBarButton
-                        {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebUserChartDelete"),
-                            Text = Resources.Delete,
-                            OnClick = Js.Confirm(Resources.Chart_AreYouSureOfDeletingUserChart0.Formato(entity.DisplayName),
-                                Js.Submit(RouteHelper.New().Action<ChartController>(cc => cc.DeleteUserChart(entity.ToLite())))).ToJS()
-                        });
-                    }
-
-                    return buttons.ToArray();
+                OperationsClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete) 
+                { 
+                    OnClick = ctx => new JsOperationDelete(ctx.Options("DeleteUserChart", "Chart"))
+                        .confirmAndAjax(ctx.Entity)
                 });
-
             }
-
         }
 
         public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {
-            if (!Navigator.IsViewable(typeof(UserChartDN), EntitySettingsContext.Admin))
+            if (!Navigator.IsNavigable(typeof(UserChartDN), isSearchEntity: true))
                 return new List<ToolBarButton>();
 
             var items = new List<ToolBarButton>();
@@ -121,7 +112,7 @@ namespace Signum.Web.Chart
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
-            if (Navigator.IsCreable(typeof(UserChartDN), EntitySettingsContext.Admin))
+            if (Navigator.IsCreable(typeof(UserChartDN)))
             {
                 string uqNewText = Resources.UserChart_CreateNew;
                 items.Add(new ToolBarButton
@@ -144,7 +135,7 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
                     AltText = ucEditText,
                     Text = ucEditText,
-                    Href = Navigator.ViewRoute(currentUserChart),
+                    Href = Navigator.NavigateRoute(currentUserChart),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }

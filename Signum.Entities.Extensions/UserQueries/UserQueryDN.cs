@@ -135,6 +135,12 @@ namespace Signum.Entities.UserQueries
         }
     }
 
+    public enum UserQueryOperation
+    { 
+        Save, 
+        Delete
+    }
+
     [Serializable]
     public abstract class QueryTokenDN : EmbeddedEntity
     {

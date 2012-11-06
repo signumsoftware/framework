@@ -41,30 +41,34 @@ SF.registerModule("Operations", function () {
                     formChildren = $(this.pf("panelPopup :input") + ", #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
             else {
-                formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "], " + this.pf(SF.Keys.runtimeInfo));
             }
             formChildren = formChildren.not(".sf-search-control *");
 
-            var info = this.runtimeInfo();
-            var runtimeType = info.runtimeType();
-
             var serializer = new SF.Serializer();
             serializer.add(formChildren.serialize());
-
-            var myRuntimeInfoKey = SF.compose(this.options.prefix, SF.Keys.runtimeInfo);
-            if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
-                var value = SF.isEmpty(runtimeType)
-                ? info.createValue(SF.StaticInfo(this.options.prefix).singleType(), info.id(), info.isNew())
-                : info.find().val();
-
-                serializer.add(myRuntimeInfoKey, value);
-            }
 
             serializer.add({ isLite: this.options.isLite,
                 operationFullKey: this.options.operationKey,
                 prefix: newPrefix,
                 oldPrefix: this.options.prefix
             });
+
+            if (!SF.isEmpty(this.options.prefix)) {
+                var $mainControl = $(".sf-main-control[data-prefix=" + this.options.prefix + "]");
+
+                //Check runtimeInfo present => if it's a popup from a LineControl it will not be
+                var myRuntimeInfoKey = SF.compose(this.options.prefix, SF.Keys.runtimeInfo);
+                if (formChildren.filter("#" + myRuntimeInfoKey).length == 0) {
+                    var value = $mainControl.data("runtimeinfo");
+                    serializer.add(myRuntimeInfoKey, value);
+                }
+
+                if ($mainControl.closest(".sf-popup-control").children(".sf-button-bar").find(".sf-ok-button").length > 0) {
+                    serializer.add("sfOkVisible", true);
+                }
+            }
+
             serializer.add(this.options.requestExtraJsonData);
 
             return serializer.serialize();
@@ -77,7 +81,8 @@ SF.registerModule("Operations", function () {
                 isLite: this.options.isLite,
                 operationFullKey: this.options.operationKey,
                 prefix: newPrefix,
-                oldPrefix: this.options.prefix
+                oldPrefix: this.options.prefix,
+                liteKeys: $(this.pf("sfSearchControl .sf-td-selection:checked")).closest("tr").map(function () { return $(this).data("entity"); }).toArray().join(",")
             })
             serializer.add(this.options.requestExtraJsonData);
 
@@ -128,6 +133,15 @@ SF.registerModule("Operations", function () {
             $form.append(SF.hiddenInput('isLite', this.options.isLite) +
             SF.hiddenInput('operationFullKey', this.options.operationKey) +
             SF.hiddenInput("oldPrefix", this.options.prefix));
+
+            if (!SF.isEmpty(this.options.prefix)) {
+                //Check runtimeInfo present => if it's a popup from a LineControl it will not be
+                var myRuntimeInfoKey = SF.compose(this.options.prefix, SF.Keys.runtimeInfo);
+                if ($form.filter("#" + myRuntimeInfoKey).length == 0) {
+                    var $mainControl = $(".sf-main-control[data-prefix=" + this.options.prefix + "]");
+                    SF.hiddenInput(myRuntimeInfoKey, $mainControl.data("runtimeinfo"));
+                }
+            }
 
             SF.submit(this.options.controllerUrl, this.options.requestExtraJsonData, $form);
 
@@ -216,12 +230,23 @@ SF.registerModule("Operations", function () {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
-            if (this.options.controllerUrl == SF.Urls.operationExecute) {
-                this.options.controllerUrl = SF.Urls.operationExecuteContextual;
-            }
 
             $('.sf-search-ctxmenu-overlay').remove();
-            this.ajax(null, SF.opMarkCellOnSuccess);
+
+            var multipleOperation = $(this.pf("sfSearchControl .sf-td-selection:checked")).length > 1;
+            var defaultController = this.options.controllerUrl == SF.Urls.operationExecute;
+            if (multipleOperation) {
+                if (defaultController) {
+                    this.options.controllerUrl = SF.Urls.operationContextualFromMany;
+                }
+                this.ajax(this.newPrefix(), SF.opOnSuccessDispatcher);
+            }
+            else {
+                if (defaultController) {
+                    this.options.controllerUrl = SF.Urls.operationContextual;
+                }
+                this.ajax(null, SF.opMarkCellOnSuccess);
+            }
         };
     };
 
@@ -269,7 +294,15 @@ SF.registerModule("Operations", function () {
             }
 
             $('.sf-search-ctxmenu-overlay').remove();
-            this.ajax(this.newPrefix(), SF.opContextualOnSuccess);
+            if ($(this.pf("sfSearchControl .sf-td-selection:checked")).length > 1) {
+                if (this.options.controllerUrl == SF.Urls.operationConstructFrom) {
+                    this.options.controllerUrl = SF.Urls.operationContextualFromMany;
+                }
+                this.ajax(this.newPrefix(), SF.opOnSuccessDispatcher);
+            }
+            else {
+                this.ajax(this.newPrefix(), SF.opContextualOnSuccess);
+            }
         };
     };
 
@@ -285,9 +318,15 @@ SF.registerModule("Operations", function () {
                 return false;
             }
 
-            this.ajax(this.options.prefix, function () {
-                SF.Notify.info(lang.signum.executed, 2000);
-            });
+            if ($(this.pf("sfSearchControl .sf-td-selection:checked")).length > 1) {
+                if (this.options.controllerUrl == SF.Urls.operationDelete) {
+                    this.options.controllerUrl = SF.Urls.operationContextualFromMany;
+                }
+                this.ajax(this.newPrefix(), SF.opOnSuccessDispatcher);
+            }
+            else {
+                this.ajax(this.options.prefix, function () { SF.Notify.info(lang.signum.executed, 2000); });
+            }
         };
     };
 
@@ -425,11 +464,17 @@ SF.registerModule("Operations", function () {
 
             SF.closePopup(prefix);
 
-            new SF.ViewNavigator({
+            var viewNavigator = new SF.ViewNavigator($.extend({}, oldViewOptions, {
                 prefix: prefix,
-                onCancelled: oldViewOptions.onCancelled,
                 containerDiv: tempDivId
-            }).viewSave(operationResult);
+            }));
+
+            if (oldViewOptions.onOk != null) {
+                viewNavigator.showViewOk(operationResult);
+            }
+            else {
+                viewNavigator.viewSave(operationResult);
+            }
         }
         SF.Notify.info(lang.signum.executed, 2000);
     };

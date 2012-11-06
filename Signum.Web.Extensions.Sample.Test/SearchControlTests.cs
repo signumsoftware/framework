@@ -48,7 +48,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
 
             //Quickfilter of a Lite
-            selenium.QuickFilter(1, 3, 0);
+            selenium.QuickFilter(1, 4, 0);
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(4));
 
@@ -70,7 +70,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(2));
 
             //Quickfilter of a string
-            selenium.QuickFilter(1, 5, 2);
+            selenium.QuickFilter(1, 6, 2);
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(1));
 
@@ -97,7 +97,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
 
             //QuickFilter from header of a Lite
-            selenium.QuickFilterFromHeader(4, 0); //Label
+            selenium.QuickFilterFromHeader(5, 0); //Label
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
             OpenFinderAndSelectFirstOrderedById(selenium, "value_0_");
@@ -196,7 +196,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.LineFind(prefix);
             selenium.Sort(3, true, prefix);
             selenium.Search(prefix);
-            selenium.SelectRowRadioButton(0, prefix);
+            selenium.SelectRowCheckbox(0, prefix);
             selenium.PopupOk(prefix);
         }
 
@@ -205,13 +205,13 @@ namespace Signum.Web.Extensions.Sample.Test
         {
             CheckLoginAndOpen(FindRoute("Album"));
 
-            int authorCol = 3;
+            int authorCol = 4;
 
             //Ascending
             selenium.Sort(authorCol, true);
             selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Album;5"));
             
-            int labelCol = 4;
+            int labelCol = 5;
             
             //Multiple orders
             selenium.SortMultiple(labelCol, true);
@@ -284,22 +284,22 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.AddColumn("Label.Name");
 
             //Edit names
-            selenium.EditColumnName(7, "Label Id");
+            selenium.EditColumnName(8, "Label Id");
 
             //Search with userColumns
             selenium.Search();
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8)));
 
             //Move columns
-            selenium.MoveColumn(7, "Label Id", true);
-            selenium.MoveColumn(6, "Label Id", false);
+            selenium.MoveColumn(8, "Label Id", true);
+            selenium.MoveColumn(7, "Label Id", false);
 
             //Delete one of the usercolumns
-            selenium.RemoveColumn(7, 8);
+            selenium.RemoveColumn(8, 9);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 7)));
-            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8)));
+            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 9)));
         }
 
         [TestMethod]
@@ -401,7 +401,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.CheckAddColumnEnabled(false);
 
             selenium.DeleteFilter(0);
-            selenium.RemoveColumn(8, 8);
+            selenium.RemoveColumn(9, 9);
 
             //Element
             selenium.FilterSelectToken(2, "value=Element", true);
@@ -420,7 +420,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
             selenium.DeleteFilter(0);
-            selenium.RemoveColumn(8, 8);
+            selenium.RemoveColumn(9, 9);
 
             //Any
             selenium.FilterSelectToken(2, "value=Any", true);

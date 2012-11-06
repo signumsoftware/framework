@@ -234,16 +234,6 @@ namespace Signum.Web.Selenium
             return "{0} > td:nth-child({1})".Formato(RowSelector(selenium, rowIndexBase1, prefix), columnIndexBase1);
         }
 
-        public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0)
-        {
-            SelectRowRadioButton(selenium, rowIndexBase0, "");
-        }
-
-        public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0, string prefix)
-        {
-            selenium.Click("{0} > input:radio".Formato(CellSelector(selenium, rowIndexBase0 + 1, 1, prefix)));
-        }
-
         public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0)
         {
             SelectRowCheckbox(selenium, rowIndexBase0, "");
@@ -421,11 +411,12 @@ namespace Signum.Web.Selenium
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix)
         {
-            selenium.EntityClick(rowIndexBase1, false, prefix);
+            selenium.EntityClick(rowIndexBase1, prefix, true);
         }
-        public static void EntityClick(this ISelenium selenium, int rowIndexBase1,bool multiSel, string prefix)
+
+        public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix, bool allowMultiple)
         {
-            if (multiSel)
+            if (allowMultiple)
                 selenium.Click("{0} > a".Formato(CellSelector(selenium, rowIndexBase1, 2, prefix)));
             else
                 selenium.Click("{0} > a".Formato(CellSelector(selenium, rowIndexBase1, 1, prefix)));

@@ -22,12 +22,12 @@ namespace Signum.Web.Extensions.Sample
     {
         public ViewResult BandDetail()
         {
-            return Navigator.View(this, Database.Retrieve<BandDN>(1), "BandDetail");
+            return Navigator.NormalPage(this, new NavigateOptions(Database.Retrieve<BandDN>(1)) { PartialViewName = "BandDetail" });
         }
 
         public ViewResult BandRepeater() 
         {
-            return Navigator.View(this, Database.Retrieve<BandDN>(1), "BandRepeater");
+            return Navigator.NormalPage(this, new NavigateOptions(Database.Retrieve<BandDN>(1)) { PartialViewName = "BandRepeater" });
         }
 
         public ActionResult CreateAlbumFromBand(string prefix)
@@ -44,7 +44,7 @@ namespace Signum.Web.Extensions.Sample
                 }).validateAndAjax().ToJS();
 
             TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc));
+            return this.PopupOpen(new PopupNavigateOptions(tc));
         }
 
         public JsonResult CreateAlbumFromBandOnSave(string prefix)
@@ -53,7 +53,7 @@ namespace Signum.Web.Extensions.Sample
 
             AlbumDN newAlbum = context.Value.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, new object[] { context.Value.Name, context.Value.Year, context.Value.Label });
 
-            return JsonAction.Redirect(Navigator.ViewRoute(newAlbum));
+            return JsonAction.Redirect(Navigator.NavigateRoute(newAlbum));
         }
 
         public ActionResult CreateGreatestHitsAlbum(List<int> ids, string prefix)
@@ -65,7 +65,7 @@ namespace Signum.Web.Extensions.Sample
             
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceAlbums, typeof(AlbumDN), AlbumOperation.CreateGreatestHitsAlbum);
 
-            return Navigator.View(this, entity);
+            return Navigator.NormalPage(this, entity);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Signum.Web.Extensions.Sample
             ViewData[ViewDataKeys.WriteSFInfo] = true;
 
             TypeContext tc = TypeContextUtilities.UntypedNew(new ValueLineBoxModel(this.ExtractEntity<AlbumDN>(), ValueLineBoxType.String, "Name", "Write new album's name"), prefix);
-            return this.PopupOpen(new ViewOkOptions(tc));
+            return this.PopupOpen(new PopupViewOptions(tc));
         }
 
         public ActionResult Clone(string prefix)
@@ -105,7 +105,7 @@ namespace Signum.Web.Extensions.Sample
             AlbumDN newAlbum = album.ConstructFromLite<AlbumDN>(AlbumOperation.Clone);
             newAlbum.Name = valueCtx.Value.StringValue;
 
-            return Navigator.View(this, newAlbum);
+            return Navigator.NormalPage(this, newAlbum);
         }
     }
 }

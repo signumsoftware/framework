@@ -10,7 +10,7 @@
 @model TypeContext<ChartRequest>
 @{ 
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-    bool viewable = (bool)ViewData[ViewDataKeys.View];
+    bool navigate = (bool)ViewData[ViewDataKeys.Navigate];
     var formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
 }
 @if (queryResult == null)
@@ -32,9 +32,9 @@ else
             <table id="@Model.Compose("tblResults")" class="sf-search-results">
                 <thead class="ui-widget-header ui-corner-top">
                     <tr>
-                        @if (!Model.Value.GroupResults && viewable)
+                        @if (!Model.Value.GroupResults && navigate)
                         {
-                            <th class="ui-state-default th-col-entity">
+                            <th class="ui-state-default sf-th-entity">
                             </th>
                         }
                         @if (queryResult.Columns.Any())
@@ -59,7 +59,7 @@ else
                     @if (!queryResult.Rows.Any())
                     {
                         <tr>
-                            <td colspan="@(queryResult.Columns.Count() + (viewable ? 1 : 0))">@Resources.Signum_noResults
+                            <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@Resources.Signum_noResults
                             </td>
                         </tr>
                     }
@@ -85,7 +85,7 @@ else
                             {
                                 Lite entityField = row.Entity;
                         <tr data-entity="@entityField.Key()">
-                            @if (entityField != null && viewable)
+                            @if (entityField != null && navigate)
                             {
                                 <td>
                                     @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)

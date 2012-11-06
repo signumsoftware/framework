@@ -29,7 +29,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult Permissions(Lite<RoleDN> role)
         {
-            return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role.FillToString()));
+            return Navigator.NormalPage(this, PermissionAuthLogic.GetPermissionRules(role.FillToString()));
         }
 
         [HttpPost]
@@ -47,7 +47,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult FacadeMethods(Lite<RoleDN> role)
         {
-            return Navigator.View(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToString()));
+            return Navigator.NormalPage(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToString()));
         }
 
         [HttpPost]
@@ -64,7 +64,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult Types(Lite<RoleDN> role)
         {
-            return Navigator.View(this, TypeAuthLogic.GetTypeRules(role.FillToString()));
+            return Navigator.NormalPage(this, TypeAuthLogic.GetTypeRules(role.FillToString()));
         }
 
         [HttpPost]
@@ -84,7 +84,7 @@ namespace Signum.Web.AuthAdmin
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             TypeContext tc = TypeContextUtilities.UntypedNew(PropertyAuthLogic.GetPropertyRules(role.FillToString(), type.Retrieve()), prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc));
+            return this.PopupOpen(new PopupNavigateOptions(tc));
         }
 
         [HttpPost]
@@ -105,7 +105,7 @@ namespace Signum.Web.AuthAdmin
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             TypeContext tc = TypeContextUtilities.UntypedNew(QueryAuthLogic.GetQueryRules(role.FillToString(), type.Retrieve()), prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc));
+            return this.PopupOpen(new PopupNavigateOptions(tc));
         }
 
         [HttpPost]
@@ -127,7 +127,7 @@ namespace Signum.Web.AuthAdmin
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             TypeContext tc = TypeContextUtilities.UntypedNew(OperationAuthLogic.GetOperationRules(role.FillToString(), type.Retrieve()), prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc));
+            return this.PopupOpen(new PopupNavigateOptions(tc));
         }
 
         [HttpPost]

@@ -62,7 +62,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="ControlPanelTests.cs" />
     <Compile Include="ChartTests.cs" />
-    <Compile Include="OperationsCtxMenuTests.cs" />
+    <Compile Include="OperationsCtxTests.cs" />
     <Compile Include="WidgetsTests.cs" />
     <Compile Include="UserQueriesTests.cs" />
     <Compile Include="OperationsTests.cs" />

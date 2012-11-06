@@ -37,7 +37,7 @@ namespace Signum.Web.ControlPanel
 
             cp.Parts.Add(newPart);
 
-            return Navigator.View(this, cp);
+            return Navigator.NormalPage(this, cp);
         }
     }
 }

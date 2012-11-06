@@ -40,7 +40,18 @@ namespace Signum.Web.Operations
         public Func<ConstructorOperationContext, bool> IsVisible { get; set; }
     }
 
-    public class EntityOperationSettings : OperationSettings
+    public abstract class EntityOperationSettingsBase : OperationSettings
+    {
+        public ContextualOperationSettings ContextualFromMany { get; set; }
+        public ContextualOperationSettings Contextual { get; set; }
+
+        public EntityOperationSettingsBase(Enum key)
+            : base(key)
+        {
+        }
+    }
+
+    public class EntityOperationSettings : EntityOperationSettingsBase
     {
         public EntityOperationSettings(Enum operationKey)
             : base(operationKey)
@@ -65,22 +76,18 @@ namespace Signum.Web.Operations
         }
 
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
-        public bool IsVisibleOnOkPopup { get; set; }
         public Func<EntityOperationContext, JsInstruction> OnClick { get; set; }
-        public Func<ContextualOperationContext, bool> IsContextualVisible { get; set; }
-        public Func<ContextualOperationContext, JsInstruction> OnContextualClick { get; set; }
     }
 
-    public class QueryOperationSettings : OperationSettings
+    public class ContextualOperationSettings : OperationSettings
     {
-        public QueryOperationSettings(Enum operationKey)
+        public ContextualOperationSettings(Enum operationKey)
             : base(operationKey)
         {
         }
 
-
-        public Func<QueryOperationContext, bool> IsVisible { get; set; }
-        public Func<QueryOperationContext, JsInstruction> OnClick { get; set; }
+        public Func<ContextualOperationContext, bool> IsVisible { get; set; }
+        public Func<ContextualOperationContext, JsInstruction> OnClick { get; set; }
 
         bool groupInMenu = true;
         /// <summary>
@@ -111,8 +118,6 @@ namespace Signum.Web.Operations
         public IdentifiableEntity Entity { get; internal set; }
         public EntityOperationSettings OperationSettings { get; internal set; }
 
-
-
         public JsOperationOptions Options()
         {
             return Options(null);
@@ -137,10 +142,10 @@ namespace Signum.Web.Operations
     }
 
     public class ContextualOperationContext : OperationContext
-    { 
-        public IdentifiableEntity Entity { get; internal set; }
+    {
+        public List<Lite> Entities { get; internal set; }
         public object QueryName { get; internal set; }
-        public EntityOperationSettings OperationSettings { get; internal set; }
+        public ContextualOperationSettings OperationSettings { get; internal set; }
 
         public JsOperationOptions Options()
         {
@@ -154,6 +159,16 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options(string controllerUrl)
         {
+            var requestData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData);
+            if (requestData == null)
+            {
+                if (Entities.Count == 1) 
+                    requestData = "{{{0}:'{1}'}}".Formato(TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), 
+                        "{0};{1};{2}".Formato(Navigator.ResolveWebTypeName(Entities[0].RuntimeType), Entities[0].Id, "o"));
+                else 
+                    requestData = "{{lites:'{0}'}}".Formato(Entities.Select(e => e.Key()).ToString(",")); 
+            }
+
             return new JsOperationOptions
             {
                 Operation = OperationInfo.Key,
@@ -161,38 +176,7 @@ namespace Signum.Web.Operations
                 Prefix = this.Prefix,
                 IsContextual = true,
                 ControllerUrl = (JsValue<string>)controllerUrl,
-                RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData) ?? 
-                    "{{{0}:'{1}'}}".Formato(
-                        TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), 
-                        "{0};{1};{2}".Formato(Navigator.ResolveWebTypeName(Entity.GetType()), Entity.Id, "o"))
-            };
-        }
-    }
-
-    public class QueryOperationContext : OperationContext
-    {
-        public object QueryName { get; internal set; }
-        public QueryOperationSettings OperationSettings { get; internal set; }
-
-        public JsOperationOptions Options()
-        {
-            return Options(null);
-        }
-
-        public JsOperationOptions Options(string actionName, string controllerName)
-        {
-            return Options(RouteHelper.New().Action(actionName, controllerName));
-        }
-
-        public JsOperationOptions Options(string controllerUrl)
-        {
-            return new JsOperationOptions
-            {
-                Operation = OperationInfo.Key,
-                IsLite = OperationInfo.Lite,
-                Prefix = this.Prefix,
-                ControllerUrl = (JsValue<string>)controllerUrl,
-                RequestExtraJsonData = OperationSettings.TryCC(opt => (JsInstruction)opt.RequestExtraJsonData), //Not quoted
+                RequestExtraJsonData = requestData
             };
         }
     }

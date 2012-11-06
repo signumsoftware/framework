@@ -3,8 +3,6 @@
 @using (var e = Html.TypeContext<EmailPackageDN>())
 {
     @Html.ValueLine(e, f => f.Name, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.NumLines, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.NumErrors, f => f.ReadOnly = true)
 
 <fieldset>
     <legend>Lines</legend>
@@ -14,9 +12,7 @@
           QueryName = typeof(EmailMessageDN),
           FilterOptions = { new FilterOption("Package", e.Value) },
           SearchOnLoad = true,
-          FilterMode = FilterMode.Hidden,
-          Create = false,
-          View = true
+          FilterMode = FilterMode.Hidden
       }, e)
 </fieldset>
 }
