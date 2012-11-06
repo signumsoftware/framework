@@ -338,10 +338,7 @@ SF.registerModule("ViewNavigator", function () {
         //Construct popup
         var tempDivId = SF.compose(_prefix, "Temp");
         var requestData = "prefix=" + tempDivId;
-        if (SF.isEmpty(jsonOptionsListFormat)) {
-            throw "chooser options must be provider. Use openTypeChooser for automatic type chooser";
-        }
-        else {
+        if (!SF.isEmpty(jsonOptionsListFormat)) {
             for (var i = 0; i < jsonOptionsListFormat.length; i++) {
                 requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
                 if (chooserOptions && chooserOptions.ids != null) {
