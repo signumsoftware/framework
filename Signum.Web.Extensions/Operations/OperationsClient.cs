@@ -72,7 +72,6 @@ namespace Signum.Web.Operations
         {
             if (prefix.HasText())
             {
-                controller.ViewData[ViewDataKeys.WriteSFInfo] = true;
                 TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
                 var popupOptions = controller.ControllerContext.HttpContext.Request[ViewDataKeys.OkVisible].HasText() ?
                     (PopupOptionsBase)new PopupViewOptions(tc) :
@@ -106,7 +105,6 @@ namespace Signum.Web.Operations
         {
             if (prefix.HasText())
             {
-                controller.ViewData[ViewDataKeys.WriteSFInfo] = true;
                 TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
                 return controller.PopupOpen(new PopupNavigateOptions(tc));
             }

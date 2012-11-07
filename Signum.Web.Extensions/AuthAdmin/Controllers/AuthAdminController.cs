@@ -82,7 +82,6 @@ namespace Signum.Web.AuthAdmin
 
         public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
             TypeContext tc = TypeContextUtilities.UntypedNew(PropertyAuthLogic.GetPropertyRules(role.FillToString(), type.Retrieve()), prefix);
             return this.PopupOpen(new PopupNavigateOptions(tc));
         }
@@ -103,7 +102,6 @@ namespace Signum.Web.AuthAdmin
         [HttpPost]
         public ActionResult Queries(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
             TypeContext tc = TypeContextUtilities.UntypedNew(QueryAuthLogic.GetQueryRules(role.FillToString(), type.Retrieve()), prefix);
             return this.PopupOpen(new PopupNavigateOptions(tc));
         }
@@ -125,7 +123,6 @@ namespace Signum.Web.AuthAdmin
         [HttpPost]
         public ActionResult Operations(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
             TypeContext tc = TypeContextUtilities.UntypedNew(OperationAuthLogic.GetOperationRules(role.FillToString(), type.Retrieve()), prefix);
             return this.PopupOpen(new PopupNavigateOptions(tc));
         }
