@@ -9,11 +9,9 @@ namespace Signum.Web
 {
     public static class ViewDataKeys
     {
-        public const string WriteSFInfo = "sfWriteSFInfo";
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
         public const string Title = "Title";
         public const string CustomHtml = "sfCustomHtml";
-
 
         public const string ViewButtons = "sfViewButtons";
         public const string OkVisible = "sfOkVisible";

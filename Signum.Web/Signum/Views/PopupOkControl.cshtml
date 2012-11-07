@@ -8,7 +8,6 @@
                 OK</button>                
     </div>
     @Html.ValidationSummaryAjax(Model)
-    @Html.PopupHeader()
     <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable != null && modifiable.SelfModified ? " sf-changed" : "")">
         @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
     </div>

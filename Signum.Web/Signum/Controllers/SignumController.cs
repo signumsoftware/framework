@@ -54,8 +54,6 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(runtimeType);
 
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
-
             IdentifiableEntity entity = null;
             if (id.HasValue)
                 entity = Database.Retrieve(type, id.Value);
