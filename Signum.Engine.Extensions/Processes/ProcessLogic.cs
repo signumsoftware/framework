@@ -368,7 +368,8 @@ namespace Signum.Engine.Processes
                     return new ProcessExecutionDN(process)
                     {
                         State = ProcessState.Created,
-                        ProcessData = data
+                        ProcessData = data,
+                        SessionData = session,
                     }.Save();
             }
 
@@ -580,7 +581,8 @@ namespace Signum.Engine.Processes
             using (ScopeSessionFactory.OverrideSession())
             {
                 if (Execution.SessionData != null)
-                    ProcessLogic.ApplySession.Invoke(Execution.SessionData);
+                    using (AuthLogic.Disable())
+                        ProcessLogic.ApplySession.Invoke(Execution.SessionData);
 
                 if (UserDN.Current == null)
                     UserDN.Current = AuthLogic.SystemUser;
