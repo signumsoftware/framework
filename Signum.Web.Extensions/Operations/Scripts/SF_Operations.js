@@ -354,7 +354,7 @@ SF.registerModule("Operations", function () {
                 });
 
             for (var i = 0, l = items.length; i < l; i++) {
-                serializer.add("ids", items[i].id);
+                serializer.add("keys", items[i].key);
             }
 
             serializer.add(this.options.requestExtraJsonData);
@@ -413,7 +413,7 @@ SF.registerModule("Operations", function () {
 
             var onSuccess = function (items) {
                 for (var i = 0, l = items.length; i < l; i++) {
-                    $(this.options.sender).closest("form").append(SF.hiddenInput('ids', items[i].id));
+                    $(this.options.sender).closest("form").append(SF.hiddenInput('keys', items[i].key));
                 }
                 this.submit();
             };
