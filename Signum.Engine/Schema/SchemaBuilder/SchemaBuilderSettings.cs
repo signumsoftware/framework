@@ -88,8 +88,6 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 18}, 
         };
 
-
-
         Dictionary<SqlDbType, int> defaultScale = new Dictionary<SqlDbType, int>()
         {
             {SqlDbType.Decimal, 2}, 

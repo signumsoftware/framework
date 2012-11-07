@@ -75,7 +75,8 @@ namespace Signum.Engine.Linq
 
             if(isOuterMost && !IsCountSumOrAvg(select) || select.Top != null)
             {
-                AppendKeys(); 
+                if (select.Top != null)
+                    AppendKeys();
 
                 orderings = gatheredOrderings;
                 gatheredOrderings = null;
