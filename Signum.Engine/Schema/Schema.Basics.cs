@@ -42,7 +42,13 @@ namespace Signum.Engine.Maps
         void GenerateColumns();
     }
 
-    public partial class Table : IFieldFinder, ITable
+    interface ITablePrivate
+    {
+        ColumnExpression GetIdExpression(Alias alias);
+    }
+      
+
+    public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         public Type Type { get; private set; }
 
@@ -184,7 +190,6 @@ namespace Signum.Engine.Maps
         {
             return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
         }
-
     }
 
     public class EntityField
@@ -660,7 +665,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class RelationalTable : ITable, IFieldFinder
+    public partial class RelationalTable : ITable, IFieldFinder, ITablePrivate
     {
         public class PrimaryKeyColumn : IColumn
         {

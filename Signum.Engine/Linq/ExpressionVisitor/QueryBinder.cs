@@ -748,7 +748,7 @@ namespace Signum.Engine.Linq
                 ((RelationalTable)table).GetProjectorExpression(tableAlias, this);
 
             Type resultType = typeof(IQueryable<>).MakeGenericType(query.ElementType);
-            TableExpression tableExpression = new TableExpression(tableAlias, table.Name);
+            TableExpression tableExpression = new TableExpression(tableAlias, table);
 
             Alias selectAlias = NextSelectAlias();
 
@@ -1730,7 +1730,7 @@ namespace Signum.Engine.Linq
                 requests.Add(new TableRequest
                 {
                     CompleteEntity = result,
-                    Table = new TableExpression(newAlias, table.Name),
+                    Table = new TableExpression(newAlias, table),
                     ExternalAliases = ExternalAliasGatherer.Externals(result.ExternalId, new HashSet<Alias>()),
                 });
 
@@ -1898,17 +1898,17 @@ namespace Signum.Engine.Linq
 
         internal ProjectionExpression MListProjection(MListExpression mle)
         {
-            RelationalTable tr = mle.RelationalTable;
+            RelationalTable relationalTable = mle.RelationalTable;
 
             Alias tableAlias = NextTableAlias(mle.RelationalTable.Name);
-            TableExpression tableExpression = new TableExpression(tableAlias, tr.Name);
+            TableExpression tableExpression = new TableExpression(tableAlias, relationalTable);
 
-            Expression projector = tr.FieldExpression(tableAlias, this);
+            Expression projector = relationalTable.FieldExpression(tableAlias, this);
 
             Alias sourceAlias = NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, sourceAlias, tableExpression.KnownAliases); // no Token
 
-            var where = SmartEqualizer.EqualNullable(mle.BackID, tr.BackColumnExpression(tableAlias));
+            var where = SmartEqualizer.EqualNullable(mle.BackID, relationalTable.BackColumnExpression(tableAlias));
             var proj = new ProjectionExpression(
                 new SelectExpression(sourceAlias, false, false, null, pc.Columns, tableExpression, where, null, null),
                  pc.Projector, null, mle.Type);
