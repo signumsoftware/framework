@@ -116,7 +116,7 @@ namespace Signum.Web.Extensions.Sample
             ChartClient.Start();
             ReportsClient.Start(true, true);
 
-            ProcessesClient.Start(true);
+            ProcessesClient.Start(packages: true, packageOperations: true);
             ProcessLogic.StartBackgroundProcess(5 * 1000);
 
             QuickLinkWidgetHelper.Start();

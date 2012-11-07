@@ -164,6 +164,12 @@ namespace Signum.Web.Operations
             return Options(RouteHelper.New().Action(actionName, controllerName));
         }
 
+        public JsOperationOptions Options<TController>(Expression<Action<TController>> action)
+            where TController : Controller
+        {
+            return Options(RouteHelper.New().Action(action));
+        }
+
         public JsOperationOptions Options(string controllerUrl)
         {
             var requestData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData);

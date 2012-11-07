@@ -62,7 +62,7 @@ namespace Signum.Web.Extensions.Sample
                             Text = "Clone with data",
                             OnClick = new JsOperationConstructorFrom(new JsOperationOptions
                             { 
-                                ControllerUrl = RouteHelper.New().Action("CloneWithData", "Music"),
+                                ControllerUrl = RouteHelper.New().Action<MusicController>(mc => mc.CloneWithData(Js.NewPrefix(ctx.Prefix))),
                                 Prefix = ctx.Prefix
                             }).ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk).ToJS()
                         }
@@ -73,12 +73,12 @@ namespace Signum.Web.Extensions.Sample
                 {
                     new EntityOperationSettings(AlbumOperation.CreateFromBand)
                     { 
-                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
+                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options<MusicController>(mc => mc.CreateAlbumFromBand(Js.NewPrefix(ctx.Prefix))))
                             .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
 
                         Contextual = new ContextualOperationSettings(AlbumOperation.CreateFromBand)
                         {
-                            OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
+                            OnClick = ctx => new JsOperationConstructorFrom(ctx.Options<MusicController>(mc => mc.CreateAlbumFromBand(Js.NewPrefix(ctx.Prefix))))
                                 .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
                         },
 
@@ -86,7 +86,8 @@ namespace Signum.Web.Extensions.Sample
                     },
                     new ContextualOperationSettings(AlbumOperation.CreateGreatestHitsAlbum)
                     {
-                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("CreateGreatestHitsAlbum", "Music")).submitSelected()
+                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options<MusicController>(mc => mc.CreateGreatestHitsAlbum()))
+                            .submitSelected()
                     },
                 });
             }
