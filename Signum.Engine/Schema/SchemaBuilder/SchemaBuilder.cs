@@ -278,7 +278,7 @@ namespace Signum.Engine.Maps
 
         static Dictionary<KindOfField, Contexts> allowedContexts = new Dictionary<KindOfField, Contexts>()
         {
-            {KindOfField.PrimaryKey,    Contexts.Normal },
+            {KindOfField.PrimaryKey,    Contexts.Normal | Contexts.View },
             {KindOfField.Value,         Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
             {KindOfField.Reference,     Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
             {KindOfField.Enum,          Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
@@ -288,7 +288,7 @@ namespace Signum.Engine.Maps
 
         private KindOfField? GetKindOfField(PropertyRoute route)
         {
-            if (route.FieldInfo != null && route.FieldInfo.FieldEquals((IdentifiableEntity ie) => ie.id))
+            if (IsPrimaryKey(route))
                 return KindOfField.PrimaryKey;
 
             if (Settings.GetSqlDbType(route) != null)
@@ -309,7 +309,12 @@ namespace Signum.Engine.Maps
             return null;
         }
 
-        private static Field GenerateFieldPrimaryKey(PropertyRoute route, Table table, NameSequence name)
+        protected virtual bool IsPrimaryKey(PropertyRoute route)
+        {
+            return route.FieldInfo != null && route.FieldInfo.FieldEquals((IdentifiableEntity ie) => ie.id);
+        }
+
+        protected virtual Field GenerateFieldPrimaryKey(PropertyRoute route, Table table, NameSequence name)
         {
             return new FieldPrimaryKey(route.Type, table);
         }
@@ -603,7 +608,7 @@ namespace Signum.Engine.Maps
         public override string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
             SqlViewColumnAttribute vc = route.FieldInfo.SingleAttribute<SqlViewColumnAttribute>();
-            if (vc != null)
+            if (vc != null && vc.Name.HasText())
                 return vc.Name;
 
             return base.GenerateFieldName(route, kindOfField);
@@ -612,6 +617,35 @@ namespace Signum.Engine.Maps
         public override string GenerateFieldName(Type type, KindOfField tipoCampo)
         {
             return base.GenerateFieldName(type, tipoCampo);
+        }
+
+        protected override bool IsPrimaryKey(PropertyRoute route)
+        {
+            if(route.FieldInfo == null) 
+                return false;
+
+            var svca = route.FieldInfo.SingleAttribute<SqlViewColumnAttribute>();
+
+            return svca != null && svca.PrimaryKey;
+        }
+
+        protected override Field GenerateFieldPrimaryKey(PropertyRoute route, Table table, NameSequence name)
+        {
+            SqlDbTypePair pair = Settings.GetSqlDbType(route);
+
+            var result = new FieldValue(route.Type)
+            {
+                PrimaryKey = true,
+                Name = name.ToString(),
+                SqlDbType = pair.SqlDbType,
+                UdtTypeName = pair.UdtTypeName,
+                Nullable = Settings.IsNullable(route, false),
+                Size = Settings.GetSqlSize(route, pair.SqlDbType),
+                Scale = Settings.GetSqlScale(route, pair.SqlDbType),
+                IndexType = Settings.GetIndexType(route),
+            };
+
+            return result;
         }
     }
 

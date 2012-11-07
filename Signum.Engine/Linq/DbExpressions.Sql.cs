@@ -224,7 +224,12 @@ namespace Signum.Engine.Linq
 
         internal ColumnExpression GetIdExpression()
         {
-            return ((ITablePrivate)Table).GetIdExpression(Alias);
+            var expression = ((ITablePrivate)Table).GetPrimaryOrder(Alias);
+
+            if (expression == null)
+                throw new InvalidOperationException("Impossible to determine Primary Key for {0}".Formato(Name));
+
+            return expression;
         }
     }
 

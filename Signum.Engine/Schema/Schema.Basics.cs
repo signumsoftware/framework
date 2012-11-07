@@ -44,7 +44,7 @@ namespace Signum.Engine.Maps
 
     interface ITablePrivate
     {
-        ColumnExpression GetIdExpression(Alias alias);
+        ColumnExpression GetPrimaryOrder(Alias alias);
     }
       
 
@@ -345,7 +345,7 @@ namespace Signum.Engine.Maps
         public bool Nullable { get; set; }
         public SqlDbType SqlDbType { get; set; }
         public string UdtTypeName { get; set; }
-        bool IColumn.PrimaryKey { get { return false; } }
+        public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
         public int? Size { get; set; }
         public int? Scale { get; set; }

@@ -64,12 +64,11 @@ namespace Signum.Engine.Maps
 
         internal Expression GetIdExpression(Alias alias)
         {
-
             var field = Fields.TryGetC(Table.fiId.Name);
 
             if (field == null)
             {
-                field = Fields.Values.First(f => f is IColumn && ((IColumn)f).PrimaryKey);
+                field = Fields.Values.FirstOrDefault(f => f .Field is IColumn && ((IColumn)f.Field).PrimaryKey);
                 if (field == null)
                     return null;
             }
@@ -77,7 +76,7 @@ namespace Signum.Engine.Maps
             return field.Field.GetExpression(alias, null, null);
         }
 
-        ColumnExpression ITablePrivate.GetIdExpression(Alias alias)
+        ColumnExpression ITablePrivate.GetPrimaryOrder(Alias alias)
         {
             return (ColumnExpression)GetIdExpression(alias);
         }
@@ -112,7 +111,7 @@ namespace Signum.Engine.Maps
                 this.Field.GetExpression(tableAlias, binder, null), this);
         }
 
-        ColumnExpression ITablePrivate.GetIdExpression(Alias alias)
+        ColumnExpression ITablePrivate.GetPrimaryOrder(Alias alias)
         {
             return RowIdExpression(alias);
         }
