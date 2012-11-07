@@ -10,6 +10,7 @@ using System.Web;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Web.Extensions.Properties;
+using System.Linq.Expressions;
 #endregion
 
 namespace Signum.Web.Operations
@@ -126,6 +127,12 @@ namespace Signum.Web.Operations
         public JsOperationOptions Options(string actionName, string controllerName)
         {
             return Options(RouteHelper.New().Action(actionName,controllerName));
+        }
+
+        public JsOperationOptions Options<TController>(Expression<Action<TController>> action)
+            where TController : Controller
+        {
+            return Options(RouteHelper.New().Action(action));
         }
 
         public JsOperationOptions Options(string controllerUrl)
