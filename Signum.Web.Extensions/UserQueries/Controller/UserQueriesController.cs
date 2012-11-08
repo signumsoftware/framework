@@ -67,7 +67,7 @@ namespace Signum.Web.UserQueries
             {
                 userQuery = this.ExtractEntity<UserQueryDN>();
             }
-            catch(Exception ex){}
+            catch(Exception){}
 
             var context = userQuery.ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
 
