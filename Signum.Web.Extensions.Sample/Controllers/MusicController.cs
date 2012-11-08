@@ -79,7 +79,7 @@ namespace Signum.Web.Extensions.Sample
         {
             ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix,
                                     Js.Submit(Url.Action<MusicController>(mc => mc.Clone(prefix)),
-                                        "function() {{ return SF.Popup.serializeJson('{0}'); }}".Formato(prefix))
+                                        Js.PopupSerializado(prefix))
                                     ).ToJS();
 
             ViewData[ViewDataKeys.Title] = "Introduzca el nombre del álbum";
