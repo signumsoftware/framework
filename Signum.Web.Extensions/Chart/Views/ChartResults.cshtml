@@ -74,9 +74,8 @@ else
                             {
                                 CellFormatter ft = formatters[col.Index];
                                 var value = row[col];
-                                <td @ft.WriteDataAttribute(value)>
-                                    @ft.
-                                    Item2(Html, row[col])
+                                 <td @ft.WriteDataAttribute(value)>
+                                    @ft.Formatter(Html, value)
                                 </td>
                             }
                         </tr>
