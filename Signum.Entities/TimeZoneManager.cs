@@ -27,6 +27,14 @@ namespace Signum.Entities
             OverrideNowVariable.Value = newNow;
             return new Disposable(() => OverrideNowVariable.Value = old);
         }
+
+        public static void IncrementOverridenNow(TimeSpan ts)
+        {
+            if (OverrideNowVariable.Value == null)
+                throw new InvalidOperationException("OverridenNow is not set");
+
+            OverrideNowVariable.Value += ts;
+        }
   
 
         public static DateTime Now
