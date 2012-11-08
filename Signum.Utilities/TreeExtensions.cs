@@ -153,6 +153,10 @@ namespace Signum.Utilities
             return "{0} Children: {1}".Formato(Children.Count, Value);
         }
 
+        void Never()
+        {
+            PropertyChanged(null, null); 
+        }
         public event PropertyChangedEventHandler PropertyChanged;
     }
 }
