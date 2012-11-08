@@ -124,5 +124,10 @@ namespace Signum.Web
         {
             return new JsInstruction(() => "if(confirm({0})) {1}".Formato(message.ToJS(), onSuccess.ToJS()));
         }
+
+        public static JsInstruction PopupSerializado(string prefix)
+        {
+            return new JsInstruction(() => "function() {{ return SF.Popup.serializeJson('{0}'); }}".Formato(prefix));
+        }
     }
 }
