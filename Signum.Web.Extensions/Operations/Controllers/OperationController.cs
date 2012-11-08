@@ -105,14 +105,16 @@ namespace Signum.Web.Operations
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFromMany(string runtimeType, List<int> ids, string operationFullKey, string prefix)
+        public ActionResult ConstructFromMany(string runtimeType, string operationFullKey, string prefix)
         {
+            var keys = Request["keys"];
+            if (string.IsNullOrEmpty(keys))
+                throw new ArgumentException("Construct from many operation {0} needs source Lite keys".Formato(operationFullKey));
+            
             Type type = Navigator.ResolveType(runtimeType);
-
-            if (ids == null || ids.Count == 0)
-                throw new ArgumentException("Construct from many operation {0} needs source Ids".Formato(operationFullKey));
-
-            List<Lite> sourceEntities = ids.Select(idstr => Lite.Create(type, idstr)).ToList();
+            
+            List<Lite> sourceEntities = keys.Split(new [] { "," }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(key => Lite.Parse(type, key)).ToList();
             
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
 

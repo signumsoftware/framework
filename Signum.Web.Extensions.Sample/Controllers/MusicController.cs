@@ -30,42 +30,43 @@ namespace Signum.Web.Extensions.Sample
             return Navigator.NormalPage(this, new NavigateOptions(Database.Retrieve<BandDN>(1)) { PartialViewName = "BandRepeater" });
         }
 
+        [HttpPost]
         public ActionResult CreateAlbumFromBand(string prefix)
         {
             BandDN band = Navigator.ExtractEntity<BandDN>(this);
 
             AlbumFromBandModel model = new AlbumFromBandModel(band.ToLite());
 
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
             ViewData[ViewDataKeys.OnSave] = new JsOperationExecutor(new JsOperationOptions 
-                { 
-                    Prefix = prefix,
-                    ControllerUrl = RouteHelper.New().Action("CreateAlbumFromBandOnSave", "Music") 
-                }).validateAndAjax().ToJS();
+            { 
+                Prefix = prefix,
+                ControllerUrl = Url.Action<MusicController>(mc => mc.CreateAlbumFromBandExecute(prefix))
+            }).validateAndAjax().ToJS();
 
             TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
             return this.PopupOpen(new PopupNavigateOptions(tc));
         }
 
-        public JsonResult CreateAlbumFromBandOnSave(string prefix)
+        [HttpPost]
+        public JsonResult CreateAlbumFromBandExecute(string prefix)
         {
-            MappingContext<AlbumFromBandModel> context = Navigator.ExtractEntity<AlbumFromBandModel>(this, prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
+            var modelo = Navigator.ExtractEntity<AlbumFromBandModel>(this, prefix)
+                .ApplyChanges(this.ControllerContext, prefix, true).Value;
 
-            AlbumDN newAlbum = context.Value.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, new object[] { context.Value.Name, context.Value.Year, context.Value.Label });
+            AlbumDN newAlbum = modelo.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, 
+                new object[] { modelo.Name, modelo.Year, modelo.Label });
 
             return JsonAction.Redirect(Navigator.NavigateRoute(newAlbum));
         }
 
-        public ActionResult CreateGreatestHitsAlbum(List<int> ids, string prefix)
+        [HttpPost]
+        public ActionResult CreateGreatestHitsAlbum()
         {
-            if (ids == null || ids.Count == 0)
-                throw new ArgumentException("You need to specify source albums");
-
-            List<Lite> sourceAlbums = ids.Select(idstr => Lite.Create(typeof(AlbumDN), idstr)).ToList();
+            var sourceAlbums = Navigator.ParseLiteKeys<AlbumDN>(Request["keys"]);
             
-            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceAlbums, typeof(AlbumDN), AlbumOperation.CreateGreatestHitsAlbum);
+            var newAlbum = OperationLogic.ConstructFromMany<AlbumDN, AlbumDN>(sourceAlbums, AlbumOperation.CreateGreatestHitsAlbum);
 
-            return Navigator.NormalPage(this, entity);
+            return Navigator.NormalPage(this, newAlbum);
         }
 
         /// <summary>
@@ -73,37 +74,30 @@ namespace Signum.Web.Extensions.Sample
         /// </summary>
         /// <param name="prefix"></param>
         /// <returns></returns>
+        [HttpPost]
         public ActionResult CloneWithData(string prefix)
         {
             ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix,
-                                    Js.Submit(
-                                        RouteHelper.New().Action("Clone", "Music"),
-                                        "function() {{ var data = {{ prefix:'{0}' }}; return $.extend(data, SF.Popup.serializeJson('{0}')); }}".Formato(prefix))
+                                    Js.Submit(Url.Action<MusicController>(mc => mc.Clone(prefix)),
+                                        "function() {{ return SF.Popup.serializeJson('{0}'); }}".Formato(prefix))
                                     ).ToJS();
 
-            ViewData[ViewDataKeys.Title] = "Introduzca los datos de las disponibilidades a crear";
+            ViewData[ViewDataKeys.Title] = "Introduzca el nombre del álbum";
 
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
-
-            TypeContext tc = TypeContextUtilities.UntypedNew(new ValueLineBoxModel(this.ExtractEntity<AlbumDN>(), ValueLineBoxType.String, "Name", "Write new album's name"), prefix);
-            return this.PopupOpen(new PopupViewOptions(tc));
+            var model = new ValueLineBoxModel(this.ExtractEntity<AlbumDN>(), ValueLineBoxType.String, "Name", "Write new album's name");
+            return this.PopupOpen(new PopupViewOptions(new TypeContext<ValueLineBoxModel>(model, prefix)));
         }
 
+        [HttpPost]
         public ActionResult Clone(string prefix)
         {
-            var valueCtx = this.ExtractEntity<ValueLineBoxModel>(prefix)
-                               .ApplyChanges(this.ControllerContext, prefix, false)
-                               .ValidateGlobal();
+            var modelo = this.ExtractEntity<ValueLineBoxModel>(prefix)
+                               .ApplyChanges(this.ControllerContext, prefix, false).Value;
+
             var album = this.ExtractLite<AlbumDN>(null);
 
-            if (valueCtx.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(valueCtx);
-                return JsonAction.ModelState(ModelState);
-            }
-
             AlbumDN newAlbum = album.ConstructFromLite<AlbumDN>(AlbumOperation.Clone);
-            newAlbum.Name = valueCtx.Value.StringValue;
+            newAlbum.Name = modelo.StringValue;
 
             return Navigator.NormalPage(this, newAlbum);
         }

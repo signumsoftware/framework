@@ -92,7 +92,7 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
-        public PartialViewResult SendMultipleSMSMessagesFromTemplate(List<int> ids, string providerWebQueryName, string prefix)
+        public PartialViewResult SendMultipleSMSMessagesFromTemplate(string providerWebQueryName, string prefix)
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(Navigator.ResolveQueryName(providerWebQueryName));
             Type entitiesType = Lite.Extract(queryDescription.Columns.SingleEx(a => a.IsEntity).Type);
@@ -103,8 +103,8 @@ namespace Signum.Web.SMS
             ViewData[ViewDataKeys.OnOk] = jsFindNavigator.hasSelectedItem(new JsFunction("item") 
             {
                 Js.Submit(Url.Action("SendMultipleMessagesFromTemplate", "SMS"),
-                    "function() {{ return {{ smsTemplate: item.key, idProviders: '{0}', webTypeName: '{1}' }} }}"
-                        .Formato(ids.ToString(","), webTypeName))
+                    "function() {{ return {{ smsTemplate: item.key, providerKeys: '{0}', webTypeName: '{1}' }} }}"
+                        .Formato(Request["keys"], webTypeName))
             }).ToJS();
 
             ViewData[ViewDataKeys.Title] = "Select the template";
@@ -120,15 +120,14 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
-        public ActionResult SendMultipleMessagesFromTemplate(string idProviders, Lite<SMSTemplateDN> smsTemplate, string webTypeName)
+        public ActionResult SendMultipleMessagesFromTemplate(Lite<SMSTemplateDN> smsTemplate, string webTypeName)
         {
             Type entitiesType = Navigator.ResolveType(webTypeName);
+            var providers = Request["providerKeys"].Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(key => Lite.Parse(entitiesType, key)).ToList();
 
-            var process = OperationLogic.ServiceConstructFromMany(
-                Database.RetrieveListLite(entitiesType, idProviders.Split(',').Select(id => int.Parse(id)).ToList()),
-                entitiesType,
-                SMSProviderOperations.SendSMSMessagesFromTemplate,
-                smsTemplate.Retrieve());
+            var process = OperationLogic.ServiceConstructFromMany(providers, entitiesType,
+                SMSProviderOperations.SendSMSMessagesFromTemplate, smsTemplate.Retrieve());
 
             return Redirect(Navigator.NavigateRoute(process));
         }
@@ -142,7 +141,7 @@ namespace Signum.Web.SMS
 
             var model = new MultipleSMSModel
             {
-                ProvidersIds = ids.ToString("_"),
+                ProviderKeys = Request["keys"].Split(new [] {","}, StringSplitOptions.RemoveEmptyEntries).ToString("_"),
                 WebTypeName = webTypeName,
             };
 
@@ -161,12 +160,10 @@ namespace Signum.Web.SMS
             };
 
             Type entitiesType = Navigator.ResolveType(model.WebTypeName);
+            var providers = model.ProviderKeys.Split('_').Select(key => Lite.Parse(entitiesType, key)).ToList();
 
-            var process = OperationLogic.ServiceConstructFromMany(
-                Database.RetrieveListLite(entitiesType, model.ProvidersIds.Split('_').Select(id => int.Parse(id)).ToList()),
-                entitiesType,
-                SMSProviderOperations.SendSMSMessage,
-                cp);
+            var process = OperationLogic.ServiceConstructFromMany(providers, entitiesType,
+                SMSProviderOperations.SendSMSMessage, cp);
 
             return JsonAction.Redirect(Navigator.NavigateRoute(process));
         }
