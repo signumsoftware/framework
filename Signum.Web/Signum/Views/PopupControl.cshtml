@@ -40,7 +40,6 @@
         }, modifiable).ToString(Html)
     </div>
     @Html.ValidationSummaryAjax(Model)
-    @Html.PopupHeader()
     <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable.SelfModified ? " sf-changed" : "")" 
         data-prefix="@Model.ControlID" 
         data-runtimeinfo="@Model.RuntimeInfo().ToString()">

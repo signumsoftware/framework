@@ -100,7 +100,15 @@ SF.registerModule("Popup", function () {
 
     SF.Popup.serialize = function (prefix) {
         var id = SF.compose(prefix, "panelPopup");
-        return $("#" + id + " :input").serialize();
+        var $formChildren = $("#" + id + " :input");
+        var data = $formChildren.serialize();
+
+        var myRuntimeInfoKey = SF.compose(prefix, SF.Keys.runtimeInfo);
+        if ($formChildren.filter("#" + myRuntimeInfoKey).length == 0) {
+            var $mainControl = $(".sf-main-control[data-prefix=" + prefix + "]");
+            data += "&" + myRuntimeInfoKey + "=" + $mainControl.data("runtimeinfo");
+        }
+        return data;
     };
 
     SF.Popup.serializeJson = function (prefix) {
@@ -114,6 +122,12 @@ SF.registerModule("Popup", function () {
             else {
                 data[arr[index].name] = arr[index].value;
             }
+        }
+
+        var myRuntimeInfoKey = SF.compose(prefix, SF.Keys.runtimeInfo);
+        if (typeof data[myRuntimeInfoKey] == "undefined") {
+            var $mainControl = $(".sf-main-control[data-prefix=" + prefix + "]");
+            data[myRuntimeInfoKey] = $mainControl.data("runtimeinfo");
         }
         return data;
     };

@@ -18,8 +18,6 @@ namespace Signum.Web.Controllers
         {
             var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
             
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
-
             TypeContext tc = TypeContextUtilities.UntypedNew(NoteWidgetHelper.CreateNote(entity), prefix);
             return this.PopupOpen(new PopupNavigateOptions(tc));
         }
@@ -36,8 +34,6 @@ namespace Signum.Web.Controllers
         public PartialViewResult CreateAlert(string prefix)
         {
             var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
-
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
 
             TypeContext tc = TypeContextUtilities.UntypedNew(AlertWidgetHelper.CreateAlert(entity), prefix);
             return this.PopupOpen(new PopupNavigateOptions(tc));

@@ -348,11 +348,7 @@ SF.registerModule("Validator", function () {
             isValid = new SF.Validator(validationOptions).validate();
         }
         else {
-            var info = new SF.RuntimeInfo(validationOptions.prefix);
-            isValid = new SF.PartialValidator($.extend(validationOptions, {
-                type: info.runtimeType(),
-                id: info.id()
-            })).validate().isValid;
+            isValid = new SF.PartialValidator(validationOptions).validate().isValid;
         }
 
         if (isValid) {
