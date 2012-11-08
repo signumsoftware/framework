@@ -81,7 +81,7 @@ namespace Signum.Windows.Authorization
             if (tac.Max().GetUI() < requested)
                 return false;
 
-            return Server.Return((ITypeAuthServer s) => s.IsAllowedFor(lite, requested));
+            return Server.Return((ITypeAuthServer s) => s.IsAllowedForInUserInterface(lite, requested));
         }
 
         public static bool IsAllowedFor(this IdentifiableEntity entity, TypeAllowedBasic requested)
@@ -94,7 +94,7 @@ namespace Signum.Windows.Authorization
             if (tac.Max().GetUI() < requested)
                 return false;
 
-            return Server.Return((ITypeAuthServer s) => s.IsAllowedFor(entity.ToLite(), requested));
+            return Server.Return((ITypeAuthServer s) => s.IsAllowedForInUserInterface(entity.ToLite(), requested));
         }
 
         public static TypeAllowedAndConditions GetAllowed(Type type)

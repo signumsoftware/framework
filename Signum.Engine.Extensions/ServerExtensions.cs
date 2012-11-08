@@ -229,10 +229,10 @@ namespace Signum.Services
               () => TypeAuthLogic.AuthorizedTypes());
         }
 
-        public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
+        public bool IsAllowedForInUserInterface(Lite lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => TypeAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
+             () => TypeAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.UserInterface));
         }
 
         public byte[] DownloadAuthRules()
