@@ -137,5 +137,15 @@ namespace Signum.Engine.Chart
         {
             return Colors.Value.TryGetC(type).TryGetS(id);
         }
+
+        public static Color? ColorFor(Lite lite)
+        {
+            return ColorFor(lite.RuntimeType, lite.Id);
+        }
+
+        public static Color? ColorFor(IdentifiableEntity ident)
+        {
+            return ColorFor(ident.GetType(), ident.Id);
+        }
     }
 }
