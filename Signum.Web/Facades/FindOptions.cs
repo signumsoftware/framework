@@ -116,7 +116,10 @@ namespace Signum.Web
             { 
                 this.filterMode = value;
                 if (value == FilterMode.OnlyResults)
+                {
                     SearchOnLoad = true;
+                    AllowMultiple = false;
+                }
             }
         }
 
