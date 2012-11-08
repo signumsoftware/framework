@@ -739,7 +739,7 @@ namespace Signum.Web
             if (findOptions.Navigate)
             {
                 findOptions.Navigate = implementations.Value.IsByAll ? true : 
-                    implementations.Value.Types.Any(t => Navigator.IsViewable(t));
+                    implementations.Value.Types.Any(t => Navigator.IsNavigable(t, true));
             }
             if (findOptions.Create)
             {
