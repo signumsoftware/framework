@@ -329,8 +329,6 @@ namespace Signum.Engine.Mailing
                                 Thread.Sleep(3000);
                         }
                     }); 
-
-                    client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
                 }
                 else
                 {
