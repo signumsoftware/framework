@@ -32,13 +32,6 @@ namespace Signum.Entities.Processes
             this.process = process;
         }
 
-        Lite<UserDN> user;
-        public Lite<UserDN> User
-        {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
-        }
-
         ProcessDN process;
         [NotNullValidator]
         public ProcessDN Process
@@ -51,6 +44,14 @@ namespace Signum.Entities.Processes
         {
             get { return processData; }
             set { Set(ref processData, value, () => ProcessData); }
+        }
+
+        [ImplementedBy(typeof(UserProcessSessionDN))]
+        ISessionDataDN sessionData;
+        public ISessionDataDN SessionData
+        {
+            get { return sessionData; }
+            set { Set(ref sessionData, value, () => SessionData); }
         }
 
         ProcessState state;
@@ -195,6 +196,29 @@ namespace Signum.Entities.Processes
     {
     }
 
+    public interface ISessionDataDN : IIdentifiable
+    {
+    }
+
+    [Serializable]
+    public class UserProcessSessionDN : Entity, ISessionDataDN
+    {
+        Lite<UserDN> user;
+        public Lite<UserDN> User
+        {
+            get { return user; }
+            set { Set(ref user, value, () => User); }
+        }
+
+        public static UserProcessSessionDN CreateCurrent()
+        {
+            return new UserProcessSessionDN
+            {
+                User = UserDN.Current.ToLite(),
+            };
+        }
+    }
+
     public enum ProcessState
     {
         Created,
@@ -210,7 +234,6 @@ namespace Signum.Entities.Processes
 
     public enum ProcessOperation
     {
-        FromProcess,
         Plan,
         Save,
         Cancel,

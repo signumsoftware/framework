@@ -44,7 +44,7 @@ namespace Signum.Services
         DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes();
 
         [OperationContract, NetDataContract]
-        bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed);
+        bool IsAllowedForInUserInterface(Lite lite, TypeAllowedBasic allowed);
 
         [OperationContract, NetDataContract]
         byte[] DownloadAuthRules();

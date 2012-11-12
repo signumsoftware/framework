@@ -10,12 +10,12 @@ namespace Signum.Windows.UIAutomation
 {
     public class ValueLineWindowProxy<T> : WindowProxy
     {
-        ValueLineProxy ValueLine{ get;set;}
+        ValueLineProxy ValueLine { get; set; }
 
 
         public ValueLineWindowProxy(AutomationElement element):base(element)
         {
-            ValueLine = new ValueLineProxy(element, null);
+            ValueLine = new ValueLineProxy(element.Child(e=>e.Current.ClassName == "ValueLine") , null);
         }
 
         public void Accept()

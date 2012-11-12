@@ -58,7 +58,7 @@ namespace Signum.Entities.SMS
         }
 
         string message;
-        [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.TripleSMSMaxTextLength)]
+        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)] // Max = SMSCharacters.TripleSMSMaxTextLength)]
         public string Message
         {
             get { return message; }

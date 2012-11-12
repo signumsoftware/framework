@@ -63,7 +63,7 @@ namespace Signum.Web.Processes
         {
             ProcessPermissions.ViewProcessControlPanel.Authorize();
 
-            ProcessLogic.Start();
+            ProcessLogic.StartProcesses();
 
             Thread.Sleep(1000);
 

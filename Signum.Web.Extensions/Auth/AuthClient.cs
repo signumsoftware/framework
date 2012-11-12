@@ -88,12 +88,12 @@ namespace Signum.Web.Auth
                     manager.IsCreable += manager_IsCreable;
                     manager.IsReadOnly += manager_IsReadOnly;
                     manager.IsViewable += manager_IsViewable;
-                }
+                        }
 
                 if (queries)
                 {
                     manager.IsFindable += QueryAuthLogic.GetQueryAllowed;
-                }
+                        }
 
                 AuthenticationRequiredAttribute.Authenticate = context =>
                 { 
@@ -161,7 +161,7 @@ namespace Signum.Web.Auth
             if (ident == null || ident.IsNew)
                 return TypeAuthLogic.GetAllowed(type).Max().GetUI() >= TypeAllowedBasic.Read;
 
-            return ident.IsAllowedFor(TypeAllowedBasic.Read);
+            return ident.IsAllowedFor(TypeAllowedBasic.Read, ExecutionContext.UserInterface);
         }
 
         static bool manager_IsReadOnly(Type type, ModifiableEntity entity)
@@ -174,7 +174,7 @@ namespace Signum.Web.Auth
             if (ident == null || ident.IsNew)
                 return TypeAuthLogic.GetAllowed(type).Max().GetUI() < TypeAllowedBasic.Modify;
 
-            return !ident.IsAllowedFor(TypeAllowedBasic.Modify);
+            return !ident.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface);
         }
 
         static bool manager_IsCreable(Type type)

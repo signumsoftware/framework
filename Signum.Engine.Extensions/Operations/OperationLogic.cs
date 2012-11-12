@@ -194,7 +194,7 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public static void RegisterOverride(this IOperation operation)
+        public static void RegisterReplace(this IOperation operation)
         {
             if (!operation.Type.IsIIdentifiable())
                 throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
