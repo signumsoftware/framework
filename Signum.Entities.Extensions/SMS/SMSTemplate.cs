@@ -57,6 +57,7 @@ namespace Signum.Entities.SMS
             set { Set(ref associatedType, value, () => AssociatedType); }
         }
 
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
         string message;
         [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)] // Max = SMSCharacters.TripleSMSMaxTextLength)]
         public string Message
