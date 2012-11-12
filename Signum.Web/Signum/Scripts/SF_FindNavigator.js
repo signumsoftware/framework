@@ -95,20 +95,20 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $tblResults.on("click", ".sf-search-ctxitem.quickfilter", function () {
+                $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter > span", function () {
                     var $elem = $(this).closest("td");
                     $('.sf-search-ctxmenu-overlay').remove();
                     self.quickFilterCell($elem);
                 });
 
-                $tblResults.on("click", ".sf-search-ctxitem.quickfilter-header", function () {
+                $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter-header > span", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
                     self.quickFilterHeader($elem);
                     return false;
                 });
 
-                $tblResults.on("click", ".sf-search-ctxitem.remove-column", function () {
+                $tblResults.on("click", ".sf-search-ctxitem.sf-remove-column > span", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
 
@@ -116,7 +116,7 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $tblResults.on("click", ".sf-search-ctxitem.edit-column", function () {
+                $tblResults.on("click", ".sf-search-ctxitem.sf-edit-column > span", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
 
@@ -207,11 +207,11 @@ SF.registerModule("FindNavigator", function () {
                 var $menu = this.createCtxMenu($th);
 
                 var $itemContainer = $menu.find(".sf-search-ctxmenu");
-                $itemContainer.append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>");
+                $itemContainer.append("<div class='sf-search-ctxitem sf-quickfilter-header'><span>" + lang.signum.addFilter + "</span></div>");
 
                 if (this.options.allowChangeColumns) {
-                    $itemContainer.append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
-                        .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
+                    $itemContainer.append("<div class='sf-search-ctxitem sf-edit-column'><span>" + lang.signum.editColumnName + "</span></div>")
+                        .append("<div class='sf-search-ctxitem sf-remove-column'><span>" + lang.signum.removeColumn + "</span></div>");
                 }
 
                 $th.append($menu);
@@ -223,7 +223,7 @@ SF.registerModule("FindNavigator", function () {
                 var $menu = this.createCtxMenu($td);
 
                 $menu.find(".sf-search-ctxmenu")
-                    .html("<div class='sf-search-ctxitem quickfilter'>" + lang.signum.addFilter + "</div>");
+                    .html("<div class='sf-search-ctxitem sf-quickfilter'><span>" + lang.signum.addFilter + "</span></div>");
 
                 $td.append($menu);
                 return false;
