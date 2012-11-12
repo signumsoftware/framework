@@ -112,7 +112,7 @@ namespace Signum.Web.Chart
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
-            if (Navigator.IsCreable(typeof(UserChartDN)))
+            if (Navigator.IsCreable(typeof(UserChartDN), isSearchEntity: true))
             {
                 string uqNewText = Resources.UserChart_CreateNew;
                 items.Add(new ToolBarButton
@@ -123,9 +123,7 @@ namespace Signum.Web.Chart
                     OnClick = Js.Submit(RouteHelper.New().Action("CreateUserChart", "Chart"), "SF.Chart.getFor('{0}').requestProcessedData()".Formato(prefix)).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
-            }
-
-            
+            }            
             
             if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
             {

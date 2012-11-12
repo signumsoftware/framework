@@ -36,6 +36,7 @@ namespace Signum.Web.Chart
         public static string ChartRequestView = ViewPrefix.Formato("ChartRequestView");
         public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");
         public static string ChartResultsView = ViewPrefix.Formato("ChartResults");
+        public static string ChartResultsTableView = ViewPrefix.Formato("ChartResultsTable");
         public static string ChartScriptCodeView = ViewPrefix.Formato("ChartScriptCode");
 
         public static void Start()
