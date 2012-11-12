@@ -131,13 +131,13 @@ SF.registerModule("ViewNavigator", function () {
 
         showViewOk: function (newHtml) {
             if (SF.isEmpty(newHtml)) {
-                newHtml = $('#' + this.viewOptions.containerDiv).html(); //preloaded
+                newHtml = $('#' + this.viewOptions.containerDiv).children().clone(true); //preloaded
             }
             //Backup current Html (for cancel scenarios)
             this.backup = SF.cloneContents(this.viewOptions.containerDiv);
             $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
 
-            $("body").append(SF.hiddenDiv(this.tempDivId(), newHtml));
+            $("body").append($("<div></div>").attr("id", this.tempDivId()).css("display", "none").append(newHtml));
             SF.triggerNewContent($("#" + this.tempDivId()));
 
             var self = this;
