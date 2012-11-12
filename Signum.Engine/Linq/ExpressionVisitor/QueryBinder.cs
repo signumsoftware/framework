@@ -538,7 +538,6 @@ namespace Signum.Engine.Linq
             }
             else
             {
-
                 map.SetRange(resultSelector.Parameters, new[] { projection.Projector, collectionProjection.Projector });
                 Expression resultProjector = Visit(resultSelector.Body);
                 map.RemoveRange(resultSelector.Parameters);
@@ -1746,8 +1745,21 @@ namespace Signum.Engine.Linq
             if (requests.IsEmpty())
                 return projection;
 
-            SourceExpression source = projection.Select;
+            SourceExpression source = ApplyExpansions(projection.Select);
 
+            if (source == projection.Select)
+                return projection;
+
+            Alias newAlias = Alias.NextSelectAlias();
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, source.KnownAliases); //Do not replace tokens
+
+            return new ProjectionExpression(
+                    new SelectExpression(newAlias, false, false, null, pc.Columns, source, null, null, null),
+                    pc.Projector, projection.UniqueFunction, projection.Type);
+        }
+
+        private SourceExpression ApplyExpansions(SourceExpression source)
+        {
             for (int i = 0; i < requests.Count; i++)
             {
                 var r = requests[i];
@@ -1774,16 +1786,7 @@ namespace Signum.Engine.Linq
                 requests.RemoveAt(i);
                 i--;
             }
-
-            if (source == projection.Select)
-                return projection;
-
-            Alias newAlias = Alias.NextSelectAlias();
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, source.KnownAliases); //Do not replace tokens
-
-            return new ProjectionExpression(
-                    new SelectExpression(newAlias, false, false, null, pc.Columns, source, null, null, null),
-                    pc.Projector, projection.UniqueFunction, projection.Type);
+            return source;
         }
 
         internal static SqlConstantExpression NullId = new SqlConstantExpression(null, typeof(int?));
