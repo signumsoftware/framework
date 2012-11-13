@@ -68,11 +68,11 @@ namespace Signum.Web
                             htmlAttr));
 
                         int? id = entityLine.IdOrNull;
-                        if (id != null && entityLine.View && Navigator.IsViewable(entityLine.CleanRuntimeType, EntitySettingsContext.Admin))
+                        if (id != null && entityLine.Navigate && Navigator.IsNavigable(entityLine.CleanRuntimeType, isSearchEntity: false))
                         {
                             sb.AddLine(
                                 helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                    entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
+                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
                                     new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                         }
                         else

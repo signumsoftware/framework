@@ -120,6 +120,46 @@
         </Path.Fill>
     </Path>
 
+    <Path x:Key="Navigate" Stretch="Fill" Stroke="#FF0367CA" x:Shared="False">
+        <Path.Data>
+            <CombinedGeometry GeometryCombineMode="Exclude">
+                <CombinedGeometry.Geometry1>
+                    <CombinedGeometry GeometryCombineMode="Union">
+                        <CombinedGeometry.Geometry1>
+                            <CombinedGeometry GeometryCombineMode="Exclude">
+                                <CombinedGeometry.Geometry1>
+                                    <RectangleGeometry Rect="1,5,14,14"/>
+                                </CombinedGeometry.Geometry1>
+                                <CombinedGeometry.Geometry2>
+                                    <RectangleGeometry Rect="3,7,10,10"/>
+                                </CombinedGeometry.Geometry2>
+                            </CombinedGeometry>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <RectangleGeometry Rect="5,1,14,14"/>
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                </CombinedGeometry.Geometry1>
+                <CombinedGeometry.Geometry2>
+                    <RectangleGeometry Rect="7,3,10,10"/>
+                </CombinedGeometry.Geometry2>
+            </CombinedGeometry>
+        </Path.Data>
+        <Path.Fill>
+            <RadialGradientBrush SpreadMethod="Pad" GradientOrigin="0.446,0.456">
+                <RadialGradientBrush.RelativeTransform>
+                    <TransformGroup>
+                        <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="0.88" ScaleY="0.88"/>
+                        <SkewTransform AngleX="0" AngleY="0" CenterX="0.5" CenterY="0.5"/>
+                        <RotateTransform Angle="0" CenterX="0.5" CenterY="0.5"/>
+                        <TranslateTransform X="-0.031" Y="-0.08"/>
+                    </TransformGroup>
+                </RadialGradientBrush.RelativeTransform>
+                <GradientStop Color="#FF1BE2EC" Offset="0"/>
+                <GradientStop Color="#FF00AEB1" Offset="1"/>
+            </RadialGradientBrush>
+        </Path.Fill>
+    </Path>
 
     <Path x:Key="Down" Stretch="Fill" Stroke="#FFCA03C4" x:Shared="False">
         <Path.Data>

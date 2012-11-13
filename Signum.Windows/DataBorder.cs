@@ -54,8 +54,8 @@ namespace Signum.Windows
                     Child = null;
                 else
                 {
-                    EntitySettings setting = Navigator.GetEntitySettings(newValue.GetType());
-                    if (setting == null)
+                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(newValue.GetType());
+                    if (es == null)
                         Child = new TextBox
                         {
                             Text = "No EntitySettings for {0}".Formato(newValue.GetType()),
@@ -63,7 +63,7 @@ namespace Signum.Windows
                             FontWeight = FontWeights.Bold
                         };
                     else
-                        Child = setting.CreateView((ModifiableEntity)newValue, Common.GetTypeContext(this)); 
+                        Child = es.CreateView((ModifiableEntity)newValue, Common.GetTypeContext(this)); 
                 }
             }
             if (Child != null)

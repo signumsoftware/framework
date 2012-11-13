@@ -64,5 +64,26 @@ namespace Signum.Utilities
                 s = s.PadRight(Console.WindowWidth - 2);
             return s;
         }
+
+        public static bool Ask(string question)
+        {
+            return Ask(question, "yes", "no") == "yes";
+        }
+
+        public static string Ask(string question, params string[] answers)
+        {
+            Console.WriteLine(question + " " + answers.ToString("/"));
+            var answer = Console.ReadLine().ToLower();
+
+            do
+            {
+
+                var result = answers.FirstOrDefault(a => a.StartsWith(answer, StringComparison.CurrentCultureIgnoreCase));
+                if (result != null)
+                    return result;
+
+                Console.WriteLine("Possible answers: " + answers.ToString("/"));
+            } while (true);
+        }
     }
 }

@@ -29,7 +29,7 @@ namespace Signum.Engine.DynamicQuery
         int ExecuteQueryCount(QueryCountRequest request);
         Lite ExecuteUniqueEntity(UniqueEntityRequest request);
         Expression Expression { get; } //Optional
-        Lazy<ColumnDescriptionFactory[]> StaticColumns { get; } 
+        ResetLazy<ColumnDescriptionFactory[]> StaticColumns { get; } 
     }
 
     public abstract class DynamicQuery<T> : IDynamicQuery
@@ -59,10 +59,9 @@ namespace Signum.Engine.DynamicQuery
 
             if (errors.HasText())
                 throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".Formato(errors, QueryUtils.GetQueryUniqueKey(QueryName)));
-             
         }
 
-        public Lazy<ColumnDescriptionFactory[]> StaticColumns { get; private set; } 
+        public ResetLazy<ColumnDescriptionFactory[]> StaticColumns { get; private set; } 
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
@@ -70,16 +69,16 @@ namespace Signum.Engine.DynamicQuery
 
         public DynamicQuery()
         {
-            StaticColumns = new Lazy<ColumnDescriptionFactory[]>(() =>
+            StaticColumns = new ResetLazy<ColumnDescriptionFactory[]>(() =>
+            {
+                using (HeavyProfiler.Log("InitColums"))
                 {
-                    using (HeavyProfiler.Log("InitColums"))
-                    {
-                        var result = InitializeColumns();
-                        if (QueryName != null)
-                            AssertColumns(result);
-                        return result;
-                    }
-                });
+                    var result = InitializeColumns();
+                    if (QueryName != null)
+                        AssertColumns(result);
+                    return result;
+                }
+            });
         }
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()

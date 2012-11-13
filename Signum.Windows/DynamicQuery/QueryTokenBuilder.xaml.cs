@@ -15,6 +15,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
 using System.Windows.Automation;
+using System.ComponentModel;
 
 namespace Signum.Windows
 {
@@ -59,6 +60,9 @@ namespace Signum.Windows
 
         List<QueryToken> OnSubTokens(QueryToken token)
         {
+            if (DesignerProperties.GetIsInDesignMode(this))
+                return new List<QueryToken>();
+
             if (SubTokensEvent == null)
                 throw new InvalidOperationException("SubTokensEvent not set");
 

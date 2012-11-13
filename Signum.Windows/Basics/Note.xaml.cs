@@ -31,10 +31,10 @@ namespace Signum.Windows.Basics
             NotesWidget.NotesQuery = typeof(NoteDN);
             NotesWidget.NotesQueryColumn = "Target";
 
-            Navigator.AddSetting(new EntitySettings<NoteDN>(EntityType.Default)
+            Navigator.AddSetting(new EntitySettings<NoteDN>(EntityType.Main)
             {
                 View = e => new Note(),
-                IsCreable = admin => false,
+                IsCreable = EntityWhen.Never,
                 Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/note.png", typeof(NotesWidget)))
             });
         }

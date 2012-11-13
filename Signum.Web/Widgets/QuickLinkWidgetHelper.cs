@@ -51,7 +51,7 @@ namespace Signum.Web
         {
             WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) => entity is IdentifiableEntity ? CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
 
-            ContextualItemsHelper.GetContextualItemsForLite += new GetContextualItemDelegate(ContextualItemsHelper_GetContextualItemsForLite);
+            ContextualItemsHelper.GetContextualItemsForLites += new GetContextualItemDelegate(ContextualItemsHelper_GetContextualItemsForLite);
         }
 
         public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
@@ -94,10 +94,13 @@ namespace Signum.Web
             };
         }
 
-        static ContextualItem ContextualItemsHelper_GetContextualItemsForLite(ControllerContext controllerContext, Lite lite, object queryName, string prefix)
+        static ContextualItem ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
         {
-            IdentifiableEntity ie = Database.Retrieve(lite);
-            List<QuickLink> quicklinks = GetForEntity(ie, Navigator.EntitySettings(ie.GetType()).OnPartialViewName(ie), prefix);
+            if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
+                return null;
+
+            IdentifiableEntity ie = Database.Retrieve(ctx.Lites[0]);
+            List<QuickLink> quicklinks = GetForEntity(ie, Navigator.EntitySettings(ie.GetType()).OnPartialViewName(ie), ctx.Prefix);
             if (quicklinks == null || quicklinks.Count == 0)
                 return null;
 
@@ -123,7 +126,7 @@ namespace Signum.Web
 
             return new ContextualItem
             {
-                Id = TypeContextUtilities.Compose(prefix, "ctxItemQuickLinks"),
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemQuickLinks"),
                 Content = content.ToHtml().ToString()
             };
         }
@@ -207,13 +210,13 @@ namespace Signum.Web
         public QuickLinkView(Lite liteEntity)
         {
             lite = liteEntity;
-            IsVisible = Navigator.IsViewable(lite.RuntimeType, EntitySettingsContext.Default);
+            IsVisible = Navigator.IsNavigable(lite.RuntimeType, isSearchEntity: false);
             Text = lite.RuntimeType.NiceName();
         }
 
         public override MvcHtmlString Execute()
         {
-            return new HtmlTag("a").Attr("href", Navigator.ViewRoute(lite)).SetInnerText(Text);
+            return new HtmlTag("a").Attr("href", Navigator.NavigateRoute(lite)).SetInnerText(Text);
         }
     }
 }

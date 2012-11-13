@@ -141,11 +141,6 @@
     <Compile Include="ValidationAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Attributes.cd" />
-    <None Include="ClassDiagram1.cd" />
-    <None Include="Diagram.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.es.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>

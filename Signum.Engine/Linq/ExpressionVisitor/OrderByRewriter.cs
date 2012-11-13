@@ -12,10 +12,25 @@ namespace Signum.Engine.Linq
 {
     internal class OrderByRewriter : DbExpressionVisitor
     {
+        List<ColumnExpression> gatheredKeys;
         ReadOnlyCollection<OrderExpression> gatheredOrderings;
         SelectExpression outerMostSelect;
 
         private OrderByRewriter() { }
+
+        public IDisposable Scope()
+        {
+            var oldOrderings = gatheredOrderings;
+            var oldKeys = gatheredKeys;
+
+            gatheredOrderings = null;
+            gatheredKeys = null;
+            return new Disposable(() =>
+            {
+                gatheredKeys = oldKeys;
+                gatheredOrderings = oldOrderings;
+            });
+        }
 
         static internal Expression Rewrite(Expression expression)
         {
@@ -24,23 +39,25 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
-            var oldGatheredOrderings = gatheredOrderings;
-            var oldOuterMostSelect = outerMostSelect;
+            using (Scope())
+            {
+                var oldOuterMostSelect = outerMostSelect;
+                outerMostSelect = proj.Select;
 
-            gatheredOrderings = null;
-            outerMostSelect = proj.Select;
+                var result = base.VisitProjection(proj);
+                outerMostSelect = oldOuterMostSelect;
 
-            var result = base.VisitProjection(proj);
+                return result;
+            }
 
-            gatheredOrderings = oldGatheredOrderings;
-            outerMostSelect = oldOuterMostSelect;
-
-            return result;
         }
 
         protected override Expression VisitSelect(SelectExpression select)
         {
             bool isOuterMost = select == outerMostSelect;
+
+            if (select.Top != null && gatheredKeys == null)
+                gatheredKeys = new List<ColumnExpression>();
 
             select = (SelectExpression)base.VisitSelect(select);
             if (select.GroupBy != null && select.GroupBy.Any())
@@ -54,10 +71,13 @@ namespace Signum.Engine.Linq
             if (select.OrderBy != null && select.OrderBy.Count > 0)
                 this.PrependOrderings(select.OrderBy);
 
-            var orderings = (isOuterMost && !IsCountSumOrAvg(select)) ? gatheredOrderings : null;
+            ReadOnlyCollection<OrderExpression> orderings = null;
 
-            if (select.Top != null)
+            if(isOuterMost && !IsCountSumOrAvg(select) || select.Top != null)
             {
+                if (select.Top != null)
+                    AppendKeys();
+
                 orderings = gatheredOrderings;
                 gatheredOrderings = null;
             }
@@ -68,40 +88,26 @@ namespace Signum.Engine.Linq
             return new SelectExpression(select.Alias, select.IsDistinct, false, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy);
         }
 
+
         protected override Expression VisitScalar(ScalarExpression scalar)
         {
-            var saveGatheredOrderings = gatheredOrderings;
-            gatheredOrderings = null;
-
-            var result = base.VisitScalar(scalar);
-
-            gatheredOrderings = saveGatheredOrderings;
-
-            return result;
+            using (Scope())
+                return base.VisitScalar(scalar);
         }
 
         protected override Expression VisitExists(ExistsExpression exists)
         {
-            var saveGatheredOrderings = gatheredOrderings;
-            gatheredOrderings = null;
-
-            var result = base.VisitExists(exists);
-
-            gatheredOrderings = saveGatheredOrderings;
-
-            return result;
+            using (Scope())
+                return base.VisitExists(exists);
         }
 
         protected override Expression VisitIn(InExpression @in)
         {
-            var saveGatheredOrderings = gatheredOrderings;
-            gatheredOrderings = null;
-
-            var result = base.VisitIn(@in);
-
-            gatheredOrderings = saveGatheredOrderings;
-
-            return result;
+            if (@in.Values != null)
+                return base.VisitIn(@in);
+            else
+                using (Scope())
+                    return base.VisitIn(@in);
         }
 
         static bool AreEqual(IEnumerable<OrderExpression> col1, IEnumerable<OrderExpression> col2)
@@ -152,7 +158,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<OrderExpression> leftOrders = this.gatheredOrderings;
             this.gatheredOrderings = null;
 
-            SourceExpression right = this.VisitSource(join.Right);
+            SourceExpression right = join.Right is TableExpression ? join.Right : this.VisitSource(join.Right);
 
             this.PrependOrderings(leftOrders);
 
@@ -165,9 +171,33 @@ namespace Signum.Engine.Linq
             return join;
         }
 
+        protected override Expression VisitTable(TableExpression table)
+        {
+            if (gatheredKeys != null)
+                gatheredKeys.Add(table.GetIdExpression());
+
+            return table;
+        }
+
+        protected void AppendKeys()
+        {
+            if(this.gatheredKeys.IsNullOrEmpty())
+                return;
+
+            if (this.gatheredOrderings.IsNullOrEmpty())
+                this.gatheredOrderings = this.gatheredKeys.Select(a => new OrderExpression(OrderType.Ascending, a)).ToReadOnly();
+            else
+            {
+                var hs = this.gatheredOrderings.Select(a=>a.Expression).OfType<ColumnExpression>().ToHashSet();
+                var postOrders = this.gatheredKeys.Where(e => !hs.Contains(e)).Select(a => new OrderExpression(OrderType.Ascending, a));
+
+                this.gatheredOrderings = this.gatheredOrderings.Concat(postOrders).ToReadOnly();
+            }
+        }
+
         protected void PrependOrderings(ReadOnlyCollection<OrderExpression> newOrderings)
         {
-            if (newOrderings != null)
+            if (!newOrderings.IsNullOrEmpty())
             {
                 if (this.gatheredOrderings.IsNullOrEmpty())
                 {

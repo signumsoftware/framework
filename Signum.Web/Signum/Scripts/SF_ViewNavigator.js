@@ -35,6 +35,9 @@ SF.registerModule("ViewNavigator", function () {
             if (this.isLoaded()) {
                 return this.showViewOk(null);
             }
+            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
+                this.viewOptions.controllerUrl = SF.Urls.popupView;
+            }
             var self = this;
             this.callServer(function (controlHtml) { self.showViewOk(controlHtml); });
         },
@@ -42,6 +45,9 @@ SF.registerModule("ViewNavigator", function () {
         createOk: function () {
             if (!SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "ContainerDiv cannot be specified to Navigator on createOk mode";
+            }
+            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
+                this.viewOptions.controllerUrl = SF.Urls.popupView;
             }
             var self = this;
             this.callServer(function (controlHtml) { self.showCreateOk(controlHtml); });
@@ -85,6 +91,9 @@ SF.registerModule("ViewNavigator", function () {
                 if (SF.isEmpty(this.viewOptions.type) && new SF.RuntimeInfo(this.viewOptions.prefix).find().length == 0) {
                     throw "Type must be specified to Navigator on viewSave mode";
                 }
+                if (SF.isEmpty(this.viewOptions.controllerUrl)) {
+                    this.viewOptions.controllerUrl = SF.Urls.popupNavigate;
+                }
                 var self = this;
                 this.callServer(function (controlHtml) { self.showViewSave(controlHtml); });
             }
@@ -98,6 +107,9 @@ SF.registerModule("ViewNavigator", function () {
                 throw "Type must be specified to Navigator on createSave mode";
             }
             this.viewOptions.prefix = SF.compose("New", this.viewOptions.prefix);
+            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
+                this.viewOptions.controllerUrl = SF.Urls.popupNavigate;
+            }
             var self = this;
             this.callServer(function (controlHtml) { self.showCreateSave(controlHtml); });
         },
@@ -119,13 +131,13 @@ SF.registerModule("ViewNavigator", function () {
 
         showViewOk: function (newHtml) {
             if (SF.isEmpty(newHtml)) {
-                newHtml = $('#' + this.viewOptions.containerDiv).html(); //preloaded
+                newHtml = $('#' + this.viewOptions.containerDiv).children().clone(true); //preloaded
             }
             //Backup current Html (for cancel scenarios)
             this.backup = SF.cloneContents(this.viewOptions.containerDiv);
             $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
 
-            $("body").append(SF.hiddenDiv(this.tempDivId(), newHtml));
+            $("body").append($("<div></div>").attr("id", this.tempDivId()).css("display", "none").append(newHtml));
             SF.triggerNewContent($("#" + this.tempDivId()));
 
             var self = this;
@@ -326,10 +338,7 @@ SF.registerModule("ViewNavigator", function () {
         //Construct popup
         var tempDivId = SF.compose(_prefix, "Temp");
         var requestData = "prefix=" + tempDivId;
-        if (SF.isEmpty(jsonOptionsListFormat)) {
-            throw "chooser options must be provider. Use openTypeChooser for automatic type chooser";
-        }
-        else {
+        if (!SF.isEmpty(jsonOptionsListFormat)) {
             for (var i = 0; i < jsonOptionsListFormat.length; i++) {
                 requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
                 if (chooserOptions && chooserOptions.ids != null) {

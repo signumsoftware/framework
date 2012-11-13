@@ -25,7 +25,8 @@ namespace Signum.Web
         public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Autocomplete = true;        
+            Autocomplete = true;
+            Navigate = true;
         }
 
         protected override void SetReadOnly()
@@ -61,12 +62,6 @@ namespace Signum.Web
 
         public JsInstruction JsCreate(JsViewOptions viewOptions)
         {
-            if (ViewMode == ViewMode.Navigate)
-            {
-                viewOptions.Navigate = true;
-                viewOptions.ControllerUrl = Navigator.ViewRoute(Type.CleanType(), null);
-            }
-            
             return new JsInstruction(() => "{0}.create({1})".Formato(
                 this.ToJS(), 
                 viewOptions.TryCC(v => v.ToJS()) ?? ""));

@@ -42,7 +42,13 @@ namespace Signum.Engine.Maps
         void GenerateColumns();
     }
 
-    public partial class Table : IFieldFinder, ITable
+    interface ITablePrivate
+    {
+        ColumnExpression GetPrimaryOrder(Alias alias);
+    }
+      
+
+    public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         public Type Type { get; private set; }
 
@@ -184,7 +190,6 @@ namespace Signum.Engine.Maps
         {
             return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
         }
-
     }
 
     public class EntityField
@@ -340,7 +345,7 @@ namespace Signum.Engine.Maps
         public bool Nullable { get; set; }
         public SqlDbType SqlDbType { get; set; }
         public string UdtTypeName { get; set; }
-        bool IColumn.PrimaryKey { get { return false; } }
+        public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
         public int? Size { get; set; }
         public int? Scale { get; set; }
@@ -660,7 +665,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class RelationalTable : ITable, IFieldFinder
+    public partial class RelationalTable : ITable, IFieldFinder, ITablePrivate
     {
         public class PrimaryKeyColumn : IColumn
         {

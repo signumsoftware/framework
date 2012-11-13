@@ -18,13 +18,13 @@ namespace Signum.Web
 
         public abstract Type StaticType { get; }
      
-        public abstract Delegate UntypedMappingDefault { get; }
-        public abstract Delegate UntypedMappingAdmin { get; }
+        public abstract Delegate UntypedMappingLine { get; }
+        public abstract Delegate UntypedMappingMain { get; }
 
-        public abstract bool OnIsReadOnly(ModifiableEntity entity, EntitySettingsContext ctx);
-        public abstract bool OnIsViewable(ModifiableEntity entity, EntitySettingsContext ctx);
-        public abstract bool OnIsCreable(EntitySettingsContext ctx);
-        public abstract bool OnShowSave();
+        internal abstract bool OnIsCreable(bool isSearchEntity);
+        internal abstract bool OnIsViewable();
+        internal abstract bool OnIsNavigable(bool isSearchEntity);
+        internal abstract bool OnIsReadonly();
 
         public abstract string OnPartialViewName(ModifiableEntity entity);
     }
@@ -33,14 +33,8 @@ namespace Signum.Web
     {
         public override string WebTypeName
         {
-            get
-            {
-                return TypeLogic.GetCleanName(typeof(T));
-            }
-            set
-            {
-                throw new InvalidOperationException();
-            }
+            get { return TypeLogic.GetCleanName(typeof(T)); }
+            set { throw new InvalidOperationException(); }
         }
 
         public override Type StaticType
@@ -48,62 +42,17 @@ namespace Signum.Web
             get { return typeof(T); }
         }
 
-        public Mapping<T> MappingDefault { get; set; }
-        public Mapping<T> MappingAdmin { get; set; }
+        public Mapping<T> MappingLine { get; set; }
+        public Mapping<T> MappingMain { get; set; }
 
-        public override Delegate UntypedMappingDefault { get { return MappingDefault; } }
-        public override Delegate UntypedMappingAdmin { get { return MappingAdmin; } }
+        public EntityWhen IsCreable { get; set; }
+        public bool IsViewable { get; set; }
+        public EntityWhen IsNavigable { get; set; }
+        public bool IsReadonly { get; set; }
 
-        public override bool OnIsReadOnly(ModifiableEntity entity, EntitySettingsContext ctx)
-        {
-            if (IsReadOnly != null)
-                foreach (Func<T, EntitySettingsContext, bool> item in IsReadOnly.GetInvocationList())
-                {
-                    if (item((T)entity, ctx))
-                        return true;
-                }
+        public override Delegate UntypedMappingLine { get { return MappingLine; } }
+        public override Delegate UntypedMappingMain { get { return MappingMain; } }
 
-            return false;
-        }
-
-        public override bool OnIsViewable(ModifiableEntity entity, EntitySettingsContext ctx)
-        {
-            if (PartialViewName == null)
-                return false;
-
-            if (IsViewable != null)
-                foreach (Func<T, EntitySettingsContext, bool> item in IsViewable.GetInvocationList())
-                {
-                    if (!item((T)entity, ctx))
-                        return false;
-                }
-
-            return true;
-        }
-
-        public override bool OnIsCreable(EntitySettingsContext ctx)
-        {
-            if (IsCreable != null)
-                foreach (Func<EntitySettingsContext, bool> item in IsCreable.GetInvocationList())
-                {
-                    if (!item(ctx))
-                        return false;
-                }
-
-            return true;
-        }
-
-        public override bool OnShowSave()
-        {
-            return ShowSave;
-        }
-
-        public Func<EntitySettingsContext, bool> IsCreable { get; set; }
-        public Func<T, EntitySettingsContext, bool> IsReadOnly { get; set; }
-        public Func<T, EntitySettingsContext, bool> IsViewable { get; set; }      
-
-        public bool ShowSave { get; set; }
-   
         public Func<T, string> PartialViewName { get; set; }
 
         public override string OnPartialViewName(ModifiableEntity entity)
@@ -115,42 +64,80 @@ namespace Signum.Web
         {
             switch (entityType)
             {
-                case EntityType.Default:
-                case EntityType.DefaultNotSaving:
-                    ShowSave = entityType == EntityType.Default;
-                    MappingAdmin = MappingDefault = new EntityMapping<T>(true).GetValue;
+                case EntityType.SystemString:
+                    IsCreable = EntityWhen.Never;
+                    IsViewable = false;
+                    IsNavigable = EntityWhen.Never;
+                    IsReadonly = true;
+                    MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
-                case EntityType.Admin:
-                case EntityType.AdminNotSaving:
-                    ShowSave =  entityType == EntityType.Admin;
-                    IsCreable = ctx => ctx == EntitySettingsContext.Admin;
-                    IsViewable = (_, ctx) => ctx == EntitySettingsContext.Admin;
-                    MappingAdmin = new EntityMapping<T>(true).GetValue;
-                    MappingDefault = new EntityMapping<T>(false).GetValue;
+                case EntityType.System:
+                    IsCreable = EntityWhen.Never;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    IsReadonly = true;
+                    MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
-                case EntityType.ServerOnly:
-                    IsReadOnly = (_, ctx) => true;
-                    IsCreable = ctx => false;
-                    MappingAdmin = MappingDefault = new EntityMapping<T>(false).GetValue;
+                case EntityType.String:
+                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsViewable = false;
+                    IsNavigable = EntityWhen.IsSearchEntity;
+                    MappingMain = new EntityMapping<T>(true).GetValue;
+                    MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
-                case EntityType.Content:
-                    ShowSave = false;
-                    IsCreable = ctx =>  ctx == EntitySettingsContext.Content;
-                    IsViewable = (_, ctx) => ctx == EntitySettingsContext.Content;
-                    MappingAdmin = null;
-                    MappingDefault = new EntityMapping<T>(true).GetValue;
+                case EntityType.Part:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
+                    break;
+                case EntityType.Shared:
+                    IsCreable = EntityWhen.Always;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
+                    break;
+                case EntityType.Main:
+                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
                 default:
                     break;
             }
         }
+
+        internal override bool OnIsCreable(bool isSearchEntity)
+        {
+            return IsCreable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+        }
+
+        internal override bool OnIsViewable()
+        {
+            return PartialViewName != null && IsViewable;
+        }
+
+        internal override bool OnIsNavigable(bool isSearchEntity)
+        {
+            return this.PartialViewName != null && IsNavigable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+        }
+
+        internal override bool OnIsReadonly()
+        {
+            return IsReadonly;
+        }
     }
 
-    public enum EntitySettingsContext
+
+    public enum EntityType
     {
-        Admin,
-        Default,
-        Content,
+        SystemString,
+        System,
+        String,
+        Part,
+        Shared,
+        Main,
     }
 
     public class EmbeddedEntitySettings<T> : EntitySettings, IImplementationsFinder where T : EmbeddedEntity
@@ -163,60 +150,14 @@ namespace Signum.Web
         }
 
         public Mapping<T> MappingDefault { get; set; }
-        public override Delegate UntypedMappingDefault { get { return MappingDefault; } }
-        public override Delegate UntypedMappingAdmin { get { return MappingDefault; } }
+        public override Delegate UntypedMappingLine { get { return MappingDefault; } }
+        public override Delegate UntypedMappingMain { get { return MappingDefault; } }
 
-        public override bool OnIsReadOnly(ModifiableEntity entity, EntitySettingsContext ctx)
-        {
-            if (IsReadOnly != null)
-                foreach (Func<T, bool> item in IsReadOnly.GetInvocationList())
-                {
-                    if (item((T)entity))
-                        return true;
-                }
 
-            return false;
-        }
+        public bool IsCreable { get; set; }
+        public bool IsViewable { get; set; }
+        public bool IsReadonly { get; set; }  
 
-        public override bool OnIsViewable(ModifiableEntity entity, EntitySettingsContext ctx)
-        {
-            if (PartialViewName == null)
-                return false;
-
-            if (IsViewable != null)
-                foreach (Func<T, bool> item in IsViewable.GetInvocationList())
-                {
-                    if (!item((T)entity))
-                        return false;
-                }
-
-            return true;
-        }
-
-        public override bool OnIsCreable(EntitySettingsContext ctx)
-        {
-            if (IsCreable != null)
-                foreach (Func<bool> item in IsCreable.GetInvocationList())
-                {
-                    if (!item())
-                        return false;
-                }
-
-            return true;
-        }
-
-        public override bool OnShowSave()
-        {
-            return ShowSave;
-        }
-
-        public Func<bool> IsCreable { get; set; }
-        public Func<T, bool> IsReadOnly { get; set; }
-        public Func<T, bool> IsViewable { get; set; }
-        public Func<T, bool> IsNavigable{ get; set; }      
-
-        public bool ShowSave { get; set; }
-   
         public Func<T, string> PartialViewName { get; set; }
 
         public override string OnPartialViewName(ModifiableEntity entity)
@@ -226,9 +167,33 @@ namespace Signum.Web
         
         public EmbeddedEntitySettings()
         {
-            ShowSave = true;
             MappingDefault = new EntityMapping<T>(true).GetValue;
             WebTypeName = typeof(T).Name;
+            IsViewable = true;
+            IsCreable = true;
+        }
+
+        internal override bool OnIsCreable(bool isSearchEntity)
+        {
+            if (isSearchEntity)
+                throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible with isSearchEntity");
+
+            return IsCreable;
+        }
+
+        internal override bool OnIsViewable()
+        {
+            return PartialViewName != null && IsViewable;
+        }
+
+        internal override bool OnIsNavigable(bool isSearchEntity)
+        {
+            return false;
+        }
+
+        internal override bool OnIsReadonly()
+        {
+            return IsReadonly;
         }
 
         public Dictionary<PropertyRoute, Implementations> OverrideImplementations { get; set; }
@@ -242,20 +207,11 @@ namespace Signum.Web
         }
     }
 
-    public enum WindowType
+    public enum EntityWhen
     {
-        View,
-        Find,
-        Admin
-    }
-
-    public enum EntityType
-    {
-        Admin,
-        Default,
-        AdminNotSaving,
-        DefaultNotSaving,
-        ServerOnly,
-        Content,
+        Always = 3,
+        IsSearchEntity = 2,
+        IsLine = 1,
+        Never = 0,
     }
 }

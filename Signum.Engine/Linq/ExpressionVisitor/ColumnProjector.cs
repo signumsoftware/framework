@@ -47,11 +47,6 @@ namespace Signum.Engine.Linq
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(ProjectionExpression projection, Alias newAlias)
-        {
-            return ProjectColumns(projection.Projector, newAlias, projection.Select.KnownAliases);
-        }
-
         static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, bool aggresiveNomination = false, bool selectTrivialColumns = false)
         {
             Expression newProj;

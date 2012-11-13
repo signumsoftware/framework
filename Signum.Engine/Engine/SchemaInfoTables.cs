@@ -14,6 +14,7 @@ namespace Signum.Engine.SchemaInfoTables
     [SqlViewName("sys.objects")]
     public class SysObjects : IView
     {
+        [SqlViewColumn(PrimaryKey=true)]
         public int object_id;
         public string name;
     }
@@ -21,6 +22,7 @@ namespace Signum.Engine.SchemaInfoTables
     [SqlViewName("sys.schemas")]
     public class SysSchemas : IView
     {
+        [SqlViewColumn(PrimaryKey = true)]
         public int schema_id;
         public string name;
 
@@ -37,6 +39,7 @@ namespace Signum.Engine.SchemaInfoTables
     public class SysTables : IView
     {
         public string name;
+        [SqlViewColumn(PrimaryKey = true)]
         public int object_id;
         public int schema_id;
 
@@ -80,6 +83,7 @@ namespace Signum.Engine.SchemaInfoTables
     public class SysViews : IView
     {
         public string name;
+        [SqlViewColumn(PrimaryKey = true)]
         public int object_id;
 
         static Expression<Func<SysViews, IQueryable<SysIndexes>>> IndicesExpression =
@@ -115,6 +119,8 @@ namespace Signum.Engine.SchemaInfoTables
     [SqlViewName("sys.types")]
     public class SysTypes : IView
     {
+        [SqlViewColumn(PrimaryKey = true)]
+        public int system_type_id;
         public int user_type_id;
         public string name;
     }
@@ -122,6 +128,7 @@ namespace Signum.Engine.SchemaInfoTables
     [SqlViewName("sys.foreign_keys")]
     public class SysForeignKeys : IView
     {
+        [SqlViewColumn(PrimaryKey = true)]
         public int object_id;
         public string name;
         public int parent_object_id;
@@ -151,6 +158,7 @@ namespace Signum.Engine.SchemaInfoTables
     {
         public int index_id;
         public string name;
+        [SqlViewColumn(PrimaryKey = true)]
         public int object_id;
         public bool is_unique;
         public bool is_primary_key;
@@ -181,6 +189,7 @@ namespace Signum.Engine.SchemaInfoTables
     [SqlViewName("sys.sql_modules")]
     public class SysSqlModules : IView
     {
+        [SqlViewColumn(PrimaryKey = true)]
         public int object_id;
         public string definition; 
     }
@@ -188,6 +197,7 @@ namespace Signum.Engine.SchemaInfoTables
     [SqlViewName("sys.procedures")]
     public class SysProcedures : IView
     {
+        [SqlViewColumn(PrimaryKey = true)]
         public int object_id;
         public string name;
     }

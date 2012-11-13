@@ -91,7 +91,7 @@ namespace Signum.Windows
 
         void ViewNote(INoteDN note)
         {
-            Navigator.NavigateUntyped(note, new NavigateOptions
+            Navigator.NavigateUntyped(note, new NavigateOptions()
             {
                 Closed = (_, __) => ReloadNotes(),
             });

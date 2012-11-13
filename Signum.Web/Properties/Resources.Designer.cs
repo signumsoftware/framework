@@ -259,6 +259,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Navigate.
+        /// </summary>
+        public static string LineButton_Navigate {
+            get {
+                return ResourceManager.GetString("LineButton_Navigate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove.
         /// </summary>
         public static string LineButton_Remove {
@@ -538,6 +547,16 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There are changes that haven&apos;t been saved. 
+        ///Lose changes?.
+        /// </summary>
+        public static string Signum_loseChanges {
+            get {
+                return ResourceManager.GetString("Signum_loseChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No elements selected.
         /// </summary>
         public static string Signum_noElementsSelected {
@@ -552,6 +571,15 @@ namespace Signum.Web.Properties {
         public static string Signum_noResults {
             get {
                 return ResourceManager.GetString("Signum_noResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can select only one element.
+        /// </summary>
+        public static string Signum_onlyOneElement {
+            get {
+                return ResourceManager.GetString("Signum_onlyOneElement", resourceCulture);
             }
         }
         
@@ -615,6 +643,15 @@ namespace Signum.Web.Properties {
         public static string Signum_search {
             get {
                 return ResourceManager.GetString("Signum_search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to selected.
+        /// </summary>
+        public static string Signum_searchControlMenuSelected {
+            get {
+                return ResourceManager.GetString("Signum_searchControlMenuSelected", resourceCulture);
             }
         }
         

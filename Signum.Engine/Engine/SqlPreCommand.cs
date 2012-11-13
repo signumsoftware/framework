@@ -79,27 +79,25 @@ namespace Signum.Engine
      
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
-            command.OpenSqlFile();
-            Console.WriteLine("Open again?");
-            string val = Console.ReadLine();
-            if (!val.StartsWith("y") && !val.StartsWith("Y"))
-                return;
-
-            command.OpenSqlFile();
+            string file = command.OpenSqlFile();
+            if (SafeConsole.Ask("Open again?"))
+                Process.Start(file);
         }
 
-        public static void OpenSqlFile(this SqlPreCommand command)
+        public static string OpenSqlFile(this SqlPreCommand command)
         {
-            OpenSqlFile(command, "Sync {0:dd-MM-yyyy}.sql".Formato(DateTime.Now));
+            return OpenSqlFile(command, "Sync {0:dd-MM-yyyy hh_mm_ss}.sql".Formato(DateTime.Now));
         }
 
-        public static void OpenSqlFile(this SqlPreCommand command, string fileName)
+        public static string OpenSqlFile(this SqlPreCommand command, string fileName)
         {
             Save(command, fileName);
 
             Thread.Sleep(1000);
 
-            Process.Start(fileName); 
+            Process.Start(fileName);
+
+            return fileName;
         }
 
         public static void Save(this SqlPreCommand command, string fileName)

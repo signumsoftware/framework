@@ -45,18 +45,5 @@ namespace Signum.Web
         {
             return helper.HiddenRuntimeInfo((TypeContext)helper.ViewData.Model);
         }
-
-        public static MvcHtmlString PopupHeader(this HtmlHelper helper)
-        {   
-            if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
-            {
-                var entityInfo = helper.HiddenRuntimeInfo((TypeContext)helper.ViewData.Model);
-                helper.ViewData.Remove(ViewDataKeys.WriteSFInfo);
-
-                return entityInfo;
-            }
-
-            return null;
-        }
     }
 }

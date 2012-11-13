@@ -330,4 +330,14 @@
   <data name="SearchControl_Pagination_Rows" xml:space="preserve">
     <value>Filas</value>
   </data>
+  <data name="Signum_loseChanges" xml:space="preserve">
+    <value>Hay cambios que no se han guardado. 
+¿Perder los cambios?</value>
+  </data>
+  <data name="Signum_onlyOneElement" xml:space="preserve">
+    <value>Sólo puedes seleccionar un elemento</value>
+  </data>
+  <data name="Signum_searchControlMenuSelected" xml:space="preserve">
+    <value>Seleccionados</value>
+  </data>
 </root>

@@ -233,6 +233,23 @@ namespace Signum.Utilities
             return t;
         }
 
+
+        public static T ThrowIfNullS<T>(this T? t, Func<string> mensaje)
+         where T : struct
+        {
+            if (t == null)
+                throw new NullReferenceException(mensaje());
+            return t.Value;
+        }
+
+        public static T ThrowIfNullC<T>(this T t, Func<string> mensaje)
+            where T : class
+        {
+            if (t == null)
+                throw new NullReferenceException(mensaje());
+            return t;
+        }
+
         public static string TryToString(this object obj)
         {
             if (obj == null)

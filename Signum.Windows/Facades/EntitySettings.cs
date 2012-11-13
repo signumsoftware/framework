@@ -19,17 +19,17 @@ namespace Signum.Windows
 
         public abstract Control CreateView(ModifiableEntity entity, PropertyRoute typeContext);
 
-        public abstract bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin);
-        public abstract bool OnIsViewable(ModifiableEntity entity, bool isAdmin);
-        public abstract bool OnIsCreable(bool isAdmin);
-        public abstract bool OnShowSave(); 
-
         public DataTemplate DataTemplate { get; set; }
         public ImageSource Icon { get; set; }
 
-        public Action<bool, ICollectionView> CollectionViewOperations { get; set; }
-
         public abstract Implementations FindImplementations(PropertyRoute route);
+
+        internal abstract bool OnIsCreable(bool isSearchEntity);
+        internal abstract bool OnIsViewable();
+        internal abstract bool OnIsNavigable(bool isSearchEntity);
+        internal abstract bool OnIsReadonly();
+
+        internal abstract bool HasView();
     }
 
     public class EntitySettings<T> : EntitySettings where T:IdentifiableEntity
@@ -41,50 +41,46 @@ namespace Signum.Windows
 
         public Func<T, Control> View { get; set; }
 
-        public Func<bool, bool> IsCreable { get; set; }
-        public Func<T, bool, bool> IsReadOnly { get; set; }
-        public Func<T, bool, bool> IsViewable { get; set; }      
+        public EntityWhen IsCreable { get; set; }
+        public bool IsViewable { get; set; }
+        public EntityWhen IsNavigable { get; set; }
+        public bool IsReadOnly { get; set; }
 
-        public bool ShowSave { get; set; }
-
-        public override bool OnShowSave()
-        {
-            return ShowSave;
-        }
-        
         public EntitySettings(EntityType entityType)
         {
             switch (entityType)
             {
-                case EntityType.Default:
-                case EntityType.DefaultNotSaving:
-                    ShowSave = entityType == EntityType.Default;
+                case EntityType.SystemString:
+                    IsCreable = EntityWhen.Never;
+                    IsViewable = false;
+                    IsNavigable = EntityWhen.Never;
+                    IsReadOnly = true;
                     break;
-                case EntityType.Admin:
-                case EntityType.AdminNotSaving:
-                    ShowSave = entityType == EntityType.Admin;
-                    IsReadOnly = (_, admin) => !admin;
-                    IsCreable = admin => admin;
-                    IsViewable = (_, admin) => admin;
-                    CollectionViewOperations = (isLite, cv) =>
-                    {
-                        ListCollectionView lcv = cv as ListCollectionView;
-                        if (lcv != null)
-                            lcv.CustomSort = isLite ?
-                                (IComparer)new LambdaComparer<Lite, int>(la => la.IdOrNull ?? int.MaxValue) :
-                                (IComparer)new LambdaComparer<IdentifiableEntity, int>(ie => ie.IdOrNull ?? int.MaxValue);
-                        else
-                            cv.SortDescriptions.Add(new SortDescription("IdOrNull", ListSortDirection.Ascending));
-                    };
+                case EntityType.System:
+                    IsCreable = EntityWhen.Never;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    IsReadOnly = true;
                     break;
-                case EntityType.ServerOnly:
-                    ShowSave = false;
-                    IsReadOnly = (_, admin) => true;
-                    IsCreable = admin => false;
+                case EntityType.String:
+                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsViewable = false;
+                    IsNavigable = EntityWhen.IsSearchEntity;
                     break;
-                case EntityType.Content:
-                    ShowSave = false;
-                    IsViewable = (_, admin) => false;
+                case EntityType.Part:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    break;
+                case EntityType.Shared:
+                    IsCreable = EntityWhen.Always;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    break;
+                case EntityType.Main:
+                    IsCreable = EntityWhen.IsSearchEntity;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
                     break;
                 default:
                     break;
@@ -105,58 +101,48 @@ namespace Signum.Windows
             View = e => overrideView(e, view(e));
         }
 
-        public override bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin)
-        {
-            if(IsReadOnly != null)
-                foreach (Func<T, bool, bool> isReadOnly in IsReadOnly.GetInvocationList())
-                {
-                    if (isReadOnly((T)entity, isAdmin))
-                        return true;
-                }
-
-            return false;
-        }
-
-        public override bool OnIsViewable(ModifiableEntity entity, bool isAdmin)
-        {
-            if (IsViewable != null)
-                foreach (Func<T, bool, bool> isViewable in IsViewable.GetInvocationList())
-                {
-                    if (!isViewable((T)entity, isAdmin))
-                        return false;
-                }
-
-            return true;
-        }
-
-        public override bool OnIsCreable(bool isAdmin)
-        {
-            if (IsCreable != null)
-                foreach (Func<bool, bool> isCreable in IsCreable.GetInvocationList())
-                {
-                    if (!isCreable(isAdmin))
-                        return false;
-                }
-
-            return true;
-        }
-
         public override Implementations FindImplementations(PropertyRoute route)
         {
             throw new InvalidOperationException("Call Server.FindImplementations for IdentifiableEntities");
         }
-    }
 
+        internal override bool OnIsCreable(bool isSearchEntity)
+        {
+            return IsCreable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+        }
+
+        internal override bool OnIsViewable()
+        {
+            return IsViewable;
+        }
+
+        internal override bool OnIsNavigable(bool isSearchEntity)
+        {
+            return IsNavigable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+        }
+
+        internal override bool OnIsReadonly()
+        {
+            return IsReadOnly;
+        }
+
+        internal override bool HasView()
+        {
+            return View != null;
+        }
+    }
 
     public enum EntityType
     {
-        Admin,
-        Default,
-        AdminNotSaving,
-        DefaultNotSaving,
-        ServerOnly,
-        Content,
+        SystemString,
+        System,
+        String,
+        Part,
+        Shared,
+        Main,
     }
+
+ 
 
     public class EmbeddedEntitySettings<T> : EntitySettings where T : EmbeddedEntity
     {
@@ -167,18 +153,9 @@ namespace Signum.Windows
 
         public Func<T, PropertyRoute, Control> View { get; set; }
 
-        public Func<Type, bool> IsCreable { set { IsCreableEvent += value; } }
-        public Func<T, bool> IsReadOnly { set { IsReadOnlyEvent += value; } }
-        public Func<T, bool> IsViewable { set { IsViewableEvent += value; } }
-
-        public event Func<Type, bool> IsCreableEvent;
-        public event Func<T, bool> IsReadOnlyEvent;
-        public event Func<T, bool> IsViewableEvent;
-
-        public override bool OnShowSave()
-        {
-            return false;
-        }
+        public bool IsCreable { get; set; }
+        public bool IsViewable { get; set; }
+        public bool IsReadonly { get; set; }
 
         public override Control CreateView(ModifiableEntity entity, PropertyRoute typeContext)
         {
@@ -197,40 +174,27 @@ namespace Signum.Windows
             View = (e, tc) => overrideView(e, tc, viewEmbedded(e, tc));
         }
 
-        public override bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin)
+        internal override bool OnIsCreable(bool isSearchEntity)
         {
-            if (IsReadOnlyEvent != null)
-                foreach (Func<T, bool> isReadOnly in IsReadOnlyEvent.GetInvocationList())
-                {
-                    if (isReadOnly((T)entity))
-                        return true;
-                }
+            if (isSearchEntity)
+                throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible wirh isSearchEntity");
 
-            return false;
+            return IsCreable;
         }
 
-        public override bool OnIsViewable(ModifiableEntity entity, bool isAdmin)
+        internal override bool OnIsViewable()
         {
-            if (IsViewableEvent != null)
-                foreach (Func<T, bool> isViewable in IsViewableEvent.GetInvocationList())
-                {
-                    if (!isViewable((T)entity))
-                        return false;
-                }
-
-            return true;
+            return View != null && IsViewable;
         }
 
-        public override bool OnIsCreable(bool isAdmin)
+        internal override bool OnIsNavigable(bool isSearchEntity)
         {
-            if (IsCreableEvent != null)
-                foreach (Func<Type, bool> isCreable in IsCreableEvent.GetInvocationList())
-                {
-                    if (!isCreable(typeof(T)))
-                        return false;
-                }
+            throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible wirh isSearchEntity");
+        }
 
-            return true;
+        internal override bool OnIsReadonly()
+        {
+            return IsReadonly; 
         }
 
         public Dictionary<PropertyRoute, Implementations> OverrideImplementations { get; set; }
@@ -242,13 +206,18 @@ namespace Signum.Windows
 
             return ModelEntity.GetImplementations(route);
         }
+
+        internal override bool HasView()
+        {
+            return View != null;
+        }
     }
 
-    public enum WindowsType
+    public enum EntityWhen
     {
-        View,
-        Find,
-        Admin
+        Always = 3,
+        IsSearchEntity = 2,
+        IsLine = 1,
+        Never = 0,
     }
-
 }

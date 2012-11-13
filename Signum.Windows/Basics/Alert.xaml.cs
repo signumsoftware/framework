@@ -34,10 +34,10 @@ namespace Signum.Windows.Basics
 
             AlertsWidget.CreateAlert = ei => ei.IsNew ? null : new AlertDN { Entity = ei.ToLite() };
 
-            Navigator.AddSetting(new EntitySettings<AlertDN>(EntityType.Default)
+            Navigator.AddSetting(new EntitySettings<AlertDN>(EntityType.Main)
             {
                 View = e => new Alert(),
-                IsCreable = admin => false,
+                IsCreable = EntityWhen.Never,
                 Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/alert.png", typeof(AlertsWidget)))
             });
         }

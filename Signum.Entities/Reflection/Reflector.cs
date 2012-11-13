@@ -38,7 +38,7 @@ namespace Signum.Entities.Reflection
         static Reflector()
         {
             DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
-            DescriptionManager.CleanType = t=> EnumProxy.Extract(t) ?? t.CleanType(); //To allow Lite<T>
+            DescriptionManager.CleanType = t=> EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
         }
 
         public static string CleanTypeName(Type t)

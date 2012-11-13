@@ -19,6 +19,7 @@ using Signum.Utilities.Reflection;
 using System.Windows.Media;
 using Signum.Services;
 using Signum.Windows.Properties;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -55,6 +56,7 @@ namespace Signum.Windows
             get { return (object)GetValue(QueryNameProperty); }
             set { SetValue(QueryNameProperty, value); }
         }
+
 
 
         public static readonly DependencyProperty OrderOptionsProperty =
@@ -110,6 +112,9 @@ namespace Signum.Windows
             OrderOptions = new ObservableCollection<OrderOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(CountSearchControl_DataContextChanged);
+
+            this.Bind(AutomationProperties.ItemStatusProperty, this, "QueryName");
+            this.Bind(AutomationProperties.HelpTextProperty, this, "ItemsCount"); 
         }
 
 

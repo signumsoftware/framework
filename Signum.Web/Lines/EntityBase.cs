@@ -44,9 +44,8 @@ namespace Signum.Web
 
         public Implementations? Implementations { get; set; }
 
-        public ViewMode ViewMode { get; set; } 
-        
-        public virtual bool View { get; set; }
+        public bool View { get; set; }
+        public bool Navigate { get; set; }
         public bool Create { get; set; }
         public bool Find { get; set; }
         public bool Remove { get; set; }
@@ -174,16 +173,5 @@ namespace Signum.Web
                        (UntypedValue as Lite).TryCC(l => l.ToString());
             }
         }
-
-        protected internal virtual EntitySettingsContext EntitySettingsContext
-        {
-            get { return ViewMode == Web.ViewMode.Popup ? Web.EntitySettingsContext.Content : Web.EntitySettingsContext.Default; }
-        }
-    }
-
-    public enum ViewMode
-    {
-        Popup,
-        Navigate
     }
 }

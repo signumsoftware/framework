@@ -23,28 +23,17 @@ namespace Signum.Windows
         public int? Top { get; set; }
         public ImageSource Icon { get; set; }
 
-        public Func<object, bool> IsFindable;
 
         internal QueryDescription QueryDescription { get; set; }
 
         public QuerySettings(object queryName)
         {
-            this.QueryName = queryName; 
+            this.QueryName = queryName;
+            this.IsFindable = true;
         }
 
-        internal bool OnIsFindable()
-        {
-            if (IsFindable != null)
-                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
-                {
-                    if (!isFindable(QueryName))
-                        return false;
-                }
-
-            return true;
-        }
-
-
+        public bool IsFindable { get; set; }
+    
         public static Dictionary<PropertyRoute, Func<Binding, DataTemplate>> PropertyFormatters { get; set; }
         public static List<FormatterRule> FormatRules { get; set; }
 
@@ -117,6 +106,8 @@ namespace Signum.Windows
         }
 
         public Func<QueryDescription, ISimpleFilterBuilder> SimpleFilterBuilder;
+
+        
     }
 
     public class FormatterPriority

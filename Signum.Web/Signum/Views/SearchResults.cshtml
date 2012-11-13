@@ -9,15 +9,15 @@
    var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
    Type entitiesType = Lite.Extract(entityColumn.Type);
    Implementations implementations = entityColumn.Implementations.Value;
-   bool viewable = (bool)ViewData[ViewDataKeys.View] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin)));
-   bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
+   bool viewable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true)));
+   bool allowMultiple = (bool)ViewData[ViewDataKeys.AllowMultiple];
 
    FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
    
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-   Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
+   Dictionary<int, CellFormatter> formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
 
-   int columnsCount = queryResult.Columns.Count() + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0);
+   int columnsCount = queryResult.Columns.Count() + (viewable ? 1 : 0) + (allowMultiple ? 1 : 0);
 }
 
 @if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
@@ -34,22 +34,16 @@
 {
     Lite entityField = row.Entity;
     <tr data-entity="@entityField.Key()">
-        @if (allowMultiple.HasValue)
+        @if (allowMultiple)
         {
             <td>
-                @if (allowMultiple.Value)
-                {
-                    @Html.CheckBox(
-                        Model.Compose("rowSelection", row.Index.ToString()),
-                          new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString() });
-
-                }
-                else
-                {
-                    @Html.RadioButton(
-                             Model.Compose("rowSelection"),
-                        entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString());
-                }
+                @Html.CheckBox(
+                    Model.Compose("rowSelection", row.Index.ToString()),
+                        new 
+                        {
+                            @class = "sf-td-selection", 
+                            value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString() 
+                        })
             </td>
         }
         @if (viewable)
@@ -60,8 +54,11 @@
         }
         @foreach (var col in queryResult.Columns)
         {
-            <td>
-                @formatters[col.Index](Html, row[col])
+            var value = row[col];
+            var ft = formatters[col.Index];
+            
+            <td @ft.WriteDataAttribute(value)>
+                @ft.Formatter(Html, value)
             </td>
         }
     </tr>

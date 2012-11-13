@@ -100,8 +100,13 @@ namespace Signum.Web
         }
 
         public bool SearchOnLoad { get; set; }
-        
-        public bool? AllowMultiple { get; set; }
+
+        bool allowMultiple = true;
+        public bool AllowMultiple 
+        {
+            get { return allowMultiple; }
+            set { allowMultiple = value; }
+        }
         
         FilterMode filterMode = FilterMode.Visible;
         public FilterMode FilterMode
@@ -111,7 +116,10 @@ namespace Signum.Web
             { 
                 this.filterMode = value;
                 if (value == FilterMode.OnlyResults)
+                {
                     SearchOnLoad = true;
+                    AllowMultiple = false;
+                }
             }
         }
 
@@ -124,18 +132,18 @@ namespace Signum.Web
 
         public string Creating { get; set; }
 
-        bool view = true;
-        public bool View
+        bool navigate = true;
+        public bool Navigate
         {
-            get { return view; }
-            set { view = value; }
+            get { return navigate; }
+            set { navigate = value; }
         }
 
-        bool entityContextMenu = ContextualItemsHelper.EntityCtxMenuInSearchPage;
-        public bool EntityContextMenu
+        bool selectedItemsContextMenu = ContextualItemsHelper.SelectedItemsMenuInSearchPage;
+        public bool SelectedItemsContextMenu
         {
-            get { return entityContextMenu; }
-            set { entityContextMenu = value; }
+            get { return selectedItemsContextMenu; }
+            set { selectedItemsContextMenu = value; }
         }
 
         public override string ToString()
@@ -147,15 +155,15 @@ namespace Signum.Web
                 ElementsPerPage.HasValue ? "elems=" + ElementsPerPage.Value : null,
                 SearchOnLoad ? "searchOnLoad=true" : null,
                 !Create ? "create=false": null, 
-                !View ? "view=false": null, 
-                AllowMultiple.HasValue ? "allowMultiple=" + AllowMultiple.ToString() : null,
+                !Navigate ? "navigate=false": null, 
+                !AllowMultiple ? "allowMultiple=false" : null,
                 !AllowChangeColumns ? "allowChangeColumns=false" : null,
                 FilterMode != FilterMode.Visible ? "filterMode=" + FilterMode.ToString() : null,
                 (FilterOptions != null && FilterOptions.Count > 0) ? ("filters=" + FilterOptions.ToString(";") + ";") : null,
                 (OrderOptions != null && OrderOptions.Count > 0) ? ("orders=" + OrderOptions.ToString(";") + ";") : null,
                 (ColumnOptions != null && ColumnOptions.Count > 0) ? ("columns=" + ColumnOptions.ToString(";") + ";") : null, 
                 (ColumnOptionsMode != ColumnOptionsMode.Add ? ("columnMode=" + ColumnOptionsMode.ToString()) : null),
-                !EntityContextMenu ? "entityContextMenu=false" : null 
+                !SelectedItemsContextMenu ? "selectedItemsContextMenu=false" : null 
             }.NotNull().ToString("&");
 
             if (options.HasText())
@@ -171,10 +179,10 @@ namespace Signum.Web
             op.Add("webQueryName", QueryName.TryCC(qn => Navigator.ResolveWebQueryName(qn).SingleQuote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
-            op.Add("view", !View ? "false" : null);
+            op.Add("view", !Navigate ? "false" : null);
             op.Add("create", !Create ? "false" : null);
-            op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
-            op.Add("entityContextMenu", !EntityContextMenu ? "false" : null);
+            op.Add("allowMultiple", !AllowMultiple ? "false" : null);
+            op.Add("selectedItemsContextMenu", !SelectedItemsContextMenu ? "false" : null);
             op.Add("allowChangeColumns", !AllowChangeColumns ? "false" : null);
             op.Add("filters", filterOptions.IsEmpty() ? null : (filterOptions.ToString(";") + ";").SingleQuote());
             op.Add("orders", OrderOptions.IsEmpty() ? null : ("[" + OrderOptions.ToString(oo => oo.ToString().SingleQuote(), ",") + "]"));

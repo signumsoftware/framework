@@ -488,5 +488,14 @@ SF.NewContentProcessor = {
         $newContent.find(".sf-search-results-container").each(function (i, val) {
             new SF.slider(jQuery(val));
         });
-    }
+    },
+
+    defaultModifiedChecker: function ($newContent) { 
+        $newContent.find(":input").on("change", function() {
+            var $mainControl = $(this).closest(".sf-main-control"); 
+            if ($mainControl.length > 0) {
+                $mainControl.addClass("sf-changed");
+            }
+        });
+    },
 };

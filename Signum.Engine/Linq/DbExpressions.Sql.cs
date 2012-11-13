@@ -202,22 +202,34 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class TableExpression : SourceWithAliasExpression
     {
-        public readonly string Name;
+        public readonly ITable Table;
+
+        public string Name { get { return Table.Name; } }
 
         public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(Alias alias, string name)
+        internal TableExpression(Alias alias, ITable table)
             : base(DbExpressionType.Table, alias)
         {
-            this.Name = name;
+            this.Table = table;
         }
 
         public override string ToString()
         {
             return "{0} as {1}".Formato(Name, Alias);
+        }
+
+        internal ColumnExpression GetIdExpression()
+        {
+            var expression = ((ITablePrivate)Table).GetPrimaryOrder(Alias);
+
+            if (expression == null)
+                throw new InvalidOperationException("Impossible to determine Primary Key for {0}".Formato(Name));
+
+            return expression;
         }
     }
 

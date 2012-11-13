@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Test.LinqProvider
 {
@@ -117,6 +118,33 @@ namespace Signum.Test.LinqProvider
                                       Artist = a1.ToLite(),
                                       Friend = a,
                                       HasFriend = a != null
+                                  }).ToList();
+        }
+
+
+        [TestMethod]
+        public void SelectManySingleJoinExpander()
+        {
+            var artistsInBands = (from b in Database.Query<BandDN>()
+                                  from a in b.Members
+                                  select new
+                                  {
+                                      MaxAlbum = Database.Query<NoteDN>()
+                                      .Where(n => n.Target.RefersTo(a.LastAward))
+                                      .Max(n => (int?)n.Id)
+                                  }).ToList();
+        }
+
+        [TestMethod]
+        public void JoinSingleJoinExpander()
+        {
+            var artistsInBands = (from b in Database.Query<BandDN>()
+                                  join mle in Database.MListQuery((BandDN b) => b.Members) on b equals mle.Parent
+                                  select new
+                                  {
+                                      MaxAlbum = Database.Query<NoteDN>()
+                                      .Where(n => n.Target.RefersTo(mle.Element.LastAward))
+                                      .Max(n => (int?)n.Id)
                                   }).ToList();
         }
     }

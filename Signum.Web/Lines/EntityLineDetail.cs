@@ -90,10 +90,5 @@ namespace Signum.Web
         {
             return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
         }
-
-        protected internal override EntitySettingsContext EntitySettingsContext
-        {
-            get { return EntitySettingsContext.Content; }
-        }
     }
 }
