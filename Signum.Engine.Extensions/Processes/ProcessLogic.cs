@@ -186,7 +186,23 @@ namespace Signum.Engine.Processes
 
         static bool running = false;
 
-        public static void StartProcesses()
+        public static int InitialDelayMiliseconds;
+
+        public static void StartBackgroundProcess(int delayMilliseconds)
+        {
+            InitialDelayMiliseconds = delayMilliseconds;
+
+            if (InitialDelayMiliseconds == 0)
+                StartBackgroundProcess();
+
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(InitialDelayMiliseconds);
+                StartBackgroundProcess();
+            });
+        }
+
+        public static void StartBackgroundProcess()
         {
             if (running)
                 throw new InvalidOperationException("ProcessLogic is running");
@@ -205,7 +221,7 @@ namespace Signum.Engine.Processes
                 {
                     pe.SetAsQueue();
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                    pe.Save();
+                        pe.Save();
                 }
 
                 Task.Factory.StartNew(() =>
@@ -305,7 +321,7 @@ namespace Signum.Engine.Processes
                 {
                     pe.SetAsQueue();
                     using (OperationLogic.AllowSave<ProcessExecutionDN>())
-                    pe.Save();
+                        pe.Save();
                 }
 
                 RefreshPlan();
@@ -454,24 +470,8 @@ namespace Signum.Engine.Processes
                     Progress = p.Execution.Progress
                 }).ToList()
             };
-    }
-
-        public static int InitialDelayMiliseconds;
-
-        public static void StartBackgroundProcess(int delayMilliseconds)
-        {
-            InitialDelayMiliseconds = delayMilliseconds;
-
-            if (InitialDelayMiliseconds == 0)
-                StartProcesses();
-
-            Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(InitialDelayMiliseconds);
-                StartProcesses();
-            });
-    }
-    }
+        }
+    }       
 
     public interface IProcessAlgorithm
     {

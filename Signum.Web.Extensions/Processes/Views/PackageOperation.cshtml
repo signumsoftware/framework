@@ -6,6 +6,6 @@
     @Html.EntityLine(e, f => f.Operation, f => f.ReadOnly = true)
     <fieldset>
         <legend>Lines</legend>
-        @Html.SearchControl(new FindOptions(typeof(PackageLineDN), "Package", e.Value), e)
+        @Html.SearchControl(new FindOptions(typeof(PackageLineDN), "Package", e.Value), new Context(e, "lines"))
     </fieldset>
 }
