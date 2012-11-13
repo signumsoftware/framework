@@ -107,7 +107,9 @@ namespace Signum.Engine.Scheduler
             get { return enabled; }
             set
             {
-                enabled = value; if (enabled) ReloadPlan();
+                enabled = value; 
+                if (enabled) 
+                    ReloadPlan();
             }
         }
 

@@ -31,14 +31,14 @@ namespace Signum.Engine.Authorization
 
 
         public static string SystemUserName { get; set; }
-        static ResetLazy<UserDN> systemUserLazy = new ResetLazy<UserDN>(() => Database.Query<UserDN>().Single(u => u.UserName == SystemUserName));
+        static ResetLazy<UserDN> systemUserLazy = GlobalLazy.Create(() => Database.Query<UserDN>().Single(u => u.UserName == SystemUserName));
         public static UserDN SystemUser
         {
             get { return systemUserLazy.Value; }
         }
 
         public static string AnonymousUserName { get; set; }
-        static ResetLazy<UserDN> anonymousUserLazy = new ResetLazy<UserDN>(() => Database.Query<UserDN>().Single(u => u.UserName == AnonymousUserName));
+        static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.Create(() => Database.Query<UserDN>().Single(u => u.UserName == AnonymousUserName));
         public static UserDN AnonymousUser
         {
             get { return anonymousUserLazy.Value; }
@@ -61,7 +61,6 @@ namespace Signum.Engine.Authorization
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
 
-                sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_Initializing;
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
@@ -104,21 +103,6 @@ namespace Signum.Engine.Authorization
                         r.Delete();
                     }
                 }.Register();
-            }
-        }
-
-        static void Schema_Initializing()
-        {
-            var r = roles.Value;
-
-            if (SystemUserName != null || AnonymousUserName != null)
-            {
-                using (new EntityCache())
-                using (AuthLogic.Disable())
-                {
-                    if (SystemUserName != null) systemUserLazy = new ResetLazy<UserDN>(()=> Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName));
-                    if (AnonymousUserName != null) anonymousUserLazy = new ResetLazy<UserDN>(() => Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName));
-                }
             }
         }
 
