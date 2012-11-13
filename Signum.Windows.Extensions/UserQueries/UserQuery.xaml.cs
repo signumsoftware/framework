@@ -17,6 +17,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Reflection;
 using Signum.Services;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.UserQueries
 {
@@ -25,6 +26,7 @@ namespace Signum.Windows.UserQueries
         public UserQuery()
         {
             InitializeComponent();
+            this.Loaded+=UserQuery_Loaded;
         }
 
         public static readonly DependencyProperty QueryDescriptionProperty =
@@ -35,6 +37,15 @@ namespace Signum.Windows.UserQueries
             set { SetValue(QueryDescriptionProperty, value); }
         }
 
+        void UserQuery_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (QueryDescription == null)
+            {
+                UserQueryDN uq = (UserQueryDN)DataContext;
+
+                QueryDescription = Navigator.Manager.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
+            }
+        }
 
         private List<QueryToken> QueryTokenBuilder_SubTokensEvent(QueryToken token)
         {

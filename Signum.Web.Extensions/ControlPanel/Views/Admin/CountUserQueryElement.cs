@@ -83,7 +83,8 @@ WriteLiteral("\r\n");
         { 
             el.Create = false;
             el.Remove = false;
-            el.ViewMode = ViewMode.Navigate; 
+            el.View = false;
+            el.Navigate = true;
         }));
 
           

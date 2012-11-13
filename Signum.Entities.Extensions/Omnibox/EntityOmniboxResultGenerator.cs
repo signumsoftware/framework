@@ -15,7 +15,7 @@ namespace Signum.Entities.Omnibox
 
         public EntityOmniboxResultGenenerator(IEnumerable<Type> schemaTypes)
         {
-            types = schemaTypes.Where(t => !t.IsEnumProxy()).ToDictionary(t => Lite.UniqueTypeName(t));
+            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(t => Lite.UniqueTypeName(t));
         }
 
         public int AutoCompleteLimit = 5;
@@ -109,8 +109,8 @@ namespace Signum.Entities.Omnibox
 
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { ToStr = "{0} Id".Formato(entityTypeName), OmniboxResultType = resultType },
-                new HelpOmniboxResult { ToStr = "{0} 'ToStr'".Formato(entityTypeName), OmniboxResultType = resultType }
+                new HelpOmniboxResult { Text = "{0} Id".Formato(entityTypeName), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} 'ToStr'".Formato(entityTypeName), OmniboxResultType = resultType }
             };
         }
     }

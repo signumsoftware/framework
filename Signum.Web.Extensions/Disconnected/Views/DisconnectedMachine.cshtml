@@ -1,0 +1,28 @@
+﻿@using Signum.Entities.Disconnected
+@using Signum.Entities.DynamicQuery
+
+@using (var dc = Html.TypeContext<DisconnectedMachineDN>())
+{
+    @Html.ValueLine(dc, d => d.CreationDate)
+    @Html.ValueLine(dc, d => d.MachineName)
+    @Html.ValueLine(dc, d => d.State, vl => vl.ReadOnly = true)
+    @Html.ValueLine(dc, d => d.SeedMin)
+    @Html.ValueLine(dc, d => d.SeedMax)
+
+    if (!dc.Value.IsNew)
+    {
+        <fieldset>
+            <legend>Last Imports</legend>
+            @Html.SearchControl(
+      new FindOptions()
+      {
+          QueryName = typeof(DisconnectedImportDN),
+          FilterOptions = { new FilterOption("Machine", dc.Value) },
+          OrderOptions = { new OrderOption("CreationDate", OrderType.Descending) },
+          SearchOnLoad = true,
+          FilterMode = FilterMode.Hidden
+      }, dc)
+        </fieldset>
+    }
+
+}

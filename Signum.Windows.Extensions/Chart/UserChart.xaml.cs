@@ -40,6 +40,12 @@ namespace Signum.Windows.Chart
 
         void UserChart_Loaded(object sender, RoutedEventArgs e)
         {
+            if (QueryDescription == null)
+            {
+                UserChartDN uq = (UserChartDN)DataContext;
+
+                QueryDescription = Navigator.Manager.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
+            }
             chartBuilder.Description = QueryDescription;
         }
 

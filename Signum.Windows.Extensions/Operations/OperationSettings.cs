@@ -23,19 +23,34 @@ namespace Signum.Windows.Operations
 
     }
 
+    public abstract class EntityOperationSettingsBase : OperationSettings
+    {
+        public ContextualOperationSettings ContextualFromMany { get; set; }
+        public ContextualOperationSettings Contextual { get; set; }
+
+        public bool AvoidMoveToSearchControl { get; set; }
+
+
+        public EntityOperationSettingsBase(Enum key)
+            : base(key)
+        {
+        }
+
+        public abstract bool ClickOverriden { get; }
+    }
+
     //Execute & ConstructorFrom
-    public class EntityOperationSettings<T> : OperationSettings
+    public class EntityOperationSettings<T> : EntityOperationSettingsBase 
         where T : class, IIdentifiable
     {
+        public override bool ClickOverriden { get { return Click != null; } }
+
         public Func<EntityOperationEventArgs<T>, T> Click { get; set; }
         public Func<EntityOperationEventArgs<T>, bool> IsVisible { get; set; }
-        public bool VisibleOnOk { get; set; }
 
         public EntityOperationSettings(Enum key): base(key)
         {
         }
-
-        public bool AvoidMoveToSearchControl { get; set; }
     }
 
     public class EntityOperationEventArgs<T> : EventArgs
@@ -47,7 +62,7 @@ namespace Signum.Windows.Operations
         public OperationInfo OperationInfo { get; internal set; }
     }
 
-    //Constructor
+
     public class ConstructorSettings : OperationSettings
     {
         public Func<OperationInfo, Window, IdentifiableEntity> Constructor { get; set; }
@@ -59,24 +74,35 @@ namespace Signum.Windows.Operations
         }
     }
 
-    //ConsturctorFromMany
-    public class ConstructorFromManySettings : OperationSettings
+    public class ContextualOperationSettings : OperationSettings
     {
-        public Func<ConstructorFromManyEventArgs, IdentifiableEntity> Constructor { get; set; }
-        public Func<object, OperationInfo, bool> IsVisible { get; set; }
+        public Action<ContextualOperationEventArgs> Click { get; set; }
+        public Func<ContextualOperationEventArgs, bool> IsVisible { get; set; }
 
-        public ConstructorFromManySettings(Enum key)
+
+        public bool OnVisible(SearchControl sc, OperationInfo oi)
+        {
+            if (IsVisible == null)
+                return true;
+
+            return IsVisible(new ContextualOperationEventArgs
+            {
+                Entities = sc.SelectedItems,
+                SearchControl = sc,
+                OperationInfo = oi,
+            });
+        }
+
+        public ContextualOperationSettings(Enum key)
             : base(key)
         {
         }
     }
 
-    public class ConstructorFromManyEventArgs : EventArgs
+    public class ContextualOperationEventArgs : EventArgs
     {
-        public object QueryName { get; internal set;  }
-        public List<Lite> Entities { get; internal set; }
-        public Window Window { get; internal set; }
+        public Lite[] Entities { get; internal set; }
+        public SearchControl SearchControl { get; internal set; }
         public OperationInfo OperationInfo { get; internal set; }
-
     }
 }

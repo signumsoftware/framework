@@ -166,7 +166,7 @@ namespace Signum.Entities.Mailing
             {
 {EmailState.Created,      false,             false,      false,         null },
 {EmailState.Sent,         false,             true,       false,         null },
-{EmailState.SentError,    true,              true,       false,         null },
+{EmailState.Exception,    true,              true,       false,         null },
 {EmailState.Received,     false,             true,       true,          null },
             };
     }
@@ -176,7 +176,7 @@ namespace Signum.Entities.Mailing
     {
         Created,
         Sent,
-        SentError,
+        Exception,
         Received
     }
 
@@ -212,23 +212,9 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        int numLines;
-        public int NumLines
-        {
-            get { return numLines; }
-            set { SetToStr(ref numLines, value, () => NumLines); }
-        }
-
-        int numErrors;
-        public int NumErrors
-        {
-            get { return numErrors; }
-            set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
         public override string ToString()
         {
-            return "{0} ({1} lines{2})".Formato(Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
+            return "EmailPackage {0}".Formato(Name);
         }
     }
 }

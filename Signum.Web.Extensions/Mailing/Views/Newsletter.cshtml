@@ -57,8 +57,6 @@
         {
             <fieldset id="emTabSend">
                 <legend>Deliveries</legend>
-                @Html.ValueLine(nc, n => n.NumLines)
-                @Html.ValueLine(nc, n => n.NumErrors)
                 <fieldset>
                     <legend>Email recipients</legend>
                     @Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))

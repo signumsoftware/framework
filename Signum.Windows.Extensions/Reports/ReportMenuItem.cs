@@ -13,118 +13,114 @@ using System.Windows.Documents;
 
 namespace Signum.Windows.Reports
 {
-    public class ReportMenuItem : SearchControlMenuItem
+    public static class ReportMenuItemConstructor
     {
-        protected override void OnInitialized(EventArgs e)
+        public static MenuItem Construct(SearchControl sc, MenuItem plainExcelMenuItem)
         {
-            base.OnInitialized(e);
-            Header = Prop.Resources.Reports;
-            Icon = ExtensionsImageLoader.GetImageSortName("excel.png").ToSmallImage();
-        }
-
-        internal PlainExcelMenuItem PlainExcelMenuItem; 
-
-        public override void Initialize()
-        {
-            Items.Clear();
-
-            this.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Clicked));
-
-            List<Lite<ExcelReportDN>> reports = Server.Return((IExcelReportServer s)=>s.GetExcelReports(SearchControl.QueryName));
-
-            if (PlainExcelMenuItem != null)
+            MenuItem miResult = new MenuItem
             {
-                Items.Add(PlainExcelMenuItem);
-                PlainExcelMenuItem.SearchControl = SearchControl;
-                PlainExcelMenuItem.Initialize();
-                Items.Add(new Separator());
-            }
+                Header = Prop.Resources.Reports,
+                Icon = ExtensionsImageLoader.GetImageSortName("excel.png").ToSmallImage()
 
-            Header = new TextBlock { Inlines = { new Run(Prop.Resources.Reports), reports.Count == 0? (Inline)new Run(): new Bold(new Run(" (" + reports.Count + ")")) } };
+            };
 
-            if (reports.Count > 0)
+            miResult.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler((object sender, RoutedEventArgs e) =>
             {
-                foreach (Lite<ExcelReportDN> report in reports)
+                e.Handled = true;
+
+                if (e.OriginalSource is MenuItem) //Not to capture the mouseDown of the scrollbar buttons
                 {
-                    MenuItem mi = new MenuItem()
+                    MenuItem b = (MenuItem)e.OriginalSource;
+                    Lite<ExcelReportDN> reportLite = (Lite<ExcelReportDN>)b.Tag;
+
+                    SaveFileDialog sfd = new SaveFileDialog()
                     {
-                        Header = report.ToString(),
-                        Icon = ExtensionsImageLoader.GetImageSortName("excelDoc.png").ToSmallImage(),
-                        Tag = report,
+                        AddExtension = true,
+                        DefaultExt = ".xlsx",
+                        Filter = Prop.Resources.Excel2007Spreadsheet,
+                        FileName = reportLite.ToString() + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx",
+                        OverwritePrompt = true,
+                        Title = Prop.Resources.FindLocationFoExcelReport
                     };
-                    Items.Add(mi);
+
+                    if (sfd.ShowDialog(Window.GetWindow(sc)) == true)
+                    {
+                        byte[] result = Server.Return((IExcelReportServer r) => r.ExecuteExcelReport(reportLite, sc.GetQueryRequest(true)));
+
+                        File.WriteAllBytes(sfd.FileName, result);
+
+                        System.Diagnostics.Process.Start(sfd.FileName);
+                    }
                 }
-            }          
+            }));
+
+            Action initialize = null;
 
             MenuItem miAdmin = new MenuItem()
             {
                 Header = "Administrar",
                 Icon = ExtensionsImageLoader.GetImageSortName("folderedit.png").ToSmallImage()
             };
-            miAdmin.Click += new RoutedEventHandler(MenuItemAdmin_Clicked);
-            Items.Add(miAdmin);
-        }
 
-        private void MenuItem_Clicked(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true;
-
-            if (e.OriginalSource is MenuItem) //Not to capture the mouseDown of the scrollbar buttons
+            miAdmin.Click += (object sender, RoutedEventArgs e)=>
             {
-                MenuItem b = (MenuItem)e.OriginalSource;
-                Lite<ExcelReportDN> reportLite = (Lite<ExcelReportDN>)b.Tag;
+                var query = QueryClient.GetQuery(sc.QueryName);
 
-                SaveFileDialog sfd = new SaveFileDialog()
+                Navigator.Explore(new ExploreOptions(typeof(ExcelReportDN))
                 {
-                    AddExtension = true,
-                    DefaultExt = ".xlsx",
-                    Filter = Prop.Resources.Excel2007Spreadsheet,
-                    FileName = reportLite.ToString() + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx",
-                    OverwritePrompt = true,
-                    Title = Prop.Resources.FindLocationFoExcelReport
-                };
+                    ShowFilters = false,
+                    ShowFilterButton = false,
+                    FilterOptions = new List<FilterOption>
+                    {
+                        new FilterOption 
+                        { 
+                            Path = "Query", 
+                            Operation = FilterOperation.EqualTo, 
+                            Value = query.ToLite(query.IsNew),
+                            Frozen = true
+                        }
+                    },
+                    Closed = (_, __) => initialize() //Refrescar lista de informes tras salir del administrador
+                });
 
-                if (sfd.ShowDialog(Window.GetWindow(this)) == true)
+                e.Handled = true;
+            };
+
+            initialize = ()=>
+            {
+                miResult.Items.Clear();
+
+                List<Lite<ExcelReportDN>> reports = Server.Return((IExcelReportServer s)=>s.GetExcelReports(sc.QueryName));
+
+                if (plainExcelMenuItem != null)
                 {
-                    byte[] result = Server.Return((IExcelReportServer r) => r.ExecuteExcelReport(reportLite, SearchControl.GetQueryRequest(true)));
-
-                    File.WriteAllBytes(sfd.FileName, result);
-
-                    System.Diagnostics.Process.Start(sfd.FileName);
+                    miResult.Items.Add(plainExcelMenuItem);
+                    miResult.Items.Add(new Separator());
                 }
-            }
 
-        }
+                miResult.Header = new TextBlock { Inlines = { new Run(Prop.Resources.Reports), reports.Count == 0? (Inline)new Run(): new Bold(new Run(" (" + reports.Count + ")")) } };
 
-        private void MenuItemAdmin_Clicked(object sender, RoutedEventArgs e)
-        {
-            var query = QueryClient.GetQuery(SearchControl.QueryName);
-
-            Navigator.Explore(new ExploreOptions(typeof(ExcelReportDN))
-            {
-                ShowFilters = false,
-                ShowFilterButton = false,
-                FilterOptions = new List<FilterOption>
+                if (reports.Count > 0)
                 {
-                    new FilterOption 
-                    { 
-                        Path = "Query", 
-                        Operation = FilterOperation.EqualTo, 
-                        Value = query.ToLite(query.IsNew),
-                        Frozen = true
+                    foreach (Lite<ExcelReportDN> report in reports)
+                    {
+                        MenuItem mi = new MenuItem()
+                        {
+                            Header = report.ToString(),
+                            Icon = ExtensionsImageLoader.GetImageSortName("excelDoc.png").ToSmallImage(),
+                            Tag = report,
+                        };
+                        miResult.Items.Add(mi);
                     }
-                },
-                Closed = (_, __) => Initialize() //Refrescar lista de informes tras salir del administrador
-            });
+                }          
 
-            e.Handled = true;
+          
+                miResult.Items.Add(miAdmin);
+            };
+
+            initialize();
+
+            return miResult;
         }
-
-        public override void QueryResultChanged()
-        {
-            if (PlainExcelMenuItem != null)
-                PlainExcelMenuItem.QueryResultChanged(); 
-        }
-
     }
 }

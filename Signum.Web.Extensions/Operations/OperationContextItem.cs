@@ -27,12 +27,15 @@ namespace Signum.Web.Operations
 
         public static void Start()
         {
-            ContextualItemsHelper.GetContextualItemsForLite += CreateContextualItem;
+            ContextualItemsHelper.GetContextualItemsForLites += CreateIndividualContextualItem;
         }
 
-        public static ContextualItem CreateContextualItem(ControllerContext controllerContext, Lite lite, object queryName, string prefix)
+        public static ContextualItem CreateIndividualContextualItem(SelectedItemsMenuContext ctx)
         {
-            List<ContextualItem> operations = GetForLite(lite, queryName, prefix);
+            if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
+                return null;
+
+            List<ContextualItem> operations = GetForLite(ctx.Lites[0], ctx.QueryName, ctx.Prefix);
             if (operations == null || operations.Count == 0) 
                 return null;
 
@@ -57,12 +60,12 @@ namespace Signum.Web.Operations
 
             return new ContextualItem
             {
-                Id = TypeContextUtilities.Compose(prefix, "ctxItemOperations"),
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemOperations"),
                 Content = content.ToHtml().ToString()
             };
         }
 
-        private static MvcHtmlString IndividualOperationToString(this ContextualItem oci)
+        public static MvcHtmlString IndividualOperationToString(this ContextualItem oci)
         {
             if (oci.Enabled)
                 oci.HtmlProps.Add("onclick", oci.OnClick);
@@ -83,14 +86,14 @@ namespace Signum.Web.Operations
 
             var list = OperationLogic.ServiceGetEntityOperationInfos(ident);
 
-            var contexts =
+            var contexts = 
                     from oi in list
                     let os = (EntityOperationSettings)OperationsClient.Manager.Settings.TryGetC(oi.Key)
                     let ctx = new ContextualOperationContext()
                     {
-                        Entity = ident,
+                        Entities = new List<Lite> { ident.ToLite() },
                         QueryName = queryName,
-                        OperationSettings = os,
+                        OperationSettings = os.TryCC(eos => eos.Contextual),
                         OperationInfo = oi,
                         Prefix = prefix
                     }
@@ -104,17 +107,11 @@ namespace Signum.Web.Operations
                     where string.IsNullOrEmpty(oi.CanExecute)
                         && oi.Lite == true
                         && (os == null 
-                            || (os.IsContextualVisible == null && (os.IsVisible == null || (os.IsVisible != null && os.IsVisible(entityCtx)))) 
-                            || (os.IsContextualVisible != null && os.IsContextualVisible(ctx)))
-                    select new 
-                    {
-                       ContextualContext = ctx,
-                       EntityContext = entityCtx
-                    };               
+                            || (os.Contextual != null && (os.Contextual.IsVisible == null || (os.Contextual.IsVisible != null && os.Contextual.IsVisible(ctx))))
+                            || (os.Contextual == null && os.OnClick == null && (os.IsVisible == null || (os.IsVisible != null && os.IsVisible(entityCtx)))))
+                    select ctx;
 
-            return contexts
-                   .Select(pair => OperationButtonFactory.Create(pair.ContextualContext, pair.EntityContext))
-                   .ToList();
+            return contexts.Select(op => OperationButtonFactory.CreateContextual(op)).ToList();
         }
     }
 
@@ -122,16 +119,20 @@ namespace Signum.Web.Operations
     {
         public static JsInstruction ConfirmOperation(ContextualOperationContext ctx, JsFunction onSuccess)
         {
-            return Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entity.ToString(), ctx.Entity.GetType().NiceName(), ctx.Entity.Id),
-                onSuccess);
+            var msg = ctx.Entities.Count == 1 ?
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entities[0].ToString(), ctx.Entities[0].GetType().NiceName(), ctx.Entities[0].Id) :
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities.Formato(ctx.OperationInfo.Key);
+
+            return Js.Confirm(msg, onSuccess);
         }
 
         public static JsInstruction ConfirmOperation(ContextualOperationContext ctx, JsInstruction onSuccess)
         {
-            return Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entity.ToString(), ctx.Entity.GetType().NiceName(), ctx.Entity.Id), 
-                onSuccess);
+            var msg = ctx.Entities.Count == 1 ?
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entities[0].ToString(), ctx.Entities[0].GetType().NiceName(), ctx.Entities[0].Id) :
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities.Formato(ctx.OperationInfo.Key);
+
+            return Js.Confirm(msg, onSuccess);
         }
     }
 }

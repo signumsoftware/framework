@@ -26,7 +26,7 @@
         {
             <tr>
                 <td>
-                    @Html.Span(null, item.Value.Resource.DisplayName)
+                    @Html.Span(null, item.Value.Resource.Name)
                     @Html.Hidden(item.Compose("Resource_Key"), item.Value.Resource.Key)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>

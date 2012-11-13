@@ -232,10 +232,16 @@
     </Compile>
     <Compile Include="Omnibox\OmniboxClient.cs" />
     <Compile Include="Operations\ConstructFromMenuItem.cs" />
+    <Compile Include="Operations\EntityOperationMenuItem.cs" />
     <Compile Include="Operations\OperationServer.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
-    <Compile Include="Operations\LogOperation.xaml.cs">
-      <DependentUpon>LogOperation.xaml</DependentUpon>
+    <Compile Include="Operations\OperationLog.xaml.cs">
+      <DependentUpon>OperationLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\PackageData.cs" />
+    <Compile Include="Processes\PackageOperationMenuItem.cs" />
+    <Compile Include="Processes\PackageOperation.xaml.cs">
+      <DependentUpon>PackageOperation.xaml</DependentUpon>
     </Compile>
     <Compile Include="Processes\Package.xaml.cs">
       <DependentUpon>Package.xaml</DependentUpon>
@@ -553,9 +559,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Operations\LogOperation.xaml">
+    <Page Include="Operations\OperationLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Processes\PackageOperation.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -720,9 +730,6 @@
     <Resource Include="Images\plan.png" />
     <Resource Include="Images\play.png" />
     <Resource Include="Images\stop.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\execute.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\customTask.png" />

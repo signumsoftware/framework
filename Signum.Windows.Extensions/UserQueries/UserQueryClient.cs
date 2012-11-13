@@ -11,6 +11,7 @@ using Signum.Entities.UserQueries;
 using Signum.Windows.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Windows.Omnibox;
+using System.Windows.Controls;
 
 namespace Signum.Windows.UserQueries
 {
@@ -21,17 +22,17 @@ namespace Signum.Windows.UserQueries
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryClient.Start();
-                Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Default) { View = _ => new UserQuery() });
-                SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
+                Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Main) { View = _ => new UserQuery() });
+                SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
             }
         }
 
-        static SearchControlMenuItem SearchControl_GetCustomMenuItems(object queryName, Type entityType)
+        static MenuItem SearchControl_GetCustomMenuItems(SearchControl seachControl)
         {
-            if (!Navigator.IsViewable(typeof(UserQueryDN), true))
+            if (!Navigator.IsViewable(typeof(UserQueryDN)))
                 return null;
 
-            return new UserQueryMenuItem();
+            return UserQueryMenuItemConsturctor.Construct(seachControl);
         }
 
         internal static UserQueryDN FromSearchControl(SearchControl searchControl)
@@ -43,7 +44,7 @@ namespace Signum.Windows.UserQueries
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
         {
-            var filters = searchControl.FilterOptions.Where(f=>f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
+            var filters = searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
             {
                 Path = qf.Token.FullKey(),
                 Operation = qf.Operation,

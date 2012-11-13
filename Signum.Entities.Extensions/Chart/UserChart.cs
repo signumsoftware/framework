@@ -169,4 +169,9 @@ namespace Signum.Entities.Chart
         }
     }
 
+    public enum UserChartOperation
+    { 
+        Save,
+        Delete
+    }
 }

@@ -31,17 +31,17 @@ namespace Signum.Engine.Authorization
 
 
         public static string SystemUserName { get; set; }
-        static UserDN systemUser;
+        static ResetLazy<UserDN> systemUserLazy = new ResetLazy<UserDN>(() => Database.Query<UserDN>().Single(u => u.UserName == SystemUserName));
         public static UserDN SystemUser
         {
-            get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
+            get { return systemUserLazy.Value; }
         }
 
         public static string AnonymousUserName { get; set; }
-        static UserDN anonymousUser;
+        static ResetLazy<UserDN> anonymousUserLazy = new ResetLazy<UserDN>(() => Database.Query<UserDN>().Single(u => u.UserName == AnonymousUserName));
         public static UserDN AnonymousUser
         {
-            get { return string.IsNullOrEmpty(AnonymousUserName) ? null : anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
+            get { return anonymousUserLazy.Value; }
         }
 
         public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
@@ -116,8 +116,8 @@ namespace Signum.Engine.Authorization
                 using (new EntityCache())
                 using (AuthLogic.Disable())
                 {
-                    if (SystemUserName != null) systemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
-                    if (AnonymousUserName != null) anonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName);
+                    if (SystemUserName != null) systemUserLazy = new ResetLazy<UserDN>(()=> Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName));
+                    if (AnonymousUserName != null) anonymousUserLazy = new ResetLazy<UserDN>(() => Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName));
                 }
             }
         }

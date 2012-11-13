@@ -103,5 +103,8 @@ namespace Signum.Entities.Disconnected
 
         [OperationContract, NetDataContractAttribute]
         void SkipExport(Lite<DisconnectedMachineDN> machine);
+
+        [OperationContract, NetDataContractAttribute]
+        void ConnectAfterFix(Lite<DisconnectedMachineDN> machine);
     }
 }

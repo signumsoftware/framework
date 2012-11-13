@@ -18,7 +18,7 @@ using Signum.Entities.Exceptions;
 namespace Signum.Entities.Processes
 {
     [Serializable]
-    public class ProcessDN : EnumDN, ITaskDN
+    public class ProcessDN : MultiEnumDN
     {
     }
 
@@ -30,13 +30,6 @@ namespace Signum.Entities.Processes
         public ProcessExecutionDN(ProcessDN process)
         {
             this.process = process;
-        }
-
-        Lite<UserDN> user;
-        public Lite<UserDN> User
-        {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
         }
 
         ProcessDN process;
@@ -51,6 +44,14 @@ namespace Signum.Entities.Processes
         {
             get { return processData; }
             set { Set(ref processData, value, () => ProcessData); }
+        }
+
+        [ImplementedBy(typeof(UserProcessSessionDN))]
+        ISessionDataDN sessionData;
+        public ISessionDataDN SessionData
+        {
+            get { return sessionData; }
+            set { Set(ref sessionData, value, () => SessionData); }
         }
 
         ProcessState state;
@@ -195,6 +196,29 @@ namespace Signum.Entities.Processes
     {
     }
 
+    public interface ISessionDataDN : IIdentifiable
+    {
+    }
+
+    [Serializable]
+    public class UserProcessSessionDN : Entity, ISessionDataDN
+    {
+        Lite<UserDN> user;
+        public Lite<UserDN> User
+        {
+            get { return user; }
+            set { Set(ref user, value, () => User); }
+        }
+
+        public static UserProcessSessionDN CreateCurrent()
+        {
+            return new UserProcessSessionDN
+            {
+                User = UserDN.Current.ToLite(),
+            };
+        }
+    }
+
     public enum ProcessState
     {
         Created,
@@ -210,8 +234,6 @@ namespace Signum.Entities.Processes
 
     public enum ProcessOperation
     {
-        Create,
-        FromProcess,
         Plan,
         Save,
         Cancel,

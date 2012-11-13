@@ -124,16 +124,15 @@ namespace Signum.Services
                 () => OperationLogic.ServiceGetEntityOperationInfos(entity));
         }
 
-        public List<OperationInfo> GetQueryOperationInfos(Type entityType)
+        public List<OperationInfo> GetOperationInfos(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.ServiceGetQueryOperationInfos(entityType));
+                () => OperationLogic.ServiceGetOperationInfos(entityType));
         }
-
-        public List<OperationInfo> GetConstructorOperationInfos(Type entityType)
+        public bool GetSaveProtected(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.ServiceGetConstructorOperationInfos(entityType));
+                  () =>  OperationLogic.IsSaveProtected(entityType));
         }
 
         public IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
@@ -176,6 +175,12 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
+        }
+
+        public Dictionary<Enum, string> GetContextualCanExecute(Lite[] lite, List<Enum> cleanKeys)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), null,
+               () => OperationLogic.GetContextualCanExecute(lite, cleanKeys));
         }
         #endregion
 
@@ -229,10 +234,10 @@ namespace Signum.Services
               () => TypeAuthLogic.AuthorizedTypes());
         }
 
-        public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
+        public bool IsAllowedForInUserInterface(Lite lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => TypeAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
+             () => TypeAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.UserInterface));
         }
 
         public byte[] DownloadAuthRules()
@@ -435,5 +440,6 @@ namespace Signum.Services
                 ProfilerLogic.ProfilerEntries(entries)); 
         }
         #endregion
+
     }
 }

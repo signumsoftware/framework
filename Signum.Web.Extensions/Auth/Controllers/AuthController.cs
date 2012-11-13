@@ -59,7 +59,7 @@ namespace Signum.Web.Auth
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return JsonAction.Redirect(Navigator.ViewRoute(context.Value));
+            return JsonAction.Redirect(Navigator.NavigateRoute(context.Value));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -82,12 +82,8 @@ namespace Signum.Web.Auth
             }
 
             context.Value.Execute(UserOperation.Save);
-            return JsonAction.Redirect(Navigator.ViewRoute(context.Value));
+            return JsonAction.Redirect(Navigator.NavigateRoute(context.Value));
         }
-
-    
-
-
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SetPassword(string prefix, string oldPrefix)
@@ -95,27 +91,26 @@ namespace Signum.Web.Auth
             UserDN entity = this.ExtractEntity<UserDN>(oldPrefix);
             var model = new SetPasswordModel { User = entity.ToLite() };
 
-            ViewData[ViewDataKeys.WriteSFInfo] = true; 
             ViewData[ViewDataKeys.OnSave] = new JsOperationExecutor(new JsOperationOptions
-                {
-                    ControllerUrl = RouteHelper.New().Action("SetPasswordOnOk", "Auth"),
-                    Prefix = prefix,
-                }).validateAndAjax().ToJS();
+            {
+                ControllerUrl = Url.Action("SetPasswordOnOk", "Auth"),
+                Prefix = prefix,
+            }).validateAndAjax().ToJS();
 
             ViewData[ViewDataKeys.Title] = Resources.EnterTheNewPassword;
 
             TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc));
+            return this.PopupOpen(new PopupNavigateOptions(tc));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
         public JsonResult SetPasswordOnOk(string prefix)
         {
-            var context = this.ExtractEntity<SetPasswordModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
+            var context = this.ExtractEntity<SetPasswordModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
 
             UserDN g = context.Value.User.ExecuteLite(UserOperation.SetPassword, context.Value.Password);
 
-            return JsonAction.Redirect(Navigator.ViewRoute(typeof(UserDN), g.Id));
+            return JsonAction.Redirect(Navigator.NavigateRoute(typeof(UserDN), g.Id));
         }
                 
         #region "Change password"

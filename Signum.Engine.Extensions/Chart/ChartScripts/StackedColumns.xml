@@ -4,7 +4,7 @@
     <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Columns" ColumnType="Groupable" IsGroupKey="true">
       <Parameter1 Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette " />
-      <Parameter2 Name="Order" Type="Enum" ValueDefinition="inside-out | reverse | default " />
+      <Parameter2 Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse " />
     </Column>
     <Column DisplayName="Height" ColumnType="Magnitude" />
   </Columns>
@@ -75,7 +75,15 @@
   
   stack(series);
   
-  var max = d3.max(series, function(s){ return d3.max(s.values0, function(v){return v.y0 + v.y;}); });  
+  var flattened = $.map(series, function(dim1){return dim1.values0});
+  
+  var maxDim0 = d3.nest()      
+      .key(function(r){return r.dim0; })
+      .rollup(function(list){ return { dim0: list[0].dim0, max: d3.max(list, function(a){return a.y0 + a.y;})};})
+      .entries(flattened)
+      .map(function(g){return g.values;});
+  
+  var max = d3.max(flattened, function(v){return v.y0 + v.y;});   
   
   var y = d3.scale.linear()
       .domain([0, max])
@@ -139,15 +147,17 @@
    
 
   var yHalf = yRule.size('content') / 2;
+   
+  
   if (x.rangeBand() > 50) {
     chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-      .enterData(series[0].values0, 'text', 'x-label')
-      .attr('transform', function (r){ return translate( x(r.row.c0) + x.rangeBand()/2, -(y(r.y) + y(r.y0)) ) +  rotate(-90);})
+      .enterData(maxDim0, 'text', 'x-label')
+      .attr('transform', function (r){ return translate( x(r.dim0) + x.rangeBand()/2, -(y(r.max)) ) +  rotate(-90);})
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
-      .attr('fill', function (r) { return y(r.y) + y(r.y0) >= yHalf ? '#fff' : '#000'; })
-      .attr('dx', function (r) { return y(r.y) + y(r.y0) >= yHalf ? -10 : 10; })
-      .attr('text-anchor',  function (r) { return y(r.y) + y(r.y0) >= yHalf ? 'end': 'start';})
+      .attr('fill', function (r) { return y(r.max) >= yHalf ? '#fff' : '#000'; })
+      .attr('dx', function (r) { return y(r.max) >= yHalf ? -10 : 10; })
+      .attr('text-anchor',  function (r) { return y(r.max) >= yHalf ? 'end': 'start';})
       .text(function (r) { return r.dim0.niceToString(); });
   }
   

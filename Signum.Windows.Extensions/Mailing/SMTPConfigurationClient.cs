@@ -22,8 +22,8 @@ namespace Signum.Windows.Mailing
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMTPConfigurationDN>(EntityType.Default) { View = e => new SMTPConfiguration() },
-                    new EntitySettings<ClientCertificationFileDN>(EntityType.Default) { View = e => new ClientCertificationFile() },
+                    new EntitySettings<SMTPConfigurationDN>(EntityType.Shared) { View = e => new SMTPConfiguration() },
+                    new EntitySettings<ClientCertificationFileDN>(EntityType.Shared) { View = e => new ClientCertificationFile() },
 
                 });
             }

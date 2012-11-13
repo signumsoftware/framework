@@ -7,5 +7,5 @@
 	@Html.ValueLine(e, f => f.Sex);
 	@Html.ValueLine(e, f => f.IsMale);
 	@Html.EntityLine(e, f => f.LastAward);
-	@Html.EntityList(e, f => f.Friends, el => el.ViewMode = ViewMode.Popup);
+	@Html.EntityList(e, f => f.Friends);
 }

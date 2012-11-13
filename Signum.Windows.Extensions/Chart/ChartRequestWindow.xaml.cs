@@ -396,7 +396,7 @@ namespace Signum.Windows.Chart
             chartScriptControl = new ChartScript();
             chartScriptControl.RequestWindow = this;
 
-            Navigator.Navigate(Request.ChartScript, new NavigateOptions
+            Navigator.Navigate(Request.ChartScript, new NavigateOptions()
             {
                 View = chartScriptControl,
                 Clone = false,
@@ -439,10 +439,10 @@ namespace Signum.Windows.Chart
 
             if (!lastRequest.GroupResults)
             {
-                var entity = (Lite)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type);
+                Lite lite = (Lite)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type);
 
-                if (Navigator.IsViewable(EntityType, false))
-                    Navigator.NavigateUntyped(entity, new NavigateOptions { Admin = false });
+                if (Navigator.IsNavigable(lite.RuntimeType, isSearchEntity: true))
+                    Navigator.NavigateUntyped(lite, new NavigateOptions());
             }
             else
             {
@@ -472,10 +472,10 @@ namespace Signum.Windows.Chart
         {
             if (row.Table.HasEntities)
             {
-                IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(row.Entity, EntityType);
+                Lite lite = row.Entity;
 
-                if (Navigator.IsViewable(EntityType, false))
-                    Navigator.NavigateUntyped(entity, new NavigateOptions { Admin = false });
+                if (Navigator.IsNavigable(lite.RuntimeType, isSearchEntity: true))
+                    Navigator.NavigateUntyped(lite);
             }
             else
             {

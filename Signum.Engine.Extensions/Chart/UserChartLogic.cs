@@ -11,6 +11,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Chart
 {
@@ -23,7 +24,6 @@ namespace Signum.Engine.Chart
                 sb.Settings.OverrideAttributes((UserChartDN uc) => uc.Columns.First().TokenString, new Attribute[0]);
 
                 sb.Include<UserChartDN>();
-
 
                 dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()
                                             select new
@@ -38,6 +38,18 @@ namespace Signum.Engine.Chart
 
                 sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
 
+                new BasicExecute<UserChartDN>(UserChartOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (uc, _) => { }
+                }.Register();
+
+                new BasicDelete<UserChartDN>(UserChartOperation.Delete)
+                {
+                    Lite = true,
+                    Delete = (uc, _) => { uc.Delete(); }
+                }.Register();
             }
         }
 

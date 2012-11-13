@@ -8,9 +8,6 @@
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" m:Common.IsReadOnly="False" />
-        <m:EntityCombo m:Common.Route="Operation" />
-        <GroupBox Header="Lines">
-            <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:PackageLineDN}" MaxHeight="400" FilterColumn="Package"/>
-        </GroupBox>
+        <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:PackageLineDN}" MaxHeight="400" FilterColumn="Package"/>
     </StackPanel>
 </UserControl>

@@ -27,6 +27,9 @@ using Signum.Web.Widgets;
 using Signum.Web.Chart;
 using Signum.Utilities;
 using Signum.Web.Files;
+using Signum.Web.Processes;
+using Signum.Web.Basic;
+using Signum.Engine.Processes;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -40,7 +43,7 @@ namespace Signum.Web.Extensions.Sample
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
-               Navigator.ViewRouteName,
+               Navigator.NavigateRouteName,
                "View/{webTypeName}/{id}",
                new { controller = "Signum", action = "View", webTypeName = "", id = "" }
             );
@@ -104,12 +107,17 @@ namespace Signum.Web.Extensions.Sample
                 facadeMethods: false);
 
             ContextualItemsHelper.Start();
+
+            QueryClient.Start();
             UserQueriesClient.Start();
             ControlPanelClient.Start();
 
             FilesClient.Start(true, true, true);
             ChartClient.Start();
             ReportsClient.Start(true, true);
+
+            ProcessesClient.Start(packages: true, packageOperations: true);
+            ProcessLogic.StartBackgroundProcess(5 * 1000);
 
             QuickLinkWidgetHelper.Start();
             NotesClient.Start();

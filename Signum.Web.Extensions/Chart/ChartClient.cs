@@ -33,9 +33,10 @@ namespace Signum.Web.Chart
     {
         public static string ViewPrefix = "~/Chart/Views/{0}.cshtml";
 
-        public static string ChartRequestView = ViewPrefix.Formato("ChartRequest");
+        public static string ChartRequestView = ViewPrefix.Formato("ChartRequestView");
         public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");
         public static string ChartResultsView = ViewPrefix.Formato("ChartResults");
+        public static string ChartResultsTableView = ViewPrefix.Formato("ChartResultsTable");
         public static string ChartScriptCodeView = ViewPrefix.Formato("ChartScriptCode");
 
         public static void Start()
@@ -53,7 +54,7 @@ namespace Signum.Web.Chart
                     new EmbeddedEntitySettings<ChartColumnDN> { PartialViewName = _ => ViewPrefix.Formato("ChartColumn") },
                     new EmbeddedEntitySettings<ChartScriptColumnDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptColumn") },
                     new EmbeddedEntitySettings<ChartScriptParameterDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptParameter") },
-                    new EntitySettings<ChartScriptDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
+                    new EntitySettings<ChartScriptDN>(EntityType.Main) { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
                 });
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);

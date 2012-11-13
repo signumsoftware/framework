@@ -9,7 +9,7 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.Operations
 {
     [Serializable]
-    public class OperationDN : EnumDN
+    public class OperationDN : MultiEnumDN
     {
     }
 
@@ -27,6 +27,18 @@ namespace Signum.Entities.Operations
         {
             return "{0} ({1}) CanExecute = {2}, Lite = {3}, Returns {4}".Formato(Key, OperationType, CanExecute, Lite, Returns);
         }
+
+        public bool IsEntityOperation
+        {
+            get
+            {
+                return OperationType == Operations.OperationType.Execute ||
+                    OperationType == Operations.OperationType.ConstructorFrom ||
+                    OperationType == Operations.OperationType.Delete;
+            }
+        }
+
+        public bool HasStates { get; set; }
     }
 
 

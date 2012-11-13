@@ -76,7 +76,6 @@ namespace Signum.Entities.Disconnected
         Save,
         UnsafeUnlock,
         FixImport,
-        AbortFaultedImport,
     }
 
     public interface IDisconnectedEntity : IIdentifiable

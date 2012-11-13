@@ -57,7 +57,7 @@
                         @Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription)
                     }
                 </table>
-                <textarea class="sf-chart-currentScript" style="display:none" data-url="@Navigator.ViewRoute(chart.Value.ChartScript)">
+                <textarea class="sf-chart-currentScript" style="display:none" data-url="@Navigator.NavigateRoute(chart.Value.ChartScript)">
                     @chart.Value.ChartScript.Script
                 </textarea>
             </td>

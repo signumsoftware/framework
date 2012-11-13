@@ -39,7 +39,7 @@ namespace Signum.Web.Omnibox
             var helpResult = result as HelpOmniboxResult;
             if (helpResult != null)
             {
-                var innerHtml = MvcHtmlString.Create(helpResult.ToStr);
+                var innerHtml = MvcHtmlString.Create(helpResult.Text.Replace("(", "<b>").Replace(")", "</b>"));
                 
                 if (helpResult.OmniboxResultType != null)
                 {
@@ -96,7 +96,7 @@ namespace Signum.Web.Omnibox
         {
             public override bool AllowedType(Type type)
             {
-                return Navigator.IsViewable(type, EntitySettingsContext.Admin);
+                return Navigator.IsNavigable(type, true);
             }
 
             public override Lite RetrieveLite(Type type, int id)

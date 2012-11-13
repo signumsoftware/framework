@@ -16,44 +16,47 @@ using System.Windows;
 
 namespace Signum.Windows.Reports
 {
-    internal class PlainExcelMenuItem : SearchControlMenuItem
+    public static class PlainExcelMenuItemConstructor
     {
-        protected override void OnInitialized(EventArgs e)
+        public static MenuItem Construct(SearchControl sc)
         {
-            base.OnInitialized(e);
-            Header = Prop.Resources.ExcelReport;
-            Icon = ExtensionsImageLoader.GetImageSortName("excelPlain.png").ToSmallImage();
-        }
-
-        protected override void OnClick()
-        {
-            SaveFileDialog sfd = new SaveFileDialog()
+            MenuItem miResult = new MenuItem()
             {
-                AddExtension = true,
-                DefaultExt = ".xlsx",
-                Filter = Prop.Resources.Excel2007Spreadsheet,
-                OverwritePrompt = true,
-                FileName = "{0}.xlsx".Formato(QueryUtils.GetNiceName(SearchControl.QueryName)),
-                Title = Prop.Resources.FindLocationFoExcelReport
+                Header = Prop.Resources.ExcelReport,
+                Icon = ExtensionsImageLoader.GetImageSortName("excelPlain.png").ToSmallImage(),
             };
 
-            if (sfd.ShowDialog(Window.GetWindow(this)) == true)
+            miResult.Click += (object sender, RoutedEventArgs e)=>
             {
+                SaveFileDialog sfd = new SaveFileDialog()
+                {
+                    AddExtension = true,
+                    DefaultExt = ".xlsx",
+                    Filter = Prop.Resources.Excel2007Spreadsheet,
+                    OverwritePrompt = true,
+                    FileName = "{0}.xlsx".Formato(QueryUtils.GetNiceName(sc.QueryName)),
+                    Title = Prop.Resources.FindLocationFoExcelReport
+                };
 
-                var request = SearchControl.GetQueryRequest(true);
+                if (sfd.ShowDialog(Window.GetWindow(sc)) == true)
+                {
+                    var request = sc.GetQueryRequest(true);
 
-                byte[] file = Server.Return((IExcelReportServer s) => s.ExecutePlainExcel(request));
+                    byte[] file = Server.Return((IExcelReportServer s) => s.ExecutePlainExcel(request));
 
-                File.WriteAllBytes(sfd.FileName, file);
+                    File.WriteAllBytes(sfd.FileName, file);
 
-                System.Diagnostics.Process.Start(sfd.FileName);
-            }
-        }
+                    System.Diagnostics.Process.Start(sfd.FileName);
+                }
+            };
 
-        public override void QueryResultChanged()
-        {
-            ResultTable qr = SearchControl.ResultTable;
-            IsEnabled = (qr != null && qr.Rows.Length > 0);
+            sc.QueryResultChanged += (object sender, RoutedEventArgs e)=>
+            {
+                ResultTable qr = sc.ResultTable;
+                sc.IsEnabled = (qr != null && qr.Rows.Length > 0);
+            };
+
+            return miResult;
         }
     }
 

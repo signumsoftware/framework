@@ -10,7 +10,7 @@ using System.IO;
 namespace Signum.Entities.Files
 {
     [Serializable]
-    public class FileTypeDN : EnumDN
+    public class FileTypeDN : MultiEnumDN
     {
     }
 
