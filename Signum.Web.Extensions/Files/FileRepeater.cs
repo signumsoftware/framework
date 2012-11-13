@@ -44,7 +44,7 @@ namespace Signum.Web.Files
             return JsCreate(DefaultJsViewOptions()).ToJS();
         }
 
-        public JsInstruction JsCreate(JsViewOptions viewOptions)
+        public new JsInstruction JsCreate(JsViewOptions viewOptions)
         {
             return new JsInstruction(() => "{0}.create({1})".Formato(
                 this.ToJS(),

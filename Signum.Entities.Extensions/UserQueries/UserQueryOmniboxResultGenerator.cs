@@ -43,7 +43,7 @@ namespace Signum.Entities.UserQueries
             var userQuery = Signum.Entities.Extensions.Properties.Resources.Omnibox_UserQuery;
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { ToStr = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }
+                new HelpOmniboxResult { Text = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }
             };
         }
     }

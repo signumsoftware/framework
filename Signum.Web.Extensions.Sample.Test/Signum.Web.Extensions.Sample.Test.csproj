@@ -62,7 +62,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="ControlPanelTests.cs" />
     <Compile Include="ChartTests.cs" />
-    <Compile Include="OperationsCtxMenuTests.cs" />
+    <Compile Include="OperationsCtxTests.cs" />
     <Compile Include="WidgetsTests.cs" />
     <Compile Include="UserQueriesTests.cs" />
     <Compile Include="OperationsTests.cs" />
@@ -127,7 +127,7 @@
     <None Include="otCharts.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="otoperations_ctxmenu.orderedtest">
+    <None Include="otoperationsCtx.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="otWidgets.orderedtest">

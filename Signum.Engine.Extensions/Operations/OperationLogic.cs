@@ -22,24 +22,6 @@ using Signum.Entities.Basics;
 
 namespace Signum.Engine.Operations
 {
-    public interface IOperation
-    {
-        Enum Key { get; }
-        Type Type { get; }
-        OperationType OperationType { get; }
-        bool Returns { get; }
-        Type ReturnType { get; }
-
-        void AssertIsValid();
-    }
-
-    public interface IEntityOperation : IOperation
-    {
-        bool Lite { get; }
-        bool AllowsNew { get; }
-        string CanExecute(IIdentifiable entity);
-    }
-
     public static class OperationLogic
     {
         static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogOperationsExpression =
@@ -57,7 +39,7 @@ namespace Signum.Engine.Operations
         }
 
 
-        public static readonly HashSet<Type> ProtectedSaveTypes = new HashSet<Type>();
+        static readonly Polymorphic<Tuple<bool>> protectedSaveTypes = new Polymorphic<Tuple<bool>>(PolymorphicMerger.InheritanceAndInterfaces, typeof(IIdentifiable));
 
         static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
         public static bool AllowSaveGlobally { get; set; }
@@ -67,9 +49,25 @@ namespace Signum.Engine.Operations
             if (AllowSaveGlobally)
                 return false;
 
-            var it = allowedTypes.Value;
+            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+                return false;
 
-            return ProtectedSaveTypes.Contains(type) && (it == null || !it.Contains(type));
+            var tuple = protectedSaveTypes.TryGetValue(type);
+            if (tuple == null || !tuple.Item1)
+                return false;
+
+            var stack = allowedTypes.Value;
+            return (stack == null || !stack.Contains(type));
+        }
+
+        public static void SetProtectedSave<T>(bool? isProtected) where T : IIdentifiable
+        {
+            SetProtectedSave(typeof(T), isProtected);
+        }
+
+        public static void SetProtectedSave(Type type, bool? isProtected)
+        {
+            protectedSaveTypes.SetDefinition(type, isProtected == null ? null : Tuple.Create(isProtected.Value));
         }
 
         public static IDisposable AllowSave<T>() where T : class, IIdentifiable
@@ -99,7 +97,7 @@ namespace Signum.Engine.Operations
                 sb.Include<OperationDN>();
                 sb.Include<OperationLogDN>();
 
-                EnumLogic<OperationDN>.Start(sb, () => RegisteredOperations);
+                MultiEnumLogic<OperationDN>.Start(sb, () => RegisteredOperations);
 
                 dqm[typeof(OperationLogDN)] = (from lo in Database.Query<OperationLogDN>()
                                                select new
@@ -134,7 +132,7 @@ namespace Signum.Engine.Operations
             if (ident.Modified == true && IsSaveProtected(ident.GetType()))
                 throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
                     ident.GetType().Name,
-                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => EnumDN.UniqueKey(k))));
+                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => MultiEnumDN.UniqueKey(k))));
         }
 
         #region Events
@@ -175,7 +173,7 @@ namespace Signum.Engine.Operations
         public static void AssertOperationAllowed(Enum operationKey)
         {
             if (!OperationAllowed(operationKey))
-                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), EnumDN.UniqueKey(operationKey)));
+                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)));
         }
         #endregion
 
@@ -192,7 +190,7 @@ namespace Signum.Engine.Operations
 
             if (operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false)
             {
-                ProtectedSaveTypes.Add(operation.Type);
+                SetProtectedSave(operation.Type, true);
             }
         }
 
@@ -215,21 +213,15 @@ namespace Signum.Engine.Operations
                 Returns = operation.Returns,
                 OperationType = operation.OperationType,
                 CanExecute = canExecute,
-                ReturnType = operation.ReturnType
+                ReturnType = operation.ReturnType,
+                HasStates = (operation as IGraphHasFromStatesOperation).TryCS(eo => eo.HasFromStates) ?? false,
             };
         }
 
-        public static List<OperationInfo> ServiceGetConstructorOperationInfos(Type entityType)
+        public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where o is IConstructOperation && OperationAllowed(o.Key)
-                    select ToOperationInfo(o, null)).ToList();
-        }
-
-        public static List<OperationInfo> ServiceGetQueryOperationInfos(Type entityType)
-        {
-            return (from o in TypeOperations(entityType)
-                    where o is IConstructorFromManyOperation && OperationAllowed(o.Key)
+                    where OperationAllowed(o.Key)
                     select ToOperationInfo(o, null)).ToList();
         }
 
@@ -372,9 +364,7 @@ namespace Signum.Engine.Operations
         public static T Find<T>(Type type, Enum operationKey)
             where T : IOperation
         {
-            IOperation result = operations.TryGetValue(type).TryGetC(operationKey);
-            if (result == null)
-                throw new InvalidOperationException("Operation {0} not found for type {1}".Formato(operationKey, type));
+            IOperation result = FindOperation(type, operationKey);
 
             if (!(result is T))
                 throw new InvalidOperationException("Operation {0} is a {1} not a {2} use {3} instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
@@ -385,6 +375,14 @@ namespace Signum.Engine.Operations
                     result is IConstructorFromManyOperation ? "ConstructFromMany" : null));
 
             return (T)result;
+        }
+
+        private static IOperation FindOperation(Type type, Enum operationKey)
+        {
+            IOperation result = operations.TryGetValue(type).TryGetC(operationKey);
+            if (result == null)
+                throw new InvalidOperationException("Operation {0} not found for type {1}".Formato(operationKey, type));
+            return result;
         }
 
         static T AssertLite<T>(this T result)
@@ -492,8 +490,77 @@ namespace Signum.Engine.Operations
             return operations.TryGetValue(type).TryGetC(operation) != null;
         }
 
+        internal static OperationType OperationType(Type type, Enum operationKey)
+        {
+            return FindOperation(type, operationKey).OperationType;
+        }
 
+        internal static Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys)
+        {
+            Dictionary<Enum, string> result = null;
+            using (Schema.Current.GlobalMode())
+            {
+                foreach (var grLites in lites.GroupBy(a => a.RuntimeType))
+                {
+                    var operations = cleanKeys.Select(k => FindOperation(grLites.Key, k)).ToList();
+
+                    foreach (var grOperations in operations.GroupBy(a => a.GetType().GetGenericArguments().Let(arr=>Tuple.Create(arr[0], arr[1]))))
+                    {
+                        var dic = giGetContextualGraphCanExecute.GetInvoker(grLites.Key, grOperations.Key.Item1, grOperations.Key.Item2)(grLites, grOperations);
+                        if (result == null)
+                            result = dic;
+                        else
+                        {
+                            foreach (var kvp in dic)
+                            {
+                                result[kvp.Key] = "\r\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        internal static GenericInvoker<Func<IEnumerable<Lite>, IEnumerable<IOperation>, Dictionary<Enum, string>>> giGetContextualGraphCanExecute =
+            new GenericInvoker<Func<IEnumerable<Lite>, IEnumerable<IOperation>, Dictionary<Enum, string>>>((lites, operations) => GetContextualGraphCanExecute<IdentifiableEntity, IdentifiableEntity, UserState>(lites, operations));
+        internal static Dictionary<Enum, string> GetContextualGraphCanExecute<T, E, S>(IEnumerable<Lite> lites, IEnumerable<IOperation> operations)
+            where E : IdentifiableEntity
+            where S : struct
+            where T : E
+        {
+            var getState = Graph<E, S>.GetState;
+
+            var states = lites.GroupsOf(200).SelectMany(list =>
+                Database.Query<T>().Where(e => list.Contains(e.ToLite())).Select(getState).Distinct()).Distinct().ToList();
+
+            return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
+                    let list = states.Where(s => !o.FromStates.Contains(s)).ToList()
+                    where list.Any()
+                    select KVP.Create(o.Key,
+                        Resources.ImpossibleToExecute0FromState1.Formato(o.Key.NiceToString(), list.CommaOr(s => ((Enum)(object)s).NiceToString())))).ToDictionary();
+        }
     }
+
+    public interface IOperation
+    {
+        Enum Key { get; }
+        Type Type { get; }
+        OperationType OperationType { get; }
+        bool Returns { get; }
+        Type ReturnType { get; }
+
+        void AssertIsValid();
+    }
+
+    public interface IEntityOperation : IOperation
+    {
+        bool Lite { get; }
+        bool AllowsNew { get; }
+        string CanExecute(IIdentifiable entity);
+    }
+
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);

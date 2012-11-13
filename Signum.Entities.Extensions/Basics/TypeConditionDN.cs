@@ -7,7 +7,7 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.Basics
 {
     [Serializable]
-    public class TypeConditionNameDN : EnumDN
+    public class TypeConditionNameDN : MultiEnumDN
     {
     
     }

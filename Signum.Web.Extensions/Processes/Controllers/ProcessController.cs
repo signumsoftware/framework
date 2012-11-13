@@ -63,7 +63,7 @@ namespace Signum.Web.Processes
         {
             ProcessPermissions.ViewProcessControlPanel.Authorize();
 
-            ProcessLogic.Start();
+            ProcessLogic.StartBackgroundProcess();
 
             Thread.Sleep(1000);
 
@@ -80,6 +80,17 @@ namespace Signum.Web.Processes
             Thread.Sleep(1000);
 
             return null;
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult ContextualExecute(string operationFullKey, string prefix, string liteKeys)
+        {
+            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Select(l => (Lite)l).ToList();
+
+            ProcessExecutionDN process = (ProcessExecutionDN)OperationLogic.ServiceConstructFromMany(
+                lites, typeof(ProcessExecutionDN), PackageOperationOperation.CreatePackageOperation, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+
+            return Navigator.PopupOpen(this, new PopupNavigateOptions(new TypeContext<ProcessExecutionDN>(process, prefix)));
         }
     }
 }

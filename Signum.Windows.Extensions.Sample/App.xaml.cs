@@ -112,19 +112,19 @@ namespace Signum.Windows.Extensions.Sample
 
             Navigator.AddSettings(new List<EntitySettings>()
             {
-                new EntitySettings<AlbumDN>(EntityType.Default){ View = e => new Album() },
+                new EntitySettings<AlbumDN>(EntityType.Main){ View = e => new Album() },
 
-                new EntitySettings<LabelDN>(EntityType.Admin) { View = e => new Label() },
-                new EntitySettings<ArtistDN>(EntityType.Default) { View = e => new Artist() },
-                new EntitySettings<BandDN>(EntityType.Default) { View = e => new Band() },
+                new EntitySettings<LabelDN>(EntityType.Shared) { View = e => new Label() },
+                new EntitySettings<ArtistDN>(EntityType.Main) { View = e => new Artist() },
+                new EntitySettings<BandDN>(EntityType.Main) { View = e => new Band() },
 
-                new EntitySettings<AmericanMusicAwardDN>(EntityType.Default) { View = e => new AmericanMusicAward() },
-                new EntitySettings<GrammyAwardDN>(EntityType.Default) { View = e => new GrammyAward() },
-                new EntitySettings<PersonalAwardDN>(EntityType.Default) { View = e => new PersonalAward() },
+                new EntitySettings<AmericanMusicAwardDN>(EntityType.Main) { View = e => new AmericanMusicAward() },
+                new EntitySettings<GrammyAwardDN>(EntityType.Main) { View = e => new GrammyAward() },
+                new EntitySettings<PersonalAwardDN>(EntityType.Main) { View = e => new PersonalAward() },
 
-                new EntitySettings<CountryDN>(EntityType.Admin) { View = e => new Country() },
+                new EntitySettings<CountryDN>(EntityType.String) { View = e => new Country() },
 
-                new EntitySettings<NoteWithDateDN>(EntityType.Default) { View = e => new NoteWithDate() },
+                new EntitySettings<NoteWithDateDN>(EntityType.Main) { View = e => new NoteWithDate() },
             });
 
             Navigator.Initialize();

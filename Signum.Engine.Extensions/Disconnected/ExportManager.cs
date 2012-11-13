@@ -22,6 +22,7 @@ using Signum.Engine.Authorization;
 using System.Threading;
 using System.Reflection;
 using Signum.Engine.Operations;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Disconnected
 {
@@ -68,17 +69,18 @@ namespace Signum.Engine.Disconnected
                 }).ToMList()
             }.Save().ToLite();
 
-            var threadContext = Statics.ExportThreadContext();
-
             var cancelationSource = new CancellationTokenSource();
+
+            UserDN user = UserDN.Current;
 
             var token = cancelationSource.Token;
 
             var task = Task.Factory.StartNew(()=>
             {
-                Statics.ImportThreadContext(threadContext);
-
-                StartExporting(machine);
+                using (AuthLogic.UserSession(user))
+                {
+                    OnStartExporting(machine);
+                    DisconnectedMachineDN.Current = machine.ToLite();
 
                 try
                 {
@@ -109,7 +111,7 @@ namespace Signum.Engine.Disconnected
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DisableForeignKeys = l })))
                     using (Connector.Override(newDatabase))
                     {
-                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumProxy()))
+                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
                         {
                             token.ThrowIfCancellationRequested();
 
@@ -140,7 +142,7 @@ namespace Signum.Engine.Disconnected
                     }
 
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { EnableForeignKeys = l })))
-                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumProxy()))
+                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
                         {
                             token.ThrowIfCancellationRequested();
 
@@ -160,6 +162,10 @@ namespace Signum.Engine.Disconnected
 
                     CopyExport(export, newDatabase);
 
+                    machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+                    using(SqlConnector.Override(newDatabase))
+                        machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
                         BackupDatabase(machine, export, newDatabase);
 
@@ -169,22 +175,22 @@ namespace Signum.Engine.Disconnected
                     token.ThrowIfCancellationRequested();
 
                     export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
-
-                    machine.IsOffline = true;
-                    using (OperationLogic.AllowSave<DisconnectedMachineDN>())
-                        machine.Save();
                 }
                 catch (Exception e)
                 {
                     var ex = e.LogException();
 
                     export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Exception = ex.ToLite(), State = DisconnectedExportState.Error });
+
+                        OnExportingError(machine, export, e);
                 }
                 finally
                 {
                     runningExports.Remove(export);
+                        DisconnectedMachineDN.Current = null;
 
-                    EndExporting();
+                        OnEndExporting();
+                }
                 }
             });
 
@@ -193,6 +199,8 @@ namespace Signum.Engine.Disconnected
 
             return export;
         }
+
+       
 
         private void CopyExport(Lite<DisconnectedExportDN> export, SqlConnector newDatabase)
         {
@@ -205,14 +213,18 @@ namespace Signum.Engine.Disconnected
         }
 
 
-        protected virtual void StartExporting(DisconnectedMachineDN machine)
+        protected virtual void OnStartExporting(DisconnectedMachineDN machine)
         {
-            DisconnectedMachineDN.Current = machine.ToLite();
+            
         }
 
-        protected virtual void EndExporting()
+        protected virtual void OnEndExporting()
         {
-            DisconnectedMachineDN.Current = null;
+            
+        }
+
+        protected virtual void OnExportingError(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Exception exception)
+        {
         }
 
         readonly MethodInfo miUnsafeLock;

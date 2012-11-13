@@ -20,7 +20,7 @@
                         <div class="sf-ftbl-part-container">
                             @{ 
                                 var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).FirstEx();
-                                Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPart"), ppTc);    
+                                Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPartView"), ppTc);    
                             }
                         </div>
                         <div class="sf-ftbl-droppable"></div>

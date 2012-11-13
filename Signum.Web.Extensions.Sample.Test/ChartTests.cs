@@ -13,6 +13,8 @@ using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Utilities;
+using Signum.Entities.Chart;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -106,7 +108,7 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsTrue(selenium.IsElementPresent("jq=#Filters_1_sfRuntimeInfo"));
             Assert.IsTrue(selenium.IsElementPresent("jq=#Orders_0_sfRuntimeInfo"));
 
-            selenium.EntityButtonSaveClick();
+            selenium.EntityOperationClick(UserChartOperation.Save);
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             //Load user chart
@@ -124,6 +126,14 @@ namespace Signum.Web.Extensions.Sample.Test
                 !selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 3)));
             //check order was set
             Assert.IsTrue(selenium.IsElementPresent("{0}:contains('Michael')".Formato(SearchTestExtensions.RowSelector(selenium, 1))));
+
+            selenium.QueryMenuOptionClick("tmUserCharts", "qbUserChartEdit");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            selenium.EntityOperationClick(UserChartOperation.Delete);
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.SearchSelector("")));
         }
     }
 }

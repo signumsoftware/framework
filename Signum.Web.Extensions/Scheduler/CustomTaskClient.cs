@@ -14,8 +14,8 @@ namespace Signum.Web.Extensions.Scheduler
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<CustomTaskExecutionDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("CustomTaskExecution") },
-                    new EntitySettings<CustomTaskDN>(EntityType.Admin){ PartialViewName = _ => ViewPrefix.Formato("CustomTask") },
+                    new EntitySettings<CustomTaskDN>(EntityType.SystemString){ PartialViewName = _ => ViewPrefix.Formato("CustomTask") },
+                    new EntitySettings<CustomTaskExecutionDN>(EntityType.System){ PartialViewName = _ => ViewPrefix.Formato("CustomTaskExecution") },
                 });
             }
         }

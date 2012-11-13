@@ -29,13 +29,12 @@ namespace Signum.Web.Chart
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(TypeDN)))
-                    Navigator.AddSetting(new EntitySettings<TypeDN>(EntityType.Admin));
+                    Navigator.AddSetting(new EntitySettings<TypeDN>(EntityType.System));
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EmbeddedEntitySettings<ChartPaletteModel>() 
                     { 
-                        ShowSave = false,
                         PartialViewName = _ => ChartClient.ViewPrefix.Formato("ChartPalette"),
                         MappingDefault = new EntityMapping<ChartPaletteModel>(true)
                             .SetProperty(a => a.Colors, new MListDictionaryMapping<ChartColorDN, Lite<IdentifiableEntity>>(cc=>cc.Related, "Related",

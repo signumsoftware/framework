@@ -10,7 +10,7 @@
     <div id="sfCpContainer">
         @for (int col = 1; col <= Model.NumberOfColumns; col++)
         {
-            bool hasChart = Model.Parts.Any(p => p.Column == col && p.Content.GetType() == typeof(UserChartPartDN));
+            bool hasChart = Model.Parts.Any(p => p.Column == col && p.Content.GetType() == typeof(UserChartPartDN) && !((UserChartPartDN)p.Content).OnlyData);
             <div class="sf-ftbl-column"@(hasChart ? " style=min-width:" + equalColumnWidth + "%" : "") data-column="@col">
                 @for (int row = 1; row <= rowNumber; row++)
                 {
@@ -18,7 +18,7 @@
                     if (pp != null)
                     {
                         <div class="sf-ftbl-part-container">
-                            @{ Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp); }   
+                            @Html.Partial(ControlPanelClient.ViewPrefix.Formato("PanelPartView"), pp)
                         </div>
                     }
                 }

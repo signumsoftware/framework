@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -252,7 +252,7 @@ namespace Signum.Entities.Authorization
 
                 Synchronizer.Synchronize(should, current, 
                     (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(), 
-                    (p, pr) => pr.Delete(),
+                    (p, pr) => pr.Delete(), 
                     (p, ar, pr) =>
                     {
                         pr.Allowed = ar.Allowed;
@@ -388,7 +388,7 @@ namespace Signum.Entities.Authorization
             var should = element.Element(rootName).Elements("Role").ToDictionary(x => roles[x.Attribute("Name").Value]);
 
             Table table = Schema.Current.Table(typeof(RT));
-            
+
             return Synchronizer.SynchronizeScript(should, current, 
                 (role, x) =>
                 {
@@ -407,8 +407,8 @@ namespace Signum.Entities.Authorization
                     }, Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
-                },
-                (role, listRules) => listRules.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
+                }, 
+                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
                 (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
@@ -417,12 +417,12 @@ namespace Signum.Entities.Authorization
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
                         x.Elements(elementName).ToDictionary(a => toResource(a.Attribute("Resource").Value)), 
-                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
+                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), 
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
                             return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, Comment(role, r, a));
-                        },
+                        }, 
                         (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
                         (r, xr, rt) =>
                         {

@@ -91,14 +91,14 @@ namespace Signum.Web.Files
                         if (filePath != null)
                         {
                             sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
-                                EnumDN.UniqueKey(filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
+                                MultiEnumDN.UniqueKey(filePath.FileTypeEnum ?? MultiEnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
                         }
                         else
                         {
                             if (fileLine.FileType == null)
                                 throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
 
-                            sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), EnumDN.UniqueKey(fileLine.FileType)));
+                            sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), MultiEnumDN.UniqueKey(fileLine.FileType)));
                         }
                     }
 
@@ -172,7 +172,7 @@ namespace Signum.Web.Files
             if (fp.FileTypeEnum != null)
                 return fp.FileTypeEnum;
             else if (fp.FileType != null)
-                return EnumLogic<FileTypeDN>.ToEnum(fp.FileType);
+                return MultiEnumLogic<FileTypeDN>.ToEnum(fp.FileType);
 
             return null;
         }

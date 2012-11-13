@@ -291,7 +291,7 @@ namespace Signum.Engine.Help
                 }
             }
 
-            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()).ToArray();
+            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
 
             foreach (Type type in types)
             {
@@ -317,7 +317,7 @@ namespace Signum.Engine.Help
                 Directory.CreateDirectory(HelpDirectory);
             }
 
-            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()).ToArray();
+            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
             var entitiesDocuments = LoadDocuments(EntitiesDirectory);
             var namespacesDocuments = LoadDocuments(NamespacesDirectory);
             var queriesDocuments = LoadDocuments(QueriesDirectory);

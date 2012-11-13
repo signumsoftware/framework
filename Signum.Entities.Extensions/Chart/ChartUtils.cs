@@ -233,7 +233,7 @@ namespace Signum.Entities.Chart
             {
                 name = "c" + i,
                 title = c.GetTitle(),
-                token = c.TokenString,
+                token = c.Token == null? null: c.Token.FullKey(),
                 type =  c.Token == null? null: c.Token.GetChartColumnType().ToString(),
                 parameter1 = c.Parameter1,
                 parameter2 = c.Parameter2,
@@ -296,7 +296,7 @@ namespace Signum.Entities.Chart
             }
             else if (type.IsEnum)
             {
-                var enumProxy = EnumProxy.Generate(type);
+                var enumEntity = EnumEntity.Generate(type);
 
                 return r =>
                 {
@@ -305,7 +305,7 @@ namespace Signum.Entities.Chart
                     {
                         key = Convert.ToInt32(e),
                         toStr = e.TryCC(en => en.NiceToString()),
-                        color = e == null ? "#555" : GetChartColor(enumProxy, Convert.ToInt32(e)).TryToHtml(),
+                        color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
                     };
                 };
             }

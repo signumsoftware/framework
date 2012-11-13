@@ -63,15 +63,14 @@ namespace Signum.Entities.Omnibox
                     result.AddRange(generator.GetHelp());
                 }
 
-                string matchingOptions = Signum.Entities.Extensions.Properties.Resources.Omnibox_MatchingOptions
-                    .Replace(new Dictionary<string, string> { { "(", "<b>" }, { ")", "</b>" } });
-                result.Add(new HelpOmniboxResult { ToStr = matchingOptions });
+                string matchingOptions = Signum.Entities.Extensions.Properties.Resources.Omnibox_MatchingOptions;
+                result.Add(new HelpOmniboxResult { Text = matchingOptions });
 
                 string databaseAccess = Signum.Entities.Extensions.Properties.Resources.Omnibox_DatabaseAccess;
-                result.Add(new HelpOmniboxResult { ToStr = databaseAccess });
+                result.Add(new HelpOmniboxResult { Text = databaseAccess });
 
                 string disambiguate = Signum.Entities.Extensions.Properties.Resources.Omnibox_Disambiguate;
-                result.Add(new HelpOmniboxResult { ToStr = disambiguate });
+                result.Add(new HelpOmniboxResult { Text = disambiguate });
 
                 return result.ToList();
             }
@@ -159,7 +158,7 @@ namespace Signum.Entities.Omnibox
 
     public class HelpOmniboxResult : OmniboxResult
     {
-        public string ToStr { get; set; }
+        public string Text { get; set; }
         public Type OmniboxResultType { get; set; }
     }
 

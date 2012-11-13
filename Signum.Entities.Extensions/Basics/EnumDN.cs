@@ -10,7 +10,7 @@ using Signum.Entities.Authorization;
 namespace Signum.Entities.Basics
 {
     [Serializable]
-    public abstract class EnumDN : IdentifiableEntity
+    public abstract class MultiEnumDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string name;
@@ -30,7 +30,7 @@ namespace Signum.Entities.Basics
             internal set { Set(ref key, value, () => Key); }
         }
 
-        static readonly Expression<Func<EnumDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<MultiEnumDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

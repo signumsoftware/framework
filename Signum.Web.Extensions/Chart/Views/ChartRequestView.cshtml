@@ -1,0 +1,83 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+@model TypeContext<ChartRequest>
+@Html.ScriptCss("~/Chart/Content/SF_Chart.css")
+@Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
+                "~/Chart/Scripts/SF_Chart_Utils.js",
+                "~/scripts/d3.v2.min.js",
+                "~/scripts/colorbrewer.js")
+@{ 
+    QueryDescription queryDescription =  (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    if (queryDescription == null)
+    {
+        queryDescription = DynamicQueryManager.Current.QueryDescription(Model.Value.QueryName);
+        ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+    }
+    
+    List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
+
+    var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+    Type entitiesType = Lite.Extract(entityColumn.Type);
+}
+<div id="@Model.Compose("sfChartControl")" 
+    class="sf-search-control sf-chart-control" 
+    data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" 
+    data-add-filter-url="@Url.Action("AddFilter", "Chart")" 
+    data-prefix="@Model.ControlID" >
+    @Html.HiddenRuntimeInfo(Model)
+    @Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
+        (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
+    <div>
+        <div class="sf-fields-list">
+            <div class="ui-widget sf-filters">
+                <div class="ui-widget-header ui-corner-top sf-filters-body">
+                    @Html.ChartTokenBuilder(null, Model.Value, queryDescription, Model)
+                    @Html.Href(
+                            Model.Compose("btnAddFilter"),
+                            Signum.Web.Properties.Resources.FilterBuilder_AddFilter,
+                            "",
+                            Signum.Web.Properties.Resources.Signum_selectToken,
+                            "sf-query-button sf-add-filter sf-disabled",
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-s" },
+                                { "data-url", Url.SignumAction("AddFilter") }
+                            })
+                </div>
+                @{ 
+                    Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+                }
+            </div>
+        </div>
+    </div>
+    <div id="@Model.Compose("sfChartBuilderContainer")">
+        @Html.Partial(ChartClient.ChartBuilderView, Model.Value)
+    </div>
+    <script type="text/javascript">
+        var str = @(MvcHtmlString.Create(Model.Value.ToJS()));
+        $('#@Model.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@Model.ControlID' }, str));
+    </script>
+    <div class="sf-query-button-bar">
+        <button type="submit" class="sf-query-button sf-chart-draw" data-icon="ui-icon-refresh" id="@Model.Compose("qbDraw")" data-url="@(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)))">@Resources.Chart_Draw</button>
+        <button class="sf-query-button sf-chart-script-edit" data-icon="ui-icon-script" id="@Model.Compose("qbEdit")">@Resources.UserChart_Edit</button>
+        @UserChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID).ToString(Html)
+    </div>
+    <div class="clearall">
+    </div>
+    <div id="@Model.Compose("divResults")" class="ui-widget ui-corner-all sf-search-results-container">
+        @{ Html.RenderPartial(ChartClient.ChartResultsView); }
+    </div>
+    <script type="text/javascript">
+        (function () {
+            var $myChart = SF.Chart.getFor('@Model.ControlID');
+            //$myChart.initOrders();
+        })();
+    </script>
+</div>

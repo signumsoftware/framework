@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
-using System.Windows;
 using System.Linq.Expressions;
 using Signum.Entities.Authorization;
 using Signum.Engine.DynamicQuery;
@@ -29,11 +28,25 @@ namespace Signum.Engine.Disconnected
         public static string BackupFolder = @"C:\Backups";
         public static string BackupNetworkFolder = @"C:\Backups";
 
-        static Dictionary<Type, IDisconnectedStrategy> strategies = new Dictionary<Type, IDisconnectedStrategy>();
+        internal static Dictionary<Type, IDisconnectedStrategy> strategies = new Dictionary<Type, IDisconnectedStrategy>();
 
         public static ExportManager ExportManager = new ExportManager();
         public static ImportManager ImportManager = new ImportManager();
         public static LocalBackupManager LocalBackupManager = new LocalBackupManager();
+
+        static Expression<Func<DisconnectedMachineDN, IQueryable<DisconnectedImportDN>>> ImportsExpression =
+                m => Database.Query<DisconnectedImportDN>().Where(di => di.Machine.RefersTo(m));
+        public static IQueryable<DisconnectedImportDN> Imports(this DisconnectedMachineDN m)
+        {
+            return ImportsExpression.Evaluate(m);
+        }
+
+        static Expression<Func<DisconnectedMachineDN, IQueryable<DisconnectedImportDN>>> ExportsExpression =
+               m => Database.Query<DisconnectedImportDN>().Where(di => di.Machine.RefersTo(m));
+        public static IQueryable<DisconnectedImportDN> Exports(this DisconnectedMachineDN m)
+        {
+            return ExportsExpression.Evaluate(m);
+        }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -48,7 +61,7 @@ namespace Signum.Engine.Disconnected
                                                       {
                                                           Entity = dm,
                                                           dm.MachineName,
-                                                          dm.IsOffline,
+                                                          dm.State,
                                                           dm.SeedMin,
                                                           dm.SeedMax,
                                                       }).ToDynamic();
@@ -75,25 +88,55 @@ namespace Signum.Engine.Disconnected
                                                          dm.Exception,
                                                      }).ToDynamic();
 
-                new BasicExecute<DisconnectedMachineDN>(DisconnectedMachineOperations.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (dm, _) => { }
-                }.Register();
+                dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Imports());
+                dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Exports());
 
-                new BasicExecute<DisconnectedMachineDN>(DisconnectedMachineOperations.UnsafeUnlock)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (dm, _) => UnsafeUnlock(dm.ToLite())
-                }.Register();
+
+                MachineGraph.Register();
+
 
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += AssertDisconnectedStrategies;
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<IdentifiableEntity>(EntityEventsGlobal_Saving);
 
                 sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+            }
+        }
+
+        class MachineGraph : Graph<DisconnectedMachineDN, DisconnectedMachineState>
+        {
+            public static void Register()
+            {
+                GetState = dm => dm.State;
+
+                new Execute(DisconnectedMachineOperations.Save)
+                {
+                    FromStates = new []{ DisconnectedMachineState.Connected },
+                    ToState = DisconnectedMachineState.Connected,
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (dm, _) => { }
+                }.Register();
+
+                new Execute(DisconnectedMachineOperations.UnsafeUnlock)
+                {
+                    FromStates = new[] { DisconnectedMachineState.Disconnected, DisconnectedMachineState.Faulted, DisconnectedMachineState.Fixed  },
+                    ToState = DisconnectedMachineState.Connected,
+                    Execute = (dm, _) =>
+                    {
+                        ImportManager.UnlockTables(dm.ToLite());
+                        dm.State = DisconnectedMachineState.Connected;
+                    }
+                }.Register();
+
+                new BasicConstructFrom<DisconnectedMachineDN, DisconnectedImportDN>(DisconnectedMachineOperations.FixImport)
+                {
+                    CanConstruct = dm => dm.State.InState(DisconnectedMachineOperations.FixImport, DisconnectedMachineState.Faulted),
+                    Construct = (dm, _) =>
+                    {
+                        return ImportManager.BeginImportDatabase(dm, null).Retrieve();
+                    }
+                }.Register();
             }
         }
 
@@ -108,21 +151,6 @@ namespace Signum.Engine.Disconnected
         }    
   
 
-        public static void UnsafeUnlock(Lite<DisconnectedMachineDN> machine)
-        {
-            foreach (var kvp in strategies)
-            {
-                if (kvp.Value.Upload == Upload.Subset)
-                    miUnsafeUnlock.MakeGenericMethod(kvp.Key).Invoke(null, new[] { machine });
-            }
-        }
-
-        static readonly MethodInfo miUnsafeUnlock = typeof(DisconnectedLogic).GetMethod("UnsafeUnlock", BindingFlags.NonPublic | BindingFlags.Static);
-        static int UnsafeUnlock<T>(Lite<DisconnectedMachineDN> machine) where T : IdentifiableEntity, IDisconnectedEntity, new()
-        {
-            using (Schema.Current.GlobalMode())
-                return Database.Query<T>().Where(a => a.DisconnectedMachine == machine).UnsafeUpdate(a => new T { DisconnectedMachine = null, LastOnlineTicks = null });
-        }
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
@@ -136,7 +164,7 @@ namespace Signum.Engine.Disconnected
         {
             var result = EnumerableExtensions.JoinStrict(
                 strategies.Keys,
-                Schema.Current.Tables.Keys.Where(a => !a.IsEnumProxy()),
+                Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntity()),
                 a => a,
                 a => a,
                 (a, b) => 0);
@@ -182,7 +210,7 @@ namespace Signum.Engine.Disconnected
 
         static DisconnectedStrategy<T> Register<T>(DisconnectedStrategy<T> stragety) where T : IdentifiableEntity
         {
-            if (typeof(T).IsEnumProxy())
+            if (typeof(T).IsEnumEntity())
                 throw new InvalidOperationException("EnumProxies can not be registered on DisconnectedLogic");
 
             if (!Schema.Current.Tables.ContainsKey(typeof(T)))
@@ -209,12 +237,12 @@ namespace Signum.Engine.Disconnected
         }
 
 
-        class EnumProxyDisconnectedStrategy : IDisconnectedStrategy
+        class EnumEntityDisconnectedStrategy : IDisconnectedStrategy
         {
             public Download Download { get { return Download.None; } }
             public Upload Upload { get { return Upload.None; } }
 
-            public EnumProxyDisconnectedStrategy(Type type)
+            public EnumEntityDisconnectedStrategy(Type type)
             {
                 this.Type = type;
             }
@@ -252,8 +280,8 @@ namespace Signum.Engine.Disconnected
 
         internal static IDisconnectedStrategy GetStrategy(Type type)
         {
-            if(type.IsEnumProxy())
-                return new EnumProxyDisconnectedStrategy(type);
+            if(type.IsEnumEntity())
+                return new EnumEntityDisconnectedStrategy(type);
 
             return DisconnectedLogic.strategies[type];
         }
@@ -336,7 +364,8 @@ namespace Signum.Engine.Disconnected
                     {
                         if (!de.DisconnectedMachine.Is(DisconnectedMachineDN.Current))
                             throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
-
+                        else
+                            return;
                     }
                 }
 

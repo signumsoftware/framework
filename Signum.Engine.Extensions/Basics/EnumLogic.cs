@@ -12,8 +12,8 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Basics
 {
-    public static class EnumLogic<T>
-        where T:EnumDN, new()
+    public static class MultiEnumLogic<T>
+        where T:MultiEnumDN, new()
     {
         public static HashSet<Enum> Keys { get; set; }
         static Dictionary<Enum, T> toEntity;
@@ -22,11 +22,11 @@ namespace Signum.Engine.Basics
 
         public static void Start(SchemaBuilder sb, Func<HashSet<Enum>> getKeys)
         {
-            if (sb.NotDefined(typeof(EnumLogic<T>).GetMethod("Start")))
+            if (sb.NotDefined(typeof(MultiEnumLogic<T>).GetMethod("Start")))
             {
                 sb.Include<T>(); 
 
-                EnumLogic<T>.getKeys = getKeys;
+                MultiEnumLogic<T>.getKeys = getKeys;
 
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_Initializing;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
@@ -44,10 +44,10 @@ namespace Signum.Engine.Basics
                      Database.RetrieveAll<T>(),
                      Keys,
                      a => a.Key,
-                     k => EnumDN.UniqueKey(k),
+                     k => MultiEnumDN.UniqueKey(k),
                      (a, k) => new { a, k }, "loading {0}".Formato(typeof(T).Name)).ToDictionary(p => p.k, p => p.a);
 
-                toEnum = toEntity.Keys.ToDictionary(k => EnumDN.UniqueKey(k));
+                toEnum = toEntity.Keys.ToDictionary(k => MultiEnumDN.UniqueKey(k));
             }
         }
 
@@ -86,7 +86,7 @@ namespace Signum.Engine.Basics
         {
             return getKeys().Select(k => new T
             {
-                Key = EnumDN.UniqueKey(k),
+                Key = MultiEnumDN.UniqueKey(k),
                 Name = k.ToString(),
             }).ToList();
         }
@@ -101,7 +101,7 @@ namespace Signum.Engine.Basics
         private static void AssertInitialized()
         {
             if (Keys == null)
-                throw new InvalidOperationException("{0} is not initialized. Consider calling Schema.InitializeUntil(InitLevel.Level0SyncEntities)".Formato(typeof(EnumLogic<T>).TypeName()));
+                throw new InvalidOperationException("{0} is not initialized. Consider calling Schema.InitializeUntil(InitLevel.Level0SyncEntities)".Formato(typeof(MultiEnumLogic<T>).TypeName()));
         }
 
         public static T ToEntity(string keyName)

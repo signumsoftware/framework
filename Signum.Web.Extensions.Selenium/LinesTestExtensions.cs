@@ -278,14 +278,9 @@ namespace Signum.Web.Selenium
 
             selenium.Search(prefix);
 
-            if (allowMultiple)
-            {
-                foreach (int index in rowIndexesBase0)
-                    SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
-            }
-            else
-                SearchTestExtensions.SelectRowRadioButton(selenium, rowIndexesBase0[0], prefix);
-
+            foreach (int index in rowIndexesBase0)
+                SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
+            
             selenium.PopupOk(prefix);
         }
 
@@ -303,18 +298,11 @@ namespace Signum.Web.Selenium
 
             selenium.Search(prefix);
 
-            if (allowMultiple)
-            {
-                foreach (int index in rowIndexesBase0)
-                    SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
-            }
-            else
-                SearchTestExtensions.SelectRowRadioButton(selenium, rowIndexesBase0[0], prefix);
-
+            foreach (int index in rowIndexesBase0)
+                SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
+            
             selenium.PopupOk(prefix);
         }
-
-
 
         public static string LineRemoveSelector(string prefix)
         {

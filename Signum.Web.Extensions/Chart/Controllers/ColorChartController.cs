@@ -17,7 +17,7 @@ namespace Signum.Web.Chart
 
             var model = ChartColorLogic.GetPalette(type);
 
-            return Navigator.View(this, model);
+            return Navigator.NormalPage(this, model);
         }
 
         public ActionResult SavePalette(string typeName)

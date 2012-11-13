@@ -15,6 +15,8 @@ using Signum.Windows;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
 
+#pragma warning disable 0067
+
 namespace Signum.Windows.Calendars
 {
 	public partial class CalendarStripHeader
@@ -327,3 +329,5 @@ namespace Signum.Windows.Calendars
         }
 	}
 }
+
+#pragma warning restore 0067

@@ -32,23 +32,22 @@ namespace Signum.Web.Extensions.Scheduler
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ScheduledTaskDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("ScheduledTask") },
+                    new EntitySettings<ScheduledTaskDN>(EntityType.Main){ PartialViewName = _ => ViewPrefix.Formato("ScheduledTask") },
                     
-                    new EntitySettings<ScheduleRuleDailyDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleDaily") },
-                    new EntitySettings<ScheduleRuleWeeklyDN >(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleWeekly") },
-                    new EntitySettings<ScheduleRuleWeekDaysDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleWeekDays") },
-                    
-                    new EntitySettings<CalendarDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("Calendar") },
+                    new EntitySettings<ScheduleRuleDailyDN>(EntityType.Part) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleDaily") },
+                    new EntitySettings<ScheduleRuleWeeklyDN >(EntityType.Part){ PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleWeekly") },
+                    new EntitySettings<ScheduleRuleWeekDaysDN>(EntityType.Part){ PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleWeekDays") },
+                    new EntitySettings<ScheduleRuleMinutelyDN>(EntityType.Part) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleMinutely") },
+                    new EntitySettings<ScheduleRuleHourlyDN>(EntityType.Part) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleHourly") },
+
+                    new EntitySettings<CalendarDN>(EntityType.Shared){ PartialViewName = _ => ViewPrefix.Formato("Calendar") },
                     new EmbeddedEntitySettings<HolidayDN>(){ PartialViewName = _ => ViewPrefix.Formato("Holiday") },
-                   
-                    new EntitySettings<ScheduleRuleMinutelyDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleMinutely") },
-                    new EntitySettings<ScheduleRuleHourlyDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleHourly") },
                 });
 
-                Navigator.EntitySettings<ScheduleRuleDailyDN>().MappingAdmin.AsEntityMapping().SetProperty(srd => srd.StartingOn, Mapping.DateHourMinute);
-                Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
-                Navigator.EntitySettings<ScheduleRuleMinutelyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
-                Navigator.EntitySettings<ScheduleRuleHourlyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
+                Navigator.EntitySettings<ScheduleRuleDailyDN>().MappingMain.AsEntityMapping().SetProperty(srd => srd.StartingOn, Mapping.DateHourMinute);
+                Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
+                Navigator.EntitySettings<ScheduleRuleMinutelyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
+                Navigator.EntitySettings<ScheduleRuleHourlyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
             }
         }
 

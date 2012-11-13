@@ -79,15 +79,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure of deleting query {0}?.
-        /// </summary>
-        public static string AreYouSureOfDeletingQuery0 {
-            get {
-                return ResourceManager.GetString("AreYouSureOfDeletingQuery0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Are you sure of deleting the report {0}.
         /// </summary>
         public static string AreYouSureOfDeletingReport0 {
@@ -183,15 +174,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string ChangePasswordAspx_WriteActualPasswordAndNewOne {
             get {
                 return ResourceManager.GetString("ChangePasswordAspx_WriteActualPasswordAndNewOne", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Are you sure of deleting user chart {0}?.
-        /// </summary>
-        public static string Chart_AreYouSureOfDeletingUserChart0 {
-            get {
-                return ResourceManager.GetString("Chart_AreYouSureOfDeletingUserChart0", resourceCulture);
             }
         }
         
@@ -691,11 +673,29 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please confirm you&apos;d like to delete the selected entities from the system.
+        /// </summary>
+        public static string PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem {
+            get {
+                return ResourceManager.GetString("PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please confirm you&apos;d like to execute the operation {0} to the entity {1} ({2}-{3}).
         /// </summary>
         public static string PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123 {
             get {
                 return ResourceManager.GetString("PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please confirm you&apos;d like to execute the operation {0} to the selected entities.
+        /// </summary>
+        public static string PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities {
+            get {
+                return ResourceManager.GetString("PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities", resourceCulture);
             }
         }
         

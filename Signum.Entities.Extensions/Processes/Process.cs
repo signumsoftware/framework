@@ -18,7 +18,7 @@ using Signum.Entities.Exceptions;
 namespace Signum.Entities.Processes
 {
     [Serializable]
-    public class ProcessDN : EnumDN, ITaskDN
+    public class ProcessDN : MultiEnumDN
     {
     }
 
@@ -210,7 +210,6 @@ namespace Signum.Entities.Processes
 
     public enum ProcessOperation
     {
-        Create,
         FromProcess,
         Plan,
         Save,

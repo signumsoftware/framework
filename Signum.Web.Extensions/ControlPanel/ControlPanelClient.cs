@@ -55,16 +55,16 @@ namespace Signum.Web.ControlPanel
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ControlPanelDN>(EntityType.Default) { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
+                    new EntitySettings<ControlPanelDN>(EntityType.Main) { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
                     new EmbeddedEntitySettings<PanelPart>(),
                     
-                    new EntitySettings<UserChartPartDN>(EntityType.Default),
-                    new EntitySettings<UserQueryPartDN>(EntityType.Default),
+                    new EntitySettings<UserChartPartDN>(EntityType.Part),
+                    new EntitySettings<UserQueryPartDN>(EntityType.Part),
 
-                    new EntitySettings<CountSearchControlPartDN>(EntityType.Default),
+                    new EntitySettings<CountSearchControlPartDN>(EntityType.Part),
                     new EmbeddedEntitySettings<CountUserQueryElement>() { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
                     
-                    new EntitySettings<LinkListPartDN>(EntityType.Default),
+                    new EntitySettings<LinkListPartDN>(EntityType.Part),
                     new EmbeddedEntitySettings<LinkElement>() { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
                 });
 

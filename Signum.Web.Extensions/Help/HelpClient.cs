@@ -193,7 +193,7 @@ namespace Signum.Web.Help
                         return new WikiLink(link, text);
 
                     case WikiFormat.OperationLink:
-                        Enum operation = EnumLogic<OperationDN>.TryToEnum(link);
+                        Enum operation = MultiEnumLogic<OperationDN>.TryToEnum(link);
 
                             Type[] types = OperationLogic.FindTypes(operation);
                             if (types.Length == 1)

@@ -64,11 +64,9 @@ namespace Signum.Web.Operations
             return new JsInstruction(() => "{0}.validateAndAjax(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
 
-        public JsInstruction ContextualExecute(IdentifiableEntity entity, string operationName)
+        public JsInstruction ContextualExecute()
         {
-            return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(operationName, entity.ToString(), entity.GetType().NiceName(), entity.Id),
-                "{0}.contextualExecute()".Formato(this.ToJS())).ToJS());
+            return new JsInstruction(() => "{0}.contextualExecute()".Formato(this.ToJS()));
         }
     }
 
@@ -90,11 +88,9 @@ namespace Signum.Web.Operations
             return new JsInstruction(() => "{0}.validateAndAjax(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
 
-        public JsInstruction ContextualConstruct(IdentifiableEntity entity, string operationName)
+        public JsInstruction ContextualConstruct()
         {
-            return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(operationName, entity.ToString(), entity.GetType().NiceName(), entity.Id),
-                "{0}.contextualConstruct()".Formato(this.ToJS())).ToJS());
+            return new JsInstruction(() => "{0}.contextualConstruct()".Formato(this.ToJS()));
         }
     }
 
@@ -137,11 +133,20 @@ namespace Signum.Web.Operations
                 "{0}.ajax()".Formato(this.ToJS())).ToJS());
         }
 
-        public JsInstruction ContextualDelete(IdentifiableEntity entity)
+        public JsInstruction ContextualDelete(List<Lite> entities)
         {
-            return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToString(), entity.GetType().NiceName(), entity.Id),
-                "{0}.contextualDelete()".Formato(this.ToJS())).ToJS());
+            if (entities.Count == 1)
+            {
+                return new JsInstruction(() => Js.Confirm(
+                    Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entities[0].ToString(), entities[0].GetType().NiceName(), entities[0].Id),
+                    "{0}.contextualDelete()".Formato(this.ToJS())).ToJS());
+            }
+            else
+            {
+                return new JsInstruction(() => Js.Confirm(
+                    Resources.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem,
+                    "{0}.contextualDelete()".Formato(this.ToJS())).ToJS());
+            }
         }
     }
 }

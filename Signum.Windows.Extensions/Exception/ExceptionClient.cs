@@ -14,7 +14,7 @@ namespace Signum.Windows.Logging
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ExceptionDN>(EntityType.ServerOnly) { View = e => new ExceptionCtrl() });
+                Navigator.AddSetting(new EntitySettings<ExceptionDN>(EntityType.System) { View = e => new ExceptionCtrl() });
             }
         }
     }

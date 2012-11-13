@@ -17,10 +17,7 @@ namespace Signum.Windows.Omnibox
 {
     public static class OmniboxClient
     {
-        public static Polymorphic<Action<OmniboxResult, Window>> OnSelected = new Polymorphic<Action<OmniboxResult, Window>>();
-        public static Polymorphic<Action<OmniboxResult, InlineCollection>> RenderLines = new Polymorphic<Action<OmniboxResult, InlineCollection>>();
-        public static Polymorphic<Func<OmniboxResult, string>> GetItemStatus = new Polymorphic<Func<OmniboxResult, string>>();
-
+        public static Dictionary<Type, OmniboxProviderBase> Providers = new Dictionary<Type,OmniboxProviderBase>();
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -32,9 +29,7 @@ namespace Signum.Windows.Omnibox
         public static void Register<T>(this OmniboxProvider<T> provider) where T : OmniboxResult
         {
             OmniboxParser.Generators.Add(provider.CreateGenerator());
-            OnSelected.Register(new Action<T, Window>(provider.OnSelected));
-            RenderLines.Register(new Action<T, InlineCollection>(provider.RenderLines));
-            GetItemStatus.Register(new Func<T, string>(provider.GetItemStatus));
+            Providers[typeof(T)] = provider;
         }
 
         public static void AddMatch(this InlineCollection lines, OmniboxMatch match)
@@ -48,7 +43,19 @@ namespace Signum.Windows.Omnibox
         }
     }
 
-    public abstract class OmniboxProvider<T> where T : OmniboxResult
+    public abstract class OmniboxProviderBase
+    {
+        public abstract void RenderLinesBase(OmniboxResult result, InlineCollection lines);
+
+        public abstract void OnSelectedBase(OmniboxResult result, Window window);
+
+        public abstract string GetItemStatusBase(OmniboxResult result);
+
+        public abstract Run GetIcon();
+
+    }
+
+    public abstract class OmniboxProvider<T> : OmniboxProviderBase where T : OmniboxResult
     {
         public abstract OmniboxResultGenerator<T> CreateGenerator();
 
@@ -57,13 +64,28 @@ namespace Signum.Windows.Omnibox
         public abstract void OnSelected(T result, Window window);
 
         public abstract string GetItemStatus(T result);
+    
+        public override void RenderLinesBase(OmniboxResult result, InlineCollection lines)
+        {
+            RenderLines((T)result, lines); 
+        }
+
+        public override void OnSelectedBase(OmniboxResult result, Window window)
+        {   
+            OnSelected((T)result, window);
+        }
+
+        public override string GetItemStatusBase(OmniboxResult result)
+        {
+            return GetItemStatus((T)result);
+        }
     }
 
     public class WindowsOmniboxManager : OmniboxManager
     {
         public override bool AllowedType(Type type)
         {
-            return Navigator.IsViewable(type, true);
+            return Navigator.IsNavigable(type, isSearchEntity: false);
         }
 
         public override Lite RetrieveLite(Type type, int id)

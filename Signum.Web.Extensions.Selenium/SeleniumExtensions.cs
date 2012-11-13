@@ -8,6 +8,7 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web.Selenium
 {
@@ -161,6 +162,13 @@ namespace Signum.Web.Selenium
         public static void PopupCancel(this ISelenium selenium, string prefix)
         {
             selenium.Click("jq=span.ui-dialog-title[id$='{0}Temp'] + a".Formato(prefix));
+            Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
+        }
+
+        public static void PopupCancelDiscardChanges(this ISelenium selenium, string prefix)
+        {
+            selenium.Click("jq=span.ui-dialog-title[id$='{0}Temp'] + a".Formato(prefix));
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 

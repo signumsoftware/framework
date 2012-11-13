@@ -15,20 +15,6 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class NewsletterDN : Entity, IProcessDataDN
     {
-        int numLines;
-        public int NumLines
-        {
-            get { return numLines; }
-            set { SetToStr(ref numLines, value, () => NumLines); }
-        }
-
-        int numErrors;
-        public int NumErrors
-        {
-            get { return numErrors; }
-            set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
         [NotNullable, SqlDbType(Size = 100)]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -38,7 +24,7 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        NewsletterState  state = NewsletterState.Created;
+        NewsletterState state = NewsletterState.Created;
         public NewsletterState State
         {
             get { return state; }
@@ -153,7 +139,7 @@ namespace Signum.Entities.Mailing
         Send,
         AddRecipients,
         RemoveRecipients,
-        CreateFromThis,
+        Clone,
     }
 
     public enum NewsletterState

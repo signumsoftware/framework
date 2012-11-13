@@ -19,9 +19,6 @@ namespace Signum.Windows.Authorization
 {
     public partial class Login
     {
-
-        
-
         public Login()
         {
             this.InitializeComponent();
@@ -35,7 +32,21 @@ namespace Signum.Windows.Authorization
             _cerrarFocus = ExtensionsImageLoader.GetImageSortName("bcerrar-on.png");
             _cerrarNoFocus = ExtensionsImageLoader.GetImageSortName("bcerrar.png");
             SettingNewPassword = false;
+            ReLogin = false;
         }
+
+        private bool reLogin;
+        public bool ReLogin
+        {
+            get { return settingNewPassword; }
+            set
+            {
+                reLogin = value;
+                this.tbUserName.IsReadOnly = value;
+               
+            }
+        }
+
 
         public string UserName
         {
