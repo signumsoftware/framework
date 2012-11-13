@@ -35,7 +35,12 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement LeftExpander
         {
-            get { return Element.ChildById("expander"); }
+            get { return Element.ChildById("widgetPanel").ChildById("expander"); }
+        }
+
+        public AutomationElement LeftExpanderButton
+        {
+            get { return LeftExpander.ChildById("HeaderSite"); }
         }
 
         AutomationElement mainControl;
@@ -57,7 +62,10 @@ namespace Signum.Windows.UIAutomation
 
         public void Ok()
         {
-            ButtonBar.OkButton.ButtonInvoke();
+           ButtonBar.OkButton.ButtonInvoke();
+
+           Element.Wait(() => IsClosed,
+           actionDescription: () => "Waiting to close window after OK {0}".Formato(EntityId));
         }
 
         public AutomationElement OkCapture()
@@ -93,7 +101,6 @@ namespace Signum.Windows.UIAutomation
                     mb.CancelButton.ButtonInvoke();
             }
         }
-
         public void Execute(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
