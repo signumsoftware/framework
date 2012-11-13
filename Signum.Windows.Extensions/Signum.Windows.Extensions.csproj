@@ -845,6 +845,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\execute.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
