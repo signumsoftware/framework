@@ -275,7 +275,7 @@ namespace Signum.Web.Controllers
         public ContentResult SelectedItemsContextMenu(string liteKeys, string webQueryName, string implementationsKey, string prefix)
         {
             var noResults = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results")
-                .InnerHtml(Resources.NoResults.EncodeHtml())
+                .InnerHtml(new HtmlTag("span").InnerHtml(Resources.NoResults.EncodeHtml()).ToHtml())
                 .ToHtml().ToString();
 
             if (string.IsNullOrEmpty(liteKeys))
