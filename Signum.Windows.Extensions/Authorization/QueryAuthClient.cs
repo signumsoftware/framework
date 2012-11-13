@@ -19,13 +19,7 @@ namespace Signum.Windows.Authorization
         {
             Started = true;
 
-            Navigator.Manager.Initializing += () =>
-            {
-                foreach (QuerySettings qs in Navigator.Manager.QuerySettings.Values)
-                {
-                    qs.IsFindable += qn => GetAllowed(qn);
-                }
-            };
+            Navigator.Manager.IsFindable += qn => GetAllowed(qn);
 
             MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
 

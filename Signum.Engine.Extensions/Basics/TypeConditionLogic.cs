@@ -30,7 +30,7 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                EnumLogic<TypeConditionNameDN>.Start(sb, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
+                MultiEnumLogic<TypeConditionNameDN>.Start(sb, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
             }
         }
 

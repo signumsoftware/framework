@@ -9,7 +9,6 @@
     <StackPanel m:Common.IsReadOnly="True" m:Common.MinLabelWidth="105">
         <m:ValueLine m:Common.Route="State" />
         <m:EntityCombo m:Common.Route="Process" />
-        <m:EntityLine m:Common.Route="ProcessData"  />
         <m:ValueLine m:Common.Route="CreationDate" />
         <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="PlannedDate" />
         <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="CancelationDate" />
@@ -22,5 +21,12 @@
         <ProgressBar Minimum="0" Maximum="100" Height="15"
                      Value="{Binding Progress, Converter={x:Static m2:Converters.DecimalOrZero}}"
                      Visibility="{Binding Progress, Converter={x:Static m:Converters.NullToVisibility}}"/>
+        <GroupBox m:Common.LabelOnlyRoute="ProcessData">
+            <m:EntityDetail m:Common.Route="ProcessData"  m:Common.LabelVisible="False" >
+                <m:EntityDetail.EntityControl>
+                    <m:DataBorder AutoChild="True" m:Common.LabelVisible="True" />
+                </m:EntityDetail.EntityControl>
+            </m:EntityDetail>
+        </GroupBox>
     </StackPanel>
 </UserControl>

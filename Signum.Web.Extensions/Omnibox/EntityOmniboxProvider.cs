@@ -52,7 +52,7 @@ namespace Signum.Web.Omnibox
 
             if (result.Lite != null)
                 html = new HtmlTag("a")
-                    .Attr("href", Navigator.ViewRoute(result.Lite))
+                    .Attr("href", Navigator.NavigateRoute(result.Lite))
                     .InnerHtml(html).ToHtml();
 
             return html;

@@ -208,6 +208,7 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Basic\BasicClient.cs" />
+    <Compile Include="Basic\QueryClient.cs" />
     <Compile Include="Basic\Views\DateSpan.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -294,6 +295,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartResults.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Chart\Views\ChartResultsTable1.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartResultsTable.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\Views\ChartScript.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -350,7 +356,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\Admin\UserChartPart1.cs">
+    <Compile Include="ControlPanel\Views\Admin\UserChartPart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>UserChartPart.cshtml</DependentUpon>
@@ -457,6 +463,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Search.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\PackageOperation.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PackageOperation.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Help\Views\ViewAppendix.generated.cs">
       <AutoGen>True</AutoGen>
@@ -988,7 +999,7 @@
     </Content>
     <Content Include="ControlPanel\Views\Admin\UserChartPart.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>UserChartPart1.cs</LastGenOutput>
+      <LastGenOutput>UserChartPart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Exception\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1054,6 +1065,10 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DisconnectedExport.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Processes\Views\PackageOperation.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PackageOperation.generated.cs</LastGenOutput>
+    </Content>
     <EmbeddedResource Include="Disconnected\Views\DisconnectedImport.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DisconnectedImport.generated.cs</LastGenOutput>
@@ -1063,6 +1078,10 @@
       <LastGenOutput>DisconnectedMachine.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Disconnected\Views\Web.config" />
+    <Content Include="Chart\Views\ChartResultsTable.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ChartResultsTable1.generated.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>

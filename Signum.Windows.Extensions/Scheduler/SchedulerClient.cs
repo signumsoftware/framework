@@ -18,17 +18,17 @@ namespace Signum.Windows.Scheduler
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ScheduledTaskDN>(EntityType.Default) { View = e => new ScheduledTask(), Icon = Image("clock.png") });
+                Navigator.AddSetting(new EntitySettings<ScheduledTaskDN>(EntityType.Main) { View = e => new ScheduledTask(), Icon = Image("clock.png") });
 
-                Navigator.AddSetting(new EntitySettings<CustomTaskDN>(EntityType.ServerOnly) { View = e => new CustomTask(), Icon = Image("customTask.png") });
-                Navigator.AddSetting(new EntitySettings<CustomTaskExecutionDN>(EntityType.ServerOnly) { View = e => new CustomTaskExecution(), Icon = Image("customTaskExecution.png") });
+                Navigator.AddSetting(new EntitySettings<CustomTaskDN>(EntityType.SystemString) { View = e => new CustomTask(), Icon = Image("customTask.png") });
+                Navigator.AddSetting(new EntitySettings<CustomTaskExecutionDN>(EntityType.System) { View = e => new CustomTaskExecution(), Icon = Image("customTaskExecution.png") });
 
                 OperationClient.AddSetting(new EntityOperationSettings<ScheduledTaskDN>(CustomTaskOperation.Execute){ Icon = Image("execute.png") });
 
-                Navigator.AddSetting(new EntitySettings<ScheduleRuleDailyDN>(EntityType.Default) { View = e => new ScheduleRuleDaily() });
-                Navigator.AddSetting(new EntitySettings<ScheduleRuleWeeklyDN>(EntityType.Default) { View = e => new ScheduleRuleWeekly() });
-                Navigator.AddSetting(new EntitySettings<ScheduleRuleWeekDaysDN>(EntityType.Default) { View = e => new ScheduleRuleWeekDays() });
-                Navigator.AddSetting(new EntitySettings<CalendarDN>(EntityType.Default) { View = e => new Calendar() });
+                Navigator.AddSetting(new EntitySettings<ScheduleRuleDailyDN>(EntityType.Part) { View = e => new ScheduleRuleDaily() });
+                Navigator.AddSetting(new EntitySettings<ScheduleRuleWeeklyDN>(EntityType.Part) { View = e => new ScheduleRuleWeekly() });
+                Navigator.AddSetting(new EntitySettings<ScheduleRuleWeekDaysDN>(EntityType.Part) { View = e => new ScheduleRuleWeekDays() });
+                Navigator.AddSetting(new EntitySettings<CalendarDN>(EntityType.Shared) { View = e => new Calendar() });
             }
         }
 

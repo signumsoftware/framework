@@ -23,8 +23,11 @@ namespace Signum.Windows.UserQueries
         public override void RenderLines(UserQueryOmniboxResult result, InlineCollection lines)
         {
             lines.AddMatch(result.ToStrMatch);
-            
-            lines.Add(new Run(" ({0})".Formato(typeof(UserQueryDN).NiceName())) { Foreground = Brushes.DodgerBlue });
+        }
+
+        public override Run GetIcon()
+        {
+            return new Run("({0})".Formato(typeof(UserQueryDN).NiceName())) { Foreground = Brushes.DodgerBlue };
         }
 
         public override void OnSelected(UserQueryOmniboxResult result, Window window)
@@ -33,7 +36,7 @@ namespace Signum.Windows.UserQueries
 
             var query = QueryClient.queryNames[uq.Query.Key];
 
-            using (UserQueryMenuItem.AutoSet(uq))
+            using (UserQueryMenuItemConsturctor.AutoSet(uq))
             {
                 Navigator.Explore(new ExploreOptions(query));
             }

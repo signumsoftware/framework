@@ -25,11 +25,11 @@ namespace Signum.Web.Extensions.SMS.Models
             set { Set(ref from, value, () => From); }
         }
 
-        string providersIds;
-        public string ProvidersIds
+        string providerKeys;
+        public string ProviderKeys
         {
-            get { return providersIds; }
-            set { Set(ref providersIds, value, () => ProvidersIds); }
+            get { return providerKeys; }
+            set { Set(ref providerKeys, value, () => ProviderKeys); }
         }
 
         string webTypeName;

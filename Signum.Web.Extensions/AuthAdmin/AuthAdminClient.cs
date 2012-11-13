@@ -19,6 +19,7 @@ using Signum.Engine.Maps;
 using System.Web.Routing;
 using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
+using Signum.Web.Basic;
 
 namespace Signum.Web.AuthAdmin
 {
@@ -35,12 +36,12 @@ namespace Signum.Web.AuthAdmin
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.EntitySettings<UserDN>().PartialViewName = _ => ViewPrefix.Formato("User");
                 else
-                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("User") });
+                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Main) { PartialViewName = _ => ViewPrefix.Formato("User") });
 
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
                     Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix.Formato("Role"); 
                 else
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("Role") });
+                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Shared) { PartialViewName = _ => ViewPrefix.Formato("Role") });
 
                 if (types)
                 {
@@ -53,7 +54,8 @@ namespace Signum.Web.AuthAdmin
 
                 if (queries)
                 {
-                    Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
+                    QueryClient.Start();
+
                     Register<QueryRulePack, QueryAllowedRule, QueryDN, bool, string>("queries", a => a.Resource.Key,
                         Mapping.New<bool>(), "Resource_Key", true);
                 }
@@ -97,12 +99,11 @@ namespace Signum.Web.AuthAdmin
             where R : IdentifiableEntity
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
-                Navigator.AddSetting(new EntitySettings<R>(EntityType.ServerOnly));
+                Navigator.AddSetting(new EntitySettings<R>(EntityType.SystemString));
 
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new EmbeddedEntitySettings<T>()
             {
-                ShowSave = false,
                 PartialViewName = e => viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
                     .CreateProperty(m => m.DefaultRule)
@@ -119,14 +120,13 @@ namespace Signum.Web.AuthAdmin
         static void RegisterTypes()
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(TypeDN)))
-                Navigator.AddSetting(new EntitySettings<TypeDN>(EntityType.ServerOnly));
+                Navigator.AddSetting(new EntitySettings<TypeDN>(EntityType.SystemString));
 
             Navigator.AddSetting(new EmbeddedEntitySettings<TypeConditionRule>());
 
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new EmbeddedEntitySettings<TypeRulePack>()
             {
-                ShowSave = false,
                 PartialViewName = e => viewPrefix.Formato("types"),
                 MappingDefault = new EntityMapping<TypeRulePack>(false)
                     .CreateProperty(m => m.DefaultRule)
@@ -138,7 +138,7 @@ namespace Signum.Web.AuthAdmin
                                 ParseTypeAllowed(ctx.Inputs.SubDictionary("Fallback")),
                                 ctx.Inputs.SubDictionary("Conditions").IndexSubDictionaries().Select(d =>
                                     new TypeConditionRule(
-                                        EnumLogic<TypeConditionNameDN>.ToEnum(d["ConditionName"]),
+                                        MultiEnumLogic<TypeConditionNameDN>.ToEnum(d["ConditionName"]),
                                         ParseTypeAllowed(d.SubDictionary("Allowed")))
                                    ).ToReadOnly()))
                         })

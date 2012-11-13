@@ -92,6 +92,13 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref userChart, value, () => UserChart); }
         }
 
+        bool onlyData = false;
+        public bool OnlyData
+        {
+            get { return onlyData; }
+            set { Set(ref onlyData, value, () => OnlyData); }
+        }
+
         static readonly Expression<Func<UserChartPartDN, string>> ToStringExpression = e => e.userChart.ToString();
         public override string ToString()
         {

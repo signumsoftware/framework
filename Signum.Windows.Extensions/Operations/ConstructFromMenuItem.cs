@@ -18,74 +18,44 @@ using Signum.Utilities;
 using Signum.Windows.Extensions.Properties;
 using Signum.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace Signum.Windows.Operations
 {
-    public class ConstructFromMenuItem : SearchControlMenuItem
+    public static class ConstructFromMenuItemConsturctor
     {
-        static readonly IValueConverter ListToVisibility = ConverterFactory.New((Array a) => a == null || a.Length == 0 ? Visibility.Collapsed : Visibility.Visible); 
-
-        internal List<OperationInfo> OperationInfos; 
-
-        protected override void OnInitialized(EventArgs e)
+        public static MenuItem Construct(SearchControl sc, OperationInfo oi, ContextualOperationSettings settings)
         {
-            base.OnInitialized(e);
-            Header = Signum.Windows.Extensions.Properties.Resources.Create + "...";
-            Icon = ExtensionsImageLoader.GetImageSortName("factory.png").ToSmallImage();
-        }
-
-        public override void Initialize()
-        {
-            Items.Clear();
-
-            this.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Clicked));
-
-            foreach (OperationInfo oi in OperationInfos)
+            MenuItem miResult = new MenuItem
             {
-                MenuItem mi = new MenuItem()
-                {
-                    Header = OperationClient.GetText(oi.Key),
-                    Icon = OperationClient.GetImage(oi.Key),
-                    Tag = oi,
-                };
-                Items.Add(mi);
-            }
+                Header = OperationClient.GetText(oi.Key),
+                Icon = OperationClient.GetImage(oi.Key),
+            };
 
-            this.Bind(VisibilityProperty, SearchControl, "SelectedItems", ListToVisibility);
-        }
-
-        private void MenuItem_Clicked(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true;
-
-            if (e.OriginalSource is MenuItem) //Not to capture the mouseDown of the scrollbar buttons
+            miResult.Click += (object sender, RoutedEventArgs e) =>
             {
-                MenuItem b = (MenuItem)e.OriginalSource;
-                OperationInfo operationInfo = (OperationInfo)b.Tag;
-                Type entityType = SearchControl.EntityType;
-                object queryName = SearchControl.QueryName;
+                Type entityType = sc.EntityType;
+                object queryName = sc.QueryName;
 
-                var lites = SearchControl.SelectedItems.TryCC(a => a.Cast<Lite>().ToList());
+                var lites = sc.SelectedItems;
 
-                if (lites == null || lites.Count == 0)
-                    throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.SelectSomeRowsFirst);
-
-                ConstructorFromManySettings settings = (ConstructorFromManySettings)OperationClient.Manager.Settings.TryGetC(operationInfo.Key);
-
-                IIdentifiable entity;
-                if (settings != null && settings.Constructor != null)
-                    entity = settings.Constructor(new ConstructorFromManyEventArgs
+                if (settings != null && settings.Click != null)
+                    settings.Click(new ContextualOperationEventArgs
                     {
                         Entities = lites,
-                        Window = Window.GetWindow(b),
-                        OperationInfo = operationInfo,
-                        QueryName = queryName
+                        SearchControl = sc,
+                        OperationInfo = oi,
                     });
-                else entity = Server.Return((IOperationServer s)=>s.ConstructFromMany(lites, entityType, operationInfo.Key)); 
+                else
+                {
+                    IIdentifiable entity = Server.Return((IOperationServer s) => s.ConstructFromMany(lites.ToList(), entityType, oi.Key));
 
-                if (operationInfo.Returns && Navigator.IsViewable(entity.GetType(), false))
-                    Navigator.Navigate(entity); 
-            }
+                    if (oi.Returns && Navigator.IsNavigable(entity.GetType(), isSearchEntity: true))
+                        Navigator.Navigate(entity);
+                }
+            };
+
+            return miResult;
         }
     }
 }

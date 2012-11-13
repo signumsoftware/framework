@@ -13,6 +13,8 @@ using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Utilities;
+using Signum.Entities.UserQueries;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -55,7 +57,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.LineFind("value_1_");
             selenium.Sort(3, true, "value_1_");
             selenium.Search("value_1_");
-            selenium.SelectRowRadioButton(1, "value_1_");
+            selenium.SelectRowCheckbox(1, "value_1_");
             selenium.PopupOk("value_1_");
 
             //add user column
@@ -76,9 +78,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.Type("DisplayName", "Last albums");
 
-            string saveId = "ebUserQuerySave";
-            
-            selenium.EntityButtonClick(saveId);
+            selenium.EntityOperationClick(UserQueryOperation.Save);
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             //check new user query is in the dropdownlist
@@ -129,8 +129,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.FilterSelectToken(2, "value=Country", true, prefix);
 
             //save it
-            string saveId = "ebUserQuerySave";
-            selenium.EntityButtonClick(saveId);
+            selenium.EntityOperationClick(UserQueryOperation.Save);
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             //check new user query is in the dropdownlist
@@ -160,7 +159,6 @@ namespace Signum.Web.Extensions.Sample.Test
             string uqMenuId = "tmUserQueries";
             string uqCreateId = "qbUserQueryNew";
             string editId = "qbUserQueryEdit";
-            string deleteId = "ebUserQueryDelete";
 
             CheckLoginAndOpen(pathAlbumSearch);
 
@@ -174,9 +172,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.Type("DisplayName", "test");
 
-            string saveId = "ebUserQuerySave";
-
-            selenium.EntityButtonClick(saveId);
+            selenium.EntityOperationClick(UserQueryOperation.Save);
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             //check new user query is in the dropdownlist
@@ -196,7 +192,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             //remove it
-            selenium.EntityButtonClick(deleteId);
+            selenium.EntityOperationClick(UserQueryOperation.Delete);
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.QueryMenuOptionPresentByAttr(uqMenuId, uqOptionSelector, false);
         }

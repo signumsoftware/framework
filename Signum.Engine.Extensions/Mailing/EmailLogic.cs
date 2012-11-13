@@ -167,32 +167,6 @@ namespace Signum.Engine.Mailing
         }
         #endregion
 
-        public static void StarProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                sb.Include<EmailPackageDN>();
-
-                ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(EmailProcesses.SendEmails, new SendEmailProcessAlgorithm());
-
-                new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
-                {
-                    Construct = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
-                }.Register();
-
-                dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
-                                               select new
-                                               {
-                                                   Entity = e,
-                                                   e.Id,
-                                                   e.Name,
-                                                   e.NumLines,
-                                                   e.NumErrors,
-                                               }).ToDynamic();
-            }
-        }
-
         public static void RegisterTemplate<T>(Func<T, EmailContent> template)
             where T : IEmailModel
         {
@@ -274,7 +248,7 @@ namespace Signum.Engine.Mailing
                 using (Transaction tr = Transaction.ForceNew())
                 {
                     emailMessage.Exception = exLog;
-                    emailMessage.State = EmailState.SentError;
+                    emailMessage.State = EmailState.Exception;
                     emailMessage.Save();
                     tr.Commit();
                 }
@@ -336,7 +310,7 @@ namespace Signum.Engine.Mailing
                             updater = em => new EmailMessageDN
                             {
                                 Exception = exLog,
-                                State = EmailState.SentError
+                                State = EmailState.Exception
                             };
                         }
                         else
@@ -355,8 +329,6 @@ namespace Signum.Engine.Mailing
                                 Thread.Sleep(3000);
                         }
                     }); 
-
-                    client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
                 }
                 else
                 {
@@ -376,7 +348,7 @@ namespace Signum.Engine.Mailing
                 using (var tr = Transaction.ForceNew())
                 {
                     emailMessage.Sent = TimeZoneManager.Now;
-                    emailMessage.State = EmailState.SentError;
+                    emailMessage.State = EmailState.Exception;
                     emailMessage.Exception = exLog;
                     emailMessage.Save();
                     tr.Commit();
@@ -395,12 +367,12 @@ namespace Signum.Engine.Mailing
                     try
                     {
                         onComplete(e);
-                    }
+                }
                     catch (Exception ex)
                     {
                         ex.LogException();
-                    }
                 }
+            }
             };
             client.SendAsync(message, null);
         }
@@ -430,16 +402,15 @@ namespace Signum.Engine.Mailing
         public static ProcessExecutionDN SendAll<T>(List<T> emails)
             where T : IEmailModel
         {
-            EmailPackageDN package = new EmailPackageDN
+            EmailPackageDN emailPackage = new EmailPackageDN
             {
-                NumLines = emails.Count
             }.Save();
 
-            var packLite = package.ToLite();
+            var packLite = emailPackage.ToLite();
 
             emails.Select(e => CreateEmailMessage(e, packLite)).SaveList();
 
-            var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
+            var process = ProcessLogic.Create(EmailProcesses.SendEmails, emailPackage);
 
             process.Execute(ProcessOperation.Execute);
 
@@ -457,7 +428,6 @@ namespace Signum.Engine.Mailing
 
             EmailPackageDN package = new EmailPackageDN
             {
-                NumLines = recipientList.Count,
             }.Save();
 
             var lite = package.ToLite();

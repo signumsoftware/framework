@@ -138,10 +138,9 @@
     <Compile Include="Help\NamespaceHelp.cs" />
     <Compile Include="Exceptions\ExceptionLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
+    <Compile Include="Mailing\EmailPackageLogic.cs" />
     <Compile Include="Mailing\EmailRenderer.cs" />
     <Compile Include="Mailing\NewsletterLogic.cs" />
-    <Compile Include="Mailing\NewsletterProcessAlgortihm.cs" />
-    <Compile Include="Mailing\SendEmailProcessAlgorithm.cs" />
     <Compile Include="Mailing\SmtpConfigurationLogic.cs" />
     <Compile Include="Operations\BasicConstruct.cs" />
     <Compile Include="Operations\BasicConstructFrom.cs" />

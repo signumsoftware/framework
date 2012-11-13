@@ -107,7 +107,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 #line 13 "..\..\Chart\Views\ChartColumn.cshtml"
      
-        var identType = type.IsEnum ? EnumProxy.Generate(type) : type;
+        var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
         
     
 #line default
@@ -183,7 +183,7 @@ WriteLiteral("\">\r\n        <td>");
 
             
             #line 28 "..\..\Chart\Views\ChartColumn.cshtml"
-        Write(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional?"?":""));
+        Write(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional ? "?" : ""));
 
             
             #line default
@@ -341,7 +341,7 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
             
             #line 72 "..\..\Chart\Views\ChartColumn.cshtml"
                                                                                                                                           
-                if (tc.Value.TryToken!= null && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                if (tc.Value.TryToken!= null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
                 {
                     var type = tc.Value.Token.Type.CleanType();
 
@@ -376,7 +376,7 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
             
             #line default
             #line hidden
-WriteLiteral("                                    ");
+WriteLiteral("                ");
 
 WriteLiteral(" | ");
 
@@ -387,20 +387,20 @@ WriteLiteral("\r\n");
             #line 92 "..\..\Chart\Views\ChartColumn.cshtml"
                                 }
                                 
-                                 
+                
             
             #line default
             #line hidden
             
             #line 94 "..\..\Chart\Views\ChartColumn.cshtml"
-                            Write(ColorLink(item.Value));
+           Write(ColorLink(item.Value));
 
             
             #line default
             #line hidden
             
             #line 94 "..\..\Chart\Views\ChartColumn.cshtml"
-                                                       ;
+                                      ;
                             }
                         }
                     }
@@ -410,12 +410,13 @@ WriteLiteral("\r\n");
             
             #line default
             #line hidden
-WriteLiteral("                </td>\r\n            </tr>\r\n");
+WriteLiteral("        </td>\r\n    </tr>\r\n");
 
 
             
             #line 102 "..\..\Chart\Views\ChartColumn.cshtml"
 }
+
             
             #line default
             #line hidden

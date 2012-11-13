@@ -25,8 +25,11 @@ namespace Signum.Windows.Chart
         public override void RenderLines(UserChartOmniboxResult result, InlineCollection lines)
         {
             lines.AddMatch(result.ToStrMatch);
+        }
 
-            lines.Add(new Run(" ({0})".Formato(typeof(UserChartDN).NiceName())) { Foreground = Brushes.DarkViolet });
+        public override Run GetIcon()
+        {
+            return new Run("({0})".Formato(typeof(UserChartDN).NiceName())) { Foreground = Brushes.DarkViolet };
         }
 
         public override void OnSelected(UserChartOmniboxResult result, Window window)

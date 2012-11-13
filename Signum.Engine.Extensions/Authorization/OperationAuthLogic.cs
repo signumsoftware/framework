@@ -36,13 +36,13 @@ namespace Signum.Engine.Authorization
                 OperationLogic.AllowOperation += new AllowOperationHandler(OperationLogic_AllowOperation);
 
                 cache = new AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool>(sb,
-                     EnumLogic<OperationDN>.ToEnum,
-                     EnumLogic<OperationDN>.ToEntity,
+                     MultiEnumLogic<OperationDN>.ToEnum,
+                     MultiEnumLogic<OperationDN>.ToEntity,
                      AuthUtils.MaxBool,
                      AuthUtils.MinBool);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Operations", "Operation", roles, EnumLogic<OperationDN>.ToEntity, bool.Parse);
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Operations", "Operation", roles, MultiEnumLogic<OperationDN>.ToEntity, bool.Parse);
             }
         }
 
@@ -58,7 +58,7 @@ namespace Signum.Engine.Authorization
 
         public static OperationRulePack GetOperationRules(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
-            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => EnumLogic<OperationDN>.ToEntity(a.Key));
+            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => MultiEnumLogic<OperationDN>.ToEntity(a.Key));
             var result = new OperationRulePack { Role = roleLite, Type = typeDN, };
             cache.GetRules(result, resources);
             return result;

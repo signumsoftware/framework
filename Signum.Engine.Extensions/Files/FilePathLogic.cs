@@ -41,7 +41,7 @@ namespace Signum.Engine.Files
             {
                 sb.Include<FilePathDN>();
 
-                EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
+                MultiEnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete += new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
@@ -136,11 +136,11 @@ namespace Signum.Engine.Files
                 {
                     //set typedn from enum
                     if (fp.FileType == null)
-                        fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
+                        fp.FileType = MultiEnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
 
                     //set enum from typedn
                     if (fp.FileTypeEnum == null)
-                        fp.SetFileTypeEnum(EnumLogic<FileTypeDN>.ToEnum(fp.FileType));
+                        fp.SetFileTypeEnum(MultiEnumLogic<FileTypeDN>.ToEnum(fp.FileType));
 
                     FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
                     string sufix = alg.CalculateSufix(fp);

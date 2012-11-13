@@ -164,7 +164,7 @@ namespace Signum.Engine.Disconnected
         {
             var result = EnumerableExtensions.JoinStrict(
                 strategies.Keys,
-                Schema.Current.Tables.Keys.Where(a => !a.IsEnumProxy()),
+                Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntity()),
                 a => a,
                 a => a,
                 (a, b) => 0);
@@ -210,7 +210,7 @@ namespace Signum.Engine.Disconnected
 
         static DisconnectedStrategy<T> Register<T>(DisconnectedStrategy<T> stragety) where T : IdentifiableEntity
         {
-            if (typeof(T).IsEnumProxy())
+            if (typeof(T).IsEnumEntity())
                 throw new InvalidOperationException("EnumProxies can not be registered on DisconnectedLogic");
 
             if (!Schema.Current.Tables.ContainsKey(typeof(T)))
@@ -237,12 +237,12 @@ namespace Signum.Engine.Disconnected
         }
 
 
-        class EnumProxyDisconnectedStrategy : IDisconnectedStrategy
+        class EnumEntityDisconnectedStrategy : IDisconnectedStrategy
         {
             public Download Download { get { return Download.None; } }
             public Upload Upload { get { return Upload.None; } }
 
-            public EnumProxyDisconnectedStrategy(Type type)
+            public EnumEntityDisconnectedStrategy(Type type)
             {
                 this.Type = type;
             }
@@ -280,8 +280,8 @@ namespace Signum.Engine.Disconnected
 
         internal static IDisconnectedStrategy GetStrategy(Type type)
         {
-            if(type.IsEnumProxy())
-                return new EnumProxyDisconnectedStrategy(type);
+            if(type.IsEnumEntity())
+                return new EnumEntityDisconnectedStrategy(type);
 
             return DisconnectedLogic.strategies[type];
         }

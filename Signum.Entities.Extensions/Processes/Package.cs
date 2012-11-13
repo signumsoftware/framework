@@ -14,34 +14,12 @@ namespace Signum.Entities.Processes
     {
         [SqlDbType(Size = 200)]
         string name;
-        [StringLengthValidator(AllowNulls = true , Max = 200)]
+        [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string Name
         {
             get { return name; }
             set { SetToStr(ref name, value, () => Name); }
-        }        
-
-        OperationDN operation;
-        public OperationDN Operation
-        {
-            get { return operation; }
-            set { SetToStr(ref operation, value, () => Operation); }
         }
-
-        int numLines;
-        public int NumLines
-        {
-            get { return numLines; }
-            set { SetToStr(ref numLines, value, () => NumLines); }
-        }
-
-        int numErrors;
-        public int NumErrors
-        {
-            get { return numErrors; }
-            set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
 
         Lite<UserDN> user;
         public Lite<UserDN> User
@@ -52,26 +30,55 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            return "{0} {1} ({2} lines{3})".Formato(Operation, Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
+            return "Package {0} {1}".Formato(Name, User);
         }
+    }
+
+    [Serializable]
+    public class PackageOperationDN : PackageDN
+    {
+        OperationDN operation;
+        public OperationDN Operation
+        {
+            get { return operation; }
+            set { SetToStr(ref operation, value, () => Operation); }
+        }
+
+        public override string ToString()
+        {
+            return "Package {0} {1} {2}".Formato(Operation, Name, User); ;
+        }
+    }
+
+    public enum PackageOperationOperation
+    {
+        CreatePackageOperation
+    }
+
+    public enum PackageOperationProcess
+    {
+        ExecutePackageOperation
     }
 
     [Serializable]
     public class PackageLineDN : IdentifiableEntity
     {
+        [NotNullable]
         Lite<PackageDN> package;
+        [NotNullValidator]
         public Lite<PackageDN> Package
         {
             get { return package; }
             set { Set(ref package, value, () => Package); }
         }
 
-        [ImplementedByAll]
-        Lite<IIdentifiable> target;
-        public Lite<IIdentifiable> Target
+        [NotNullable, ImplementedByAll]
+        Lite<IIdentifiable> entity;
+        [NotNullValidator]
+        public Lite<IIdentifiable> Entity
         {
-            get { return target; }
-            set { Set(ref target, value, () => Target); }
+            get { return entity; }
+            set { Set(ref entity, value, () => Entity); }
         }
 
         [ImplementedByAll]

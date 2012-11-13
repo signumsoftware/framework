@@ -23,16 +23,16 @@ namespace Signum.Web.Extensions.Sample
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<AlbumDN>(EntityType.DefaultNotSaving) { PartialViewName = e => ViewPrefix.Formato("Album") },
-                    new EntitySettings<AmericanMusicAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("AmericanMusicAward") },
-                    new EntitySettings<ArtistDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Artist") },
-                    new EntitySettings<BandDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Band") },
-                    new EntitySettings<GrammyAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("GrammyAward") },
-                    new EntitySettings<LabelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Label") },
-                    new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("PersonalAward") },
+                    new EntitySettings<AlbumDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("Album") },
+                    new EntitySettings<AmericanMusicAwardDN>(EntityType.Shared) { PartialViewName = e => ViewPrefix.Formato("AmericanMusicAward") },
+                    new EntitySettings<ArtistDN>(EntityType.Shared) { PartialViewName = e => ViewPrefix.Formato("Artist") },
+                    new EntitySettings<BandDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("Band") },
+                    new EntitySettings<GrammyAwardDN>(EntityType.Shared) { PartialViewName = e => ViewPrefix.Formato("GrammyAward") },
+                    new EntitySettings<LabelDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("Label") },
+                    new EntitySettings<PersonalAwardDN>(EntityType.Shared) { PartialViewName = e => ViewPrefix.Formato("PersonalAward") },
                     new EmbeddedEntitySettings<SongDN>() { PartialViewName = e => ViewPrefix.Formato("Song")},
 
-                    new EntitySettings<NoteWithDateDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("NoteWithDate") },
+                    new EntitySettings<NoteWithDateDN>(EntityType.Shared) { PartialViewName = e => ViewPrefix.Formato("NoteWithDate") },
 
                     new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => ViewPrefix.Formato("AlbumFromBandModel")},
                 });
@@ -62,7 +62,7 @@ namespace Signum.Web.Extensions.Sample
                             Text = "Clone with data",
                             OnClick = new JsOperationConstructorFrom(new JsOperationOptions
                             { 
-                                ControllerUrl = RouteHelper.New().Action("CloneWithData", "Music"),
+                                ControllerUrl = RouteHelper.New().Action<MusicController>(mc => mc.CloneWithData(Js.NewPrefix(ctx.Prefix))),
                                 Prefix = ctx.Prefix
                             }).ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk).ToJS()
                         }
@@ -71,23 +71,23 @@ namespace Signum.Web.Extensions.Sample
 
                 OperationsClient.AddSettings( new List<OperationSettings>
                 {
-                    new EntityOperationSettings(AlbumOperation.Clone)
-                    { 
-                        OnContextualClick = ctx => Js.Confirm("Do you wish to clone album {0}".Formato(ctx.Entity.ToString()),
-                            new JsOperationConstructorFrom(ctx.Options()).ajax(ctx.Prefix, JsOpSuccess.DefaultContextualDispatcher)),
-                        IsVisible = ctx => true,
-                    },
                     new EntityOperationSettings(AlbumOperation.CreateFromBand)
                     { 
-                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
-                            .validateAndAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options<MusicController>(mc => mc.CreateAlbumFromBand(Js.NewPrefix(ctx.Prefix))))
+                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
 
-                        OnContextualClick = ctx => Js.Confirm("Do you wish to create an album for band {0}".Formato(ctx.Entity.ToString()),
-                            new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music")).ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
+                        Contextual = new ContextualOperationSettings(AlbumOperation.CreateFromBand)
+                        {
+                            OnClick = ctx => new JsOperationConstructorFrom(ctx.Options<MusicController>(mc => mc.CreateAlbumFromBand(Js.NewPrefix(ctx.Prefix))))
+                                .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
+                        },
+
+                        ContextualFromMany = new ContextualOperationSettings(AlbumOperation.CreateFromBand)
                     },
-                    new QueryOperationSettings(AlbumOperation.CreateGreatestHitsAlbum)
+                    new ContextualOperationSettings(AlbumOperation.CreateGreatestHitsAlbum)
                     {
-                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("CreateGreatestHitsAlbum", "Music")).submitSelected()
+                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options<MusicController>(mc => mc.CreateGreatestHitsAlbum()))
+                            .submitSelected()
                     },
                 });
             }
@@ -108,8 +108,8 @@ namespace Signum.Web.Extensions.Sample
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<DemoPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("DemoPackage"), },
-                    new EntitySettings<DemoPackageLineDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("DemoPackageLine"), },
+                    new EntitySettings<DemoPackageDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("DemoPackage"), },
+                    new EntitySettings<DemoPackageLineDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("DemoPackageLine"), },
                 });
             }
         }

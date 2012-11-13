@@ -12,7 +12,8 @@
     object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
     FindOptions fo = new FindOptions(queryName)
     {
-        FilterMode = FilterMode.OnlyResults
+        FilterMode = FilterMode.OnlyResults,
+        AllowMultiple = false
     };
 
     @Html.SearchControl(uq, fo, new Context(null, "r{0}c{1}".Formato(Model.Row, Model.Column)));

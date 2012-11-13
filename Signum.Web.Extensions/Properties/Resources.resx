@@ -342,9 +342,6 @@
   <data name="User" xml:space="preserve">
     <value>User</value>
   </data>
-  <data name="AreYouSureOfDeletingQuery0" xml:space="preserve">
-    <value>Are you sure of deleting query {0}?</value>
-  </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
@@ -438,9 +435,6 @@
   <data name="UserChart_UserCharts" xml:space="preserve">
     <value>User charts</value>
   </data>
-  <data name="Chart_AreYouSureOfDeletingUserChart0" xml:space="preserve">
-    <value>Are you sure of deleting user chart {0}?</value>
-  </data>
   <data name="_0Rules" xml:space="preserve">
     <value>{0} rules</value>
   </data>
@@ -476,5 +470,11 @@
   </data>
   <data name="ChartScript_Edit" xml:space="preserve">
     <value>Edit Script</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" xml:space="preserve">
+    <value>Please confirm you'd like to delete the selected entities from the system</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities" xml:space="preserve">
+    <value>Please confirm you'd like to execute the operation {0} to the selected entities</value>
   </data>
 </root>

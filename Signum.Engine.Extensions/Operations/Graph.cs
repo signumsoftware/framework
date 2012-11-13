@@ -17,9 +17,15 @@ using Signum.Utilities.DataStructures;
 using Signum.Engine.Extensions.Properties;
 using System.Xml.Linq;
 using System.ComponentModel;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Operations
 {
+    public interface IGraphHasFromStatesOperation
+    {
+        bool HasFromStates { get; }
+    }
+
     public class Graph<E, S>
         where E : IdentifiableEntity
         where S : struct
@@ -28,12 +34,17 @@ namespace Signum.Engine.Operations
         {
         }
 
-        public interface IGraphInnerOperation : IGraphOperation
+        public interface IGraphToStateOperation : IGraphOperation
         {
             S ToState { get; }
         }
 
-        public class Execute : BasicExecute<E>, IGraphInnerOperation
+        public interface IGraphFromStatesOperation : IGraphOperation, IGraphHasFromStatesOperation
+        {
+            S[] FromStates { get; }
+        }
+
+        public class Execute : BasicExecute<E>, IGraphToStateOperation, IGraphFromStatesOperation
         {
             S? toState;
             public S ToState
@@ -41,7 +52,13 @@ namespace Signum.Engine.Operations
                 get { return toState.Value; }
                 set { toState = value; }
             }
+            
             public S[] FromStates { get; set; }
+
+            bool IGraphHasFromStatesOperation.HasFromStates
+            {
+                get { return !FromStates.IsNullOrEmpty(); }
+            }
 
             public Execute(Enum key)
                 : base(key)
@@ -50,7 +67,7 @@ namespace Signum.Engine.Operations
 
             protected override string OnCanExecute(E entity)
             {
-                S state = Graph<E, S>.GetState(entity);
+                S state = Graph<E, S>.GetStateFunc(entity);
 
                 string stateError = state.InState(key, FromStates);
                 if (stateError.HasText())
@@ -63,9 +80,7 @@ namespace Signum.Engine.Operations
             {
                 base.OnBeginOperation(entity);
 
-                S oldState = Graph<E, S>.GetState(entity);
-
-                Graph<E, S>.OnExitState(oldState, entity);
+                S oldState = Graph<E, S>.GetStateFunc(entity);
             }
 
             protected override void OnEndOperation(E entity)
@@ -87,9 +102,14 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public class Delete : BasicDelete<E>, IGraphOperation
+        public class Delete : BasicDelete<E>, IGraphOperation, IGraphFromStatesOperation
         {
             public S[] FromStates { get; set; }
+
+            bool IGraphHasFromStatesOperation.HasFromStates
+            {
+                get { return !FromStates.IsNullOrEmpty(); }
+            }
 
             public Delete(Enum key)
                 : base(key)
@@ -98,18 +118,16 @@ namespace Signum.Engine.Operations
 
             protected override string OnCanDelete(E entity)
             {
-                S state = Graph<E, S>.GetState(entity);
+                S state = Graph<E, S>.GetStateFunc(entity);
                 if (FromStates != null && !FromStates.Contains(state))
-                    return Resources.ImpossibleToExecute0FromState1.Formato(key, state);
+                    return Resources.ImpossibleToExecute0FromState1.Formato(key, ((Enum)(object)state).NiceToString());
 
                 return base.OnCanDelete(entity);
             }
 
             protected override void OnDelete(E entity, object[] args)
             {
-                S oldState = Graph<E, S>.GetState(entity);
-
-                Graph<E, S>.OnExitState(oldState, entity);
+                S oldState = Graph<E, S>.GetStateFunc(entity);
 
                 base.OnDelete(entity, args);
             }
@@ -123,7 +141,7 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public class Construct : BasicConstruct<E>, IGraphInnerOperation
+        public class Construct : BasicConstruct<E>, IGraphToStateOperation
         {
             S? toState;
             public S ToState
@@ -159,7 +177,7 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public class ConstructFrom<F> : BasicConstructFrom<F, E>, IGraphInnerOperation
+        public class ConstructFrom<F> : BasicConstructFrom<F, E>, IGraphToStateOperation
             where F : class, IIdentifiable
         {
             S? toState;
@@ -196,7 +214,7 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public class ConstructFromMany<F> : BasicConstructFromMany<F, E>, IGraphInnerOperation
+        public class ConstructFromMany<F> : BasicConstructFromMany<F, E>, IGraphToStateOperation
             where F : class, IIdentifiable
         {
             S? toState;
@@ -232,23 +250,29 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public class StateOptions
-        {
-            public Action<E> Enter { get; set; }
-            public Action<E> Exit { get; set; }
-        }
-
         protected Graph()
         {
             throw new InvalidOperationException("OperationGraphs should not be instantiated");
         }
 
-        public static Func<E, S> GetState { get; set; }
+        static Expression<Func<E, S>> getState;
+        public static Expression<Func<E, S>> GetState
+        {
+            get { return getState; }
+            set
+            {
+                getState = value;
+                GetStateFunc = getState == null ? null : getState.Compile();
+            }
+        }
+
+        public static Func<E, S> GetStateFunc{get; private set;}
+
 
         public static Action<E, S> EnterState { get; set; }
         public static Action<E, S> ExitState { get; set; }
 
-        public static Dictionary<S, StateOptions> States { get; set; }
+
 
         public static XDocument ToDGML()
         {
@@ -303,7 +327,7 @@ namespace Signum.Engine.Operations
                                             item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
                                             item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
 
-                            Add(from, ((IGraphInnerOperation)item).ToState.ToString(), item.Key);
+                            Add(from, ((IGraphToStateOperation)item).ToState.ToString(), item.Key);
 
 
                         } break;
@@ -313,34 +337,12 @@ namespace Signum.Engine.Operations
             return result;
         }
 
-        internal static void OnExitState(S state, E entity)
+        internal static void AssertEnterState(E entity, IGraphToStateOperation operation)
         {
-            StateOptions so = States.TryGetC(state);
-            if (so != null && so.Exit != null)
-                so.Exit(entity);
-
-            if (ExitState != null)
-                ExitState(entity, state);
-        }
-
-        internal static void OnEnterState(S state, E entity)
-        {
-            if (EnterState != null)
-                EnterState(entity, state);
-
-            StateOptions sn = States.TryGetC(state);
-            if (sn != null && sn.Enter != null)
-                sn.Enter(entity);
-        }
-
-        internal static void AssertEnterState(E entity, IGraphInnerOperation operation)
-        {
-            S state = GetState(entity);
+            S state = GetStateFunc(entity);
 
             if (!state.Equals(operation.ToState))
                 throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".Formato(operation.Key, operation.ToState, state));
-
-            OnEnterState(state, entity);
         }
     }
 }

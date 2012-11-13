@@ -442,7 +442,7 @@ WriteLiteral("                        <input type=\"hidden\" disabled=\"disabled
 
             
             #line 82 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                                                                        Write(item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(EnumDN.UniqueKey(ac), ac.NiceToString()), ","));
+                                                                                                        Write(item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(TypeConditionNameDN.UniqueKey(ac), ac.NiceToString()), ","));
 
             
             #line default
@@ -482,7 +482,7 @@ WriteLiteral("\r\n                    ");
 
             
             #line 86 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(EnumDN.UniqueKey(a.ConditionName), a.Allowed.ToStringParts()), ";")))));
+               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(TypeConditionNameDN.UniqueKey(a.ConditionName), a.Allowed.ToStringParts()), ";")))));
 
             
             #line default
@@ -803,7 +803,7 @@ WriteLiteral("\" data-condition=\"");
 
             
             #line 161 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                                                                                          Write(EnumDN.UniqueKey(condition.ConditionName));
+                                                                                                                          Write(TypeConditionNameDN.UniqueKey(condition.ConditionName));
 
             
             #line default
@@ -813,7 +813,7 @@ WriteLiteral("\" data-index=\"");
 
             
             #line 161 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                                                                                                                                                  Write(conditionIter.Value.Index);
+                                                                                                                                                                                               Write(conditionIter.Value.Index);
 
             
             #line default
@@ -874,7 +874,7 @@ WriteLiteral("</span>\r\n                    ");
 
             
             #line 171 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), EnumDN.UniqueKey(condition.ConditionName)));
+               Write(Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName)));
 
             
             #line default

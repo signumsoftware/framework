@@ -136,7 +136,6 @@ WriteLiteral("\r\n");
     }
     
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
-    bool viewable = (bool)ViewData[ViewDataKeys.View];
 
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);

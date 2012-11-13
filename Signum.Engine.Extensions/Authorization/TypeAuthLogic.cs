@@ -115,7 +115,7 @@ namespace Signum.Engine.Authorization
         {
             var result = new TypeRulePack { Role = roleLite };
 
-            cache.GetRules(result, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(a => a.Value));
+            cache.GetRules(result, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumEntity()).Select(a => a.Value));
 
             foreach (TypeAllowedRule r in result.Rules)
             {
@@ -148,7 +148,7 @@ namespace Signum.Engine.Authorization
             if (!TypeLogic.TypeToDN.ContainsKey(type))
                 return AuthUtils.MaxType.BaseAllowed;
 
-            if (EnumProxy.Extract(type) != null)
+            if (EnumEntity.Extract(type) != null)
                 return new TypeAllowedAndConditions(TypeAllowed.Read);
 
             TypeAllowed? temp = TypeAuthLogic.GetTemporallyAllowed(type);

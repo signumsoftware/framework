@@ -13,16 +13,16 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
-using Signum.Entities.Operations;
+using Signum.Entities.Processes;
 
-namespace Signum.Windows.Operations
+namespace Signum.Windows.Processes
 {
     /// <summary>
-    /// Interaction logic for LogOperation.xaml
+    /// Interaction logic for PackageOperation.xaml
     /// </summary>
-    public partial class LogOperation : UserControl
+    public partial class PackageOperation : UserControl
     {
-        public LogOperation()
+        public PackageOperation()
         {
             InitializeComponent();
         }

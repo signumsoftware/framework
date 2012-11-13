@@ -217,7 +217,7 @@ namespace Signum.Entities.Omnibox
                 case FilterType.Lite:
                 case FilterType.Embedded: break;
                 case FilterType.Boolean: return new[] { new ValueTuple { Value = true, Match = null }, new ValueTuple { Value = false, Match = null } };
-                case FilterType.Enum: return EnumProxy.GetValues(queryToken.Type.UnNullify()).Select(e => new ValueTuple { Value = e, Match = null }).ToArray();
+                case FilterType.Enum: return EnumEntity.GetValues(queryToken.Type.UnNullify()).Select(e => new ValueTuple { Value = e, Match = null }).ToArray();
                 case FilterType.Guid: break;
             }
 
@@ -297,7 +297,7 @@ namespace Signum.Entities.Omnibox
                     {
                         string value = omniboxToken.Type == OmniboxTokenType.Identifier ? omniboxToken.Value : OmniboxUtils.CleanCommas(omniboxToken.Value);
                         bool isPascalValue = OmniboxUtils.IsPascalCasePattern(value);
-                        var dic = EnumProxy.GetValues(queryToken.Type.UnNullify()).ToDictionary(a => a.ToString(), a => (object)a);
+                        var dic = EnumEntity.GetValues(queryToken.Type.UnNullify()).ToDictionary(a => a.ToString(), a => (object)a);
 
                         var result = OmniboxUtils.Matches(dic, e => ((Enum)e).NiceToString(), value, isPascalValue)
                             .Select(m => new ValueTuple { Value = m.Value, Match = m })
@@ -444,9 +444,9 @@ namespace Signum.Entities.Omnibox
 
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { ToStr = "{0}".Formato(queryName), OmniboxResultType = resultType },
-                new HelpOmniboxResult { ToStr = "{0} {1}='{2}'".Formato(queryName, field, value), OmniboxResultType = resultType },
-                new HelpOmniboxResult { ToStr = "{0} {1}1='{2}1' {1}2='{2}2'".Formato(queryName, field, value), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0}".Formato(queryName), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} {1}='{2}'".Formato(queryName, field, value), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} {1}1='{2}1' {1}2='{2}2'".Formato(queryName, field, value), OmniboxResultType = resultType },
             };
         }
     }

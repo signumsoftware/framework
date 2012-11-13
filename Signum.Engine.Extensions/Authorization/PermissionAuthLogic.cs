@@ -61,18 +61,18 @@ namespace Signum.Engine.Authorization
 
                 sb.Include<PermissionDN>();
 
-                EnumLogic<PermissionDN>.Start(sb, () => RegisteredPermission.ToHashSet());
+                MultiEnumLogic<PermissionDN>.Start(sb, () => RegisteredPermission.ToHashSet());
 
                 cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
-                    EnumLogic<PermissionDN>.ToEnum,
-                    EnumLogic<PermissionDN>.ToEntity,
+                    MultiEnumLogic<PermissionDN>.ToEnum,
+                    MultiEnumLogic<PermissionDN>.ToEntity,
                     AuthUtils.MaxBool,
                     AuthUtils.MinBool);
 
                 RegisterPermissions(BasicPermissions.AdminRules);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Permissions", "Permission", roles, EnumLogic<PermissionDN>.ToEntity, bool.Parse);
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Permissions", "Permission", roles, MultiEnumLogic<PermissionDN>.ToEntity, bool.Parse);
             }
         }
  
@@ -103,7 +103,7 @@ namespace Signum.Engine.Authorization
         public static PermissionRulePack GetPermissionRules(Lite<RoleDN> roleLite)
         {
             var result = new PermissionRulePack { Role = roleLite };
-            cache.GetRules(result, EnumLogic<PermissionDN>.AllEntities());
+            cache.GetRules(result, MultiEnumLogic<PermissionDN>.AllEntities());
             return result;
         }
 
