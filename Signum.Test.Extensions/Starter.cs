@@ -78,8 +78,9 @@ namespace Signum.Test.Extensions
                 UserTicketLogic.Start(sb, dqm);
                 OperationLogic.Start(sb, dqm);
                 
-                ProcessLogic.Start(sb, dqm, 1);
+                ProcessLogic.Start(sb, dqm, 1, userProcessSession: true);
                 PackageLogic.Start(sb, dqm, true, true);
+                ProcessLogic.CreateDefaultProcessSession = UserProcessSessionDN.CreateCurrent;
                 CacheLogic.Start(sb);
 
                 AuthLogic.StartAllModules(sb, dqm, typeof(IServerSample));
