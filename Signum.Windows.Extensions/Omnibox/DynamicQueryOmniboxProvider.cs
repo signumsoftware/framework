@@ -108,7 +108,11 @@ namespace Signum.Windows.Omnibox
                 }
             }
 
-            lines.Add(new Run(" ({0})".Formato(typeof(QueryDN).NiceName())) { Foreground = Brushes.Orange });
+        }
+
+        public override Run GetIcon()
+        {
+            return new Run("({0})".Formato(typeof(QueryDN).NiceName())) { Foreground = Brushes.Orange };
         }
 
         public override string GetItemStatus(DynamicQueryOmniboxResult result)

@@ -11,7 +11,7 @@
 @using Signum.Entities.Authorization;
 @helper ColorLink(Type type)
     {
-        var identType = type.IsEnum ? EnumProxy.Generate(type) : type;
+        var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
         
     @Html.Field(Signum.Entities.Extensions.Properties.Resources.ColorsFor0.Formato(type.NiceName()),
                  Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
@@ -25,7 +25,7 @@
     }
     
     <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnDN>)tc.Parent).Index)">
-        <td>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional?"?":""))
+        <td>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional ? "?" : ""))
         </td>
         <td>
             @if (tc.Value.GroupByVisible)
@@ -70,7 +70,7 @@
                 @Html.ValueLine(tc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter1))
                 @Html.ValueLine(tc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter2))
                 @Html.ValueLine(tc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter3))
-                if (tc.Value.TryToken!= null && !Navigator.IsReadOnly(typeof(ChartColorDN), EntitySettingsContext.Admin))
+                if (tc.Value.TryToken!= null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
                 {
                     var type = tc.Value.Token.Type.CleanType();
 
@@ -88,15 +88,15 @@
                             {
                                 if (!item.IsFirst)
                                 {
-                                    <text> | </text>
+                <text> | </text>
                                 }
                                 
-                                 @ColorLink(item.Value);
+                @ColorLink(item.Value);
                             }
                         }
                     }
                 }
             }
-                </td>
-            </tr>
+        </td>
+    </tr>
 }

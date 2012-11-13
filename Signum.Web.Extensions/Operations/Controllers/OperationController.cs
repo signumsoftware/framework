@@ -29,7 +29,7 @@ namespace Signum.Web.Operations
             if (isLite)
             {
                 Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(oldPrefix);
-                entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
+                entity = OperationLogic.ServiceExecuteLite(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
             }
             else
             {
@@ -42,7 +42,7 @@ namespace Signum.Web.Operations
                     return JsonAction.ModelState(ModelState);
                 }
 
-                entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
+                entity = OperationLogic.ServiceExecute(entity, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
             }
 
            return OperationsClient.DefaultExecuteResult(this, entity, prefix);
@@ -58,7 +58,7 @@ namespace Signum.Web.Operations
                 throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(operationFullKey));
 
             Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-            entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
+            entity = OperationLogic.ServiceExecuteLite(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
 
             return Content("");
         }
@@ -71,7 +71,7 @@ namespace Signum.Web.Operations
                 throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(operationFullKey));
 
             Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-            OperationLogic.ServiceDelete(lite, EnumLogic<OperationDN>.ToEnum(operationFullKey), null);
+            OperationLogic.ServiceDelete(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey), null);
 
             if (Navigator.Manager.QuerySettings.ContainsKey(runtimeInfo.RuntimeType))
                 return JsonAction.Redirect(Navigator.FindRoute(runtimeInfo.RuntimeType));
@@ -85,7 +85,7 @@ namespace Signum.Web.Operations
             if (isLite)
             {
                 Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(oldPrefix);
-                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
+                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
             }
             else
             {
@@ -98,23 +98,25 @@ namespace Signum.Web.Operations
                     return JsonAction.ModelState(ModelState);
                 }
 
-                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
+                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
             }
 
             return OperationsClient.DefaultConstructResult(this, entity, prefix);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFromMany(string runtimeType, List<int> ids, string operationFullKey, string prefix)
+        public ActionResult ConstructFromMany(string runtimeType, string operationFullKey, string prefix)
         {
-            Type type = Navigator.ResolveType(runtimeType);
-
-            if (ids == null || ids.Count == 0)
-                throw new ArgumentException("Construct from many operation {0} needs source Ids".Formato(operationFullKey));
-
-            List<Lite> sourceEntities = ids.Select(idstr => Lite.Create(type, idstr)).ToList();
+            var keys = Request["keys"];
+            if (string.IsNullOrEmpty(keys))
+                throw new ArgumentException("Construct from many operation {0} needs source Lite keys".Formato(operationFullKey));
             
-            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, EnumLogic<OperationDN>.ToEnum(operationFullKey));
+            Type type = Navigator.ResolveType(runtimeType);
+            
+            List<Lite> sourceEntities = keys.Split(new [] { "," }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(key => Lite.Parse(type, key)).ToList();
+            
+            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
 
             return OperationsClient.DefaultConstructResult(this, entity, prefix);
         }

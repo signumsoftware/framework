@@ -60,7 +60,11 @@ namespace Signum.Windows.Omnibox
                 }
             }
 
-            lines.Add(new Run(" ({0})".Formato(Extensions.Properties.Resources.View)) { Foreground = Brushes.DodgerBlue });
+        }
+
+        public override Run GetIcon()
+        {
+            return new Run("({0})".Formato(Extensions.Properties.Resources.View)) { Foreground = Brushes.DodgerBlue };
         }
 
         public override void OnSelected(EntityOmniboxResult result, Window window)

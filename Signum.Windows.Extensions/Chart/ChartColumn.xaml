@@ -12,17 +12,15 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <AdornerDecorator>
+
+    <Expander>
+        <Expander.Header>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="A"/>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="B"/>
                 <ColumnDefinition Width="*" SharedSizeGroup="C"/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
             <Label Content="{Binding PropertyLabel}" />
             <ToggleButton ToolTip="Group results" 
                       Visibility="{Binding GroupByVisible, Converter={x:Static m:Converters.BoolToVisibility}}" 
@@ -32,14 +30,12 @@
                 <Image Source="/Signum.Windows.Extensions;Component/Images/groupby.png" Stretch="None" SnapsToDevicePixels="True" />
             </ToggleButton>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" >
-                <m:QueryTokenBuilder  Style="{StaticResource toolTip}"  x:Name="token"
+                <m:QueryTokenBuilder  Style="{StaticResource toolTip}"  x:Name="token" Grid.Column="2"
                              Token="{Binding Token, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
                               SubTokensEvent="token_SubTokensEvent"/>
-            </StackPanel>
-
-            <Expander Grid.Row="1" Grid.ColumnSpan="3">
-                <StackPanel Orientation="Horizontal" m:Common.MinLabelWidth="70" x:Name="sp">
+            </Grid>
+        </Expander.Header>
+        <StackPanel Orientation="Horizontal" m:Common.MinLabelWidth="70" x:Name="sp" Background="{StaticResource LightBlue}">
                     <m:ValueLine m:Common.Route="DisplayName" MinWidth="200"/>
                     
                     <m:ValueLine m:Common.Route="Parameter1" x:Name="param1" />
@@ -47,8 +43,4 @@
                     <m:ValueLine m:Common.Route="Parameter3" x:Name="param3" />
                 </StackPanel>
             </Expander>
-        </Grid>
-
-
-    </AdornerDecorator>
 </UserControl>

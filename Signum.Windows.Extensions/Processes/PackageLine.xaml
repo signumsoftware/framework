@@ -7,8 +7,9 @@
     MinWidth="300">
     <StackPanel>
         <m:EntityLine m:Common.Route="Package" />
-        <m:EntityLine m:Common.Route="Target" />
+        <m:EntityLine m:Common.Route="Entity" />
+        <m:EntityLine m:Common.Route="Result"  m:Common.CollapseIfNull="True" />
         <m:ValueLine m:Common.Route="FinishTime" />
-        <m:EntityLine m:Common.Route="Exception" />
+        <m:EntityLine m:Common.Route="Exception" m:Common.CollapseIfNull="True" />
     </StackPanel>
 </UserControl>

@@ -40,16 +40,16 @@ namespace Signum.Web.Files
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<FileRepositoryDN>(EntityType.Admin){PartialViewName = e => ViewPrefix.Formato("FileRepository")},
-                        new EntitySettings<FilePathDN>(EntityType.Default),
-                        new EntitySettings<FileTypeDN>(EntityType.ServerOnly),
+                        new EntitySettings<FileRepositoryDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
+                        new EntitySettings<FilePathDN>(EntityType.Shared),
+                        new EntitySettings<FileTypeDN>(EntityType.SystemString),
                     });
 
                     var es = Navigator.EntitySettings<FilePathDN>();
                      
-                    var baseMapping = (Mapping<FilePathDN>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+                    var baseMapping = (Mapping<FilePathDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
-                    es.MappingDefault = ctx =>
+                    es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
                         if (runtimeInfo.RuntimeType == null)
@@ -62,7 +62,7 @@ namespace Signum.Web.Files
                                 if (hpf != null)
                                 {
                                     string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                    return new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
+                                    return new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType))
                                     {
                                         FileName = Path.GetFileName(hpf.FileName),
                                         BinaryFile = hpf.InputStream.ReadAllBytes(),
@@ -78,7 +78,7 @@ namespace Signum.Web.Files
                         return baseMapping(ctx);
                     };
 
-                    es.MappingAdmin = es.MappingDefault;
+                    es.MappingMain = es.MappingLine;
 
                     var lm = new LiteMapping<FilePathDN>();
                     lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
@@ -87,12 +87,12 @@ namespace Signum.Web.Files
 
                 if (file)
                 {
-                    var es = new EntitySettings<FileDN>(EntityType.Default);
+                    var es = new EntitySettings<FileDN>(EntityType.Shared);
                     Navigator.AddSetting(es);
 
-                    var baseMapping = (Mapping<FileDN>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+                    var baseMapping = (Mapping<FileDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
-                    es.MappingDefault = ctx =>
+                    es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
                         if (runtimeInfo.RuntimeType == null)

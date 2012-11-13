@@ -44,7 +44,7 @@ namespace Signum.Entities.Chart
             {
                 new HelpOmniboxResult 
                 { 
-                    ToStr = "'{0}'".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_UserChart), 
+                    Text = "'{0}'".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_UserChart), 
                     OmniboxResultType = resultType 
                 }
             };

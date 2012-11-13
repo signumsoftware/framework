@@ -20,7 +20,7 @@ namespace Signum.Web.Operations
         {
             return new ToolBarButton
             {
-                Id = EnumDN.UniqueKey(ctx.OperationInfo.Key),
+                Id = MultiEnumDN.UniqueKey(ctx.OperationInfo.Key),
 
                 DivCssClass = " ".CombineIfNotEmpty(
                     ToolBarButton.DefaultEntityDivCssClass,
@@ -34,11 +34,11 @@ namespace Signum.Web.Operations
             };
         }
 
-        public static ContextualItem Create(ContextualOperationContext ctx, EntityOperationContext entityCtx)
+        public static ContextualItem CreateContextual(ContextualOperationContext ctx)
         {
             return new ContextualItem
             {
-                Id = EnumDN.UniqueKey(ctx.OperationInfo.Key),
+                Id = MultiEnumDN.UniqueKey(ctx.OperationInfo.Key),
 
                 DivCssClass = " ".CombineIfNotEmpty(
                     ToolBarButton.DefaultEntityDivCssClass,
@@ -48,26 +48,9 @@ namespace Signum.Web.Operations
                 Enabled = ctx.OperationInfo.CanExecute == null,
 
                 Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
-                OnClick = (ctx.OperationSettings != null && ctx.OperationSettings.OnContextualClick != null) ? ctx.OperationSettings.OnContextualClick(ctx).ToJS()
-                        : (entityCtx.OperationSettings != null && entityCtx.OperationSettings.OnClick != null) ? entityCtx.OperationSettings.OnClick(entityCtx).ToJS()
-                        : DefaultContextualClick(ctx).ToJS()
-            };
-        }
-
-        public static ToolBarButton Create(QueryOperationContext ctx)
-        {
-            return new ToolBarButton
-            {
-                Id = EnumDN.UniqueKey(ctx.OperationInfo.Key),
-
-                DivCssClass = " ".CombineIfNotEmpty(
-                    ToolBarButton.DefaultQueryCssClass,
-                    EntityOperationSettings.CssClass(ctx.OperationInfo.Key)),
-
-                AltText = ctx.OperationSettings.TryCC(o => o.AltText),
-
-                Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
-                OnClick = (ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).ToJS(),
+                OnClick = (ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? 
+                        ctx.OperationSettings.OnClick(ctx).ToJS() : 
+                        DefaultClick(ctx).ToJS()
             };
         }
 
@@ -82,31 +65,25 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return new JsOperationConstructorFrom(ctx.Options()).validateAndAjax();                    
                 default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
             }
         }
 
-        static JsInstruction DefaultContextualClick(ContextualOperationContext ctx)
+        static JsInstruction DefaultClick(ContextualOperationContext ctx)
         {
             switch (ctx.OperationInfo.OperationType)
             {
                 case OperationType.Execute:
-                    return new JsOperationExecutor(ctx.Options()).ContextualExecute(ctx.Entity, ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString());
+                    return new JsOperationExecutor(ctx.Options()).ContextualExecute();
                 case OperationType.Delete:
-                    return new JsOperationDelete(ctx.Options()).ContextualDelete(ctx.Entity);
+                    return new JsOperationDelete(ctx.Options()).ContextualDelete(ctx.Entities);
                 case OperationType.ConstructorFrom:
-                    return new JsOperationConstructorFrom(ctx.Options()).ContextualConstruct(ctx.Entity, ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString());
+                    return new JsOperationConstructorFrom(ctx.Options()).ContextualConstruct();
+                case OperationType.ConstructorFromMany:
+                    return new JsOperationConstructorFromMany(ctx.Options()).ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.DefaultDispatcher);
                 default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
             }
-        }
-
-        static JsInstruction DefaultClick(QueryOperationContext ctx)
-        {
-            if (ctx.OperationInfo.OperationType != OperationType.ConstructorFromMany)
-                throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
-
-            return new JsOperationConstructorFromMany(ctx.Options()).ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.DefaultDispatcher);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Signum.Web.Extensions.Sample.Test
     {
         public ControlPanelTests()
         {
-            using (AuthLogic.Disable())
+            using (AuthLogic.UnsafeUserSession("su"))
             {
                 object queryName = typeof(AlbumDN);
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);

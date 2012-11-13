@@ -23,8 +23,8 @@ namespace Signum.Windows.Files
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<FileRepositoryDN>(EntityType.Default) { View = e => new FileRepository() },
-                    new EntitySettings<FilePathDN>(EntityType.Default) {View = e => new FilePath() },
+                    new EntitySettings<FileRepositoryDN>(EntityType.Main) { View = e => new FileRepository() },
+                    new EntitySettings<FilePathDN>(EntityType.Shared) { View = e => new FilePath() },
                 });
             }
         }

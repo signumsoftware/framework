@@ -33,6 +33,12 @@ namespace Signum.Web.Extensions.Disconnected.Views
     
     #line default
     #line hidden
+    
+    #line 2 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+    using Signum.Entities.DynamicQuery;
+    
+    #line default
+    #line hidden
     using Signum.Utilities;
     using Signum.Web;
     
@@ -46,83 +52,116 @@ namespace Signum.Web.Extensions.Disconnected.Views
         public override void Execute()
         {
 
+
 WriteLiteral("\r\n");
 
 
             
-            #line 3 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
- using (var dc = Html.TypeContext<DisconnectedMachineDN>()) 
+            #line 4 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+ using (var dc = Html.TypeContext<DisconnectedMachineDN>())
 {
-	
+    
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+            #line 6 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
 Write(Html.ValueLine(dc, d => d.CreationDate));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
-                                         
-	
+            #line 6 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+                                            
+    
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+            #line 7 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
 Write(Html.ValueLine(dc, d => d.MachineName));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
-                                        
-	
-            
-            #line default
-            #line hidden
-            
             #line 7 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
-Write(Html.ValueLine(dc, d => d.State, vl=>vl.ReadOnly= true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
-                                                         
-	
+                                           
+    
             
             #line default
             #line hidden
             
             #line 8 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+Write(Html.ValueLine(dc, d => d.State, vl => vl.ReadOnly = true));
+
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+                                                               
+    
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
 Write(Html.ValueLine(dc, d => d.SeedMin));
 
             
             #line default
             #line hidden
             
-            #line 8 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
-                                    
-	
+            #line 9 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+                                       
+    
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+            #line 10 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
 Write(Html.ValueLine(dc, d => d.SeedMax));
 
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
-                                    
+            #line 10 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+                                       
+
+    if (!dc.Value.IsNew)
+    {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <fieldset>\r\n            <legend>Last Imports</legend>\r\n            ");
+
+
+            
+            #line 16 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+       Write(Html.SearchControl(
+      new FindOptions()
+      {
+          QueryName = typeof(DisconnectedImportDN),
+          FilterOptions = { new FilterOption("Machine", dc.Value) },
+          OrderOptions = { new OrderOption("CreationDate", OrderType.Descending) },
+          SearchOnLoad = true,
+          FilterMode = FilterMode.Hidden
+      }, dc));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n        </fieldset>\r\n");
+
+
+            
+            #line 26 "..\..\Disconnected\Views\DisconnectedMachine.cshtml"
+    }
+
 }
 
             

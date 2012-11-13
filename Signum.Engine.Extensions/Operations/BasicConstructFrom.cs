@@ -74,7 +74,7 @@ namespace Signum.Engine.Operations
                     {
                         OperationLogDN log = new OperationLogDN
                         {
-                            Operation = EnumLogic<OperationDN>.ToEntity(key),
+                            Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
                             Start = TimeZoneManager.Now,
                             User = UserDN.Current.ToLite()
                         };

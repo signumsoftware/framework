@@ -348,7 +348,7 @@ WriteLiteral("                </table>\r\n                <textarea class=\"sf-c
 
             
             #line 60 "..\..\Chart\Views\ChartBuilder.cshtml"
-                                                                                   Write(Navigator.ViewRoute(chart.Value.ChartScript));
+                                                                                   Write(Navigator.NavigateRoute(chart.Value.ChartScript));
 
             
             #line default

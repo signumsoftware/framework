@@ -7,6 +7,7 @@
         SF.NewContentProcessor.defaultTabs($newContent);
         SF.NewContentProcessor.defaultDropdown($newContent);
         SF.NewContentProcessor.defaultAutocomplete($newContent);
+        SF.NewContentProcessor.defaultModifiedChecker($newContent);
     });
 
     $("body").trigger("sf-new-content");

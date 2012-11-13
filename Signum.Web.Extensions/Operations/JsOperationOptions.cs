@@ -32,7 +32,7 @@ namespace Signum.Web.Operations
                 {
                     {"sender", "this"},
                     {"parentDiv", ParentDiv.TryCC(a => a.ToJS())},
-                    {"operationKey", Operation.TryCC(o => ((JsValue<string>)EnumDN.UniqueKey(o))).TryCC(a=>a.ToJS())},
+                    {"operationKey", Operation.TryCC(o => ((JsValue<string>)MultiEnumDN.UniqueKey(o))).TryCC(a=>a.ToJS())},
                     {"contextual", IsContextual.TryCC(a=>a.ToJS())},
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},

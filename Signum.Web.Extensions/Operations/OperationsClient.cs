@@ -31,12 +31,15 @@ namespace Signum.Web.Operations
             scripts.Add("~/Operations/Scripts/SF_Operations.js");
             Navigator.Manager.DefaultScripts += () => scripts;
 
+            Navigator.Manager.SaveProtected += type => OperationLogic.IsSaveProtected(type);
+
             Navigator.Manager.DefaultSFUrls.Add(url =>
             {
                 return new Dictionary<string, string> 
                 { 
                     { "operationExecute", url.Action("Execute", "Operation") },
-                    { "operationExecuteContextual", url.Action("ContextualExecute", "Operation") },
+                    { "operationContextual", url.Action("ContextualExecute", "Operation") },
+                    { "operationContextualFromMany", url.Action("ContextualExecute", "Process") },
                     { "operationDelete", url.Action("Delete", "Operation") },
                     { "operationConstructFrom", url.Action("ConstructFrom", "Operation") },
                     { "operationConstructFromMany", url.Action("ConstructFromMany", "Operation") },
@@ -47,7 +50,8 @@ namespace Signum.Web.Operations
 
             Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);
             Constructor.ConstructorManager.VisualGeneralConstructor += new Func<ConstructContext, ActionResult>(Manager.ConstructorManager_VisualGeneralConstructor); 
-            ButtonBarQueryHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarForQueryName);
+            
+            ContextualItemsHelper.GetContextualItemsForLites += new GetContextualItemDelegate(CreateConstructFromManyGroup);
 
             if (contextualMenuInSearchWindow)
                 OperationsContextualItemsHelper.Start();
@@ -68,15 +72,18 @@ namespace Signum.Web.Operations
         {
             if (prefix.HasText())
             {
-                controller.ViewData[ViewDataKeys.WriteSFInfo] = true;
                 TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                return controller.PopupOpen(new ViewSaveOptions(tc));
+                var popupOptions = controller.ControllerContext.HttpContext.Request[ViewDataKeys.OkVisible].HasText() ?
+                    (PopupOptionsBase)new PopupViewOptions(tc) :
+                    new PopupNavigateOptions(tc);
+
+                return controller.PopupOpen(popupOptions);
             }
             else
             {
                 var request = controller.ControllerContext.RequestContext.HttpContext.Request;
 
-                string newUrl = Navigator.ViewRoute(entity);
+                string newUrl = Navigator.NavigateRoute(entity);
                 if (request.IsAjaxRequest())
                 {
                     if (request.UrlReferrer.AbsolutePath.Contains(newUrl))
@@ -87,7 +94,7 @@ namespace Signum.Web.Operations
                 else
                 {
                     if (request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                        return Navigator.View(controller, entity);
+                        return Navigator.NormalPage(controller, entity);
                     else
                         return new RedirectResult(newUrl);
                 }
@@ -98,9 +105,8 @@ namespace Signum.Web.Operations
         {
             if (prefix.HasText())
             {
-                controller.ViewData[ViewDataKeys.WriteSFInfo] = true;
                 TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                return controller.PopupOpen(new ViewSaveOptions(tc));
+                return controller.PopupOpen(new PopupNavigateOptions(tc));
             }
             else //NormalWindow
             {
@@ -111,16 +117,76 @@ namespace Signum.Web.Operations
                     if (entity.IsNew)
                         return Navigator.NormalControl(controller, entity);
                     else
-                        return JsonAction.Redirect(Navigator.ViewRoute(entity));
+                        return JsonAction.Redirect(Navigator.NavigateRoute(entity));
                 }
                 else
                 {
                     if (entity.IsNew)
-                        return Navigator.View(controller, entity);
+                        return Navigator.NormalPage(controller, entity);
                     else
-                        return new RedirectResult(Navigator.ViewRoute(entity));
+                        return new RedirectResult(Navigator.NavigateRoute(entity));
                 }
             }
+        }
+
+        private static ContextualItem CreateConstructFromManyGroup(SelectedItemsMenuContext ctx)
+        {
+            if (ctx.Lites.IsNullOrEmpty())
+                return null;
+
+            if (ctx.Implementations.IsByAll)
+                return null;
+
+            List<ContextualItem> operations = GetConstructFromManyOperations(ctx);
+            if (operations == null || operations.Count == 0)
+                return null;
+
+            HtmlStringBuilder content = new HtmlStringBuilder();
+            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-constructors")))
+            {
+                string ctxItemClass = "sf-search-ctxitem";
+
+                content.AddLine(new HtmlTag("li")
+                    .Class(ctxItemClass + " sf-search-ctxitem-header")
+                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Extensions.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
+
+                foreach (var operation in operations)
+                {
+                    content.AddLine(new HtmlTag("li")
+                        .Class(ctxItemClass)
+                        .InnerHtml(OperationsContextualItemsHelper.IndividualOperationToString(operation)));
+                }
+            }
+
+            return new ContextualItem
+            {
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemConstructors"),
+                Content = content.ToHtml().ToString()
+            };
+        }
+
+        private static List<ContextualItem> GetConstructFromManyOperations(SelectedItemsMenuContext ctx)
+        {
+            var contexts = (from t in ctx.Implementations.Types
+                            from oi in OperationLogic.ServiceGetOperationInfos(t)
+                            where oi.OperationType == OperationType.ConstructorFromMany
+                            let os = (ContextualOperationSettings)OperationsClient.Manager.Settings.TryGetC(oi.Key)
+                            group Tuple.Create(t, oi, os) by oi.Key into g
+                            let context = new ContextualOperationContext
+                            {
+                                OperationInfo = g.First().Item2,
+                                Prefix = ctx.Prefix,
+                                QueryName = ctx.QueryName,
+                                Entities = ctx.Lites,
+                                OperationSettings = g.First().Item3
+                            }
+                            where string.IsNullOrEmpty(context.OperationInfo.CanExecute)
+                                && (context.OperationSettings == null
+                                    || (context.OperationSettings != null && (context.OperationSettings.IsVisible == null || (context.OperationSettings.IsVisible != null && context.OperationSettings.IsVisible(context)))))
+                            select context
+                    );
+
+            return contexts.Select(op => OperationButtonFactory.CreateContextual(op)).ToList();
         }
     }
 
@@ -148,8 +214,7 @@ namespace Signum.Web.Operations
                          PartialViewName = ctx.PartialViewName,
                          Prefix = ctx.Prefix
                     }
-                    where (ctx.Buttons == ViewButtons.Save || os.TryCS(sett => sett.IsVisibleOnOkPopup) == true) &&
-                          (os == null || os.IsVisible == null || os.IsVisible(octx))
+                    where (os == null || os.IsVisible == null || os.IsVisible(octx))
                     select octx;
 
             List<ToolBarButton> buttons = contexts
@@ -176,54 +241,12 @@ namespace Signum.Web.Operations
             return buttons.ToArray();
         }
 
-        internal ToolBarButton[] ButtonBar_GetButtonBarForQueryName(QueryButtonContext qbc)
-        {
-            if (qbc.EntityType == null || qbc.QueryName == null)
-                return null;
-
-            var list = OperationLogic.ServiceGetQueryOperationInfos(qbc.EntityType);
-            var contexts = (from oi in list
-                           let os = (QueryOperationSettings)Settings.TryGetC(oi.Key)
-                           let ctx = new QueryOperationContext
-                           {
-                               OperationSettings = os,
-                               OperationInfo = oi,
-                               Prefix = qbc.Prefix
-                           }
-                           where os == null || os.IsVisible == null || os.IsVisible(ctx)
-                           select ctx).ToList();
-
-            if (contexts.Count == 1)
-                return new ToolBarButton[] { OperationButtonFactory.Create(contexts[0]) };
-            
-            List<ToolBarButton> buttons = contexts
-                .Where(oi => oi.OperationSettings != null && !oi.OperationSettings.GroupInMenu)
-                .Select(ctx => OperationButtonFactory.Create(ctx))
-                .ToList();
-
-            var groupedConstructs = contexts.Where(oi => oi.OperationSettings == null || (oi.OperationSettings != null && oi.OperationSettings.GroupInMenu));
-            if (groupedConstructs.Any())
-            {
-                string createText = Resources.Create;
-                buttons.Add(new ToolBarMenu
-                {
-                    Id = "tmConstructors",
-                    AltText = createText,
-                    Text = createText,
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass,
-                    Items = groupedConstructs.Select(ctx => OperationButtonFactory.Create(ctx)).ToList()
-                });
-            }
-
-            return buttons.ToArray();
-        }
-
         internal ModifiableEntity ConstructorManager_GeneralConstructor(Type type)
         {
             if (!type.IsIIdentifiable())
                 return null;
 
-            OperationInfo constructor = OperationLogic.ServiceGetConstructorOperationInfos(type).SingleOrDefaultEx();
+            OperationInfo constructor = OperationLogic.ServiceGetOperationInfos(type).SingleOrDefaultEx(a => a.OperationType == OperationType.Constructor);
 
             if (constructor == null)
                 return null;
@@ -233,7 +256,7 @@ namespace Signum.Web.Operations
 
         internal ActionResult ConstructorManager_VisualGeneralConstructor(ConstructContext ctx)
         {
-            var count = OperationLogic.ServiceGetConstructorOperationInfos(ctx.Type).Count;
+            var count = OperationLogic.ServiceGetOperationInfos(ctx.Type).Count(a => a.OperationType == OperationType.Constructor);
 
             if (count == 0 || count == 1)
                 return null;

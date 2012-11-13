@@ -14,7 +14,8 @@
                 "~/scripts/colorbrewer.js")
 @Html.ScriptCss("~/Chart/Content/SF_Chart.css")
 @{ 
-    UserChartDN uc = ((UserChartPartDN)Model.Content).UserChart;
+    var ucPart = (UserChartPartDN)Model.Content;
+    UserChartDN uc = ucPart.UserChart;
     ChartRequest request = uc.ToRequest();
 
     using (var crc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
@@ -40,7 +41,7 @@
             </script>
         </div>
         <div id="@crc.Compose("sfChartContainer")">
-            <div class="sf-chart-container" 
+            <div class="sf-chart-container" style="display:@(ucPart.OnlyData ? "none" : "block")" 
                     data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.ControlID)))" 
                     data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(crc.ControlID)))"
                     data-json="@Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString()">
@@ -48,18 +49,34 @@
         </div>
     </div>
     
-        MvcHtmlString divSelector = MvcHtmlString.Create("#" + crc.Compose("sfChartContainer") + " > .sf-chart-container");
+        if (ucPart.OnlyData)
+        {
+            ViewData[ViewDataKeys.Results] = resultTable;
+            ViewData[ViewDataKeys.Navigate] = false;
+
+            QuerySettings settings = Navigator.QuerySettings(request.QueryName);
+            ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => settings.GetFormatter(c.c.Column));
+
+            @Html.Partial(ChartClient.ChartResultsTableView, new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
+        }
+        else
+        {
+            MvcHtmlString divSelector = MvcHtmlString.Create("#" + crc.Compose("sfChartContainer") + " > .sf-chart-container");
    
+            <script type="text/javascript">
+                (function () {
+                    var $myChart = SF.Chart.getFor('@crc.ControlID');
+                    $myChart.reDraw();
+                })();
+            </script>
+        }
         <script type="text/javascript">
             (function () {
-                var $myChart = SF.Chart.getFor('@crc.ControlID');
-                $myChart.reDraw();
-
                 $("#" + SF.compose("@crc.ControlID", "sfFullScreen")).on("mousedown", function (e) {
+                    var $myChart = SF.Chart.getFor('@crc.ControlID');
                     $myChart.fullScreen(e);
                 });
             })();
         </script>
-        
     }
 }

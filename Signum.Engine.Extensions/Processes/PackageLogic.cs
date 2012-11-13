@@ -17,35 +17,103 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
+using System.Linq.Expressions;
+using Signum.Utilities;
 
 namespace Signum.Engine.Processes
 {
     public static class PackageLogic
     {
-        public static void AssertStarted(SchemaBuilder sb)
+        static Expression<Func<PackageDN, IQueryable<PackageLineDN>>> LinesExpression =
+            p => Database.Query<PackageLineDN>().Where(pl => pl.Package.RefersTo(p));
+        public static IQueryable<PackageLineDN> Lines(this PackageDN p)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
+            return LinesExpression.Evaluate(p);
         }
 
-        internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        static Expression<Func<PackageDN, IQueryable<PackageLineDN>>> RemainingLinesExpression =
+            p => p.Lines().Where(a => a.FinishTime == null && a.Exception == null);
+        public static IQueryable<PackageLineDN> RemainingLines(this PackageDN p)
+        {
+            return RemainingLinesExpression.Evaluate(p);
+        }
+
+        static Expression<Func<PackageDN, IQueryable<PackageLineDN>>> ExceptionLinesExpression =
+            p => p.Lines().Where(a => a.Exception != null);
+        public static IQueryable<PackageLineDN> ExceptionLines(this PackageDN p)
+        {
+            return ExceptionLinesExpression.Evaluate(p);
+        }
+
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, true, true)));
+        }
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool packages, bool packageOperations)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 ProcessLogic.AssertStarted(sb);
 
-                sb.Include<PackageDN>();
                 sb.Include<PackageLineDN>();
 
-                dqm[typeof(PackageDN)] =
-                     (from p in Database.Query<PackageDN>()
-                      select new
-                      {
-                          Entity = p,
-                          p.Id,
-                          p.Operation,
-                          p.Name ,
-                          Lines = (int?)Database.Query<PackageLineDN>().Count(pl => pl.Package == p.ToLite())
-                      }).ToDynamic();
+                if (packages)
+                {
+                    sb.Settings.AssertImplementedBy((PackageLineDN pl) => pl.Package, typeof(PackageDN));
+                    sb.Settings.AssertImplementedBy((ProcessExecutionDN pe) => pe.ProcessData, typeof(PackageDN));
+
+                    sb.Include<PackageDN>();
+                    dqm[typeof(PackageDN)] =
+                        (from p in Database.Query<PackageDN>()
+                         select new
+                         {
+                             Entity = p,
+                             p.Id,
+                             p.Name,
+                             Lines = p.Lines().Count()
+                         }).ToDynamic();
+
+                }
+
+                if (packageOperations)
+                {
+                    sb.Settings.AssertImplementedBy((PackageLineDN pl) => pl.Package, typeof(PackageOperationDN));
+                    sb.Settings.AssertImplementedBy((ProcessExecutionDN pe) => pe.ProcessData, typeof(PackageOperationDN));
+
+
+                    sb.Include<PackageOperationDN>();
+                    dqm[typeof(PackageOperationDN)] =
+                        (from p in Database.Query<PackageOperationDN>()
+                         select new
+                         {
+                             Entity = p,
+                             p.Id,
+                             p.Name,
+                             p.Operation,
+                             Lines = p.Lines().Count()
+                         }).ToDynamic();
+
+                    ProcessLogic.Register(PackageOperationProcess.ExecutePackageOperation, new PackageOperationAlgorithm());
+
+                    new BasicConstructFromMany<IdentifiableEntity, ProcessExecutionDN>(PackageOperationOperation.CreatePackageOperation)
+                    {
+                        Construct = (entities, args) =>
+                        {
+                            if (args == null || args.Length < 0 || !(args[0] is OperationDN || args[0] is Enum))
+                                throw new ArgumentNullException("{0} requires an operation as the first argument".Formato(PackageOperationOperation.CreatePackageOperation));
+
+                            OperationDN operation = args[0] as OperationDN ?? MultiEnumLogic<OperationDN>.ToEntity((Enum)args[0]);
+
+                            var process = ProcessLogic.Create(PackageOperationProcess.ExecutePackageOperation, new PackageOperationDN()
+                            {
+                                Operation = operation
+                            }.CreateLines(entities));
+
+                            return process;
+                        }
+                    }.Register();
+                }
 
                 dqm[typeof(PackageLineDN)] =
                     (from pl in Database.Query<PackageLineDN>()
@@ -54,73 +122,45 @@ namespace Signum.Engine.Processes
                          Entity = pl,
                          Package = pl.Package,
                          pl.Id,
-                         pl.Target,
+                         Target = pl.Entity,
                          pl.FinishTime,
                          pl.Exception,
                      }).ToDynamic();
+
+                dqm.RegisterExpression((PackageDN p) => p.Lines());
+                dqm.RegisterExpression((PackageDN p) => p.RemainingLines());
+                dqm.RegisterExpression((PackageDN p) => p.ExceptionLines());
             }
         }
-    }
 
-    public abstract class PackageAlgorithm<T>: IProcessAlgorithm
-        where T:class, IIdentifiable
-    {
-        Func<List<Lite<T>>> getLites;
-
-        public PackageAlgorithm()
+        public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite> lites)
         {
-        }
-
-        public PackageAlgorithm(Func<List<Lite<T>>> getLites)
-        {
-            this.getLites = getLites;
-        }
-
-        public virtual IProcessDataDN CreateData(object[] args)
-        {
-            PackageDN package = CreatePackage(args);
-
             package.Save();
 
-            List<Lite<T>> lites = 
-                args != null && args.Length > 1? (List<Lite<T>>)args.GetArg<List<Lite<T>>>(1): 
-                getLites != null? getLites(): null;
-
-            if (lites == null)
-                throw new InvalidOperationException("No entities to process found");
-
-            package.NumLines = lites.Count; 
-            
             lites.Select(lite => new PackageLineDN
             {
                 Package = package.ToLite(),
-                Target = lite.ToLite<IIdentifiable>()
+                Entity = lite.ToLite<IIdentifiable>()
             }).SaveList();
 
             return package;
         }
 
-
-        public virtual void Execute(IExecutingProcess executingProcess)
+        public static void ForEachLine(this IExecutingProcess executingProcess, PackageDN package, Action<PackageLineDN> action)
         {
-            PackageDN package = (PackageDN)executingProcess.Data;
-
-            List<Lite<PackageLineDN>> lines =
-                (from pl in Database.Query<PackageLineDN>()
-                 where pl.Package == package.ToLite() && pl.FinishTime == null && pl.Exception == null
-                 select pl.ToLite()).ToList();
+            List<PackageLineDN> lines = package.RemainingLines().ToList();
 
             for (int i = 0; i < lines.Count; i++)
             {
                 executingProcess.CancellationToken.ThrowIfCancellationRequested();
-                
-                PackageLineDN pl = lines[i].RetrieveAndForget();
+
+                PackageLineDN pl = lines[i];
 
                 try
                 {
                     using (Transaction tr = Transaction.ForceNew())
                     {
-                        ExecuteLine(pl, package);
+                        action(pl);
                         pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();
                         tr.Commit();
@@ -129,7 +169,7 @@ namespace Signum.Engine.Processes
                 catch (Exception e)
                 {
                     if (Transaction.InTestTransaction)
-                        throw; 
+                        throw;
 
                     var exLog = e.LogException();
 
@@ -139,51 +179,74 @@ namespace Signum.Engine.Processes
                         pl.Save();
                         tr.Commit();
                     }
-
-                    package.NumErrors++;
-                    package.Save();
                 }
 
                 executingProcess.ProgressChanged(i, lines.Count);
             }
         }
-
-        public int NotificationSteps = 100; 
-        protected abstract PackageDN CreatePackage(object[] args);
-        public abstract void ExecuteLine(PackageLineDN pl, PackageDN package);
     }
 
-    public class PackageExecuteAlgorithm<T> : PackageAlgorithm<T> where T : class, IIdentifiable
+    public class PackageOperationAlgorithm : IProcessAlgorithm
+    {
+        public void Execute(IExecutingProcess executingProcess)
+        {
+            PackageOperationDN package = (PackageOperationDN)executingProcess.Data;
+
+            Enum operationKey = MultiEnumLogic<OperationDN>.ToEnum(package.Operation);
+
+            executingProcess.ForEachLine(package, line =>
+            {
+                OperationType operationType = OperationLogic.OperationType(line.Entity.RuntimeType, operationKey);
+
+                switch (operationType)
+                {
+                    case OperationType.Execute:
+                        OperationLogic.ServiceExecuteLite(line.Entity, operationKey);
+                        break;
+                    case OperationType.Delete:
+                        OperationLogic.ServiceDelete(line.Entity, operationKey);
+                        break;
+                    case OperationType.ConstructorFrom:
+                        {
+                            var result = OperationLogic.ServiceExecuteLite(line.Entity, operationKey);
+                            if (result.IsNew)
+                                result.Save();
+
+                            line.Result = result.ToLite<IIdentifiable>();
+                        }
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unexpected operation type {0}".Formato(operationType));
+                }
+            });
+        }
+    }
+
+   
+    public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
     {
         public Enum OperationKey { get; private set; }
 
         public PackageExecuteAlgorithm(Enum operationKey)
         {
+            if(operationKey == null)
+                throw new ArgumentNullException("operatonKey");
+
             this.OperationKey = operationKey;
         }
 
-        public PackageExecuteAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLites)
-            : base(getLites)
+        public virtual void Execute(IExecutingProcess executingProcess)
         {
-            this.OperationKey = operationKey;
-        }
+            PackageDN package = (PackageDN)executingProcess.Data;
 
-        public override void ExecuteLine(PackageLineDN pl, PackageDN package)
-        {
-            pl.Target.ToLite<T>().ExecuteLite<T>(OperationKey);
-        }
-
-        protected override PackageDN CreatePackage(object[] args)
-        {
-            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
-
-            if (args != null && args.Length > 0)
-                package.Name = args.TryGetArgC<string>(0);
-            return package;
+            executingProcess.ForEachLine(package, line =>
+            {
+                line.Entity.ToLite<T>().ExecuteLite<T>(OperationKey);
+            });
         }
     }
 
-    public class PackageConstructFromAlgorithm<F, T> : PackageAlgorithm<F>
+    public class PackageConstructFromAlgorithm<F, T> : IProcessAlgorithm
         where T : class, IIdentifiable
         where F : class, IIdentifiable
     {
@@ -194,28 +257,18 @@ namespace Signum.Engine.Processes
             this.OperationKey = operationKey;
         }
 
-        public PackageConstructFromAlgorithm(Enum operationKey, Func<List<Lite<F>>> getLites)
-            : base(getLites)
+        public virtual void Execute(IExecutingProcess executingProcess)
         {
-            this.OperationKey = operationKey;
-        }
+            PackageDN package = (PackageDN)executingProcess.Data;
 
-        public override void ExecuteLine(PackageLineDN pl, PackageDN package)
-        {
-            var result = OperationLogic.ConstructFromLite<T>(pl.Target.ToLite<F>(), OperationKey);
-            if (result.IsNew)
-                result.Save();
+            executingProcess.ForEachLine(package, line =>
+            {
+                var result = OperationLogic.ConstructFromLite<T>(line.Entity.ToLite<F>(), OperationKey);
+                if (result.IsNew)
+                    result.Save();
 
-            pl.Result = result.ToLite<IIdentifiable>();
-        }
-
-        protected override PackageDN CreatePackage(object[] args)
-        {
-            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
-
-            if (args != null && args.Length > 0)
-                package.Name = args.TryGetArgC<string>(0);
-            return package;
+                line.Result = result.ToLite<IIdentifiable>();
+            });
         }
     }
 }

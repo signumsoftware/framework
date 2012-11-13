@@ -232,21 +232,7 @@ Write(Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnl
             #line 18 "..\..\Processes\Views\ProcessExecution.cshtml"
                                                                                            
     
-            
-            #line default
-            #line hidden
-            
-            #line 19 "..\..\Processes\Views\ProcessExecution.cshtml"
-Write(Html.ValueLine(e, f => f.Progress, f => f.ReadOnly = true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 19 "..\..\Processes\Views\ProcessExecution.cshtml"
-                                                               
-    
-    if (e.Value.State == ProcessState.Executing)
+    if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
     {
 
             
@@ -271,8 +257,8 @@ WriteLiteral("    <div class=\"progressContainer\">\r\n        <div class=\"prog
 
 
             
-            #line 27 "..\..\Processes\Views\ProcessExecution.cshtml"
-                                                                         Write(Math.Round((double)e.Value.Progress, 0));
+            #line 26 "..\..\Processes\Views\ProcessExecution.cshtml"
+                                                                         Write(Math.Round((double?)e.Value.Progress ?? 0, 0));
 
             
             #line default
@@ -281,7 +267,7 @@ WriteLiteral("%;\">\r\n        </div>\r\n    </div>\r\n");
 
 
             
-            #line 30 "..\..\Processes\Views\ProcessExecution.cshtml"
+            #line 29 "..\..\Processes\Views\ProcessExecution.cshtml"
 
 
             
@@ -292,47 +278,46 @@ WriteLiteral("    <script type=\"text/javascript\">\r\n    $(function() {\r\n   
 
 
             
-            #line 33 "..\..\Processes\Views\ProcessExecution.cshtml"
+            #line 32 "..\..\Processes\Views\ProcessExecution.cshtml"
                     Write(e.Value.Id);
 
             
             #line default
             #line hidden
-WriteLiteral("\';\r\n        var idPrefix = \'");
+WriteLiteral("\';\r\n        var prefix = \'");
 
 
             
-            #line 34 "..\..\Processes\Views\ProcessExecution.cshtml"
-                   Write(e.ControlID);
+            #line 33 "..\..\Processes\Views\ProcessExecution.cshtml"
+                 Write(e.ControlID);
 
             
             #line default
             #line hidden
-WriteLiteral("\';\r\n\r\n        refreshUpdate(idProcess,idPrefix);\r\n    })\r\n\r\n    function refreshU" +
-"pdate(idProcess, idPrefix) {\r\n        setTimeout(function() {\r\n\r\n            $.p" +
-"ost(\"");
+WriteLiteral("\';\r\n\r\n        refreshUpdate(idProcess, prefix);\r\n    })\r\n\r\n    function refreshUp" +
+"date(idProcess, prefix) {\r\n        setTimeout(function() {\r\n            $.post(\"" +
+"");
 
 
             
-            #line 42 "..\..\Processes\Views\ProcessExecution.cshtml"
+            #line 40 "..\..\Processes\Views\ProcessExecution.cshtml"
                Write(Url.Action("GetProgressExecution", "Process"));
 
             
             #line default
             #line hidden
-WriteLiteral(@""", { id: idProcess },
-            function(data) {
+WriteLiteral(@""", { id: idProcess }, function(data) {
                 $(""#progressBar"").width(data + '%');
                 if (data < 100) {
-                    refreshUpdate(idProcess, idPrefix);
+                    refreshUpdate(idProcess, prefix);
                 }
                 else {
-                    if (SF.isEmpty(idPrefix)) {
+                    if (SF.isEmpty(prefix)) {
                         /*SF.reloadEntity(""");
 
 
             
-            #line 50 "..\..\Processes\Views\ProcessExecution.cshtml"
+            #line 47 "..\..\Processes\Views\ProcessExecution.cshtml"
                                       Write(Url.Action("FinishProcessNormalPage", "Process"));
 
             
@@ -341,12 +326,17 @@ WriteLiteral(@""", { id: idProcess },
 WriteLiteral(@""", idPrefix);*/
                     }
                     else {
-                        $(""#"" + idPrefix.compose(""externalPopupDiv"")).remove();
+                        var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
+                        var tempDivId = oldViewNav.tempDivId();
+                    
+                        SF.closePopup(prefix);
+
                         new SF.ViewNavigator({
-                            type: ""ProcessExecutionDN"",
+                            type: ""ProcessExecution"",
                             id: idProcess,
-                            prefix: idPrefix
-                        }).createOk();
+                            prefix: prefix,
+                            containerDiv: tempDivId
+                        }).viewSave();
                     }
                 }
             });
@@ -357,7 +347,7 @@ WriteLiteral(@""", idPrefix);*/
 
 
             
-            #line 65 "..\..\Processes\Views\ProcessExecution.cshtml"
+            #line 67 "..\..\Processes\Views\ProcessExecution.cshtml"
 
     }
 } 

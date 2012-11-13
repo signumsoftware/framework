@@ -25,39 +25,22 @@ namespace Signum.Windows.Operations
     {
         public static OperationManager Manager { get; private set; }
 
-        static Dictionary<Type, List<OperationInfo>> QueryOperationInfoCache = new Dictionary<Type, List<OperationInfo>>();
-
         public static void Start(OperationManager operationManager)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<OperationLogDN>(EntityType.ServerOnly) { View = e => new LogOperation() });
+                Navigator.AddSetting(new EntitySettings<OperationLogDN>(EntityType.System) { View = e => new OperationLog() });
 
                 Manager = operationManager;
+
+                Navigator.Manager.SaveProtected += Manager.DefaultSaveProtected; 
 
                 ButtonBar.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
 
                 Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
 
-                SearchControl.GetCustomMenuItems += (qn, type) =>
-                {
-                    if (type == null)
-                        return null;
-
-                    var infos = QueryOperationInfoCache.GetOrCreate(type, () => Server.Return((IOperationServer o) => o.GetQueryOperationInfos(type)));
-
-                    var list = infos.Where(oi =>
-                    {
-                        ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
-                        return set == null || set.IsVisible == null || set.IsVisible(qn, oi);
-                    }).ToList();
-
-                    if (list.Count == 0)
-                        return null;
-
-                    return new ConstructFromMenuItem { OperationInfos = list };
-                };
-
+                SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
+                SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
             }
         }
 
@@ -110,6 +93,9 @@ namespace Signum.Windows.Operations
             if (ident == null)
                 return null;
 
+            if (!OperationInfos(ident.GetType()).Any(a => a.IsEntityOperation))
+                return null;
+
             var list = Server.Return((IOperationServer s)=>s.GetEntityOperationInfos(ident)); 
 
             var result = list.Select(oi => 
@@ -152,10 +138,6 @@ namespace Signum.Windows.Operations
             if (os != null && os.IsVisible != null && !os.IsVisible(args))
                 return null;
 
-            if (viewButtons == ViewButtons.Ok && (os == null || !os.VisibleOnOk))
-                return null;
-
-            
             if(operationInfo.OperationType == OperationType.ConstructorFrom && (os == null  || !os.AvoidMoveToSearchControl))
             {
                 var controls = entityControl.Children<SearchControl>()
@@ -195,7 +177,7 @@ namespace Signum.Windows.Operations
             return result;
         }
 
-        private ToolBarButton CreateButton<T>(OperationInfo operationInfo, EntityOperationSettings<T> os, EntityOperationEventArgs<T> args) where T : class, IIdentifiable
+        protected internal virtual ToolBarButton CreateButton<T>(OperationInfo operationInfo, EntityOperationSettings<T> os, EntityOperationEventArgs<T> args) where T : class, IIdentifiable
         {
             ToolBarButton button = new ToolBarButton
             {
@@ -265,7 +247,7 @@ namespace Signum.Windows.Operations
             return key.NiceToString();
         }
 
-        private static void DefaultOperationExecute<T>(EntityOperationEventArgs<T> args)
+        protected internal virtual void DefaultOperationExecute<T>(EntityOperationEventArgs<T> args)
             where T: class, IIdentifiable
         {
             IdentifiableEntity ident = (IdentifiableEntity)(IIdentifiable)args.Entity;
@@ -317,24 +299,28 @@ namespace Signum.Windows.Operations
             }
         }
 
-        internal object ConstructorManager_GeneralConstructor(Type type, Window win)
+        Dictionary<Type, List<OperationInfo>> operationInfoCache = new Dictionary<Type, List<OperationInfo>>();
+        public List<OperationInfo> OperationInfos(Type entityType)
         {
-            if (!type.IsIIdentifiable())
+            return operationInfoCache.GetOrCreate(entityType, () => Server.Return((IOperationServer o) => o.GetOperationInfos(entityType)));
+        }
+
+        protected internal virtual object ConstructorManager_GeneralConstructor(Type entityType, Window win)
+        {
+            if (!entityType.IsIIdentifiable())
                 return null;
 
-            var list = Server.Return((IOperationServer s)=>s.GetConstructorOperationInfos(type)); 
-
-            var dic = (from oi in list
+            var dic = (from oi in OperationInfos(entityType)
+                       where  oi.OperationType == OperationType.Constructor
                        let os = (ConstructorSettings)Settings.TryGetC(oi.Key)
                        where os == null || os.IsVisible == null || os.IsVisible(oi)
                        select new { OperationInfo = oi, OperationSettings = os }).ToDictionary(a => a.OperationInfo.Key);
-
 
             if (dic.Count == 0)
                 return null;
 
             Enum selected = null;
-            if (list.Count == 1)
+            if (dic.Count == 1)
             {
                 selected = dic.Keys.SingleEx();
             }
@@ -354,7 +340,87 @@ namespace Signum.Windows.Operations
             if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
                 return pair.OperationSettings.Constructor(pair.OperationInfo, win);
             else
-                return Server.Return((IOperationServer s)=>s.Construct(type, selected)); 
+                return Server.Return((IOperationServer s)=>s.Construct(entityType, selected)); 
+        }
+
+        protected internal virtual IEnumerable<MenuItem> SearchControl_GetConstructorFromManyMenuItems(SearchControl sc)
+        {
+            if (sc.SelectedItems.IsNullOrEmpty())
+                return null;
+
+            var entityType = sc.EntityType;
+
+            if (entityType == null)
+                return null;
+
+            return (from oi in OperationInfos(entityType)
+                    where oi.OperationType == OperationType.ConstructorFromMany
+                    let os = (ContextualOperationSettings)Settings.TryGetC(oi.Key)
+                    where os == null || os.OnVisible(sc, oi)
+                    select ConstructFromMenuItemConsturctor.Construct(sc, oi, os))
+                   .ToList();
+        }
+
+        class EntityData
+        {
+            public Enum OperationKey;
+            public OperationInfo OperationInfo;
+            public EntityOperationSettingsBase Settings;
+            public string CanExecute;
+        }
+
+        protected internal virtual IEnumerable<MenuItem> SearchControl_GetEntityOperationMenuItem(SearchControl sc)
+        {
+            if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Length != 1)
+                return null;
+
+            if (sc.Implementations.IsByAll)
+                return null;
+
+            var result = (from t in sc.Implementations.Types
+                          from oi in OperationClient.Manager.OperationInfos(sc.SelectedItem.RuntimeType)
+                          where oi.IsEntityOperation && oi.Lite == true
+                          let os = (EntityOperationSettingsBase)OperationClient.Manager.Settings.TryGetC(oi.Key)
+                          where os == null ||
+                                os.Contextual == null && !os.ClickOverriden ||
+                                os.Contextual.OnVisible(sc, oi)
+                          select new EntityData
+                          {    
+                              OperationKey = oi.Key,
+                              OperationInfo = oi,
+                              CanExecute = null,
+                              Settings = os
+                          }).ToList();
+
+            if (result.IsEmpty())
+                return null;
+
+            var cleanKeys = result.Where(eomi => eomi.CanExecute == null && eomi.OperationInfo.HasStates)
+                .Select(kvp => kvp.OperationKey).ToList();
+
+            if (cleanKeys.Any())
+            {
+                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetContextualCanExecute(sc.SelectedItems, cleanKeys));
+                foreach (var pomi in result)
+                {
+                    var ce = canExecutes.TryGetC(pomi.OperationKey);
+                    if (ce.HasText())
+                        pomi.CanExecute = ce;
+                }
+            }
+
+            return result.Select(a => EntityOperationMenuItemConsturctor.Construct(sc, a.OperationInfo, a.CanExecute, a.Settings));
+        }
+
+     
+
+        static Dictionary<Type,bool> SaveProtectedCache = new Dictionary<Type, bool>();
+        protected internal virtual bool DefaultSaveProtected(Type type)
+        {
+            if (!type.IsIIdentifiable())
+                return false;
+
+            return SaveProtectedCache.GetOrCreate(type, () => Server.Return((IOperationServer o) => o.GetSaveProtected(type)));
         }
     }
 }

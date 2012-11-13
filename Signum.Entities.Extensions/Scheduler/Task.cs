@@ -21,7 +21,7 @@ namespace Signum.Entities.Scheduler
     }
 
     [Serializable]
-    public class CustomTaskDN : EnumDN, ITaskDN
+    public class CustomTaskDN : MultiEnumDN, ITaskDN
     {
         
     }

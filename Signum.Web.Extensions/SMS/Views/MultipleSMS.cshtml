@@ -22,7 +22,7 @@
     </div>
     <br />
     @Html.ValueLine(e, s => s.From)
-    @Html.Hidden(e.Compose("ProvidersIds"), e.Value.ProvidersIds);
+    @Html.Hidden(e.Compose("ProviderKeys"), e.Value.ProviderKeys);
     @Html.Hidden(e.Compose("WebTypeName"), e.Value.WebTypeName);
 }
 @Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")

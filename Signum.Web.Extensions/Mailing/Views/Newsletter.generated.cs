@@ -249,32 +249,12 @@ WriteLiteral("\r\n        </fieldset>\r\n");
             #line default
             #line hidden
 WriteLiteral("            <fieldset id=\"emTabSend\">\r\n                <legend>Deliveries</legend" +
-">\r\n                ");
+">\r\n                <fieldset>\r\n                    <legend>Email recipients</leg" +
+"end>\r\n                    ");
 
 
             
-            #line 56 "..\..\Mailing\Views\Newsletter.cshtml"
-           Write(Html.ValueLine(nc, n => n.NumLines));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                ");
-
-
-            
-            #line 57 "..\..\Mailing\Views\Newsletter.cshtml"
-           Write(Html.ValueLine(nc, n => n.NumErrors));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                <fieldset>\r\n                    <legend>Email recipients</legen" +
-"d>\r\n                    ");
-
-
-            
-            #line 60 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 58 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
                     {
                         FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
@@ -288,7 +268,7 @@ WriteLiteral("\r\n                </fieldset>\r\n            </fieldset>\r\n");
 
 
             
-            #line 67 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 65 "..\..\Mailing\Views\Newsletter.cshtml"
         }
 
             
@@ -298,7 +278,7 @@ WriteLiteral("    </div>    \r\n");
 
 
             
-            #line 69 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 67 "..\..\Mailing\Views\Newsletter.cshtml"
 }
 
             
@@ -306,7 +286,7 @@ WriteLiteral("    </div>    \r\n");
             #line hidden
 
             
-            #line 70 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 68 "..\..\Mailing\Views\Newsletter.cshtml"
 Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mail.js"));
 
             

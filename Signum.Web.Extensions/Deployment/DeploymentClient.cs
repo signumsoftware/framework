@@ -33,7 +33,7 @@ namespace Signum.Web.Deployment
             {
                 Navigator.RegisterArea(typeof(DeploymentClient));
 
-                Navigator.AddSetting(new EntitySettings<DeploymentLogDN>(EntityType.ServerOnly) { PartialViewName = e => ViewPrefix.Formato("DeploymentLog") });
+                Navigator.AddSetting(new EntitySettings<DeploymentLogDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("DeploymentLog") });
             }
         }
     }

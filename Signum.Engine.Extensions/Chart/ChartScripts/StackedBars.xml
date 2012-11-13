@@ -4,7 +4,7 @@
     <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Sub-bars" ColumnType="Groupable" IsGroupKey="true">
       <Parameter1 Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette " />
-      <Parameter2 Name="Order" Type="Enum" ValueDefinition="inside-out | reverse | default " />
+      <Parameter2 Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse" />
     </Column>
     <Column DisplayName="Width" ColumnType="Magnitude" />
   </Columns>
@@ -74,8 +74,15 @@
   
   stack(series);
   
-  var max = d3.max(series, function(s){ return d3.max(s.values0, function(v){return v.y0 + v.y;}); });  
+  var flattened = $.map(series, function(dim1){return dim1.values0});
   
+  var maxDim0 = d3.nest()      
+      .key(function(r){return r.dim0; })
+      .rollup(function(list){ return { dim0: list[0].dim0, max: d3.max(list, function(a){return a.y0 + a.y;})};})
+      .entries(flattened)
+      .map(function(g){return g.values;});
+  
+  var max = d3.max(flattened, function(v){return v.y0 + v.y;});   
   
   var x = d3.scale.linear()
       .domain([0, max])
@@ -148,13 +155,13 @@
   if (y.rangeBand() > 15 && series.length > 0) {
     
     var xHalf = xRule.size('content') / 2;
-    var labelMargin = 10;
+    var labelMargin = 5;
     chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', translate(xRule.start('content'), yRule.start('content') + y.rangeBand() / 2))
-      .enterData(series[0].values0,'text', 'y-axis-tick-label sf-chart-strong')
-      .attr('x', function (v) { var posx = x(v.y0) + x(v.y); return posx >= xHalf ? posx - labelMargin : posx + labelMargin; })
+      .enterData(maxDim0,'text', 'y-axis-tick-label sf-chart-strong')
+      .attr('x', function (v) { var posx = x(v.max); return posx >= xHalf ? posx - labelMargin : posx + labelMargin; })
       .attr('y', function (v) { return y(v.dim0); })
-      .attr('text-anchor', function (v) { var posx = x(v.y0) + x(v.y); return posx >= xHalf ? 'end' : 'start'; })
-      .attr('fill', function (v) { var posx = x(v.y0) + x(v.y); return posx >= xHalf ? '#fff' : '#000'; })
+      .attr('text-anchor', function (v) { var posx = x(v.max); return posx >= xHalf ? 'end' : 'start'; })
+      .attr('fill', function (v) { var posx = x(v.max); return posx >= xHalf ? '#fff' : '#000'; })
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
       .text(function (v, i) { return v.dim0.niceToString(); });

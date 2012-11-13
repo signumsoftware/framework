@@ -41,7 +41,7 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 findOptions.FilterOptions,
-                findOptions.View && IsViewableEntity(request.QueryName));
+                findOptions.Navigate && IsNavigableEntity(request.QueryName));
         }
 
         public ViewResult FullScreen(string prefix)
@@ -50,10 +50,10 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                IsViewableEntity(request.QueryName));
+                IsNavigableEntity(request.QueryName));
         }
 
-        public bool IsViewableEntity(object queryName)
+        public bool IsNavigableEntity(object queryName)
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
@@ -62,7 +62,7 @@ namespace Signum.Web.Chart
             Type entitiesType = Lite.Extract(entityColumn.Type);
             Implementations implementations = entityColumn.Implementations.Value;
 
-            return implementations.IsByAll || implementations.Types.Any(t => Navigator.IsViewable(t, EntitySettingsContext.Admin));
+            return implementations.IsByAll || implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
         }
 
         [HttpPost]
@@ -130,7 +130,7 @@ namespace Signum.Web.Chart
 
             ViewData[ViewDataKeys.Results] = resultTable;
 
-            ViewData[ViewDataKeys.View] = IsViewableEntity(request.QueryName);
+            ViewData[ViewDataKeys.Navigate] = IsNavigableEntity(request.QueryName);
             ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => querySettings.GetFormatter(c.c.Column));
 
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
@@ -179,7 +179,7 @@ namespace Signum.Web.Chart
                 Type entitiesType = Lite.Extract(entityColumn.Type);
 
                 Lite lite = Lite.Parse(entitiesType, entity);
-                return Redirect(Navigator.ViewRoute(lite));
+                return Redirect(Navigator.NavigateRoute(lite));
             }
         }
 
@@ -243,13 +243,13 @@ namespace Signum.Web.Chart
             return ctx;
         }
 
-        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool view)
+        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool navigate)
         {
             ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartRequestView;
             ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName); ;
             ViewData[ViewDataKeys.FilterOptions] = filterOptions;
-            ViewData[ViewDataKeys.View] = view;
+            ViewData[ViewDataKeys.Navigate] = navigate;
 
             return View(Navigator.Manager.SearchPageView, new TypeContext<ChartRequest>(request, ""));
         }
@@ -268,7 +268,7 @@ namespace Signum.Web.Chart
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
-            return Navigator.View(this, userChart);
+            return Navigator.NormalPage(this, userChart);
         }
 
         public ActionResult ViewUserChart(Lite<UserChartDN> lite)
@@ -279,14 +279,17 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                IsViewableEntity(request.QueryName));
+                IsNavigableEntity(request.QueryName));
         }
 
-        public ActionResult DeleteUserChart(Lite<UserChartDN> lite)
+        [HttpPost]
+        public ActionResult DeleteUserChart(string prefix)
         {
-            var queryName = QueryLogic.ToQueryName(lite.InDB().Select(uq => uq.Query.Key).FirstEx());
+            var userChart = this.ExtractLite<UserChartDN>(prefix);
 
-            Database.Delete<UserChartDN>(lite);
+            var queryName = QueryLogic.ToQueryName(userChart.InDB().Select(uq => uq.Query.Key).FirstEx());
+
+            userChart.Delete();
 
             return Redirect(Navigator.FindRoute(queryName));
         }

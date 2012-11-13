@@ -14,7 +14,7 @@ namespace Signum.Windows.Deployment
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<DeploymentLogDN>(EntityType.ServerOnly) { View = e => new DeploymentLog() });
+                Navigator.AddSetting(new EntitySettings<DeploymentLogDN>(EntityType.System) { View = e => new DeploymentLog() });
             }
         }
     }

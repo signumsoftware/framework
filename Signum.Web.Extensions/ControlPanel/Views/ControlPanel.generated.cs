@@ -137,7 +137,7 @@ WriteLiteral("    <h1>\r\n        <a href=\"");
 
             
             #line 26 "..\..\ControlPanel\Views\ControlPanel.cshtml"
-            Write(Navigator.ViewRoute(typeof(ControlPanelDN), cp.Id));
+            Write(Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id));
 
             
             #line default
@@ -147,7 +147,7 @@ WriteLiteral("\">");
 
             
             #line 26 "..\..\ControlPanel\Views\ControlPanel.cshtml"
-                                                                 Write(cp.DisplayName);
+                                                                     Write(cp.DisplayName);
 
             
             #line default

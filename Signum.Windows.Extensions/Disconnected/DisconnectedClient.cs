@@ -42,22 +42,23 @@ namespace Signum.Windows.Disconnected
             {
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<DisconnectedMachineDN>(EntityType.AdminNotSaving) { View = dm => new DisconnectedMachine() },
-                    new EntitySettings<DisconnectedExportDN>(EntityType.ServerOnly) { View = dm => new DisconnectedExport() },
-                    new EntitySettings<DisconnectedImportDN>(EntityType.ServerOnly) { View = dm => new DisconnectedImport() },
+                    new EntitySettings<DisconnectedMachineDN>(EntityType.Main) { View = dm => new DisconnectedMachine() },
+                    new EntitySettings<DisconnectedExportDN>(EntityType.System) { View = dm => new DisconnectedExport() },
+                    new EntitySettings<DisconnectedImportDN>(EntityType.System) { View = dm => new DisconnectedImport() },
                 });
 
                 Server.Connecting += UpdateCache;
                 UpdateCache();
 
-                Navigator.Manager.Initializing += () =>
+                Navigator.Manager.IsReadOnly += (type, entity) => entity is IdentifiableEntity && !Editable((IdentifiableEntity)entity, type);
+
+                Navigator.Manager.IsCreable += type =>
                 {
-                    foreach (EntitySettings es in Navigator.Manager.EntitySettings.Values)
-                    {
-                        if (typeof(IdentifiableEntity).IsAssignableFrom(es.StaticType))
-                            miAttachTypeEvent.GetInvoker(es.StaticType)(es);
-                    }
-                };
+                    if (OfflineMode)
+                        return strategies[type].Upload != Upload.None;
+                    else
+                        return true;
+                }; 
 
                 Lite<DisconnectedMachineDN> current = null; 
 
@@ -74,22 +75,6 @@ namespace Signum.Windows.Disconnected
                     return current;
                 };
             }
-        }
-
-
-        static GenericInvoker<Action<EntitySettings>> miAttachTypeEvent = new GenericInvoker<Action<EntitySettings>>(es => AttachTypeEvent<TypeDN>((EntitySettings<TypeDN>)es));
-        private static void AttachTypeEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
-        {
-            settings.IsCreable += admin =>
-            {
-                if (OfflineMode)
-                    return strategies[typeof(T)].Upload != Upload.None;
-                else 
-                    return true;
-            };
-
-            settings.IsReadOnly += (entity, admin) => !Editable(entity, typeof(T));
-           
         }
 
         private static bool Editable(IdentifiableEntity entity, Type type)

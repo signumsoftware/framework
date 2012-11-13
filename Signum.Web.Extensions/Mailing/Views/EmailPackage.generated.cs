@@ -67,34 +67,6 @@ Write(Html.ValueLine(e, f => f.Name, f => f.ReadOnly = true));
             
             #line 5 "..\..\Mailing\Views\EmailPackage.cshtml"
                                                            
-    
-            
-            #line default
-            #line hidden
-            
-            #line 6 "..\..\Mailing\Views\EmailPackage.cshtml"
-Write(Html.ValueLine(e, f => f.NumLines, f => f.ReadOnly = true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 6 "..\..\Mailing\Views\EmailPackage.cshtml"
-                                                               
-    
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Mailing\Views\EmailPackage.cshtml"
-Write(Html.ValueLine(e, f => f.NumErrors, f => f.ReadOnly = true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Mailing\Views\EmailPackage.cshtml"
-                                                                
 
 
             
@@ -104,16 +76,14 @@ WriteLiteral("<fieldset>\r\n    <legend>Lines</legend>\r\n    ");
 
 
             
-            #line 11 "..\..\Mailing\Views\EmailPackage.cshtml"
+            #line 9 "..\..\Mailing\Views\EmailPackage.cshtml"
 Write(Html.SearchControl(
       new FindOptions()
       {
           QueryName = typeof(EmailMessageDN),
           FilterOptions = { new FilterOption("Package", e.Value) },
           SearchOnLoad = true,
-          FilterMode = FilterMode.Hidden,
-          Create = false,
-          View = true
+          FilterMode = FilterMode.Hidden
       }, e));
 
             
@@ -123,7 +93,7 @@ WriteLiteral("\r\n</fieldset>\r\n");
 
 
             
-            #line 22 "..\..\Mailing\Views\EmailPackage.cshtml"
+            #line 18 "..\..\Mailing\Views\EmailPackage.cshtml"
 }
             
             #line default

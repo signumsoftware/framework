@@ -131,7 +131,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Create and cancel
             selenium.LineCreate(prefix, true, 4);
-            selenium.PopupCancel("{0}4_".Formato(prefix));
+            selenium.PopupCancelDiscardChanges("{0}4_".Formato(prefix));
             selenium.ListLineElementExists(prefix, 4, false);
 
             //Create and ok
@@ -169,7 +169,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //View
             selenium.ListLineViewElement(prefix, 0, true);
-            selenium.PopupCancel("{0}0_".Formato(prefix));
+            selenium.PopupCancelDiscardChanges("{0}0_".Formato(prefix));
         }
 
         [TestMethod]
