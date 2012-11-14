@@ -228,7 +228,7 @@ namespace Signum.Windows.UIAutomation
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T : IdentifiableEntity
         {
             var win = Element.CaptureWindow(
-                () => Element.ChildById("btView").ButtonInvoke(),
+                () => ViewButton.ButtonInvoke(),
                 () => "View selected entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
             return new NormalWindowProxy<T>(win);
@@ -239,14 +239,25 @@ namespace Signum.Windows.UIAutomation
             return new NormalWindowProxy<T>(CreateCapture());
         }
 
-        private AutomationElement CreateCapture(int? timeOut = null)
+        public AutomationElement CreateCapture(int? timeOut = null)
         {
             var win = Element.CaptureWindow(
-                () => Element.ChildById("btCreate").ButtonInvoke(),
+                () => CreateButton.ButtonInvoke(),
                 () => "Create a new entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
             return win;
         }
+
+        public AutomationElement CreateButton
+        {
+            get{return Element.ChildById("btCreate");}
+        }
+
+        public AutomationElement ViewButton
+        {
+            get { return Element.ChildById("btView"); }
+        }
+
 
         public AutomationElement Menu
         {
