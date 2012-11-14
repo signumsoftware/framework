@@ -633,23 +633,32 @@ namespace Signum.Engine
 
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
-                var value = ExpressionEvaluator.Eval(arguments[0]);
+                var exp = ExpressionEvaluator.PartialEval(arguments[0]);
 
-                var genericArguments = mi.GetGenericArguments();
+                if (exp.NodeType == ExpressionType.Constant)
+                {
+                    var value = ((ConstantExpression)exp).Value;
 
-                var staticType = genericArguments[0];
-                var isLite = arguments[0].Type.IsLite();
-                var runtimeType = isLite ? ((Lite)value).RuntimeType : value.GetType();
+                    var genericArguments = mi.GetGenericArguments();
 
-                Expression query = !isLite ?
-                    giInDB.GetInvoker(staticType, runtimeType)((IIdentifiable)value).Expression :
-                    giInDBLite.GetInvoker(staticType, runtimeType)((Lite)value).Expression;
+                    var staticType = genericArguments[0];
+                    var isLite = arguments[0].Type.IsLite();
+                    var runtimeType = isLite ? ((Lite)value).RuntimeType : value.GetType();
 
-                var select = Expression.Call(miSelect.MakeGenericMethod(genericArguments), query, arguments[1]);
+                    Expression query = !isLite ?
+                        giInDB.GetInvoker(staticType, runtimeType)((IIdentifiable)value).Expression :
+                        giInDBLite.GetInvoker(staticType, runtimeType)((Lite)value).Expression;
 
-                var single = Expression.Call(miSingleEx.MakeGenericMethod(genericArguments[1]), select);
+                    var select = Expression.Call(miSelect.MakeGenericMethod(genericArguments), query, arguments[1]);
 
-                return single;
+                    var single = Expression.Call(miSingleEx.MakeGenericMethod(genericArguments[1]), select);
+
+                    return single;
+                }
+                else
+                {
+                    return Expression.Invoke(arguments[1], arguments[0]); 
+                }
             }
         }
 
