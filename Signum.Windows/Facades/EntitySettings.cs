@@ -189,7 +189,7 @@ namespace Signum.Windows
 
         internal override bool OnIsNavigable(bool isSearchEntity)
         {
-            throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible wirh isSearchEntity");
+            return false;
         }
 
         internal override bool OnIsReadonly()
