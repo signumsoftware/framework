@@ -21,29 +21,29 @@ namespace Signum.Services
         bool GetSaveProtected(Type entityType);
 
         [OperationContract, NetDataContract]
-        IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args);
+        IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        IIdentifiable ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args);
-
-
-        [OperationContract, NetDataContract]
-        IIdentifiable Delete(Lite lite, Enum operationKey, params object[] args);
+        IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IIdentifiable Construct(Type type, Enum operationKey, params object[] args);
+        IdentifiableEntity Delete(Lite lite, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IIdentifiable ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args);
-
-        [OperationContract, NetDataContract]
-        IIdentifiable ConstructFromLite(Lite lite, Enum operationKey, params object[] args);
+        IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IIdentifiable ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args);
+        IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args);
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args);
+
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
         Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys);

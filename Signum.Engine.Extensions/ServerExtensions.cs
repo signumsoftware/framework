@@ -135,43 +135,43 @@ namespace Signum.Services
                   () =>  OperationLogic.IsSaveProtected(entityType));
         }
 
-        public IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
+        public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
-        public IIdentifiable ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
+        public IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
         }
 
-        public IIdentifiable Delete(Lite lite, Enum operationKey, params object[] args)
+        public IdentifiableEntity Delete(Lite lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceDelete(lite, operationKey, args));
         }
 
-        public IIdentifiable Construct(Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstruct(type, operationKey, args));
         }
 
-        public IIdentifiable ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
-        public IIdentifiable ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
         }
 
-        public IIdentifiable ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
               () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));

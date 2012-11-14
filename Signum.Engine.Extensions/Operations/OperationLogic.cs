@@ -305,10 +305,10 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region Construct
-        public static IIdentifiable ServiceConstruct(Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructOperation>(type, operationKey);
-            return op.Construct(args);
+            return (IdentifiableEntity)op.Construct(args);
         }
 
         public static T Construct<T>(Enum operationKey, params object[] args)
@@ -320,16 +320,16 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region ConstructFrom
-        public static IIdentifiable ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
-            return op.Construct(entity, args);
+            return (IdentifiableEntity)op.Construct(entity, args);
         }
 
-        public static IIdentifiable ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite();
-            return op.Construct(Database.RetrieveAndForget(lite), args);
+            return (IdentifiableEntity)op.Construct(Database.RetrieveAndForget(lite), args);
         }
 
         public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
@@ -424,45 +424,35 @@ namespace Signum.Engine.Operations
             return dic.Values;
         }
 
-        public static T GetArg<T>(this object[] args, int pos)
+        public static T GetArg<T>(this object[] args)
         {
-            if (pos < 0)
-                throw new ArgumentException("pos");
-
-            bool acceptsNulls = typeof(T).IsByRef || Nullable.GetUnderlyingType(typeof(T)) != null;
-
-            if (args == null || args.Length <= pos || (args[pos] == null ? !acceptsNulls : !(args[pos] is T)))
-                throw new ArgumentException("The operation needs a {0} in the argument {1}".Formato(typeof(T), pos));
-
-            return (T)args[pos];
+            return args.OfTypeOrEmpty<T>().SingleEx(
+                () => "The operation needs a {0} in the arguments".Formato(typeof(T)),
+                () => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
         }
 
-        public static T TryGetArgC<T>(this object[] args, int pos) where T : class
+        public static T TryGetArgC<T>(this object[] args) where T : class
         {
-            if (pos < 0)
-                throw new ArgumentException("pos");
-
-            if (args == null || args.Length <= pos || args[pos] == null)
-                return null;
-
-            if (!(args[pos] is T))
-                throw new ArgumentException("The operation needs a {0} in the argument {1}".Formato(typeof(T), pos));
-
-            return (T)args[pos];
+            return args.OfTypeOrEmpty<T>().SingleOrDefaultEx(
+                () => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
         }
 
-        public static T? TryGetArgS<T>(this object[] args, int pos) where T : struct
+        public static T? TryGetArgS<T>(this object[] args) where T : struct
         {
-            if (pos < 0)
-                throw new ArgumentException("pos");
+            var casted = args.OfTypeOrEmpty<T>();
 
-            if (args == null || args.Length <= pos || args[pos] == null)
+            if (casted.IsEmpty())
                 return null;
 
-            if (!(args[pos] is T))
-                throw new ApplicationException("The operation needs a {0} in the argument {1}".Formato(typeof(T), pos));
+            return casted.SingleEx(() => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
+        }
 
-            return (T)args[pos];
+        static IEnumerable<T> OfTypeOrEmpty<T>(this object[] args)
+        {
+            if (args == null)
+                return Enumerable.Empty<T>();
+
+            return args.OfType<T>(); 
         }
 
         public static string InState<T>(this T state, Enum operationKey, params T[] validStates) where T : struct
