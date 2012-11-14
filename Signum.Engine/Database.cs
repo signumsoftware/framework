@@ -633,32 +633,33 @@ namespace Signum.Engine
 
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
-                var exp = ExpressionEvaluator.PartialEval(arguments[0]);
+                var entity = arguments[0];
+                var lambda = arguments[1];
 
-                if (exp.NodeType == ExpressionType.Constant)
-                {
-                    var value = ((ConstantExpression)exp).Value;
+                var isLite = entity.Type.IsLite();
 
-                    var genericArguments = mi.GetGenericArguments();
+                var partialEntity = ExpressionEvaluator.PartialEval(entity);
 
-                    var staticType = genericArguments[0];
-                    var isLite = arguments[0].Type.IsLite();
-                    var runtimeType = isLite ? ((Lite)value).RuntimeType : value.GetType();
+                if (partialEntity.NodeType != ExpressionType.Constant)
+                    return Expression.Invoke(lambda.StripQuotes(), isLite ? Expression.Property(entity, "Entity") : entity);
 
-                    Expression query = !isLite ?
-                        giInDB.GetInvoker(staticType, runtimeType)((IIdentifiable)value).Expression :
-                        giInDBLite.GetInvoker(staticType, runtimeType)((Lite)value).Expression;
+                var value = ((ConstantExpression)partialEntity).Value;
 
-                    var select = Expression.Call(miSelect.MakeGenericMethod(genericArguments), query, arguments[1]);
+                var genericArguments = mi.GetGenericArguments();
 
-                    var single = Expression.Call(miSingleEx.MakeGenericMethod(genericArguments[1]), select);
+                var staticType = genericArguments[0];
+            
+                var runtimeType = isLite ? ((Lite)value).RuntimeType : value.GetType();
 
-                    return single;
-                }
-                else
-                {
-                    return Expression.Invoke(arguments[1], arguments[0]); 
-                }
+                Expression query = !isLite ?
+                    giInDB.GetInvoker(staticType, runtimeType)((IIdentifiable)value).Expression :
+                    giInDBLite.GetInvoker(staticType, runtimeType)((Lite)value).Expression;
+
+                var select = Expression.Call(miSelect.MakeGenericMethod(genericArguments), query, arguments[1]);
+
+                var single = Expression.Call(miSingleEx.MakeGenericMethod(genericArguments[1]), select);
+
+                return single;
             }
         }
 

@@ -148,15 +148,6 @@ namespace Signum.Test.LinqProvider
                                   }).ToList();
         }
 
-        [TestMethod]
-        public void SelectManyInDB()
-        {
-            var artistsInBands = (from b in Database.Query<BandDN>()
-                                  from a in b.Members
-                                  select new
-                                  {
-                                      MaxAlbum = a.InDBEntity(ar=>ar.IsMale)
-                                  }).ToList();
-        }
+      
     }
 }
