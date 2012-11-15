@@ -622,7 +622,5 @@ namespace Signum.Engine.DynamicQuery
             }
             return array;
         }
-
-
     }
 }
