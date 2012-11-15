@@ -125,7 +125,11 @@ namespace Signum.Engine.Processes
                         if (ups.User != null)
                             UserDN.Current = ups.User.Retrieve();
                     });
+
+                    CreateDefaultProcessSession = UserProcessSessionDN.CreateCurrent;
                 }
+                else
+                    CreateDefaultProcessSession = () => null;
             }
         }
 
