@@ -149,13 +149,13 @@ namespace Signum.Engine.Processes
                             Suspend(pe);
                             break;
                         case ProcessState.Queued:
-                            Execute(pe);
+                            Enqueue(pe);
                             break;
                     }
                 };
         }
 
-        static void Execute(ProcessExecutionDN pe)
+        static void Enqueue(ProcessExecutionDN pe)
         {
             if (pe.State != ProcessState.Queued || queue.Any(a => a.Execution.Id == pe.Id))
                 return;
@@ -235,19 +235,25 @@ namespace Signum.Engine.Processes
                     {
                         Parallel.ForEach(queue.GetConsumingEnumerable(CancelNewProcesses.Token), po, ep =>
                         {
-                            try
-                            {
-                                executing.TryAdd(ep.Execution.Id, ep);
 
-                                using (AuthLogic.Disable())
+                            ProcessState dbState;
+                            using (AuthLogic.Disable())
+                                dbState = ep.Execution.InDBEntity(pe => pe.State);
+
+                            if (dbState == ProcessState.Queued) //Not canceled
+                            {
+                                try
                                 {
+                                    executing.TryAdd(ep.Execution.Id, ep);
+
                                     ep.Execute();
                                 }
-                            }
-                            finally
-                            {
-                                ExecutingProcess rubish;
-                                executing.TryRemove(ep.Execution.Id, out rubish);
+
+                                finally
+                                {
+                                    ExecutingProcess rubish;
+                                    executing.TryRemove(ep.Execution.Id, out rubish);
+                                }
                             }
                         });
                     }
@@ -376,7 +382,7 @@ namespace Signum.Engine.Processes
 
                 new Execute(ProcessOperation.Cancel)
                 {
-                    FromStates = new[] { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended },
+                    FromStates = new[] { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended, ProcessState.Queued },
                     ToState = ProcessState.Canceled,
                     Execute = (pe, _) =>
                     {
@@ -397,7 +403,7 @@ namespace Signum.Engine.Processes
 
                 new Execute(ProcessOperation.Suspend)
                 {
-                    FromStates = new[] { ProcessState.Queued, ProcessState.Executing },
+                    FromStates = new[] { ProcessState.Executing },
                     ToState = ProcessState.Suspending,
                     Execute = (pe, _) =>
                     {
@@ -515,7 +521,7 @@ namespace Signum.Engine.Processes
         {
             if (progress != Execution.Progress)
             {
-            Execution.Progress = progress;
+                Execution.Progress = progress;
                 Execution.InDB().UnsafeUpdate(a => new ProcessExecutionDN { Progress = progress });
             }
         }
