@@ -105,16 +105,15 @@ namespace Signum.Windows
                     DialogResult = true;
                 else
                 {
-                    var answer = MessageBox.Show(
+                    var result = MessageBox.Show(
                         Properties.Resources.ThereAreChangesContinue,
                         Properties.Resources.ThereAreChanges,
                         MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
 
-                    if (answer != MessageBoxResult.OK)
+                    if (result != MessageBoxResult.OK)
                         return;
 
                     DialogResult = false;
-
                 }
             }
             else
@@ -129,12 +128,19 @@ namespace Signum.Windows
                     {
                         case AllowErrors.Yes: break;
                         case AllowErrors.No:
-                            MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), Properties.Resources.FixErrors,
-                                MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            MessageBox.Show(this, 
+                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), 
+                                Properties.Resources.FixErrors,
+                                MessageBoxButton.OK, 
+                                MessageBoxImage.Exclamation);
                             return;
                         case AllowErrors.Ask:
-                            if (MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway, Properties.Resources.ContinueWithErrors,
-                                MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.None) == MessageBoxResult.No)
+                            if (MessageBox.Show(this, 
+                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway, 
+                                Properties.Resources.ContinueWithErrors,
+                                MessageBoxButton.YesNo, 
+                                MessageBoxImage.Exclamation, 
+                                MessageBoxResult.None) == MessageBoxResult.No)
                                 return;
                             break;
                     }
@@ -181,26 +187,56 @@ namespace Signum.Windows
             {
                 if (buttonBar.SaveVisible)
                 {
-                    var result = MessageBox.Show(this, Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
-                        MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
-
-                    if (result == MessageBoxResult.Cancel)
+                    if (Navigator.Manager.OnSaveProtected(this.DataContext.GetType()))
                     {
-                        e.Cancel = true;
-                        return;
-                    }
+                        var result = MessageBox.Show(
+                            Properties.Resources.ThereAreChangesContinue,
+                            Properties.Resources.ThereAreChanges,
+                            MessageBoxButton.OKCancel, 
+                            MessageBoxImage.Question, 
+                            MessageBoxResult.OK);
 
-                    if (result == MessageBoxResult.Yes)
-                        DataContext = Server.Save((IdentifiableEntity)DataContext);
+                        if (result == MessageBoxResult.Cancel)
+                        {
+                            e.Cancel = true;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        var result = MessageBox.Show(this, 
+                            Properties.Resources.SaveChanges, 
+                            Properties.Resources.ThereAreChanges,
+                            MessageBoxButton.YesNoCancel, 
+                            MessageBoxImage.Question, 
+                            MessageBoxResult.No);
+
+                        if (result == MessageBoxResult.Cancel)
+                        {
+                            e.Cancel = true;
+                            return;
+                        }
+
+                        if (result == MessageBoxResult.Yes)
+                            DataContext = Server.Save((IdentifiableEntity)DataContext);
+                    }
                 }
                 else
                 {
-                    var result = MessageBox.Show(this, Properties.Resources.LoseChanges, Properties.Resources.ThereAreChanges, MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
-
-                    if (result == MessageBoxResult.Cancel)
+                    if (DialogResult == null)
                     {
-                        e.Cancel = true;
-                        return;
+                        var result = MessageBox.Show(this, 
+                            Properties.Resources.LoseChanges, 
+                            Properties.Resources.ThereAreChanges, 
+                            MessageBoxButton.OKCancel, 
+                            MessageBoxImage.Question, 
+                            MessageBoxResult.OK);
+
+                        if (result == MessageBoxResult.Cancel)
+                        {
+                            e.Cancel = true;
+                            return;
+                        }
                     }
                 }
             }
