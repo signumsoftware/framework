@@ -549,6 +549,7 @@ namespace Signum.Engine.Linq
 
         COALESCE,
         CONVERT,
+        ISNULL,
     }
 
     internal enum SqlEnums

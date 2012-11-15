@@ -482,13 +482,19 @@ namespace Signum.Engine.Linq
             Expression left = b.Left;
             Expression right = b.Right;
 
-            if ((left.Type == typeof(string)) != (right.Type == typeof(string)))
+            if (left.Type == typeof(string) || right.Type == typeof(string))
             {
                 b = Expression.Add(
-                    left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
-                    right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
+                    left.Type == typeof(string) ? NullToStringEmpty(left) : new SqlCastExpression(typeof(string), left),
+                    right.Type == typeof(string) ? NullToStringEmpty(right) : new SqlCastExpression(typeof(string), right),
+                    miSimpleConcat);
             }
             return b;
+        }
+
+        private Expression NullToStringEmpty(Expression left)
+        {
+            return new SqlFunctionExpression(typeof(string), null, SqlFunction.ISNULL.ToString(), new[] { left, new SqlConstantExpression("") });
         }
 
         private Expression ConvertToSqlComparison(BinaryExpression b)

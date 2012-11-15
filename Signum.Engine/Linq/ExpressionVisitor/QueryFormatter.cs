@@ -388,6 +388,8 @@ namespace Signum.Engine.Linq
                     sb.Append("1");
                 else if (c.Value.Equals(false))
                     sb.Append("0");
+                else if (c.Value is string)
+                    sb.Append(((string)c.Value == "") ? "''" : ("'" + c.Value + "'"));
                 else
                     sb.Append(c.ToString());
             }
