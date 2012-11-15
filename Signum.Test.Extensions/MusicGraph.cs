@@ -60,9 +60,9 @@ namespace Signum.Test.Extensions
                     new AlbumDN
                     {
                         Author = band,
-                        Name = args.GetArg<string>(0),
-                        Year = args.GetArg<int>(1),
-                        Label = args.GetArg<LabelDN>(2)
+                        Name = args.GetArg<string>(),
+                        Year = args.GetArg<int>(),
+                        Label = args.GetArg<LabelDN>()
                     }.Save()
             }.Register();
 
