@@ -314,6 +314,36 @@ namespace Signum.Utilities.DataStructures
 
     public static class IntervalExtensions
     {
+        public static int Length(this Interval<int> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static long Length(this Interval<long> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static double Length(this Interval<double> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static float Length(this Interval<float> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static decimal Length(this Interval<decimal> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static TimeSpan Length(this Interval<DateTime> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
         public static int Distance(this Interval<int> interval, int point)
         {
             return point < interval.Min ? interval.Min - point :
