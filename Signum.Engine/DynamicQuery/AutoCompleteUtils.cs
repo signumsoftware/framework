@@ -29,11 +29,50 @@ namespace Signum.Engine.DynamicQuery
 
         public static List<Lite> FindLiteLike(Type liteType, IEnumerable<Type> types, string subString, int count)
         {
-            return (from mi in new[] { miLiteStarting, miLiteContaining }
-                    from type in types
-                    where Schema.Current.IsAllowed(type) == null
-                    from lite in mi.GetInvoker(liteType, type)(subString, count)
-                    select lite).Take(count).ToList();
+            types = types.Where(t => Schema.Current.IsAllowed(t) == null);
+
+            List<Lite> results = new List<Lite>();
+            int? id = subString.ToInt();
+            if (id.HasValue)
+            {
+                foreach (var t in types)
+                {
+                    var lite = miLiteById.GetInvoker(liteType, t).Invoke(id.Value);
+                    if (lite != null)
+                    {
+                        results.Add(lite);
+
+                        if (results.Count >= count)
+                            return results;
+                    }
+                }
+            }
+
+            foreach (var t in types)
+            {
+                results.AddRange(miLiteStarting.GetInvoker(liteType, t)(subString, count - results.Count));
+
+                if (results.Count >= count)
+                    return results;
+            }
+
+            foreach (var t in types)
+            {
+                results.AddRange(miLiteContaining.GetInvoker(liteType, t)(subString, count - results.Count));
+
+                if (results.Count >= count)
+                    return results;
+            }
+
+            return results;
+        }
+
+        static GenericInvoker<Func<int, Lite>> miLiteById = new GenericInvoker<Func<int, Lite>>(id => LiteById<TypeDN, TypeDN>(id));
+        static Lite LiteById<LT, RT>(int id)
+            where LT : class, IIdentifiable
+            where RT : IdentifiableEntity, LT
+        {
+            return Database.Query<RT>().Where(a => a.id == id).Select(a => a.ToLite<LT>()).SingleOrDefault();
         }
 
         static GenericInvoker<Func<string, int, List<Lite>>> miLiteStarting = new GenericInvoker<Func<string, int, List<Lite>>>((ss, c) => LiteStarting<TypeDN, TypeDN>(ss, c));
