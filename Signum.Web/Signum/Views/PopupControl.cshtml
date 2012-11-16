@@ -20,13 +20,16 @@
     </span>
     <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString()) </span>
     <div class="sf-button-bar">
-        @{ var saveProtected = Navigator.Manager.OnSaveProtected(Model.UntypedValue.GetType()); }
+        @{
+            var canSave = Navigator.Manager.CanSave(Model.UntypedValue.GetType());
+        }
         @if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
-        {  
+        {
+            var saveProtected = typeof(IdentifiableEntity).IsAssignableFrom(Model.UntypedValue.GetType()) && !canSave; 
             <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
                 OK</button>                
         }
-        @if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible] && !saveProtected)
+        @if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible] && canSave)
         {  
             <button id="@Model.Compose("ebSave")" class="sf-entity-button sf-save" @(ViewData[ViewDataKeys.OnSave] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnSave] + "\"") : null)>
                 @Resources.Save</button>                

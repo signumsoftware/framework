@@ -690,7 +690,7 @@ namespace Signum.Windows
 
             win.MainControl = ctrl;
             win.ButtonBar.ViewButtons = buttons;
-            win.ButtonBar.SaveVisible = buttons == ViewButtons.Save  && !isReadOnly && !OnSaveProtected(entity.GetType());
+            win.ButtonBar.SaveVisible = buttons == ViewButtons.Save  && !isReadOnly && CanSave(entity.GetType());
             win.ButtonBar.OkVisible = buttons == ViewButtons.Ok;
             win.DataContext = options.Clone ? ((ICloneable)entity).Clone() : entity;
 
@@ -800,16 +800,19 @@ namespace Signum.Windows
 
         public event Func<Type, bool> SaveProtected;
 
-        public bool OnSaveProtected(Type type)
+        public bool CanSave(Type type)
         {
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+                return false;
+
             if (SaveProtected != null)
                 foreach (Func<Type, bool> sp in SaveProtected.GetInvocationList())
                 {
                     if (sp(type))
-                        return true;
+                        return false;
                 }
 
-            return false;
+            return true;
         }
 
         public event Func<object, bool> IsFindable;

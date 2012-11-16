@@ -144,7 +144,7 @@ WriteLiteral("</span>\r\n</div>\r\n<div class=\"sf-button-bar\">\r\n");
 
             
             #line 24 "..\..\Signum\Views\NormalControl.cshtml"
-     if (Model != null && !Navigator.Manager.OnSaveProtected(modifiable.GetType()) && !Model.ReadOnly)
+     if (Model != null && Navigator.Manager.CanSave(modifiable.GetType()) && !Model.ReadOnly)
     {
 
             

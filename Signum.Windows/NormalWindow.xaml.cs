@@ -99,25 +99,7 @@ namespace Signum.Windows
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            if (Navigator.Manager.OnSaveProtected(this.DataContext.GetType()))
-            {
-                if (!this.HasChanges())
-                    DialogResult = true;
-                else
-                {
-                    var answer = MessageBox.Show(
-                        Properties.Resources.ThereAreChangesContinue,
-                        Properties.Resources.ThereAreChanges,
-                        MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
-
-                    if (answer != MessageBoxResult.OK)
-                        return;
-
-                    DialogResult = false;
-
-                }
-            }
-            else
+            if (Navigator.Manager.CanSave(this.DataContext.GetType()))
             {
                 string errors = this.GetErrors();
 
@@ -141,6 +123,24 @@ namespace Signum.Windows
                 }
 
                 base.DialogResult = true;
+            }
+            else
+            {
+                if (!this.HasChanges())
+                    DialogResult = true;
+                else
+                {
+                    var answer = MessageBox.Show(
+                        Properties.Resources.ThereAreChangesContinue,
+                        Properties.Resources.ThereAreChanges,
+                        MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
+
+                    if (answer != MessageBoxResult.OK)
+                        return;
+
+                    DialogResult = false;
+
+                }
             }
         }
 
