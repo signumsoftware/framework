@@ -17,6 +17,7 @@ using Signum.Entities.Authorization;
 using System.Windows.Threading;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 
 namespace Signum.Windows.Disconnected
 {
@@ -104,17 +105,24 @@ namespace Signum.Windows.Disconnected
             pbDownloading.Minimum = 0;
             pbDownloading.Maximum = file.Length;
 
-            using (var ps = new ProgressStream(file.Stream))
+
+            Task.Factory.StartNew(() =>
             {
-                ps.ProgressChanged += (s, args) => pbDownloading.Value = ps.Position;
+                using (var ps = new ProgressStream(file.Stream))
+                {
+                    ps.ProgressChanged += (s, args) => Dispatcher.Invoke(() => pbDownloading.Value = ps.Position);
 
-                using (FileStream fs = File.OpenWrite(DisconnectedClient.DownloadBackupFile))
-                    ps.CopyTo(fs);
-            }
+                    using (FileStream fs = File.OpenWrite(DisconnectedClient.DownloadBackupFile))
+                        ps.CopyTo(fs);
+                }
 
-            MessageBox.Show(Window.GetWindow(this), "You have successfully downloaded a local database. \r\nThe application will turn off now.\r\nNext time you start it up, choose LocalDB.", "Download complete", MessageBoxButton.OK);
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(Window.GetWindow(this), "You have successfully downloaded a local database. \r\nThe application will turn off now.\r\nNext time you start it up, choose LocalDB.", "Download complete", MessageBoxButton.OK);
+                });
 
-            Environment.Exit(0);
+                Environment.Exit(0);
+            });
         }
     }
 }
