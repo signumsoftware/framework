@@ -137,7 +137,7 @@ namespace Signum.Web.Files
             sb.AppendLine("<script type='text/javascript'>");
             sb.AppendLine("var parDoc = window.parent.document;");
 
-            if (/*file.TryCS(f => f.IdOrNull) != null ||*/ !shouldHaveSaved)
+            if (file.BinaryFile == null /* If file has been saved */ || !shouldHaveSaved)
             {
                 RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
 

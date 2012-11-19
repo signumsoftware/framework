@@ -133,7 +133,7 @@
     <value>El correo electrónico debe tener un valor</value>
   </data>
   <data name="ErrorSavingFile" xml:space="preserve">
-    <value>Error guardadndo el archivo</value>
+    <value>Error guardando el archivo</value>
   </data>
   <data name="HelpDocumentation" xml:space="preserve">
     <value>Documentación de ayuda</value>
