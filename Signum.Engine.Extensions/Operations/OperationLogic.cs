@@ -42,24 +42,28 @@ namespace Signum.Engine.Operations
         static readonly Polymorphic<Tuple<bool>> protectedSaveTypes = new Polymorphic<Tuple<bool>>(PolymorphicMerger.InheritanceAndInterfaces, typeof(IIdentifiable));
 
         static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
+
         public static bool AllowSaveGlobally { get; set; }
+
+        public static bool IsSaveProtectedAllowed(Type type)
+        {
+            if (!AllowSaveGlobally)
+                return false;
+
+            var stack = allowedTypes.Value;
+            return (stack != null && stack.Contains(type));
+        }
 
         public static bool IsSaveProtected(Type type)
         {
-            if (AllowSaveGlobally)
-                return false;
-
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
                 return false;
 
             var tuple = protectedSaveTypes.TryGetValue(type);
-            if (tuple == null || !tuple.Item1)
-                return false;
 
-            var stack = allowedTypes.Value;
-            return (stack == null || !stack.Contains(type));
+            return tuple != null && tuple.Item1;
         }
-
+        
         public static void SetProtectedSave<T>(bool? isProtected) where T : IIdentifiable
         {
             SetProtectedSave(typeof(T), isProtected);
@@ -129,7 +133,9 @@ namespace Signum.Engine.Operations
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
-            if (ident.Modified == true && IsSaveProtected(ident.GetType()))
+            if (ident.Modified == true && 
+                IsSaveProtected(ident.GetType()) && 
+                !IsSaveProtectedAllowed(ident.GetType()))
                 throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
                     ident.GetType().Name,
                     operations.GetValue(ident.GetType()).Keys.CommaOr(k => MultiEnumDN.UniqueKey(k))));
