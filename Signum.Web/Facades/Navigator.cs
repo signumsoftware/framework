@@ -1005,7 +1005,6 @@ namespace Signum.Web
         public event Func<Type, bool> SaveProtected;
 
         public bool CanSave(Type type)
-        public bool OnSaveProtected(Type type)
         {
             if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
                 return false;
@@ -1016,11 +1015,10 @@ namespace Signum.Web
                 {
                     if (sp(type))
                         return false;
-                        return true;
                 }
             }
 
-            return false;
+            return true;
         }
     }
 
