@@ -132,7 +132,7 @@ namespace Signum.Services
         public bool GetSaveProtected(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                  () =>  OperationLogic.IsSaveProtected(entityType));
+                  () => OperationLogic.IsSaveProtected(entityType));
         }
 
         public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
