@@ -47,8 +47,8 @@ namespace Signum.Engine.Operations
 
         public static bool IsSaveProtectedAllowed(Type type)
         {
-            if (!AllowSaveGlobally)
-                return false;
+            if (AllowSaveGlobally)
+                return true;
 
             var stack = allowedTypes.Value;
             return (stack != null && stack.Contains(type));
