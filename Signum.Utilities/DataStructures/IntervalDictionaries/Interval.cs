@@ -379,5 +379,26 @@ namespace Signum.Utilities.DataStructures
             return point < interval.Min ? interval.Min - point :
                     point > interval.Max ? point - interval.Max : new TimeSpan(0);
         }
+
+        public static Interval<T>? Intersection<T>(this IEnumerable<Interval<T>> intervals)
+            where T : struct, IComparable<T>, IEquatable<T>
+        {
+            using (var enumerator = intervals.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    return null;
+
+                Interval<T>? result = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                    result = result.Value.Intersection(enumerator.Current);
+                    if (result == null)
+                        return null;
+                }
+
+                return result;
+            }
+        }
     }
 }
