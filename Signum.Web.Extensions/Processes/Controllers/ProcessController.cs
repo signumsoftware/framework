@@ -87,8 +87,7 @@ namespace Signum.Web.Processes
         {
             var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Select(l => (Lite)l).ToList();
 
-            ProcessExecutionDN process = (ProcessExecutionDN)OperationLogic.ServiceConstructFromMany(
-                lites, typeof(ProcessExecutionDN), PackageOperationOperation.CreatePackageOperation, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+            ProcessExecutionDN process = PackageLogic.CreatePackageOperation(lites, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
 
             return Navigator.PopupOpen(this, new PopupNavigateOptions(new TypeContext<ProcessExecutionDN>(process, prefix)));
         }

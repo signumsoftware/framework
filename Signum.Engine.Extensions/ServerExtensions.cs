@@ -29,6 +29,8 @@ using Signum.Engine.Exceptions;
 using System.IO;
 using System.Xml;
 using Signum.Engine.Profiler;
+using Signum.Entities.Processes;
+using Signum.Engine.Processes;
 
 
 namespace Signum.Services
@@ -132,55 +134,61 @@ namespace Signum.Services
         public bool GetSaveProtected(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                  () =>  OperationLogic.IsSaveProtected(entityType));
+                () =>  OperationLogic.IsSaveProtected(entityType));
         }
 
         public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-               () => OperationLogic.ServiceExecute(entity, operationKey, args));
+                () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
         public IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
+                () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
         }
 
         public IdentifiableEntity Delete(Lite lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceDelete(lite, operationKey, args));
+                () => OperationLogic.ServiceDelete(lite, operationKey, args));
         }
 
         public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceConstruct(type, operationKey, args));
+                () => OperationLogic.ServiceConstruct(type, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
+                () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
+                () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
+                () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
 
         public Dictionary<Enum, string> GetContextualCanExecute(Lite[] lite, List<Enum> cleanKeys)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
-               () => OperationLogic.GetContextualCanExecute(lite, cleanKeys));
+                () => OperationLogic.GetContextualCanExecute(lite, cleanKeys));
+        }
+
+        public ProcessExecutionDN CreatePackageOperation(List<Lite> lites, Enum operationKey)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), null,
+                () => PackageLogic.CreatePackageOperation(lites, operationKey));
         }
         #endregion
 
@@ -440,6 +448,5 @@ namespace Signum.Services
                 ProfilerLogic.ProfilerEntries(entries)); 
         }
         #endregion
-
     }
 }

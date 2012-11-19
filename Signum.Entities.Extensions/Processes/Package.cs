@@ -50,14 +50,9 @@ namespace Signum.Entities.Processes
         }
     }
 
-    public enum PackageOperationOperation
-    {
-        CreatePackageOperation
-    }
-
     public enum PackageOperationProcess
     {
-        ExecutePackageOperation
+        PackageOperation
     }
 
     [Serializable]

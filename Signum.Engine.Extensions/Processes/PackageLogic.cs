@@ -94,25 +94,7 @@ namespace Signum.Engine.Processes
                              Lines = p.Lines().Count()
                          }).ToDynamic();
 
-                    ProcessLogic.Register(PackageOperationProcess.ExecutePackageOperation, new PackageOperationAlgorithm());
-
-                    new BasicConstructFromMany<IdentifiableEntity, ProcessExecutionDN>(PackageOperationOperation.CreatePackageOperation)
-                    {
-                        Construct = (entities, args) =>
-                        {
-                            if (args == null || args.Length < 0 || !(args[0] is OperationDN || args[0] is Enum))
-                                throw new ArgumentNullException("{0} requires an operation as the first argument".Formato(PackageOperationOperation.CreatePackageOperation));
-
-                            OperationDN operation = args[0] as OperationDN ?? MultiEnumLogic<OperationDN>.ToEntity((Enum)args[0]);
-
-                            var process = ProcessLogic.Create(PackageOperationProcess.ExecutePackageOperation, new PackageOperationDN()
-                            {
-                                Operation = operation
-                            }.CreateLines(entities));
-
-                            return process;
-                        }
-                    }.Register();
+                    ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
                 }
 
                 dqm[typeof(PackageLineDN)] =
@@ -183,6 +165,34 @@ namespace Signum.Engine.Processes
 
                 executingProcess.ProgressChanged(i, lines.Count);
             }
+        }
+
+        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite> entities, Enum operationKey)
+        {
+            return CreatePackageOperation(entities, MultiEnumLogic<OperationDN>.ToEntity((Enum)operationKey));
+        }
+
+        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite> entities, OperationDN operation)
+        {
+            return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationDN()
+            {
+                Operation = operation
+            }.CreateLines(entities));
+        }
+
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum conditionName)
+        {
+            TypeConditionLogic.Register<UserProcessSessionDN>(conditionName,
+               se => se.User.RefersTo(UserDN.Current));
+
+            TypeConditionLogic.Register<ProcessExecutionDN>(conditionName,
+                pe => ((UserProcessSessionDN)pe.SessionData).InCondition(conditionName));
+
+            TypeConditionLogic.Register<PackageOperationDN>(conditionName,
+                po => Database.Query<ProcessExecutionDN>().WhereCondition(conditionName).Any(pe => pe.ProcessData == po));
+
+            TypeConditionLogic.Register<PackageLineDN>(conditionName,
+                pl => ((PackageOperationDN)pl.Package.Entity).InCondition(conditionName));
         }
     }
 
