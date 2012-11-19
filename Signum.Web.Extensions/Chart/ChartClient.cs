@@ -202,7 +202,7 @@ namespace Signum.Web.Chart
         {
             bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.IsGroupKey == false) ?? true;
 
-            return helper.QueryTokenBuilder(chartToken.TryCC(ct => ct.Token), context, qd.QueryName, t =>
+            return helper.QueryTokenDNBuilder(chartToken, context, qd.QueryName, t =>
                 t.SubTokensChart(qd.Columns, chart.GroupResults && canAggregate)
             );
         }

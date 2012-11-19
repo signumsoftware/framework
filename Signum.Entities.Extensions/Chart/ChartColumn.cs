@@ -45,6 +45,8 @@ namespace Signum.Entities.Chart
             {
                 DisplayName = null;
             }
+
+            base.TokenChanged();
         }
 
         public void SetDefaultParameters()
