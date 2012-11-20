@@ -136,6 +136,8 @@ namespace Signum.Web.Controllers
             if (ident == null)
                 throw new ArgumentNullException("No IdentifiableEntity to save");
 
+            Navigator.AssertNotReadonly(ident);
+
             Database.Save(ident);
 
             string newUrl = Navigator.NavigateRoute(ident.GetType(), ident.Id);
@@ -163,7 +165,11 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
             if (ident != null && !context.GlobalErrors.Any())
+            {
+                Navigator.AssertNotReadonly(ident);
+
                 Database.Save(ident);
+            }
 
             string newLink = Navigator.NavigateRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
 
@@ -217,7 +223,7 @@ namespace Signum.Web.Controllers
             if (typeArray == StaticInfo.ImplementedByAll)
                 throw new ArgumentException("ImplementedBy not allowed in Autocomplete");
 
-            List<Lite> lites  = AutoCompleteUtils.FindLiteLike(typeof(IdentifiableEntity), typeArray, q, l);
+            List<Lite> lites  = AutoCompleteUtils.FindLiteLike(typeof(IdentifiableEntity), Implementations.By(typeArray), q, l);
 
             var result = lites.Select(o => new
             {

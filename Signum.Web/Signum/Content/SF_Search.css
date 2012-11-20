@@ -85,7 +85,7 @@
     line-height: 1.5;
     text-decoration: none;
     white-space: nowrap;
-    text-align: right;
+    text-align: left;
     padding: .2em .4em;
 }
 .ui-state-default .sf-search-ctxitem a

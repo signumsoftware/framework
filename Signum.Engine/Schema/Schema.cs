@@ -358,13 +358,13 @@ namespace Signum.Engine.Maps
 
         public void Initialize()
         {
-            using (GlobalMode())
+            using (ExecutionMode.Global())
                 Initializing.InitializeUntil(InitLevel.Level4BackgroundProcesses);
         }
 
         public void InitializeUntil(InitLevel level)
         {
-            using (GlobalMode())
+            using (ExecutionMode.Global())
                 Initializing.InitializeUntil(level);
         }
 
@@ -551,19 +551,6 @@ namespace Signum.Engine.Maps
         public DirectedEdgedGraph<Table, bool> ToDirectedGraph()
         {
             return DirectedEdgedGraph<Table, bool>.Generate(Tables.Values, t => t.DependentTables());
-        }
-
-        ThreadLocal<bool> inGlobalMode = new ThreadLocal<bool>(() => false);
-        public bool InGlobalMode
-        {
-            get { return inGlobalMode.Value; }
-        }
-
-        public IDisposable GlobalMode()
-        {
-            var oldValue = inGlobalMode.Value; 
-            inGlobalMode.Value = true;
-            return new Disposable(() => inGlobalMode.Value = oldValue);
         }
     }
 

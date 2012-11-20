@@ -28,10 +28,13 @@ namespace Signum.Services
         List<IdentifiableEntity> RetrieveAll(Type type);
 
         [OperationContract, NetDataContract]
+        List<Lite> RetrieveAllLite(Type type);
+
+        [OperationContract, NetDataContract]
         List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list);
 
         [OperationContract, NetDataContract]
-        List<Lite> RetrieveAllLite(Type liteType, Implementations implementations);
+        List<Lite> FindAllLite(Type liteType, Implementations implementations);
 
         [OperationContract, NetDataContract]
         List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count);
@@ -50,35 +53,5 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         bool Exists(Type type, int id);
-    }
-
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-    public sealed class SuggestUserInterfaceAttribute : Attribute
-    {
-        public bool value; 
-
-        public SuggestUserInterfaceAttribute() : this(true)
-        {
-
-        }
-        public SuggestUserInterfaceAttribute(bool value)
-        {
-            this.value = value; 
-        }
-
-        static ConcurrentDictionary<MethodBase, bool?> dictionary = new ConcurrentDictionary<MethodBase, bool?>();  
-
-        internal static bool? Suggests(MethodBase mi)
-        {
-            return dictionary.GetOrAdd(mi, _=>
-            {
-                var attr = mi.SingleAttributeInherit<SuggestUserInterfaceAttribute>();
-                     
-                if (attr == null)
-                    return null;
-
-                return attr.value; 
-            }); 
-        }
     }
 }

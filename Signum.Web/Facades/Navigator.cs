@@ -410,6 +410,12 @@ namespace Signum.Web
         {
             Manager.Initialize();
         }
+
+        internal static void AssertNotReadonly(IdentifiableEntity ident)
+        {
+            if (Navigator.IsReadOnly(ident))
+                throw new UnauthorizedAccessException("{0} is read-only".Formato(ident));
+        }
     }
     
     public class NavigationManager

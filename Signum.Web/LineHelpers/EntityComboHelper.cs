@@ -56,7 +56,7 @@ namespace Signum.Web
                         {
                             int? id = entityCombo.IdOrNull;
 
-                            IEnumerable<Lite> data = entityCombo.Data ?? AutoCompleteUtils.RetrieveAllLite(entityCombo.Type.CleanType(), entityCombo.Implementations.Value);
+                            IEnumerable<Lite> data = entityCombo.Data ?? AutoCompleteUtils.FindAllLite(entityCombo.Type.CleanType(), entityCombo.Implementations.Value);
 
                             bool complexCombo = entityCombo.Implementations.Value.IsByAll || entityCombo.Implementations.Value.Types.Count() > 1;
 
