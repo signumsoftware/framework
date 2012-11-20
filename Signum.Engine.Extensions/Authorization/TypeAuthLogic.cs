@@ -213,6 +213,25 @@ namespace Signum.Engine.Authorization
             return acum.Value ? AuthThumbnail.All : AuthThumbnail.None;
         }
 
+        public static AuthThumbnail? Collapse(this IEnumerable<OperationAllowed> values)
+        {
+            OperationAllowed? acum = null;
+            foreach (var item in values)
+            {
+                if (acum == null)
+                    acum = item;
+                else if (acum.Value != item)
+                    return AuthThumbnail.Mix;
+            }
+
+            if (acum == null)
+                return null;
+
+            return
+               acum.Value == OperationAllowed.None ? AuthThumbnail.None :
+               acum.Value == OperationAllowed.DBOnly ? AuthThumbnail.Mix : AuthThumbnail.All;
+        }
+
         public static AuthThumbnail? Collapse(this IEnumerable<PropertyAllowed> values)
         {
             PropertyAllowed? acum = null;

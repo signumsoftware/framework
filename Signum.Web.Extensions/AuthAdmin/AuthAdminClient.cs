@@ -61,8 +61,8 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (operations)
-                    Register<OperationRulePack, OperationAllowedRule, OperationDN, bool, OperationDN>("operations", a => a.Resource,
-                        Mapping.New<bool>(), "Resource", true);
+                    Register<OperationRulePack, OperationAllowedRule, OperationDN, OperationAllowed, OperationDN>("operations", a => a.Resource,
+                        Mapping.New<OperationAllowed>(), "Resource", true);
 
                 if (permissions)
                     Register<PermissionRulePack, PermissionAllowedRule, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource,

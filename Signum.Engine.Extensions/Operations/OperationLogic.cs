@@ -168,18 +168,19 @@ namespace Signum.Engine.Operations
                 ErrorOperation(operation, entity, ex);
         }
 
-        public static bool OperationAllowed(Enum operationKey)
+        public static bool OperationAllowed(Enum operationKey, bool inUserInterface)
         {
             if (AllowOperation != null)
-                return AllowOperation(operationKey);
+                return AllowOperation(operationKey, inUserInterface);
             else
                 return true;
         }
 
-        public static void AssertOperationAllowed(Enum operationKey)
+        public static void AssertOperationAllowed(Enum operationKey, bool inUserInterface)
         {
-            if (!OperationAllowed(operationKey))
-                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)));
+            if (!OperationAllowed(operationKey, inUserInterface))
+                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)) +
+                    (inUserInterface ? " " + Resources.InUserInterface : ""));
         }
         #endregion
 
@@ -227,7 +228,7 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where OperationAllowed(o.Key)
+                    where OperationAllowed(o.Key, true)
                     select ToOperationInfo(o, null)).ToList();
         }
 
@@ -235,7 +236,7 @@ namespace Signum.Engine.Operations
         {
             return (from o in TypeOperations(entity.GetType())
                     let eo = o as IEntityOperation
-                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key)
+                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key, true)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
         }
 
@@ -560,7 +561,7 @@ namespace Signum.Engine.Operations
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
-    public delegate bool AllowOperationHandler(Enum operationKey);
+    public delegate bool AllowOperationHandler(Enum operationKey, bool inUserInterface);
 
 
 }

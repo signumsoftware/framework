@@ -57,7 +57,7 @@ namespace Signum.Entities.Authorization
     public class RulePermissionDN : RuleDN<PermissionDN, bool> { }
 
     [Serializable]
-    public class RuleOperationDN : RuleDN<OperationDN, bool> { }
+    public class RuleOperationDN : RuleDN<OperationDN, OperationAllowed> { }
 
     [Serializable]
     public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
@@ -124,6 +124,13 @@ namespace Signum.Entities.Authorization
         {
             return "{0} ({1})".Formato(condition, allowed);
         }
+    }
+
+    public enum OperationAllowed
+    {
+        None = 0, 
+        DBOnly = 1,
+        Allow = 2,
     }
 
     public enum PropertyAllowed

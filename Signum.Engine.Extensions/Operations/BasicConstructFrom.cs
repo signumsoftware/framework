@@ -59,7 +59,7 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructorFromOperation.Construct(IIdentifiable entity, params object[] args)
         {
-            OperationLogic.AssertOperationAllowed(key);
+            OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
 
             string error = OnCanConstruct(entity);
             if (error != null)

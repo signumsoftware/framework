@@ -346,7 +346,7 @@ namespace Signum.Services
                () => OperationAuthLogic.SetOperationRules(rules));
         }
 
-        public DefaultDictionary<Enum, bool> OperationRules()
+        public DefaultDictionary<Enum, OperationAllowed> OperationRules()
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => OperationAuthLogic.OperationRules());

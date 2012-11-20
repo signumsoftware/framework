@@ -547,11 +547,20 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deny.
+        ///   Looks up a localized string similar to DB Only.
         /// </summary>
-        public static string OperationsAscx_Deny {
+        public static string OperationsAscx_DBOnly {
             get {
-                return ResourceManager.GetString("OperationsAscx_Deny", resourceCulture);
+                return ResourceManager.GetString("OperationsAscx_DBOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string OperationsAscx_None {
+            get {
+                return ResourceManager.GetString("OperationsAscx_None", resourceCulture);
             }
         }
         
