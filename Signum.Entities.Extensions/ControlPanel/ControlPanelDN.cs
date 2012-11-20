@@ -51,9 +51,9 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref parts, value, () => Parts); }
         }
 
-        static Expression<Func<ControlPanelDN, IIdentifiable, bool>> ContainsContentExpression =
+        static Expression<Func<ControlPanelDN, IPartDN, bool>> ContainsContentExpression =
             (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
-        public bool ContainsContent(IIdentifiable content)
+        public bool ContainsContent(IPartDN content)
         {
             return ContainsContentExpression.Evaluate(this, content);
         }
@@ -97,6 +97,21 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        public ControlPanelDN Clone()
+        {
+
+            return new ControlPanelDN {
+            
+            DisplayName="Clon {0}".Formato(this.DisplayName),
+             HomePage=this.HomePage,
+              NumberOfColumns=this.NumberOfColumns,
+               Parts =this.Parts.Select(p=>p.Clone()).ToMList(),
+                Related=this.Related,
+            
+            };
+        
         }
     }
 }

@@ -223,12 +223,12 @@ namespace Signum.Entities.Chart
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public override void ParseData(QueryDescription description)
+        public override void ParseData(QueryDescription description, IdentifiableEntity context)
         {
-            ParseData(t => SubTokensChart(t, description.Columns));
+            ParseData(t => SubTokensChart(t, description.Columns), context);
         }
 
-        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
+        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
         {
             try
             {
@@ -236,7 +236,7 @@ namespace Signum.Entities.Chart
             }
             catch (Exception e)
             {
-                parseException = e;
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
 
             CleanSelfModified();

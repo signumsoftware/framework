@@ -136,9 +136,11 @@ namespace Signum.Engine.Operations
             if (ident.Modified == true && 
                 IsSaveProtected(ident.GetType()) && 
                 !IsSaveProtectedAllowed(ident.GetType()))
-                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
+                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".Formato(
                     ident.GetType().Name,
-                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => MultiEnumDN.UniqueKey(k))));
+                    operations.GetValue(ident.GetType()).Values
+                    .Where(IsExecuteNoLite)
+                    .CommaOr(o => MultiEnumDN.UniqueKey(o.Key))));
         }
 
         #region Events
@@ -195,10 +197,15 @@ namespace Signum.Engine.Operations
 
             operations.GetOrAdd(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
 
-            if (operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false)
+            if (IsExecuteNoLite(operation))
             {
                 SetProtectedSave(operation.Type, true);
             }
+        }
+
+        private static bool IsExecuteNoLite(IOperation operation)
+        {
+            return operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false;
         }
 
         public static void RegisterReplace(this IOperation operation)
