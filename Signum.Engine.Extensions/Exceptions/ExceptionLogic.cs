@@ -46,7 +46,7 @@ namespace Signum.Engine.Exceptions
             {
                 completeContext(prev);
 
-                using (Schema.Current.GlobalMode())
+                using (ExecutionMode.Global())
                 using (Transaction tr = Transaction.ForceNew())
                 {
                     prev.Save();
@@ -84,9 +84,9 @@ namespace Signum.Engine.Exceptions
             }
             catch { }
 
-            ex.Version = Schema.Current.Version.ToString(); 
+            ex.Version = Schema.Current.Version.ToString();
 
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             using (Transaction tr = Transaction.ForceNew())
             {
                 ex.Save();

@@ -211,7 +211,7 @@ namespace Signum.Engine.Processes
             if (running)
                 throw new InvalidOperationException("ProcessLogic is running");
 
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             using (new EntityCache(true))
             {
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()

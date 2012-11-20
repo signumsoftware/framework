@@ -142,7 +142,7 @@ namespace Signum.Engine.Authorization
 
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return AuthUtils.MaxType.BaseAllowed;
 
             if (!TypeLogic.TypeToDN.ContainsKey(type))

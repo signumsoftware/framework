@@ -78,7 +78,7 @@ namespace Signum.Engine.Authorization
 
         public static bool GetQueryAllowed(object queryName)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return true;
 
             return cache.GetAllowed(RoleDN.Current.ToLite(), queryName);

@@ -125,7 +125,7 @@ namespace Signum.Web.Chart
                 });
             }            
             
-            if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
+            if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string ucEditText = Resources.UserChart_Edit;
                 items.Add(new ToolBarButton

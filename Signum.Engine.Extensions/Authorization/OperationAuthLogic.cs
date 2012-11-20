@@ -79,7 +79,7 @@ namespace Signum.Engine.Authorization
 
         public static bool GetOperationAllowed(Enum operationKey)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return true;
 
             if (GetTemporallyAllowed(operationKey))

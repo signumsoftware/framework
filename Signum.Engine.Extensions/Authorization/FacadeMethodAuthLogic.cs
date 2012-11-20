@@ -71,7 +71,7 @@ namespace Signum.Engine.Authorization
 
         public static bool GetFacadeMethodAllowed(MethodInfo mi)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return true;
 
             return cache.GetAllowed(RoleDN.Current.ToLite(), FacadeMethodLogic.Normalize(mi).Key());

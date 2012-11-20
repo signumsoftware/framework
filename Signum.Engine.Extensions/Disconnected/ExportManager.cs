@@ -230,7 +230,7 @@ namespace Signum.Engine.Disconnected
         readonly MethodInfo miUnsafeLock;
         protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : IdentifiableEntity, IDisconnectedEntity, new()
         {
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             {
                 var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.DisconnectedMachine != null).Select(a =>
                     "{0} locked in {1}".Formato(a.Id, a.DisconnectedMachine.Entity.MachineName)).ToString("\r\n");

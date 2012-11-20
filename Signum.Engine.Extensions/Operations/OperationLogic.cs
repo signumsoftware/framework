@@ -494,7 +494,7 @@ namespace Signum.Engine.Operations
         internal static Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys)
         {
             Dictionary<Enum, string> result = null;
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             {
                 foreach (var grLites in lites.GroupBy(a => a.RuntimeType))
                 {
