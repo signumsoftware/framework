@@ -39,8 +39,8 @@ namespace Signum.Entities.ControlPanel
         }
 
         [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
-        IIdentifiable content;
-        public IIdentifiable Content
+        IPartDN content;
+        public IPartDN Content
         {
             get { return content; }
             set { Set(ref content, value, () => Content); }
@@ -61,10 +61,27 @@ namespace Signum.Entities.ControlPanel
 
             return base.PropertyValidation(pi);
         }
+
+        public PanelPart Clone()
+        {
+            return new PanelPart
+            {
+                Column = this.Column,
+                Row=this.Row,
+                Content = content.Clone(),
+                Title = this.Title
+            };
+        }
     }
 
+
+    public interface IPartDN:IIdentifiable
+    {
+        IPartDN Clone();
+    };
+
     [Serializable]
-    public class UserQueryPartDN : Entity
+    public class UserQueryPartDN : Entity, IPartDN
     {
         UserQueryDN userQuery;
         [NotNullValidator]
@@ -79,10 +96,18 @@ namespace Signum.Entities.ControlPanel
         {
             return userQuery == null ? null : ToStringExpression.Evaluate(this);
         }
+
+        public IPartDN Clone()
+        {
+            return new UserQueryPartDN
+            {
+                UserQuery = this.UserQuery,
+            };
+        }
     }
 
     [Serializable]
-    public class UserChartPartDN : Entity
+    public class UserChartPartDN : Entity, IPartDN
     {
         UserChartDN userChart;
         [NotNullValidator]
@@ -104,10 +129,18 @@ namespace Signum.Entities.ControlPanel
         {
             return userChart == null ? null : ToStringExpression.Evaluate(this);
         }
+        public IPartDN Clone()
+        {
+            return new UserChartPartDN
+            {
+                UserChart = this.UserChart,
+                OnlyData = this.OnlyData
+            };
+        }
     }
 
     [Serializable]
-    public class CountSearchControlPartDN : Entity
+    public class CountSearchControlPartDN : Entity, IPartDN
     {
         MList<CountUserQueryElement> userQueries = new MList<CountUserQueryElement>();
         public MList<CountUserQueryElement> UserQueries
@@ -119,6 +152,14 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return "{0} {1}".Formato(userQueries.Count, typeof(UserQueryDN).NicePluralName());
+        }
+
+        public IPartDN Clone()
+        {
+            return new CountSearchControlPartDN
+            {
+                UserQueries = this.UserQueries.Select(e=>e.Clone()).ToMList(),
+            };
         }
     }
 
@@ -146,10 +187,19 @@ namespace Signum.Entities.ControlPanel
             get { return href; }
             set { Set(ref href, value, () => Href); }
         }
+        public CountUserQueryElement Clone()
+        {
+            return new CountUserQueryElement
+            {
+                Href = this.Href,
+                Label = this.Label,
+                UserQuery = UserQuery,
+            };
+        }
     }
 
     [Serializable]
-    public class LinkListPartDN : Entity
+    public class LinkListPartDN : Entity, IPartDN
     {
         MList<LinkElement> links = new MList<LinkElement>();
         public MList<LinkElement> Links
@@ -161,6 +211,13 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
+        }
+        public IPartDN Clone()
+        {
+            return new LinkListPartDN
+            {
+                Links = this.Links.Select(e => e.Clone()).ToMList(),
+            };
         }
     }
 
@@ -182,5 +239,15 @@ namespace Signum.Entities.ControlPanel
             get { return link; }
             set { Set(ref link, value, () => Link); }
         }
+
+        public LinkElement Clone()
+        {
+            return new LinkElement
+            {
+                Label = this.Label,
+                Link = this.Link
+            };
+        }
+
     }
 }

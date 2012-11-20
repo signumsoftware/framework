@@ -125,15 +125,15 @@ namespace Signum.Entities.Chart
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(t => t.SubTokensChart(description.Columns, this.GroupResults));
+                    f.ParseData(t => t.SubTokensChart(description.Columns, this.GroupResults), this);
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(description);
+                    c.ParseData(description, this);
 
             if (Orders != null)
                 foreach (var o in Orders)
-                    o.ParseData(t => t.SubTokensChart(description.Columns, this.GroupResults));
+                    o.ParseData(t => t.SubTokensChart(description.Columns, this.GroupResults), this);
         }
 
         static Func<QueryDN, object> ToQueryName;
