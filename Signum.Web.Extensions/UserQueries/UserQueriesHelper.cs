@@ -49,8 +49,8 @@ namespace Signum.Web.UserQueries
             if (queryToken.TryCC(qt => qt.ParseException) != null)
             {
                 HtmlStringBuilder sb = new HtmlStringBuilder();
+                sb.Add(new HtmlTag("div").Class("ui-state-error").SetInnerText(queryToken.ParseException.Message).ToHtml());
                 sb.Add(new HtmlTag("pre").SetInnerText(queryToken.TokenString).ToHtml());
-                sb.Add(new HtmlTag("pre").SetInnerText(queryToken.ParseException.Message).ToHtml());
                 sb.Add(helper.QueryTokenBuilder(null, context, queryName, subTokens));
                 return sb.ToHtml();
             }

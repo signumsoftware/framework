@@ -189,6 +189,7 @@ namespace Signum.Web.UserQueries
             findOptions.ColumnOptions.Clear();
             findOptions.ColumnOptions.AddRange(userQuery.Columns.Select(qc => new ColumnOption
             {
+                Token = qc.Token,
                 ColumnName = qc.TokenString,                
                 DisplayName = qc.DisplayName,
             }));
