@@ -373,13 +373,13 @@ namespace Signum.Web
             this.ColumnName = columnName;
         }
 
+        public QueryToken Token { get; set; }
         public string ColumnName { get; set; }
         public string DisplayName { get; set; }
 
         public Column ToColumn(QueryDescription qd)
         {
-            var token = QueryUtils.Parse(ColumnName, qd);
-            return new Column(token, DisplayName.DefaultText(token.NiceName()));
+            return new Column(Token, DisplayName.DefaultText(Token.NiceName()));
         }
 
         public override string ToString()
