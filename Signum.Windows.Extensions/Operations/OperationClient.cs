@@ -382,10 +382,9 @@ namespace Signum.Windows.Operations
                           where oi.IsEntityOperation && oi.Lite == true
                           let os = (EntityOperationSettingsBase)OperationClient.Manager.Settings.TryGetC(oi.Key)
                           where os == null ||
-                                os.Contextual == null && !os.ClickOverriden ||
-                                os.Contextual.OnVisible(sc, oi)
+                                (os.Contextual == null ? !os.ClickOverriden : os.Contextual.OnVisible(sc, oi))
                           select new EntityData
-                          {    
+                          {
                               OperationKey = oi.Key,
                               OperationInfo = oi,
                               CanExecute = null,
