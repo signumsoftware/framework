@@ -103,7 +103,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Type("{0}Year".Formato(popupPrefix), "2010");
             selenium.LineFindAndSelectElements("{0}Label_".Formato(popupPrefix), false, new int[] { 0 });
 
-            selenium.PopupOk(popupPrefix);
+            selenium.Click("{0}btnOk".Formato(popupPrefix));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.MainEntityHasId();
         }
 

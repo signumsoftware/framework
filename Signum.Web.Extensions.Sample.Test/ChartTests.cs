@@ -67,8 +67,8 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsTrue(selenium.IsElementPresent("jq=#value_0[value=1]"));
 
             //set chart tokens
-            selenium.FilterSelectToken(0, "value=Author", true, "Chart_Dimension1_");
-            selenium.FilterSelectToken(0, "value=Count", false, "Chart_Value1_");
+            selenium.FilterSelectToken(0, "value=Author", true, "Columns_0_");
+            selenium.FilterSelectToken(0, "value=Count", false, "Columns_1_");
 
             Draw();
             //3 filas
