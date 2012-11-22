@@ -144,7 +144,6 @@ namespace Signum.Engine.Linq
         }
 
 
-
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             //We can not assume allways true because neasted projections
@@ -154,6 +153,18 @@ namespace Signum.Engine.Linq
                 sqlFunction = new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); ;
 
             if (args.All(Has) && (obj == null || Has(obj)))
+                return Add(sqlFunction);
+
+            return sqlFunction;
+        }
+
+        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            if (args != sqlFunction.Arguments)
+                sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args); ;
+
+            if (args.All(Has))
                 return Add(sqlFunction);
 
             return sqlFunction;

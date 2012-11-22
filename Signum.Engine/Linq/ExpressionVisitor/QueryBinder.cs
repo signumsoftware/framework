@@ -16,6 +16,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using Signum.Entities.DynamicQuery;
 using System.Collections.ObjectModel;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Linq
 {
@@ -213,6 +214,11 @@ namespace Signum.Engine.Linq
             {
                 NewExpression nex = (NewExpression)expression;
                 return (ProjectionExpression)nex.Arguments[1];
+            }
+
+            if (expression is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)expression))
+            {
+               return GetTableValuedFunctionProjection((MethodCallExpression)expression);
             }
 
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
@@ -753,6 +759,12 @@ namespace Signum.Engine.Linq
             return true;
         }
 
+        public bool IsTableValuedFunction(MethodCallExpression mce)
+        {
+            return typeof(IQueryable).IsAssignableFrom(mce.Method.ReturnType) &&
+                mce.Method.SingleAttribute<SqlMethodAttribute>() != null;
+        }
+
         private ProjectionExpression GetTableProjection(IQueryable query)
         { 
             ITable table = query is ISignumTable ? ((ISignumTable)query).Table : new ViewBuilder(Schema.Current).NewView(query.ElementType);
@@ -773,6 +785,33 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null),
             pc.Projector, null, resultType);
+
+            return projection;
+        }
+
+        private ProjectionExpression GetTableValuedFunctionProjection(MethodCallExpression mce)
+        {
+            Type returnType = mce.Method.ReturnType;
+            var type = returnType.GetGenericArguments()[0];
+
+            Table table = new ViewBuilder(Schema.Current).NewView(type);
+
+            Alias tableAlias = NextTableAlias(table.Name);
+
+            Expression exp = table.GetProjectorExpression(tableAlias, this);
+
+            var functionName = mce.Method.SingleAttribute<SqlMethodAttribute>().Name ?? mce.Method.Name;
+
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, tableAlias,
+                mce.Arguments.Select(DbExpressionNominator.FullNominate));
+
+            Alias selectAlias = NextSelectAlias();
+
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, new[] { tableAlias });
+
+            ProjectionExpression projection = new ProjectionExpression(
+                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null),
+            pc.Projector, null, returnType);
 
             return projection;
         }

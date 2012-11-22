@@ -522,7 +522,23 @@ namespace Signum.Engine.Linq
                 Visit(sqlFunction.Object);
                 sb.Append(".");
             }
-            sb.Append(sqlFunction.SqlFunction);
+            sb.Append(sqlFunction.SqlFunction.SqlScape());
+            sb.Append("(");
+            for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
+            {
+                Expression exp = sqlFunction.Arguments[i];
+                if (i > 0)
+                    sb.Append(", ");
+                this.Visit(exp);
+            }
+            sb.Append(")");
+
+            return sqlFunction;
+        }
+
+        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            sb.Append(sqlFunction.SqlFunction.SqlScape());
             sb.Append("(");
             for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
             {
@@ -558,7 +574,7 @@ namespace Signum.Engine.Linq
         {
             if (source is SourceWithAliasExpression)
             {
-                if (source is TableExpression)
+                if (source is TableExpression || source is SqlTableValuedFunctionExpression)
                     Visit(source);
                 else
                 {

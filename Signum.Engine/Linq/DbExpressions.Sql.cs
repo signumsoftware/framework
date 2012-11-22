@@ -33,7 +33,8 @@ namespace Signum.Engine.Linq
         Join,
         Aggregate,
         AggregateSubquery,
-        SqlFunction,
+        SqlFunction,        
+        SqlTableValuedFunction,
         SqlConstant,
         SqlEnum,
         SqlCast,
@@ -197,9 +198,43 @@ namespace Signum.Engine.Linq
     }
 
 
-    /// <summary>
-    /// A custom expression node that represents a table reference in a SQL query
-    /// </summary>
+    internal class SqlTableValuedFunctionExpression : SourceWithAliasExpression
+    {
+        public readonly Table Table;
+        public readonly ReadOnlyCollection<Expression> Arguments;
+        public readonly string SqlFunction;
+
+        public override Alias[] KnownAliases
+        {
+            get { return new[] { Alias }; }
+        }
+
+        public SqlTableValuedFunctionExpression(string sqlFunction, Table table, Alias alias, IEnumerable<Expression> arguments)
+            :base(DbExpressionType.SqlTableValuedFunction, alias)
+        {
+            this.SqlFunction = sqlFunction;
+            this.Table = table;
+            this.Arguments = arguments.ToReadOnly(); 
+        }
+
+        public override string ToString()
+        {
+            string result = "{0}({1}) as {2}".Formato(Table.Name, Arguments.ToString(a => a.NiceToString(), ","), Alias);
+
+            return result;
+        }
+      
+        internal ColumnExpression GetIdExpression()
+        {
+            var expression = ((ITablePrivate)Table).GetPrimaryOrder(Alias);
+
+            if (expression == null)
+                throw new InvalidOperationException("Impossible to determine Primary Key for {0}".Formato(Table.Name));
+
+            return expression;
+        }
+    }
+
     internal class TableExpression : SourceWithAliasExpression
     {
         public readonly ITable Table;
@@ -233,9 +268,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// A custom expression node that represents a reference to a column in a SQL query
-    /// </summary>
     internal class ColumnExpression : DbExpression, IEquatable<ColumnExpression>
     {
         public readonly Alias Alias;
@@ -275,9 +307,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// A declaration of a column in a SQL SELECT expression
-    /// </summary>
     internal class ColumnDeclaration
     {
         public readonly string Name;
@@ -331,9 +360,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// A pairing of an expression and an order type for use in a SQL Order By clause
-    /// </summary>
     internal class OrderExpression
     {
         public readonly OrderType OrderType;
@@ -365,9 +391,8 @@ namespace Signum.Engine.Linq
         Distinct = 64,
         Top = 128
     }
-    /// <summary>
-    /// A custom expression node used to represent a SQL SELECT expression
-    /// </summary>
+
+
     internal class SelectExpression : SourceWithAliasExpression
     {
         public readonly ReadOnlyCollection<ColumnDeclaration> Columns;
@@ -446,9 +471,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// A kind of SQL join
-    /// </summary>
     internal enum JoinType
     {
         CrossJoin,
@@ -461,9 +483,6 @@ namespace Signum.Engine.Linq
         FullOuterJoin, 
     }
 
-    /// <summary>
-    /// A custom expression node representing a SQL join clause
-    /// </summary>
     internal class JoinExpression : SourceExpression
     {
         public readonly JoinType JoinType;

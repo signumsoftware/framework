@@ -204,7 +204,13 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
-       
+        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => MakeSqlValue(Visit(a)));
+            if (args != sqlFunction.Arguments)
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
+            return sqlFunction;
+        }
 
         protected override Expression VisitCase(CaseExpression cex)
         {
