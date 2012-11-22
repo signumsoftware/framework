@@ -19,6 +19,7 @@ using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
+using System.Data.Common;
 
 namespace Signum.Engine.Operations
 {
@@ -128,7 +129,30 @@ namespace Signum.Engine.Operations
                 dqm.RegisterExpression((OperationDN o) => o.LogOperations());
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
+
+                sb.Schema.Table<OperationDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Operation_PreDeleteSqlSync);
+                sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Type_PreDeleteSqlSync);
             }
+        }
+
+        static SqlPreCommand Operation_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            var t = Schema.Current.Table<OperationLogDN>();
+            var f = (FieldReference)t.Fields["operation"].Field;
+
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
+
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+        }
+
+        static SqlPreCommand Type_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            var t = Schema.Current.Table<OperationLogDN>();
+            var f = ((FieldImplementedByAll)t.Fields["entity"].Field).ColumnTypes;
+
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
+
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
         }
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
