@@ -25,6 +25,8 @@ namespace Signum.Engine
 
     public abstract class SqlPreCommand
     {
+        public const string GO = ";\r\nGO";
+
         public abstract IEnumerable<SqlPreCommandSimple> Leaves();
 
         protected internal abstract void GenerateScript(StringBuilder sb);
@@ -208,6 +210,7 @@ namespace Signum.Engine
 
             return this;
         }
+
     }
 
     public class SqlPreCommandConcat : SqlPreCommand
@@ -229,15 +232,20 @@ namespace Signum.Engine
         protected internal override void GenerateScript(StringBuilder sb)
         {
             string sep = separators[Spacing];
-            bool borrar = false;
-            foreach (SqlPreCommand com in Commands)
+            for (int i = 0; i < Commands.Length - 1; i++)
             {
-                com.GenerateScript(sb);
+                Commands[i].GenerateScript(sb);
+
+                if (sb.ToString(sb.Length - SqlPreCommand.GO.Length, SqlPreCommand.GO.Length) != SqlPreCommand.GO)
+                    sb.Append(";");
+
                 sb.Append(sep);
-                borrar = true;
             }
 
-            if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
+            if (Commands.Length > 0)
+            {
+                Commands[Commands.Length - 1].GenerateScript(sb);
+            }
         }
 
         protected internal override void GenerateParameters(List<DbParameter> list)
@@ -259,9 +267,9 @@ namespace Signum.Engine
 
         static Dictionary<Spacing, string> separators = new Dictionary<Spacing, string>()
         {
-            {Spacing.Simple, ";\r\n"},
-            {Spacing.Double, ";\r\n\r\n"},
-            {Spacing.Triple, ";\r\n\r\n\r\n"},
+            {Spacing.Simple, "\r\n"},
+            {Spacing.Double, "\r\n\r\n"},
+            {Spacing.Triple, "\r\n\r\n\r\n"},
         };
 
         protected internal override int NumParameters

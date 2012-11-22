@@ -49,6 +49,8 @@ namespace Signum.Engine.Maps
 
         public SchemaSettings Settings { get; private set; }
 
+        public SchemaAssets Assets { get; private set; }
+
         Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
         public Dictionary<Type, Table> Tables
         {
@@ -379,13 +381,16 @@ namespace Signum.Engine.Maps
         internal Schema(SchemaSettings settings)
         {
             this.Settings = settings;
+            this.Assets = new SchemaAssets();   
 
             Generating += SchemaGenerator.CreateTablesScript;
             Generating += SchemaGenerator.InsertEnumValuesScript;
             Generating += TypeLogic.Schema_Generating;
+            Generating += Assets.Schema_Generating;
 
             Synchronizing += SchemaSynchronizer.SynchronizeSchemaScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
+            Synchronizing += Assets.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
             Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.GlobalLazy_Initialize;

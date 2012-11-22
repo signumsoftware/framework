@@ -206,7 +206,7 @@ namespace Signum.Engine
                 string viewName = index.ViewName;
 
                 SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM dbo.{2} WHERE {3}"
-                    .Formato(viewName.SqlScape(), columns, index.Table.Name.SqlScape(), index.Where));
+                    .Formato(viewName.SqlScape(), columns, index.Table.Name.SqlScape(), index.Where) + SqlPreCommand.GO);
 
                 SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
                     .Formato(index.IndexName, viewName.SqlScape(), index.Columns.ToString(c => c.Name.SqlScape(), ", ")));
@@ -224,9 +224,15 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableDropConstraint(string table, string constraintName)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1} ".Formato(
+            return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".Formato(
                 table.SqlScape(),
-                constraintName.SqlScape()));
+                constraintName.SqlScape()) + SqlPreCommand.GO);
+        }
+
+        public static SqlPreCommand AlterTableAddDefaultConstraint(string table, string column, string constraintName, string definition)
+        {
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
+                        .Formato(table.SqlScape(), constraintName.SqlScape(), definition, column.SqlScape()));
         }
 
         public static SqlPreCommand AlterTableAddConstraintForeignKey(string table, string fieldName, string foreignTable)
