@@ -113,6 +113,6 @@ namespace Signum.Services
 
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<Enum, bool> OperationRules();
+        DefaultDictionary<Enum, OperationAllowed> OperationRules();
     }
 }

@@ -291,11 +291,14 @@
   </data>
   <data name="NotAllowedToSaveThis0WhileOffline" xml:space="preserve">
     <value>Not allowed to save this {0} while offline</value>
-</data>
+  </data>
   <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
     <value>There's not a registered user with that email address</value>
   </data>
   <data name="TheProperty0" xml:space="preserve">
     <value>the property {0}</value>
+  </data>
+  <data name="InUserInterface" xml:space="preserve">
+    <value>(in user interface)</value>
   </data>
 </root>

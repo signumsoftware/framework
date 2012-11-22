@@ -13,6 +13,7 @@ using Signum.Entities.Basics;
 using Signum.Web.Extensions.Properties;
 using Signum.Entities.Reflection;
 using Signum.Engine.Maps;
+using Signum.Engine.Basics;
 #endregion
 
 namespace Signum.Web.Operations
@@ -187,6 +188,15 @@ namespace Signum.Web.Operations
                     );
 
             return contexts.Select(op => OperationButtonFactory.CreateContextual(op)).ToList();
+        }
+
+        internal static Enum GetOperationKeyAssert(string operationFullKey)
+        {
+            var operationKey = MultiEnumLogic<OperationDN>.ToEnum(operationFullKey);
+
+            OperationLogic.AssertOperationAllowed(operationKey, inUserInterface: true);
+
+            return operationKey;
         }
     }
 

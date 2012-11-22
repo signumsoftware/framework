@@ -38,7 +38,7 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructOperation.Construct(params object[] args)
         {
-            OperationLogic.AssertOperationAllowed(key);
+            OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
 
             using (OperationLogic.AllowSave<T>())
             {

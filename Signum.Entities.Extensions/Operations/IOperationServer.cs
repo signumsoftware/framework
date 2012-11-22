@@ -5,6 +5,7 @@ using System.Text;
 using System.ServiceModel;
 using Signum.Entities.Operations;
 using Signum.Entities;
+using Signum.Entities.Processes;
 
 namespace Signum.Services
 {
@@ -47,5 +48,8 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys);
+
+        [OperationContract, NetDataContract]
+        ProcessExecutionDN CreatePackageOperation(List<Lite> lites, Enum operationKey);
     }
 }

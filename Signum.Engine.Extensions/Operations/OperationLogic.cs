@@ -136,9 +136,11 @@ namespace Signum.Engine.Operations
             if (ident.Modified == true && 
                 IsSaveProtected(ident.GetType()) && 
                 !IsSaveProtectedAllowed(ident.GetType()))
-                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
+                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".Formato(
                     ident.GetType().Name,
-                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => MultiEnumDN.UniqueKey(k))));
+                    operations.GetValue(ident.GetType()).Values
+                    .Where(IsExecuteNoLite)
+                    .CommaOr(o => MultiEnumDN.UniqueKey(o.Key))));
         }
 
         #region Events
@@ -168,18 +170,19 @@ namespace Signum.Engine.Operations
                 ErrorOperation(operation, entity, ex);
         }
 
-        public static bool OperationAllowed(Enum operationKey)
+        public static bool OperationAllowed(Enum operationKey, bool inUserInterface)
         {
             if (AllowOperation != null)
-                return AllowOperation(operationKey);
+                return AllowOperation(operationKey, inUserInterface);
             else
                 return true;
         }
 
-        public static void AssertOperationAllowed(Enum operationKey)
+        public static void AssertOperationAllowed(Enum operationKey, bool inUserInterface)
         {
-            if (!OperationAllowed(operationKey))
-                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)));
+            if (!OperationAllowed(operationKey, inUserInterface))
+                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)) +
+                    (inUserInterface ? " " + Resources.InUserInterface : ""));
         }
         #endregion
 
@@ -194,10 +197,15 @@ namespace Signum.Engine.Operations
 
             operations.GetOrAdd(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
 
-            if (operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false)
+            if (IsExecuteNoLite(operation))
             {
                 SetProtectedSave(operation.Type, true);
             }
+        }
+
+        private static bool IsExecuteNoLite(IOperation operation)
+        {
+            return operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false;
         }
 
         public static void RegisterReplace(this IOperation operation)
@@ -227,7 +235,7 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where OperationAllowed(o.Key)
+                    where OperationAllowed(o.Key, true)
                     select ToOperationInfo(o, null)).ToList();
         }
 
@@ -235,7 +243,7 @@ namespace Signum.Engine.Operations
         {
             return (from o in TypeOperations(entity.GetType())
                     let eo = o as IEntityOperation
-                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key)
+                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key, true)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
         }
 
@@ -494,7 +502,7 @@ namespace Signum.Engine.Operations
         internal static Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys)
         {
             Dictionary<Enum, string> result = null;
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             {
                 foreach (var grLites in lites.GroupBy(a => a.RuntimeType))
                 {
@@ -560,7 +568,7 @@ namespace Signum.Engine.Operations
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
-    public delegate bool AllowOperationHandler(Enum operationKey);
+    public delegate bool AllowOperationHandler(Enum operationKey, bool inUserInterface);
 
 
 }

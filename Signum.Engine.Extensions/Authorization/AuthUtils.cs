@@ -15,6 +15,9 @@ namespace Signum.Engine.Authorization
         public static readonly DefaultBehaviour<bool> MaxBool = new DefaultBehaviour<bool>(true, col => col.Any(a => a));
         public static readonly DefaultBehaviour<bool> MinBool = new DefaultBehaviour<bool>(false, col => col.All(a => a));
 
+        public static readonly DefaultBehaviour<OperationAllowed> MaxOperation = new DefaultBehaviour<OperationAllowed>(OperationAllowed.Allow, MaxPropertyAllowed);
+        public static readonly DefaultBehaviour<OperationAllowed> MinOperation = new DefaultBehaviour<OperationAllowed>(OperationAllowed.None, MinPropertyAllowed);
+        
         public static readonly DefaultBehaviour<PropertyAllowed> MaxProperty = new DefaultBehaviour<PropertyAllowed>(PropertyAllowed.Modify, MaxPropertyAllowed);
         public static readonly DefaultBehaviour<PropertyAllowed> MinProperty = new DefaultBehaviour<PropertyAllowed>(PropertyAllowed.None, MinPropertyAllowed);
 
@@ -89,6 +92,39 @@ namespace Signum.Engine.Authorization
                     result = item;
 
                 if (result == PropertyAllowed.None)
+                    return result;
+
+            }
+            return result;
+        }
+
+
+        static OperationAllowed MaxPropertyAllowed(this IEnumerable<OperationAllowed> collection)
+        {
+            OperationAllowed result = OperationAllowed.None;
+
+            foreach (var item in collection)
+            {
+                if (item > result)
+                    result = item;
+
+                if (result == OperationAllowed.Allow)
+                    return result;
+
+            }
+            return result;
+        }
+
+        static OperationAllowed MinPropertyAllowed(this IEnumerable<OperationAllowed> collection)
+        {
+            OperationAllowed result = OperationAllowed.Allow;
+
+            foreach (var item in collection)
+            {
+                if (item < result)
+                    result = item;
+
+                if (result == OperationAllowed.None)
                     return result;
 
             }

@@ -54,10 +54,6 @@ namespace Signum.Web.Processes
                 if (packageOperations)
                 {
                     Navigator.AddSetting(new EntitySettings<PackageOperationDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("PackageOperation") });
-                    OperationsClient.AddSetting(new ContextualOperationSettings(PackageOperationOperation.CreatePackageOperation)
-                    {
-                        IsVisible = _ => false,
-                    });
 
                     ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
                 }

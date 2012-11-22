@@ -74,13 +74,13 @@ namespace Signum.Engine.Authorization
 
         public static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return PropertyAllowed.Modify;
 
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
 
-            if (TypeAuthLogic.GetAllowed(route.RootType).Max().Get(ExecutionContext.Current == ExecutionContext.UserInterface) == TypeAllowedBasic.None)
+            if (TypeAuthLogic.GetAllowed(route.RootType).Max().Get(ExecutionMode.InUserInterface) == TypeAllowedBasic.None)
                 return PropertyAllowed.None;
 
             return cache.GetAllowed(RoleDN.Current.ToLite(), route);

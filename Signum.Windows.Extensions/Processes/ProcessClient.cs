@@ -48,10 +48,7 @@ namespace Signum.Windows.Processes
                 if (packageOperation)
                 {
                     Navigator.AddSetting(new EntitySettings<PackageOperationDN>(EntityType.System) { View = e => new PackageOperation(), Icon = Image("package.png") });
-                    OperationClient.AddSetting(new ContextualOperationSettings(PackageOperationOperation.CreatePackageOperation)
-                    {
-                        IsVisible = args=>false,
-                    });
+
                     SearchControl.GetContextMenuItems += SearchControl_GetContextMenuItems;
                 }
             }
