@@ -94,8 +94,8 @@ namespace Signum.Test.Extensions
                 ControlPanelLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
                 
                 ChartLogic.Start(sb, dqm);
-                //ChartLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
-                //ChartLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
+                UserChartLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
+                UserChartLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
 
                 FilePathLogic.Start(sb, dqm);
                 ReportsLogic.Start(sb, dqm, true);
@@ -136,16 +136,11 @@ namespace Signum.Test.Extensions
 
             using (AuthLogic.Disable())
             {
-                //Schema.Current.Initialize(InitLevel.Level1SimpleEntities);
+                var anonymousUserRole = new RoleDN { Name = "Anonymous" }.Save();
+                var superUserRole = new RoleDN { Name = "SuperUser" }.Save();
+                var internalUserRole = new RoleDN { Name = "InternalUser" }.Save();
+                var externalUserRole = new RoleDN { Name = "ExternalUser" }.Save();
 
-                //RoleDN systemUser = new RoleDN { Name = "System" }.Save();
-                RoleDN anonymousUser = new RoleDN { Name = "Anonymous" }.Save();
-                
-                RoleDN superUser = new RoleDN { Name = "SuperUser" }.Save();
-                RoleDN internalUser = new RoleDN { Name = "InternalUser" }.Save();
-                RoleDN externalUser = new RoleDN { Name = "ExternalUser" }.Save();
-
-                // crear los usuarios base
                 using (OperationLogic.AllowSave<UserDN>())
                 {
                     new UserDN
@@ -153,7 +148,7 @@ namespace Signum.Test.Extensions
                         State = UserState.Created,
                         UserName = AuthLogic.SystemUserName,
                         PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                        Role = superUser
+                        Role = superUserRole
                     }.Save();
 
                     new UserDN
@@ -161,7 +156,7 @@ namespace Signum.Test.Extensions
                         State = UserState.Created,
                         UserName = AuthLogic.AnonymousUserName,
                         PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                        Role = anonymousUser
+                        Role = anonymousUserRole
                     }.Save();
 
                     new UserDN
@@ -169,7 +164,7 @@ namespace Signum.Test.Extensions
                         State = UserState.Created,
                         UserName = "su",
                         PasswordHash = Security.EncodePassword("su"),
-                        Role = superUser
+                        Role = superUserRole
                     }.Save();
 
                     new UserDN
@@ -177,7 +172,7 @@ namespace Signum.Test.Extensions
                         State = UserState.Created,
                         UserName = "internal",
                         PasswordHash = Security.EncodePassword("internal"),
-                        Role = internalUser
+                        Role = internalUserRole
                     }.Save();
 
                     new UserDN
@@ -185,7 +180,7 @@ namespace Signum.Test.Extensions
                         State = UserState.Created,
                         UserName = "external",
                         PasswordHash = Security.EncodePassword("external"),
-                        Role = externalUser
+                        Role = externalUserRole
                     }.Save();
                 }
 
@@ -193,17 +188,19 @@ namespace Signum.Test.Extensions
                 using (OperationLogic.AllowSave<AlbumDN>())
                     Signum.Test.Starter.Load();
 
-                TypeConditionUsersRoles(externalUser.ToLite());
+                TypeConditionUsersRoles(externalUserRole.ToLite());
                 
-                TypeAuthLogic.Manual.SetAllowed(externalUser.ToLite(), typeof(LabelDN), 
+                TypeAuthLogic.Manual.SetAllowed(externalUserRole.ToLite(), typeof(LabelDN), 
                     new TypeAllowedAndConditions(TypeAllowed.None, 
                             new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
 
-                TypeAuthLogic.Manual.SetAllowed(externalUser.ToLite(), typeof(AlbumDN), 
+                TypeAuthLogic.Manual.SetAllowed(externalUserRole.ToLite(), typeof(AlbumDN), 
                     new TypeAllowedAndConditions(TypeAllowed.None,
                             new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
 
-                TypeConditionUsersRoles(internalUser.ToLite());
+                TypeConditionUsersRoles(internalUserRole.ToLite());
+
+                ChartScriptLogic.ImportAllScripts(@"d:\Signum\Extensions\Signum.Engine.Extensions\Chart\ChartScripts");
             }
         }
 
@@ -219,10 +216,10 @@ namespace Signum.Test.Extensions
                         new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
                         new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
 
-            //TypeAuthLogic.Manual.SetAllowed(role, typeof(UserChartDN),
-            //    new TypeAllowedAndConditions(TypeAllowed.None,
-            //            new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
-            //            new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
+            TypeAuthLogic.Manual.SetAllowed(role, typeof(UserChartDN),
+                new TypeAllowedAndConditions(TypeAllowed.None,
+                        new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
+                        new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
 
             TypeAuthLogic.Manual.SetAllowed(role, typeof(LinkListPartDN),
               new TypeAllowedAndConditions(TypeAllowed.None,
