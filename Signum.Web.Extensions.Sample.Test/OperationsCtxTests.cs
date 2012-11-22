@@ -76,7 +76,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             selenium.LineFindAndSelectElements("New_Label_", false, new int[] { 0 });
 
-            selenium.PopupSave("New_"); 
+            selenium.PopupOk("New_"); 
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.MainEntityHasId();
         }

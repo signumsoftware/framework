@@ -37,14 +37,14 @@ namespace Signum.Web.Extensions.Sample
 
             AlbumFromBandModel model = new AlbumFromBandModel(band.ToLite());
 
-            ViewData[ViewDataKeys.OnSave] = new JsOperationExecutor(new JsOperationOptions 
+            ViewData[ViewDataKeys.OnOk] = new JsOperationExecutor(new JsOperationOptions 
             { 
                 Prefix = prefix,
                 ControllerUrl = Url.Action<MusicController>(mc => mc.CreateAlbumFromBandExecute(prefix))
             }).validateAndAjax().ToJS();
 
             TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
-            return this.PopupOpen(new PopupNavigateOptions(tc));
+            return this.PopupOpen(new PopupViewOptions(tc));
         }
 
         [HttpPost]
