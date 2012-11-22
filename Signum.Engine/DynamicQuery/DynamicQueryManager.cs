@@ -73,7 +73,8 @@ namespace Signum.Engine.DynamicQuery
 
         public QueryDescription QueryDescription(object queryName)
         {
-            return this[queryName].GetDescription(queryName);
+            using (ExecutionMode.UserInterface())
+                return this[queryName].GetDescription(queryName);
         }
 
         public event Func<object, bool> AllowQuery;
