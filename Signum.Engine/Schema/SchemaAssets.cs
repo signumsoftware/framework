@@ -110,7 +110,7 @@ namespace Signum.Engine.Maps
         SqlPreCommand SyncProcedures(Replacements replacements)
         {
             var oldProcedures = (from p in Database.View<SysObjects>()
-                                 where p.type == "P" || p.type == "F"
+                                 where p.type == "P" || p.type == "IF"
                                  join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
                                  select new { p.name, p.type, m.definition }).ToDictionary(a => a.name);
 
