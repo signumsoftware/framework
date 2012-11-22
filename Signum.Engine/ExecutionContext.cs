@@ -6,34 +6,32 @@ using Signum.Utilities;
 
 namespace Signum.Engine
 {
-    public class ExecutionContext
+    public static class ExecutionMode
     {
-        public string Description { get; private set; }
-        public ExecutionContext(string description)
+        static ThreadVariable<bool> inGlobalMode = Statics.ThreadVariable<bool>("inGlobalMode");
+        public static bool InGlobal
         {
-            this.Description = description;
+            get { return inGlobalMode.Value; }
         }
 
-        public override string ToString()
+        public static IDisposable Global()
         {
-            return Description;
+            var oldValue = inGlobalMode.Value;
+            inGlobalMode.Value = true;
+            return new Disposable(() => inGlobalMode.Value = oldValue);
         }
 
-
-        public static ExecutionContext UserInterface = new ExecutionContext("UserInterface");  
-
-        static readonly Variable<ExecutionContext> currentExecutionContext = Statics.ThreadVariable<ExecutionContext>("executionContext");
-
-        public static ExecutionContext Current
+        static ThreadVariable<bool> inUserInterfaceMode = Statics.ThreadVariable<bool>("inUserInterfaceMode");
+        public static bool InUserInterface
         {
-            get { return currentExecutionContext.Value; }
+            get { return inUserInterfaceMode.Value; }
         }
 
-        public static IDisposable Scope(ExecutionContext executionContext)
+        public static IDisposable UserInterface()
         {
-            var oldValue = currentExecutionContext.Value;
-            currentExecutionContext.Value = executionContext;
-            return new Disposable(() => currentExecutionContext.Value = oldValue);
+            var oldValue = inUserInterfaceMode.Value;
+            inUserInterfaceMode.Value = true;
+            return new Disposable(() => inUserInterfaceMode.Value = oldValue);
         }
     }
 }

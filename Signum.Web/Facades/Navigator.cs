@@ -410,6 +410,12 @@ namespace Signum.Web
         {
             Manager.Initialize();
         }
+
+        internal static void AssertNotReadonly(IdentifiableEntity ident)
+        {
+            if (Navigator.IsReadOnly(ident))
+                throw new UnauthorizedAccessException("{0} is read-only".Formato(ident));
+        }
     }
     
     public class NavigationManager
@@ -627,7 +633,7 @@ namespace Signum.Web
             ViewButtons buttons = viewOptions.ViewButtons;
             controller.ViewData[ViewDataKeys.ViewButtons] = buttons;
             controller.ViewData[ViewDataKeys.OkVisible] = buttons == ViewButtons.Ok;
-            controller.ViewData[ViewDataKeys.SaveVisible] = buttons == ViewButtons.Save && !OnSaveProtected(cleanType) && !isReadOnly;
+            controller.ViewData[ViewDataKeys.SaveVisible] = buttons == ViewButtons.Save && CanSave(cleanType) && !isReadOnly;
 
             return new PartialViewResult
             {
@@ -1004,18 +1010,21 @@ namespace Signum.Web
 
         public event Func<Type, bool> SaveProtected;
 
-        public bool OnSaveProtected(Type type)
+        public bool CanSave(Type type)
         {
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+                return false;
+
             if (SaveProtected != null)
             {
                 foreach (Func<Type, bool> sp in SaveProtected.GetInvocationList())
                 {
                     if (sp(type))
-                        return true;
+                        return false;
                 }
             }
 
-            return false;
+            return true;
         }
     }
 

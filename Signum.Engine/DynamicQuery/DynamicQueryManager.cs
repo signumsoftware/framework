@@ -55,22 +55,26 @@ namespace Signum.Engine.DynamicQuery
 
         public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return this[request.QueryName].ExecuteQuery(request);
+            using (ExecutionMode.UserInterface())
+                return this[request.QueryName].ExecuteQuery(request);
         }
 
         public int ExecuteQueryCount(QueryCountRequest request)
         {
-            return this[request.QueryName].ExecuteQueryCount(request);
+            using (ExecutionMode.UserInterface())
+                return this[request.QueryName].ExecuteQueryCount(request);
         }
 
         public Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return this[request.QueryName].ExecuteUniqueEntity(request);
+            using (ExecutionMode.UserInterface())
+                return this[request.QueryName].ExecuteUniqueEntity(request);
         }
 
         public QueryDescription QueryDescription(object queryName)
         {
-            return this[queryName].GetDescription(queryName);
+            using (ExecutionMode.UserInterface())
+                return this[queryName].GetDescription(queryName);
         }
 
         public event Func<object, bool> AllowQuery;

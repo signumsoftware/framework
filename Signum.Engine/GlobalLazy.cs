@@ -109,7 +109,7 @@ namespace Signum.Engine
         {
             var result = new ResetLazy<T>(() =>
             {
-                using (Schema.Current.GlobalMode())
+                using (ExecutionMode.Global())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
                 using (Transaction tr = Transaction.InTestTransaction ? null:  Transaction.ForceNew())
                 using (new EntityCache(true))

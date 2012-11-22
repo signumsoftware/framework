@@ -145,22 +145,22 @@ namespace Signum.Windows
 
         public static T Save<T>(this T entidad) where T : IdentifiableEntity
         {
-            return (T)Return((IBaseServer s)=>s.Save(entidad));
+            return (T)Return((IBaseServer s) => s.Save(entidad));
         }
 
         public static IdentifiableEntity Save(IdentifiableEntity entidad)
         {
-            return Return((IBaseServer s)=>s.Save(entidad)); 
+            return Return((IBaseServer s) => s.Save(entidad)); 
         }
 
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
         {
-            return (T)Return((IBaseServer s)=>s.Retrieve(typeof(T), id)); 
+            return (T)Return((IBaseServer s) => s.Retrieve(typeof(T), id)); 
         }
 
         public static IdentifiableEntity Retrieve(Type type, int id)
         {
-            return Return((IBaseServer s)=>s.Retrieve(type, id)); 
+            return Return((IBaseServer s) => s.Retrieve(type, id)); 
         }
 
         public static IdentifiableEntity Retrieve(Lite lite)
@@ -188,48 +188,43 @@ namespace Signum.Windows
 
         public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Return((IBaseServer s)=>s.Retrieve(lite.RuntimeType, lite.Id)); 
+            return (T)(IIdentifiable)Return((IBaseServer s) => s.Retrieve(lite.RuntimeType, lite.Id)); 
         }
 
         public static List<T> RetrieveAll<T>() where T : IdentifiableEntity
         {
-            return Return((IBaseServer s)=>s.RetrieveAll(typeof(T)).Cast<T>().ToList<T>()); 
+            return Return((IBaseServer s) => s.RetrieveAll(typeof(T)).Cast<T>().ToList<T>()); 
         }
 
         public static List<IdentifiableEntity> RetrieveAll(Type type)
         {
-            return Return((IBaseServer s)=>s.RetrieveAll(type)); 
-        }
-
-        public static List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
-        {
-            return Return((IBaseServer s)=>s.RetrieveAllLite(liteType, implementations)); 
+            return Return((IBaseServer s) => s.RetrieveAll(type)); 
         }
 
         public static List<Lite> RetrieveAllLite(Type type)
         {
-            return RetrieveAllLite(type, Implementations.By(type));
-        }
-
-        public static List<Lite<T>> RetrieveAllLite<T>(Implementations implementations) where T : class, IIdentifiable
-        {
-            return Return((IBaseServer s)=>s.RetrieveAllLite(typeof(T), implementations).Cast<Lite<T>>().ToList()); 
+            return Return((IBaseServer s) => s.RetrieveAllLite(type));
         }
 
         public static List<Lite<T>> RetrieveAllLite<T>() where T : class, IIdentifiable
         {
-            return RetrieveAllLite<T>(Implementations.By(typeof(T)));
+            return RetrieveAllLite(typeof(T)).Cast<Lite<T>>().ToList(); 
+        }
+
+        public static List<Lite> FindAllLite(Type liteType, Implementations implementations)
+        {
+            return Return((IBaseServer s) => s.FindAllLite(liteType, implementations));
         }
 
         public static List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
-            return Return((IBaseServer s)=>s.FindLiteLike(liteType, implementations, subString, count)); 
+            return Return((IBaseServer s) => s.FindLiteLike(liteType, implementations, subString, count)); 
         }
 
         public static List<T> SaveList<T>(List<T> list)
             where T: IdentifiableEntity
         {
-            return Return((IBaseServer s)=>s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
+            return Return((IBaseServer s) => s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
         }
 
         static Dictionary<Type, Dictionary<PropertyRoute, Implementations>> implementations = new Dictionary<Type, Dictionary<PropertyRoute, Implementations>>();

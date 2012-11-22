@@ -99,24 +99,7 @@ namespace Signum.Windows
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            if (Navigator.Manager.OnSaveProtected(this.DataContext.GetType()))
-            {
-                if (!this.HasChanges())
-                    DialogResult = true;
-                else
-                {
-                    var result = MessageBox.Show(
-                        Properties.Resources.ThereAreChangesContinue,
-                        Properties.Resources.ThereAreChanges,
-                        MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
-
-                    if (result != MessageBoxResult.OK)
-                        return;
-
-                    DialogResult = false;
-                }
-            }
-            else
+            if (Navigator.Manager.CanSave(this.DataContext.GetType()))
             {
                 string errors = this.GetErrors();
 
@@ -147,6 +130,24 @@ namespace Signum.Windows
                 }
 
                 base.DialogResult = true;
+            }
+            else
+            {
+                if (!this.HasChanges())
+                    DialogResult = true;
+                else
+                {
+                    var result = MessageBox.Show(
+                        Properties.Resources.ThereAreChangesContinue,
+                        Properties.Resources.ThereAreChanges,
+                        MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
+
+                    if (result == MessageBoxResult.Cancel)
+                        return;
+
+                    DialogResult = false;
+
+                }
             }
         }
 
@@ -187,28 +188,13 @@ namespace Signum.Windows
             {
                 if (buttonBar.SaveVisible)
                 {
-                    if (Navigator.Manager.OnSaveProtected(this.DataContext.GetType()))
+                    if (Navigator.Manager.CanSave(this.DataContext.GetType()))
                     {
-                        var result = MessageBox.Show(
-                            Properties.Resources.ThereAreChangesContinue,
+                        var result = MessageBox.Show(this,
+                            Properties.Resources.SaveChanges,
                             Properties.Resources.ThereAreChanges,
-                            MessageBoxButton.OKCancel, 
-                            MessageBoxImage.Question, 
-                            MessageBoxResult.OK);
-
-                        if (result == MessageBoxResult.Cancel)
-                        {
-                            e.Cancel = true;
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        var result = MessageBox.Show(this, 
-                            Properties.Resources.SaveChanges, 
-                            Properties.Resources.ThereAreChanges,
-                            MessageBoxButton.YesNoCancel, 
-                            MessageBoxImage.Question, 
+                            MessageBoxButton.YesNoCancel,
+                            MessageBoxImage.Question,
                             MessageBoxResult.No);
 
                         if (result == MessageBoxResult.Cancel)
@@ -219,6 +205,21 @@ namespace Signum.Windows
 
                         if (result == MessageBoxResult.Yes)
                             DataContext = Server.Save((IdentifiableEntity)DataContext);
+                    }
+                    else
+                    {
+                        var result = MessageBox.Show(
+                          Properties.Resources.ThereAreChangesContinue,
+                          Properties.Resources.ThereAreChanges,
+                          MessageBoxButton.OKCancel,
+                          MessageBoxImage.Question,
+                          MessageBoxResult.OK);
+
+                        if (result == MessageBoxResult.Cancel)
+                        {
+                            e.Cancel = true;
+                            return;
+                        }
                     }
                 }
                 else

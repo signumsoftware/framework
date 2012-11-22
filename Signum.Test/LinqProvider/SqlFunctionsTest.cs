@@ -187,5 +187,13 @@ namespace Signum.Test.LinqProvider
         {
             Debug.WriteLine(Database.Query<T>().Select(a => bla.Evaluate(a).InSql()).ToString(","));
         }
+
+        [TestMethod]
+        public void ConcatenateNull()
+        {
+            var list = Database.Query<ArtistDN>().Select(a => (a.Name + null).InSql()).ToList();
+
+            Assert.IsFalse(list.Any(string.IsNullOrEmpty));
+        }
     }
 }
