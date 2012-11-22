@@ -35,16 +35,32 @@ namespace Signum.Engine.Maps
         }
 
         #region Views
+        public class View
+        {
+            public string Name;
+            public string Definition;
 
-        public Dictionary<string, string> Views = new Dictionary<string, string>();
+            public SqlPreCommandSimple CreateView()
+            {
+                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(Name.SqlScape()) + Definition + SqlPreCommand.GO);
+            }
+
+            public SqlPreCommandSimple AlterView()
+            {
+                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(Name.SqlScape()) + Definition + SqlPreCommand.GO);
+            } 
+        }
+
+
+        public Dictionary<string, View> Views = new Dictionary<string, View>();
         public void IncludeView(string viewName, string viewDefinition)
         {
-            Views[viewName] = viewDefinition;
+            Views[viewName] = new View { Name = viewName, Definition = viewDefinition };
         }
 
         SqlPreCommand GenerateViews()
         {
-            return Views.Select(v => CreateView(v.Key, v.Value)).Combine(Spacing.Double);
+            return Views.Values.Select(v => v.CreateView()).Combine(Spacing.Double);
         }
 
         SqlPreCommand SyncViews(Replacements replacements)
@@ -56,52 +72,73 @@ namespace Signum.Engine.Maps
             return Synchronizer.SynchronizeScript(
                 Views,
                 oldView,
-                (name, newDefinition) => CreateView(name, newDefinition),
+                (name, newView) => newView.CreateView(),
                 null,
                 (name, newDef, oldDef) =>
-                    Clean(CreateView(name, newDef).Sql.RemoveRight(SqlPreCommand.GO.Length)) == Clean(oldDef) ? null :
-                    new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(name.SqlScape()) + newDef + SqlPreCommand.GO),
+                    Clean(newDef.CreateView().Sql.RemoveRight(SqlPreCommand.GO.Length)) == Clean(oldDef) ? null : newDef.AlterView(),
                 Spacing.Double);
         }
-
-        static SqlPreCommandSimple CreateView(string viewName, string viewDefinition)
-        {
-            return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(viewName.SqlScape()) + viewDefinition + SqlPreCommand.GO);
-        } 
         #endregion
 
         #region Procedures
-        public Dictionary<string, string> StoreProcedures = new Dictionary<string, string>();
+        public Dictionary<string, Procedure> StoreProcedures = new Dictionary<string, Procedure>();
         public void IncludeStoreProcedure(string procedureName, string procedureCodeAndArguments)
         {
-            StoreProcedures[procedureName] = procedureCodeAndArguments;
+            StoreProcedures[procedureName] = new Procedure
+            {
+                ProcedureName = procedureName,
+                ProcedureCodeAndArguments = procedureCodeAndArguments,
+                ProcedureType = "PROCEDURE"
+            }; 
+        }
+
+        public void IncludeUserDefinedFunction(string functionName, string functionCodeAndArguments)
+        {
+            StoreProcedures[functionName] = new Procedure
+            {
+                ProcedureName = functionName,
+                ProcedureCodeAndArguments = functionCodeAndArguments,
+                ProcedureType = "FUNCTION"
+            };
         }
 
         SqlPreCommand GenerateProcedures()
         {
-            return StoreProcedures.Select(v => CreateProcedure(v.Key, v.Value)).Combine(Spacing.Double);
+            return StoreProcedures.Select(p => p.Value.CreateSql()).Combine(Spacing.Double);
         }
 
         SqlPreCommand SyncProcedures(Replacements replacements)
         {
-            var oldProc = (from p in Database.View<SysProcedures>()
-                           join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
-                           select KVP.Create(p.name, m.definition)).ToDictionary();
+            var oldProcedures = (from p in Database.View<SysObjects>()
+                                 where p.type == "P" || p.type == "F"
+                                 join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
+                                 select new { p.name, p.type, m.definition }).ToDictionary(a => a.name);
 
             return Synchronizer.SynchronizeScript(
                 StoreProcedures,
-                oldProc,
-                (name, newCodeAndArgument) => CreateProcedure(name, newCodeAndArgument),
+                oldProcedures,
+                (name, newProc) => newProc.CreateSql(),
                 null,
-                (name, newCodeAndArgument, oldCodeAndArgument) =>
-                    Clean(CreateProcedure(name, newCodeAndArgument).Sql.RemoveRight(SqlPreCommand.GO.Length)) == Clean(oldCodeAndArgument) ? null :
-                    new SqlPreCommandSimple("ALTER PROCEDURE {0} ".Formato(name.SqlScape()) + newCodeAndArgument + SqlPreCommand.GO),
+                (name, newProc, oldProc) =>
+                    Clean(newProc.CreateSql().Sql.RemoveRight(SqlPreCommand.GO.Length)) == Clean(oldProc.definition) ? null : newProc.AlterSql(),
                 Spacing.Double);
         }
 
-        static SqlPreCommandSimple CreateProcedure(string procedureName, string procedureCodeAndArguments)
+        public class Procedure
         {
-            return new SqlPreCommandSimple("CREATE PROCEDURE {0} ".Formato(procedureName.SqlScape()) + procedureCodeAndArguments + SqlPreCommand.GO);
+            public string ProcedureType;
+            public string ProcedureName;
+            public string ProcedureCodeAndArguments;
+
+            public SqlPreCommandSimple CreateSql()
+            {
+                return new SqlPreCommandSimple("CREATE {0} {1} ".Formato(ProcedureType, ProcedureName.SqlScape()) + ProcedureCodeAndArguments + SqlPreCommand.GO);
+            }
+
+            public SqlPreCommandSimple AlterSql()
+            {
+                return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName.SqlScape()) + ProcedureCodeAndArguments + SqlPreCommand.GO);
+            }
         }
         #endregion
 

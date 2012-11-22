@@ -16,6 +16,8 @@ namespace Signum.Engine.SchemaInfoTables
     {
         [SqlViewColumn(PrimaryKey=true)]
         public int object_id;
+        public string type;
+        public string type_desc;
         public string name;
     }
 
