@@ -132,12 +132,21 @@ SF.registerModule("ViewNavigator", function () {
         showViewOk: function (newHtml) {
             if (SF.isEmpty(newHtml)) {
                 newHtml = $('#' + this.viewOptions.containerDiv).children().clone(true); //preloaded
-            }
-            //Backup current Html (for cancel scenarios)
-            this.backup = SF.cloneContents(this.viewOptions.containerDiv);
-            $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
 
-            $("body").append($("<div></div>").attr("id", this.tempDivId()).css("display", "none").append(newHtml));
+                //Backup current Html (for cancel scenarios)
+                this.backup = SF.cloneContents(this.viewOptions.containerDiv);
+                $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
+
+                $("body").append($("<div></div>").attr("id", this.tempDivId()).css("display", "none").html(newHtml));
+            }
+            else {
+                //Backup current Html (for cancel scenarios)
+                this.backup = SF.cloneContents(this.viewOptions.containerDiv);
+                $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
+
+                $("body").append(SF.hiddenDiv(this.tempDivId(), newHtml));
+            }
+
             SF.triggerNewContent($("#" + this.tempDivId()));
 
             var self = this;
@@ -370,7 +379,8 @@ SF.registerModule("ViewNavigator", function () {
                     if (onCancelled != null) {
                         onCancelled();
                     }
-                }});
+                } 
+                });
             }
         });
     }

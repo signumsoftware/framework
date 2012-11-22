@@ -52,9 +52,9 @@ SF.registerModule("FindNavigator", function () {
 
                 var $tblResults = self.element.find(".sf-search-results-container");
                 $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection),th:not(.sf-th-entity):not(.sf-th-selection) span,th:not(.sf-th-entity):not(.sf-th-selection) .sf-header-droppable", function (e) {
-                    if (e.target != this) {
+                    if (e.target != this || $(this).closest(".sf-search-ctxmenu").length > 0) {
                         return;
-                    }
+                    } 
                     self.newSortOrder($(e.target).closest("th"), e.shiftKey);
                     self.search();
                     return false;
