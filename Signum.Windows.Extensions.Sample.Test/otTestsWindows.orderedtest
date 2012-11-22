@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="otTestsUI" storage="d:\signum\extensions\signum.windows.extensions.sample.test\ottestsui.orderedtest" id="0a18c68e-74dd-4166-804a-e7ed1abba9b7" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
-  <TestLinks>
-    <TestLink id="fedbc181-1ab4-da70-8a9d-e15656ad4813" name="CreateMusicEnvironment" storage="..\signum.test.extensions\bin\debug\signum.test.extensions.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <TestLink id="feeac68e-bf15-8403-d1ac-0025b34622f0" name="Search" storage="bin\x86\debug\signum.windows.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  </TestLinks>
-</OrderedTest>
