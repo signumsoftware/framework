@@ -42,12 +42,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateView()
             {
-                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(Name.SqlScape()) + Definition + SqlPreCommand.GO);
+                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(Name.SqlScape()) + Definition) { AddGo = true };
             }
 
             public SqlPreCommandSimple AlterView()
             {
-                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(Name.SqlScape()) + Definition + SqlPreCommand.GO);
+                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(Name.SqlScape()) + Definition) { AddGo = true };
             } 
         }
 
@@ -75,7 +75,7 @@ namespace Signum.Engine.Maps
                 (name, newView) => newView.CreateView(),
                 null,
                 (name, newDef, oldDef) =>
-                    Clean(newDef.CreateView().Sql.RemoveRight(SqlPreCommand.GO.Length)) == Clean(oldDef) ? null : newDef.AlterView(),
+                    Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null : newDef.AlterView(),
                 Spacing.Double);
         }
         #endregion
@@ -120,7 +120,7 @@ namespace Signum.Engine.Maps
                 (name, newProc) => newProc.CreateSql(),
                 null,
                 (name, newProc, oldProc) =>
-                    Clean(newProc.CreateSql().Sql.RemoveRight(SqlPreCommand.GO.Length)) == Clean(oldProc.definition) ? null : newProc.AlterSql(),
+                    Clean(newProc.CreateSql().Sql) == Clean(oldProc.definition) ? null : newProc.AlterSql(),
                 Spacing.Double);
         }
 
@@ -132,12 +132,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateSql()
             {
-                return new SqlPreCommandSimple("CREATE {0} {1} ".Formato(ProcedureType, ProcedureName.SqlScape()) + ProcedureCodeAndArguments + SqlPreCommand.GO);
+                return new SqlPreCommandSimple("CREATE {0} {1} ".Formato(ProcedureType, ProcedureName.SqlScape()) + ProcedureCodeAndArguments) { AddGo = true };
             }
 
             public SqlPreCommandSimple AlterSql()
             {
-                return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName.SqlScape()) + ProcedureCodeAndArguments + SqlPreCommand.GO);
+                return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName.SqlScape()) + ProcedureCodeAndArguments) { AddGo = true };
             }
         }
         #endregion

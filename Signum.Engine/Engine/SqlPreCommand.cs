@@ -25,7 +25,7 @@ namespace Signum.Engine
 
     public abstract class SqlPreCommand
     {
-        public const string GO = ";\r\nGO";
+        protected internal abstract bool EndsWithGo { get; }
 
         public abstract IEnumerable<SqlPreCommandSimple> Leaves();
 
@@ -112,6 +112,15 @@ namespace Signum.Engine
 
     public class SqlPreCommandSimple : SqlPreCommand
     {
+        internal const string GO = ";\r\nGO";
+
+        protected internal override bool EndsWithGo
+        {
+            get { return AddGo; }
+        }
+
+        public bool AddGo { get; set; }
+
         public string Sql { get; private set; }
         public List<DbParameter> Parameters { get; private set; }
 
@@ -134,6 +143,9 @@ namespace Signum.Engine
         protected internal override void GenerateScript(StringBuilder sb)
         {
             sb.Append(Sql);
+
+            if (AddGo)
+                sb.Append(GO);
         }
 
         protected internal override void GenerateParameters(List<DbParameter> list)
@@ -234,9 +246,10 @@ namespace Signum.Engine
             string sep = separators[Spacing];
             for (int i = 0; i < Commands.Length - 1; i++)
             {
-                Commands[i].GenerateScript(sb);
+                var cmd = Commands[i];
+                cmd.GenerateScript(sb);
 
-                if (sb.ToString(sb.Length - SqlPreCommand.GO.Length, SqlPreCommand.GO.Length) != SqlPreCommand.GO)
+                if (!cmd.EndsWithGo)
                     sb.Append(";");
 
                 sb.Append(sep);
@@ -294,6 +307,11 @@ namespace Signum.Engine
         public override SqlPreCommand Clone()
         {
             return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());  
+        }
+
+        protected internal override bool EndsWithGo
+        {
+            get { return Commands.Any() && Commands.Last().EndsWithGo; }
         }
     }
 

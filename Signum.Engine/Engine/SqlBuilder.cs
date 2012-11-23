@@ -206,7 +206,7 @@ namespace Signum.Engine
                 string viewName = index.ViewName;
 
                 SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM dbo.{2} WHERE {3}"
-                    .Formato(viewName.SqlScape(), columns, index.Table.Name.SqlScape(), index.Where) + SqlPreCommand.GO);
+                    .Formato(viewName.SqlScape(), columns, index.Table.Name.SqlScape(), index.Where)) { AddGo = true };
 
                 SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
                     .Formato(index.IndexName, viewName.SqlScape(), index.Columns.ToString(c => c.Name.SqlScape(), ", ")));
@@ -226,7 +226,7 @@ namespace Signum.Engine
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".Formato(
                 table.SqlScape(),
-                constraintName.SqlScape()) + SqlPreCommand.GO);
+                constraintName.SqlScape())) { AddGo = true };
         }
 
         public static SqlPreCommand AlterTableAddDefaultConstraint(string table, string column, string constraintName, string definition)

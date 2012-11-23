@@ -670,32 +670,11 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
-            //if (proj.IsOneCell)
-            //{
-            //    var column = proj.Select.Columns.SingleEx();
-
-            //    var select = (SelectExpression)base.Visit(proj.Select);
-            //    var scalar = new ScalarExpression(column.Expression.Type, select);
-
-            //    var reference = column.GetReference(proj.Select.Alias);
-
-            //    if (replacements == null)
-            //        replacements = new Dictionary<ColumnExpression, ScalarExpression>(); 
-
-            //    replacements.Add(reference, scalar);
-            //    var result = Visit(proj.Projector);
-            //    replacements.Remove(reference);
-
-            //    return result;
-            //}
-            //else
-            //{
             bool oldInnerProjection = this.innerProjection;
             innerProjection = true;
             var result = base.VisitProjection(proj);
             innerProjection = oldInnerProjection;
             return result;
-            //}
         }
 
         protected override Expression VisitIn(InExpression inExp)

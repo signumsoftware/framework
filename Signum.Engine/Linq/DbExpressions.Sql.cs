@@ -219,7 +219,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            string result = "{0}({1}) as {2}".Formato(Table.Name, Arguments.ToString(a => a.NiceToString(), ","), Alias);
+            string result = "{0}({1}) as {2}".Formato(SqlFunction, Arguments.ToString(a => a.NiceToString(), ","), Alias);
 
             return result;
         }

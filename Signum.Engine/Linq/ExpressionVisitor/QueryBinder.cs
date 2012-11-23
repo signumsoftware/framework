@@ -238,12 +238,16 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             Alias alias = NextSelectAlias();
+
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases);
+
             return new ProjectionExpression(
                 new SelectExpression(alias, false, false, count, pc.Columns, projection.Select, null, null, null),
                 pc.Projector, null, resultType);
         }
 
+        //Avoid self referencing SQL problems
+        bool inTableValuedFunction = false;
 
         private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate, bool isRoot)
         {
@@ -258,9 +262,13 @@ namespace Signum.Engine.Linq
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, newSource.KnownAliases);
 
+            if (!isRoot && !inTableValuedFunction && pc.Projector is ColumnExpression && (function == UniqueFunction.First || function == UniqueFunction.FirstOrDefault))
+                return new ScalarExpression(pc.Projector.Type,
+                    new SelectExpression(alias, false, false, top, new[] { new ColumnDeclaration("val", pc.Projector) }, newSource, where, null, null));
+
             var newProjector = new ProjectionExpression(
-                    new SelectExpression(alias, false, false, top, pc.Columns, newSource, where, null, null),
-                    pc.Projector, function, resultType);
+                new SelectExpression(alias, false, false, top, pc.Columns, newSource, where, null, null),
+                pc.Projector, function, resultType);
 
             if (isRoot)
                 return newProjector;
@@ -801,9 +809,12 @@ namespace Signum.Engine.Linq
             Expression exp = table.GetProjectorExpression(tableAlias, this);
 
             var functionName = mce.Method.SingleAttribute<SqlMethodAttribute>().Name ?? mce.Method.Name;
+            var oldInTVF = inTableValuedFunction;
+            inTableValuedFunction = true;
+            var argumens  = mce.Arguments.Select(DbExpressionNominator.FullNominate).ToList();
+            inTableValuedFunction = oldInTVF;
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, tableAlias,
-                mce.Arguments.Select(DbExpressionNominator.FullNominate));
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, tableAlias, argumens);
 
             Alias selectAlias = NextSelectAlias();
 
