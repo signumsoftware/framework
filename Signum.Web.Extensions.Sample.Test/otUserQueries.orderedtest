@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="otuserqueries" storage="d:\signum\extensions\signum.web.extensions.sample.test\otuserqueries.orderedtest" id="5f7c1890-218e-4dc4-8b20-dffe51dcf9ec" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
-  <Execution timeOut="2147483647" id="016d5854-1f04-4130-8d2d-e5818945efbb" />
-  <TestLinks>
-    <TestLink id="c6e7afad-3425-b46e-31fd-130b909d49c6" name="UserQueries001_Create" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <TestLink id="87b4e0a6-5e86-74c0-5eb4-20882d9ad0b9" name="UserQueries002_Edit" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <TestLink id="1bb55e0b-73e7-a61b-14db-da47ffd0f814" name="UserQueries003_Delete" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  </TestLinks>
-</OrderedTest>

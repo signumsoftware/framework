@@ -42,7 +42,7 @@ namespace Signum.Entities.Authorization
                 if (user == null)
                     throw new AuthenticationException(Resources.NotUserLogged);
 
-                return user.Role;
+               return user.Role;
             }
         }
     }

@@ -104,13 +104,13 @@ namespace Signum.Windows.Operations
                 OperationSettings settings = Settings.TryGetC(oi.Key);
                 if(settings != null)
                 {
-                    if(!settings.GetType().IsInstantiationOf(typeof(EntityOperationSettings<>)))
-                        throw new InvalidOperationException("OperationSettings for {0} should be a {1} instead of {2}".Formato(
-                            oi.Key, typeof(EntityOperationSettings<>).MakeGenericType(type).TypeName(), settings.GetType()));
+                    if (!settings.GetType().IsInstantiationOf(typeof(EntityOperationSettings<>)))
+                        throw new InvalidOperationException("{0}([1]) should be a {1} instead".Formato(
+                            settings.GetType().TypeName(), OperationDN.UniqueKey(oi.Key), typeof(EntityOperationSettings<>).MakeGenericType(type).TypeName()));
  
                     Type supraType = settings.GetType().GetGenericArguments()[0]; 
                     if(!supraType.IsAssignableFrom(type))
-                        throw new InvalidOperationException("{0} is not a subclass of {1}".Formato(type, supraType)); 
+                        throw new InvalidOperationException("{0}({1}) does not match {2}".Formato(settings.GetType().TypeName(), OperationDN.UniqueKey(oi.Key), type.TypeName())); 
 
                     type = supraType; 
                 }
@@ -382,10 +382,9 @@ namespace Signum.Windows.Operations
                           where oi.IsEntityOperation && oi.Lite == true
                           let os = (EntityOperationSettingsBase)OperationClient.Manager.Settings.TryGetC(oi.Key)
                           where os == null ||
-                                os.Contextual == null && !os.ClickOverriden ||
-                                os.Contextual.OnVisible(sc, oi)
+                                (os.Contextual == null ? !os.ClickOverriden : os.Contextual.OnVisible(sc, oi))
                           select new EntityData
-                          {    
+                          {
                               OperationKey = oi.Key,
                               OperationInfo = oi,
                               CanExecute = null,
