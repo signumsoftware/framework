@@ -86,7 +86,7 @@ namespace Signum.Windows.Operations
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
 
-        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, Control entityControl, ViewButtons viewButtons)
+        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, ButtonBarEventArgs ctx)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -114,33 +114,35 @@ namespace Signum.Windows.Operations
 
                     type = supraType; 
                 }
-                return miGenerateButton.GetInvoker(type)(this, oi, ident, entityControl, viewButtons, settings);
+                return miGenerateButton.GetInvoker(type)(this, oi, ident, ctx, settings);
             }).NotNull().ToList();
 
             return result;
         }
 
-        delegate Win.FrameworkElement GenerateButtonDelegate(OperationManager manager, OperationInfo operationInfo, IdentifiableEntity entity, FrameworkElement entityControl, ViewButtons viewButtons, OperationSettings os); 
+        delegate Win.FrameworkElement GenerateButtonDelegate(OperationManager manager, OperationInfo operationInfo, IdentifiableEntity entity, ButtonBarEventArgs ctx, OperationSettings os); 
 
         static GenericInvoker<GenerateButtonDelegate> miGenerateButton = new GenericInvoker<GenerateButtonDelegate>(
-            (ma, oi, e, ec, vb, os) => ma.GenerateButton<TypeDN>(oi, (TypeDN)e, ec,vb, (EntityOperationSettings<TypeDN>)os));
+            (ma, oi, e, args, os) => ma.GenerateButton<TypeDN>(oi, (TypeDN)e, args, (EntityOperationSettings<TypeDN>)os));
 
-        protected internal virtual Win.FrameworkElement GenerateButton<T>(OperationInfo operationInfo, T entity, FrameworkElement entityControl, ViewButtons viewButtons, EntityOperationSettings<T> os)
+        protected internal virtual Win.FrameworkElement GenerateButton<T>(OperationInfo operationInfo, T entity, ButtonBarEventArgs bb, EntityOperationSettings<T> os)
             where T:class, IIdentifiable
         {
             EntityOperationEventArgs<T> args = new EntityOperationEventArgs<T>
             {
                 Entity = entity,
-                EntityControl = entityControl,
+                EntityControl = bb.MainControl,
                 OperationInfo = operationInfo,
+                ViewButtons = bb.ViewButtons,
+                SaveProtected = bb.SaveProtected,
             };
 
-            if (os != null && os.IsVisible != null && !os.IsVisible(args))
+            if ((os != null && os.IsVisible != null) ? !os.IsVisible(args) : !bb.SaveProtected)
                 return null;
 
             if(operationInfo.OperationType == OperationType.ConstructorFrom && (os == null  || !os.AvoidMoveToSearchControl))
             {
-                var controls = entityControl.Children<SearchControl>()
+                var controls = bb.MainControl.Children<SearchControl>()
                     .Where(sc => operationInfo.Key.Equals(OperationClient.GetConstructFromOperationKey(sc)) ||
                     sc.NotSet(OperationClient.ConstructFromOperationKeyProperty) && sc.EntityType == operationInfo.ReturnType).ToList();
 
@@ -357,7 +359,7 @@ namespace Signum.Windows.Operations
                     where oi.OperationType == OperationType.ConstructorFromMany
                     let os = (ContextualOperationSettings)Settings.TryGetC(oi.Key)
                     where os == null || os.OnVisible(sc, oi)
-                    select ConstructFromMenuItemConsturctor.Construct(sc, oi, os))
+                    select ConstructFromManyMenuItemConsturctor.Construct(sc, oi, os))
                    .ToList();
         }
 

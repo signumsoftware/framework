@@ -231,7 +231,7 @@
       <DependentUpon>OmniboxTemplate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Omnibox\OmniboxClient.cs" />
-    <Compile Include="Operations\ConstructFromMenuItem.cs" />
+    <Compile Include="Operations\ConstructFromManyMenuItem.cs" />
     <Compile Include="Operations\EntityOperationMenuItem.cs" />
     <Compile Include="Operations\OperationServer.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
