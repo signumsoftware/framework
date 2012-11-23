@@ -99,39 +99,7 @@ namespace Signum.Windows
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            if (Navigator.Manager.CanSave(this.DataContext.GetType()))
-            {
-                string errors = this.GetErrors();
-
-                if (errors.HasText())
-                {
-                    Type type = DataContext.GetType();
-
-                    switch (AllowErrors)
-                    {
-                        case AllowErrors.Yes: break;
-                        case AllowErrors.No:
-                            MessageBox.Show(this, 
-                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), 
-                                Properties.Resources.FixErrors,
-                                MessageBoxButton.OK, 
-                                MessageBoxImage.Exclamation);
-                            return;
-                        case AllowErrors.Ask:
-                            if (MessageBox.Show(this, 
-                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway, 
-                                Properties.Resources.ContinueWithErrors,
-                                MessageBoxButton.YesNo, 
-                                MessageBoxImage.Exclamation, 
-                                MessageBoxResult.None) == MessageBoxResult.No)
-                                return;
-                            break;
-                    }
-                }
-
-                base.DialogResult = true;
-            }
-            else
+            if (this.DataContext is IdentifiableEntity && ButtonBar.SaveProtected)
             {
                 if (!this.HasChanges())
                     DialogResult = true;
@@ -148,6 +116,38 @@ namespace Signum.Windows
                     DialogResult = false;
 
                 }
+            }
+            else
+            {
+                string errors = this.GetErrors();
+
+                if (errors.HasText())
+                {
+                    Type type = DataContext.GetType();
+
+                    switch (AllowErrors)
+                    {
+                        case AllowErrors.Yes: break;
+                        case AllowErrors.No:
+                            MessageBox.Show(this,
+                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)),
+                                Properties.Resources.FixErrors,
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Exclamation);
+                            return;
+                        case AllowErrors.Ask:
+                            if (MessageBox.Show(this,
+                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway,
+                                Properties.Resources.ContinueWithErrors,
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Exclamation,
+                                MessageBoxResult.None) == MessageBoxResult.No)
+                                return;
+                            break;
+                    }
+                }
+
+                base.DialogResult = true;
             }
         }
 
@@ -186,9 +186,9 @@ namespace Signum.Windows
 
             if (this.HasChanges())
             {
-                if (buttonBar.SaveVisible)
+                if (buttonBar.ViewButtons == ViewButtons.Save)
                 {
-                    if (Navigator.Manager.CanSave(this.DataContext.GetType()))
+                    if (buttonBar.SaveVisible)
                     {
                         var result = MessageBox.Show(this,
                             Properties.Resources.SaveChanges,

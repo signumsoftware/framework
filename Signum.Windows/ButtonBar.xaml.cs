@@ -54,6 +54,14 @@ namespace Signum.Windows
             set { SetValue(ReloadVisibleProperty, value); }
         }
 
+        public static readonly DependencyProperty SaveProtectedProperty =
+            DependencyProperty.Register("SaveProtected", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
+        public bool SaveProtected
+        {
+            get { return (bool)GetValue(SaveProtectedProperty); }
+            set { SetValue(SaveProtectedProperty, value); }
+        }
+
         public event RoutedEventHandler OkClick
         {
             add { btOk.Click += value; }
@@ -99,10 +107,19 @@ namespace Signum.Windows
         {
             List<FrameworkElement> elements = new List<FrameworkElement>();
             if (GetButtonBarElement != null)
+            {
+                ButtonBarEventArgs ctx = new ButtonBarEventArgs
+                {
+                    MainControl = MainControl,
+                    ViewButtons = ViewButtons,
+                    SaveProtected = SaveProtected, 
+                }; 
+
                 elements.AddRange(GetButtonBarElement.GetInvocationList()
                     .Cast<GetButtonBarElementDelegate>()
-                    .Select(d => d(e.NewValue, MainControl, ViewButtons))
+                    .Select(d => d(e.NewValue, ctx))
                     .NotNull().SelectMany(d => d).NotNull().ToList());
+            }
 
             wrapPanel.Children.RemoveRange(2, wrapPanel.Children.Count - 3);
             for (int i = 0; i < elements.Count; i++)
@@ -113,16 +130,23 @@ namespace Signum.Windows
 
         public static void Start()
         {
-            ButtonBar.GetButtonBarElement += (obj, mainControl, viewButtons) => mainControl is IHaveToolBarElements ?
-                ((IHaveToolBarElements)mainControl).GetToolBarElements(obj, viewButtons) : null;
+            ButtonBar.GetButtonBarElement += (obj, ctx) => ctx.MainControl is IHaveToolBarElements ?
+                ((IHaveToolBarElements)ctx.MainControl).GetToolBarElements(obj, ctx) : null;
         }
     }
 
-    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, Control mainControl, ViewButtons buttons);
+    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, ButtonBarEventArgs context);
 
     public interface IHaveToolBarElements
     {
-        List<FrameworkElement> GetToolBarElements(object dataContext, ViewButtons buttons);
+        List<FrameworkElement> GetToolBarElements(object dataContext, ButtonBarEventArgs ctx);
+    }
+
+    public class ButtonBarEventArgs
+    {
+        public Control MainControl { get; set; }
+        public ViewButtons ViewButtons { get; set; }
+        public bool SaveProtected { get; set; }
     }
 
     public enum ViewButtons
