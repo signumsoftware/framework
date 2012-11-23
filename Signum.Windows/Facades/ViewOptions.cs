@@ -15,9 +15,11 @@ namespace Signum.Windows
 
         public bool? ReadOnly { get; set; }
 
+        public bool? SaveProtected { get; set; }
+
         public Control View { get; set; }
 
-        public abstract ViewButtons ViewButtons { get; set; }
+        public abstract ViewButtons ViewButtons { get; }
     }
 
     public class ViewOptions: ViewOptionsBase
@@ -25,14 +27,16 @@ namespace Signum.Windows
         public ViewOptions()
         {
             Clone = true;
-            ViewButtons = Windows.ViewButtons.Ok;
         }
 
         public PropertyRoute TypeContext { get; set; }
 
         public AllowErrors AllowErrors { get; set; }
 
-        public override ViewButtons ViewButtons { get; set; }
+        public override ViewButtons ViewButtons
+        {
+            get { return ViewButtons.Ok; }
+        }
     }
 
     public class NavigateOptions: ViewOptionsBase
@@ -42,7 +46,6 @@ namespace Signum.Windows
         public override ViewButtons ViewButtons
         {
             get { return ViewButtons.Save; }
-            set { throw new InvalidOperationException("ViewButtons is always Save in NavigateOptions"); }
         }
     }
 }
