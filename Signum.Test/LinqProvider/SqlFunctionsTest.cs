@@ -206,39 +206,43 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void TableValuedPerformanceTest()
         {
-            var songs = Database.Query<AlbumDN>().SelectMany(a => a.Songs);
+            var songs = Database.MListQuery((AlbumDN a) => a.Songs).Select(a => a.Element);
 
-            HeavyProfiler.Enabled = true;
-            using (HeavyProfiler.Log())
-            {
-                var min1 = (from s1 in songs
-                            from s2 in songs
-                            from s3 in songs
-                            from s4 in songs
-                            select MinimumExtensions.MinimumTableValued(
-                            MinimumExtensions.MinimumTableValued(s1.Seconds, s2.Seconds).Select(a => a.MinValue).First(),
-                            MinimumExtensions.MinimumTableValued(s3.Seconds, s4.Seconds).Select(a => a.MinValue).First()
-                            ).Select(a => a.MinValue).First()).ToList();
+            var t1 = PerfCounter.Ticks;
+            
+            var fast = (from s1 in songs
+                        from s2 in songs
+                        from s3 in songs
+                        from s4 in songs
+                        select MinimumExtensions.MinimumTableValued(
+                        MinimumExtensions.MinimumTableValued(s1.Seconds, s2.Seconds).Select(a => a.MinValue).First(),
+                        MinimumExtensions.MinimumTableValued(s3.Seconds, s4.Seconds).Select(a => a.MinValue).First()
+                        ).Select(a => a.MinValue).First()).ToList();
 
-                var min = (from s1 in songs
-                           from s2 in songs
-                           from s3 in songs
-                           from s4 in songs
-                           let x = MinimumExtensions.MinimumTableValued(s1.Seconds, s2.Seconds).Select(a => a.MinValue).First()
-                           let y = MinimumExtensions.MinimumTableValued(s3.Seconds, s4.Seconds).Select(a => a.MinValue).First()
-                           select MinimumExtensions.MinimumTableValued(x, y).Select(a => a.MinValue).First()).ToList();
+            var t2 = PerfCounter.Ticks;
 
-                var min3 = (from s1 in songs
-                            from s2 in songs
-                            from s3 in songs
-                            from s4 in songs
-                            let x = MinimumExtensions.MinimumScalar(s1.Seconds, s2.Seconds)
-                            let y = MinimumExtensions.MinimumScalar(s3.Seconds, s4.Seconds)
-                            select MinimumExtensions.MinimumScalar(x, y)).ToList();
-            }
+            var fast2 = (from s1 in songs
+                         from s2 in songs
+                         from s3 in songs
+                         from s4 in songs
+                         let x = MinimumExtensions.MinimumTableValued(s1.Seconds, s2.Seconds).Select(a => a.MinValue).First()
+                         let y = MinimumExtensions.MinimumTableValued(s3.Seconds, s4.Seconds).Select(a => a.MinValue).First()
+                         select MinimumExtensions.MinimumTableValued(x, y).Select(a => a.MinValue).First()).ToList();
 
+            var t3 = PerfCounter.Ticks;
 
-            HeavyProfiler.FullXDocument().Save(@"c:\performance.xml");
+            var slow = (from s1 in songs
+                        from s2 in songs
+                        from s3 in songs
+                        from s4 in songs
+                        let x = MinimumExtensions.MinimumScalar(s1.Seconds, s2.Seconds)
+                        let y = MinimumExtensions.MinimumScalar(s3.Seconds, s4.Seconds)
+                        select MinimumExtensions.MinimumScalar(x, y)).ToList();
+
+            var t4 = PerfCounter.Ticks;
+
+            Assert.IsTrue(PerfCounter.ToMilliseconds(t1, t2) < PerfCounter.ToMilliseconds(t3, t4));
+            Assert.IsTrue(PerfCounter.ToMilliseconds(t2, t3) < PerfCounter.ToMilliseconds(t3, t4));
         }
     }
 }

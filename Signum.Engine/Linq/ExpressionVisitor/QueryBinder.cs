@@ -196,8 +196,23 @@ namespace Signum.Engine.Linq
       
         private ProjectionExpression VisitCastProjection(Expression source)
         {
-            var visit = Visit(source);
-            return AsProjection(visit);
+            if (source is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)source))
+            {
+                var oldInTVF = inTableValuedFunction;
+                inTableValuedFunction = true;
+
+                var visit = Visit(source);
+
+                inTableValuedFunction = oldInTVF;
+
+                return GetTableValuedFunctionProjection((MethodCallExpression)visit);
+            }
+            else
+            {
+
+                var visit = Visit(source);
+                return AsProjection(visit);
+            }
         }
 
         private ProjectionExpression AsProjection(Expression expression)
@@ -218,7 +233,7 @@ namespace Signum.Engine.Linq
 
             if (expression is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)expression))
             {
-               return GetTableValuedFunctionProjection((MethodCallExpression)expression);
+              
             }
 
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
@@ -809,10 +824,8 @@ namespace Signum.Engine.Linq
             Expression exp = table.GetProjectorExpression(tableAlias, this);
 
             var functionName = mce.Method.SingleAttribute<SqlMethodAttribute>().Name ?? mce.Method.Name;
-            var oldInTVF = inTableValuedFunction;
-            inTableValuedFunction = true;
+
             var argumens  = mce.Arguments.Select(DbExpressionNominator.FullNominate).ToList();
-            inTableValuedFunction = oldInTVF;
 
             SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, tableAlias, argumens);
 

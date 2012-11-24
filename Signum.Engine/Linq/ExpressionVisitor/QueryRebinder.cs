@@ -53,6 +53,18 @@ namespace Signum.Engine.Linq
             return table;
         }
 
+        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            var columns = CurrentScope.Keys.Where(ce => ce.Alias == sqlFunction.Alias).ToList();
+
+            CurrentScope.SetRange(columns, columns.Cast<Expression>());
+
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            if (args != sqlFunction.Arguments)
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
+            return sqlFunction;
+        }
+
         protected override Expression VisitJoin(JoinExpression join)
         {
             if (join.Condition != null)
@@ -190,7 +202,6 @@ namespace Signum.Engine.Linq
             return new Disposable(() => scopes = scopes.Pop());
         }
 
-
         protected override Expression VisitColumn(ColumnExpression column)
         {
             Expression result;
@@ -201,6 +212,18 @@ namespace Signum.Engine.Linq
                 CurrentScope[column] = null;
                 return column;
             }
+        }
+
+        protected override Expression VisitScalar(ScalarExpression scalar)
+        {
+            var column = scalar.Select.Columns.SingleEx();
+
+            VisitColumn(new ColumnExpression(scalar.Type, scalar.Select.Alias, column.Name));
+
+            var select = (SelectExpression)this.Visit(scalar.Select);
+            if (select != scalar.Select)
+                return new ScalarExpression(scalar.Type, select);
+            return scalar;
         }
     }
 }
