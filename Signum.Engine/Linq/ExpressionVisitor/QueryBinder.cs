@@ -16,6 +16,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using Signum.Entities.DynamicQuery;
 using System.Collections.ObjectModel;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Linq
 {
@@ -195,8 +196,23 @@ namespace Signum.Engine.Linq
       
         private ProjectionExpression VisitCastProjection(Expression source)
         {
-            var visit = Visit(source);
-            return AsProjection(visit);
+            if (source is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)source))
+            {
+                var oldInTVF = inTableValuedFunction;
+                inTableValuedFunction = true;
+
+                var visit = Visit(source);
+
+                inTableValuedFunction = oldInTVF;
+
+                return GetTableValuedFunctionProjection((MethodCallExpression)visit);
+            }
+            else
+            {
+
+                var visit = Visit(source);
+                return AsProjection(visit);
+            }
         }
 
         private ProjectionExpression AsProjection(Expression expression)
@@ -213,6 +229,11 @@ namespace Signum.Engine.Linq
             {
                 NewExpression nex = (NewExpression)expression;
                 return (ProjectionExpression)nex.Arguments[1];
+            }
+
+            if (expression is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)expression))
+            {
+              
             }
 
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
@@ -232,12 +253,16 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             Alias alias = NextSelectAlias();
+
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases);
+
             return new ProjectionExpression(
                 new SelectExpression(alias, false, false, count, pc.Columns, projection.Select, null, null, null),
                 pc.Projector, null, resultType);
         }
 
+        //Avoid self referencing SQL problems
+        bool inTableValuedFunction = false;
 
         private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate, bool isRoot)
         {
@@ -252,9 +277,13 @@ namespace Signum.Engine.Linq
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, newSource.KnownAliases);
 
+            if (!isRoot && !inTableValuedFunction && pc.Projector is ColumnExpression && (function == UniqueFunction.First || function == UniqueFunction.FirstOrDefault))
+                return new ScalarExpression(pc.Projector.Type,
+                    new SelectExpression(alias, false, false, top, new[] { new ColumnDeclaration("val", pc.Projector) }, newSource, where, null, null));
+
             var newProjector = new ProjectionExpression(
-                    new SelectExpression(alias, false, false, top, pc.Columns, newSource, where, null, null),
-                    pc.Projector, function, resultType);
+                new SelectExpression(alias, false, false, top, pc.Columns, newSource, where, null, null),
+                pc.Projector, function, resultType);
 
             if (isRoot)
                 return newProjector;
@@ -753,6 +782,12 @@ namespace Signum.Engine.Linq
             return true;
         }
 
+        public bool IsTableValuedFunction(MethodCallExpression mce)
+        {
+            return typeof(IQueryable).IsAssignableFrom(mce.Method.ReturnType) &&
+                mce.Method.SingleAttribute<SqlMethodAttribute>() != null;
+        }
+
         private ProjectionExpression GetTableProjection(IQueryable query)
         { 
             ITable table = query is ISignumTable ? ((ISignumTable)query).Table : new ViewBuilder(Schema.Current).NewView(query.ElementType);
@@ -773,6 +808,34 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null),
             pc.Projector, null, resultType);
+
+            return projection;
+        }
+
+        private ProjectionExpression GetTableValuedFunctionProjection(MethodCallExpression mce)
+        {
+            Type returnType = mce.Method.ReturnType;
+            var type = returnType.GetGenericArguments()[0];
+
+            Table table = new ViewBuilder(Schema.Current).NewView(type);
+
+            Alias tableAlias = NextTableAlias(table.Name);
+
+            Expression exp = table.GetProjectorExpression(tableAlias, this);
+
+            var functionName = mce.Method.SingleAttribute<SqlMethodAttribute>().Name ?? mce.Method.Name;
+
+            var argumens  = mce.Arguments.Select(DbExpressionNominator.FullNominate).ToList();
+
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, tableAlias, argumens);
+
+            Alias selectAlias = NextSelectAlias();
+
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, new[] { tableAlias });
+
+            ProjectionExpression projection = new ProjectionExpression(
+                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null),
+            pc.Projector, null, returnType);
 
             return projection;
         }

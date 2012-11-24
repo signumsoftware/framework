@@ -144,7 +144,6 @@ namespace Signum.Engine.Linq
         }
 
 
-
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             //We can not assume allways true because neasted projections
@@ -154,6 +153,18 @@ namespace Signum.Engine.Linq
                 sqlFunction = new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); ;
 
             if (args.All(Has) && (obj == null || Has(obj)))
+                return Add(sqlFunction);
+
+            return sqlFunction;
+        }
+
+        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            if (args != sqlFunction.Arguments)
+                sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args); ;
+
+            if (args.All(Has))
                 return Add(sqlFunction);
 
             return sqlFunction;
@@ -659,32 +670,11 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
-            //if (proj.IsOneCell)
-            //{
-            //    var column = proj.Select.Columns.SingleEx();
-
-            //    var select = (SelectExpression)base.Visit(proj.Select);
-            //    var scalar = new ScalarExpression(column.Expression.Type, select);
-
-            //    var reference = column.GetReference(proj.Select.Alias);
-
-            //    if (replacements == null)
-            //        replacements = new Dictionary<ColumnExpression, ScalarExpression>(); 
-
-            //    replacements.Add(reference, scalar);
-            //    var result = Visit(proj.Projector);
-            //    replacements.Remove(reference);
-
-            //    return result;
-            //}
-            //else
-            //{
             bool oldInnerProjection = this.innerProjection;
             innerProjection = true;
             var result = base.VisitProjection(proj);
             innerProjection = oldInnerProjection;
             return result;
-            //}
         }
 
         protected override Expression VisitIn(InExpression inExp)

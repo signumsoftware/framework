@@ -16,6 +16,8 @@ namespace Signum.Engine.SchemaInfoTables
     {
         [SqlViewColumn(PrimaryKey=true)]
         public int object_id;
+        public string type;
+        public string type_desc;
         public string name;
     }
 
@@ -114,6 +116,17 @@ namespace Signum.Engine.SchemaInfoTables
         public int precision;
         public int scale;
         public bool is_identity; 
+    }
+
+    [SqlViewName("sys.default_constraints")]
+    public class SysDefaultConstraints : IView
+    {
+        public string name;
+        public int object_id;
+        public int parent_object_id;
+        public int parent_column_id;
+        public string definition;
+        public bool is_system_named;
     }
 
     [SqlViewName("sys.types")]

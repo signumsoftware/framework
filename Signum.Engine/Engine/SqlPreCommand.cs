@@ -25,6 +25,8 @@ namespace Signum.Engine
 
     public abstract class SqlPreCommand
     {
+        protected internal abstract bool EndsWithGo { get; }
+
         public abstract IEnumerable<SqlPreCommandSimple> Leaves();
 
         protected internal abstract void GenerateScript(StringBuilder sb);
@@ -110,6 +112,15 @@ namespace Signum.Engine
 
     public class SqlPreCommandSimple : SqlPreCommand
     {
+        internal const string GO = ";\r\nGO";
+
+        protected internal override bool EndsWithGo
+        {
+            get { return AddGo; }
+        }
+
+        public bool AddGo { get; set; }
+
         public string Sql { get; private set; }
         public List<DbParameter> Parameters { get; private set; }
 
@@ -132,6 +143,9 @@ namespace Signum.Engine
         protected internal override void GenerateScript(StringBuilder sb)
         {
             sb.Append(Sql);
+
+            if (AddGo)
+                sb.Append(GO);
         }
 
         protected internal override void GenerateParameters(List<DbParameter> list)
@@ -208,6 +222,7 @@ namespace Signum.Engine
 
             return this;
         }
+
     }
 
     public class SqlPreCommandConcat : SqlPreCommand
@@ -229,15 +244,21 @@ namespace Signum.Engine
         protected internal override void GenerateScript(StringBuilder sb)
         {
             string sep = separators[Spacing];
-            bool borrar = false;
-            foreach (SqlPreCommand com in Commands)
+            for (int i = 0; i < Commands.Length - 1; i++)
             {
-                com.GenerateScript(sb);
+                var cmd = Commands[i];
+                cmd.GenerateScript(sb);
+
+                if (!cmd.EndsWithGo)
+                    sb.Append(";");
+
                 sb.Append(sep);
-                borrar = true;
             }
 
-            if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
+            if (Commands.Length > 0)
+            {
+                Commands[Commands.Length - 1].GenerateScript(sb);
+            }
         }
 
         protected internal override void GenerateParameters(List<DbParameter> list)
@@ -259,9 +280,9 @@ namespace Signum.Engine
 
         static Dictionary<Spacing, string> separators = new Dictionary<Spacing, string>()
         {
-            {Spacing.Simple, ";\r\n"},
-            {Spacing.Double, ";\r\n\r\n"},
-            {Spacing.Triple, ";\r\n\r\n\r\n"},
+            {Spacing.Simple, "\r\n"},
+            {Spacing.Double, "\r\n\r\n"},
+            {Spacing.Triple, "\r\n\r\n\r\n"},
         };
 
         protected internal override int NumParameters
@@ -286,6 +307,11 @@ namespace Signum.Engine
         public override SqlPreCommand Clone()
         {
             return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());  
+        }
+
+        protected internal override bool EndsWithGo
+        {
+            get { return Commands.Any() && Commands.Last().EndsWithGo; }
         }
     }
 
