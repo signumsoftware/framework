@@ -157,6 +157,12 @@ namespace Signum.Windows
         public bool IsViewable { get; set; }
         public bool IsReadonly { get; set; }
 
+        public EmbeddedEntitySettings()
+        {
+            IsCreable = true;
+            IsViewable = true;
+        }
+
         public override Control CreateView(ModifiableEntity entity, PropertyRoute typeContext)
         {
             if (View == null)
