@@ -9,6 +9,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.IO;
 
 namespace Signum.Engine.Disconnected
 {
@@ -33,6 +34,16 @@ END".Formato(databaseName);
             Executor.ExecuteNonQuery(dropDatabase);
         }
 
+        public static void CreateDatabaseDirectory(string databaseFile)
+        {
+            string databaseDirectory = Path.GetDirectoryName(databaseFile);
+            if (!Directory.Exists(databaseDirectory))
+            {
+                Directory.CreateDirectory(databaseDirectory);
+            }
+        }
+
+
         public static void CreateDatabase(string databaseName, string databaseFile, string databaseLogFile)
         {
             string script = @"CREATE DATABASE [{0}] ON  PRIMARY 
@@ -51,6 +62,7 @@ LOG ON
         public static void RestoreDatabase(string databaseName, string backupFile, string databaseFile, string databaseLogFile)
         {
             DataTable dataTable = Executor.ExecuteDataTable("RESTORE FILELISTONLY FROM DISK ='{0}'".Formato(backupFile));
+
 
             string logicalDatabaseFile = dataTable.AsEnumerable().Single(a => a.Field<string>("Type") == "D").Field<string>("LogicalName");
             string logicalDatabaseLogFile = dataTable.AsEnumerable().Single(a => a.Field<string>("Type") == "L").Field<string>("LogicalName");

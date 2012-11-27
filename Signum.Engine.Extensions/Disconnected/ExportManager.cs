@@ -285,6 +285,8 @@ namespace Signum.Engine.Disconnected
             string fileName = DatabaseFileName(machine);
             string logFileName = DatabaseLogFileName(machine);
 
+            DisconnectedTools.CreateDatabaseDirectory(fileName);
+            DisconnectedTools.CreateDatabaseDirectory(logFileName);
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
             return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName);
@@ -317,7 +319,7 @@ namespace Signum.Engine.Disconnected
         protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
-
+            DisconnectedTools.CreateDatabaseDirectory(backupFileName);
             DisconnectedTools.BackupDatabase(newDatabase.DatabaseName(), backupFileName);
         }
 
