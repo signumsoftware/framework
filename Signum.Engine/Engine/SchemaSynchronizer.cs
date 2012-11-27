@@ -63,7 +63,7 @@ namespace Signum.Engine
                         Spacing.Double);
 
             SqlPreCommand tables =
-                Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyTables,
+                Synchronizer.SynchronizeScriptReplacing(replacements, Replacements.KeyTables,
                 model,
                 database,
                 (tn, tab) => SqlBuilder.CreateTableSql(tab),
@@ -71,7 +71,7 @@ namespace Signum.Engine
                 (tn, tab, dif) =>
                     SqlPreCommand.Combine(Spacing.Simple,
                     dif.Name != tab.Name ? SqlBuilder.RenameTable(dif.Name, tab.Name) : null,
-                    Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyColumnsForTable(tn),
+                    Synchronizer.SynchronizeScriptReplacing(replacements, Replacements.KeyColumnsForTable(tn),
                         tab.Columns,
                     dif.Colums,
                         (cn, tabCol) => SqlBuilder.AlterTableAddColumn(tn, tabCol),
