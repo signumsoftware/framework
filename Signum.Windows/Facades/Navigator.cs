@@ -686,8 +686,9 @@ namespace Signum.Windows
 
             ViewButtons buttons = options.ViewButtons;
 
-            bool isReadOnly = options.ReadOnly ?? OnIsReadOnly(entity.GetType(), entity);
-            bool isSaveProtected = options.SaveProtected ?? OnSaveProtected(entity.GetType());
+            bool isReadOnly = options.ReadOnly ?? OnIsReadOnly(entityType, entity);
+            bool isSaveProtected = options.SaveProtected ??
+                (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OnSaveProtected(entityType));
             win.MainControl = ctrl;
             win.ButtonBar.SaveProtected = isSaveProtected; //Matters even on Ok
             win.ButtonBar.ViewButtons = buttons;
