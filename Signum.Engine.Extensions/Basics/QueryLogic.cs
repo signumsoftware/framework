@@ -112,7 +112,7 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<QueryDN>();
 
-            return Synchronizer.SynchronizeReplacing(
+            return Synchronizer.SynchronizeScriptReplacing(
                 replacements,
                 QueriesKey,
                 should.ToDictionary(a => a.Key),

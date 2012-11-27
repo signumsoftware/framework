@@ -94,49 +94,68 @@ namespace Signum.Engine.Chart
             }
         }
 
+        class Options
+        {
+            public bool RemoveOld;
+            public bool OverrideAll;
+            public bool ForceAll;
+        }
+
         public static void ImportAllScripts(string folderName)
         {
-            string[] fileNames = Directory.GetFiles(folderName, "*.xml");
-
+            var files = Directory.GetFiles(folderName, "*.xml").ToDictionary(Path.GetFileNameWithoutExtension);
+            
             var charts = Database.Query<ChartScriptDN>().ToDictionary(a => a.Name); 
 
-            bool overriteAll = false;
-            bool forceAll = false;
-            foreach (var item in fileNames)
-            {
-                var name = Path.GetFileNameWithoutExtension(item);
+            Options options = new Options();
 
-                var previous = charts.TryGetC(name);
-                if (previous != null && previous.Icon != null)
-                    previous.Icon.Retrieve();
-
-                var script = previous ?? new ChartScriptDN();
-
-                try
+            Synchronizer.SynchronizeReplacing(new Replacements(), "scripts",
+                files,
+                charts,
+                (name, file) =>
                 {
-                    script.ImportXml(XDocument.Load(item), name, false);
-                }
-                catch (FormatException f)
-                {
-                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, f.Message);
-                    if (AskYesNoAll("Foce {0}? (*yes, no, all)".Formato(name), ref forceAll))
-                        script.ImportXml(XDocument.Load(item), name, true);
-                }
+                    var cs = new ChartScriptDN(); 
+                    cs.ImportXml(XDocument.Load(file), name, force: false);
+                    cs.Save();
 
-                if (previous != null)
+                    Console.WriteLine("{0} created.".Formato(name));
+                },
+                (name, script) =>
                 {
-                    if (previous.HasChanges() && AskYesNoAll("Override {0}? (*yes, no, all)".Formato(name), ref overriteAll))
+                    if (AskYesNoAll("Remove {0}?".Formato(name), ref options.RemoveOld))
                     {
-                        previous.Save();
+                        try
+                        {
+                            script.Delete();
+                            Console.WriteLine("{0} removed.".Formato(name));
+                        }
+                        catch (Exception e)
+                        {
+                            SafeConsole.WriteLineColor(ConsoleColor.Red, "Error removing {0}: {1}".Formato(name, e.Message));
+                        }
+                    }
+                },
+                (name, file, script) =>
+                {
+                    var xDoc = XDocument.Load(file);
+
+                    try
+                    {
+                        script.ImportXml(xDoc, name, false);
+                    }
+                    catch (FormatException f)
+                    {
+                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, f.Message);
+                        if (AskYesNoAll("Force {0}?".Formato(name), ref options.ForceAll))
+                            script.ImportXml(xDoc, name, true);
+                    }
+
+                    if (script.HasChanges() && AskYesNoAll("Override {0}?".Formato(name), ref options.OverrideAll))
+                    {
+                        script.Save();
                         Console.WriteLine("{0} overriden.".Formato(name));
                     }
-                }
-                else
-                {
-                    script.Save();
-                    Console.WriteLine("{0} created.".Formato(name));
-                }
-            }
+                });
         }
 
         private static bool AskYesNoAll(string message, ref bool all)
@@ -146,7 +165,7 @@ namespace Signum.Engine.Chart
 
             while (true)
             {
-                Console.Write(message);
+                Console.Write(message + "(*yes, no, all)");
 
                 var str = Console.ReadLine();
 
@@ -162,10 +181,7 @@ namespace Signum.Engine.Chart
                 }
                 else if (c == 'n')
                     return false;
-
             }
         }
-
-     
     }
 }

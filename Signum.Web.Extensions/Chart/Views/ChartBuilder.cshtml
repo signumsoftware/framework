@@ -31,7 +31,7 @@
                     { 
                     <div class="@ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)" 
                     data-related="@(new RuntimeInfo(script).ToString())"  title="@(script.ToString() + "\r\n" + script.ColumnsStructure)">
-                        <img src=" @(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
+                        <img src="@(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
                         Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())))" />
                     </div>
                     }
