@@ -53,8 +53,12 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(options);
 
-            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
-            Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
+
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
+            Navigator.SetTokens(queryDescription, findOptions.OrderOptions);
+            Navigator.SetTokens(queryDescription, findOptions.ColumnOptions);
             Navigator.SetSearchViewableAndCreable(findOptions);
 
             var viewData = new ViewDataDictionary(context);
