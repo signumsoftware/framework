@@ -31,7 +31,9 @@ namespace Signum.Web.Chart
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(findOptions.QueryName));
 
-            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
 
             var request = new ChartRequest(findOptions.QueryName)
             {
