@@ -337,6 +337,14 @@ namespace Signum.Utilities
 
     public static class EnumerableExtensions
     {
+        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> collection)
+        {
+            if (collection == null)
+                return Enumerable.Empty<T>();
+
+            return collection;
+        }
+
         public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
             foreach (var item in collection)
