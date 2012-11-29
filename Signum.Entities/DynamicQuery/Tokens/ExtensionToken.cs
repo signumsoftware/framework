@@ -19,6 +19,9 @@ namespace Signum.Entities.DynamicQuery
             bool isAllowed, PropertyRoute propertyRoute)
             : base(parent)
         {
+            if (typeof(IIdentifiable).IsAssignableFrom(type.CleanType()) && implementations == null)
+                throw new ArgumentNullException("Extension {0} of type {1} has no implementations".Formato(key, type.Name));
+
             this.key= key;
             this.type = type;
             this.isProjection = isProjection;
