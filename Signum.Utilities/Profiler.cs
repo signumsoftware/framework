@@ -469,6 +469,11 @@ namespace Signum.Utilities
                 return count;
             }
         }
+
+        public static long ToMilliseconds(long t1, long t2)
+        {
+            return (t2 - t1) / FrequencyMilliseconds;
+        }
     }
 
     public class SqlProfileResume

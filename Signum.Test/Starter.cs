@@ -65,6 +65,10 @@ namespace Signum.Test
             sb.Include<PersonalAwardDN>();
             sb.Include<AwardNominationDN>();
 
+            MinimumExtensions.IncludeFunction(sb.Schema.Assets);
+
+           
+
             dqm[typeof(AlbumDN)] = (from a in Database.Query<AlbumDN>()
                                     select new
                                     {

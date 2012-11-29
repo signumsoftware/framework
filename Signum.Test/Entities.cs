@@ -6,6 +6,9 @@ using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Server;
+using Signum.Engine;
+using Signum.Engine.Maps;
 
 namespace Signum.Test
 {
@@ -427,5 +430,43 @@ namespace Signum.Test
             get { return year; }
             set { Set(ref year, value, () => Year); }
         }
+    }
+
+    public static class MinimumExtensions
+    {
+        [SqlMethod(Name = "dbo.MinimumTableValued")]
+        public static IQueryable<IntValue> MinimumTableValued(int? a, int? b)
+        {
+            throw new InvalidOperationException("sql only");
+        }
+
+
+        [SqlMethod(Name = "dbo.MinimumScalar")]
+        public static int? MinimumScalar(int? a, int? b)
+        {
+            throw new InvalidOperationException("sql only");
+        }
+
+        internal static void IncludeFunction(SchemaAssets assets)
+        {
+            assets.IncludeUserDefinedFunction("MinimumTableValued", @"(@Param1 Integer, @Param2 Integer)
+RETURNS Table As
+RETURN (SELECT Case When @Param1 < @Param2 Then @Param1 
+               Else COALESCE(@Param2, @Param1) End MinValue)");
+
+
+            assets.IncludeUserDefinedFunction("MinimumScalar", @"(@Param1 Integer, @Param2 Integer)
+RETURNS Integer
+AS
+BEGIN
+   RETURN (Case When @Param1 < @Param2 Then @Param1 
+           Else COALESCE(@Param2, @Param1) End);
+END");
+        }
+    }
+
+    public class IntValue : IView
+    {
+        public int? MinValue; 
     }
 }

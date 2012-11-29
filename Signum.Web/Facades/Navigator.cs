@@ -184,14 +184,19 @@ namespace Signum.Web
             return Manager.SearchTitle(queryName);
         }
 
-        public static void SetTokens(object queryName, List<FilterOption> filters)
+        public static void SetTokens(QueryDescription queryDescription, List<FilterOption> filters)
         {
-            Manager.SetTokens(queryName, filters);
+            Manager.SetTokens(queryDescription, filters);
         }
 
-        public static void SetTokens(object queryName, IEnumerable<OrderOption> orders)
+        public static void SetTokens(QueryDescription queryDescription, List<OrderOption> orders)
         {
-            Manager.SetTokens(queryName, orders);
+            Manager.SetTokens(queryDescription, orders);
+        }
+
+        public static void SetTokens(QueryDescription queryDescription, List<ColumnOption> columns)
+        {
+            Manager.SetTokens(queryDescription, columns);
         }
 
         public static void SetSearchViewableAndCreable(FindOptions findOptions)
@@ -669,7 +674,9 @@ namespace Signum.Web
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.Query0IsNotAllowed.Formato(findOptions.QueryName));
 
-            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
             SetSearchViewableAndCreable(findOptions);
 
             controller.ViewData.Model = new Context(null, "");
@@ -692,8 +699,10 @@ namespace Signum.Web
 
         protected internal virtual Lite FindUnique(FindUniqueOptions options)
         {
-            SetTokens(options.QueryName, options.FilterOptions);
-            SetTokens(options.QueryName, options.OrderOptions);
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
+
+            SetTokens(queryDescription, options.FilterOptions);
+            SetTokens(queryDescription, options.OrderOptions);
 
             var request = new UniqueEntityRequest
             {
@@ -708,7 +717,9 @@ namespace Signum.Web
 
         protected internal virtual int QueryCount(CountOptions options)
         {
-            SetTokens(options.QueryName, options.FilterOptions);
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
+
+            SetTokens(queryDescription, options.FilterOptions);
 
             var request = new QueryCountRequest
             { 
@@ -719,19 +730,21 @@ namespace Signum.Web
             return DynamicQueryManager.Current.ExecuteQueryCount(request);
         }
 
-        protected internal void SetTokens(object queryName, List<FilterOption> filters)
+        protected internal void SetTokens(QueryDescription queryDescription, List<FilterOption> filters)
         {
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
-
             foreach (var f in filters)
                 f.Token = QueryUtils.Parse(f.ColumnName, queryDescription);
         }
 
-        public void SetTokens(object queryName, IEnumerable<OrderOption> orders)
+        protected internal void SetTokens(QueryDescription queryDescription, List<OrderOption> orders)
         {
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
-
             foreach (var o in orders)
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription);
+        }
+
+        protected internal void SetTokens(QueryDescription queryDescription, List<ColumnOption> columns)
+        {
+            foreach (var o in columns)
                 o.Token = QueryUtils.Parse(o.ColumnName, queryDescription);
         }
 

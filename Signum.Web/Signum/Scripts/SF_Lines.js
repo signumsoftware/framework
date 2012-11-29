@@ -357,7 +357,7 @@ SF.registerModule("Lines", function () {
                 var separator = fullValue.indexOf(";");
                 var value = [];
                 if (separator === -1) {
-                    value.runtimeType = this.staticInfo().singleType();
+                    value.runtimeType = SF.isEmpty(fullValue) ? "" : this.staticInfo().singleType();
                     value.id = fullValue;
                 }
                 else {

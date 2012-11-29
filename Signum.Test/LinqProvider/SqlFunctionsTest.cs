@@ -195,5 +195,54 @@ namespace Signum.Test.LinqProvider
 
             Assert.IsFalse(list.Any(string.IsNullOrEmpty));
         }
+
+        [TestMethod]
+        public void TableValuedFunction()
+        {
+            var list = Database.Query<AlbumDN>()
+                .Where(a => MinimumExtensions.MinimumTableValued(a.Id * 2, a.Id).Select(m => m.MinValue).First() > 2).Select(a => a.Id).ToList();
+        }
+
+        [TestMethod]
+        public void TableValuedPerformanceTest()
+        {
+            var songs = Database.MListQuery((AlbumDN a) => a.Songs).Select(a => a.Element);
+
+            var t1 = PerfCounter.Ticks;
+            
+            var fast = (from s1 in songs
+                        from s2 in songs
+                        from s3 in songs
+                        from s4 in songs
+                        select MinimumExtensions.MinimumTableValued(
+                        MinimumExtensions.MinimumTableValued(s1.Seconds, s2.Seconds).Select(a => a.MinValue).First(),
+                        MinimumExtensions.MinimumTableValued(s3.Seconds, s4.Seconds).Select(a => a.MinValue).First()
+                        ).Select(a => a.MinValue).First()).ToList();
+
+            var t2 = PerfCounter.Ticks;
+
+            var fast2 = (from s1 in songs
+                         from s2 in songs
+                         from s3 in songs
+                         from s4 in songs
+                         let x = MinimumExtensions.MinimumTableValued(s1.Seconds, s2.Seconds).Select(a => a.MinValue).First()
+                         let y = MinimumExtensions.MinimumTableValued(s3.Seconds, s4.Seconds).Select(a => a.MinValue).First()
+                         select MinimumExtensions.MinimumTableValued(x, y).Select(a => a.MinValue).First()).ToList();
+
+            var t3 = PerfCounter.Ticks;
+
+            var slow = (from s1 in songs
+                        from s2 in songs
+                        from s3 in songs
+                        from s4 in songs
+                        let x = MinimumExtensions.MinimumScalar(s1.Seconds, s2.Seconds)
+                        let y = MinimumExtensions.MinimumScalar(s3.Seconds, s4.Seconds)
+                        select MinimumExtensions.MinimumScalar(x, y)).ToList();
+
+            var t4 = PerfCounter.Ticks;
+
+            Assert.IsTrue(PerfCounter.ToMilliseconds(t1, t2) < PerfCounter.ToMilliseconds(t3, t4));
+            Assert.IsTrue(PerfCounter.ToMilliseconds(t2, t3) < PerfCounter.ToMilliseconds(t3, t4));
+        }
     }
 }

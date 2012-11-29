@@ -73,11 +73,9 @@ namespace Signum.Utilities
         public static string Ask(string question, params string[] answers)
         {
             Console.WriteLine(question + " " + answers.ToString("/"));
-            var answer = Console.ReadLine().ToLower();
-
             do
             {
-
+                var answer = Console.ReadLine().ToLower();
                 var result = answers.FirstOrDefault(a => a.StartsWith(answer, StringComparison.CurrentCultureIgnoreCase));
                 if (result != null)
                     return result;

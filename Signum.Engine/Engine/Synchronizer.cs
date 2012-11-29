@@ -11,6 +11,82 @@ namespace Signum.Engine
 {
     public static class Synchronizer
     {
+        public static void Synchronize<K, N, O>(
+          Dictionary<K, N> newDictionary,
+          Dictionary<K, O> oldDictionary,
+          Action<K, N> createNew,
+          Action<K, O> removeOld,
+          Action<K, N, O> merge)
+            where O : class
+            where N : class
+        {
+            HashSet<K> set = new HashSet<K>();
+            set.UnionWith(oldDictionary.Keys);
+            set.UnionWith(newDictionary.Keys);
+            foreach (var key in set)
+            {
+                var oldVal = oldDictionary.TryGetC(key);
+                var newVal = newDictionary.TryGetC(key);
+
+                if (oldVal == null)
+                {
+                    if (createNew != null) 
+                        createNew(key, newVal);
+                }
+                else if (newVal == null)
+                {
+                    if (removeOld != null) 
+                        removeOld(key, oldVal);
+                }
+                else
+                {
+                    if (merge != null) 
+                        merge(key, newVal, oldVal);
+                }
+            }
+        }
+
+        public static void SynchronizeReplacing<N, O>(
+          Replacements replacements,
+          string replacementsKey, 
+          Dictionary<string, N> newDictionary,
+          Dictionary<string, O> oldDictionary,
+          Action<string, N> createNew,
+          Action<string, O> removeOld,
+          Action<string, N, O> merge)
+            where O : class
+            where N : class
+        {
+            replacements.AskForReplacements(oldDictionary, newDictionary, replacementsKey);
+
+            var repOldDictionary = replacements.ApplyReplacements(oldDictionary, replacementsKey);
+
+            HashSet<string> set = new HashSet<string>();
+            set.UnionWith(repOldDictionary.Keys);
+            set.UnionWith(newDictionary.Keys);
+            foreach (var key in set)
+            {
+                var oldVal = repOldDictionary.TryGetC(key);
+                var newVal = newDictionary.TryGetC(key);
+
+                if (oldVal == null)
+                {
+                    if (createNew != null)
+                        createNew(key, newVal);
+                }
+                else if (newVal == null)
+                {
+                    if (removeOld != null)
+                        removeOld(key, oldVal);
+                }
+                else
+                {
+                    if (merge != null)
+                        merge(key, newVal, oldVal);
+                }
+            }
+        }
+
         public static SqlPreCommand SynchronizeScript<K, N, O>(
             Dictionary<K, N> newDictionary, 
             Dictionary<K, O> oldDictionary, 
@@ -32,39 +108,9 @@ namespace Signum.Engine
             }).Values.Combine(spacing);
         }
 
-        public static void Synchronize<K, N, O>(
-            Dictionary<K, N> newDictionary, 
-            Dictionary<K, O> oldDictionary, 
-            Action<K, N> createNew, 
-            Action<K, O> removeOld, 
-            Action<K, N, O> merge)
-            where O : class
-            where N : class
-        {
-            HashSet<K> set = new HashSet<K>();
-            set.UnionWith(oldDictionary.Keys);
-            set.UnionWith(newDictionary.Keys);
-            foreach (var key in set)
-            {
-                var oldVal = oldDictionary.TryGetC(key);
-                var newVal = newDictionary.TryGetC(key);
+      
 
-                if (oldVal == null)
-                {
-                    if (createNew != null) createNew(key, newVal);
-                }
-                else if (newVal == null)
-                {
-                    if (removeOld != null) removeOld(key, oldVal);
-                }
-                else
-                {
-                    if (merge != null) merge(key, newVal, oldVal);
-                }
-            }
-        }
-
-        public static SqlPreCommand SynchronizeReplacing<N, O>(
+        public static SqlPreCommand SynchronizeScriptReplacing<N, O>(
             Replacements replacements, 
             string replacementsKey, 
             Dictionary<string, N> newDictionary, 

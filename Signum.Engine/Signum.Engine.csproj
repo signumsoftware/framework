@@ -168,6 +168,7 @@
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
     <Compile Include="Schema\Schema.Save.cs" />
+    <Compile Include="Schema\SchemaAssets.cs" />
     <Compile Include="Schema\SchemaBuilder\SchemaBuilder.cs" />
     <Compile Include="Schema\SchemaBuilder\SchemaBuilderSettings.cs" />
     <Compile Include="Schema\SchemaBuilder\NameSequence.cs" />

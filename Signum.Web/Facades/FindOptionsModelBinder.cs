@@ -46,7 +46,7 @@ namespace Signum.Web
 
             fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
             fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
-            fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
+            fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
 
             if (parameters.AllKeys.Contains("allowMultiple"))
             {
@@ -160,7 +160,7 @@ namespace Signum.Web
             "(?<token>[^;,]+)(,(?<name>'(?:[^']+|'')*'|[^;,]*))?;".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
-        public static List<ColumnOption> ExtractColumnsOptions(HttpContextBase httpContext, QueryDescription queryDescription)
+        public static List<ColumnOption> ExtractColumnsOptions(HttpContextBase httpContext, Func<QueryToken, List<QueryToken>> subTokens)
         {
             List<ColumnOption> result = new List<ColumnOption>();
 
@@ -176,8 +176,10 @@ namespace Signum.Web
             {
                 var colName = m.Groups["token"].Value;
                 var displayCapture = m.Groups["name"].Captures;
+                var token = QueryUtils.Parse(colName, subTokens);
                 return new ColumnOption
                 {
+                    Token = token,
                     ColumnName = colName,
                     DisplayName = displayCapture.Count > 0 ? DecodeValue(m.Groups["name"].Value) : colName
                 };
