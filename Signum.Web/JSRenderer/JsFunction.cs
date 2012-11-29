@@ -96,6 +96,11 @@ namespace Signum.Web
             return new JsInstruction(() => "SF.submit({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
         }
 
+        public static JsInstruction SubmitOnly<T>(Expression<Action<T>> action, JsInstruction requestExtraJsonData) where T : Controller
+        {
+            return SubmitOnly(RouteHelper.New().Action(action), requestExtraJsonData);
+        }
+
         public static JsInstruction SubmitOnly(JsValue<string> controllerUrl, JsInstruction requestExtraJsonData)
         {
             if (requestExtraJsonData == null)
