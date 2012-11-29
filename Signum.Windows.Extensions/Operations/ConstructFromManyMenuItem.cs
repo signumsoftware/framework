@@ -22,7 +22,7 @@ using System.Windows.Media;
 
 namespace Signum.Windows.Operations
 {
-    public static class ConstructFromMenuItemConsturctor
+    public static class ConstructFromManyMenuItemConsturctor
     {
         public static MenuItem Construct(SearchControl sc, OperationInfo oi, ContextualOperationSettings settings)
         {

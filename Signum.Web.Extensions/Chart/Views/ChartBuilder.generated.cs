@@ -236,12 +236,12 @@ WriteLiteral("\"  title=\"");
             
             #line default
             #line hidden
-WriteLiteral("\">\r\n                        <img src=\" ");
+WriteLiteral("\">\r\n                        <img src=\"");
 
 
             
             #line 34 "..\..\Chart\Views\ChartBuilder.cshtml"
-                               Write(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
+                              Write(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") :
                         Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())));
 
             

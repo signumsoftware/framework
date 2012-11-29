@@ -279,10 +279,13 @@ namespace Signum.Engine.Disconnected
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, import));
 
-            DisconnectedTools.RestoreDatabase(DatabaseName(machine),
-                backupFileName,
-                DatabaseFileName(machine),
-                DatabaseLogFileName(machine));
+            string fileName = DatabaseFileName(machine);
+            string logFileName = DatabaseLogFileName(machine);
+
+            DisconnectedTools.CreateDatabaseDirectory(fileName);
+            DisconnectedTools.CreateDatabaseDirectory(logFileName);
+
+            DisconnectedTools.RestoreDatabase(DatabaseName(machine), backupFileName, fileName, logFileName);
         }
 
         private string GetImportConnectionString(DisconnectedMachineDN machine)

@@ -367,7 +367,6 @@ namespace Signum.Engine.Processes
                     Lite = false,
                     Execute = (pe, args) =>
                     {
-
                         pe.Save();
                     }
                 }.Register();
@@ -431,12 +430,13 @@ namespace Signum.Engine.Processes
                 session = ProcessLogic.CreateDefaultProcessSession();
             }
 
-            return new ProcessExecutionDN(process)
-            {
-                State = ProcessState.Created,
-                ProcessData = processData,
-                SessionData = session,
-            }.Save();
+            using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                return new ProcessExecutionDN(process)
+                {
+                    State = ProcessState.Created,
+                    ProcessData = processData,
+                    SessionData = session,
+                }.Save();
         }
 
         public static void ExecuteTest(this ProcessExecutionDN pe)
