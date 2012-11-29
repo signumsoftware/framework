@@ -280,7 +280,7 @@ namespace Signum.Engine.DynamicQuery
 
                 CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
 
-                var result = new ExtensionRouteInfo(); 
+                var result = new ExtensionRouteInfo();
 
                 if (cm != null && cm.PropertyRoutes.Any())
                 {
@@ -290,6 +290,10 @@ namespace Signum.Engine.DynamicQuery
                     result.Implementations = AllImplementations ?? ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
                     result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
+                }
+                else
+                {
+                    result.Implementations = AllImplementations;
                 }
 
                 result.IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
