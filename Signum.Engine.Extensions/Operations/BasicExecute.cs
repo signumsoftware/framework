@@ -59,7 +59,7 @@ namespace Signum.Engine.Operations
 
         void IExecuteOperation.Execute(IIdentifiable entity, params object[] parameters)
         {
-            OperationLogic.AssertOperationAllowed(key);
+            OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
 
             string error = OnCanExecute((T)entity);
             if (error != null)

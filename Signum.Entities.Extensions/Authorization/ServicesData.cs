@@ -320,7 +320,7 @@ namespace Signum.Entities.Authorization
         }
     }
     [Serializable]
-    public class OperationAllowedRule : AllowedRule<OperationDN, bool> { } 
+    public class OperationAllowedRule : AllowedRule<OperationDN, OperationAllowed> { } 
 
 
     [Serializable]

@@ -67,7 +67,7 @@ namespace Signum.Engine.Basics
             List<T> current = Administrator.TryRetrieveAll<T>(replacements);
             List<T> should = GenerateEntities();
 
-            return Synchronizer.SynchronizeReplacing(replacements, typeof(T).Name, 
+            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name, 
                 should.ToDictionary(s => s.Key), 
                 current.ToDictionary(c => c.Key), 
                 (k, s) => table.InsertSqlSync(s), 

@@ -126,12 +126,12 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </th>\r\n                <th>\r\n                    ");
+WriteLiteral("\r\n                </th> \r\n                <th>\r\n                    ");
 
 
             
             #line 18 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(Resources.OperationsAscx_Deny);
+               Write(Resources.OperationsAscx_DBOnly);
 
             
             #line default
@@ -141,6 +141,16 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 21 "..\..\AuthAdmin\Views\Operations.cshtml"
+               Write(Resources.OperationsAscx_None);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                </th>\r\n                <th>\r\n                    ");
+
+
+            
+            #line 24 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Resources.OperationsAscx_Overriden);
 
             
@@ -150,7 +160,7 @@ WriteLiteral("\r\n                </th>\r\n            </tr>\r\n        </thead>
 
 
             
-            #line 25 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 28 "..\..\AuthAdmin\Views\Operations.cshtml"
          foreach (var item in tc.TypeElementContext(p => p.Rules))
         {
 
@@ -161,7 +171,7 @@ WriteLiteral("            <tr>\r\n                <td>\r\n                    ")
 
 
             
-            #line 29 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 32 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Html.Span(null, item.Value.Resource.Name));
 
             
@@ -171,7 +181,7 @@ WriteLiteral("\r\n                    ");
 
 
             
-            #line 30 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 33 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Html.HiddenRuntimeInfo(item, i => i.Resource));
 
             
@@ -181,31 +191,41 @@ WriteLiteral("\r\n                    ");
 
 
             
-            #line 31 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 34 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"sf-a" +
-"uth-chooser sf-auth-allowed\">\r\n                        ");
+WriteLiteral("\r\n                </td>\r\n                 <td>\r\n                    <a class=\"sf-" +
+"auth-chooser sf-auth-modify\">\r\n                        ");
 
 
             
-            #line 35 "..\..\AuthAdmin\Views\Operations.cshtml"
-                   Write(Html.RadioButton(item.Compose("Allowed"), "True", item.Value.Allowed));
+            #line 38 "..\..\AuthAdmin\Views\Operations.cshtml"
+                   Write(Html.RadioButton(item.Compose("Allowed"), "Allow", item.Value.Allowed == OperationAllowed.Allow));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"sf-auth-chooser sf-auth-not-allowed\">\r\n                   " +
-"     ");
+"            <a class=\"sf-auth-chooser sf-auth-read\">\r\n                        ");
 
 
             
-            #line 40 "..\..\AuthAdmin\Views\Operations.cshtml"
-                   Write(Html.RadioButton(item.Compose("Allowed"), "False", !item.Value.Allowed));
+            #line 43 "..\..\AuthAdmin\Views\Operations.cshtml"
+                   Write(Html.RadioButton(item.Compose("Allowed"), "DBOnly", item.Value.Allowed == OperationAllowed.DBOnly));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
+"            <a class=\"sf-auth-chooser sf-auth-none\">\r\n                        ");
+
+
+            
+            #line 48 "..\..\AuthAdmin\Views\Operations.cshtml"
+                   Write(Html.RadioButton(item.Compose("Allowed"), "None", item.Value.Allowed == OperationAllowed.None));
 
             
             #line default
@@ -215,7 +235,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 
 
             
-            #line 44 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 52 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" }));
 
             
@@ -225,7 +245,7 @@ WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 47 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 55 "..\..\AuthAdmin\Views\Operations.cshtml"
         }
 
             
@@ -235,7 +255,7 @@ WriteLiteral("    </table>\r\n");
 
 
             
-            #line 49 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 57 "..\..\AuthAdmin\Views\Operations.cshtml"
 }
             
             #line default

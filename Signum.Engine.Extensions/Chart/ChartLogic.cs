@@ -46,7 +46,8 @@ namespace Signum.Engine.Chart
 
             if (dq.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(DynamicQuery<>))))
             {
-                return miExecuteChart.GetInvoker(dq.GetType().GetGenericArguments()[0])(request, dq);
+                using (ExecutionMode.UserInterface())
+                    return miExecuteChart.GetInvoker(dq.GetType().GetGenericArguments()[0])(request, dq);
             }
 
             throw new NotImplementedException(); 
@@ -81,7 +82,7 @@ namespace Signum.Engine.Chart
             return new DQueryable<T>(resultQuery, newContext);
         }
 
-        private static LambdaExpression ResultSelectSelectorAndContext(BuildExpressionContext context, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens, Type keyTupleType, out BuildExpressionContext newContext)
+        static LambdaExpression ResultSelectSelectorAndContext(BuildExpressionContext context, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens, Type keyTupleType, out BuildExpressionContext newContext)
         {
             Dictionary<QueryToken, Expression> resultExpressions = new Dictionary<QueryToken, Expression>();
             ParameterExpression pk = Expression.Parameter(keyTupleType, "key");
@@ -101,7 +102,7 @@ namespace Signum.Engine.Chart
             return Expression.Lambda(Expression.Convert(resultConstructor, typeof(object)), pk, pe);
         }
 
-        private static LambdaExpression KeySelector(BuildExpressionContext context, HashSet<QueryToken> keyTokens)
+        static LambdaExpression KeySelector(BuildExpressionContext context, HashSet<QueryToken> keyTokens)
         {
             var keySelector = Expression.Lambda(
               TupleReflection.TupleChainConstructor(keyTokens.Select(t => t.BuildExpression(context)).ToList()),
@@ -205,7 +206,7 @@ namespace Signum.Engine.Chart
             }
         }
 
-        private static ResultTable ResultTable(object[] values, List<Column> columns, BuildExpressionContext context)
+        static ResultTable ResultTable(object[] values, List<Column> columns, BuildExpressionContext context)
         {
             var cols = columns.Select(c => Tuple.Create(c,
                 Expression.Lambda(c.Token.BuildExpression(context), context.Parameter))).ToList();

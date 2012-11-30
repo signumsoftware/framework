@@ -30,18 +30,22 @@ namespace Signum.Engine.Authorization
         public static event Func<string> LoginMessage;
 
 
-        public static string SystemUserName { get; set; }
-        static UserDN systemUser;
+        public static string SystemUserName { get; private set; }
+        static ResetLazy<UserDN> systemUserLazy = GlobalLazy.Create(() => SystemUserName == null ? null :
+            Database.Query<UserDN>().Where(u => u.UserName == SystemUserName)
+            .SingleEx(() => "SystemUser with name '{0}' not found".Formato(SystemUserName)));
         public static UserDN SystemUser
         {
-            get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
+            get { return systemUserLazy.Value; }
         }
 
-        public static string AnonymousUserName { get; set; }
-        static UserDN anonymousUser;
+        public static string AnonymousUserName { get; private set; }
+        static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.Create(() => AnonymousUserName == null ? null:
+            Database.Query<UserDN>().Where(u => u.UserName == AnonymousUserName)
+            .SingleEx(() => "AnonymousUser with name '{0}' not found".Formato(AnonymousUserName)));
         public static UserDN AnonymousUser
         {
-            get { return string.IsNullOrEmpty(AnonymousUserName) ? null : anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
+            get { return anonymousUserLazy.Value; }
         }
 
         public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
@@ -61,7 +65,6 @@ namespace Signum.Engine.Authorization
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
 
-                sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_Initializing;
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
@@ -104,21 +107,6 @@ namespace Signum.Engine.Authorization
                         r.Delete();
                     }
                 }.Register();
-            }
-        }
-
-        static void Schema_Initializing()
-        {
-            var r = roles.Value;
-
-            if (SystemUserName != null || AnonymousUserName != null)
-            {
-                using (new EntityCache())
-                using (AuthLogic.Disable())
-                {
-                    if (SystemUserName != null) systemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
-                    if (AnonymousUserName != null) anonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName);
-                }
             }
         }
 

@@ -58,7 +58,7 @@ namespace Signum.Engine.Mailing
                     {
                         EmailPackageDN emailPackage = new EmailPackageDN()
                         {
-                            Name = args.TryGetArgC<string>(0)
+                            Name = args.TryGetArgC<string>()
                         }.Save();
 
                         messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()

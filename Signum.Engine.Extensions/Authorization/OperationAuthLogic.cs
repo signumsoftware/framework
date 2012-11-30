@@ -20,9 +20,9 @@ namespace Signum.Engine.Authorization
 {
     public static class OperationAuthLogic
     {
-        static AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool> cache;
+        static AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, OperationAllowed> cache;
 
-        public static IManualAuth<Enum, bool> Manual { get { return cache; } }
+        public static IManualAuth<Enum, OperationAllowed> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
 
@@ -35,25 +35,20 @@ namespace Signum.Engine.Authorization
 
                 OperationLogic.AllowOperation += new AllowOperationHandler(OperationLogic_AllowOperation);
 
-                cache = new AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool>(sb,
+                cache = new AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, OperationAllowed>(sb,
                      MultiEnumLogic<OperationDN>.ToEnum,
                      MultiEnumLogic<OperationDN>.ToEntity,
-                     AuthUtils.MaxBool,
-                     AuthUtils.MinBool);
+                     AuthUtils.MaxOperation,
+                     AuthUtils.MinOperation);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Operations", "Operation", roles, MultiEnumLogic<OperationDN>.ToEntity, bool.Parse);
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Operations", "Operation", roles, MultiEnumLogic<OperationDN>.ToEntity, EnumExtensions.ToEnum<OperationAllowed>);
             }
         }
 
-        static bool OperationLogic_AllowOperation(Enum operationKey)
+        static bool OperationLogic_AllowOperation(Enum operationKey, bool inUserInterface)
         {
-            return GetOperationAllowed(operationKey);
-        }
-
-        public static List<OperationInfo> Filter(List<OperationInfo> operationInfos)
-        {
-            return operationInfos.Where(ai => GetOperationAllowed(ai.Key)).ToList(); 
+            return GetOperationAllowed(operationKey, inUserInterface);
         }
 
         public static OperationRulePack GetOperationRules(Lite<RoleDN> roleLite, TypeDN typeDN)
@@ -72,20 +67,24 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => keys.Contains(r.Key));
         }
 
-        public static bool GetOperationAllowed(Lite<RoleDN> role, Enum operationKey)
+        public static bool GetOperationAllowed(Enum operationKey, bool inUserInterface, Lite<RoleDN> role)
         {
-            return cache.GetAllowed(role, operationKey);
+            OperationAllowed allowed = cache.GetAllowed(role, operationKey);
+
+            return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
 
-        public static bool GetOperationAllowed(Enum operationKey)
+        public static bool GetOperationAllowed(Enum operationKey, bool inUserInterface)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return true;
 
             if (GetTemporallyAllowed(operationKey))
                 return true;
 
-            return cache.GetAllowed(RoleDN.Current.ToLite(), operationKey);
+            OperationAllowed allowed =cache.GetAllowed(RoleDN.Current.ToLite(), operationKey);
+
+            return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
@@ -93,7 +92,7 @@ namespace Signum.Engine.Authorization
             return OperationLogic.GetAllOperationInfos(entityType).Select(oi => cache.GetAllowed(role, oi.Key)).Collapse();
         }
 
-        public static DefaultDictionary<Enum, bool> OperationRules()
+        public static DefaultDictionary<Enum, OperationAllowed> OperationRules()
         {
             return cache.GetDefaultDictionary();
         }

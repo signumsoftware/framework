@@ -250,7 +250,7 @@ namespace Signum.Engine.Cache
                 pack = new ResetLazy<Pack>(() =>
                 {
                     using (new EntityCache(true))
-                    using (Schema.Current.GlobalMode())
+                    using (ExecutionMode.Global())
                     using (Transaction tr = inCache.Value ? new Transaction(): Transaction.ForceNew())
                     using (SetInCache())
                     using (HeavyProfiler.Log("CACHE"))

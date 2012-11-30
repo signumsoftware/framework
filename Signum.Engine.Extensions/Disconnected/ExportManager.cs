@@ -230,7 +230,7 @@ namespace Signum.Engine.Disconnected
         readonly MethodInfo miUnsafeLock;
         protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : IdentifiableEntity, IDisconnectedEntity, new()
         {
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             {
                 var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.DisconnectedMachine != null).Select(a =>
                     "{0} locked in {1}".Formato(a.Id, a.DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
@@ -285,6 +285,8 @@ namespace Signum.Engine.Disconnected
             string fileName = DatabaseFileName(machine);
             string logFileName = DatabaseLogFileName(machine);
 
+            DisconnectedTools.CreateDatabaseDirectory(fileName);
+            DisconnectedTools.CreateDatabaseDirectory(logFileName);
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
             return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName);
@@ -317,7 +319,7 @@ namespace Signum.Engine.Disconnected
         protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
-
+            DisconnectedTools.CreateDatabaseDirectory(backupFileName);
             DisconnectedTools.BackupDatabase(newDatabase.DatabaseName(), backupFileName);
         }
 

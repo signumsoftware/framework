@@ -102,7 +102,7 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<FacadeMethodDN>();
 
-            return Synchronizer.SynchronizeReplacing(replacements, FacadeMethodKey, 
+            return Synchronizer.SynchronizeScriptReplacing(replacements, FacadeMethodKey, 
                 should.ToDictionary(a => a.ToString(), "FacadeMethods in Service Interface"), 
                 current.ToDictionary(a => a.ToString(), "FacadeMethods in Database"), 
                 null, 

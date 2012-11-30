@@ -13,9 +13,12 @@
                 </th>
                 <th>
                     @Resources.OperationsAscx_Allow
+                </th> 
+                <th>
+                    @Resources.OperationsAscx_DBOnly
                 </th>
                 <th>
-                    @Resources.OperationsAscx_Deny
+                    @Resources.OperationsAscx_None
                 </th>
                 <th>
                     @Resources.OperationsAscx_Overriden
@@ -30,14 +33,19 @@
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>
-                <td>
-                    <a class="sf-auth-chooser sf-auth-allowed">
-                        @Html.RadioButton(item.Compose("Allowed"), "True", item.Value.Allowed)
+                 <td>
+                    <a class="sf-auth-chooser sf-auth-modify">
+                        @Html.RadioButton(item.Compose("Allowed"), "Allow", item.Value.Allowed == OperationAllowed.Allow)
                     </a>
                 </td>
                 <td>
-                    <a class="sf-auth-chooser sf-auth-not-allowed">
-                        @Html.RadioButton(item.Compose("Allowed"), "False", !item.Value.Allowed)
+                    <a class="sf-auth-chooser sf-auth-read">
+                        @Html.RadioButton(item.Compose("Allowed"), "DBOnly", item.Value.Allowed == OperationAllowed.DBOnly)
+                    </a>
+                </td>
+                <td>
+                    <a class="sf-auth-chooser sf-auth-none">
+                        @Html.RadioButton(item.Compose("Allowed"), "None", item.Value.Allowed == OperationAllowed.None)
                     </a>
                 </td>
                 <td>

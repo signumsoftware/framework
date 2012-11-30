@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="BasicExtensions.cs" />
     <Compile Include="ConditionBuilder.cs" />
+    <Compile Include="Proxies\LineUIPoxy.cs" />
     <Compile Include="Proxies\ValueLineWindowProxy.cs" />
     <Compile Include="Proxies\LineContainer.cs" />
     <Compile Include="Proxies\MessageBoxProxy.cs" />

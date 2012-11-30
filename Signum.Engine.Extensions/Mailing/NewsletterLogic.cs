@@ -184,7 +184,7 @@ namespace Signum.Engine.Mailing
                 ToState = NewsletterState.Saved,
                 Execute = (n, args) =>
                 {
-                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>(0);
+                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>();
                     var existent = Database.Query<NewsletterDeliveryDN>().Where(d => d.Newsletter.RefersTo(n)).Select(d => d.Recipient).ToList();
                     p.Except(existent).Select(ie => new NewsletterDeliveryDN
                     {
@@ -202,7 +202,7 @@ namespace Signum.Engine.Mailing
                 ToState = NewsletterState.Saved,
                 Execute = (n, args) =>
                 {
-                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>(0);
+                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>();
                     foreach (var eo in p.GroupsOf(20))
                     {
                         var col = Database.Query<NewsletterDeliveryDN>().Where(d =>

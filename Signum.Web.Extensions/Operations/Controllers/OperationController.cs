@@ -25,11 +25,13 @@ namespace Signum.Web.Operations
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Execute(string operationFullKey, bool isLite, string prefix, string oldPrefix)
         {
+            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
+
             IdentifiableEntity entity = null;
             if (isLite)
             {
                 Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(oldPrefix);
-                entity = OperationLogic.ServiceExecuteLite(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+                entity = OperationLogic.ServiceExecuteLite(lite, operationKey);
             }
             else
             {
@@ -42,7 +44,7 @@ namespace Signum.Web.Operations
                     return JsonAction.ModelState(ModelState);
                 }
 
-                entity = OperationLogic.ServiceExecute(entity, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+                entity = OperationLogic.ServiceExecute(entity, operationKey);
             }
 
            return OperationsClient.DefaultExecuteResult(this, entity, prefix);
@@ -52,25 +54,27 @@ namespace Signum.Web.Operations
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ContextualExecute(string operationFullKey, string oldPrefix)
         {
-            IdentifiableEntity entity = null;
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(oldPrefix, EntityBaseKeys.RuntimeInfo)]);
-            if (!runtimeInfo.IdOrNull.HasValue)
-                throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(operationFullKey));
+            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
+
+            RuntimeInfo runtimeInfo = GetRuntimeInfoWithId(oldPrefix, operationKey);
 
             Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-            entity = OperationLogic.ServiceExecuteLite(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+            IdentifiableEntity entity = OperationLogic.ServiceExecuteLite(lite, operationKey);
 
             return Content("");
         }
 
+    
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Delete(string operationFullKey, string prefix, string oldPrefix)
         {
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(oldPrefix, EntityBaseKeys.RuntimeInfo)]);
-            if (!runtimeInfo.IdOrNull.HasValue)
-                throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(operationFullKey));
+            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
+
+            RuntimeInfo runtimeInfo = GetRuntimeInfoWithId(oldPrefix, operationKey);
 
             Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+
             OperationLogic.ServiceDelete(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey), null);
 
             if (Navigator.Manager.QuerySettings.ContainsKey(runtimeInfo.RuntimeType))
@@ -78,14 +82,24 @@ namespace Signum.Web.Operations
             return Content("");
         }
 
+        RuntimeInfo GetRuntimeInfoWithId(string oldPrefix, Enum operationKey)
+        {
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(oldPrefix, EntityBaseKeys.RuntimeInfo)]);
+            if (!runtimeInfo.IdOrNull.HasValue)
+                throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(operationKey.ToString()));
+            return runtimeInfo;
+        }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ConstructFrom(string operationFullKey, bool isLite, string prefix, string oldPrefix)
         {
+            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
+
             IdentifiableEntity entity = null;
             if (isLite)
             {
                 Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(oldPrefix);
-                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, operationKey);
             }
             else
             {
@@ -98,7 +112,7 @@ namespace Signum.Web.Operations
                     return JsonAction.ModelState(ModelState);
                 }
 
-                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, operationKey);
             }
 
             return OperationsClient.DefaultConstructResult(this, entity, prefix);
@@ -107,6 +121,8 @@ namespace Signum.Web.Operations
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ConstructFromMany(string runtimeType, string operationFullKey, string prefix)
         {
+            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
+
             var keys = Request["keys"];
             if (string.IsNullOrEmpty(keys))
                 throw new ArgumentException("Construct from many operation {0} needs source Lite keys".Formato(operationFullKey));
@@ -115,8 +131,8 @@ namespace Signum.Web.Operations
             
             List<Lite> sourceEntities = keys.Split(new [] { "," }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(key => Lite.Parse(type, key)).ToList();
-            
-            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+
+            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, operationKey);
 
             return OperationsClient.DefaultConstructResult(this, entity, prefix);
         }

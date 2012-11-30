@@ -84,7 +84,7 @@ namespace Signum.Engine.SMS
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
                         .Select(pr => new { Exp = exp.Evaluate(pr), Referred = pr.ToLite<IdentifiableEntity>() }).AsEnumerable().NotNull().Distinct().ToList();
 
-                    CreateMessageParams createParams = args.GetArg<CreateMessageParams>(0);
+                    CreateMessageParams createParams = args.GetArg<CreateMessageParams>();
 
                     if (!createParams.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
@@ -163,7 +163,7 @@ namespace Signum.Engine.SMS
             {
                 Construct = (providers, args) =>
                 {
-                    var template = args.GetArg<SMSTemplateDN>(0);
+                    var template = args.GetArg<SMSTemplateDN>();
 
                     if (TypeLogic.DnToType[template.AssociatedType] != typeof(T))
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
@@ -206,7 +206,7 @@ namespace Signum.Engine.SMS
             {
                 Construct = (provider, args) =>
                 {
-                    var template = args.GetArg<SMSTemplateDN>(0);
+                    var template = args.GetArg<SMSTemplateDN>();
 
                     if (template.AssociatedType != null &&
                         TypeLogic.DnToType[template.AssociatedType] != typeof(T))
@@ -474,7 +474,7 @@ namespace Signum.Engine.SMS
                 Construct = (t, args) =>
                 {
                     var message = t.CreateStaticSMSMessage();
-                    message.DestinationNumber = args.TryGetArgC<string>(0);
+                    message.DestinationNumber = args.TryGetArgC<string>();
                     return message;
                 }
             }.Register();
@@ -487,7 +487,7 @@ namespace Signum.Engine.SMS
                 ToState = SMSMessageState.Sent,
                 Execute = (t, args) =>
                 {
-                    var func = args.TryGetArgC<Func<SMSMessageDN, string>>(0);
+                    var func = args.TryGetArgC<Func<SMSMessageDN, string>>();
                     if (func != null)
                         SMSLogic.SendSMS(t, func);
                     else
@@ -500,7 +500,7 @@ namespace Signum.Engine.SMS
                 CanExecute = m => m.State != SMSMessageState.Created ? null : Resources.StatusCanNotBeUpdatedForNonSentMessages,
                 Execute = (t, args) => 
                 {
-                    var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>(0);
+                    var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>();
                     if (func != null)
                         SMSLogic.UpdateMessageStatus(t, func);
                     else

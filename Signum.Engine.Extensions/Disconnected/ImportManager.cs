@@ -279,10 +279,13 @@ namespace Signum.Engine.Disconnected
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, import));
 
-            DisconnectedTools.RestoreDatabase(DatabaseName(machine),
-                backupFileName,
-                DatabaseFileName(machine),
-                DatabaseLogFileName(machine));
+            string fileName = DatabaseFileName(machine);
+            string logFileName = DatabaseLogFileName(machine);
+
+            DisconnectedTools.CreateDatabaseDirectory(fileName);
+            DisconnectedTools.CreateDatabaseDirectory(logFileName);
+
+            DisconnectedTools.RestoreDatabase(DatabaseName(machine), backupFileName, fileName, logFileName);
         }
 
         private string GetImportConnectionString(DisconnectedMachineDN machine)
@@ -332,11 +335,9 @@ namespace Signum.Engine.Disconnected
         static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static);
         static int UnlockTable<T>(Lite<DisconnectedMachineDN> machine) where T : IdentifiableEntity, IDisconnectedEntity, new()
         {
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
                 return Database.Query<T>().Where(a => a.DisconnectedMachine == machine).UnsafeUpdate(a => new T { DisconnectedMachine = null, LastOnlineTicks = null });
         }
-
-  
     }
 
     public interface ICustomImporter

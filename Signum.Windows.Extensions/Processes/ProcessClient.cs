@@ -33,7 +33,6 @@ namespace Signum.Windows.Processes
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    new EntityOperationSettings<ProcessDN>(ProcessOperation.FromProcess){ Icon = Image("execute.png") },
                     new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
                     new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Cancel){ Icon = Image("stop.png") },
                     new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Execute){ Icon = Image("play.png") },
@@ -49,10 +48,7 @@ namespace Signum.Windows.Processes
                 if (packageOperation)
                 {
                     Navigator.AddSetting(new EntitySettings<PackageOperationDN>(EntityType.System) { View = e => new PackageOperation(), Icon = Image("package.png") });
-                    OperationClient.AddSetting(new ContextualOperationSettings(PackageOperationOperation.CreatePackageOperation)
-                    {
-                        IsVisible = args=>false,
-                    });
+
                     SearchControl.GetContextMenuItems += SearchControl_GetContextMenuItems;
                 }
             }

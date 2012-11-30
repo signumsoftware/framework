@@ -32,6 +32,10 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessLogic
     {
+        public static Polymorphic<Action<ISessionDataDN>> ApplySession = new Polymorphic<Action<ISessionDataDN>>();
+
+        public static Func<ISessionDataDN> CreateDefaultProcessSession;
+
         static Expression<Func<ProcessDN, IQueryable<ProcessExecutionDN>>> ExecutionsExpression =
             p => Database.Query<ProcessExecutionDN>().Where(a => a.Process == p);
         public static IQueryable<ProcessExecutionDN> Executions(this ProcessDN p)
@@ -59,10 +63,10 @@ namespace Signum.Engine.Processes
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null, null, 0)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null, null, 0, false)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, int maxDegreeOfParallelism)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, int maxDegreeOfParallelism, bool userProcessSession)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -112,6 +116,20 @@ namespace Signum.Engine.Processes
 
                 dqm.RegisterExpression((ProcessDN p) => p.Executions());
                 dqm.RegisterExpression((ProcessDN p) => p.LastExecution());
+
+                if (userProcessSession)
+                {
+                    sb.Settings.AssertImplementedBy((ProcessExecutionDN pe) => pe.SessionData, typeof(UserProcessSessionDN));
+                    ApplySession.Register((UserProcessSessionDN ups) =>
+                    {
+                        if (ups.User != null)
+                            UserDN.Current = ups.User.Retrieve();
+                    });
+
+                    CreateDefaultProcessSession = UserProcessSessionDN.CreateCurrent;
+                }
+                else
+                    CreateDefaultProcessSession = () => null;
             }
         }
 
@@ -135,13 +153,13 @@ namespace Signum.Engine.Processes
                             Suspend(pe);
                             break;
                         case ProcessState.Queued:
-                            Execute(pe);
+                            Enqueue(pe);
                             break;
                     }
                 };
         }
 
-        static void Execute(ProcessExecutionDN pe)
+        static void Enqueue(ProcessExecutionDN pe)
         {
             if (pe.State != ProcessState.Queued || queue.Any(a => a.Execution.Id == pe.Id))
                 return;
@@ -193,7 +211,7 @@ namespace Signum.Engine.Processes
             if (running)
                 throw new InvalidOperationException("ProcessLogic is running");
 
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             using (new EntityCache(true))
             {
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()
@@ -221,19 +239,25 @@ namespace Signum.Engine.Processes
                     {
                         Parallel.ForEach(queue.GetConsumingEnumerable(CancelNewProcesses.Token), po, ep =>
                         {
-                            try
-                            {
-                                executing.TryAdd(ep.Execution.Id, ep);
 
-                                using (AuthLogic.Disable())
+                            ProcessState dbState;
+                            using (AuthLogic.Disable())
+                                dbState = ep.Execution.InDBEntity(pe => pe.State);
+
+                            if (dbState == ProcessState.Queued) //Not canceled
+                            {
+                                try
                                 {
+                                    executing.TryAdd(ep.Execution.Id, ep);
+
                                     ep.Execute();
                                 }
-                            }
-                            finally
-                            {
-                                ExecutingProcess rubish;
-                                executing.TryRemove(ep.Execution.Id, out rubish);
+
+                                finally
+                                {
+                                    ExecutingProcess rubish;
+                                    executing.TryRemove(ep.Execution.Id, out rubish);
+                                }
                             }
                         });
                     }
@@ -335,20 +359,6 @@ namespace Signum.Engine.Processes
             {
                 GetState = e => e.State;
 
-                new ConstructFrom<ProcessDN>(ProcessOperation.FromProcess)
-                {
-                    ToState = ProcessState.Created,
-                    Construct = (process, args) =>
-                    {
-                        return new ProcessExecutionDN(process)
-                        {
-                            User = UserDN.Current.ToLite(),
-                            State = ProcessState.Created,
-                            ProcessData = args.GetArg<IProcessDataDN>(0)
-                        }.Save();
-                    }
-                }.Register();
-
                 new Execute(ProcessOperation.Save)
                 {
                     FromStates = new[] { ProcessState.Created },
@@ -357,22 +367,10 @@ namespace Signum.Engine.Processes
                     Lite = false,
                     Execute = (pe, args) =>
                     {
-
                         pe.Save();
                     }
                 }.Register();
 
-                //new Execute(ProcessOperation.Save, ProcessState.Planned)
-                //{
-                //     FromStates = new []{ProcessState.Planned},
-                //     AllowsNew = true,
-                //     Lite = false,
-                //     Execute = (pe, args)=>
-                //     {
-                //pe.State=ProcessState.Planned ;
-                //         pe.Save(); 
-                //     }
-                //}.Register();
 
                 new Execute(ProcessOperation.Plan)
                 {
@@ -387,7 +385,7 @@ namespace Signum.Engine.Processes
 
                 new Execute(ProcessOperation.Cancel)
                 {
-                    FromStates = new[] { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended },
+                    FromStates = new[] { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended, ProcessState.Queued },
                     ToState = ProcessState.Canceled,
                     Execute = (pe, _) =>
                     {
@@ -408,7 +406,7 @@ namespace Signum.Engine.Processes
 
                 new Execute(ProcessOperation.Suspend)
                 {
-                    FromStates = new[] { ProcessState.Queued, ProcessState.Executing },
+                    FromStates = new[] { ProcessState.Executing },
                     ToState = ProcessState.Suspending,
                     Execute = (pe, _) =>
                     {
@@ -420,14 +418,25 @@ namespace Signum.Engine.Processes
         }
 
 
-        public static ProcessExecutionDN Create(Enum processKey, IProcessDataDN processData)
+        public static ProcessExecutionDN Create(Enum processKey, IProcessDataDN processData, ISessionDataDN session = null)
         {
-            return MultiEnumLogic<ProcessDN>.ToEntity(processKey).ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, processData);
+            return MultiEnumLogic<ProcessDN>.ToEntity(processKey).Create(processData, session);
         }
 
-        public static ProcessExecutionDN Create(this ProcessDN process, IProcessDataDN processData)
+        public static ProcessExecutionDN Create(this ProcessDN process, IProcessDataDN processData, ISessionDataDN session = null)
         {
-            return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, processData);
+            if (session == null)
+            {
+                session = ProcessLogic.CreateDefaultProcessSession();
+            }
+
+            using (OperationLogic.AllowSave<ProcessExecutionDN>())
+                return new ProcessExecutionDN(process)
+                {
+                    State = ProcessState.Created,
+                    ProcessData = processData,
+                    SessionData = session,
+                }.Save();
         }
 
         public static void ExecuteTest(this ProcessExecutionDN pe)
@@ -472,9 +481,7 @@ namespace Signum.Engine.Processes
                 }).ToList()
             };
         }
-
-       
-    }
+    }       
 
     public interface IProcessAlgorithm
     {
@@ -483,7 +490,6 @@ namespace Signum.Engine.Processes
 
     public interface IExecutingProcess
     {
-        Lite<UserDN> User { get; }
         IProcessDataDN Data { get; }
         CancellationToken CancellationToken { get; }
         void ProgressChanged(decimal progress);
@@ -508,11 +514,6 @@ namespace Signum.Engine.Processes
             get { return CancelationSource.Token; }
         }
 
-        public Lite<UserDN> User
-        {
-            get { return Execution.User; }
-        }
-
         public void ProgressChanged(int position, int count)
         {
             decimal progress = (100 * position) / count;
@@ -531,8 +532,15 @@ namespace Signum.Engine.Processes
 
         public void Execute()
         {
-            using (AuthLogic.UserSession(Execution.User != null ? Execution.User.Retrieve() : AuthLogic.SystemUser))
+            using (ScopeSessionFactory.OverrideSession())
             {
+                if (Execution.SessionData != null)
+                    using (AuthLogic.Disable())
+                        ProcessLogic.ApplySession.Invoke(Execution.SessionData);
+
+                if (UserDN.Current == null)
+                    UserDN.Current = AuthLogic.SystemUser;
+                
                 Execution.State = ProcessState.Executing;
                 Execution.ExecutionStart = TimeZoneManager.Now;
                 Execution.Progress = 0;

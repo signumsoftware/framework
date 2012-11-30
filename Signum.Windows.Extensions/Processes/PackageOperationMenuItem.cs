@@ -53,7 +53,7 @@ namespace Signum.Windows.Processes
                      });
                 else
                 {
-                    IIdentifiable entity = Server.Return((IOperationServer s) => s.ConstructFromMany(lites.ToList(), entityType, PackageOperationOperation.CreatePackageOperation, operationKey));
+                    IIdentifiable entity = Server.Return((IOperationServer s) => s.CreatePackageOperation(lites.ToList(), operationKey));
 
                     Navigator.Navigate(entity);
                 }

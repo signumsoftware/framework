@@ -39,7 +39,7 @@ namespace Signum.Engine.Basics
                 null,
                 null,
                 (tn, dicShould, dicCurr) =>
-                    Synchronizer.SynchronizeReplacing(replacements, FieldsForKey.Formato(tn),
+                    Synchronizer.SynchronizeScriptReplacing(replacements, FieldsForKey.Formato(tn),
                     dicShould,
                     dicCurr,
                     null,

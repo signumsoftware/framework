@@ -258,8 +258,8 @@
   <data name="OperationsAscx_Allow" xml:space="preserve">
     <value>Allow</value>
   </data>
-  <data name="OperationsAscx_Deny" xml:space="preserve">
-    <value>Deny</value>
+  <data name="OperationsAscx_None" xml:space="preserve">
+    <value>None</value>
   </data>
   <data name="OperationsAscx_Operation" xml:space="preserve">
     <value>Operation</value>
@@ -476,5 +476,8 @@
   </data>
   <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities" xml:space="preserve">
     <value>Please confirm you'd like to execute the operation {0} to the selected entities</value>
+  </data>
+  <data name="OperationsAscx_DBOnly" xml:space="preserve">
+    <value>DB Only</value>
   </data>
 </root>

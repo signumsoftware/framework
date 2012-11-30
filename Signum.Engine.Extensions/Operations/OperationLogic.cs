@@ -19,6 +19,7 @@ using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
+using System.Data.Common;
 
 namespace Signum.Engine.Operations
 {
@@ -42,24 +43,28 @@ namespace Signum.Engine.Operations
         static readonly Polymorphic<Tuple<bool>> protectedSaveTypes = new Polymorphic<Tuple<bool>>(PolymorphicMerger.InheritanceAndInterfaces, typeof(IIdentifiable));
 
         static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
+
         public static bool AllowSaveGlobally { get; set; }
+
+        public static bool IsSaveProtectedAllowed(Type type)
+        {
+            if (AllowSaveGlobally)
+                return true;
+
+            var stack = allowedTypes.Value;
+            return (stack != null && stack.Contains(type));
+        }
 
         public static bool IsSaveProtected(Type type)
         {
-            if (AllowSaveGlobally)
-                return false;
-
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
                 return false;
 
             var tuple = protectedSaveTypes.TryGetValue(type);
-            if (tuple == null || !tuple.Item1)
-                return false;
 
-            var stack = allowedTypes.Value;
-            return (stack == null || !stack.Contains(type));
+            return tuple != null && tuple.Item1;
         }
-
+        
         public static void SetProtectedSave<T>(bool? isProtected) where T : IIdentifiable
         {
             SetProtectedSave(typeof(T), isProtected);
@@ -124,15 +129,42 @@ namespace Signum.Engine.Operations
                 dqm.RegisterExpression((OperationDN o) => o.LogOperations());
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
+
+                sb.Schema.Table<OperationDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Operation_PreDeleteSqlSync);
+                sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Type_PreDeleteSqlSync);
             }
+        }
+
+        static SqlPreCommand Operation_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            var t = Schema.Current.Table<OperationLogDN>();
+            var f = (FieldReference)t.Fields["operation"].Field;
+
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
+
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+        }
+
+        static SqlPreCommand Type_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            var t = Schema.Current.Table<OperationLogDN>();
+            var f = ((FieldImplementedByAll)t.Fields["entity"].Field).ColumnTypes;
+
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
+
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
         }
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
-            if (ident.Modified == true && IsSaveProtected(ident.GetType()))
-                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
+            if (ident.Modified == true && 
+                IsSaveProtected(ident.GetType()) && 
+                !IsSaveProtectedAllowed(ident.GetType()))
+                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".Formato(
                     ident.GetType().Name,
-                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => MultiEnumDN.UniqueKey(k))));
+                    operations.GetValue(ident.GetType()).Values
+                    .Where(IsExecuteNoLite)
+                    .CommaOr(o => MultiEnumDN.UniqueKey(o.Key))));
         }
 
         #region Events
@@ -162,18 +194,19 @@ namespace Signum.Engine.Operations
                 ErrorOperation(operation, entity, ex);
         }
 
-        public static bool OperationAllowed(Enum operationKey)
+        public static bool OperationAllowed(Enum operationKey, bool inUserInterface)
         {
             if (AllowOperation != null)
-                return AllowOperation(operationKey);
+                return AllowOperation(operationKey, inUserInterface);
             else
                 return true;
         }
 
-        public static void AssertOperationAllowed(Enum operationKey)
+        public static void AssertOperationAllowed(Enum operationKey, bool inUserInterface)
         {
-            if (!OperationAllowed(operationKey))
-                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)));
+            if (!OperationAllowed(operationKey, inUserInterface))
+                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)) +
+                    (inUserInterface ? " " + Resources.InUserInterface : ""));
         }
         #endregion
 
@@ -188,13 +221,18 @@ namespace Signum.Engine.Operations
 
             operations.GetOrAdd(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
 
-            if (operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false)
+            if (IsExecuteNoLite(operation))
             {
                 SetProtectedSave(operation.Type, true);
             }
         }
 
-        public static void RegisterOverride(this IOperation operation)
+        private static bool IsExecuteNoLite(IOperation operation)
+        {
+            return operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false;
+        }
+
+        public static void RegisterReplace(this IOperation operation)
         {
             if (!operation.Type.IsIIdentifiable())
                 throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
@@ -221,7 +259,7 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where OperationAllowed(o.Key)
+                    where OperationAllowed(o.Key, true)
                     select ToOperationInfo(o, null)).ToList();
         }
 
@@ -229,7 +267,7 @@ namespace Signum.Engine.Operations
         {
             return (from o in TypeOperations(entity.GetType())
                     let eo = o as IEntityOperation
-                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key)
+                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key, true)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
         }
 
@@ -305,10 +343,10 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region Construct
-        public static IIdentifiable ServiceConstruct(Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructOperation>(type, operationKey);
-            return op.Construct(args);
+            return (IdentifiableEntity)op.Construct(args);
         }
 
         public static T Construct<T>(Enum operationKey, params object[] args)
@@ -320,16 +358,16 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region ConstructFrom
-        public static IIdentifiable ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
-            return op.Construct(entity, args);
+            return (IdentifiableEntity)op.Construct(entity, args);
         }
 
-        public static IIdentifiable ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite();
-            return op.Construct(Database.RetrieveAndForget(lite), args);
+            return (IdentifiableEntity)op.Construct(Database.RetrieveAndForget(lite), args);
         }
 
         public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
@@ -424,45 +462,35 @@ namespace Signum.Engine.Operations
             return dic.Values;
         }
 
-        public static T GetArg<T>(this object[] args, int pos)
+        public static T GetArg<T>(this object[] args)
         {
-            if (pos < 0)
-                throw new ArgumentException("pos");
-
-            bool acceptsNulls = typeof(T).IsByRef || Nullable.GetUnderlyingType(typeof(T)) != null;
-
-            if (args == null || args.Length <= pos || (args[pos] == null ? !acceptsNulls : !(args[pos] is T)))
-                throw new ArgumentException("The operation needs a {0} in the argument {1}".Formato(typeof(T), pos));
-
-            return (T)args[pos];
+            return args.OfTypeOrEmpty<T>().SingleEx(
+                () => "The operation needs a {0} in the arguments".Formato(typeof(T)),
+                () => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
         }
 
-        public static T TryGetArgC<T>(this object[] args, int pos) where T : class
+        public static T TryGetArgC<T>(this object[] args) where T : class
         {
-            if (pos < 0)
-                throw new ArgumentException("pos");
-
-            if (args == null || args.Length <= pos || args[pos] == null)
-                return null;
-
-            if (!(args[pos] is T))
-                throw new ArgumentException("The operation needs a {0} in the argument {1}".Formato(typeof(T), pos));
-
-            return (T)args[pos];
+            return args.OfTypeOrEmpty<T>().SingleOrDefaultEx(
+                () => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
         }
 
-        public static T? TryGetArgS<T>(this object[] args, int pos) where T : struct
+        public static T? TryGetArgS<T>(this object[] args) where T : struct
         {
-            if (pos < 0)
-                throw new ArgumentException("pos");
+            var casted = args.OfTypeOrEmpty<T>();
 
-            if (args == null || args.Length <= pos || args[pos] == null)
+            if (casted.IsEmpty())
                 return null;
 
-            if (!(args[pos] is T))
-                throw new ApplicationException("The operation needs a {0} in the argument {1}".Formato(typeof(T), pos));
+            return casted.SingleEx(() => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
+        }
 
-            return (T)args[pos];
+        static IEnumerable<T> OfTypeOrEmpty<T>(this object[] args)
+        {
+            if (args == null)
+                return Enumerable.Empty<T>();
+
+            return args.OfType<T>(); 
         }
 
         public static string InState<T>(this T state, Enum operationKey, params T[] validStates) where T : struct
@@ -498,7 +526,7 @@ namespace Signum.Engine.Operations
         internal static Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys)
         {
             Dictionary<Enum, string> result = null;
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             {
                 foreach (var grLites in lites.GroupBy(a => a.RuntimeType))
                 {
@@ -564,7 +592,7 @@ namespace Signum.Engine.Operations
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
-    public delegate bool AllowOperationHandler(Enum operationKey);
+    public delegate bool AllowOperationHandler(Enum operationKey, bool inUserInterface);
 
 
 }

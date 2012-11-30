@@ -146,7 +146,7 @@ namespace Signum.Web.UserQueries
                 });
             }
 
-            if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
+            if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string uqEditText = Resources.UserQueries_Edit;
                 items.Add(new ToolBarButton
@@ -189,6 +189,7 @@ namespace Signum.Web.UserQueries
             findOptions.ColumnOptions.Clear();
             findOptions.ColumnOptions.AddRange(userQuery.Columns.Select(qc => new ColumnOption
             {
+                Token = qc.Token,
                 ColumnName = qc.TokenString,                
                 DisplayName = qc.DisplayName,
             }));
