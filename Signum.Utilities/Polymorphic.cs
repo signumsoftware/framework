@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Signum.Utilities
 {
@@ -193,6 +194,7 @@ namespace Signum.Utilities
         }
     }
 
+    [DebuggerStepThrough]
     public static class PolymorphicExtensions
     {
         public static T GetOrAdd<T>(this Polymorphic<T> polymorophic, Type type) where T : class, new()
