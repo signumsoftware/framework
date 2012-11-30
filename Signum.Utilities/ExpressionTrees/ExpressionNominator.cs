@@ -60,7 +60,10 @@ namespace Signum.Utilities.ExpressionTrees
             return expression;
         }
     }
+}
 
+namespace Signum.Utilities
+{
     public static class ExpressionNominatorExtensions
     {
         static MethodInfo miInSql = ReflectionTools.GetMethodInfo((int i) => i.InSql()).GetGenericMethodDefinition();
