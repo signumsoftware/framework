@@ -13,9 +13,10 @@ namespace Signum.Windows.UIAutomation
         ValueLineProxy ValueLine { get; set; }
 
 
-        public ValueLineWindowProxy(AutomationElement element):base(element)
+        public ValueLineWindowProxy(AutomationElement element)
+            : base(element)
         {
-            ValueLine = new ValueLineProxy(element.Child(e=>e.Current.ClassName == "ValueLine") , null);
+            ValueLine = new ValueLineProxy(element.Child(e => e.Current.ClassName == "ValueLine"), null);
         }
 
         public void Accept()
@@ -26,7 +27,7 @@ namespace Signum.Windows.UIAutomation
         public AutomationElement AcceptCapture()
         {
             return ValueLine.Element.CaptureWindow(
-                  () =>  AcceptButton.ButtonInvoke(),
+                  () => AcceptButton.ButtonInvoke(),
                   () => "Waiting new windows after click accept button");
         }
 
@@ -45,20 +46,55 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("btCancel"); }
         }
 
-        public T Value 
+        public T Value
         {
-            get 
+            get
             {
-               return  (T)ValueLine.GetValue(typeof(T));
+                return (T)ValueLine.GetValue(typeof(T));
             }
 
-              set 
-              {
-                  ValueLine.SetValue(value, typeof(T));
+            set
+            {
+                ValueLine.SetValue(value, typeof(T));
+            }
+        }
+    }
+
+    public static class ValueLineWindowProxyExtension
+    {
+        public static void ValueLineWindowAccept(this AutomationElement element)
+        {
+            using (var vlwp = new ValueLineWindowProxy<string>(element))
+            {
+                vlwp.Accept();
             }
         }
 
+        public static void ValueLineWindowAccept<T>(this AutomationElement element, T value)
+        {
+            using (var vlwp = new ValueLineWindowProxy<T>(element))
+            {
+                vlwp.Value = value;
+                vlwp.Accept();
+            }
+        }
 
+        public static AutomationElement ValueLineWindowAcceptCapture(this AutomationElement element)
+        {
+            using (var vlwp = new ValueLineWindowProxy<string>(element))
+            {
+                return vlwp.AcceptCapture();
+            }
+        }
+
+        public static AutomationElement ValueLineWindowAcceptCapture<T>(this AutomationElement element, T value)
+        {
+            using (var vlwp = new ValueLineWindowProxy<T>(element))
+            {
+                vlwp.Value = value;
+                return vlwp.AcceptCapture();
+            }
+        }
     }
- 
+
 }
