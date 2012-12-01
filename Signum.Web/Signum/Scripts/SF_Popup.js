@@ -23,7 +23,7 @@ SF.registerModule("Popup", function () {
                 if ($mainControl.length > 0) {
                     if ($mainControl.hasClass("sf-changed")) {
                         if (!confirm(lang.signum.loseChanges)) {
-                            return false;
+                            return true;
                         }
                     }
                 }
