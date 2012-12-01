@@ -229,10 +229,10 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public NormalWindowProxy<T> View<T>(int? timeOut = null) where T : IdentifiableEntity
+        public NormalWindowProxy<T> Navigate<T>(int? timeOut = null) where T : IdentifiableEntity
         {
             var win = Element.CaptureWindow(
-                () => ViewButton.ButtonInvoke(),
+                () => NavigateButton.ButtonInvoke(),
                 () => "View selected entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
             return new NormalWindowProxy<T>(win);
@@ -257,9 +257,9 @@ namespace Signum.Windows.UIAutomation
             get{return Element.ChildById("btCreate");}
         }
 
-        public AutomationElement ViewButton
+        public AutomationElement NavigateButton
         {
-            get { return Element.ChildById("btView"); }
+            get { return Element.ChildById("btNavigate"); }
         }
 
 
@@ -304,7 +304,7 @@ namespace Signum.Windows.UIAutomation
         {
             SelectElementAt(index);
 
-            return View<T>();
+            return Navigate<T>();
         }
 
         ResetLazy<Dictionary<string, int>> HeaderMap;
