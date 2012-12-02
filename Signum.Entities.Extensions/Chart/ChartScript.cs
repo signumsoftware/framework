@@ -277,7 +277,7 @@ namespace Signum.Entities.Chart
                 if (s == null)
                     return false;
 
-                if (c == null)
+                if (c == null || c.Token == null)
                     return s.IsOptional;
 
                 if (!ChartUtils.IsChartColumnType(c.Token, s.ColumnType))
