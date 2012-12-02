@@ -87,7 +87,7 @@
     .attr('height', function (v) { return y(v.c1); })
     .attr('width', x.rangeBand)
     .attr('x', function (v) { return x(v.c0); })
-    .attr('fill', function (v) { return getColor(v.c0, color); })
+    .attr('fill', function (v) { return v.c0.color || color(v.c0); })
     .attr('stroke', '#fff')
     .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
     .append('svg:title')
@@ -102,7 +102,7 @@
       .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) ) +  rotate(-90);})
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
-      .attr('fill', function (v) { return y(v.c1) >= yHalf ? '#fff' : getColor(v.c0, color); })
+      .attr('fill', function (v) { return y(v.c1) >= yHalf ? '#fff' : (v.c0.color || color(v.c0)); })
       .attr('dx', function (v) { return y(v.c1) >= yHalf ? -10 : 10; })
       .attr('text-anchor', function (v) { return y(v.c1) >= yHalf ? 'end' : 'start'; })
       .text(function (v) { return v.c0.niceToString(); });
