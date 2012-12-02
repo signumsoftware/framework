@@ -156,7 +156,7 @@ namespace Signum.Web.Chart
 
                 foreach (var column in chartRequest.Columns.Iterate())
                 {
-                    if (column.Value.ScriptColumn.IsGroupKey)
+                    if (column.Value.ScriptColumn.IsGroupKey && column.Value.Token != null)
                         filters.AddRange(GetFilter(column.Value, "c" + column.Position));
                 }
 
