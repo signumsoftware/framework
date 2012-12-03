@@ -164,7 +164,7 @@ namespace Signum.Entities
             if (id == null)
                 throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
-            this.toStr = this.UntypedEntityOrNull.ToString();
+            this.toStr = this.UntypedEntityOrNull.TryToString();
             this.UntypedEntityOrNull = null;
         }
 

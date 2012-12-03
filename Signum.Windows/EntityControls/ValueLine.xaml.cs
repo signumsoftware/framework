@@ -132,7 +132,7 @@ namespace Signum.Windows
             Binding b;
 
             var vBinding = GetValueBinding();
-            if (vBinding != null) // is something is binded to ValueProperty, bind the new control to there
+            if (vBinding != null)
             {
                 Validation.SetErrorTemplate(this, null);
                 BindingOperations.ClearBinding(this, ValueProperty);
