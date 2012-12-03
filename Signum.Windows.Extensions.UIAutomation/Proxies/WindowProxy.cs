@@ -92,5 +92,26 @@ namespace Signum.Windows.UIAutomation
             return walker.Normalize(element);
         }
     }
- 
+
+    public static class WindowExtensions
+    {
+        public static T Next<F, T>(this F from, Func<F, T> wizarAction)
+            where F : WindowProxy
+            where T : WindowProxy
+        {
+            using (from)
+            {
+                return wizarAction(from);
+            }
+        }
+
+        public static void End<F>(this F from, Action<F> wizarAction)
+            where F : WindowProxy
+        {
+            using (from)
+            {
+                wizarAction(from);
+            }
+        }
+    }
 }
