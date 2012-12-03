@@ -118,9 +118,9 @@
   //PAINT GRAPH
   chart.enterData(data.rows.sort(function (p){ return -p.c3;})  , 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .append('svg:circle').attr('class', 'shape')
-    .attr('stroke', function(p) { return getColor(p.c0, color); })
+    .attr('stroke', function(p) { return p.c0.color || color(p.c0); })
     .attr('stroke-width', 3)
-    .attr('fill', function(p) { return getColor(p.c0, color); })
+    .attr('fill', function(p) { return p.c0.color || color(p.c0); })
     .attr('fill-opacity', .5)
     .attr('shape-rendering', 'initial')
     .attr('r', function(p) { return Math.sqrt(sizeScale(p.c3)/Math.PI); })

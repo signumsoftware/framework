@@ -2,34 +2,92 @@
 <ChartScript GroupBy="Always">
   <Columns>
     <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Sub-columns" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Split Columns" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
     <Column DisplayName="Height" ColumnType="Positionable">
       <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
     </Column>
+    <Column DisplayName="Height 2" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Height 3" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Height 4" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Height 5" ColumnType="Positionable" IsOptional="true" />
   </Columns>
   <Icon FileName="multicolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmpJREFUeNrsmDFLHEEUgGdFAkIqwV+QTmxSB5IioFinicUFEoR0CWKXf5DCxk4sLK5I/oEYiGiRUtKI+A+UBCKEE3Fn3nvOm93B2515d3OLnFvswHIwezv7zfvevJ3djIhUm9uMannrAB8EsLfZpy6CHWAHGG+zk/x5u/+L9o/Pgv7VV4vqU+9F9uiADPf+7eugf+/7TwZsp2JAao/iWMMI4L+DNcr//g76nyw8V/Mr37KpATKcAQz6Ge7p0segf3C6M13FYOFigK3IQc49w4eBdgIioo0gKN3GCEKZe9pYxRqmv4qvDtfJXJ0rQqMUQfGL2p75PARIDjCHNEAe48v5V3Wxvhss++WXi2rjXbzQRwEZbu7Zm/DEYbFyWS3nnjs0JsHxRC8u/6gPa0Wh1/ba65tc/R/cqh9HJwz4MIrB5p6xkdMWMk9YxRULlQpQGOBj4hwkwviNOLo8sM8/Aw40CQ5vg/rpJjqmCsQjSBC9UQFYqNXaQ2ISHEFetcAVwEBTQBQVmVKLBwVJcQ2O3CIL9TZS7AFjitzCKGfPmiTAAK4ErOttFEEeXFKU+/wr4UB68a/B+evrescVemEVk6iIC7OLHkOiPHgAV+ZwXa9ploNGVKShgOPo4Yi9YB3uvgpU9ZomEYzBeUVe76joFYpDOF8FhvU2ArSFUFRkylnjmJ10DM5PcFgvK2+oOK5I2wGTtvkRuPsyNVQFsJFiFBUBgttqJT1/I62ud5yJGSnBJUUIKS9J8gQm0SsCukkJitL00gjAdL0ioDayosTN32jARL3cMv4E3LbPb/2tXlYB7D4edYCP2O4EGADo6x722MhiTAAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
   
-  var dim0 = d3.nest()
-    .key(function(r){return r.c0.toString(); })
-    .rollup(function(r){return r[0].c0 })
-    .entries(data.rows)
-    .map(function(g){return g.values;});
+   var dim0, series, title;
+  
+   if(data.columns.c1.token == null)
+   {   
+      dim0 = data.rows.map(function(r){return r.c0;});     
+      series = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){
+           var col = data.columns[cn];
+            return {
+              key : cn,
+              color : null,
+              niceName : col.title,
+              points : data.rows.map(function(r){
+                var v = r[cn];
+                return {
+                  rowClick : r,
+                  value: v,
+                  niceToString : v == null ? null: (r.c0.niceToString() + ', ' + col.title + ': ' + v.niceToString()),
+                  dim0 : r.c0,
+                };
+              }) 
+            };        
+        });
+    
+     title = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return data.columns[cn].title; })
+        .join(" | ")
+   }
+   else
+   {
+      var errors = ['c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return "'" + data.columns[cn].displayName + "'"; });
+     
+     if(errors.length > 0)
+      throw errors.join() + " not compatible with '" + data.columns.c1.displayName + "'";  
+    
+     dim0 = d3.nest()
+      .key(function(r){return r.c0.toString(); })
+      .rollup(function(r){return r[0].c0 })
+      .entries(data.rows)
+      .map(function(g){return g.values;});
 
-  var series = d3.nest()
+  
+     series = d3.nest()
       .key(function(r){return r.c1; })
       .rollup(function(list){ 
         var obj = d3.nest()
             .key(function(r){return r.c0.toString(); })
             .rollup(function(r){return r[0] })
             .map(list);
+        
+        var c1 = list[0].c1;
         return {
-          dim1 : list[0].c1,
-          values0 : dim0.map(function(d1){ return obj[d1]; })
+          key : c1.key,
+          color: c1.color,
+          niceName : c1.niceToString(),
+          points : dim0.map(function(dim0){ 
+            var row = obj[dim0];
+            return {
+              rowClick: row, 
+              value: row == null ? null: row.c2,
+              niceToString : row == null ? null: (row.c0.niceToString() + ', ' + row.c1.niceToString() + ': ' + row.c2.niceToString()),
+              dim0: dim0
+          	}; })
         };
       })
       .entries(data.rows)
-      .map(function(g){return g.values;}); 
+      .map(function(g){return g.values;});
+     
+     title = data.columns.c2.title + " by " + data.columns.c1.title
+   }
   
   var xRule = rule({
     _1 : 5,
@@ -115,29 +173,33 @@
     .append('svg:text').attr('class', 'y-label')
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-    .text(data.columns.c2.title);
+    .text(title);
   
   var interMagin = 2;
   
   var xSubscale = d3.scale.ordinal()
-      .domain($.map(series, function (s) { return s.dim1; }))
+      .domain($.map(series, function (s) { return s.key; }))
       .rangeBands([interMagin, x.rangeBand() - interMagin]);
   
-  var color =  d3.scale.category20().domain($.map(series, function (s) { return s.dim1; }));
+  var color =  d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
   
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-    .enterData(function (s) {   return s.values0; }, 'rect', 'shape')
-    .filter(function(r) { return r != undefined; })
-    .attr('stroke', function (r) { return '#fff'; })
-    .attr('fill', function (r) { return getColor(r.c1, color); })
-    .attr('x', function (r) { return xSubscale(r.c1) + x(r.c0); })
-    .attr('width', xSubscale.rangeBand())
-    .attr('y', function (r) { return yRule.size('content') - y(r.c2); })      
-    .attr('height', function (r) { return y(r.c2); })       
-    .attr('data-click', function (r) { return getClickKeys(r, data.columns); })
-    .append('svg:title')
-    .text(function (r) { return r.c0.niceToString() + ', ' + r.c1.niceToString() + ': ' + r.c2.niceToString(); });
+    .each(function(s)
+    {
+       d3.select(this).enterData(function (s) {   return s.points; }, 'rect', 'shape')
+      .filter(function(r) { return r.value != undefined; })
+      .attr('stroke', function (r) { return '#fff'; })
+      .attr('fill', function (r) { return s.color || color(s.key); })
+      .attr('x', function (r) { return x(r.dim0); })
+      .attr('transform', function(r) { return translate(xSubscale(s.key),0); })
+      .attr('width', xSubscale.rangeBand())
+      .attr('y', function (r) { return yRule.size('content') - y(r.value); })      
+      .attr('height', function (r) { return y(r.value); })       
+      .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
+      .append('svg:title')
+      .text(function (r) { return r.niceToString; });
+	});
   
   
   var legendScale = d3.scale.ordinal()
@@ -153,13 +215,13 @@
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('width', yRule.size('legend'))
       .attr('height', yRule.size('legend'))
-      .attr('fill', function (s) { return getColor(s.dim1, color); });
+      .attr('fill', function (s) { return s.color || color(s.key); });
     
     chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
       .enterData(series, 'text', 'color-text')
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('dominant-baseline', 'middle')
-      .text(function (s) { return s.dim1.niceToString(); });
+      .text(function (s) { return s.niceName; });
   }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

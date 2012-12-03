@@ -36,7 +36,7 @@
     .enterData(pie(data.rows), 'g', 'slice')
       .append('svg:path').attr('class', 'shape')
       .attr('d', arc)
-      .attr('fill', function (slice) { return getColor(slice.data.c0, color); })
+      .attr('fill', function (slice) { return slice.data.c0.color || color(slice.data.c0); })
       .attr('shape-rendering', 'initial')
       .attr('data-click', function (slice) { return getClickKeys(slice.data, data.columns); })
       .append('svg:title')
@@ -55,7 +55,7 @@
       var m = (slice.endAngle + slice.startAngle) / 2; 
       var cuadr = Math.floor(12 * m / (2 * Math.PI)); 
       return (1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'; })
-    .attr('fill', function (slice) { return getColor(slice.data.c0, color); })
+    .attr('fill', function (slice) { return  slice.data.c0.color || color(slice.data.c0); })
     .attr('data-click', function (slice) { return getClickKeys(slice.data, data.columns); })
   .text(function (slice) { return ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? slice.data.c0.niceToString() : ''; });
   
