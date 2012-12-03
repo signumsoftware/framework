@@ -107,8 +107,8 @@
   //PAINT GRAPH
   chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .append('svg:circle').attr('class', 'shape')
-    .attr('stroke', function(p) { return getColor(p.c0, color); })
-    .attr('fill', function(p) { return getColor(p.c0, color); })
+    .attr('stroke', function(p) { return p.c0.color || color(p.c0); })
+    .attr('fill', function(p) { return p.c0.color || color(p.c0); })
     .attr('shape-rendering', 'initial')
     .attr('r', 5)
     .attr('cx', function(p) { return x(p.c1); })

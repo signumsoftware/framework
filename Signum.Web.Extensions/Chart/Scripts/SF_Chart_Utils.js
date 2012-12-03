@@ -59,19 +59,15 @@ SF.Chart.Utils = (function () {
             };
         },
 
-
-        getColor: function (tokenValue, color) {
-            return ((tokenValue !== null && tokenValue.color != /*or null*/undefined) ? tokenValue.color : null)
-            || color(tokenValue);
-        },
-
         getClickKeys: function (row, columns) {
             var options = "";
             for (var k in columns) {
                 var col = columns[k];
                 if (col.isGroupKey == true) {
                     var tokenValue = row[k];
-                    options += "&" + k + "=" + (tokenValue.keyForFilter || tokenValue.toString());
+                    if (tokenValue != null) {
+                        options += "&" + k + "=" + (tokenValue.keyForFilter || tokenValue.toString());
+                    }
                 }
             }
 

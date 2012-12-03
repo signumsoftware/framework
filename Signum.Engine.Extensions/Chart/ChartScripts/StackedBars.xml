@@ -1,39 +1,97 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Sub-bars" ColumnType="Groupable" IsGroupKey="true">
+    <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true">
       <Parameter1 Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette " />
       <Parameter2 Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse" />
     </Column>
+    <Column DisplayName="Split Bars" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
     <Column DisplayName="Width" ColumnType="Magnitude" />
+    <Column DisplayName="Width 2" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Width 3" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Width 4" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Width 5" ColumnType="Magnitude" IsOptional="true" />
   </Columns>
   <Icon FileName="stackedbars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAw9JREFUeNrsmEFrFDEUx5PZfokiCFIF9SYVehCtXtRT9QtUP0Sh30KKFE9ehIIHv4TiqSLiQauVtYJQULx5srtJ3vPl5SWT2V23sxjoQieQyWQm7Pzm/5K8/45GRDXPpVJzXjrAIoDrGzvYKdgBnlBZiCefthexIlztL/Z0uNlTqievsP37mep/+6E03dJ0qCqq1OrYNq5V6ubKefXw3hVdDPDs9c2xm4hAB6oK1Oenh+r2rav1PTkAbfRAQ4AOjsY6i8rS+cvdvgcsp+A4lGIwukBdSwCYjREwqs7FFrh6OGvDedEQ52oxAbUIcg0dA3pGFDAgMAe+BihWzgM6F2ChMKBCm9QK/QAWQC2DeSAQlTywZUgXwFi1EF4PCMUVdGYECgK0n2gScmNcUMyJctYlIA9ooQ61AyysIJgxMFYTbFwSamBC+GIYTZp3mMLK6km/rIIwDOqRWjwfIYMUBQdDI4Ch5iFlOPDjZY5C8RAPBIo79aJhuKDg0dCJSi6FmVcxbzEBLgWkdIgP3jyfOvDCuTW192H/2B/UvGkrdXf1clnA5Y2fU3f95S4Xd4Cn3W59ebKIk2xWr/L+KgzT7McWFC9TerfUp/L415ba7x+2tmO+XV1ZUg/WpluyBHjm2uZ/venH19+THUPZB0HMhN/AjZXNndqhDfn71e5XDzib3WpbEJuZIm7MbMU8GMZ8jbyxMyD4FkMOt66V45noB7WuagD8149AbQ6jYmJeY4aJ9ssbCSPnxkR71s4zZrnYZpC28fAIhJPeWDwkinl1gClXBxvmApyHlNC6LH/PlovHHjyuVOrzEGj0OT+zy6k9okkKOjG1LhhdMRsz2636wTkc5P9EGi+Rz8WokI1zrhFSOhfDy66npePJFDyqAeShjXnYmIs4EZJXp5WweqctcDb6RvGKscw2B+2fJsAo5KQFk6yYzgBdI7TRM3rlYORTXxtLVtutty+mpxwd7VQ4D5uu3KP9+uLSffX+3V5rO+bbOzculbNbx5WtU5+L5+kT3M6j9RRN3X2j7gBPuPwVYADS+ixYpGUkHwAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
   
-   var pStack = data.columns.c1.parameter1;
-   var pOrder = data.columns.c1.parameter2;
+   var pStack = data.columns.c0.parameter1;
+   var pOrder = data.columns.c0.parameter2;
   
-   var dim0 = d3.nest()
-    .key(function(r){return r.c0.toString(); })
-    .rollup(function(r){return r[0].c0 })
-    .entries(data.rows)
-    .map(function(g){return g.values;});
+   var dim0, series, title;
+  
+   if(data.columns.c1.token == null)
+   {   
+      dim0 = data.rows.map(function(r){return r.c0;});     
+      series = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){
+           var col = data.columns[cn];
+            return {
+              key : cn,
+              color : null,
+              niceName : col.title,
+              points : data.rows.map(function(r){
+                var v = r[cn];
+                return {
+                  rowClick : r,
+                  value: v,
+                  niceToString : v == null ? null: (r.c0.niceToString() + ', ' + col.title + ': ' + v.niceToString()),
+                  dim0 : r.c0,
+                };
+              }) 
+            };        
+        });
+    
+     title = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return data.columns[cn].title; })
+        .join(" | ")
+   }
+   else
+   {
+      var errors = ['c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return "'" + data.columns[cn].displayName + "'"; });
+     
+     if(errors.length > 0)
+      throw errors.join() + " not compatible with '" + data.columns.c1.displayName + "'";  
+    
+     dim0 = d3.nest()
+      .key(function(r){return r.c0.toString(); })
+      .rollup(function(r){return r[0].c0 })
+      .entries(data.rows)
+      .map(function(g){return g.values;});
 
-  var series = d3.nest()
+  
+     series = d3.nest()
       .key(function(r){return r.c1; })
       .rollup(function(list){ 
         var obj = d3.nest()
             .key(function(r){return r.c0.toString(); })
             .rollup(function(r){return r[0] })
             .map(list);
+        
+        var c1 = list[0].c1;
         return {
-          dim1 : list[0].c1,
-          values0 : dim0.map(function(dim0){ return { row: obj[dim0], dim0: dim0}; })
+          key : c1.key,
+          color: c1.color,
+          niceName : c1.niceToString(),
+          points : dim0.map(function(dim0){ 
+            var row = obj[dim0];
+            return {
+              rowClick: row, 
+              value: row == null ? null: row.c2,
+              niceToString : row == null ? null: (row.c0.niceToString() + ', ' + row.c1.niceToString() + ': ' + row.c2.niceToString()),
+              dim0: dim0
+          	}; })
         };
       })
       .entries(data.rows)
-      .map(function(g){return g.values;}); 
+      .map(function(g){return g.values;});
+     
+     title = data.columns.c2.title + " by " + data.columns.c1.title
+   }
   
   
   var xRule = rule({
@@ -68,13 +126,13 @@
   var stack = d3.layout.stack()
       .offset(pStack)
       .order(pOrder)
-      .values(function(d) { return d.values0; })
-      .y(function(p){return p.row === undefined ? 0: p.row.c2.key;})
+      .values(function(d) { return d.points; })
+      .y(function(p){return p.value == undefined ? 0: p.value.key;})
       .x(function(p){return y(p.dim0);});
   
   stack(series);
   
-  var flattened = $.map(series, function(dim1){return dim1.values0});
+  var flattened = $.map(series, function(s){return s.points});
   
   var maxDim0 = d3.nest()      
       .key(function(r){return r.dim0; })
@@ -118,7 +176,7 @@
     .append('svg:text').attr('class', 'x-title')
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-  	.text(data.columns.c1.title);
+  	.text(title);
   
   
   chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
@@ -134,22 +192,23 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c0.title);
 
-  
-  var color = d3.scale.category20().domain($.map(series, function (s) { return s.dim1; }));
+  var color = d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
   
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-    .enterData(function (s) { return s.values0; }, 'rect', 'shape')
-    .filter(function (r) {return r.row !== undefined;})
-    .attr('stroke', '#fff')
-    .attr('fill', function (r) { return getColor(r.row.c1, color); })
-    .attr('transform', function (r) { return translate(0,  y(r.row.c0)); })
-    .attr('height', y.rangeBand())
-    .attr('width', function (r) { return x(r.y); })
-    .attr('x', function (r) { return x(r.y0)})
-    .attr('data-click', function (r) { return getClickKeys(r.row, data.columns); })
-    .append('svg:title')
-    .text(function (r) { return r.row.c0.niceToString() + ', ' + r.row.c1.niceToString() + ': ' + r.row.c2.niceToString(); });
+    .each(function(s){
+      d3.select(this).enterData(function (s) { return s.points; }, 'rect', 'shape')
+      .filter(function (r) {return r.value != undefined;})
+      .attr('stroke', '#fff')
+      .attr('fill', function (r) { return s.color || color(s.key); })
+      .attr('transform', function (r) { return translate(0,  y(r.dim0)); })
+      .attr('height', y.rangeBand())
+      .attr('width', function (r) { return x(r.y); })
+      .attr('x', function (r) { return x(r.y0)})
+      .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
+      .append('svg:title')
+      .text(function (r) { return r.niceToString; })
+    });
 
   
   if (y.rangeBand() > 15 && series.length > 0) {
@@ -178,13 +237,13 @@
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('width', yRule.size('legend'))
       .attr('height', yRule.size('legend'))
-      .attr('fill', function (s) { return getColor(s.dim1, color); });
+      .attr('fill', function (s) { return s.color || color(s.key); });
   
       chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
       .enterData(series, 'text', 'color-text')
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('dominant-baseline', 'middle')
-      .text(function (s) { return s.dim1.niceToString(); });
+      .text(function (s) { return s.niceName; });
   }
 
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

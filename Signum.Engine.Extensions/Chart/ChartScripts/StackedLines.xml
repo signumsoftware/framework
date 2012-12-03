@@ -1,44 +1,102 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Areas" ColumnType="Groupable" IsGroupKey="true">
+    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true">
       <Parameter1 Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette " />
       <Parameter2 Name="Order" Type="Enum" ValueDefinition="inside-out | reverse | default " />
     </Column>
+    <Column DisplayName="Areas" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
     <Column DisplayName="Height" ColumnType="Magnitude">
       <Parameter1 Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
       <Parameter2 Name="Undefined" Type="Enum" ValueDefinition="zero | empty" />
     </Column>
+    <Column DisplayName="Height 2" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Height 3" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Height 4" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Height 5" ColumnType="Magnitude" IsOptional="true" />
   </Columns>
   <Icon FileName="stackedareas.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABUNJREFUeNrsmHtsU1Ucx7+3vW3T9bFWto51g7GtIGxzo9sKiwETwEgixCiC/wiJz0zB+MBABIMKGmOiJBITwJEYcaiwaUxMRCARIg4dG4JDgzCUTZExcGNbt7VZH/d4zu27996uGwj7g5P8eh/nnN/9nO/vnN+5txwhBBO5qDDBy23AGwK46uX6CTsR+Rvp7JEX9xBezWNBTRGeXjGHm1AhfvvDw2TWzCLUzL0LbX/04pWt+8nhlg4yIQD3fttGLlxyIzvLCnAqTC8ugM5gxY5Pj2HXFy3klgM27m/DrDsLIVAUllcJPcnMNMFVXYaW37qxadtBcssAd+5tJkWF+dBotVE4gR2pcSqqpqMAPujx0HO7SV3D2NW8LsBDP54nTSf/Rn7+ZAlc9EjvWSwmOJ2l+Ol0F159/wC5aauYzbGqylLxXAkucq3iOBRSpfv63Lj/qV0pN9gHF89G7QoXlwDIVuHG2oVpp4aPvjxB7HYbTCbDqHCRemZmsxFVrvJwG8j2OXT0DANMDLFGb8HK9XtJ48Ff0wrBwaZzKC6aMia4hLYKcEKStlHALJoi7q6Zje+aO7Bz3/GUkO/UHSEOOvlVNKXcaDiiBMgqdFoNqumc6rzswfLn68mRlgsS0H0HTpP2i/3InmT9X+DYtSIgCecxljZclSWoaziO+q9PJfRo+OYXzHBMk4UT6NOvFy6FghHIEChLtDV0Mv9A08j2z5vFXjtozisosENLlU527PP50H/pLHK66+DxeMYNJ5CUCsZUZA15Xo3yshno7PZiGU20x07+hTx7jqzjQfcQ1ju/wsM1HB4gazHsHhwXXLKCvFyIhSgsEbevvLwc2HNtinOuv68fz+a+CV3uUtFXyRwb8s+twbYrW8FnWMV76cIxBo/XJ1XQ7w/KwqXaIdhxaHAI8/iPkeVYxLK1aJzGiMyyx7DO8R4MQ6fgGxlJG052DhqNJlzu6saVq71jgmPzLsPdivnlmeDUGqYT7RQMG4F+6n1YXdWKSnyGEY83LTjZOajT67H+nlPIF5rR29ufFhy79g1exTMV30NtsIdXWVCEJEIganxmMZbONaPWtgk+r2dUOFkFObpPctTZisp+zNd+gp5/r40KN9A3gNWTN0Fjc8UBCaJFQg0SEI2FPL/kXmws3gLBOwAhEFCES96kVZEFwkbO8XpUldqxyrolBKkANzw4jOW6DTAWLkkAiVlQarQYChbideduZKEDxO+ThVPMgwhDspLjmI819s3o6bkmzrN4OP+IH9OGGzB9VgV93+MVYIQ4RQOJIbc48MLcn1Fi6QQCIxI4eUDx4aqE8BimzMPawncx1HUGXq83mnh5z3ksK/kT6gxbeEBCNLTxIIpqgr56aY1YWX4WLxV/AFWQphTWN2WIxR+pQ53NiXXVB2DuOwIPDat7wI0ns9+CJrsiBsMeIPbzS0BC56EBJyvJ7tnypmNz+XYYOC9U1McoIfbLhkdtLsDj1e3I9TdBJdCX96mLpSAijDxIdBAMKmKsbbifzlqE11yNmGn+h+4aAYWdRAxfWMHQ63GEWvxl4XzU2Umrf6f5zhYCibaJax9/L1aZdCmEHxnrw2lNeKL8BFovtqOxY4EUMBTi2GpLfhgRdweDaCSqAFLDJPVXHkDsvmuKG0XGPdjQt0SqYCQ8Y1ZlLCCydYm+JlkyYDZmyLwsBEfAxSuYZnjSB1EeWIJP9vnB83IhJjEH4wjPeEDS/+ykcEHCQR1JC7KFGzU8EkxZX9zYAS1mHd44ugiJakpz0s0qd1j1seHc/o/6NuAtLv8JMADhVUxtvGMrBgAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){ 
 
-   var pStack = data.columns.c1.parameter1;
-   var pOrder = data.columns.c1.parameter2;
+   var pStack = data.columns.c0.parameter1;
+   var pOrder = data.columns.c0.parameter2;
    var pInterpolate = data.columns.c2.parameter1;
    var pUndefined =   data.columns.c2.parameter2;
   
-   var dim0 = d3.nest()
-    .key(function(r){return r.c0.toString(); })
-    .rollup(function(r){return r[0].c0 })
-    .entries(data.rows)
-    .map(function(g){return g.values;});
+   var dim0, series, title;
+  
+   if(data.columns.c1.token == null)
+   {   
+      dim0 = data.rows.map(function(r){return r.c0;});     
+      series = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){
+           var col = data.columns[cn];
+            return {
+              key : cn,
+              color : null,
+              niceName : col.title,
+              points : data.rows.map(function(r){
+                var v = r[cn];
+                return {
+                  rowClick : r,
+                  value: v,
+                  niceToString : v == null ? null: (r.c0.niceToString() + ', ' + col.title + ': ' + v.niceToString()),
+                  dim0 : r.c0,
+                };
+              }) 
+            };        
+        });
+    
+     title = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return data.columns[cn].title; })
+        .join(" | ")
+   }
+   else
+   {
+      var errors = ['c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return "'" + data.columns[cn].displayName + "'"; });
+     
+     if(errors.length > 0)
+      throw errors.join() + " not compatible with '" + data.columns.c1.displayName + "'";  
+    
+     dim0 = d3.nest()
+      .key(function(r){return r.c0.toString(); })
+      .rollup(function(r){return r[0].c0 })
+      .entries(data.rows)
+      .map(function(g){return g.values;});
 
-  var series = d3.nest()
+  
+     series = d3.nest()
       .key(function(r){return r.c1; })
       .rollup(function(list){ 
         var obj = d3.nest()
             .key(function(r){return r.c0.toString(); })
             .rollup(function(r){return r[0] })
             .map(list);
+        
+        var c1 = list[0].c1;
         return {
-          dim1 : list[0].c1,
-          values0 : dim0.map(function(dim0){ return { row: obj[dim0], dim0: dim0}; })
+          key : c1.key,
+          color: c1.color,
+          niceName : c1.niceToString(),
+          points : dim0.map(function(dim0){ 
+            var row = obj[dim0];
+            return {
+              rowClick: row, 
+              value: row == null ? null: row.c2,
+              niceToString : row == null ? null: (row.c0.niceToString() + ', ' + row.c1.niceToString() + ': ' + row.c2.niceToString()),
+              dim0: dim0
+          	}; })
         };
       })
       .entries(data.rows)
-      .map(function(g){return g.values;}); 
+      .map(function(g){return g.values;});
+     
+     title = data.columns.c2.title + " by " + data.columns.c1.title
+   }
   
   var xRule = rule({
     _1 : 5,
@@ -74,15 +132,15 @@
   var stack = d3.layout.stack()
     .offset(pStack)
     .order(pOrder)
-    .values(function(d) { return d.values0; })
-    .y(function(p){return p.row === undefined ? 0: p.row.c2.key;})
+    .values(function(d) { return d.points; })
+    .y(function(p){return p.value == undefined ? 0: p.value;})
     .x(function(p){return x(p.dim0);});
   
   
   var a = stack(series);
   
 
-  var max = d3.max(series, function(s){ return d3.max(s.values0, function(v){return v.y0 + v.y;}); });
+  var max = d3.max(series, function(s){ return d3.max(s.points, function(v){return v.y0 + v.y;}); });
   
   var y = d3.scale.linear()
       .domain([0, max])
@@ -146,9 +204,9 @@
     .append('svg:text').attr('class', 'y-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
-      .text(data.columns.c2.title);
+      .text(title);
   
-  var color =  d3.scale.category20().domain($.map(series, function (s) { return s.dim1; }));
+  var color =  d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
   
   var area = d3.svg.area()
     .x(function(v) { return x(v.dim0); })
@@ -158,34 +216,34 @@
   
   
   if(pUndefined != "zero")
-    area.defined(function(v) {return v.row !== undefined;});
+    area.defined(function(v) {return v.value !== undefined;});
   
   //paint graph
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content')))
     .append('svg:path').attr('class', 'shape')
-      .attr('stroke', function (s) { return getColor(s.dim1, color); })
-      .attr('fill', function (s) { return getColor(s.dim1, color); })
+      .attr('stroke', function (s) { return s.color || color(s.key); })
+      .attr('fill', function (s) { return s.color || color(s.key); })
       .attr('shape-rendering', 'initial')
-      .attr('d',   function (s) { return area(s.values0);})
+      .attr('d',   function (s) { return area(s.points);})
       .append('svg:title')
-      .text(function (s) { return s.dim1.niceToString(); })
+      .text(function (s) { return s.niceName; })
       
       var rectRadious = 2; 
   
   //paint graph - hover area trigger
   chart.enterData(series, 'g', 'hover-trigger-serie').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content')))
-    .enterData(function(s) { return s.values0; }, 'rect', 'point')
-      .filter(function(v) {return v.row != undefined;})
-      .attr('x', function(v) { return x(v.row.c0) - rectRadious; })
+    .enterData(function(s) { return s.points; }, 'rect', 'point')
+      .filter(function(v) {return v.value != undefined;})
+      .attr('x', function(v) { return x(v.dim0) - rectRadious; })
       .attr('y', function(v) { return -y(v.y) -y(v.y0); })
       .attr('width', 2 * rectRadious)
       .attr('height', function(v) { return y(v.y); } )
       .attr('fill', '#fff')
       .attr('fill-opacity', .1)
       .attr('stroke', 'none')
-      .attr('data-click', function(v) { return getClickKeys(v.row, data.columns); })
+      .attr('data-click', function(v) { return getClickKeys(v.rowClick, data.columns); })
       .append('svg:title')
-      .text(function(v) { return  v.row.c0.niceToString() + ', ' + v.row.c1.niceToString() + ': ' + v.row.c2.niceToString(); });
+      .text(function(v) { return v.niceToString; });
   
   var legendScale = d3.scale.ordinal()
       .domain($.map(series, function (s, i) { return i; }))
@@ -200,13 +258,13 @@
           .attr('x', function (e, i) { return legendScale(i); })
           .attr('width', yRule.size('legend'))
           .attr('height', yRule.size('legend'))
-          .attr('fill', function (s) { return getColor(s.dim1, color); });
+          .attr('fill', function (s) { return s.color || color(s.key); });
         
         chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
           .enterData(series, 'text', 'color-text')
             .attr('x', function (e, i) { return legendScale(i); })
             .attr('dominant-baseline', 'middle')
-            .text(function (s) { return s.dim1.niceToString(); });
+            .text(function (s) { return s.niceName; });
       }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
