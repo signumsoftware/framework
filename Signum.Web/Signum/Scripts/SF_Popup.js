@@ -71,11 +71,12 @@ SF.registerModule("Popup", function () {
                                     options.onOk();
                                 }
                                 else if (canClose($popupDialog)) {
-                                    if (typeof options.onCancel != "undefined") {
-                                        if (options.onCancel()) {
-                                            $popupDialog.remove();
-                                        }
-                                    }
+                                    options.onOk();
+//                                    if (typeof options.onCancel != "undefined") {
+//                                        if (options.onCancel()) {
+//                                            $popupDialog.remove();
+//                                        }
+//                                    }
                                 }
                             }
                             else {
