@@ -59,7 +59,7 @@ namespace Signum.Windows.UIAutomation
                     var item = lb.TryDescendant(e => e.Current.ItemStatus == itemsStatus);
 
                     if (item == null)
-                        throw new KeyNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(autoCompleteText, itemsStatus));
+                        throw new KeyNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(itemsStatus, autoCompleteText));
 
                     var listItem = item.Normalize(a => a.Current.ControlType == ControlType.ListItem);
 

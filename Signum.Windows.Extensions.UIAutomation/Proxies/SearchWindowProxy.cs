@@ -120,6 +120,10 @@ namespace Signum.Windows.UIAutomation
         public SearchControlProxy(AutomationElement element)
         {
             this.Element = element;
+            this.HeaderMap = new ResetLazy<Dictionary<string, int>>(() =>
+                HeaderItems
+                .Select((e, i) => KVP.Create(e.Current.ItemStatus, i))
+                .AgGroupToDictionary(a => a.Key, gr => gr.First().Value));
         }
 
         public void SelectToken(string token)
@@ -225,10 +229,10 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public NormalWindowProxy<T> View<T>(int? timeOut = null) where T : IdentifiableEntity
+        public NormalWindowProxy<T> Navigate<T>(int? timeOut = null) where T : IdentifiableEntity
         {
             var win = Element.CaptureWindow(
-                () => ViewButton.ButtonInvoke(),
+                () => NavigateButton.ButtonInvoke(),
                 () => "View selected entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
             return new NormalWindowProxy<T>(win);
@@ -253,9 +257,9 @@ namespace Signum.Windows.UIAutomation
             get{return Element.ChildById("btCreate");}
         }
 
-        public AutomationElement ViewButton
+        public AutomationElement NavigateButton
         {
-            get { return Element.ChildById("btView"); }
+            get { return Element.ChildById("btNavigate"); }
         }
 
 
@@ -300,17 +304,53 @@ namespace Signum.Windows.UIAutomation
         {
             SelectElementAt(index);
 
-            return View<T>();
+            return Navigate<T>();
         }
 
+        ResetLazy<Dictionary<string, int>> HeaderMap;
+
         public void SelectElementAt(int index)
+        {
+            var row = ElementAtPrivate(index);
+            row.Pattern<SelectionItemPattern>().Select();
+        }
+
+        public class ListViewItemProxy
+        {
+            public ListViewItemProxy( AutomationElement element, SearchControlProxy sc)
+            {
+                this.Element = element;
+                this.SearchControl = sc; 
+                this.Columns = element.Children(a=>a.Current.ClassName =="ContentPresenter");
+            }
+
+            public SearchControlProxy SearchControl { get; private set; }
+
+            public AutomationElement Element { get; private set; }
+
+            public List<AutomationElement> Columns { get; private set; }
+
+            public AutomationElement Column(string tokenName)
+            {
+                return Columns[SearchControl.HeaderMap.Value.GetOrThrow(tokenName,
+                    tb => new KeyNotFoundException("{0} not found on query {1}".Formato(tb, SearchControl.Element.Current.ItemStatus)))];
+            }
+        }
+
+        AutomationElement ElementAtPrivate(int index)
         {
             var rows = GetRows();
 
             if (rows.Count <= index)
                 throw new IndexOutOfRangeException("Row with index {0} not found, only {1} results on SearchControl {2}".Formato(index, rows.Count, Element.Current.ItemStatus));
 
-            rows[index].Pattern<SelectionItemPattern>().Select();
+            var row = rows[index];
+            return row;
+        }
+
+        public ListViewItemProxy ElementAt(int index)
+        {
+            return new ListViewItemProxy(ElementAtPrivate(index), this);
         }
 
         public string GetNumResults()

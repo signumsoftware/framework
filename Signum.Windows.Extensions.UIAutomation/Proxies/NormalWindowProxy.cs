@@ -12,9 +12,9 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows.UIAutomation
 {
-    public class NormalWindowProxy<T>: WindowProxy, ILineContainer<T> where T: ModifiableEntity
+    public class NormalWindowProxy<T> : WindowProxy, ILineContainer<T> where T : ModifiableEntity
     {
-        public WindowProxy ParentWindow { get { return this;} }
+        public WindowProxy ParentWindow { get { return this; } }
         public PropertyRoute PreviousRoute { get; set; }
 
         AutomationElement ILineContainer.Element
@@ -62,17 +62,17 @@ namespace Signum.Windows.UIAutomation
 
         public void Ok()
         {
-           ButtonBar.OkButton.ButtonInvoke();
+            ButtonBar.OkButton.ButtonInvoke();
 
-           Element.Wait(() => IsClosed,
-           actionDescription: () => "Waiting to close window after OK {0}".Formato(EntityId));
+            Element.Wait(() => IsClosed,
+            actionDescription: () => "Waiting to close window after OK {0}".Formato(EntityId));
         }
 
         public AutomationElement OkCapture()
         {
-           return Element.CaptureWindow(
-           action: () =>  ButtonBar.OkButton.ButtonInvoke(),
-           actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
+            return Element.CaptureWindow(
+            action: () => ButtonBar.OkButton.ButtonInvoke(),
+            actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
         }
 
         public void Save()
@@ -129,7 +129,7 @@ namespace Signum.Windows.UIAutomation
                 () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time));
         }
 
-        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T:IdentifiableEntity
+        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T : IdentifiableEntity
         {
             AutomationElement element = ConstructFrom(operationKey, timeOut);
 
@@ -163,16 +163,25 @@ namespace Signum.Windows.UIAutomation
                 }
             }
 
-            OnDisposed(); 
+            OnDisposed();
         }
     }
+
+    public static class NormalWindowExtensions
+    {
+        public static NormalWindowProxy<T> ToNormalWindow<T>(this AutomationElement element) where T : IdentifiableEntity
+        {
+            return new NormalWindowProxy<T>(element);
+        }
+    }
+
 
     public class OperationTimeouts
     {
         public static int ExecuteTimeout = 3 * 1000;
         public static int ConstructFromTimeout = 2 * 1000;
     }
-  
+
 
     public class ButtonBarProxy
     {
@@ -204,5 +213,5 @@ namespace Signum.Windows.UIAutomation
         }
     }
 
-    
+
 }
