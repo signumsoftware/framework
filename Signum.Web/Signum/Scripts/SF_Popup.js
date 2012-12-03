@@ -22,7 +22,9 @@ SF.registerModule("Popup", function () {
                 var $mainControl = $popupDialog.find(".sf-main-control");
                 if ($mainControl.length > 0) {
                     if ($mainControl.hasClass("sf-changed")) {
-                        return true;
+                        if (!confirm(lang.signum.loseChanges)) {
+                            return false;
+                        }
                     }
                 }
                 return true;
@@ -71,12 +73,11 @@ SF.registerModule("Popup", function () {
                                     options.onOk();
                                 }
                                 else if (canClose($popupDialog)) {
-                                    options.onOk();
-//                                    if (typeof options.onCancel != "undefined") {
-//                                        if (options.onCancel()) {
-//                                            $popupDialog.remove();
-//                                        }
-//                                    }
+                                    if (typeof options.onCancel != "undefined") {
+                                        if (options.onCancel()) {
+                                            $popupDialog.remove();
+                                        }
+                                    }
                                 }
                             }
                             else {
