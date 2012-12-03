@@ -148,7 +148,7 @@ namespace Signum.Engine.Operations
         static SqlPreCommand Type_PreDeleteSqlSync(IdentifiableEntity arg)
         {
             var t = Schema.Current.Table<OperationLogDN>();
-            var f = ((FieldImplementedByAll)t.Fields["entity"].Field).ColumnTypes;
+            var f = ((FieldImplementedByAll)t.Fields["target"].Field).ColumnTypes;
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
 
