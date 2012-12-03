@@ -51,6 +51,7 @@ namespace Signum.Entities.Chart
             set { Set(ref type, value, () => Type); }
         }
 
+        [NotNullable]
         MList<ChartColorDN> colors = new MList<ChartColorDN>();
         public MList<ChartColorDN> Colors
         {

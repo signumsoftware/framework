@@ -43,7 +43,7 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref numberOfColumns, value, () => NumberOfColumns); }
         }
 
-        [ValidateChildProperty]
+        [ValidateChildProperty, NotNullable]
         MList<PanelPart> parts = new MList<PanelPart>();
         public MList<PanelPart> Parts
         {

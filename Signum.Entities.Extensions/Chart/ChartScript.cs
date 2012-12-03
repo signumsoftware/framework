@@ -50,7 +50,7 @@ namespace Signum.Entities.Chart
             set { Set(ref groupBy, value, () => GroupBy); }
         }
 
-        [NotifyCollectionChanged, ValidateChildProperty]
+        [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
         MList<ChartScriptColumnDN> columns = new MList<ChartScriptColumnDN>();
         public MList<ChartScriptColumnDN> Columns
         {
