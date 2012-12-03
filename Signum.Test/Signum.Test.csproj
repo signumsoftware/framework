@@ -79,6 +79,7 @@
     <Compile Include="LinqProvider\DistinctTest.cs" />
     <Compile Include="LinqProvider\SelectManyTest.cs" />
     <Compile Include="LinqProvider\SingleFirstTest.cs" />
+    <Compile Include="LinqProvider\SelectImplementations.cs" />
     <Compile Include="LinqProvider\UpdateDeleteTest.cs" />
     <Compile Include="LinqProvider\SqlFunctionsTest.cs" />
     <Compile Include="LinqProvider\TakeSkipTest.cs" />
