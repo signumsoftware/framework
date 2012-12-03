@@ -21,7 +21,7 @@
     <span class="sf-entity-title">@(ViewBag.Title)</span>
 </div>
 <div class="sf-button-bar">
-    @if (Model != null && Navigator.Manager.CanSave(modifiable.GetType()) && !Model.ReadOnly)
+    @if (Model != null && Navigator.Manager.CanSave(modifiable.GetType()) && !Model.ReadOnly && Navigator.Manager.ShowSaveGlobally)
     {
         <a id="ebSave" class="sf-entity-button sf-save" onclick="new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
     }

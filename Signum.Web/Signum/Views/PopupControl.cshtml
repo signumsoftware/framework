@@ -29,7 +29,7 @@
             <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
                 OK</button>                
         }
-        @if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible] && canSave)
+        @if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible] && canSave && Navigator.Manager.ShowSaveGlobally)
         {  
             <button id="@Model.Compose("ebSave")" class="sf-entity-button sf-save" @(ViewData[ViewDataKeys.OnSave] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnSave] + "\"") : null)>
                 @Resources.Save</button>                
