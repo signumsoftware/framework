@@ -21,6 +21,7 @@ using Signum.Utilities.Reflection;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using System.Windows.Automation;
+using System.Diagnostics;
 
 namespace Signum.Windows
 {
@@ -515,18 +516,13 @@ namespace Signum.Windows
         {
             if (GetCollapseIfNull(fe) && fe.NotSet(UIElement.VisibilityProperty))
             {
-                var dp = ValueProperty(fe);
-
-                if (dp == null)
-                    throw new InvalidOperationException("Unknown value property of {0}".Formato(fe.GetType().Name));
-
-                Binding b = new Binding()
+                Binding b = new Binding(route)
                 {
-                    Path = new PropertyPath(dp.Name),
-                    Source = fe,
                     Mode = BindingMode.OneWay,
                     Converter = Converters.NullToVisibility,
                 };
+                
+                PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }
