@@ -1021,6 +1021,8 @@ namespace Signum.Web
             return true;
         }
 
+        public bool ShowSaveGlobally = true;
+
         public event Func<Type, bool> SaveProtected;
 
         public bool CanSave(Type type)
