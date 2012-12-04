@@ -93,10 +93,12 @@ namespace Signum.Entities.DynamicQuery
 
         protected List<QueryToken> SubTokensBase(Type type, Implementations? implementations)
         {
-            if (type.UnNullify() == typeof(DateTime))
-            {
+            var ut = type.UnNullify();
+            if (ut == typeof(DateTime))
                 return DateTimeProperties(this, DateTimePrecision.Milliseconds);
-            }
+
+            if (ut == typeof(float) || ut == typeof(double) || ut == typeof(decimal))
+                return DecimalProperties(this);
 
             Type cleanType = type.CleanType();
             if (cleanType.IsIIdentifiable())
@@ -161,6 +163,15 @@ namespace Signum.Entities.DynamicQuery
                 precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), utc + Resources.Second), 
                 precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), utc + Resources.Millisecond), 
             }.NotNull().ToList();
+        }
+
+        public static List<QueryToken> DecimalProperties(QueryToken parent)
+        {
+            return new List<QueryToken>
+            {
+                new CeilToken(parent),
+                new FloorToken(parent),
+            }; 
         }
 
         public static List<QueryToken> CollectionProperties(QueryToken parent)
