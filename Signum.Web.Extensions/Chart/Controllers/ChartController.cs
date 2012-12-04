@@ -190,12 +190,12 @@ namespace Signum.Web.Chart
             if (chartToken == null ||  chartToken.Token is AggregateToken)
                 return null;
 
-
             var token = chartToken.Token;
 
-            bool hasKey = Request.Params.AllKeys.Contains(key);
-            var value = !hasKey ? null : 
-                FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(Request.Params[key]), token.Type);
+            string str = Request.Params.AllKeys.Contains(key)  ? Request.Params[key] : null;
+
+            var value = str == null || str == "null" ? null :
+                FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(str), token.Type);
             
             return new FilterOption
             {
