@@ -49,6 +49,7 @@ namespace Signum.Entities.Disconnected
             set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
         }
 
+        [NotNullable]
         MList<DisconnectedImportTableDN> copies = new MList<DisconnectedImportTableDN>();
         public MList<DisconnectedImportTableDN> Copies
         {

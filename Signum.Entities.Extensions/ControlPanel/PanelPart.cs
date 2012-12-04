@@ -142,6 +142,7 @@ namespace Signum.Entities.ControlPanel
     [Serializable]
     public class CountSearchControlPartDN : Entity, IPartDN
     {
+        [NotNullable]
         MList<CountUserQueryElement> userQueries = new MList<CountUserQueryElement>();
         public MList<CountUserQueryElement> UserQueries
         {
@@ -201,6 +202,7 @@ namespace Signum.Entities.ControlPanel
     [Serializable]
     public class LinkListPartDN : Entity, IPartDN
     {
+        [NotNullable]
         MList<LinkElement> links = new MList<LinkElement>();
         public MList<LinkElement> Links
         {

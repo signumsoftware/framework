@@ -50,6 +50,7 @@ namespace Signum.Entities.Authorization
             internal set { Set(ref role, value, () => Role); }
         }
 
+        [NotNullable]
         MList<Lite<RoleDN>> subRoles = new MList<Lite<RoleDN>>();
         public MList<Lite<RoleDN>> SubRoles
         {
@@ -77,6 +78,7 @@ namespace Signum.Entities.Authorization
             internal set { Set(ref type, value, () => Type); }
         }
 
+        [NotNullable]
         MList<T> rules = new MList<T>();
         public MList<T> Rules
         {
