@@ -105,7 +105,7 @@ namespace Signum.Test
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
-        [NotNullable]
+        //[NotNullable] Do not add Nullable for testing purposes
         MList<Lite<ArtistDN>> friends = new MList<Lite<ArtistDN>>();
         public MList<Lite<ArtistDN>> Friends
         {
