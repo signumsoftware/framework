@@ -12,11 +12,12 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Mailing;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Authorization
 {
     [Serializable]
-    public class UserDN : Entity, IEmailOwnerDN
+    public class UserDN : Entity, IEmailOwnerDN, IUserDN
     {
         public static Func<string, string> ValidatePassword = p =>
         {
@@ -132,12 +133,10 @@ namespace Signum.Entities.Authorization
             return ToStringExpression.Evaluate(this);
         }
 
-        public static string UserSessionKey = "user";
-        public static readonly SessionVariable<UserDN> CurrentUserVariable = Statics.SessionVariable<UserDN>(UserSessionKey);
         public static UserDN Current
         {
-            get { return CurrentUserVariable.Value; }
-            set { CurrentUserVariable.Value = value; }
+            get { return (UserDN)UserHolder.Current; }
+            set { UserHolder.Current = value; }
         }
     }
 

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Exceptions;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {

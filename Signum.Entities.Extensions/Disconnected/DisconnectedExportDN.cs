@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
-using Signum.Entities.Exceptions;
 using System.Linq.Expressions;
 using System.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {

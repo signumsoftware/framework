@@ -150,12 +150,6 @@
   <data name="View" xml:space="preserve">
     <value>View</value>
   </data>
-  <data name="ConstructorSelector" xml:space="preserve">
-    <value>Constructor Selector</value>
-  </data>
-  <data name="PleaseSelectAConstructor" xml:space="preserve">
-    <value>Please Select a Constructor</value>
-  </data>
   <data name="DownloadFile" xml:space="preserve">
     <value>Download File</value>
   </data>

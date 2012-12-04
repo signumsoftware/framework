@@ -7,7 +7,6 @@ using System.Web.Mvc.Ajax;
 using System.Reflection;
 using Signum.Engine.Help;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
@@ -17,6 +16,7 @@ using System.Text;
 using Signum.Web.Extensions.Properties;
 using Signum.Engine;
 using Signum.Engine.WikiMarkup;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Help
 {

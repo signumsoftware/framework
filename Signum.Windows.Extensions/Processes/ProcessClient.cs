@@ -11,9 +11,9 @@ using Signum.Services;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Windows;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using System.Windows.Controls;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Processes
 {

@@ -9,7 +9,6 @@ using Signum.Entities;
 using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using System.Threading;
 using Signum.Utilities.DataStructures;
 using System.Diagnostics;
@@ -24,7 +23,6 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Signum.Engine.Scheduler;
 using System.Linq.Expressions;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 using System.IO;
 

@@ -13,13 +13,13 @@ using System.Web.Routing;
 using System.Web.Mvc;
 using System.Text.RegularExpressions;
 using Signum.Engine.Help;
-using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Engine;
 using Signum.Engine.WikiMarkup;
+using Signum.Entities.Basics;
 #endregion
 
 namespace Signum.Web.Help

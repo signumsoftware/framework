@@ -7,7 +7,6 @@ using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities.Authorization;
-using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Scheduler
 {

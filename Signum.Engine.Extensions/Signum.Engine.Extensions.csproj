@@ -107,7 +107,6 @@
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
-    <Compile Include="Basics\EnumLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
@@ -120,7 +119,6 @@
     <Compile Include="Chart\ChartScriptLogic.cs" />
     <Compile Include="Chart\UserChartLogic.cs" />
     <Compile Include="ControlPanel\ControlPanelLogic.cs" />
-    <Compile Include="Deployment\DeploymentLogic.cs" />
     <Compile Include="Disconnected\DisconnectedTools.cs" />
     <Compile Include="Disconnected\LocalBackupManager.cs" />
     <Compile Include="Disconnected\ImportManager.cs" />
@@ -136,20 +134,11 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
-    <Compile Include="Exceptions\ExceptionLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailPackageLogic.cs" />
     <Compile Include="Mailing\EmailRenderer.cs" />
     <Compile Include="Mailing\NewsletterLogic.cs" />
     <Compile Include="Mailing\SmtpConfigurationLogic.cs" />
-    <Compile Include="Operations\BasicConstruct.cs" />
-    <Compile Include="Operations\BasicConstructFrom.cs" />
-    <Compile Include="Operations\BasicConstructFromMany.cs" />
-    <Compile Include="Operations\BasicDelete.cs" />
-    <Compile Include="Operations\BasicExecute.cs" />
-    <Compile Include="Operations\Graph.cs" />
-    <Compile Include="Operations\OperationLogic.cs" />
-    <Compile Include="Operations\Typle.cs" />
     <Compile Include="Processes\PackageLogic.cs" />
     <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Profiler\ProfilerLogic.cs" />
@@ -201,7 +190,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <None Include="Chart\ChartScripts\charts.psd" />
-    <None Include="Operations\Operations.cd" />
     <EmbeddedResource Include="Reports\plainExcelTemplate.xlsx" />
   </ItemGroup>
   <ItemGroup>
@@ -255,6 +243,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

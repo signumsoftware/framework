@@ -18,7 +18,6 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Linq;
 using Signum.Engine.Extensions.Properties;
-using Signum.Entities.Operations;
 using Signum.Engine.Exceptions;
 using System.Data.SqlClient;
 using System.Xml.Linq;

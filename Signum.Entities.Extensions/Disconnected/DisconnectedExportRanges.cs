@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {

@@ -251,15 +251,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Impossible to execute {0} from state {1}.
-        /// </summary>
-        internal static string ImpossibleToExecute0FromState1 {
-            get {
-                return ResourceManager.GetString("ImpossibleToExecute0FromState1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Incorrect password.
         /// </summary>
         internal static string IncorrectPassword {
@@ -274,15 +265,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string Integer {
             get {
                 return ResourceManager.GetString("Integer", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to (in user interface).
-        /// </summary>
-        internal static string InUserInterface {
-            get {
-                return ResourceManager.GetString("InUserInterface", resourceCulture);
             }
         }
         
@@ -355,15 +337,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string OfThe0 {
             get {
                 return ResourceManager.GetString("OfThe0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} ({1}) is not Authorized.
-        /// </summary>
-        internal static string Operation01IsNotAuthorized {
-            get {
-                return ResourceManager.GetString("Operation01IsNotAuthorized", resourceCulture);
             }
         }
         
@@ -472,15 +445,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string TheDatabaseVersion {
             get {
                 return ResourceManager.GetString("TheDatabaseVersion", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The entity {0} is new.
-        /// </summary>
-        internal static string TheEntity0IsNew {
-            get {
-                return ResourceManager.GetString("TheEntity0IsNew", resourceCulture);
             }
         }
         

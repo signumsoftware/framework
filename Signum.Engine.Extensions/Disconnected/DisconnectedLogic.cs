@@ -17,6 +17,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Data.SqlClient;
 using Signum.Engine.Operations;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Disconnected
 {

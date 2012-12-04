@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Basics;
-using Signum.Entities.Operations;
 using System.Text.RegularExpressions;
 using System.Reflection;
 

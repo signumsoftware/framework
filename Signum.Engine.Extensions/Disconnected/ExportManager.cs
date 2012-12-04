@@ -16,13 +16,13 @@ using Signum.Utilities.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Linq.Expressions;
-using Signum.Engine.Exceptions;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Authorization;
 using System.Threading;
 using System.Reflection;
 using Signum.Engine.Operations;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Disconnected
 {
@@ -129,7 +129,7 @@ namespace Signum.Engine.Disconnected
                         }
 
                         int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
-
+                        
                         ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e =>
                             new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
                             {

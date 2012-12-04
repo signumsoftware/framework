@@ -6,6 +6,7 @@ using System.ServiceModel;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.Basics;
 
 namespace Signum.Services
 {

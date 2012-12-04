@@ -277,15 +277,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create.
-        /// </summary>
-        public static string Create {
-            get {
-                return ResourceManager.GetString("Create", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Create palette.
         /// </summary>
         public static string CreatePalette {
@@ -673,42 +664,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please confirm you&apos;d like to delete the entity from the system.
-        /// </summary>
-        public static string PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem {
-            get {
-                return ResourceManager.GetString("PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Please confirm you&apos;d like to delete the selected entities from the system.
-        /// </summary>
-        public static string PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem {
-            get {
-                return ResourceManager.GetString("PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Please confirm you&apos;d like to execute the operation {0} to the entity {1} ({2}-{3}).
-        /// </summary>
-        public static string PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123 {
-            get {
-                return ResourceManager.GetString("PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Please confirm you&apos;d like to execute the operation {0} to the selected entities.
-        /// </summary>
-        public static string PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities {
-            get {
-                return ResourceManager.GetString("PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Please, enter your chosen new password.
         /// </summary>
         public static string PleaseEnterYourChosenNewPassword {
@@ -867,15 +822,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string ResetPasswordSuccess {
             get {
                 return ResourceManager.GetString("ResetPasswordSuccess", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operations.
-        /// </summary>
-        public static string Search_CtxMenuItem_Operations {
-            get {
-                return ResourceManager.GetString("Search_CtxMenuItem_Operations", resourceCulture);
             }
         }
         

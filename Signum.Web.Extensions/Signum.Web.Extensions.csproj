@@ -401,17 +401,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Deployment\DeploymentClient.cs" />
-    <Compile Include="Deployment\Views\DeploymentLog.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DeploymentLog.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Deployment\Views\_ViewStart.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Disconnected\DisconnectedClient.cs" />
     <Compile Include="Disconnected\Views\DisconnectedExport.generated.cs">
       <AutoGen>True</AutoGen>
@@ -427,17 +416,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>DisconnectedMachine.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Exception\ExceptionClient.cs" />
-    <Compile Include="Exception\Views\ExceptionLog.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ExceptionLog.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Exception\Views\_ViewStart.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Help\Views\EntityProperty.generated.cs">
       <AutoGen>True</AutoGen>
@@ -597,13 +575,6 @@
     <Compile Include="Help\HelpModels.cs" />
     <Compile Include="HttpModules\WhitespaceModule.cs" />
     <Compile Include="Mailing\EmailClient.cs" />
-    <Compile Include="Operations\JsOperations.cs" />
-    <Compile Include="Operations\JsOperationOptions.cs" />
-    <Compile Include="Operations\OperationButtonFactory.cs" />
-    <Compile Include="Operations\OperationContextItem.cs" />
-    <Compile Include="Operations\Controllers\OperationController.cs" />
-    <Compile Include="Operations\OperationsClient.cs" />
-    <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="Processes\ProcessesClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
     <Compile Include="Profiler\ProfilerClient.cs" />
@@ -904,7 +875,6 @@
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Omnibox\Scripts\SF_Omnibox.js" />
-    <Content Include="Operations\Scripts\SF_Operations.js" />
     <Content Include="Processes\Scripts\SF_Process.js" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1001,15 +971,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserChartPart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Exception\Views\_ViewStart.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Exception\Views\Web.config" />
-    <Content Include="Exception\Views\ExceptionLog.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ExceptionLog.generated.cs</LastGenOutput>
-    </Content>
     <Content Include="Chart\Views\UserChartFilter.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserChartFilter.generated.cs</LastGenOutput>
@@ -1026,15 +987,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ProcessPanelTable.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Deployment\Views\_ViewStart.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Deployment\Views\DeploymentLog.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>DeploymentLog.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Deployment\Views\Web.config" />
     <Content Include="Chart\Views\ChartPalette.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChartPalette.generated.cs</LastGenOutput>

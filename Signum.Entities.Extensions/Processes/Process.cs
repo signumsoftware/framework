@@ -13,7 +13,6 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;
-using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Processes
 {

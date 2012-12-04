@@ -96,7 +96,6 @@
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
     <Compile Include="Basics\TypeConditionDN.cs" />
-    <Compile Include="Basics\EnumDN.cs" />
     <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
@@ -121,8 +120,6 @@
     <Compile Include="Disconnected\DisconnectedMachineDN.cs" />
     <Compile Include="Disconnected\DisconnectedExportDN.cs" />
     <Compile Include="Disconnected\FileMessage.cs" />
-    <Compile Include="Exceptions\ExceptionDN.cs" />
-    <Compile Include="Deployment\DeploymentLogDN.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
@@ -133,14 +130,12 @@
     <Compile Include="Mailing\Newsletter.cs" />
     <Compile Include="Mailing\SMTPConfiguration.cs" />
     <Compile Include="Chart\UserChartOmniboxResultGenerator.cs" />
+    <Compile Include="Processes\IProcessServer.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\EntityOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\OmniboxParser.cs" />
     <Compile Include="Omnibox\OmniboxUtils.cs" />
-    <Compile Include="Operations\IOperationServer.cs" />
-    <Compile Include="Operations\OperationDN.cs" />
-    <Compile Include="Operations\OperationLogDN.cs" />
     <Compile Include="Processes\Process.cs" />
     <Compile Include="Processes\Package.cs" />
     <Compile Include="Profiler\IProfilerServer.cs" />
@@ -213,7 +208,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"

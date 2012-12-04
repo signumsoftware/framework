@@ -15,7 +15,6 @@ using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
-using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
@@ -79,7 +78,7 @@ namespace Signum.Web.Processes
 
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Extensions.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
+                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
 
                 foreach (var operation in operations)
                 {

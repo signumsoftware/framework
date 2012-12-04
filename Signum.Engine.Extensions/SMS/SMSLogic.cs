@@ -16,6 +16,7 @@ using Signum.Entities.Processes;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.SMS
 {

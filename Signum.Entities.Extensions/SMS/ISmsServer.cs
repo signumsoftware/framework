@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.ServiceModel;
 using Signum.Services;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.SMS
 {

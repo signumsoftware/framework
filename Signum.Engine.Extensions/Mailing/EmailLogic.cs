@@ -13,7 +13,6 @@ using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
-using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Engine.Extensions.Properties;
 using System.Net;
@@ -24,7 +23,6 @@ using System.Web;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Linq.Expressions;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Mailing

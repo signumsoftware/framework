@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.SMS;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.SMS
 {

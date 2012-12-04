@@ -13,7 +13,6 @@ using Microsoft.Win32;
 using Signum.Entities.Reports;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Windows.Extensions.Properties;
 using Signum.Windows;
@@ -21,10 +20,10 @@ using System.Windows.Data;
 using System.Windows.Media;
 using Signum.Windows.Operations;
 using Signum.Entities.Processes;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Processes
 {
-
     public static class PackageOperationMenuItemConsturctor
     {
         public static MenuItem Construct(SearchControl sc, Enum operationKey, string canExecute, Dictionary<Type, OperationInfo> operationInfos, EntityOperationSettingsBase settings)
@@ -53,7 +52,7 @@ namespace Signum.Windows.Processes
                      });
                 else
                 {
-                    IIdentifiable entity = Server.Return((IOperationServer s) => s.CreatePackageOperation(lites.ToList(), operationKey));
+                    IIdentifiable entity = Server.Return((IProcessServer s) => s.CreatePackageOperation(lites.ToList(), operationKey));
 
                     Navigator.Navigate(entity);
                 }

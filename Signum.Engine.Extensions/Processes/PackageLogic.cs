@@ -6,8 +6,6 @@ using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Processes;
 using Signum.Entities;
-using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using System.Reflection;
 using Signum.Entities.Scheduler;
@@ -15,10 +13,11 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Basics;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Processes
 {

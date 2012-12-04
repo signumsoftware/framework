@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Authorization;
-using Signum.Entities.Operations;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Mailing;
-using Signum.Entities.Exceptions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Mailing
 {
