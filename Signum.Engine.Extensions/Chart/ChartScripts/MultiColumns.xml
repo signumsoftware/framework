@@ -120,7 +120,7 @@
       .domain($.map(dim0, function (d) { return d; }))
       .rangeBands([0, xRule.size('content')]);
   
-  var y = scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, yRule.size('content'));
+  var y = scaleFor(data.columns.c2, $.map(series, function(s){ return s.points.map(function(p){return p.value;})}), 0, yRule.size('content'));
   
   chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.start('ticks')))
     .enterData(dim0, 'line', 'x-tick')
