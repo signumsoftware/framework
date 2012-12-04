@@ -37,7 +37,9 @@
 				</Literal>
 			</Declarations>
 			<Code Language="csharp">
-				<![CDATA[MList<$type$> $field$ = new MList<$type$>();
+				<![CDATA[[NotNullable]
+        MList<$type$> $field$ = new MList<$type$>();
+        [NotNullValidator, NoRepeatValidator]
         public MList<$type$> $property$
         {
             get { return $field$; }
