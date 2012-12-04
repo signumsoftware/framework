@@ -12,6 +12,7 @@ using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Diagnostics;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities
 {

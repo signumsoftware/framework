@@ -13,6 +13,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
 using Signum.Engine;
 using System.Web;
+using Signum.Entities.Basics;
 
 namespace Signum.Web
 {

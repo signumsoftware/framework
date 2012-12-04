@@ -15,6 +15,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Collections;
 using Signum.Engine.Maps;
 using System.Data.Common;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Linq
 {  

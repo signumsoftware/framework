@@ -346,4 +346,22 @@ Lose changes?</value>
   <data name="Signum_searchControlMenuSelected" xml:space="preserve">
     <value>selected</value>
   </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
+    <value>Please confirm you'd like to delete the entity from the system</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" xml:space="preserve">
+    <value>Please confirm you'd like to delete the selected entities from the system</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
+    <value>Please confirm you'd like to execute the operation {0} to the entity {1} ({2}-{3})</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities" xml:space="preserve">
+    <value>Please confirm you'd like to execute the operation {0} to the selected entities</value>
+  </data>
+  <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
+    <value>Operations</value>
+  </data>
 </root>

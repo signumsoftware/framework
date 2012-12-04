@@ -16,6 +16,7 @@ using System.Collections;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
 using System.Threading;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine
 {

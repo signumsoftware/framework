@@ -16,6 +16,7 @@ using System.Diagnostics;
 using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Services;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.DynamicQuery
 {

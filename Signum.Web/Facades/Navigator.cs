@@ -23,6 +23,8 @@ using Signum.Web.Controllers;
 using System.Web.Hosting;
 using System.Web.Compilation;
 using Signum.Web.PortableAreas;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 #endregion
 
 namespace Signum.Web
@@ -456,7 +458,8 @@ namespace Signum.Web
             "~/signum/Scripts/SF_ViewNavigator.js",
             "~/signum/Scripts/SF_FindNavigator.js",
             "~/signum/Scripts/SF_Validator.js",
-            "~/signum/Scripts/SF_Widgets.js"
+            "~/signum/Scripts/SF_Widgets.js",
+            "~/signum/Scripts/SF_Operations.js"
         };
         public Func<List<string>> DefaultScripts = () => defaultScripts;
 

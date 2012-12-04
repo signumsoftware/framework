@@ -10,8 +10,9 @@ using Signum.Utilities;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Basics;
 
-namespace Signum.Engine
+namespace Signum.Engine.Basics
 {
     public static class TypeLogic
     {

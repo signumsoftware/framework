@@ -10,6 +10,7 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Linq
 {

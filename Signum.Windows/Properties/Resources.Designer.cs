@@ -196,6 +196,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Constructor Selector.
+        /// </summary>
+        public static string ConstructorSelector {
+            get {
+                return ResourceManager.GetString("ConstructorSelector", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Continue anyway?.
         /// </summary>
         public static string ContinueAnyway {
@@ -555,6 +564,15 @@ namespace Signum.Windows.Properties {
         public static string PleaseChooseAValueToContinue {
             get {
                 return ResourceManager.GetString("PleaseChooseAValueToContinue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please Select a Constructor.
+        /// </summary>
+        public static string PleaseSelectAConstructor {
+            get {
+                return ResourceManager.GetString("PleaseSelectAConstructor", resourceCulture);
             }
         }
         

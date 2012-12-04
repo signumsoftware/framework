@@ -12,6 +12,7 @@ using System.ServiceModel;
 using System.Windows;
 using System.ServiceModel.Security;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows
 {

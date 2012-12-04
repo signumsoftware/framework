@@ -12,10 +12,11 @@ using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Engine.Linq;
+using Signum.Engine.Operations;
 
 namespace Signum.Services
 {
-    public abstract class ServerBasic : IBaseServer, IDynamicQueryServer
+    public abstract class ServerBasic : IBaseServer, IDynamicQueryServer, IOperationServer
     {
         protected Dictionary<string, object> session = new Dictionary<string, object>();
 
@@ -171,6 +172,74 @@ namespace Signum.Services
              () => DynamicQueryManager.Current.BatchExecute(requests));
         }
         #endregion
-       
+
+
+        #region IOperationServer Members
+        public List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
+                () => OperationLogic.ServiceGetEntityOperationInfos(entity));
+        }
+
+        public List<OperationInfo> GetOperationInfos(Type entityType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => OperationLogic.ServiceGetOperationInfos(entityType));
+        }
+        public bool GetSaveProtected(Type entityType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => OperationLogic.IsSaveProtected(entityType));
+        }
+
+        public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceExecute(entity, operationKey, args));
+        }
+
+        public IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
+        }
+
+        public IdentifiableEntity Delete(Lite lite, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceDelete(lite, operationKey, args));
+        }
+
+        public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceConstruct(type, operationKey, args));
+        }
+
+        public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
+        }
+
+        public IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
+        }
+
+        public IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
+        }
+
+        public Dictionary<Enum, string> GetContextualCanExecute(Lite[] lite, List<Enum> cleanKeys)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), null,
+                () => OperationLogic.GetContextualCanExecute(lite, cleanKeys));
+        }
+
+        #endregion
     }
 }

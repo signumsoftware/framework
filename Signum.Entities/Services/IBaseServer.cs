@@ -11,6 +11,7 @@ using Signum.Entities.DynamicQuery;
 using System.Reflection;
 using Signum.Utilities;
 using System.Collections.Concurrent;
+using Signum.Entities.Basics;
 
 
 namespace Signum.Services

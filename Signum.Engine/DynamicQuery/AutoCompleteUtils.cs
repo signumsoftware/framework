@@ -14,6 +14,7 @@ using Signum.Entities;
 using Signum.Engine.Linq;
 using System.Collections;
 using Signum.Engine.Maps;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.DynamicQuery
 {

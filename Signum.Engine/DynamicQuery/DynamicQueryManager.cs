@@ -190,8 +190,7 @@ namespace Signum.Engine.DynamicQuery
         {
             if (mi.DeclaringType.Assembly == typeof(Enumerable).Assembly ||
                 mi.DeclaringType.Assembly == typeof(Csv).Assembly ||
-                mi.DeclaringType.Assembly == typeof(Lite).Assembly ||
-                mi.DeclaringType.Assembly == typeof(Database).Assembly)
+                mi.DeclaringType.Assembly == typeof(Lite).Assembly)
                 throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
         }
 

@@ -18,6 +18,8 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Linq;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Maps
 {

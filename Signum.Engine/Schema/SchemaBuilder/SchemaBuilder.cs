@@ -15,6 +15,8 @@ using Signum.Engine.Properties;
 using System.Linq.Expressions;
 using System.Runtime.Remoting.Contexts;
 using Signum.Engine.Linq;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Maps
 {

@@ -98,6 +98,10 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Page Include="Basics\Exception.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\TimePicker.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -124,6 +128,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Basics\Exception.xaml.cs">
+      <DependentUpon>Exception.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TimePicker.xaml.cs">
       <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
@@ -197,6 +204,10 @@
     <Page Include="DynamicQuery\QueryTokenRenderer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Operations\OperationLog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -425,6 +436,14 @@
     <Compile Include="Fluent\TreeExtensions.cs" />
     <Compile Include="Fluent\WhereExtensions.cs" />
     <Compile Include="MarkupExtensions\NavigatorExtensions.cs" />
+    <Compile Include="Operations\ConstructFromManyMenuItem.cs" />
+    <Compile Include="Operations\EntityOperationMenuItem.cs" />
+    <Compile Include="Operations\OperationClient.cs" />
+    <Compile Include="Operations\OperationLog.xaml.cs">
+      <DependentUpon>OperationLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Operations\OperationServer.cs" />
+    <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="SelectorWindow.xaml.cs">
       <DependentUpon>SelectorWindow.xaml</DependentUpon>
     </Compile>
