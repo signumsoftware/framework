@@ -114,7 +114,7 @@
   }, height);
   //yRule.debugY(chart);
 
-  var x = scaleFor(data.columns.c2, data.rows.map(function (e) { return e.c2; }), 0, xRule.size('content'));
+  var x = scaleFor(data.columns.c2, $.map(series, function(s){ return s.points.map(function(p){return p.value;})}), 0, xRule.size('content'));
   
   var y = d3.scale.ordinal()
       .domain($.map(dim0, function (v) { return v; }))
