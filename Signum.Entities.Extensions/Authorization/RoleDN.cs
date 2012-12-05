@@ -21,6 +21,7 @@ namespace Signum.Entities.Authorization
             set { SetToStr(ref name, value, () => Name); }
         }
 
+        [NotNullable]
         MList<Lite<RoleDN>> roles = new MList<Lite<RoleDN>>();
         public MList<Lite<RoleDN>> Roles
         {

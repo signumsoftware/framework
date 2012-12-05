@@ -67,6 +67,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref enableSSL, value, () => EnableSSL); }
         }
 
+        [NotNullable]
         MList<ClientCertificationFileDN> clientCertificationFiles = new MList<ClientCertificationFileDN>();
         public MList<ClientCertificationFileDN> ClientCertificationFiles
         {
