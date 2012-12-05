@@ -70,7 +70,7 @@ namespace Signum.Engine.Operations
                 User = UserHolder.Current.ToLite()
             };
 
-            using (OperationLogic.AllowSave<T>())
+            using (OperationLogic.AllowSave(entity.GetType()))
             {
                 try
                 {

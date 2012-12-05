@@ -63,7 +63,7 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
-            using (OperationLogic.AllowSave<F>())
+            using (OperationLogic.AllowSave(entity.GetType()))
             using (OperationLogic.AllowSave<T>())
             {
                 try

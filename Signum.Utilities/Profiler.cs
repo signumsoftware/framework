@@ -149,6 +149,17 @@ namespace Signum.Utilities
             return tracer;
         }
 
+        public static T LogValue<T>(string role, Func<T> valueFactory)
+        {
+            if (!enabled)
+                return valueFactory();
+
+            using (HeavyProfiler.LogNoStackTrace(role))
+            {
+                return valueFactory();
+            }
+        }
+
         public static Tracer LogNoStackTrace(string role)
         {
             if (!enabled)

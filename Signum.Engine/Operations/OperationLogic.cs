@@ -77,15 +77,12 @@ namespace Signum.Engine.Operations
             return AllowSave(typeof(T));
         }
 
-        private static IDisposable AllowSave(Type type)
+        public static IDisposable AllowSave(Type type)
         {
             allowedTypes.Value = (allowedTypes.Value ?? ImmutableStack<Type>.Empty).Push(type);
 
             return new Disposable(() => allowedTypes.Value = allowedTypes.Value.Pop());
         }
-
-
-
 
         public static void AssertStarted(SchemaBuilder sb)
         {

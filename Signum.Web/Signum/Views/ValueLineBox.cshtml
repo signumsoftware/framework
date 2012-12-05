@@ -9,6 +9,7 @@
     <div style="display: none">
     
         @Html.ValueLine(e, f => f.BoxType)
+        @Html.Hidden(e.Compose("IsNullable"), e.Value.IsNullable)
     </div>
     switch (e.Value.BoxType)
     {
