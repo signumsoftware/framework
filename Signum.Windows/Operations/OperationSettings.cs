@@ -60,7 +60,7 @@ namespace Signum.Windows.Operations
         public FrameworkElement EntityControl { get; internal set; }
         public ToolBarButton SenderButton { get; internal set; }
         public OperationInfo OperationInfo { get; internal set; }
-        public ViewButtons ViewButtons { get; internal set; }
+        public ViewMode ViewButtons { get; internal set; }
         public bool SaveProtected { get; internal set; }
     }
 

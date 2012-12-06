@@ -18,7 +18,7 @@ namespace Signum.Services
         List<OperationInfo> GetOperationInfos(Type entityType);
 
         [OperationContract, NetDataContract]
-        bool GetSaveProtected(Type entityType);
+        HashSet<Type> GetSaveProtectedTypes();
 
         [OperationContract, NetDataContract]
         IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args);

@@ -19,6 +19,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Services;
 using System.Windows.Threading;
 using System.Collections.ObjectModel;
+using Signum.Windows.Operations;
 
 namespace Signum.Windows
 {
@@ -684,16 +685,13 @@ namespace Signum.Windows
         {
             Type entityType = entity.GetType();
 
-            ViewButtons buttons = options.ViewButtons;
 
             bool isReadOnly = options.ReadOnly ?? OnIsReadOnly(entityType, entity);
             bool isSaveProtected = options.SaveProtected ??
-                (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OnSaveProtected(entityType));
+                (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType));
             win.MainControl = ctrl;
-            win.ButtonBar.SaveProtected = isSaveProtected; //Matters even on Ok
-            win.ButtonBar.ViewButtons = buttons;
-            win.ButtonBar.SaveVisible = buttons == ViewButtons.Save && !isReadOnly && !isSaveProtected;
-            win.ButtonBar.OkVisible = buttons == ViewButtons.Ok;
+            win.SaveProtected = isSaveProtected; //Matters even on Ok
+            win.ViewMode = options.ViewButtons;
             win.DataContext = options.Clone ? ((ICloneable)entity).Clone() : entity;
 
             if (isReadOnly)
@@ -799,23 +797,6 @@ namespace Signum.Windows
                 es.OnIsViewable();
         }
 
-
-        public event Func<Type, bool> SaveProtected;
-
-        public bool OnSaveProtected(Type type)
-        {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                throw new InvalidOperationException("An {0} can not be save".Formato(type.Name));
-
-            if (SaveProtected != null)
-                foreach (Func<Type, bool> sp in SaveProtected.GetInvocationList())
-                {
-                    if (sp(type))
-                        return true;
-                }
-
-            return false;
-        }
 
         public event Func<object, bool> IsFindable;
 

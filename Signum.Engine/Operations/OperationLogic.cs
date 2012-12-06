@@ -61,6 +61,11 @@ namespace Signum.Engine.Operations
 
             return tuple != null && tuple.Item1;
         }
+
+        public static HashSet<Type> GetSaveProtectedTypes()
+        {
+            return TypeLogic.TypeToDN.Keys.Where(IsSaveProtected).ToHashSet();
+        }
         
         public static void SetProtectedSave<T>(bool? isProtected) where T : IIdentifiable
         {

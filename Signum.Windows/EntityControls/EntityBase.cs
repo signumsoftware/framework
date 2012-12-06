@@ -72,10 +72,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ViewButtonsProperty =
-            DependencyProperty.Register("ViewButtons", typeof(ViewButtons?), typeof(EntityBase), new UIPropertyMetadata(null));
-        public ViewButtons? ViewButtons
+            DependencyProperty.Register("ViewButtons", typeof(ViewMode?), typeof(EntityBase), new UIPropertyMetadata(null));
+        public ViewMode? ViewButtons
         {
-            get { return (ViewButtons?)GetValue(ViewButtonsProperty); }
+            get { return (ViewMode?)GetValue(ViewButtonsProperty); }
             set { SetValue(ViewButtonsProperty, value); }
         }
 

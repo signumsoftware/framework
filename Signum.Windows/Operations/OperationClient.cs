@@ -33,15 +33,18 @@ namespace Signum.Windows.Operations
 
                 Manager = operationManager;
 
-                Navigator.Manager.SaveProtected += Manager.DefaultSaveProtected; 
-
-                ButtonBar.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
+                NormalWindow.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
 
                 Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
 
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
             }
+        }
+
+        public static bool SaveProtected(Type type)
+        {
+            return Manager.SaveProtected(type);
         }
 
         public static readonly DependencyProperty ConstructFromOperationKeyProperty =
@@ -413,15 +416,18 @@ namespace Signum.Windows.Operations
             return result.Select(a => EntityOperationMenuItemConsturctor.Construct(sc, a.OperationInfo, a.CanExecute, a.Settings));
         }
 
-     
 
-        static Dictionary<Type,bool> SaveProtectedCache = new Dictionary<Type, bool>();
-        protected internal virtual bool DefaultSaveProtected(Type type)
+
+        static HashSet<Type> SaveProtectedCache = new HashSet<Type>();
+        protected internal virtual bool SaveProtected(Type type)
         {
             if (!type.IsIIdentifiable())
                 return false;
 
-            return SaveProtectedCache.GetOrCreate(type, () => Server.Return((IOperationServer o) => o.GetSaveProtected(type)));
+            if (SaveProtectedCache == null)
+                SaveProtectedCache = Server.Return((IOperationServer o) => o.GetSaveProtectedTypes());
+
+            return SaveProtectedCache.Contains(type);
         }
     }
 }

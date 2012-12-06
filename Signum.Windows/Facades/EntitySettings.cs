@@ -10,6 +10,10 @@ using System.Windows.Data;
 using System.Collections;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
+using Signum.Windows.Operations;
+using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows
 {
@@ -62,29 +66,46 @@ namespace Signum.Windows
                     IsNavigable = EntityWhen.Always;
                     IsReadOnly = true;
                     break;
+
                 case EntityType.String:
+                    AssertSaveProtected(entityType);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
                     break;
-                case EntityType.Part:
-                    IsCreable = EntityWhen.IsLine;
-                    IsViewable = true;
-                    IsNavigable = EntityWhen.Always;
-                    break;
                 case EntityType.Shared:
+                    AssertSaveProtected(entityType);
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
                 case EntityType.Main:
+                    AssertSaveProtected(entityType);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
+
+                case EntityType.Part:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    break;
+                case EntityType.SharedPart:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    break;
+           
                 default:
                     break;
             }
+        }
+
+        private void AssertSaveProtected(EntityType entityType)
+        {
+            if (!OperationClient.SaveProtected(typeof(T)))
+                throw new InvalidOperationException("{0} can not be {1} because is not save protected (does not have a save operation)".Formato(typeof(T).TypeName(), entityType));
         }
 
         public override Control CreateView(ModifiableEntity entity, PropertyRoute typeContext)
@@ -137,9 +158,10 @@ namespace Signum.Windows
         SystemString,
         System,
         String,
-        Part,
         Shared,
         Main,
+        Part,
+        SharedPart,
     }
 
  

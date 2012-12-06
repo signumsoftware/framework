@@ -9,6 +9,8 @@ using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Engine.Basics;
+using Signum.Engine.Operations;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Web
 {
@@ -79,35 +81,55 @@ namespace Signum.Web
                     IsReadonly = true;
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
+
                 case EntityType.String:
+                    AssertSaveProtected(entityType);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
                     MappingMain = new EntityMapping<T>(true).GetValue;
                     MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
-                case EntityType.Part:
-                    IsCreable = EntityWhen.IsLine;
-                    IsViewable = true;
-                    IsNavigable = EntityWhen.Always;
-                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
-                    break;
                 case EntityType.Shared:
+                    AssertSaveProtected(entityType);
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
                 case EntityType.Main:
+                    AssertSaveProtected(entityType);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
+
+                case EntityType.Part:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
+                    break;
+
+                case EntityType.SharedPart:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
+                    break;
+             
                 default:
                     break;
             }
         }
+
+        private void AssertSaveProtected(EntityType entityType)
+        {
+            if (!OperationLogic.IsSaveProtected(typeof(T)))
+                throw new InvalidOperationException("{0} can not be {1} because is not save protected (does not have a save operation)".Formato(typeof(T).TypeName(), entityType));
+        }
+
 
         internal override bool OnIsCreable(bool isSearchEntity)
         {
@@ -136,9 +158,10 @@ namespace Signum.Web
         SystemString,
         System,
         String,
-        Part,
         Shared,
         Main,
+        Part,
+        SharedPart,
     }
 
     public class EmbeddedEntitySettings<T> : EntitySettings, IImplementationsFinder where T : EmbeddedEntity

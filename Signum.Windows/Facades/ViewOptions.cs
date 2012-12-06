@@ -19,7 +19,7 @@ namespace Signum.Windows
 
         public Control View { get; set; }
 
-        public abstract ViewButtons ViewButtons { get; }
+        public abstract ViewMode ViewButtons { get; }
     }
 
     public class ViewOptions: ViewOptionsBase
@@ -33,9 +33,9 @@ namespace Signum.Windows
 
         public AllowErrors AllowErrors { get; set; }
 
-        public override ViewButtons ViewButtons
+        public override ViewMode ViewButtons
         {
-            get { return ViewButtons.Ok; }
+            get { return ViewMode.View; }
         }
     }
 
@@ -43,9 +43,9 @@ namespace Signum.Windows
     {
         public EventHandler Closed { get; set; }
 
-        public override ViewButtons ViewButtons
+        public override ViewMode ViewButtons
         {
-            get { return ViewButtons.Save; }
+            get { return ViewMode.Navigate; }
         }
     }
 }

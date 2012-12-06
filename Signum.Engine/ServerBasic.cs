@@ -186,10 +186,11 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => OperationLogic.ServiceGetOperationInfos(entityType));
         }
-        public bool GetSaveProtected(Type entityType)
+
+        public HashSet<Type> GetSaveProtectedTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.IsSaveProtected(entityType));
+                () => OperationLogic.GetSaveProtectedTypes());
         }
 
         public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
