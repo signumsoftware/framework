@@ -74,11 +74,10 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-
-    public interface IPartDN:IIdentifiable
+    public interface IPartDN : IIdentifiable
     {
         IPartDN Clone();
-    };
+    }
 
     [Serializable]
     public class UserQueryPartDN : Entity, IPartDN

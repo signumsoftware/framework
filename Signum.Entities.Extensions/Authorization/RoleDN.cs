@@ -56,6 +56,7 @@ namespace Signum.Entities.Authorization
 
     public enum RoleOperations
     {
+        Save,
         Delete
     }
 }

@@ -100,6 +100,13 @@ namespace Signum.Engine.Authorization
 
                 UserGraph.Register();
 
+                new BasicExecute<RoleDN>(RoleOperations.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (r, args) =>{}
+                }.Register();
+
                 new BasicDelete<RoleDN>(RoleOperations.Delete)
                 {
                     Delete = (r, args) =>

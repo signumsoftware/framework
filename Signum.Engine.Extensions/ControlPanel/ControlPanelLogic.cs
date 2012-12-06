@@ -13,6 +13,7 @@ using Signum.Utilities;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.UserQueries;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.ControlPanel
 {
@@ -48,8 +49,37 @@ namespace Signum.Engine.ControlPanel
                                                    Entity = cp,
                                                    ToStr = cp.ToString(),
                                                    Links = cp.UserQueries.Count
-                                               }).ToDynamic(); 
+                                               }).ToDynamic();
+
+                RegisterOperations();
             }
+        }
+
+        private static void RegisterOperations()
+        {
+            new BasicExecute<ControlPanelDN>(ControlPanelOperations.Save)
+            {
+                AllowsNew = true,
+                Lite = false,
+                Execute = (cp, _) => { }
+            }.Register();
+
+            new BasicDelete<ControlPanelDN>(ControlPanelOperations.Delete)
+            {
+                Lite = false,
+                Delete = (cp, _) =>
+                {
+                    var parts = cp.Parts.Select(a => a.Content).ToList();
+                    cp.Delete();
+                    Database.DeleteList(parts);
+                }
+            }.Register();
+
+            new BasicConstructFrom<ControlPanelDN, ControlPanelDN>(ControlPanelOperations.Clone)
+            {
+                Lite = false,
+                Construct = (cp, _) => cp.Clone()
+            }.Register();
         }
 
         public static Lite<ControlPanelDN> GetHomePageControlPanel()

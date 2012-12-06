@@ -86,7 +86,7 @@ namespace Signum.Web.Files
 
                 if (file)
                 {
-                    var es = new EntitySettings<FileDN>(EntityType.Shared);
+                    var es = new EntitySettings<FileDN>(EntityType.SharedPart);
                     Navigator.AddSetting(es);
 
                     var baseMapping = (Mapping<FileDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);

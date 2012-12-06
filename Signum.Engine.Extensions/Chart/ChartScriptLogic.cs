@@ -37,31 +37,45 @@ namespace Signum.Engine.Chart
                                                   uq.Columns.Count,
                                                   uq.Icon,
                                               }).ToDynamic();
-                
-                new BasicConstructFrom<ChartScriptDN, ChartScriptDN>(ChartScriptOperations.Clone)
-                {
-                    Construct = (cs, _) => new ChartScriptDN
-                    {
-                        Name = cs.Name,
-                        GroupBy = cs.GroupBy,
-                        Icon = cs.Icon,
-                        Columns = cs.Columns.Select(col => new ChartScriptColumnDN
-                        {
-                            ColumnType = col.ColumnType,
-                            DisplayName = col.DisplayName,
-                            IsGroupKey = col.IsGroupKey,
-                            IsOptional = col.IsOptional,
-                        }).ToMList(),
-                        Script = cs.Script,
-                    }
-                }.Register();
 
-                new BasicDelete<ChartScriptDN>(ChartScriptOperations.Delete)
-                {
-                    CanDelete = c => Database.Query<UserChartDN>().Any(a => a.ChartScript == c) ? "There are {0} in the database using {1}".Formato(typeof(UserChartDN).NicePluralName(), c) : null,
-                    Delete = (c, _) => c.Delete(),
-                }.Register();
+
+                RegisterOperations();
             }
+        }
+
+        private static void RegisterOperations()
+        {
+            new BasicExecute<ChartScriptDN>(ChartScriptOperations.Save)
+            {
+                AllowsNew = true,
+                Lite = false,
+                Execute = (cs, _) => { }
+            }.Register();
+
+            new BasicConstructFrom<ChartScriptDN, ChartScriptDN>(ChartScriptOperations.Clone)
+            {
+                Construct = (cs, _) => new ChartScriptDN
+                {
+                    Name = cs.Name,
+                    GroupBy = cs.GroupBy,
+                    Icon = cs.Icon,
+                    Columns = cs.Columns.Select(col => new ChartScriptColumnDN
+                    {
+                        ColumnType = col.ColumnType,
+                        DisplayName = col.DisplayName,
+                        IsGroupKey = col.IsGroupKey,
+                        IsOptional = col.IsOptional,
+                    }).ToMList(),
+                    Script = cs.Script,
+                }
+            }.Register();
+
+
+            new BasicDelete<ChartScriptDN>(ChartScriptOperations.Delete)
+            {
+                CanDelete = c => Database.Query<UserChartDN>().Any(a => a.ChartScript == c) ? "There are {0} in the database using {1}".Formato(typeof(UserChartDN).NicePluralName(), c) : null,
+                Delete = (c, _) => c.Delete(),
+            }.Register();
         }
 
         public static void ImportExportScripts(string folderName)

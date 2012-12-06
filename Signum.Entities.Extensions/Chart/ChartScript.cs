@@ -300,6 +300,7 @@ namespace Signum.Entities.Chart
 
     public enum ChartScriptOperations
     {
+        Save,
         Clone,
         Delete
     }
@@ -371,6 +372,20 @@ namespace Signum.Entities.Chart
         {
             get { return parameter3; }
             set { Set(ref parameter3, value, () => Parameter3); }
+        }
+
+        internal ChartScriptColumnDN Clone()
+        {
+            return new ChartScriptColumnDN
+            {
+                DisplayName = DisplayName,
+                IsGroupKey = IsGroupKey,
+                ColumnType = ColumnType,
+                IsOptional = IsOptional,
+                Parameter1 = Parameter1.TryCC(p => p.Clone()),
+                Parameter2 = Parameter2.TryCC(p => p.Clone()),
+                Parameter3 = Parameter3.TryCC(p => p.Clone()),
+            };
         }
     }
 
