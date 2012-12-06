@@ -463,7 +463,7 @@ namespace Signum.Engine
 
 
         public static void DeleteList<T>(IList<T> collection)
-            where T : IdentifiableEntity
+            where T : IIdentifiable
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
