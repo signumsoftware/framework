@@ -10,6 +10,7 @@ using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Selenium
 {

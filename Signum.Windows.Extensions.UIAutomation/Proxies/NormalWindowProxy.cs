@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Automation;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using Signum.Entities;
 using System.Windows;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.UIAutomation
 {

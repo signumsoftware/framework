@@ -6,9 +6,9 @@ using System.Windows.Automation;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using System.Windows;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.UIAutomation
 {
