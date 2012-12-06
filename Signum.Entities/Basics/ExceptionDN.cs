@@ -23,6 +23,7 @@ namespace Signum.Entities.Basics
             this.StackTrace = ex.StackTrace;
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
+           
         }
 
         DateTime creationDate = TimeZoneManager.Now;
@@ -38,7 +39,7 @@ namespace Signum.Entities.Basics
         public string ExceptionType
         {
             get { return exceptionType; }
-            set { Set(ref exceptionType, value, () => ExceptionType); }
+            private set { Set(ref exceptionType, value, () => ExceptionType); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -46,7 +47,7 @@ namespace Signum.Entities.Basics
         public string ExceptionMessage
         {
             get { return exceptionMessage; }
-            set
+            private set
             {
                 if (Set(ref exceptionMessage, value, () => ExceptionMessage))
                 {
@@ -59,7 +60,7 @@ namespace Signum.Entities.Basics
         public int ExceptionMessageHash
         {
             get { return exceptionMessageHash; }
-            internal set { Set(ref exceptionMessageHash, value, () => ExceptionMessageHash); }
+            private set { Set(ref exceptionMessageHash, value, () => ExceptionMessageHash); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -68,7 +69,7 @@ namespace Signum.Entities.Basics
         public string StackTrace
         {
             get { return stackTrace; }
-            set
+            private set
             {
                 if (Set(ref stackTrace, value, () => StackTrace))
                 {
@@ -81,14 +82,14 @@ namespace Signum.Entities.Basics
         public int StackTraceHash
         {
             get { return stackTraceHash; }
-            internal set { Set(ref stackTraceHash, value, () => StackTraceHash); }
+            private set { Set(ref stackTraceHash, value, () => StackTraceHash); }
         }
 
         int threadId;
         public int ThreadId
         {
             get { return threadId; }
-            set { Set(ref threadId, value, () => ThreadId); }
+            private set { Set(ref threadId, value, () => ThreadId); }
         }
 
         Lite<IUserDN> user;
