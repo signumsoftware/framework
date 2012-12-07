@@ -138,7 +138,6 @@
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />
-    <Compile Include="Signum\Controllers\WidgetsController.cs" />
     <Compile Include="Lines\ValueLine.cs" />
     <Compile Include="Mappings\Mapping.cs">
       <SubType>Code</SubType>
@@ -216,16 +215,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ValueLineBox.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\Widgets\Alert.cs">
-      <DependentUpon>Alert.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Signum\Views\Widgets\Note.cs">
-      <DependentUpon>Note.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Signum\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -254,11 +243,7 @@
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
-    <Compile Include="TypeContext\Widgets\AlertWidgetHelper.cs" />
-    <Compile Include="TypeContext\Widgets\AlertsClient.cs" />
-    <Compile Include="TypeContext\Widgets\NotesClient.cs" />
     <Compile Include="TypeContext\Widgets\QuickLinkWidgetHelper.cs" />
-    <Compile Include="TypeContext\Widgets\NoteWidgetHelper.cs" />
     <Compile Include="TypeContext\Widgets\WidgetsHelper.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
     <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
@@ -345,14 +330,6 @@
     </None>
     <Content Include="Signum\Images\calendar.png" />
     <Content Include="Signum\Scripts\SF_Utils.js" />
-    <Content Include="Signum\Views\Widgets\Note.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Note.cs</LastGenOutput>
-    </Content>
-    <Content Include="Signum\Views\Widgets\Alert.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Alert.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.config" />
@@ -419,7 +396,9 @@
     <EmbeddedResource Include="Properties\Resources.de.resx" />
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Signum\Views\Widgets\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

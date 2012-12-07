@@ -153,18 +153,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Basics\Alert.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Basics\Note.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="BlueMenu.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -307,19 +295,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Widgets\AlertsWidget.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Widgets\LinksWidget.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Widgets\NotesWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
@@ -401,12 +377,6 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Async.cs" />
-    <Compile Include="Basics\Alert.xaml.cs">
-      <DependentUpon>Alert.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Basics\Note.xaml.cs">
-      <DependentUpon>Note.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ButtonBar.xaml.cs">
       <DependentUpon>ButtonBar.xaml</DependentUpon>
     </Compile>
@@ -521,14 +491,8 @@
       <DependentUpon>EntityCombo.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageLoader.cs" />
-    <Compile Include="Widgets\AlertsWidget.xaml.cs">
-      <DependentUpon>AlertsWidget.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Widgets\LinksWidget.xaml.cs">
       <DependentUpon>LinksWidget.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Widgets\NotesWidget.xaml.cs">
-      <DependentUpon>NotesWidget.xaml</DependentUpon>
     </Compile>
     <Compile Include="Widgets\WidgetPanel.xaml.cs">
       <DependentUpon>WidgetPanel.xaml</DependentUpon>

@@ -106,14 +106,12 @@
     <Compile Include="DynamicQuery\QueryUtils.cs" />
     <Compile Include="DynamicQuery\Tokens\QueryToken.cs" />
     <Compile Include="FieldAttributes.cs" />
-    <Compile Include="Basics\AlertDN.cs" />
     <Compile Include="Basics\ColorDN.cs" />
     <Compile Include="DynamicQuery\Meta.cs" />
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="Patterns\CorruptEntity.cs" />
     <Compile Include="DynamicQuery\Order.cs" />
     <Compile Include="DynamicQuery\QueryDescription.cs" />
-    <Compile Include="Basics\NoteDN.cs" />
     <Compile Include="Patterns\ImmutableEntity.cs" />
     <Compile Include="Patterns\LockeableEntity.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

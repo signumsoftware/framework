@@ -59,9 +59,7 @@ namespace Signum.Test
             }
 
             sb.Include<AlbumDN>();
-            sb.Include<NoteDN>();
             sb.Include<NoteWithDateDN>();
-            sb.Include<AlertDN>();
             sb.Include<PersonalAwardDN>();
             sb.Include<AwardNominationDN>();
 
@@ -79,15 +77,6 @@ namespace Signum.Test
                                         a.Name,
                                         a.Year
                                     }).ToDynamic();
-
-            dqm[typeof(NoteDN)] = (from a in Database.Query<NoteDN>()
-                                           select new
-                                           {
-                                               Entity = a.ToLite(),
-                                               a.Id,
-                                               a.Text,
-                                               a.Target
-                                           }).ToDynamic();
 
             dqm[typeof(NoteWithDateDN)] = (from a in Database.Query<NoteWithDateDN>()
                                     select new
@@ -171,21 +160,6 @@ namespace Signum.Test
                                                 a.Author
                                             }).ToDynamic();
             
-            var alertExpr = Linq.Expr((AlertDN a) => new
-            {
-                Entity = a.ToLite(),
-                a.Id,
-                a.AlertDate,
-                Text = a.Text.Etc(100),
-                a.CheckDate,
-                Target = a.Entity
-            });
-
-            dqm[typeof(AlertDN)] = Database.Query<AlertDN>().Select(alertExpr).ToDynamic();
-            dqm[AlertQueries.NotAttended] = Database.Query<AlertDN>().Where(a => a.NotAttended).Select(alertExpr).ToDynamic();
-            dqm[AlertQueries.Attended] = Database.Query<AlertDN>().Where(a => a.Attended).Select(alertExpr).ToDynamic();
-            dqm[AlertQueries.Future] = Database.Query<AlertDN>().Where(a => a.Future).Select(alertExpr).ToDynamic();
-            
             dqm[typeof(IAuthorDN)] = DynamicQuery.Manual((request, descriptions) =>
                                     {
                                         var one = (from a in Database.Query<ArtistDN>()
@@ -203,7 +177,6 @@ namespace Signum.Test
                                                     .OrderBy(request.Orders)
                                                     .Select(request.Columns)
                                                     .TryPaginatePartial(request.MaxElementIndex);
-
 
                                         var two = (from a in Database.Query<BandDN>()
                                                    select new
