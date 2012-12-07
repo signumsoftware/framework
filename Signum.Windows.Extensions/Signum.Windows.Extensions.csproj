@@ -90,6 +90,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alerts\Alert.xaml.cs">
+      <DependentUpon>Alert.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Alerts\AlertClient.cs" />
+    <Compile Include="Alerts\AlertsWidget.xaml.cs">
+      <DependentUpon>AlertsWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Alerts\AlertType.xaml.cs">
+      <DependentUpon>AlertType.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Authorization\AuthClient.cs" />
     <Compile Include="Authorization\NewPassword.xaml.cs">
       <DependentUpon>NewPassword.xaml</DependentUpon>
@@ -214,6 +224,13 @@
       <DependentUpon>SMTPConfiguration.xaml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\SMTPConfigurationClient.cs" />
+    <Compile Include="Notes\Note.xaml.cs">
+      <DependentUpon>Note.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Notes\NoteClient.cs" />
+    <Compile Include="Notes\NotesWidget.xaml.cs">
+      <DependentUpon>NotesWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Omnibox\DynamicQueryOmniboxProvider.cs" />
     <Compile Include="Omnibox\EntityOmniboxProvider.cs" />
     <Compile Include="Omnibox\OmniboxAutocomplete.xaml.cs">
@@ -333,6 +350,18 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Alerts\Alert.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Alerts\AlertsWidget.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Alerts\AlertType.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Authorization\AuthResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -526,6 +555,14 @@
     <Page Include="Mailing\SMTPConfiguration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Notes\Note.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Notes\NotesWidget.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Omnibox\OmniboxAutocomplete.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -820,6 +857,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Exception\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\alert.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\not.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

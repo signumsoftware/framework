@@ -83,6 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alerts\Alert.cs" />
     <Compile Include="Authorization\PasswordValidIntervalDN.cs" />
     <Compile Include="Authorization\ResetPasswordRequestDN.cs" />
     <Compile Include="Authorization\SessionLogDN.cs" />
@@ -130,6 +131,7 @@
     <Compile Include="Mailing\Newsletter.cs" />
     <Compile Include="Mailing\SMTPConfiguration.cs" />
     <Compile Include="Chart\UserChartOmniboxResultGenerator.cs" />
+    <Compile Include="Notes\Nota.cs" />
     <Compile Include="Processes\IProcessServer.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />
