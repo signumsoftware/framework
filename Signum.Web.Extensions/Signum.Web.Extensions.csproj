@@ -466,7 +466,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Search.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Notes\NotesClient.cs" />
+    <Compile Include="Notes\NoteClient.cs" />
     <Compile Include="Notes\NoteWidgetHelper.cs" />
     <Compile Include="Notes\Views\Nota.generated.cs">
       <DependentUpon>Nota.cshtml</DependentUpon>

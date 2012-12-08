@@ -33,7 +33,7 @@ namespace Signum.Web.Alerts
 
                 OperationsClient.AddSettings(new List<OperationSettings>
                 {
-                     new EntityOperationSettings(AlertaOperations.SaveNew) 
+                     new EntityOperationSettings(AlertOperation.SaveNew) 
                      { 
                          OnClick = ctx => 
                          {

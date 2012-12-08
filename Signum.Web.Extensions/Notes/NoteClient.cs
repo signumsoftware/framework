@@ -11,7 +11,7 @@ using Signum.Web.Operations;
 
 namespace Signum.Web.Notes
 {
-    public static class NotesClient
+    public static class NoteClient
     {
         public static string ViewPrefix = "~/Notes/Views/{0}.cshtml";
 
@@ -19,7 +19,7 @@ namespace Signum.Web.Notes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.RegisterArea(typeof(NotesClient));
+                Navigator.RegisterArea(typeof(NoteClient));
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {

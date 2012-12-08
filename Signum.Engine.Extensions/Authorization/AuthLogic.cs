@@ -20,7 +20,6 @@ using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
-//using Signum.Entities.Extensions.Authorization;
 
 namespace Signum.Engine.Authorization
 {

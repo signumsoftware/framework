@@ -89,7 +89,7 @@ namespace Signum.Engine.Alerts
                 Title = titule,
                 Target = new Lite<IdentifiableEntity>(entity.RuntimeType, entity.Id, entity.ToString()),
                 AlertType = alertType == null ? null : AlertTypeEnumLogic.ToEntity(alertType)
-            }.Execute(AlertaOperations.SaveNew);
+            }.Execute(AlertOperation.SaveNew);
         }
 
         public static AlertDN CreateAlertForceNew(this IIdentifiable entity, string text, Enum alertType = null, DateTime? alertDate = null, Lite<UserDN> user = null)
@@ -116,49 +116,49 @@ namespace Signum.Engine.Alerts
         }
     }
 
-    public class AlertGraph : Graph<AlertDN, AlertaState>
+    public class AlertGraph : Graph<AlertDN, AlertState>
     {
         public static void Register()
         {
             GetState = a => a.State;
 
-            new Execute(AlertaOperations.SaveNew)
+            new Execute(AlertOperation.SaveNew)
             {
-                FromStates = new[] { AlertaState.New },
-                ToState = AlertaState.Saved,
+                FromStates = new[] { AlertState.New },
+                ToState = AlertState.Saved,
                 AllowsNew = true,
                 Lite = false,
-                Execute = (a, _) => { a.State = AlertaState.Saved; }
+                Execute = (a, _) => { a.State = AlertState.Saved; }
             }.Register();
 
-            new Execute(AlertaOperations.Save)
+            new Execute(AlertOperation.Save)
             {
-                FromStates = new[] { AlertaState.Saved },
-                ToState = AlertaState.Saved,
+                FromStates = new[] { AlertState.Saved },
+                ToState = AlertState.Saved,
                 Lite = false,
-                Execute = (a, _) => { a.State = AlertaState.Saved; }
+                Execute = (a, _) => { a.State = AlertState.Saved; }
             }.Register();
 
-            new Execute(AlertaOperations.Attend)
+            new Execute(AlertOperation.Attend)
             {
-                FromStates = new[] { AlertaState.Saved },
-                ToState = AlertaState.Attended,
+                FromStates = new[] { AlertState.Saved },
+                ToState = AlertState.Attended,
                 Lite = false,
                 Execute = (a, _) =>
                 {
-                    a.State = AlertaState.Attended;
+                    a.State = AlertState.Attended;
                     a.AttendedDate = TimeZoneManager.Now;
                     a.AttendedBy = UserDN.Current.ToLite();
                 }
             }.Register();
 
-            new Execute(AlertaOperations.Unattend)
+            new Execute(AlertOperation.Unattend)
             {
-                FromStates = new[] { AlertaState.Attended },
-                ToState = AlertaState.Saved,
+                FromStates = new[] { AlertState.Attended },
+                ToState = AlertState.Saved,
                 Execute = (a, _) =>
                 {
-                    a.State = AlertaState.Saved;
+                    a.State = AlertState.Saved;
                     a.AttendedDate = null;
                     a.AttendedBy = null;
                 }

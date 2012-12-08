@@ -87,8 +87,8 @@ namespace Signum.Entities.Alerts
             set { Set(ref alertType, value, () => AlertType); }
         }
 
-        AlertaState state;
-        public AlertaState State
+        AlertState state;
+        public AlertState State
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
@@ -121,14 +121,14 @@ namespace Signum.Entities.Alerts
         }
     }
 
-    public enum AlertaState
+    public enum AlertState
     {
         New,
         Saved,
         Attended
     }
 
-    public enum AlertaOperations
+    public enum AlertOperation
     {
         SaveNew,
         Save,

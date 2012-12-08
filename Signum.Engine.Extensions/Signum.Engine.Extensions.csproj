@@ -90,7 +90,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Alerts\AlertaLogic.cs" />
+    <Compile Include="Alerts\AlertLogic.cs" />
     <Compile Include="Authorization\AuthCache.cs" />
     <Compile Include="Authorization\SessionLogLogic.cs" />
     <Compile Include="Authorization\TypeAuthCache.cs" />
