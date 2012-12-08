@@ -140,6 +140,7 @@
     <Compile Include="Mailing\EmailRenderer.cs" />
     <Compile Include="Mailing\NewsletterLogic.cs" />
     <Compile Include="Mailing\SmtpConfigurationLogic.cs" />
+    <Compile Include="Notes\NotasLogic.cs" />
     <Compile Include="Processes\PackageLogic.cs" />
     <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Profiler\ProfilerLogic.cs" />
@@ -247,7 +248,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Exceptions\" />
-    <Folder Include="Notes\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

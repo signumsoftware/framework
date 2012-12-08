@@ -16,11 +16,11 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Alerts;
 
-namespace Negocio.Logic.Comun
+namespace Signum.Engine.Alerts
 {
     public static class AlertLogic
     {
-        public static HashSet<Enum> TiposAlertasSistema = new HashSet<Enum>();
+        public static HashSet<Enum> SystemAlertTypes = new HashSet<Enum>();
         static bool started = false;
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -60,7 +60,7 @@ namespace Negocio.Logic.Comun
 
                 AlertGraph.Register();
 
-                AlertTypeEnumLogic.Start(sb, () => TiposAlertasSistema);
+                AlertTypeEnumLogic.Start(sb, () => SystemAlertTypes);
 
                 started = true;
             }
@@ -68,7 +68,7 @@ namespace Negocio.Logic.Comun
 
         public static void RegisterAlertType(Enum alertType)
         {
-            TiposAlertasSistema.Add(alertType); 
+            SystemAlertTypes.Add(alertType); 
         }
 
         public static AlertDN CreateAlert(this IIdentifiable entity, string text, Enum alertType = null, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null)
