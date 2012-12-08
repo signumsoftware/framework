@@ -13,6 +13,7 @@ using Signum.Utilities;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.UserQueries;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.ControlPanel
 {
@@ -27,12 +28,12 @@ namespace Signum.Engine.ControlPanel
                 sb.Include<ControlPanelDN>();
 
                 dqm[typeof(ControlPanelDN)] = (from cp in Database.Query<ControlPanelDN>()
-                                            select new
-                                            {
-                                                Entity = cp,
-                                                cp.DisplayName,
-                                                cp.Related,
-                                            }).ToDynamic();
+                                               select new
+                                               {
+                                                   Entity = cp,
+                                                   cp.DisplayName,
+                                                   cp.Related,
+                                               }).ToDynamic();
 
                 dqm[typeof(LinkListPartDN)] = (from cp in Database.Query<LinkListPartDN>()
                                                select new
@@ -43,12 +44,24 @@ namespace Signum.Engine.ControlPanel
                                                }).ToDynamic();
 
                 dqm[typeof(CountSearchControlPartDN)] = (from cp in Database.Query<CountSearchControlPartDN>()
-                                               select new
-                                               {
-                                                   Entity = cp,
-                                                   ToStr = cp.ToString(),
-                                                   Links = cp.UserQueries.Count
-                                               }).ToDynamic(); 
+                                                         select new
+                                                         {
+                                                             Entity = cp,
+                                                             ToStr = cp.ToString(),
+                                                             Links = cp.UserQueries.Count
+                                                         }).ToDynamic();
+
+                new BasicConstructFrom<ControlPanelDN, ControlPanelDN>(ControlPanelOpetation.Clone)
+                {
+                    Lite = true,
+                    AllowsNew = false,
+                    Construct = (cp,_) =>{
+                       var ncp =cp.Clone();
+                       ncp.DisplayName = "Clon " + cp.DisplayName;
+                       return ncp;
+                    }
+                }.Register();
+
             }
         }
 

@@ -101,17 +101,20 @@ namespace Signum.Entities.ControlPanel
 
         public ControlPanelDN Clone()
         {
+            return new ControlPanelDN
+            {
 
-            return new ControlPanelDN {
-            
-            DisplayName="Clon {0}".Formato(this.DisplayName),
-             HomePage=this.HomePage,
-              NumberOfColumns=this.NumberOfColumns,
-               Parts =this.Parts.Select(p=>p.Clone()).ToMList(),
-                Related=this.Related,
-            
+                DisplayName = "Clon {0}".Formato(this.DisplayName),
+                HomePage = this.HomePage,
+                NumberOfColumns = this.NumberOfColumns,
+                Parts = this.Parts.Select(p => p.Clone()).ToMList(),
+                Related = this.Related,
+
             };
-        
         }
+    }
+    public enum ControlPanelOpetation
+    {
+        Clone
     }
 }
