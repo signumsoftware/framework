@@ -15,9 +15,10 @@ using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
+using Signum.Web.Operations;
 #endregion
 
-namespace Signum.Web.Operations
+namespace Signum.Web.Controllers
 {
     public class OperationController : Controller
     {

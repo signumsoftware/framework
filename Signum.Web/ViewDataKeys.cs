@@ -16,8 +16,6 @@ namespace Signum.Web
         public const string ViewButtons = "sfViewButtons";
         public const string OkVisible = "sfOkVisible";
         public const string OnOk = "sfOnOk";
-        public const string SaveVisible = "sfSaveVisible";
-        public const string OnSave = "sfOnSave";
 
         public const string ManualToolbarButtons = "sfManualToolbarButtons";
         public const string FindOptions = "sfFindOptions";

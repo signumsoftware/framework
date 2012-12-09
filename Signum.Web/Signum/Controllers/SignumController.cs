@@ -121,32 +121,6 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, tc, url);
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult TrySave()
-        {
-            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
-
-            if (context.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(context);
-                return JsonAction.ModelState(ModelState);
-            }
-
-            IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
-            if (ident == null)
-                throw new ArgumentNullException("No IdentifiableEntity to save");
-
-            Navigator.AssertNotReadonly(ident);
-
-            Database.Save(ident);
-
-            string newUrl = Navigator.NavigateRoute(ident.GetType(), ident.Id);
-            if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                return Navigator.NormalPage(this, ident);
-            else
-                return JsonAction.Redirect(newUrl);
-        }
-
         [HttpPost]
         public JsonResult Validate()
         {
@@ -154,26 +128,6 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromContext(context);
             return JsonAction.ModelState(ModelState);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public JsonResult TrySavePartial(string prefix)
-        {
-            MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
-
-            this.ModelState.FromContext(context);
-
-            IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
-            if (ident != null && !context.GlobalErrors.Any())
-            {
-                Navigator.AssertNotReadonly(ident);
-
-                Database.Save(ident);
-            }
-
-            string newLink = Navigator.NavigateRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
-
-            return JsonAction.ModelState(ModelState, context.UntypedValue.ToString(), newLink);
         }
 
         [HttpPost]

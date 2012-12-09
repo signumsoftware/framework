@@ -641,7 +641,6 @@ namespace Signum.Web
             ViewButtons buttons = viewOptions.ViewButtons;
             controller.ViewData[ViewDataKeys.ViewButtons] = buttons;
             controller.ViewData[ViewDataKeys.OkVisible] = buttons == ViewButtons.Ok;
-            controller.ViewData[ViewDataKeys.SaveVisible] = buttons == ViewButtons.Save && CanSave(cleanType) && !isReadOnly;
 
             return new PartialViewResult
             {
@@ -1020,27 +1019,6 @@ namespace Signum.Web
                     if (!isFindable(queryName))
                         return false;
                 }
-
-            return true;
-        }
-
-        public bool ShowSaveGlobally = true;
-
-        public event Func<Type, bool> SaveProtected;
-
-        public bool CanSave(Type type)
-        {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return false;
-
-            if (SaveProtected != null)
-            {
-                foreach (Func<Type, bool> sp in SaveProtected.GetInvocationList())
-                {
-                    if (sp(type))
-                        return false;
-                }
-            }
 
             return true;
         }

@@ -25,8 +25,6 @@ namespace Signum.Web.Operations
         {
             Manager = operationManager;
 
-            Navigator.Manager.SaveProtected += type => OperationLogic.IsSaveProtected(type);
-
             Navigator.Manager.DefaultSFUrls.Add(url =>
             {
                 return new Dictionary<string, string> 
