@@ -65,11 +65,6 @@ namespace Signum.Windows.Operations
             obj.SetValue(ConstructFromOperationKeyProperty, value);
         }
 
-        public static Brush GetBackground(Enum key)
-        {
-            return Manager.GetBackground(key, Manager.Settings.TryGetC(key));
-        }
-
         public static ImageSource GetImage(Enum key)
         {
             return Manager.GetImage(key, Manager.Settings.TryGetC(key));
@@ -94,6 +89,16 @@ namespace Signum.Windows.Operations
     public class OperationManager
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
+
+        public Func<Enum, bool> IsSave = e => e.ToString().StartsWith("Save");
+
+        public List<OperationColor> BackgroundColors = new List<OperationColor>
+        {
+            new OperationColor(a => a.OperationType == OperationType.Execute && a.Lite == false) { Color = Colors.Blue}, 
+            new OperationColor(a => a.OperationType == OperationType.Execute && a.Lite == true) { Color = Colors.Yellow}, 
+            new OperationColor(e => e.OperationType == OperationType.Delete ) { Color = Colors.Red }, 
+            new OperationColor(e => e.OperationType == OperationType.ConstructorFrom ) { Color = Colors.Green }, 
+        };
 
         protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, ButtonBarEventArgs ctx)
         {
@@ -194,7 +199,7 @@ namespace Signum.Windows.Operations
             {
                 Content = GetText(operationInfo.Key, os),
                 Image = GetImage(operationInfo.Key, os),
-                Background = GetBackground(operationInfo.Key, os),
+                Background = GetBackground(operationInfo.Key, os, operationInfo),
                 Tag = operationInfo,
             };
 
@@ -231,13 +236,14 @@ namespace Signum.Windows.Operations
             return button;
         }
 
-        protected internal virtual Brush GetBackground(Enum key, OperationSettings os)
+        protected internal virtual Brush GetBackground(Enum key, OperationSettings os, OperationInfo oi)
         {
             if (os != null && os.Color != null)
                 return new SolidColorBrush(os.Color.Value);
 
-            //if (oi.OperationType == OperationType.Delete) TODO Olmo: Pasar OperationInfo
-            //    return new SolidColorBrush(Colors.Red);
+            var bc = BackgroundColors.LastOrDefault(a => a.IsApplicable(oi));
+            if (bc != null)
+                return new SolidColorBrush(bc.Color);
 
             return null;
         }
@@ -246,6 +252,9 @@ namespace Signum.Windows.Operations
         {
             if (os != null && os.Icon != null)
                 return os.Icon;
+
+            if (IsSave(key))
+                return ImageLoader.GetImageSortName("save.png");
 
             return null;
         }
@@ -422,8 +431,6 @@ namespace Signum.Windows.Operations
             return result.Select(a => EntityOperationMenuItemConsturctor.Construct(sc, a.OperationInfo, a.CanExecute, a.Settings));
         }
 
-
-
         static HashSet<Type> SaveProtectedCache;
         protected internal virtual bool SaveProtected(Type type)
         {
@@ -435,5 +442,15 @@ namespace Signum.Windows.Operations
 
             return SaveProtectedCache.Contains(type);
         }
+    }
+
+    public class OperationColor
+    {
+        public OperationColor(Func<OperationInfo, bool> isApplicable)
+        {
+            IsApplicable = isApplicable;
+        }
+        public Func<OperationInfo, bool> IsApplicable;
+        public Color Color;
     }
 }
