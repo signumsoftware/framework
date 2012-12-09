@@ -59,7 +59,7 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 5 "..\..\Alerts\Views\AlertType.cshtml"
-Write(Html.ValueLine(cp, d => d.Nombre));
+Write(Html.ValueLine(cp, d => d.Name));
 
             
             #line default

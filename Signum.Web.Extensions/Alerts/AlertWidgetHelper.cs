@@ -148,7 +148,7 @@ namespace Signum.Web.Alerts
                     FilterOptions = 
                     { 
                         new FilterOption("Target", identifiable.ToLite()),
-                        new FilterOption(fieldToFilter, true),
+                        new FilterOption("Entity." + fieldToFilter, true),
                     },
                     ColumnOptions = { new ColumnOption("Target") },
                     ColumnOptionsMode = ColumnOptionsMode.Remove,

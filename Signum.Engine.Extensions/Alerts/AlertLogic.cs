@@ -54,7 +54,7 @@ namespace Signum.Engine.Alerts
                                             {
                                                 Entity = t,
                                                 t.Id,
-                                                t.Nombre,
+                                                Nombre = t.Name,
                                                 t.Key,
                                             }).ToDynamic();
 
@@ -240,10 +240,10 @@ namespace Signum.Engine.Alerts
                 (k, c) => table.DeleteSqlSync(c), 
                 (k, s, c) =>
                 {
-                    if (c.Nombre != s.Nombre)
+                    if (c.Name != s.Name)
                     {
                         c.Key = null;
-                        c.Nombre = s.Nombre;
+                        c.Name = s.Name;
                         c.Key = s.Key;
                     }
                     return table.UpdateSqlSync(c);
@@ -256,7 +256,7 @@ namespace Signum.Engine.Alerts
         {
             return getKeys().Select(k => new AlertTypeDN
             {
-                Nombre = k.NiceToString(),
+                Name = k.NiceToString(),
                 Key = MultiEnumDN.UniqueKey(k),
             }).ToList();
         }

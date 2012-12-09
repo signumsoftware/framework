@@ -140,17 +140,17 @@ namespace Signum.Entities.Alerts
     public class AlertTypeDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string nombre;
+        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Nombre
+        public string Name
         {
-            get { return nombre; }
+            get { return name; }
             set
             {
                 if (key != null)
                     throw new ApplicationException("This alert type is protected");
 
-                SetToStr(ref nombre, value, () => Nombre);
+                SetToStr(ref name, value, () => Name);
             }
         }
 
@@ -162,7 +162,7 @@ namespace Signum.Entities.Alerts
             set { Set(ref key, value, () => Key); }
         }
 
-        static readonly Expression<Func<AlertTypeDN, string>> ToStringExpression = e => e.nombre;
+        static readonly Expression<Func<AlertTypeDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

@@ -40,10 +40,6 @@ namespace Signum.Windows.Alerts
             };
         }
 
-        public static object WarnedAlertsQuery { get; set; }
-        public static object CheckedAlertsQuery { get; set; }
-        public static object FutureAlertsQuery { get; set; }
-        public static string AlertsQueryColumn { get; set; }
 
         public AlertsWidget()
         {
@@ -138,17 +134,21 @@ namespace Signum.Windows.Alerts
 
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
 
-            object queryName = 
-                sender == btnFutureAlerts? FutureAlertsQuery: 
-                sender == btnCheckedAlerts? CheckedAlertsQuery: 
-                sender == btnWarnedAlerts? WarnedAlertsQuery: null;
+            string field =
+                sender == btnFutureAlerts ? "Future" :
+                sender == btnCheckedAlerts ? "Attended" :
+                sender == btnWarnedAlerts ? "NotAttended" : null;
 
-            Navigator.Explore(new ExploreOptions(queryName)
+            Navigator.Explore(new ExploreOptions(typeof(AlertDN))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
-                FilterOptions = { new FilterOption(AlertsQueryColumn, entity) { Frozen = true } },
-                ColumnOptions = { new ColumnOption(AlertsQueryColumn)},
+                FilterOptions = 
+                { 
+                    new FilterOption("Target", entity) { Frozen = true }, 
+                    new FilterOption("Entity." + field, true)
+                },
+                ColumnOptions = { new ColumnOption("Target") },
                 ColumnOptionsMode = ColumnOptionsMode.Remove,
                 Closed = (o, ea) => ReloadAlerts(),
             });
