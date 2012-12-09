@@ -90,25 +90,25 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Alerts\AlertClient.cs" />
-    <Compile Include="Alerts\AlertWidgetHelper.cs" />
-    <Compile Include="Alerts\Controllers\AlertsController.cs" />
-    <Compile Include="Alerts\Views\Alert.generated.cs">
+    <Compile Include="Alert\AlertClient.cs" />
+    <Compile Include="Alert\AlertWidgetHelper.cs" />
+    <Compile Include="Alert\Controllers\AlertsController.cs" />
+    <Compile Include="Alert\Views\Alert.generated.cs">
       <DependentUpon>Alert.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Alerts\Views\AlertType.generated.cs">
+    <Compile Include="Alert\Views\AlertType.generated.cs">
       <DependentUpon>AlertType.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Alerts\Views\Web.generated.cs">
+    <Compile Include="Alert\Views\Web.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Web.config</DependentUpon>
     </Compile>
-    <Compile Include="Alerts\Views\_ViewStart.generated.cs">
+    <Compile Include="Alert\Views\_ViewStart.generated.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -823,19 +823,19 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Alerts\Views\_ViewStart.cshtml">
+    <Content Include="Alert\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Alerts\Views\Alert.cshtml">
+    <Content Include="Alert\Views\Alert.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Alert.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Alerts\Views\AlertType.cshtml">
+    <Content Include="Alert\Views\AlertType.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>AlertType.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Alerts\Views\Web.config">
+    <Content Include="Alert\Views\Web.config">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Web.generated.cs</LastGenOutput>
     </Content>

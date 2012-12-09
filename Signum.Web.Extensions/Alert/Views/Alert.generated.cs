@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Extensions.Alerts.Views
+namespace Signum.Web.Extensions.Alert.Views
 {
     using System;
     using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace Signum.Web.Extensions.Alerts.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 1 "..\..\Alerts\Views\Alert.cshtml"
+    #line 1 "..\..\Alert\Views\Alert.cshtml"
     using Signum.Entities.Alerts;
     
     #line default
@@ -37,7 +37,7 @@ namespace Signum.Web.Extensions.Alerts.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Alerts/Views/Alert.cshtml")]
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Alert/Views/Alert.cshtml")]
     public class Alert : System.Web.Mvc.WebViewPage<dynamic>
     {
         public Alert()
@@ -48,7 +48,7 @@ namespace Signum.Web.Extensions.Alerts.Views
 
 
             
-            #line 2 "..\..\Alerts\Views\Alert.cshtml"
+            #line 2 "..\..\Alert\Views\Alert.cshtml"
  using (var cp = Html.TypeContext<AlertDN>())
 {
     
@@ -56,57 +56,57 @@ namespace Signum.Web.Extensions.Alerts.Views
             #line default
             #line hidden
             
-            #line 4 "..\..\Alerts\Views\Alert.cshtml"
+            #line 4 "..\..\Alert\Views\Alert.cshtml"
 Write(Html.ValueLine(cp, d => d.CreationDate, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 4 "..\..\Alerts\Views\Alert.cshtml"
+            #line 4 "..\..\Alert\Views\Alert.cshtml"
                                                                       
     
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Alerts\Views\Alert.cshtml"
+            #line 5 "..\..\Alert\Views\Alert.cshtml"
 Write(Html.EntityLine(cp, d => d.Target, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Alerts\Views\Alert.cshtml"
+            #line 5 "..\..\Alert\Views\Alert.cshtml"
                                                                  
     
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Alerts\Views\Alert.cshtml"
+            #line 6 "..\..\Alert\Views\Alert.cshtml"
 Write(Html.EntityCombo(cp, d => d.AlertType));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Alerts\Views\Alert.cshtml"
+            #line 6 "..\..\Alert\Views\Alert.cshtml"
                                            
     
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Alerts\Views\Alert.cshtml"
+            #line 7 "..\..\Alert\Views\Alert.cshtml"
 Write(Html.ValueLine(cp, d => d.AlertDate));
 
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Alerts\Views\Alert.cshtml"
-                                          
+            #line 7 "..\..\Alert\Views\Alert.cshtml"
+                                         
 
     if (cp.Value.Attended)
     {
@@ -115,28 +115,28 @@ Write(Html.ValueLine(cp, d => d.AlertDate));
             #line default
             #line hidden
             
-            #line 11 "..\..\Alerts\Views\Alert.cshtml"
+            #line 11 "..\..\Alert\Views\Alert.cshtml"
 Write(Html.ValueLine(cp, d => d.AttendedDate, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 11 "..\..\Alerts\Views\Alert.cshtml"
+            #line 11 "..\..\Alert\Views\Alert.cshtml"
                                                                       
     
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Alerts\Views\Alert.cshtml"
+            #line 12 "..\..\Alert\Views\Alert.cshtml"
 Write(Html.EntityLine(cp, d => d.AttendedBy, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Alerts\Views\Alert.cshtml"
+            #line 12 "..\..\Alert\Views\Alert.cshtml"
                                                                      
     }
     
@@ -144,7 +144,7 @@ Write(Html.EntityLine(cp, d => d.AttendedBy, vl => vl.ReadOnly = true));
             #line default
             #line hidden
             
-            #line 14 "..\..\Alerts\Views\Alert.cshtml"
+            #line 14 "..\..\Alert\Views\Alert.cshtml"
 Write(Html.ValueLine(cp, d => d.Text, vl =>
     {
         vl.ValueLineType = ValueLineType.TextArea;
@@ -156,7 +156,7 @@ Write(Html.ValueLine(cp, d => d.Text, vl =>
             #line default
             #line hidden
             
-            #line 19 "..\..\Alerts\Views\Alert.cshtml"
+            #line 19 "..\..\Alert\Views\Alert.cshtml"
       
 }
 

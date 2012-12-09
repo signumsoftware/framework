@@ -13,7 +13,7 @@ namespace Signum.Web.Alerts
 {
     public static class AlertClient
     {
-        public static string ViewPrefix = "~/Alerts/Views/{0}.cshtml";
+        public static string ViewPrefix = "~/Alert/Views/{0}.cshtml";
 
         public static void Start(params Type[] tipos)
         {

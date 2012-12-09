@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Negocio.Web.Alertas.Views
+namespace Signum.Web.Extensions.Alert.Views
 {
     using System;
     using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace Negocio.Web.Alertas.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Alertas/Views/_ViewStart.cshtml")]
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Alert/Views/_ViewStart.cshtml")]
     public class ViewStart : System.Web.Mvc.ViewStartPage
     {
         public ViewStart()
@@ -41,7 +41,7 @@ namespace Negocio.Web.Alertas.Views
         {
 
             
-            #line 1 "..\..\Alertas\Views\_ViewStart.cshtml"
+            #line 1 "..\..\Alert\Views\_ViewStart.cshtml"
   
     Layout = "~/Views/Shared/_Layout.cshtml";
 

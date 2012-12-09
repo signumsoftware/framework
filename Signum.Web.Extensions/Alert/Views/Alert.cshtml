@@ -1,10 +1,10 @@
 ﻿@using Signum.Entities.Alerts
 @using (var cp = Html.TypeContext<AlertDN>())
 {
-    @Html.ValueLine(cp, d => d.CreacionDate, vl => vl.ReadOnly = true)
+    @Html.ValueLine(cp, d => d.CreationDate, vl => vl.ReadOnly = true)
     @Html.EntityLine(cp, d => d.Target, vl => vl.ReadOnly = true)
     @Html.EntityCombo(cp, d => d.AlertType)
-    @Html.ValueLine(cp, d => d.AlertaDate)
+    @Html.ValueLine(cp, d => d.AlertDate)
 
     if (cp.Value.Attended)
     {

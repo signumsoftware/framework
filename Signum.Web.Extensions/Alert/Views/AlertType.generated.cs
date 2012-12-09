@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Extensions.Alerts.Views
+namespace Signum.Web.Extensions.Alert.Views
 {
     using System;
     using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace Signum.Web.Extensions.Alerts.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 1 "..\..\Alerts\Views\AlertType.cshtml"
+    #line 1 "..\..\Alert\Views\AlertType.cshtml"
     using Signum.Entities.Alerts;
     
     #line default
@@ -37,7 +37,7 @@ namespace Signum.Web.Extensions.Alerts.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Alerts/Views/AlertType.cshtml")]
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Alert/Views/AlertType.cshtml")]
     public class AlertType : System.Web.Mvc.WebViewPage<dynamic>
     {
         public AlertType()
@@ -50,7 +50,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 3 "..\..\Alerts\Views\AlertType.cshtml"
+            #line 3 "..\..\Alert\Views\AlertType.cshtml"
  using (var cp = Html.TypeContext<AlertTypeDN>())
 {
     
@@ -58,15 +58,15 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 5 "..\..\Alerts\Views\AlertType.cshtml"
+            #line 5 "..\..\Alert\Views\AlertType.cshtml"
 Write(Html.ValueLine(cp, d => d.Name));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Alerts\Views\AlertType.cshtml"
-                                      
+            #line 5 "..\..\Alert\Views\AlertType.cshtml"
+                                    
 }
             
             #line default
