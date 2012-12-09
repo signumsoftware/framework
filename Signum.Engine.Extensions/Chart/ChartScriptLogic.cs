@@ -140,59 +140,60 @@ namespace Signum.Engine.Chart
         public static void ImportAllScripts(string folderName)
         {
             var files = Directory.GetFiles(folderName, "*.xml").ToDictionary(Path.GetFileNameWithoutExtension);
-            
-            var charts = Database.Query<ChartScriptDN>().ToDictionary(a => a.Name); 
+
+            var charts = Database.Query<ChartScriptDN>().ToDictionary(a => a.Name);
 
             Options options = new Options();
 
-            Synchronizer.SynchronizeReplacing(new Replacements(), "scripts",
-                files,
-                charts,
-                (name, file) =>
-                {
-                    var cs = new ChartScriptDN(); 
-                    cs.ImportXml(XDocument.Load(file), name, force: false);
-                    cs.Save();
-
-                    Console.WriteLine("{0} entity created.".Formato(name));
-                },
-                (name, script) =>
-                {
-                    if (AskYesNoAll("Remove {0} entity?".Formato(name), ref options.RemoveOld))
+            using (OperationLogic.AllowSave<ChartScriptDN>())
+                Synchronizer.SynchronizeReplacing(new Replacements(), "scripts",
+                    files,
+                    charts,
+                    (name, file) =>
                     {
+                        var cs = new ChartScriptDN();
+                        cs.ImportXml(XDocument.Load(file), name, force: false);
+                        cs.Save();
+
+                        Console.WriteLine("{0} entity created.".Formato(name));
+                    },
+                    (name, script) =>
+                    {
+                        if (AskYesNoAll("Remove {0} entity?".Formato(name), ref options.RemoveOld))
+                        {
+                            try
+                            {
+                                script.Delete();
+                                Console.WriteLine("{0} entity removed.".Formato(name));
+                            }
+                            catch (Exception e)
+                            {
+                                SafeConsole.WriteLineColor(ConsoleColor.Red, "Error removing {0} entity: {1}".Formato(name, e.Message));
+                            }
+                        }
+                    },
+                    (name, file, script) =>
+                    {
+                        var xDoc = XDocument.Load(file);
+                        if (script.Icon != null)
+                            script.Icon.Retrieve();
                         try
                         {
-                            script.Delete();
-                            Console.WriteLine("{0} entity removed.".Formato(name));
+                            script.ImportXml(xDoc, name, false);
                         }
-                        catch (Exception e)
+                        catch (FormatException f)
                         {
-                            SafeConsole.WriteLineColor(ConsoleColor.Red, "Error removing {0} entity: {1}".Formato(name, e.Message));
+                            SafeConsole.WriteLineColor(ConsoleColor.Yellow, f.Message);
+                            if (AskYesNoAll("Force {0}?".Formato(name), ref options.ForceAll))
+                                script.ImportXml(xDoc, name, true);
                         }
-                    }
-                },
-                (name, file, script) =>
-                {
-                    var xDoc = XDocument.Load(file);
-                    if (script.Icon != null)
-                        script.Icon.Retrieve(); 
-                    try
-                    {
-                        script.ImportXml(xDoc, name, false);
-                    }
-                    catch (FormatException f)
-                    {
-                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, f.Message);
-                        if (AskYesNoAll("Force {0}?".Formato(name), ref options.ForceAll))
-                            script.ImportXml(xDoc, name, true);
-                    }
 
-                    if (script.HasChanges() && AskYesNoAll("Override {0} entity?".Formato(name), ref options.OverrideAll))
-                    {
-                        script.Save();
-                        Console.WriteLine("{0} entity overriden.".Formato(name));
-                    }
-                });
+                        if (script.HasChanges() && AskYesNoAll("Override {0} entity?".Formato(name), ref options.OverrideAll))
+                        {
+                            script.Save();
+                            Console.WriteLine("{0} entity overriden.".Formato(name));
+                        }
+                    });
         }
 
 
