@@ -29,7 +29,7 @@ namespace Signum.Web.Alerts
                 FilterOptions = 
                 {
                     new FilterOption("Target", identifiable),
-                    new FilterOption(filterField, true) 
+                    new FilterOption("Entity." + filterField, true) 
                 },
             });
         }

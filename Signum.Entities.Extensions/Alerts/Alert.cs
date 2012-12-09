@@ -26,10 +26,10 @@ namespace Signum.Entities.Alerts
         }
 
         DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreacionDate
+        public DateTime CreationDate
         {
             get { return creationDate; }
-            private set { Set(ref creationDate, value, () => CreacionDate); }
+            private set { Set(ref creationDate, value, () => CreationDate); }
         }
 
         DateTime? alertDate;
@@ -99,11 +99,11 @@ namespace Signum.Entities.Alerts
             return text.EtcLines(100);
         }
 
-        static Expression<Func<AlertDN, bool>> NoAtendidaExpression = 
+        static Expression<Func<AlertDN, bool>> NotAttendedExpression = 
             a => (a.AlertDate.HasValue && a.AlertDate <= TimeZoneManager.Now) && !a.AttendedDate.HasValue;
         public bool NotAttended
         {
-            get{ return NoAtendidaExpression.Evaluate(this); }
+            get{ return NotAttendedExpression.Evaluate(this); }
         }
 
         static Expression<Func<AlertDN, bool>> AttendedExpression = 
@@ -167,5 +167,10 @@ namespace Signum.Entities.Alerts
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum AlertTypeOperation
+    {
+        Save,
     }
 }

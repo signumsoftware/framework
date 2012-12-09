@@ -862,7 +862,10 @@
     <Resource Include="Images\alert.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\not.png" />
+    <Resource Include="Images\note2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\pin.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

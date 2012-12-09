@@ -28,7 +28,7 @@ namespace Signum.Windows.Notes
                 {
                     View = e => new Note(),
                     IsCreable = EntityWhen.Never,
-                    Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/note.png", typeof(NotesWidget)))
+                    Icon = ExtensionsImageLoader.GetImageSortName("note2.png")
                 });
             }
         }

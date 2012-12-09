@@ -24,8 +24,8 @@
         <m:ValueLine m:Common.Route="CreationDate" m:Common.IsReadOnly="True"/>
         <m:EntityLine  m:Common.Route="Target" m:Common.IsReadOnly="True"/>
         <m:ValueLine m:Common.Route="AlertDate" />
-        <Label Content="Texto"/>
-        <m:TextArea Margin="8,0,8,8" Background="#7FFFFFFF" m:Common.Route="Texto" Height="55" m:Common.IsReadOnly="{Binding Attended}"/>
+        <Label Content="Text"/>
+        <m:TextArea Margin="8,0,8,8" Background="#7FFFFFFF" m:Common.Route="Text" Height="55" m:Common.IsReadOnly="{Binding Attended}"/>
         <!--<TextBox TextWrapping="Wrap" Margin="8,0,8,8" Background="#7FFFFFFF"
          Style="{DynamicResource toolTip}" AcceptsReturn="True" Text="{Binding Path=Texto, Mode=Default, ValidatesOnDataErrors=True, 
             ValidatesOnExceptions=True,NotifyOnValidationError=True}" Height="55"/>-->

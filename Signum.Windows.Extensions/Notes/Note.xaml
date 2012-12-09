@@ -32,17 +32,20 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <m:EntityLine LabelText="Nota de" m:Common.Route="Creador" 
+        <m:EntityLine  m:Common.Route="CreatedBy" 
                       FontFamily="Comic Sans MS" FontWeight="Bold" 
                       FontSize="14" m:Common.IsReadOnly="True" Grid.Row="0" />
-        <m:ValueLine LabelText="Creada el" Grid.Row="1" 
-                     m:Common.Route="FechaCreacion" FontFamily="Comic Sans MS" 
+        <m:ValueLine Grid.Row="1" 
+                     m:Common.Route="CreationDate" FontFamily="Comic Sans MS" 
                      FontWeight="Bold" FontSize="14" m:Common.IsReadOnly="True"/>
-        <m:ValueLine LabelText="Título" Grid.Row="3" 
-                     m:Common.Route="Titulo" FontFamily="Comic Sans MS" 
+        <m:ValueLine Grid.Row="3" 
+                     m:Common.Route="Title" FontFamily="Comic Sans MS" 
                      FontWeight="Bold" FontSize="14"/>
         <TextBox TextWrapping="Wrap" Grid.Row="4" Margin="8,8,8,8"  
                  Background="#7FFFFFFF" Style="{DynamicResource toolTip}" AcceptsReturn="True"
-			Text="{Binding Path=Texto, Mode=Default, ValidatesOnDataErrors=True, ValidatesOnExceptions=True,NotifyOnValidationError=True}"/>
+			Text="{Binding Path=Text, Mode=Default, 
+            ValidatesOnDataErrors=True, 
+            ValidatesOnExceptions=True,
+            NotifyOnValidationError=True}"/>
     </Grid>
 </UserControl>

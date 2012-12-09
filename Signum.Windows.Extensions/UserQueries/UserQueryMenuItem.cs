@@ -35,8 +35,11 @@ namespace Signum.Windows.UserQueries
                 Icon = ExtensionsImageLoader.GetImageSortName("favorite.png").ToSmallImage()
             };
 
-            Action updateCurrent = () =>
-            {
+            MenuItem edit = null;
+            MenuItem remove = null;
+
+            Action updatecurrent = () =>
+            {   
                 miResult.Header = new TextBlock
                 {
                     Inlines = 
@@ -51,6 +54,9 @@ namespace Signum.Windows.UserQueries
                 {
                     item.IsChecked = ((Lite<UserQueryDN>)item.Tag).RefersTo(current);
                 }
+
+                edit.IsEnabled = current != null;
+                remove.IsEnabled = current != null;
             };
 
             Action initialize = null;
@@ -61,20 +67,21 @@ namespace Signum.Windows.UserQueries
 
                 UserQueryDN userQuery = UserQueryClient.FromSearchControl(sc);
 
-                userQuery = Navigator.View(userQuery, new ViewOptions
+                Navigator.Navigate(userQuery, new NavigateOptions
                 {
-                    AllowErrors = AllowErrors.No,
-                    View = new UserQuery { QueryDescription = sc.Description }
+                    View = new UserQuery { QueryDescription = sc.Description },
+                    Closed = (s, args) =>
+                    {
+                        initialize();
+
+                        if (userQuery.IdOrNull != null)
+                        {
+                            current = userQuery;
+                        }
+
+                        updatecurrent();
+                    }
                 });
-
-                if (userQuery != null)
-                {
-                    userQuery.Save();
-
-                    initialize();
-
-                    current = userQuery;
-                }
             };
 
             RoutedEventHandler edit_Clicked = (object sender, RoutedEventArgs e) =>
@@ -84,7 +91,11 @@ namespace Signum.Windows.UserQueries
                 Navigator.Navigate(current, new NavigateOptions()
                 {
                     View = new UserQuery { QueryDescription = sc.Description },
-                    Closed = (s, args) => initialize()
+                    Closed = (s, args) =>
+                    {
+                        initialize();
+                        updatecurrent();
+                    }
                 });
             };
 
@@ -97,9 +108,11 @@ namespace Signum.Windows.UserQueries
                 {
                     Server.Execute((IUserQueryServer s) => s.RemoveUserQuery(current.ToLite()));
 
+                    initialize();
+
                     current = null;
 
-                    initialize();
+                    updatecurrent();
                 }
             };
 
@@ -118,6 +131,8 @@ namespace Signum.Windows.UserQueries
 
                     current = uq;
 
+                    updatecurrent();
+
                     sc.Search();
                 }
             };
@@ -128,7 +143,6 @@ namespace Signum.Windows.UserQueries
 
                 userQueries = Server.Return((IUserQueryServer s) => s.GetUserQueries(sc.QueryName));
 
-                updateCurrent();
 
                 if (userQueries.Count > 0)
                 {
@@ -156,32 +170,35 @@ namespace Signum.Windows.UserQueries
                     }.Handle(MenuItem.ClickEvent, new_Clicked));
                 }
 
-                miResult.Items.Add(new MenuItem()
+                miResult.Items.Add(edit = new MenuItem()
                 {
                     Header = Signum.Windows.Extensions.Properties.Resources.Edit,
                     Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
-                }.Handle(MenuItem.ClickEvent, edit_Clicked)
-                .Bind(MenuItem.IsEnabledProperty, miResult, "CurrentUserQuery", notNullAndEditable));
+                }.Handle(MenuItem.ClickEvent, edit_Clicked));
 
-                miResult.Items.Add(new MenuItem()
+                miResult.Items.Add(remove = new MenuItem()
                 {
                     Header = Signum.Windows.Extensions.Properties.Resources.Remove,
                     Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
-                }.Handle(MenuItem.ClickEvent, remove_Clicked)
-                .Bind(MenuItem.IsEnabledProperty, miResult, "CurrentUserQuery", notNullAndEditable));
-
-
+                }.Handle(MenuItem.ClickEvent, remove_Clicked));
             };
+
+          
 
             initialize();
 
             if (autoSet != null)
             {
                 UserQueryClient.ToSearchControl(autoSet, sc);
-
                 current = autoSet;
 
+                updatecurrent();
+
                 sc.Search();
+            }
+            else
+            {
+                updatecurrent();
             }
 
             return miResult;

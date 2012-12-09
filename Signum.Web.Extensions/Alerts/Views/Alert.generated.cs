@@ -57,7 +57,7 @@ namespace Signum.Web.Extensions.Alerts.Views
             #line hidden
             
             #line 4 "..\..\Alerts\Views\Alert.cshtml"
-Write(Html.ValueLine(cp, d => d.CreacionDate, vl => vl.ReadOnly = true));
+Write(Html.ValueLine(cp, d => d.CreationDate, vl => vl.ReadOnly = true));
 
             
             #line default

@@ -42,7 +42,7 @@ namespace Signum.Engine.Alerts
                                 a.Id,
                                 a.AlertType,
                                 Texto = a.Text.Etc(100),
-                                a.CreacionDate,
+                                CreacionDate = a.CreationDate,
                                 a.CreatedBy,
                                 a.AttendedDate,
                                 a.AttendedBy,
@@ -61,6 +61,13 @@ namespace Signum.Engine.Alerts
                 AlertGraph.Register();
 
                 AlertTypeEnumLogic.Start(sb, () => SystemAlertTypes);
+
+                new BasicExecute<AlertTypeDN>(AlertTypeOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (a, _) => {  }
+                }.Register();
 
                 started = true;
             }

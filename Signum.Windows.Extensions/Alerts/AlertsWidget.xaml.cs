@@ -109,7 +109,7 @@ namespace Signum.Windows.Alerts
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption("Target" , DataContext),
-                    new FilterOption(filterColumn, true),
+                    new FilterOption("Entity." + filterColumn, true),
                 }
             },
             count =>

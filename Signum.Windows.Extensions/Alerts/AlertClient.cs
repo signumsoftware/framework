@@ -9,7 +9,7 @@ namespace Signum.Windows.Alerts
 {
     public static class AlertClient
     {
-        public static void Start(params Type[] tipos)
+        public static void Start(params Type[] types)
         {
             Navigator.AddSetting(new EntitySettings<AlertDN>(EntityType.Main)
             {
@@ -22,7 +22,7 @@ namespace Signum.Windows.Alerts
 
 
             WidgetPanel.GetWidgets += (obj, mainControl) =>
-             (obj is IdentifiableEntity && tipos.Contains(obj.GetType()) && !((IdentifiableEntity)obj).IsNew) &&
+             (obj is IdentifiableEntity && types.Contains(obj.GetType()) && !((IdentifiableEntity)obj).IsNew) &&
              Navigator.IsFindable(typeof(AlertDN)) ? new AlertsWidget() : null;
         }
     }
