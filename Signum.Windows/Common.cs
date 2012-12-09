@@ -522,7 +522,6 @@ namespace Signum.Windows
                     Converter = Converters.NullToVisibility,
                 };
                 
-                PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }

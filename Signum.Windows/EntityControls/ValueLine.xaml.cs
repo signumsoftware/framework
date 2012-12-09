@@ -177,9 +177,6 @@ namespace Signum.Windows
             };
 
             control.SetBinding(Configurator.readOnlyProperties[this.ValueLineType], rb);  
-            // Binding b = new Binding(binding.Path.Path) { Mode = binding.Mode, UpdateSourceTrigger = binding.UpdateSourceTrigger };
-
-            //System.Diagnostics.PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
    
             return control;
         }

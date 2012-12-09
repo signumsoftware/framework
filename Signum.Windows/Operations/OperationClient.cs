@@ -39,6 +39,12 @@ namespace Signum.Windows.Operations
 
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
+
+                Links.RegisterGlobalLinks((entity, control) => new[]
+                { 
+                    entity.GetType() == typeof(OperationLogDN) ? null : 
+                        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)){ IsShy = true}
+                });
             }
         }
 
@@ -418,7 +424,7 @@ namespace Signum.Windows.Operations
 
 
 
-        static HashSet<Type> SaveProtectedCache = new HashSet<Type>();
+        static HashSet<Type> SaveProtectedCache;
         protected internal virtual bool SaveProtected(Type type)
         {
             if (!type.IsIIdentifiable())

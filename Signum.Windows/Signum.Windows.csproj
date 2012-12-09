@@ -538,7 +538,6 @@
     <Resource Include="Images\admin.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\pin.png" />
     <Resource Include="Images\star.png" />
   </ItemGroup>
   <ItemGroup>
@@ -565,9 +564,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\note.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\alert.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\forbidden.png" />
