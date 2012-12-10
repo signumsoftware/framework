@@ -123,7 +123,7 @@ namespace Signum.Web.Reports
             Lite<UserQueryDN> currentUserQuery = null;
             string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                currentUserQuery = new Lite<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
+                currentUserQuery = Lite.Create<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
 
             ToolBarButton plain = new ToolBarButton
             {

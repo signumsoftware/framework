@@ -88,7 +88,7 @@ namespace Signum.Engine.ControlPanel
             if (currentUser == null)
                 return null;
 
-            var panel = Database.Query<ControlPanelDN>().Where(cp => cp.Related.ToLite<UserDN>().RefersTo(currentUser) && cp.HomePage).Select(a => a.ToLite()).FirstOrDefault();
+            var panel = Database.Query<ControlPanelDN>().Where(cp => cp.Related.RefersTo(currentUser) && cp.HomePage).Select(a => a.ToLite()).FirstOrDefault();
             if (panel != null)
                 return panel;
 
@@ -119,7 +119,7 @@ namespace Signum.Engine.ControlPanel
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
 
             TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));

@@ -15,7 +15,7 @@ namespace Signum.Entities.Omnibox
 
         public EntityOmniboxResultGenenerator(IEnumerable<Type> schemaTypes)
         {
-            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(t => Lite.UniqueTypeName(t));
+            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(Lite.UniqueTypeName);
         }
 
         public int AutoCompleteLimit = 5;
@@ -49,7 +49,7 @@ namespace Signum.Entities.Omnibox
 
                 foreach (var match in matches.OrderBy(ma => ma.Distance))
                 {
-                    Lite lite = OmniboxParser.Manager.RetrieveLite((Type)match.Value, id);
+                    Lite<IdentifiableEntity> lite = OmniboxParser.Manager.RetrieveLite((Type)match.Value, id);
 
                     yield return new EntityOmniboxResult
                     {
@@ -71,7 +71,7 @@ namespace Signum.Entities.Omnibox
 
                     if (autoComplete.Any())
                     {
-                        foreach (Lite lite in autoComplete)
+                        foreach (Lite<IdentifiableEntity> lite in autoComplete)
                         {
                             OmniboxMatch distance = OmniboxUtils.Contains(lite, lite.ToString(), pattern);
 
@@ -125,7 +125,7 @@ namespace Signum.Entities.Omnibox
         public string ToStr { get; set; }
         public OmniboxMatch ToStrMatch { get; set; }
 
-        public Lite Lite { get; set; }
+        public Lite<IdentifiableEntity> Lite { get; set; }
 
         public override string ToString()
         {

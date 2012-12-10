@@ -90,7 +90,7 @@ namespace Signum.Windows.Authorization
                 return !ident.IsAllowedFor(TypeAllowedBasic.Modify);
         }
 
-        public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic requested)
+        public static bool IsAllowedFor(this Lite<IIdentifiable> lite, TypeAllowedBasic requested)
         {
             TypeAllowedAndConditions tac = GetAllowed(lite.RuntimeType);
 

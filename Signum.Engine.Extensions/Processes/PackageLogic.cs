@@ -114,14 +114,14 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite> lites)
+        public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite<IIdentifiable>> lites)
         {
             package.Save();
 
             lites.Select(lite => new PackageLineDN
             {
                 Package = package.ToLite(),
-                Entity = lite.ToLite<IIdentifiable>()
+                Entity = lite
             }).SaveList();
 
             return package;
@@ -166,12 +166,12 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite> entities, Enum operationKey)
+        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, Enum operationKey)
         {
             return CreatePackageOperation(entities, MultiEnumLogic<OperationDN>.ToEntity((Enum)operationKey));
         }
 
-        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite> entities, OperationDN operation)
+        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationDN operation)
         {
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationDN()
             {
@@ -250,7 +250,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package, line =>
             {
-                line.Entity.ToLite<T>().ExecuteLite<T>(OperationKey);
+                ((Lite<T>)line.Entity).ExecuteLite(OperationKey);
             });
         }
     }
@@ -272,7 +272,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package, line =>
             {
-                var result = OperationLogic.ConstructFromLite<T>(line.Entity.ToLite<F>(), OperationKey);
+                var result = line.Entity.ConstructFromLite<T>(OperationKey);
                 if (result.IsNew)
                     result.Save();
 

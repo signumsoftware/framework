@@ -119,8 +119,8 @@ namespace Signum.Services
 
         
 
-#region IProcessServer
-        public ProcessExecutionDN CreatePackageOperation(List<Lite> lites, Enum operationKey)
+        #region IProcessServer
+        public ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => PackageLogic.CreatePackageOperation(lites, operationKey));
@@ -176,7 +176,7 @@ namespace Signum.Services
               () => TypeAuthLogic.AuthorizedTypes());
         }
 
-        public bool IsAllowedForInUserInterface(Lite lite, TypeAllowedBasic allowed)
+        public bool IsAllowedForInUserInterface(Lite<IIdentifiable> lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface : true ));
@@ -357,12 +357,12 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType()));
-        }    
-    
-        public List<Lite> GetAssociatedTypesForTemplates()
+        }
+
+        public List<Lite<TypeDN>> GetAssociatedTypesForTemplates()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList());
+                () => SMSLogic.RegisteredDataObjectProviders());
         }
 
         #endregion

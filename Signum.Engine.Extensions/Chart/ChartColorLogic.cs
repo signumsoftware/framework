@@ -45,7 +45,7 @@ namespace Signum.Engine.Chart
         {
             AssertFewEntities(type);
 
-            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = l.ToLite<IdentifiableEntity>() }).ToDictionary(a => a.Related);
+            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = (Lite<IdentifiableEntity>)l }).ToDictionary(a => a.Related);
 
             dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.RuntimeType == type).ToDictionary(a=>a.Related));
 
@@ -128,7 +128,7 @@ namespace Signum.Engine.Chart
                 Type = type.ToTypeDN(),
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorDN
                 {
-                    Related = l.ToLite<IdentifiableEntity>(),
+                    Related = (Lite<IdentifiableEntity>)l,
                     Color = dic.TryGetS(l.Id).TrySC(c => new ColorDN { Argb = c.ToArgb() })
                 }).ToMList()
             };
@@ -139,7 +139,7 @@ namespace Signum.Engine.Chart
             return Colors.Value.TryGetC(type).TryGetS(id);
         }
 
-        public static Color? ColorFor(Lite lite)
+        public static Color? ColorFor(Lite<IdentifiableEntity> lite)
         {
             return ColorFor(lite.RuntimeType, lite.Id);
         }

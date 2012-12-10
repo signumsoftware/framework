@@ -439,7 +439,7 @@ namespace Signum.Windows.Chart
 
             if (!lastRequest.GroupResults)
             {
-                Lite lite = (Lite)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type);
+                Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type);
 
                 if (Navigator.IsNavigable(lite.RuntimeType, isSearchEntity: true))
                     Navigator.NavigateUntyped(lite, new NavigateOptions());
@@ -472,7 +472,7 @@ namespace Signum.Windows.Chart
         {
             if (row.Table.HasEntities)
             {
-                Lite lite = row.Entity;
+                Lite<IdentifiableEntity> lite = row.Entity;
 
                 if (Navigator.IsNavigable(lite.RuntimeType, isSearchEntity: true))
                     Navigator.NavigateUntyped(lite);
