@@ -112,24 +112,24 @@ namespace Signum.Engine.Linq
                         return BindTake(m.Type, m.GetArgument("source"), m.GetArgument("count"));
                 }
             }
-            else if (m.Method.DeclaringType == typeof(LiteUtils) && m.Method.Name == "ToLite")
+            else if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
             {
                 Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
 
-                if (m.Method.GetParameters().FirstEx().ParameterType == typeof(Lite))
-                {
-                    LiteExpression liteRef = (LiteExpression)Visit(m.GetArgument("lite"));
+                //if (m.Method.GetParameters().FirstEx().ParameterType == typeof(Lite))
+                //{
+                //    LiteExpression liteRef = (LiteExpression)Visit(m.GetArgument("lite"));
 
-                    Expression entity = EntityCasting(liteRef.Reference, Lite.Extract(m.Type));
+                //    Expression entity = EntityCasting(liteRef.Reference, LiteUtils.Extract(m.Type));
 
-                    return MakeLite(m.Type, entity, toStr);
-                }
-                else
-                {
-                    var entity = Visit(m.GetArgument("entity"));
-                    var converted = EntityCasting(entity, Lite.Extract(m.Type));
-                    return MakeLite(m.Type, converted, toStr);
-                }
+                //    return MakeLite(m.Type, entity, toStr);
+                //}
+                //else
+                //{
+                var entity = Visit(m.GetArgument("entity"));
+                var converted = EntityCasting(entity, Lite.Extract(m.Type));
+                return MakeLite(m.Type, converted, toStr);
+                //}
             }
             else if (m.Method.DeclaringType.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
             {
@@ -467,7 +467,7 @@ namespace Signum.Engine.Linq
 
                 switch ((DbExpressionType)newItem.NodeType)
                 {
-                    case DbExpressionType.Lite: return SmartEqualizer.EntityIn((LiteExpression)newItem, col == null ? Enumerable.Empty<Lite>() : col.Cast<Lite>().ToList());
+                    case DbExpressionType.Lite: return SmartEqualizer.EntityIn((LiteExpression)newItem, col == null ? Enumerable.Empty<Lite<IIdentifiable>>() : col.Cast<Lite<IIdentifiable>>().ToList());
                     case DbExpressionType.Entity:
                     case DbExpressionType.ImplementedBy:
                     case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>().ToList());

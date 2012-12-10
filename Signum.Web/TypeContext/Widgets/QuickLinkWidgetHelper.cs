@@ -205,9 +205,9 @@ namespace Signum.Web
 
     public class QuickLinkView : QuickLink
     {
-        public Lite lite;
+        public Lite<IdentifiableEntity> lite;
 
-        public QuickLinkView(Lite liteEntity)
+        public QuickLinkView(Lite<IdentifiableEntity> liteEntity)
         {
             lite = liteEntity;
             IsVisible = Navigator.IsNavigable(lite.RuntimeType, isSearchEntity: false);

@@ -11,7 +11,7 @@ namespace Signum.Engine.Operations
 {
     public interface IConstructorFromManyOperation : IOperation
     {
-        IIdentifiable Construct(List<Lite> lites, params object[] parameters);
+        IIdentifiable Construct(IEnumerable<Lite<IIdentifiable>> lites, params object[] parameters);
     }
 
     public class BasicConstructFromMany<F, T> : IConstructorFromManyOperation
@@ -33,7 +33,7 @@ namespace Signum.Engine.Operations
             this.key = key; 
         }
 
-        IIdentifiable IConstructorFromManyOperation.Construct(List<Lite> lites, params object[] args)
+        IIdentifiable IConstructorFromManyOperation.Construct(IEnumerable<Lite<IIdentifiable>> lites, params object[] args)
         {
             OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
 
@@ -53,7 +53,7 @@ namespace Signum.Engine.Operations
 
                         OnBeginOperation();
 
-                        T result = OnConstruct(lites.Select(l => l.ToLite<F>()).ToList(), args);
+                        T result = OnConstruct(lites.Cast<Lite<F>>().ToList(), args);
 
                         OnEndOperation(result);
 

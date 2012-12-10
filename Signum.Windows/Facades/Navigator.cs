@@ -59,7 +59,7 @@ namespace Signum.Windows
             return (Lite<T>)Manager.FindUnique(options);
         }
 
-        public static Lite FindUnique(FindUniqueOptions options)
+        public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
         {
             return Manager.FindUnique(options);
         }
@@ -80,13 +80,13 @@ namespace Signum.Windows
             return (Lite<T>)Manager.Find(options);
         }
 
-        public static Lite Find(FindOptions options)
+        public static Lite<IdentifiableEntity> Find(FindOptions options)
         {
             return Manager.Find(options);
         }
 
 
-        public static Lite[] FindMany(FindManyOptions options)
+        public static Lite<IdentifiableEntity>[] FindMany(FindManyOptions options)
         {
             return Manager.FindMany(options);
         }
@@ -94,7 +94,7 @@ namespace Signum.Windows
         public static Lite<T>[] FindMany<T>()
          where T : IdentifiableEntity
         {
-            Lite[] result = Manager.FindMany(new FindManyOptions(typeof(T)));
+            Lite<IdentifiableEntity>[] result = Manager.FindMany(new FindManyOptions(typeof(T)));
             if (result == null)
                 return null;
 
@@ -107,7 +107,7 @@ namespace Signum.Windows
             if (options.QueryName == null)
                 options.QueryName = typeof(T);
 
-            Lite[] result = Manager.FindMany(options);
+            Lite<IdentifiableEntity>[] result = Manager.FindMany(options);
             if (result == null)
                 return null;
 
@@ -427,13 +427,13 @@ namespace Signum.Windows
             return Resources.FinderOf0.Formato(QueryUtils.GetNiceName(queryName));
         }
 
-        public virtual Lite Find(FindOptions options)
+        public virtual Lite<IdentifiableEntity> Find(FindOptions options)
         {
             AssertFindable(options.QueryName);
 
             if (options.ReturnIfOne)
             {
-                Lite lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = FindUnique(new FindUniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.SingleOrMany
@@ -456,7 +456,7 @@ namespace Signum.Windows
             return null;
         }
 
-        public virtual Lite[] FindMany(FindManyOptions options)
+        public virtual Lite<IdentifiableEntity>[] FindMany(FindManyOptions options)
         {
             AssertFindable(options.QueryName);
 
@@ -474,7 +474,7 @@ namespace Signum.Windows
 
             if (options.NavigateIfOne)
             {
-                Lite lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = FindUnique(new FindUniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.Only,
@@ -495,7 +495,7 @@ namespace Signum.Windows
             sw.Show();
         }
 
-        public virtual Lite FindUnique(FindUniqueOptions options)
+        public virtual Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
         {
             AssertFindable(options.QueryName);
 
@@ -601,7 +601,7 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            Type type = entityOrLite is Lite? ((Lite)entityOrLite).RuntimeType :entityOrLite.GetType();
+            Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).RuntimeType : entityOrLite.GetType();
 
             NormalWindow win = CreateNormalWindow();
             win.SetTitleText(Resources.Loading0.Formato(type.NiceName()));
@@ -612,7 +612,7 @@ namespace Signum.Windows
                 ModifiableEntity entity = entityOrLite as ModifiableEntity;
                 if (entity == null)
                 {
-                    Lite lite = (Lite)entityOrLite;
+                    Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)entityOrLite;
                     entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
                 }
 
@@ -647,7 +647,7 @@ namespace Signum.Windows
             if (entity == null)
             {
                 liteType = Lite.Extract(entityOrLite.GetType());
-                entity = Server.Retrieve((Lite)entityOrLite);
+                entity = Server.Retrieve((Lite<IdentifiableEntity>)entityOrLite);
             }
 
             EntitySettings es = AssertViewableEntitySettings(entity);
@@ -670,7 +670,7 @@ namespace Signum.Windows
             object result = win.DataContext;
             if (liteType != null)
             {
-                return Lite.Create(liteType, (IdentifiableEntity)result);
+                return Lite.Create((IdentifiableEntity)result);
             }
             return result;
 
@@ -874,9 +874,10 @@ namespace Signum.Windows
         {
             if (entityType.IsLite())
             {
-                DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
-                if (template != null)
-                    return template;
+                return null;
+                //DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
+                //if (template != null)
+                //    return template;
             }
 
             if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())

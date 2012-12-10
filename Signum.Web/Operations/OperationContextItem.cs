@@ -13,7 +13,7 @@ using Signum.Web.Properties;
 
 namespace Signum.Web.Operations
 {
-    public delegate ContextualItem[] GetOperationsContextualItemDelegate(Lite lite);
+    public delegate ContextualItem[] GetOperationsContextualItemDelegate(Lite<IdentifiableEntity> lite);
 
     public static class OperationsContextualItemsHelper
     {
@@ -79,9 +79,9 @@ namespace Signum.Web.Operations
 
         static ContextualItem[] Empty = new ContextualItem[0];
 
-        public static List<ContextualItem> GetForLite(Lite lite, object queryName, string prefix)
+        public static List<ContextualItem> GetForLite(Lite<IIdentifiable> lite, object queryName, string prefix)
         {
-            IdentifiableEntity ident = Database.Retrieve(lite);
+            IdentifiableEntity ident = (IdentifiableEntity)Database.Retrieve(lite);
 
             var list = OperationLogic.ServiceGetEntityOperationInfos(ident);
 
@@ -90,7 +90,7 @@ namespace Signum.Web.Operations
                     let os = (EntityOperationSettings)OperationsClient.Manager.Settings.TryGetC(oi.Key)
                     let ctx = new ContextualOperationContext()
                     {
-                        Entities = new List<Lite> { ident.ToLite() },
+                        Entities = new List<Lite<IdentifiableEntity>> { ident.ToLite() },
                         QueryName = queryName,
                         OperationSettings = os.TryCC(eos => eos.Contextual),
                         OperationInfo = oi,

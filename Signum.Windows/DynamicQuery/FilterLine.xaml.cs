@@ -54,7 +54,7 @@ namespace Signum.Windows
             {
                 Implementations implementations = f.Token.GetImplementations().Value;
 
-                Lite lite = f.RealValue as Lite;
+                Lite<IIdentifiable> lite = f.RealValue as Lite<IIdentifiable>;
 
                 if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                     Server.FillToStr(lite);

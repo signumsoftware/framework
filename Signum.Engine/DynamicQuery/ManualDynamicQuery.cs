@@ -61,7 +61,7 @@ namespace Signum.Engine.DynamicQuery
             return Execute(req, GetColumnDescriptions()).Collection.Count();
         }
 
-        public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
+        public override Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             var req = new QueryRequest
             {
@@ -75,9 +75,9 @@ namespace Signum.Engine.DynamicQuery
             DEnumerable<T> mr = Execute(req, GetColumnDescriptions());
 
             ParameterExpression pe = Expression.Parameter(typeof(object), "p");
-            Func<object, Lite> entitySelector = Expression.Lambda<Func<object, Lite>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
+            Func<object, Lite<IIdentifiable>> entitySelector = Expression.Lambda<Func<object, Lite<IIdentifiable>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
 
-            return mr.Collection.Select(entitySelector).Unique(request.UniqueType);
+            return (Lite<IdentifiableEntity>)mr.Collection.Select(entitySelector).Unique(request.UniqueType);
         }
     }
 }

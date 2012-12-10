@@ -74,8 +74,8 @@ namespace Signum.Test.LinqProvider
         {
             var bands = new List<Lite<IAuthorDN>>
             {
-                new Lite<IAuthorDN>(typeof(ArtistDN), 5),
-                new Lite<IAuthorDN>(typeof(BandDN), 1)
+                Lite.Create<ArtistDN>(5),
+                Lite.Create<BandDN>(1)
             };
 
             var albums = (from a in Database.Query<AlbumDN>()

@@ -637,16 +637,16 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, new Lite<S>((S)(IIdentifiable)Constructor.Construct(runtimeInfo.RuntimeType)));
+                return TryModifyEntity(ctx, (Lite<S>)Lite.Create((IdentifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType)));
             }
 
             if (lite == null)
-                return TryModifyEntity(ctx, Database.RetrieveLite<S>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
+                return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
 
             if (runtimeInfo.IdOrNull.Value == lite.IdOrNull && runtimeInfo.RuntimeType == lite.RuntimeType)
                 return TryModifyEntity(ctx, lite);
 
-            return TryModifyEntity(ctx, Database.RetrieveLite<S>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
+            return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
         }
 
         public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> lite)

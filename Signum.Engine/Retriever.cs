@@ -17,7 +17,7 @@ namespace Signum.Engine
         T Request<T>(int? id) where T : IdentifiableEntity;
         T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
         T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable;
-        Lite<T> RequestLite<T>(int? id, Type runtimeType) where T : class, IIdentifiable;
+        Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable;
         T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity; 
         IRetriever Parent { get; }
     }
@@ -37,7 +37,7 @@ namespace Signum.Engine
         EntityCache.RealEntityCache entityCache;
         Dictionary<IdentityTuple, IdentifiableEntity> retrieved = new Dictionary<IdentityTuple, IdentifiableEntity>();
         Dictionary<Type, Dictionary<int, IdentifiableEntity>> requests;
-        Dictionary<IdentityTuple, List<Lite>> liteRequests;
+        Dictionary<IdentityTuple, List<Lite<IIdentifiable>>> liteRequests;
         List<EmbeddedEntity> embeddedPostRetrieving;
 
         bool TryGetRequest(IdentityTuple key, out IdentifiableEntity value)
@@ -128,17 +128,16 @@ namespace Signum.Engine
             return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id); 
         }
 
-        public Lite<T> RequestLite<T>(int? id, Type runtimeType) where T : class, IIdentifiable
+        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable
         {
-            if (id == null)
+            if (lite == null)
                 return null;
 
-            IdentityTuple tuple = new IdentityTuple(runtimeType, id.Value);
-            Lite<T> result = new Lite<T>(runtimeType, id.Value);
+            IdentityTuple tuple = new IdentityTuple(lite.RuntimeType, lite.Id);
             if (liteRequests == null)
-                liteRequests = new Dictionary<IdentityTuple, List<Lite>>();
-            liteRequests.GetOrCreate(tuple).Add(result);
-            return result;
+                liteRequests = new Dictionary<IdentityTuple, List<Lite<IIdentifiable>>>();
+            liteRequests.GetOrCreate(tuple).Add(lite);
+            return lite;
         }
 
         public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity
@@ -293,9 +292,9 @@ namespace Signum.Engine
             return Parent.RequestIBA<T>(id, typeId);
         }
 
-        public Lite<T> RequestLite<T>(int? id, Type runtimeType) where T : class, IIdentifiable
+        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable
         {
-            return Parent.RequestLite<T>(id, runtimeType);
+            return Parent.RequestLite<T>(lite);
         }
 
         public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity

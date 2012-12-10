@@ -42,7 +42,7 @@ namespace Signum.Windows
             {
                 btNavigate.Visibility = Visibility.Visible;
 
-                Type cleanType = Entity is Lite ? ((Lite)Entity).RuntimeType : Entity.GetType();
+                Type cleanType = Entity is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)Entity).RuntimeType : Entity.GetType();
 
                 btNavigate.IsEnabled = Navigator.IsNavigable(cleanType, isSearchEntity: false);
             }

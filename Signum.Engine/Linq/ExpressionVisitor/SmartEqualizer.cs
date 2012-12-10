@@ -355,7 +355,7 @@ namespace Signum.Engine.Linq
             return EntityIn(newItem, entityIDs);
         }
 
-        internal static Expression EntityIn(LiteExpression liteReference, IEnumerable<Lite> collection)
+        internal static Expression EntityIn(LiteExpression liteReference, IEnumerable<Lite<IIdentifiable>> collection)
         {
             if (collection.IsEmpty())
                 return False;
@@ -537,7 +537,7 @@ namespace Signum.Engine.Linq
 
             if (c.Type.IsLite())
             {
-                var lite = (Lite)c.Value;
+                var lite = (Lite<IIdentifiable>)c.Value;
 
                 Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 

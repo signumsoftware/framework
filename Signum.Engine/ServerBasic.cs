@@ -73,7 +73,7 @@ namespace Signum.Services
                 () => Database.RetrieveAll(type));
         }
 
-        public virtual List<Lite> RetrieveAllLite(Type type)
+        public virtual List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () => Database.RetrieveAllLite(type));
@@ -86,16 +86,16 @@ namespace Signum.Services
             return list;
         }
 
-        public virtual List<Lite> FindAllLite(Type liteType, Implementations implementations)
+        public virtual List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
         {
-            return Return(MethodInfo.GetCurrentMethod(), liteType.Name,
-                () => AutoCompleteUtils.FindAllLite(liteType, implementations));
+            return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
+                () => AutoCompleteUtils.FindAllLite(implementations));
         }
 
-        public virtual List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
+        public virtual List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
-            return Return(MethodInfo.GetCurrentMethod(), liteType.Name,
-                () => AutoCompleteUtils.FindLiteLike(liteType, implementations, subString, count));
+            return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
+                () => AutoCompleteUtils.FindLiteLike(implementations, subString, count));
         }
 
         public virtual Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
@@ -148,7 +148,7 @@ namespace Signum.Services
                 () => DynamicQueryManager.Current.ExecuteQueryCount(request));
         }
 
-        public virtual Lite ExecuteUniqueEntity(UniqueEntityRequest request)
+        public virtual Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteUniqueEntity(request));
@@ -199,13 +199,13 @@ namespace Signum.Services
                 () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
-        public IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
+        public IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                 () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
         }
 
-        public IdentifiableEntity Delete(Lite lite, Enum operationKey, params object[] args)
+        public IdentifiableEntity Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                 () => OperationLogic.ServiceDelete(lite, operationKey, args));
@@ -223,19 +223,19 @@ namespace Signum.Services
                 () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
-        public IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                 () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
         }
 
-        public IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                 () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
 
-        public Dictionary<Enum, string> GetContextualCanExecute(Lite[] lite, List<Enum> cleanKeys)
+        public Dictionary<Enum, string> GetContextualCanExecute(Lite<IIdentifiable>[] lite, List<Enum> cleanKeys)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => OperationLogic.GetContextualCanExecute(lite, cleanKeys));

@@ -103,7 +103,7 @@ namespace Signum.Windows.Operations
 
     public class ContextualOperationEventArgs : EventArgs
     {
-        public Lite[] Entities { get; set; }
+        public Lite<IdentifiableEntity>[] Entities { get; set; }
         public SearchControl SearchControl { get; set; }
         public OperationInfo OperationInfo { get; set; }
     }

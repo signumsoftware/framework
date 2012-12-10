@@ -283,12 +283,12 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)entity;
         }
 
-        public static IdentifiableEntity ServiceExecuteLite(Lite lite, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceExecuteLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
-            IdentifiableEntity entity = Database.RetrieveAndForget(lite);
+            IIdentifiable entity = Database.RetrieveAndForget(lite);
             var op = Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite();
             op.Execute(entity, args);
-            return entity;
+            return (IdentifiableEntity)entity;
         }
 
         public static T Execute<T>(this T entity, Enum operationKey, params object[] args)
@@ -317,12 +317,12 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region Delete
-        public static IdentifiableEntity ServiceDelete(Lite lite, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceDelete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
-            IdentifiableEntity entity = Database.RetrieveAndForget(lite);
+            IIdentifiable entity = Database.RetrieveAndForget(lite);
             var op = Find<IDeleteOperation>(lite.RuntimeType, operationKey);
             op.Delete(entity, args);
-            return entity;
+            return (IdentifiableEntity)entity;
         }
 
         public static void Delete<T>(this Lite<T> lite, Enum operationKey, params object[] args)
@@ -363,7 +363,7 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)op.Construct(entity, args);
         }
 
-        public static IdentifiableEntity ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite();
             return (IdentifiableEntity)op.Construct(Database.RetrieveAndForget(lite), args);
@@ -376,7 +376,7 @@ namespace Signum.Engine.Operations
             return (T)op.Construct(entity, args);
         }
 
-        public static T ConstructFromLite<T>(this Lite lite, Enum operationKey, params object[] args)
+        public static T ConstructFromLite<T>(this Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
             var op = Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite();
@@ -385,7 +385,7 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region ConstructFromMany
-        public static IdentifiableEntity ServiceConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, Enum operationKey, params object[] args)
         {
             return (IdentifiableEntity)Find<IConstructorFromManyOperation>(type, operationKey).Construct(lites, args);
         }
@@ -394,7 +394,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), operationKey).Construct(lites.Cast<Lite>().ToList(), args);
+            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), operationKey).Construct(lites.Cast<Lite<IIdentifiable>>().ToList(), args);
         }
         #endregion
 
@@ -522,7 +522,7 @@ namespace Signum.Engine.Operations
             return FindOperation(type, operationKey).OperationType;
         }
 
-        public static Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys)
+        public static Dictionary<Enum, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<Enum> cleanKeys)
         {
             Dictionary<Enum, string> result = null;
             using (ExecutionMode.Global())
@@ -550,9 +550,9 @@ namespace Signum.Engine.Operations
             return result;
         }
 
-        internal static GenericInvoker<Func<IEnumerable<Lite>, IEnumerable<IOperation>, Dictionary<Enum, string>>> giGetContextualGraphCanExecute =
-            new GenericInvoker<Func<IEnumerable<Lite>, IEnumerable<IOperation>, Dictionary<Enum, string>>>((lites, operations) => GetContextualGraphCanExecute<IdentifiableEntity, IdentifiableEntity, DayOfWeek>(lites, operations));
-        internal static Dictionary<Enum, string> GetContextualGraphCanExecute<T, E, S>(IEnumerable<Lite> lites, IEnumerable<IOperation> operations)
+        internal static GenericInvoker<Func<IEnumerable<Lite<IIdentifiable>>, IEnumerable<IOperation>, Dictionary<Enum, string>>> giGetContextualGraphCanExecute =
+            new GenericInvoker<Func<IEnumerable<Lite<IIdentifiable>>, IEnumerable<IOperation>, Dictionary<Enum, string>>>((lites, operations) => GetContextualGraphCanExecute<IdentifiableEntity, IdentifiableEntity, DayOfWeek>(lites, operations));
+        internal static Dictionary<Enum, string> GetContextualGraphCanExecute<T, E, S>(IEnumerable<Lite<IIdentifiable>> lites, IEnumerable<IOperation> operations)
             where E : IdentifiableEntity
             where S : struct
             where T : E

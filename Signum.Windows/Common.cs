@@ -608,7 +608,7 @@ namespace Signum.Windows
                 return ident.ToLite().Key();
             }
 
-            var lite = newValue as Lite;
+            var lite = newValue as Lite<IIdentifiable>;
             if (lite != null)
             {
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)

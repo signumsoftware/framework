@@ -16,6 +16,7 @@ using System.Collections;
 using Signum.Engine.Maps;
 using System.Data.Common;
 using Signum.Entities.Basics;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine.Linq
 {  
@@ -197,7 +198,7 @@ namespace Signum.Engine.Linq
             static MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<TypeDN>(null, null)).GetGenericMethodDefinition();
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeDN>(null)).GetGenericMethodDefinition();
             static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeDN>(1, 1)).GetGenericMethodDefinition();
-            static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<TypeDN>(1, null)).GetGenericMethodDefinition();
+            static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<TypeDN>(null)).GetGenericMethodDefinition();
             static MethodInfo miEmbeddedPostRetrieving = ReflectionTools.GetMethodInfo((IRetriever r) => r.EmbeddedPostRetrieving<EmbeddedEntity>(null)).GetGenericMethodDefinition();
 
             Scope scope; 
@@ -369,38 +370,55 @@ namespace Signum.Engine.Linq
             protected override Expression VisitLite(LiteExpression lite)
             {
                 var id = Visit(NullifyColumn(lite.Id));
-                var toStr = Visit(lite.ToStr);
-
-                Type liteType = Lite.Extract(lite.Type);
 
                 if (id == null)
                     return Expression.Constant(null, lite.Type);
-                else if (toStr == null)
-                {
-                    var type = Visit(lite.TypeId);
 
-                    return Expression.Call(retriever, miRequestLite.MakeGenericMethod(liteType), id.Nullify(), type);
+                var toStr = Visit(lite.ToStr);
+                var typeId = lite.TypeId;
+
+                if (typeId.NodeType == ExpressionType.Convert)
+                    typeId = ((UnaryExpression)typeId).Operand;
+
+                Expression nothing = Expression.Constant(null, lite.Type);
+                Expression liteConstructor = null;
+                if (typeId.NodeType == ExpressionType.Constant)
+                {
+                    liteConstructor = Expression.Condition(id.NotEqualsNulll(),
+                        Expression.New(LiteConstructor((Type)((ConstantExpression)typeId).Value), id, toStr),
+                        nothing);
                 }
+                else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
+                {
+                    TypeImplementedByExpression tib = (TypeImplementedByExpression)typeId;
+                    liteConstructor = tib.TypeImplementations.Aggregate(nothing,
+                        (acum, ti) => Expression.Condition(ti.ExternalId.NotEqualsNulll(),
+                            Expression.New(LiteConstructor(ti.Type), ti.ExternalId, toStr),
+                            acum));
+                }
+                else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
+                {
+                    TypeImplementedByAllExpression tib = (TypeImplementedByAllExpression)typeId;
+                    liteConstructor = Expression.Condition(id.NotEqualsNulll(),
+                                      Expression.Call(miLiteCreate, Visit(tib), id, toStr),
+                                     nothing);
+                }
+                else 
+                    throw new InvalidOperationException("Unexpected lite type " + typeId.NodeType);
+
+                if (toStr != null)
+                    return liteConstructor;
                 else
-                {
-                    var type = Visit(lite.TypeId);
+                    return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)), liteConstructor);
+            }
 
-                    Type constantTypeId = ConstantType(type);
-             
-                    NewExpression liteConstructor;
-                    if (constantTypeId == liteType)
-                    {
-                        ConstructorInfo ciLite = lite.Type.GetConstructor(new[] { typeof(int), typeof(string) });
-                        liteConstructor = Expression.New(ciLite, id.UnNullify(), toStr);
-                    }
-                    else
-                    {
-                        ConstructorInfo ciLite = lite.Type.GetConstructor(new[] { typeof(Type), typeof(int), typeof(string) });
-                        liteConstructor = Expression.New(ciLite, type, id.UnNullify(), toStr);
-                    }
+            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
 
-                    return Expression.Condition(id.NotEqualsNulll(), liteConstructor, Expression.Constant(null, lite.Type));
-                }
+            static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructor = new ConcurrentDictionary<Type,ConstructorInfo>();
+
+            static ConstructorInfo LiteConstructor( Type type)
+            {
+                return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(int), typeof(string) }));
             }
 
             protected override Expression VisitMListElement(MListElementExpression mle)
@@ -423,8 +441,6 @@ namespace Signum.Engine.Linq
 
                 return null;
             }
-
-            static ConstructorInfo ciLite = ReflectionTools.GetConstuctorInfo(() => new Lite<IdentifiableEntity>(typeof(IdentifiableEntity), 2, ""));
 
             protected override Expression VisitSqlConstant(SqlConstantExpression sce)
             {

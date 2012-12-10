@@ -39,7 +39,7 @@ namespace Signum.Windows
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFrom(entity, operationKey, args)); 
         }
 
-        public static T ConstructFromLite<T>(this Lite lite, Enum operationKey, params object[] args)
+        public static T ConstructFromLite<T>(this Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
             return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromLite(lite, operationKey, args)); 
@@ -49,7 +49,7 @@ namespace Signum.Windows
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromMany(lites.Cast<Lite>().ToList(), typeof(F), operationKey, args)); 
+            return (T)(IIdentifiable)Server.Return((IOperationServer s) => s.ConstructFromMany(lites, typeof(F), operationKey, args)); 
         }
     }
 }

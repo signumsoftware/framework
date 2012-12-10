@@ -35,7 +35,7 @@ namespace Signum.Web
 
         public static MvcHtmlString RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
         {
-            Type cleanRuntimeType = (typeContext.UntypedValue as Lite).TryCC(l => l.RuntimeType) ?? typeContext.UntypedValue.GetType();
+            Type cleanRuntimeType = (typeContext.UntypedValue as Lite<IIdentifiable>).TryCC(l => l.RuntimeType) ?? typeContext.UntypedValue.GetType();
 
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType)
                 .ThrowIfNullC("There's no EntitySettings registered for type {0}".Formato(cleanRuntimeType));

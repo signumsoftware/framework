@@ -44,7 +44,7 @@ namespace Signum.Windows.Operations
                     });
                 else
                 {
-                    IIdentifiable entity = Server.Return((IOperationServer s) => s.ConstructFromMany(lites.ToList(), entityType, oi.Key));
+                    IIdentifiable entity = Server.Return((IOperationServer s) => s.ConstructFromMany(lites, entityType, oi.Key));
 
                     if (oi.Returns && Navigator.IsNavigable(entity.GetType(), isSearchEntity: true))
                         Navigator.Navigate(entity);

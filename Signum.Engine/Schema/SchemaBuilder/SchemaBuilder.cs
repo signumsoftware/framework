@@ -368,9 +368,9 @@ namespace Signum.Engine.Maps
         protected virtual Field GenerateFieldImplmentedBy(PropertyRoute route, NameSequence name, bool forceNull, IEnumerable<Type> types)
         {
             Type cleanType = Lite.Extract(route.Type) ?? route.Type;
-            string erroneos = types.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
-            if (erroneos.Length != 0)
-                throw new InvalidOperationException("Type {0} do not implement {1}".Formato(erroneos, cleanType));
+            string errors = types.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
+            if (errors.Length != 0)
+                throw new InvalidOperationException("Type {0} do not implement {1}".Formato(errors, cleanType));
 
             bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 

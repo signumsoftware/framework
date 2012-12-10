@@ -148,7 +148,7 @@ namespace Signum.Web.Operations
 
     public class ContextualOperationContext : OperationContext
     {
-        public List<Lite> Entities { get; set; }
+        public List<Lite<IdentifiableEntity>> Entities { get; set; }
         public object QueryName { get; set; }
         public ContextualOperationSettings OperationSettings { get; set; }
 

@@ -12,7 +12,7 @@ namespace Signum.Web
     public class SelectedItemsMenuContext
     {
         public ControllerContext ControllerContext { get; set; }
-        public List<Lite> Lites { get; set; }
+        public List<Lite<IdentifiableEntity>> Lites { get; set; }
         public object QueryName { get; set; }
         public Implementations Implementations { get; set; }
         public string Prefix { get; set; }

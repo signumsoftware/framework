@@ -53,22 +53,22 @@ namespace Signum.Web
             });
         }
 
-        public static string NavigateRoute(IdentifiableEntity ie)
+        public static string NavigateRoute(IIdentifiable ie)
         {
             return NavigateRoute(ie.GetType(), ie.Id);
         }
 
-        public static string NavigateRoute(Lite lite)
+        public static string NavigateRoute(Lite<IIdentifiable> lite)
         {
             return NavigateRoute(lite.RuntimeType, lite.Id);
         }
 
-        public static RedirectResult RedirectToEntity(IdentifiableEntity ie)
+        public static RedirectResult RedirectToEntity(IIdentifiable ie)
         {
             return new RedirectResult(NavigateRoute(ie));
         }
 
-        public static RedirectResult RedirectToEntity(Lite lite)
+        public static RedirectResult RedirectToEntity(Lite<IIdentifiable> lite)
         {
             return new RedirectResult(NavigateRoute(lite));
         }
@@ -166,7 +166,7 @@ namespace Signum.Web
             return Manager.PartialFind(controller, findOptions, new Context(null, prefix));
         }
 
-        public static Lite FindUnique(FindUniqueOptions options)
+        public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
         {
             return Manager.FindUnique(options);
         }
@@ -699,7 +699,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual Lite FindUnique(FindUniqueOptions options)
+        protected internal virtual Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 
@@ -910,7 +910,7 @@ namespace Signum.Web
             if (!runtimeInfo.IdOrNull.HasValue)
                 throw new ArgumentException("Could not create a Lite without an Id");
 
-            return new Lite<T>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            return (Lite<T>)Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
         }
 
         public event Func<Type, bool> IsCreable;

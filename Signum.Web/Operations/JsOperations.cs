@@ -133,7 +133,7 @@ namespace Signum.Web.Operations
                 "{0}.ajax()".Formato(this.ToJS())).ToJS());
         }
 
-        public JsInstruction ContextualDelete(List<Lite> entities)
+        public JsInstruction ContextualDelete(List<Lite<IdentifiableEntity>> entities)
         {
             if (entities.Count == 1)
             {
