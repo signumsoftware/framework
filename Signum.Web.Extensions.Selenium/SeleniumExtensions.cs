@@ -174,8 +174,16 @@ namespace Signum.Web.Selenium
 
         public static void PopupOk(this ISelenium selenium, string prefix)
         {
+            PopupOk(selenium, prefix, false);
+        }
+
+        public static void PopupOk(this ISelenium selenium, string prefix, bool submit)
+        {
             selenium.Click("jq=#{0}btnOk".Formato(prefix));
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
+            if (submit)
+                selenium.WaitForPageToLoad(DefaultPageLoadTimeout);
+            else 
+                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
 
         public static void PopupSave(this ISelenium selenium, string prefix)
