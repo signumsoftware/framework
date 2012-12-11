@@ -53,7 +53,7 @@ namespace Signum.Engine.DynamicQuery
 
         private void AssertColumns(ColumnDescriptionFactory[] columns)
         {
-            columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found");
+            columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not foundon {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
 
             var errors =  columns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a=>a.Name, ", ");
 
