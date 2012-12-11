@@ -21,44 +21,45 @@ using System.Windows.Data;
 using System.Windows.Media;
 using Signum.Windows.Operations;
 using Signum.Entities.Processes;
+using System.Windows.Automation;
 
 namespace Signum.Windows.Processes
 {
 
     public static class PackageOperationMenuItemConsturctor
     {
-        public static MenuItem Construct(SearchControl sc, Enum operationKey, string canExecute, Dictionary<Type, OperationInfo> operationInfos, EntityOperationSettingsBase settings)
+        public static MenuItem Construct(ContextualOperationContext coc)
         {
             MenuItem miResult = new MenuItem
             {
-                Header = settings.TryCC(s => s.ContextualFromMany.TryCC(f => f.Text) ?? s.Text) ?? operationKey.NiceToString(),
-                Icon = settings.TryCC(s => s.ContextualFromMany.TryCC(f => f.Icon) ?? s.Icon),
-                ToolTip = canExecute,
-                IsEnabled = string.IsNullOrEmpty(canExecute)
+                Header = coc.OperationSettings.TryCC(s => s.Text) ?? coc.OperationInfo.Key.NiceToString(),
+                Icon = coc.OperationSettings.TryCC(s => s.Icon),
             };
+
+            if (coc.CanExecute != null)
+            {
+                miResult.ToolTip = coc.CanExecute;
+                miResult.IsEnabled = false;
+                ToolTipService.SetShowOnDisabled(miResult, true);
+                AutomationProperties.SetHelpText(miResult, coc.CanExecute);
+            }
 
             miResult.Click += (object sender, RoutedEventArgs e) =>
             {
-                Type entityType = sc.EntityType;
-                object queryName = sc.QueryName;
-
-                var lites = sc.SelectedItems;
-
-                if (settings != null && settings.ContextualFromMany != null && settings.ContextualFromMany.Click != null)
-                    settings.ContextualFromMany.Click(new ContextualOperationEventArgs
+                if (coc.OperationSettings != null && coc.OperationSettings.Click != null)
+                    coc.OperationSettings.Click(new ContextualOperationContext
                      {
-                         Entities = lites,
-                         SearchControl = sc,
-                         OperationInfo = operationInfos.Values.First(),
+                         Entities = coc.Entities,
+                         SearchControl = coc.SearchControl,
+                         OperationInfo = coc.OperationInfo,
                      });
                 else
                 {
-                    IIdentifiable entity = Server.Return((IOperationServer s) => s.CreatePackageOperation(lites.ToList(), operationKey));
+                    IIdentifiable entity = Server.Return((IOperationServer s) => s.CreatePackageOperation(coc.Entities.ToList(), coc.OperationInfo.Key));
 
                     Navigator.Navigate(entity);
                 }
             };
-
 
             return miResult;
         }

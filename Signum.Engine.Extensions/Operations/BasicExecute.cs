@@ -30,6 +30,8 @@ namespace Signum.Engine.Operations
         bool IOperation.Returns { get { return true; } }
         Type IOperation.ReturnType { get { return null; } }
 
+        bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
+
         public bool AllowsNew { get; set; }
 
         public Action<T, object[]> Execute { get; set; }

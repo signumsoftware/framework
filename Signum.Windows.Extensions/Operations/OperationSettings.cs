@@ -23,47 +23,34 @@ namespace Signum.Windows.Operations
 
     }
 
-    public abstract class EntityOperationSettingsBase : OperationSettings
+    public class EntityOperationSettings : OperationSettings
     {
+        public Func<EntityOperationContext, IdentifiableEntity> Click { get; set; }
+        public Func<EntityOperationContext, bool> IsVisible { get; set; }
+
         public ContextualOperationSettings ContextualFromMany { get; set; }
         public ContextualOperationSettings Contextual { get; set; }
 
         public bool AvoidMoveToSearchControl { get; set; }
 
-
-        public EntityOperationSettingsBase(Enum key)
+        public EntityOperationSettings(Enum key)
             : base(key)
         {
         }
-
-        public abstract bool ClickOverriden { get; }
     }
 
-    //Execute & ConstructorFrom
-    public class EntityOperationSettings<T> : EntityOperationSettingsBase 
-        where T : class, IIdentifiable
+    public class EntityOperationContext
     {
-        public override bool ClickOverriden { get { return Click != null; } }
-
-        public Func<EntityOperationEventArgs<T>, T> Click { get; set; }
-        public Func<EntityOperationEventArgs<T>, bool> IsVisible { get; set; }
-
-        public EntityOperationSettings(Enum key): base(key)
-        {
-        }
-    }
-
-    public class EntityOperationEventArgs<T> : EventArgs
-        where T : class, IIdentifiable
-    {
-        public T Entity { get; internal set; }
         public FrameworkElement EntityControl { get; internal set; }
         public ToolBarButton SenderButton { get; internal set; }
         public OperationInfo OperationInfo { get; internal set; }
         public ViewButtons ViewButtons { get; internal set; }
         public bool SaveProtected { get; internal set; }
-    }
+        public string CanExecute { get; internal set; }
 
+        public IdentifiableEntity Entity { get; internal set; }
+        public EntityOperationSettings OperationSettings { get; internal set; }
+    }
 
     public class ConstructorSettings : OperationSettings
     {
@@ -78,22 +65,8 @@ namespace Signum.Windows.Operations
 
     public class ContextualOperationSettings : OperationSettings
     {
-        public Action<ContextualOperationEventArgs> Click { get; set; }
-        public Func<ContextualOperationEventArgs, bool> IsVisible { get; set; }
-
-
-        public bool OnVisible(SearchControl sc, OperationInfo oi)
-        {
-            if (IsVisible == null)
-                return true;
-
-            return IsVisible(new ContextualOperationEventArgs
-            {
-                Entities = sc.SelectedItems,
-                SearchControl = sc,
-                OperationInfo = oi,
-            });
-        }
+        public Action<ContextualOperationContext> Click { get; set; }
+        public Func<ContextualOperationContext, bool> IsVisible { get; set; }
 
         public ContextualOperationSettings(Enum key)
             : base(key)
@@ -101,10 +74,12 @@ namespace Signum.Windows.Operations
         }
     }
 
-    public class ContextualOperationEventArgs : EventArgs
+    public class ContextualOperationContext 
     {
         public Lite[] Entities { get; internal set; }
         public SearchControl SearchControl { get; internal set; }
         public OperationInfo OperationInfo { get; internal set; }
+        public string CanExecute { get; internal set; }
+        public ContextualOperationSettings OperationSettings { get; set; }
     }
 }

@@ -20,6 +20,7 @@ namespace Signum.Entities.Processes
     [Serializable]
     public class ProcessDN : MultiEnumDN
     {
+       
     }
 
     [Serializable]

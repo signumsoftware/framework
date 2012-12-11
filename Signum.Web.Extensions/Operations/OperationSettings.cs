@@ -25,7 +25,6 @@ namespace Signum.Web.Operations
         public Enum Key { get; private set; }
 
         public string Text { get; set; }
-        public string AltText { get; set; }
         public string RequestExtraJsonData { get; set; }
     }
 
@@ -90,21 +89,13 @@ namespace Signum.Web.Operations
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
         public Func<ContextualOperationContext, JsInstruction> OnClick { get; set; }
 
-        bool groupInMenu = true;
-        /// <summary>
-        /// Set to false if this operation is not to be grouped in a Constructors menu
-        /// </summary>
-        public bool GroupInMenu
-        {
-            get { return groupInMenu; }
-            set { groupInMenu = value; }
-        }
     }
 
     public abstract class OperationContext
     {
         public string Prefix { get; internal set; }
         public OperationInfo OperationInfo { get; internal set; }
+
     }
 
     public class ConstructorOperationContext : OperationContext
@@ -118,6 +109,9 @@ namespace Signum.Web.Operations
         public string PartialViewName { get; internal set; }
         public IdentifiableEntity Entity { get; internal set; }
         public EntityOperationSettings OperationSettings { get; internal set; }
+        public string CanExecute { get; internal set; }
+        public ViewButtons ViewButtons { get; internal set; }
+        public bool SaveProtected { get; internal set; }
 
         public JsOperationOptions Options()
         {
@@ -153,6 +147,7 @@ namespace Signum.Web.Operations
         public List<Lite> Entities { get; internal set; }
         public object QueryName { get; internal set; }
         public ContextualOperationSettings OperationSettings { get; internal set; }
+        public string CanExecute { get; internal set; }
 
         public JsOperationOptions Options()
         {

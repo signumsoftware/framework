@@ -44,7 +44,7 @@ namespace Signum.Engine.Operations
             S[] FromStates { get; }
         }
 
-        public class Execute : BasicExecute<E>, IGraphToStateOperation, IGraphFromStatesOperation
+        public class Execute : BasicExecute<E>, IGraphToStateOperation, IGraphFromStatesOperation, IEntityOperation
         {
             S? toState;
             public S ToState
@@ -64,6 +64,8 @@ namespace Signum.Engine.Operations
                 : base(key)
             {
             }
+
+            bool IEntityOperation.HasCanExecute { get { return true; } }
 
             protected override string OnCanExecute(E entity)
             {
