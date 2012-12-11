@@ -336,7 +336,7 @@ namespace Signum.Windows
         {
             if (context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                if(context.IsAllowed())
+                if(context.IsAllowed() == null)
                 {
                     VoteVisible(fe);
                 }

@@ -336,7 +336,7 @@ namespace Signum.Windows
 
             entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             if (entityColumn == null)
-                throw new InvalidOperationException("Entity Column not found");
+                throw new InvalidOperationException("Entity Column not found on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
 
 

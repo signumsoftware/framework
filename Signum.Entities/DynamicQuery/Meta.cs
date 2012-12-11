@@ -14,7 +14,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class Meta
     {
-        public abstract bool IsAllowed();
+        public abstract string IsAllowed();
     }
 
     [Serializable]
@@ -27,9 +27,13 @@ namespace Signum.Entities.DynamicQuery
             this.PropertyRoutes = propertyRoutes;
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
-            return PropertyRoutes.All(a => a.IsAllowed());
+            var result = PropertyRoutes.Select(a => a.IsAllowed()).NotNull().CommaAnd();
+            if (string.IsNullOrEmpty(result))
+                return null;
+
+            return result;
         }
 
         public override string ToString()
@@ -51,9 +55,13 @@ namespace Signum.Entities.DynamicQuery
                 .ToReadOnly();
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
-            return Properties.All(cm => cm.IsAllowed());
+            var result = Properties.Select(a => a.IsAllowed()).NotNull().CommaAnd();
+            if (string.IsNullOrEmpty(result))
+                return null;
+
+            return result;
         }
 
         public override string ToString()
