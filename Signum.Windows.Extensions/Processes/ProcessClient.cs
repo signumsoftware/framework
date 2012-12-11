@@ -80,8 +80,8 @@ namespace Signum.Windows.Processes
                           where oi.IsEntityOperation && oi.Lite == true
                           group KVP.Create(t, oi) by oi.Key into g
                           let os = (EntityOperationSettingsBase)OperationClient.Manager.Settings.TryGetC(g.Key)
-                          where os == null ||
-                                os.ContextualFromMany == null && !os.ClickOverriden ||
+                          where os == null ? true:
+                                os.ContextualFromMany == null ? !os.ClickOverriden :
                                 os.ContextualFromMany.OnVisible(sc, g.First().Value)
                           select new PackageData
                           {
