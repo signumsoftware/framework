@@ -64,7 +64,7 @@ SF.Auth = (function () {
             if (typeof type == "undefined") {
                 total = multiSelToStringParts($tr);
                 $tr.find(".sf-auth-overriden").attr("checked", total != $tr.find("input[name$=AllowedBase]").val());
-            } 
+            }
             else {
                 var $groupTrs = findTrsInGroup($tr.attr("data-ns"), type);
                 var $typeTr = $groupTrs.filter(".sf-auth-type");
@@ -75,7 +75,7 @@ SF.Auth = (function () {
                     total += ";" + $ctr.attr("data-condition") + "-" + multiSelToStringParts($ctr);
                 });
                 $typeTr.find(".sf-auth-overriden").attr("checked", total != $typeTr.find("input[name$=AllowedBase]").val());
-            }            
+            }
 
             $tr.find(".sf-auth-chooser").each(updateMultiSelBackground);
         });
@@ -113,7 +113,10 @@ SF.Auth = (function () {
     };
 
     var postDialog = function (controllerUrl, prefix) {
-        new SF.PartialValidator({ controllerUrl: controllerUrl, prefix: prefix }).trySave();
+        var result = new SF.PartialValidator({ controllerUrl: controllerUrl, prefix: prefix }).trySave();
+        if (result.isValid) {
+            $(".sf-main-control[data-prefix='" + prefix + "']").removeClass("sf-changed");
+        }
     };
 
     var findTrsInGroup = function (ns, type) {
