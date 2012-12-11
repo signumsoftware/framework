@@ -15,38 +15,39 @@ using Signum.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using Signum.Entities.Basics;
+using System.Windows.Automation;
 
 namespace Signum.Windows.Operations
 {
     public static class ConstructFromManyMenuItemConsturctor
     {
-        public static MenuItem Construct(SearchControl sc, OperationInfo oi, ContextualOperationSettings settings)
-        {
+        public static MenuItem Construct(ContextualOperationContext coc)
+        { 
             MenuItem miResult = new MenuItem
             {
-                Header = OperationClient.GetText(oi.Key),
-                Icon = OperationClient.GetImage(oi.Key),
+                Header = OperationClient.GetText(coc.OperationInfo.Key),
+                Icon = OperationClient.GetImage(coc.OperationInfo.Key),
             };
+
+            if (coc.CanExecute != null)
+            {
+                miResult.ToolTip = coc.CanExecute;
+                miResult.IsEnabled = false;
+                ToolTipService.SetShowOnDisabled(miResult, true);
+                AutomationProperties.SetHelpText(miResult, coc.CanExecute);
+            }
 
             miResult.Click += (object sender, RoutedEventArgs e) =>
             {
-                Type entityType = sc.EntityType;
-                object queryName = sc.QueryName;
+                Type entityType = coc.SearchControl.EntityType;
 
-                var lites = sc.SelectedItems;
-
-                if (settings != null && settings.Click != null)
-                    settings.Click(new ContextualOperationEventArgs
-                    {
-                        Entities = lites,
-                        SearchControl = sc,
-                        OperationInfo = oi,
-                    });
+                if (coc.OperationSettings != null && coc.OperationSettings.Click != null)
+                    coc.OperationSettings.Click(coc);
                 else
                 {
-                    IIdentifiable entity = Server.Return((IOperationServer s) => s.ConstructFromMany(lites.ToList(), entityType, oi.Key));
+                    IIdentifiable entity = Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), entityType, coc.OperationInfo.Key));
 
-                    if (oi.Returns && Navigator.IsNavigable(entity.GetType(), isSearchEntity: true))
+                    if (coc.OperationInfo.Returns && Navigator.IsNavigable(entity.GetType(), isSearchEntity: true))
                         Navigator.Navigate(entity);
                 }
             };
