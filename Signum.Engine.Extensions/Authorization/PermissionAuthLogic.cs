@@ -82,6 +82,14 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
+        public static string IsAuthorizedString(this Enum permissionKey)
+        {
+            if (!IsAuthorized(permissionKey))
+                return "Permission '{0}' is denied".Formato(permissionKey);
+
+            return null;
+        }
+
         public static bool IsAuthorized(this Enum permissionKey)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal || cache == null)
