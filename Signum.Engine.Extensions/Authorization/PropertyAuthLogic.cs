@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
 
                 if (queries)
                 {
-                    PropertyRoute.SetIsAllowedCallback(pp => GetPropertyAllowed(pp) > PropertyAllowed.None);
+                    PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
                 }
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => p.Type.CleanName + "|" + p.Path, pa => pa.ToString());
@@ -84,6 +84,25 @@ namespace Signum.Engine.Authorization
                 return PropertyAllowed.None;
 
             return cache.GetAllowed(RoleDN.Current.ToLite(), route);
+        }
+
+        public static string GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
+        {
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+                return null;
+
+            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                return GetAllowedFor(route.Parent, requested);
+
+            if (TypeAuthLogic.GetAllowed(route.RootType).Max().Get(ExecutionMode.InUserInterface) == TypeAllowedBasic.None)
+                return "Type {0} is set to None for {1}".Formato(route.RootType.NiceName(), RoleDN.Current);
+
+            var current = cache.GetAllowed(RoleDN.Current.ToLite(), route);
+
+            if (current < requested)
+                return "Property {0} is set to {1} for {2}".Formato(route, current, RoleDN.Current);
+
+            return null;
         }
 
         public static DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()

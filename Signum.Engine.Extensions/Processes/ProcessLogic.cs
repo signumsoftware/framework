@@ -190,18 +190,18 @@ namespace Signum.Engine.Processes
 
         static bool running = false;
 
-        public static int InitialDelayMiliseconds;
+        static int initialDelayMiliseconds;
 
         public static void StartBackgroundProcess(int delayMilliseconds)
         {
-            InitialDelayMiliseconds = delayMilliseconds;
+            initialDelayMiliseconds = delayMilliseconds;
 
-            if (InitialDelayMiliseconds == 0)
+            if (initialDelayMiliseconds == 0)
                 StartBackgroundProcess();
 
             Task.Factory.StartNew(() =>
             {
-                Thread.Sleep(InitialDelayMiliseconds);
+                Thread.Sleep(initialDelayMiliseconds);
                 StartBackgroundProcess();
             });
         }
@@ -462,7 +462,7 @@ namespace Signum.Engine.Processes
             return new ProcessLogicState
             {
                 Running = running,
-                InitialDelayMiliseconds = InitialDelayMiliseconds,
+                InitialDelayMiliseconds = initialDelayMiliseconds,
                 MaxDegreeOfParallelism = MaxDegreeOfParallelism,
                 NextPlannedExecution = nextPlannedExecution,
                 Executing = executing.Values.Select(p => new ExecutionState
