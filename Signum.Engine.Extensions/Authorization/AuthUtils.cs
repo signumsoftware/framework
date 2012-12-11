@@ -25,14 +25,26 @@ namespace Signum.Engine.Authorization
 
         public static readonly DefaultBehaviour<TypeAllowedAndConditions> MaxType = new DefaultBehaviour<TypeAllowedAndConditions>(
             new TypeAllowedAndConditions(TypeAllowed.Create),
-            baseRules => new TypeAllowedAndConditions(baseRules.Select(a=>a.Fallback).MaxTypeAllowed(),
-                baseRules.Only().TryCC(a => a.Conditions) ?? None));
+            baseRules => Merge(baseRules, MaxTypeAllowed));
 
         public static readonly DefaultBehaviour<TypeAllowedAndConditions> MinType = new DefaultBehaviour<TypeAllowedAndConditions>(
               new TypeAllowedAndConditions(TypeAllowed.None),
-            baseRules => new TypeAllowedAndConditions(baseRules.Select(a=>a.Fallback).MinTypeAllowed(),
-                baseRules.Only().TryCC(a => a.Conditions) ?? None));
-            
+           baseRules => Merge(baseRules, MinTypeAllowed));
+
+        static TypeAllowedAndConditions Merge(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> merge)
+        {
+            var only = baseRules.Only();
+            if (only != null)
+                return only;
+
+            var conditions = baseRules.First().Conditions.Select(c => c.ConditionName).ToList();
+
+            if (baseRules.Skip(1).Any(br => !br.Conditions.Select(c => c.ConditionName).SequenceEqual(conditions)))
+                return new TypeAllowedAndConditions(TypeAllowed.None);
+
+            return new TypeAllowedAndConditions(merge(baseRules.Select(a => a.Fallback)),
+                conditions.Select((c, i) => new TypeConditionRule(c, merge(baseRules.Select(br => br.Conditions[i].Allowed)))).ToArray());
+        }   
 
         static TypeAllowed MaxTypeAllowed(this IEnumerable<TypeAllowed> collection)
         {
