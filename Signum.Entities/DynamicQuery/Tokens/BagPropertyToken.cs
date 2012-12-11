@@ -77,7 +77,7 @@ namespace Signum.Entities.DynamicQuery
             get { return PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName); }
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         { 
             return Parent.IsAllowed();
         }

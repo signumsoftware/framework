@@ -37,7 +37,7 @@ namespace Signum.Entities.DynamicQuery
 
         public abstract PropertyRoute GetPropertyRoute();
         public abstract Implementations? GetImplementations();
-        public abstract bool IsAllowed();
+        public abstract string IsAllowed();
 
         public abstract QueryToken Clone();
 
@@ -62,7 +62,7 @@ namespace Signum.Entities.DynamicQuery
             if (result.IsEmpty())
                 return new List<QueryToken>();
 
-            result.RemoveAll(t => !t.IsAllowed());
+            result.RemoveAll(t => t.IsAllowed() != null);
 
             result.Sort((a, b) =>
             {

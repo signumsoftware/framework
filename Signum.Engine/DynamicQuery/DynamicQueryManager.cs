@@ -236,7 +236,7 @@ namespace Signum.Engine.DynamicQuery
             public string Format;
             public string Unit;
             public Implementations? Implementations;
-            public Func<bool> IsAllowed;
+            public Func<string> IsAllowed;
             public PropertyRoute PropertyRoute;
         }
 
@@ -292,7 +292,7 @@ namespace Signum.Engine.DynamicQuery
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }
 
-                result.IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
+                result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
 
                 return result;
             });

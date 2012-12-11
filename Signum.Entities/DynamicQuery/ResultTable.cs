@@ -48,7 +48,7 @@ namespace Signum.Entities.DynamicQuery
                 this.EntityColumn = ((ColumnToken)entityColumn.Column.Token).Column;
                 entityValues = entityColumn.Values;
             }
-            this.Columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed()).ToArray();
+            this.Columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed() == null).ToArray();
 
             for (int i = 0; i < Columns.Length; i++)
                 Columns[i].Index = i;
