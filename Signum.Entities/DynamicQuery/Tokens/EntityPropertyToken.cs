@@ -100,11 +100,18 @@ namespace Signum.Entities.DynamicQuery
             get { return PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName); }
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
-            PropertyRoute route = GetPropertyRoute();
+            PropertyRoute pr = GetPropertyRoute();
 
-            return Parent.IsAllowed() && (route == null || route.IsAllowed());
+            string parent = Parent.IsAllowed();
+
+            string route = pr == null ? null : pr.IsAllowed();
+
+            if (parent.HasText() && route.HasText())
+                return Resources.And.Combine(parent, route);
+
+            return parent ?? route;
         }
 
         public override PropertyRoute GetPropertyRoute()
