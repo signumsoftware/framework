@@ -34,7 +34,7 @@ using Signum.Engine.Operations;
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer,
-        IChartServer, IExcelReportServer, IUserQueryServer,  IQueryAuthServer, IPropertyAuthServer, 
+        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer,
         ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
@@ -117,9 +117,7 @@ namespace Signum.Services
 
         #endregion
 
-        
-
-#region IProcessServer
+        #region IProcessServer
         public ProcessExecutionDN CreatePackageOperation(List<Lite> lites, Enum operationKey)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
@@ -179,7 +177,7 @@ namespace Signum.Services
         public bool IsAllowedForInUserInterface(Lite lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface : true ));
+                () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface: true));
         }
 
         public byte[] DownloadAuthRules()
@@ -357,8 +355,8 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType()));
-        }    
-    
+        }
+
         public List<Lite> GetAssociatedTypesForTemplates()
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -371,7 +369,7 @@ namespace Signum.Services
         public void PushProfilerEntries(List<HeavyProfilerEntry> entries)
         {
             Execute(MethodInfo.GetCurrentMethod(), () =>
-                ProfilerLogic.ProfilerEntries(entries)); 
+                ProfilerLogic.ProfilerEntries(entries));
         }
         #endregion
     }

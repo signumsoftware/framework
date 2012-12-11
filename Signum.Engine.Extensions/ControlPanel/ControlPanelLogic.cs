@@ -49,7 +49,7 @@ namespace Signum.Engine.ControlPanel
                                                    Entity = cp,
                                                    ToStr = cp.ToString(),
                                                    Links = cp.UserQueries.Count
-                                               }).ToDynamic();
+                                               }).ToDynamic(); 
 
                 RegisterOperations();
             }
@@ -57,14 +57,14 @@ namespace Signum.Engine.ControlPanel
 
         private static void RegisterOperations()
         {
-            new BasicExecute<ControlPanelDN>(ControlPanelOperations.Save)
+            new BasicExecute<ControlPanelDN>(ControlPanelOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (cp, _) => { }
             }.Register();
 
-            new BasicDelete<ControlPanelDN>(ControlPanelOperations.Delete)
+            new BasicDelete<ControlPanelDN>(ControlPanelOperation.Delete)
             {
                 Lite = false,
                 Delete = (cp, _) =>
@@ -72,12 +72,14 @@ namespace Signum.Engine.ControlPanel
                     var parts = cp.Parts.Select(a => a.Content).ToList();
                     cp.Delete();
                     Database.DeleteList(parts);
+
                 }
             }.Register();
 
-            new BasicConstructFrom<ControlPanelDN, ControlPanelDN>(ControlPanelOperations.Clone)
+            new BasicConstructFrom<ControlPanelDN, ControlPanelDN>(ControlPanelOperation.Clone)
             {
-                Lite = false,
+                Lite = true,
+                AllowsNew = false,
                 Construct = (cp, _) => cp.Clone()
             }.Register();
         }

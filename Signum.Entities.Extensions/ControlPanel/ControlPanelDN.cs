@@ -112,7 +112,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    public enum ControlPanelOperations
+    public enum ControlPanelOperation
     {
         Save,
         Clone,

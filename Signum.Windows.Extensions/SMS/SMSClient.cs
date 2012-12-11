@@ -30,14 +30,14 @@ namespace Signum.Windows.SMS
                     new EntitySettings<SMSUpdatePackageDN>(EntityType.Main) { View = e => new SMSUpdatePackage()},
                 });
 
-                OperationClient.AddSetting(new EntityOperationSettings<IdentifiableEntity>(SMSMessageOperations.CreateSMSMessageFromTemplate)
+                OperationClient.AddSetting(new EntityOperationSettings(SMSMessageOperations.CreateSMSMessageFromTemplate)
                 {
                     Click = FindAssociatedTemplates
                 });
             }
         }
 
-        public static IdentifiableEntity FindAssociatedTemplates(EntityOperationEventArgs<IdentifiableEntity> e)
+        public static IdentifiableEntity FindAssociatedTemplates(EntityOperationContext e)
         {
             var template = Navigator.Find(new FindOptions(typeof(SMSTemplateDN))
             {

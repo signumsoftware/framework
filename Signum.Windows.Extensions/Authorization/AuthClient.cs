@@ -47,12 +47,12 @@ namespace Signum.Windows.Authorization
                 Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Shared) { View = e => new Role() });
                 Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Part) { View = e => new PasswordExpiresInterval() });
 
-                OperationClient.AddSetting(new EntityOperationSettings<UserDN>(UserOperation.SaveNew)
+                OperationClient.AddSetting(new EntityOperationSettings(UserOperation.SaveNew)
                 {
                     IsVisible = e=>e.Entity.IsNew,
                 });
 
-                OperationClient.AddSetting(new EntityOperationSettings<UserDN>(UserOperation.Save)
+                OperationClient.AddSetting(new EntityOperationSettings(UserOperation.Save)
                 {
                     IsVisible = e => !e.Entity.IsNew,
                 }); 
