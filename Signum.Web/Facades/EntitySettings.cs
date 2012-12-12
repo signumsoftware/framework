@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Engine.Operations;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Web.Operations;
 
 namespace Signum.Web
 {
@@ -30,6 +31,13 @@ namespace Signum.Web
         internal abstract bool OnIsReadonly();
 
         public abstract string OnPartialViewName(ModifiableEntity entity);
+
+        protected static List<string> SaveProtectedErrors = new List<string>();
+
+        protected static void Manager_Initializing()
+        {
+            throw new InvalidOperationException("EntitySettings inconsitencies: \r\n" + SaveProtectedErrors.ToString("\r\n"));
+        }
     }
 
     public class EntitySettings<T> : EntitySettings where T : IdentifiableEntity
@@ -68,6 +76,7 @@ namespace Signum.Web
             switch (entityType)
             {
                 case EntityType.SystemString:
+                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.Never;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
@@ -75,6 +84,7 @@ namespace Signum.Web
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
                 case EntityType.System:
+                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.Never;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -83,7 +93,7 @@ namespace Signum.Web
                     break;
 
                 case EntityType.String:
-                    AssertSaveProtected(entityType);
+                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
@@ -91,14 +101,14 @@ namespace Signum.Web
                     MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
                 case EntityType.Shared:
-                    AssertSaveProtected(entityType);
+                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
                 case EntityType.Main:
-                    AssertSaveProtected(entityType);
+                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -106,6 +116,7 @@ namespace Signum.Web
                     break;
 
                 case EntityType.Part:
+                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -113,6 +124,7 @@ namespace Signum.Web
                     break;
 
                 case EntityType.SharedPart:
+                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -124,12 +136,17 @@ namespace Signum.Web
             }
         }
 
-        private void AssertSaveProtected(EntityType entityType)
+        void AssertSaveProtected(EntityType entityType, bool saveProtected)
         {
-            if (!OperationLogic.IsSaveProtected(typeof(T)))
-                throw new InvalidOperationException("{0} can not be {1} because is not save protected (does not have a save operation)".Formato(typeof(T).TypeName(), entityType));
-        }
+            var current = OperationLogic.IsSaveProtected(typeof(T));
 
+            if (current != saveProtected)
+            {
+                SaveProtectedErrors.Add("{0} is {1} but is {2}save protected".Formato(typeof(T).Name, entityType, current ? "" : "NOT "));
+                Navigator.Manager.Initializing -= new Action(Manager_Initializing);
+                Navigator.Manager.Initializing += new Action(Manager_Initializing);
+            }
+        }
 
         internal override bool OnIsCreable(bool isSearchEntity)
         {

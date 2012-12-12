@@ -34,6 +34,13 @@ namespace Signum.Windows
         internal abstract bool OnIsReadonly();
 
         internal abstract bool HasView();
+
+        protected static List<string> SaveProtectedErrors = new List<string>();
+
+        protected static void Manager_Initializing()
+        {
+            throw new InvalidOperationException("EntitySettings inconsitencies: \r\n" + SaveProtectedErrors.ToString("\r\n"));
+        }
     }
 
     public class EntitySettings<T> : EntitySettings where T:IdentifiableEntity
@@ -55,12 +62,14 @@ namespace Signum.Windows
             switch (entityType)
             {
                 case EntityType.SystemString:
+                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.Never;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
                     IsReadOnly = true;
                     break;
                 case EntityType.System:
+                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.Never;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -68,30 +77,32 @@ namespace Signum.Windows
                     break;
 
                 case EntityType.String:
-                    AssertSaveProtected(entityType);
+                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
                     break;
                 case EntityType.Shared:
-                    AssertSaveProtected(entityType);
+                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
                 case EntityType.Main:
-                    AssertSaveProtected(entityType);
+                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
 
                 case EntityType.Part:
+                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
                 case EntityType.SharedPart:
+                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -102,10 +113,16 @@ namespace Signum.Windows
             }
         }
 
-        private void AssertSaveProtected(EntityType entityType)
+        private void AssertSaveProtected(EntityType entityType, bool saveProtected)
         {
-            if (!OperationClient.SaveProtected(typeof(T)))
-                throw new InvalidOperationException("{0} can not be {1} because is not save protected (does not have a save operation)".Formato(typeof(T).TypeName(), entityType));
+            var current = OperationClient.SaveProtected(typeof(T));  
+
+            if(current != saveProtected)
+            {
+                SaveProtectedErrors.Add("{0} is {1} but is {2}save protected".Formato(typeof(T).Name, entityType, current ? "": "NOT "));
+                Navigator.Manager.Initializing -=new Action(Manager_Initializing);
+                Navigator.Manager.Initializing +=new Action(Manager_Initializing);
+            }
         }
 
         public override Control CreateView(ModifiableEntity entity, PropertyRoute typeContext)
