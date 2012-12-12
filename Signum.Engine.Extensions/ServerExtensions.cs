@@ -34,7 +34,7 @@ using Signum.Engine.Operations;
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer,
-        IChartServer, IExcelReportServer, IUserQueryServer,  IQueryAuthServer, IPropertyAuthServer, 
+        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer,
         ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
@@ -117,8 +117,6 @@ namespace Signum.Services
 
         #endregion
 
-        
-
         #region IProcessServer
         public ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
         {
@@ -179,7 +177,7 @@ namespace Signum.Services
         public bool IsAllowedForInUserInterface(Lite<IIdentifiable> lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface : true ));
+                () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface: true));
         }
 
         public byte[] DownloadAuthRules()
@@ -371,7 +369,7 @@ namespace Signum.Services
         public void PushProfilerEntries(List<HeavyProfilerEntry> entries)
         {
             Execute(MethodInfo.GetCurrentMethod(), () =>
-                ProfilerLogic.ProfilerEntries(entries)); 
+                ProfilerLogic.ProfilerEntries(entries));
         }
         #endregion
     }

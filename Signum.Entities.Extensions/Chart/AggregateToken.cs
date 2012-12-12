@@ -117,10 +117,10 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             if (AggregateFunction == Chart.AggregateFunction.Count)
-                return true;
+                return null;
 
             return Parent.IsAllowed();
         }
