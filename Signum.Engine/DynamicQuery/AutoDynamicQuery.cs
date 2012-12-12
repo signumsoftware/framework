@@ -32,7 +32,7 @@ namespace Signum.Engine.DynamicQuery
             var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, metas[e.MemberInfo.Name])).ToArray();
 
-            result.Where(a => a.IsEntity).SingleEx(() => "Entity column not found");
+            result.Where(a => a.IsEntity).SingleEx(() => "Entity column not foundon {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
             
             return result;
         }

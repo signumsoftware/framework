@@ -252,7 +252,7 @@ namespace Signum.Web.Controllers
                 Lites = lites,
                 QueryName = queryName,
                 Implementations = implementations,
-                Prefix = prefix
+                Prefix = prefix,
             }).ToString("");
 
             if (string.IsNullOrEmpty(result))

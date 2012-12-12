@@ -15,7 +15,8 @@ namespace Signum.Web
         public ControllerContext ControllerContext { get; internal set; }
         public string PartialViewName { get; internal set; }
         public string Prefix{ get; internal set; }
-        public ViewButtons Buttons { get; internal set; }
+        public ViewButtons ViewButtons { get; set; }
+        public bool SaveProtected { get; set; }
     }
     
     public static class ButtonBarEntityHelper

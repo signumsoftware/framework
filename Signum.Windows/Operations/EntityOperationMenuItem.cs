@@ -15,49 +15,47 @@ using Signum.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using Signum.Entities.Basics;
+using System.Windows.Automation;
 
 namespace Signum.Windows.Operations
 {
     public static class EntityOperationMenuItemConsturctor
     {
-        public static MenuItem Construct(SearchControl sc, OperationInfo oi, string canExecute,   EntityOperationSettingsBase settings)
+        public static MenuItem Construct(ContextualOperationContext coc)
         {
             MenuItem miResult = new MenuItem()
             {
-                Header = settings.TryCC(s => s.Contextual.TryCC(f => f.Text) ?? s.Text) ?? oi.Key.NiceToString(),
-                Icon = settings.TryCC(s => s.Contextual.TryCC(f => f.Icon) ?? s.Icon),
-                ToolTip = canExecute,
-                IsEnabled = string.IsNullOrEmpty(canExecute),
-            }.Set(ToolTipService.ShowOnDisabledProperty, true);
+                Header = coc.OperationSettings.TryCC(f => f.Text) ?? coc.OperationInfo.Key.NiceToString(),
+                Icon = coc.OperationSettings.TryCC(f => f.Icon),
+            };
+
+            if (coc.CanExecute != null)
+            {
+                miResult.ToolTip = coc.CanExecute;
+                miResult.IsEnabled = false;
+                ToolTipService.SetShowOnDisabled(miResult, true);
+                AutomationProperties.SetHelpText(miResult, coc.CanExecute);
+            }
 
             miResult.Click += (object sender, RoutedEventArgs e) =>
             {
-                Type entityType = sc.EntityType;
-                object queryName = sc.QueryName;
-
-            
-                if (settings != null && settings.Contextual != null && settings.Contextual.Click != null)
-                    settings.Contextual.Click(new ContextualOperationEventArgs
-                    {
-                        Entities = sc.SelectedItems,
-                        SearchControl = sc,
-                        OperationInfo = oi,
-                    });
+                if (coc.OperationSettings != null && coc.OperationSettings.Click != null)
+                    coc.OperationSettings.Click(coc);
                 else
                 {
-                    var lite = sc.SelectedItems.Single();
+                    var lite = coc.SearchControl.SelectedItems.Single();
 
-                    switch (oi.OperationType)
+                    switch (coc.OperationInfo.OperationType)
                     {
-                        case OperationType.Execute: 
-                            Server.Return((IOperationServer os) => os.ExecuteOperationLite(lite, oi.Key)); 
+                        case OperationType.Execute:
+                            Server.Return((IOperationServer os) => os.ExecuteOperationLite(lite, coc.OperationInfo.Key)); 
                             break;
                         case OperationType.Delete: 
-                            Server.Return((IOperationServer os) => os.Delete(lite, oi.Key));
+                            Server.Return((IOperationServer os) => os.Delete(lite, coc.OperationInfo.Key));
                             break;
                         case OperationType.ConstructorFrom:
                             {
-                                var result = Server.Return((IOperationServer os) => os.ConstructFromLite(lite, oi.Key));
+                                var result = Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.Key));
                                 if (Navigator.IsNavigable(result, true))
                                     Navigator.Navigate(result);
                                 break;

@@ -1,5 +1,6 @@
 ﻿@using System.Configuration
 @using Signum.Web.Properties
+@using Signum.Engine.Operations
 @model TypeContext
 @{
     ModifiableEntity modifiable = Model.UntypedValue as ModifiableEntity;
@@ -23,7 +24,8 @@
 <div class="sf-button-bar">
     @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     { 
-        Buttons = ViewButtons.Save,
+        ViewButtons = ViewButtons.Save,
+        SaveProtected = OperationLogic.IsSaveProtected(modifiable.GetType()),
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
         Prefix =  Model.ControlID

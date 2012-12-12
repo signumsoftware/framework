@@ -54,7 +54,7 @@ namespace Signum.Engine.DynamicQuery
 
         private void AssertColumns(ColumnDescriptionFactory[] columns)
         {
-            columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found");
+            columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not foundon {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
 
             var errors =  columns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a=>a.Name, ", ");
 
@@ -101,7 +101,13 @@ namespace Signum.Engine.DynamicQuery
 
         public List<ColumnDescription> GetColumnDescriptions()
         {
-            return StaticColumns.Value.Where(f => f.IsAllowed()).Select(f => f.BuildColumnDescription()).ToList();
+            var entity = StaticColumns.Value.Single(f => f.IsEntity);
+            string allowed = entity.IsAllowed();
+            if (allowed != null)
+                throw new InvalidOperationException(
+                    "Not authorized to see Entity column of {0} because {1}".Formato(QueryUtils.GetQueryUniqueKey(QueryName), allowed));
+
+            return StaticColumns.Value.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
         }
 
         public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)

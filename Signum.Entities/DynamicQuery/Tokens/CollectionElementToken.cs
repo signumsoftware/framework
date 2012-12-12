@@ -90,7 +90,7 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             return Parent.IsAllowed();
         }

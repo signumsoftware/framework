@@ -205,7 +205,7 @@ WriteLiteral("\r\n        ");
             #line 31 "..\..\Signum\Views\PopupControl.cshtml"
    Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         {
-            Buttons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
+            ViewButtons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
             Prefix = Model.ControlID
