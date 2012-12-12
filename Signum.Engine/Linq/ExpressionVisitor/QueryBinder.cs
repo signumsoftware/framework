@@ -1356,7 +1356,7 @@ namespace Signum.Engine.Linq
                 else
                 {
                     return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null);
-                }               
+                }
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
@@ -1371,7 +1371,7 @@ namespace Signum.Engine.Linq
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
 
-                return new ImplementedByExpression(uType, fies.Select(f => new ImplementationColumn(f.Type, f)).ToReadOnly()); 
+                return new ImplementedByExpression(uType, fies.Select(f => new ImplementationColumn(f.Type, f)).ToReadOnly());
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
@@ -1383,11 +1383,12 @@ namespace Signum.Engine.Linq
                 var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id, NullId);
                 return new EntityExpression(uType, conditionalId, null, null);
             }
-            else if(operand.NodeType == (ExpressionType)DbExpressionType.Lite)
+
+            else if (operand.NodeType == (ExpressionType)DbExpressionType.Lite)
             {
                 LiteExpression lite = (LiteExpression)operand;
 
-                Expression entity = EntityCasting(lite.Reference, Lite.Extract(operand.Type));
+                Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType));
 
                 return MakeLite(entity, null);
             }
