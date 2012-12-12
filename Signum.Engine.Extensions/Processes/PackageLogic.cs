@@ -221,7 +221,7 @@ namespace Signum.Engine.Processes
                             if (result.IsNew)
                                 result.Save();
 
-                            line.Result = result.ToLite<IIdentifiable>();
+                            line.Result = result.ToLite();
                         }
                         break;
                     default:
@@ -276,7 +276,7 @@ namespace Signum.Engine.Processes
                 if (result.IsNew)
                     result.Save();
 
-                line.Result = result.ToLite<IIdentifiable>();
+                line.Result = result.ToLite();
             });
         }
     }

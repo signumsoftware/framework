@@ -69,7 +69,7 @@ namespace Signum.Web.ControlPanel
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(
-                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite<IdentifiableEntity>() });
+                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite() });
 
                 ButtonBarEntityHelper.RegisterEntityButtons<ControlPanelDN>((ctx, panel) => 
                 {

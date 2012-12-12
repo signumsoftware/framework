@@ -113,7 +113,7 @@ namespace Signum.Engine.Chart
         static int DeleteColors<T>() where T : IdentifiableEntity
         {
             return (from t in Database.Query<T>() // To filter by type conditions
-                    join cc in Database.Query<ChartColorDN>() on t.ToLite<IdentifiableEntity>() equals cc.Related
+                    join cc in Database.Query<ChartColorDN>() on t.ToLite() equals cc.Related
                     select cc).UnsafeDelete();
         }
 
