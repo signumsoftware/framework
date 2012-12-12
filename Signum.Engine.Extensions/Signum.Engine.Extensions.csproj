@@ -140,7 +140,7 @@
     <Compile Include="Mailing\EmailRenderer.cs" />
     <Compile Include="Mailing\NewsletterLogic.cs" />
     <Compile Include="Mailing\SmtpConfigurationLogic.cs" />
-    <Compile Include="Notes\NotasLogic.cs" />
+    <Compile Include="Notes\NoteLogic.cs" />
     <Compile Include="Processes\PackageLogic.cs" />
     <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Profiler\ProfilerLogic.cs" />

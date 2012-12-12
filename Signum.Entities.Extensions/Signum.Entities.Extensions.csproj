@@ -131,7 +131,7 @@
     <Compile Include="Mailing\Newsletter.cs" />
     <Compile Include="Mailing\SMTPConfiguration.cs" />
     <Compile Include="Chart\UserChartOmniboxResultGenerator.cs" />
-    <Compile Include="Notes\Nota.cs" />
+    <Compile Include="Notes\Note.cs" />
     <Compile Include="Processes\IProcessServer.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />
