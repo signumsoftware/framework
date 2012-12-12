@@ -116,20 +116,9 @@ namespace Signum.Engine.Linq
             {
                 Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
 
-                //if (m.Method.GetParameters().FirstEx().ParameterType == typeof(Lite))
-                //{
-                //    LiteExpression liteRef = (LiteExpression)Visit(m.GetArgument("lite"));
-
-                //    Expression entity = EntityCasting(liteRef.Reference, LiteUtils.Extract(m.Type));
-
-                //    return MakeLite(m.Type, entity, toStr);
-                //}
-                //else
-                //{
                 var entity = Visit(m.GetArgument("entity"));
                 var converted = EntityCasting(entity, Lite.Extract(m.Type));
-                return MakeLite(m.Type, converted, toStr);
-                //}
+                return MakeLite(converted, toStr);
             }
             else if (m.Method.DeclaringType.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
             {
@@ -1172,7 +1161,7 @@ namespace Signum.Engine.Linq
                 Expression entity = CombineWhens(whens.Select(w => new When(w.Condition,
                     ((LiteExpression)w.Value).Reference)).ToList(), Lite.Extract(returnType));
 
-                return MakeLite(returnType, entity, null);
+                return MakeLite(entity, null);
             }
 
             if (whens.Any(e => e.Value is ImplementedByAllExpression))
@@ -1394,7 +1383,15 @@ namespace Signum.Engine.Linq
                 var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id, NullId);
                 return new EntityExpression(uType, conditionalId, null, null);
             }
-            
+            else if(operand.NodeType == (ExpressionType)DbExpressionType.Lite)
+            {
+                LiteExpression lite = (LiteExpression)operand;
+
+                Expression entity = EntityCasting(lite.Reference, Lite.Extract(operand.Type));
+
+                return MakeLite(entity, null);
+            }
+
             return null;
         }
 
@@ -1869,11 +1866,11 @@ namespace Signum.Engine.Linq
 
         internal static SqlConstantExpression NullId = new SqlConstantExpression(null, typeof(int?));
 
-        public Expression MakeLite(Type type, Expression entity, Expression customToStr)
+        public Expression MakeLite(Expression entity, Expression customToStr)
         {
             Expression id = GetId(entity);
             Expression typeId = GetEntityType(entity);
-            return new LiteExpression(type, entity, id, customToStr, typeId, customToStr != null);
+            return new LiteExpression(Lite.Generate(entity.Type), entity, id, customToStr, typeId, customToStr != null);
         }
 
         public Expression GetId(Expression expression)

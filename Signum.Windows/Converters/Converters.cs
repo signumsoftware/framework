@@ -29,7 +29,7 @@ namespace Signum.Windows
             ConverterFactory.New((ResultRow row) => row.Entity.Key());
 
         public static readonly IValueConverter ToLite =
-           ConverterFactory.New((IIdentifiable ei) => ei == null ? null : Lite.Create((IdentifiableEntity)ei));
+           ConverterFactory.New((IIdentifiable ei) => ei == null ? null : ei.ToLite());
 
         public static readonly IValueConverter Retrieve =
                    ConverterFactory.New((Lite<IIdentifiable> lite) => lite == null ? null : Server.Retrieve(lite));

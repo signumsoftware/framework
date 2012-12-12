@@ -176,14 +176,14 @@ namespace Signum.Entities
             if (IdOrNull != null && lite.IdOrNull != null)
                 return Id == lite.Id;
             else
-                return object.ReferenceEquals(this.UntypedEntityOrNull, lite.UntypedEntityOrNull);
+                return object.ReferenceEquals(this.entityOrNull, lite.EntityOrNull);
         }
 
         const int MagicMask = 123456853;
         public override int GetHashCode()
         {
             return this.id == null ?
-                UntypedEntityOrNull.GetHashCode() ^ MagicMask :
+                entityOrNull.GetHashCode() ^ MagicMask :
                 this.RuntimeType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
         }
 
@@ -303,14 +303,14 @@ namespace Signum.Entities
             Lite.ResolveType = resolveType;
         }
 
-        public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr = null)
+        public static Lite<IdentifiableEntity> Create(Type type, int id)
         {
-            return giNewLite.GetInvoker(type)(id, toStr);
+            return giNewLite.GetInvoker(type)(id, null);
         }
 
-        public static Lite<IdentifiableEntity> Create(IdentifiableEntity entity, string toStr = null)
+        public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr)
         {
-            return giNewLiteFat.GetInvoker(entity.GetType())(entity, toStr);
+            return giNewLite.GetInvoker(type)(id, toStr);
         }
 
         public static Lite<T> ToLite<T>(this T entity)
@@ -322,7 +322,7 @@ namespace Signum.Entities
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-            return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, null);
+            return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, entity.ToString());
         }
 
         public static Lite<T> ToLite<T>(this T entity, string toStr)
@@ -334,7 +334,7 @@ namespace Signum.Entities
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-            return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, toStr);
+            return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, toStr ?? entity.ToString());
         }
 
         public static Lite<T> ToLiteFat<T>(this T entity)
@@ -343,10 +343,7 @@ namespace Signum.Entities
             if (entity == null)
                 return null;
 
-            if (entity.IsNew)
-                throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
-
-            return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((IdentifiableEntity)(IIdentifiable)entity, null);
+            return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((IdentifiableEntity)(IIdentifiable)entity, entity.ToString());
         }
 
         public static Lite<T> ToLiteFat<T>(this T entity, string toStr)
@@ -355,10 +352,7 @@ namespace Signum.Entities
             if (entity == null)
                 return null;
 
-            if (entity.IsNew)
-                throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
-
-            return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((IdentifiableEntity)(IIdentifiable)entity, toStr);
+            return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((IdentifiableEntity)(IIdentifiable)entity, toStr ?? entity.ToString());
         }
 
         public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IIdentifiable
@@ -369,7 +363,7 @@ namespace Signum.Entities
                 return entity.ToLite();
         }
 
-        public static Lite<T> ToLite<T>(this T entity, bool fat, string toStr = null) where T : class, IIdentifiable
+        public static Lite<T> ToLite<T>(this T entity, bool fat, string toStr) where T : class, IIdentifiable
         {
             if (fat)
                 return entity.ToLiteFat(toStr);

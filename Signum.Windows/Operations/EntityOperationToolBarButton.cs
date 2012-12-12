@@ -128,7 +128,7 @@ namespace Signum.Windows.Operations
                 {
                     if (eoc.EntityControl.LooseChangesIfAny())
                     {
-                        Lite lite = Lite.Create(ident.GetType(), ident);
+                        Lite<IdentifiableEntity> lite = ident.ToLite();
                         IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.Key, null));
                         if (eoc.OperationInfo.Returns)
                             Navigator.Navigate(newIdent);
@@ -145,7 +145,7 @@ namespace Signum.Windows.Operations
             {
                 if (MessageBox.Show(Window.GetWindow(eoc.EntityControl), "Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    Lite lite = Lite.Create(ident.GetType(), ident);
+                    Lite<IdentifiableEntity> lite = ident.ToLite();
                     Server.Return((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.Key, null));
                 }
             }

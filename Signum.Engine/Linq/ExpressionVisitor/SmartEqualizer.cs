@@ -537,21 +537,13 @@ namespace Signum.Engine.Linq
 
             if (c.Type.IsLite())
             {
-                var lite = (Lite<IIdentifiable>)c.Value;
+                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)c.Value;
 
                 Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 
-                Type liteType = lite.GetType();
-
                 EntityExpression ere = new EntityExpression(lite.RuntimeType, id, null, null);
 
-                Type staticType = Lite.Extract(liteType);
-                Expression reference = staticType == ere.Type ? (Expression)ere :
-                    new ImplementedByExpression(staticType,
-                        new[] { new ImplementationColumn(ere.Type, ere) }.ToReadOnly());
-
-                return new LiteExpression(liteType,
-                    reference, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.RuntimeType), false);
+                return new LiteExpression(Lite.Generate(lite.RuntimeType), ere, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.RuntimeType), false);
             }
 
             return null;

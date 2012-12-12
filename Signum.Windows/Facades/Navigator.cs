@@ -670,7 +670,7 @@ namespace Signum.Windows
             object result = win.DataContext;
             if (liteType != null)
             {
-                return Lite.Create((IdentifiableEntity)result);
+                return ((IdentifiableEntity)result).ToLite();
             }
             return result;
 

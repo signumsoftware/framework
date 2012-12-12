@@ -182,7 +182,7 @@ namespace Signum.Web
                 Type liteType = Lite.Extract(type);
                 if (liteType.IsAssignableFrom(objType))
                 {
-                    return Lite.Create((IdentifiableEntity)obj);
+                    return ((IdentifiableEntity)obj).ToLite();
                 }
             }
 

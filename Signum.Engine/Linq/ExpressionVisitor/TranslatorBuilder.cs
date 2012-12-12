@@ -363,8 +363,13 @@ namespace Signum.Engine.Linq
             {
                 return Expression.Condition(
                     Expression.NotEqual(Visit(NullifyColumn(typeIba.TypeColumn)), NullId),
-                    Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify()),
+                    SchemaGetType(typeIba),
                     NullType);
+            }
+
+            private MethodCallExpression SchemaGetType(TypeImplementedByAllExpression typeIba)
+            {
+                return Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify());
             }
 
             protected override Expression VisitLite(LiteExpression lite)
@@ -377,34 +382,43 @@ namespace Signum.Engine.Linq
                 var toStr = Visit(lite.ToStr);
                 var typeId = lite.TypeId;
 
-                if (typeId.NodeType == ExpressionType.Convert)
-                    typeId = ((UnaryExpression)typeId).Operand;
+                var toStringOrNull = toStr ?? Expression.Constant(null, typeof(string));
 
+                
                 Expression nothing = Expression.Constant(null, lite.Type);
                 Expression liteConstructor = null;
-                if (typeId.NodeType == ExpressionType.Constant)
+                if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeEntity)
                 {
-                    liteConstructor = Expression.Condition(id.NotEqualsNulll(),
-                        Expression.New(LiteConstructor((Type)((ConstantExpression)typeId).Value), id, toStr),
+                    Type type = ((TypeEntityExpression)typeId).TypeValue;
+
+                    liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
+                        Expression.Convert(Expression.New(LiteConstructor(type), id.UnNullify(), toStringOrNull), lite.Type),
                         nothing);
                 }
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
                 {
                     TypeImplementedByExpression tib = (TypeImplementedByExpression)typeId;
                     liteConstructor = tib.TypeImplementations.Aggregate(nothing,
-                        (acum, ti) => Expression.Condition(ti.ExternalId.NotEqualsNulll(),
-                            Expression.New(LiteConstructor(ti.Type), ti.ExternalId, toStr),
-                            acum));
+                        (acum, ti) =>
+                            {
+                                var visitId = Visit(NullifyColumn(ti.ExternalId));
+                                return Expression.Condition(Expression.NotEqual(visitId, NullId),
+                                    Expression.Convert(Expression.New(LiteConstructor(ti.Type), visitId.UnNullify(), toStringOrNull), lite.Type), acum);
+                            });
                 }
-                else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
+                else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
                 {
-                    TypeImplementedByAllExpression tib = (TypeImplementedByAllExpression)typeId;
-                    liteConstructor = Expression.Condition(id.NotEqualsNulll(),
-                                      Expression.Call(miLiteCreate, Visit(tib), id, toStr),
+                    TypeImplementedByAllExpression tiba = (TypeImplementedByAllExpression)typeId;
+                    liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
+                                    Expression.Convert(Expression.Call(miLiteCreate, SchemaGetType(tiba), id.UnNullify(), toStringOrNull), lite.Type),
                                      nothing);
                 }
-                else 
-                    throw new InvalidOperationException("Unexpected lite type " + typeId.NodeType);
+                else
+                {
+                    liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
+                                       Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull), lite.Type),
+                                        nothing);
+                }
 
                 if (toStr != null)
                     return liteConstructor;

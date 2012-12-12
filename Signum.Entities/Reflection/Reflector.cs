@@ -74,9 +74,9 @@ namespace Signum.Entities.Reflection
             return typeof(ModifiableEntity).IsAssignableFrom(type);
         }
 
-        public static bool IsModifiableOrInterface(this Type t)
+        public static bool IsModifiableIdentifiableOrLite(this Type t)
         {
-            return IsModifiable(t) || IsIIdentifiable(t);
+            return t.IsModifiable() || t.IsIIdentifiable() || t.IsLite();
         }
 
         public static bool IsIdentifiableEntity(this Type ft)

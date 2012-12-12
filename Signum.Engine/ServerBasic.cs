@@ -180,7 +180,7 @@ namespace Signum.Services
                 () => OperationLogic.ServiceCanExecute(entity));
         }
 
-        public Dictionary<Enum, string> GetCanExecuteLite(Lite lite)
+        public Dictionary<Enum, string> GetCanExecuteLite(Lite<IdentifiableEntity> lite)
         {
             return Return(MethodInfo.GetCurrentMethod(), lite.RuntimeType.Name,
                 () => OperationLogic.ServiceCanExecute(Database.Retrieve(lite)));

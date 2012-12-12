@@ -15,7 +15,7 @@ namespace Signum.Services
         Dictionary<Enum, string> GetCanExecute(IdentifiableEntity entity);
 
         [OperationContract, NetDataContract]
-        Dictionary<Enum, string> GetCanExecuteLite(Lite lite);
+        Dictionary<Enum, string> GetCanExecuteLite(Lite<IdentifiableEntity> lite);
 
         [OperationContract, NetDataContract]
         List<OperationInfo> GetOperationInfos(Type entityType);

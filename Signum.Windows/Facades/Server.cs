@@ -250,7 +250,7 @@ namespace Signum.Windows
               
                 if(liteType.IsAssignableFrom(objType))
                 {
-                    return Lite.Create((IdentifiableEntity)obj);
+                    return ((IdentifiableEntity)obj).ToLite();
                 }
             }
 

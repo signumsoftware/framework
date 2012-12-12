@@ -637,7 +637,7 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, (Lite<S>)Lite.Create((IdentifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType)));
+                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType)).ToLite());
             }
 
             if (lite == null)
