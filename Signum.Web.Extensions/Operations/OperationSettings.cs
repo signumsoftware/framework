@@ -140,6 +140,11 @@ namespace Signum.Web.Operations
                 RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData),
             };
         }
+
+        public override string ToString()
+        {
+            return OperationInfo.ToString();
+        }
     }
 
     public class ContextualOperationContext : OperationContext
