@@ -175,14 +175,14 @@ Write(Html.ValueLine(e, f => f.Deleted, vl => vl.ReadOnly = true));
             #line hidden
             
             #line 19 "..\..\Reports\Views\ExcelReport.cshtml"
-Write(Html.FileLine(e, f => f.File, fl => fl.FileType = fl.AsyncUpload = false));
+Write(Html.FileLine(e, f => f.File, fl => fl.AsyncUpload = false));
 
             
             #line default
             #line hidden
             
             #line 19 "..\..\Reports\Views\ExcelReport.cshtml"
-                                                                              
+                                                                
 }
             
             #line default

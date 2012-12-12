@@ -113,18 +113,54 @@ namespace Signum.Test.Extensions
                 CacheLogic.CacheTable<LabelDN>(sb);
 
                 AlbumGraph.Register();
-                OperationLogic.Register(new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
+
+                new BasicExecute<AwardDN>(AwardOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (a, _) => { }
+                }.Register();
+
+                new BasicDelete<AlbumDN>(AlbumOperation.Delete)
+                {
+                    Delete = (album, _) => album.Delete()
+                }.Register();
+                
+                new BasicExecute<NoteWithDateDN>(NoteWithDateOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (n, _) => { }
+                }.Register();
+
+                new BasicExecute<ArtistDN>(ArtistOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (a, _) => { }
+                }.Register();
+
+                new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
                 {
                     Lite = true,
                     AllowsNew = false,
                     CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
                     Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
-                });
+                }.Register();
 
-                OperationLogic.Register(new BasicDelete<AlbumDN>(AlbumOperation.Delete)
+                new BasicExecute<BandDN>(BandOperation.Save)
                 {
-                    Delete = (album, _) => album.Delete()
-                });
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (b, _) => { }
+                }.Register();
+
+                new BasicExecute<LabelDN>(LabelOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (l, _) => { }
+                }.Register();
 
                 TypeConditionLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(Signum.Test.Starter.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(Signum.Test.Starter.Japan));
                 TypeConditionLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.InCondition(MusicGroups.JapanEntities));
@@ -200,7 +236,8 @@ namespace Signum.Test.Extensions
                 }
 
                 Schema.Current.InitializeUntil(InitLevel.Level3MainEntities);
-                using (OperationLogic.AllowSave<AlbumDN>())
+                
+                using (AuthLogic.UnsafeUserSession("su"))
                     Signum.Test.Starter.Load();
 
                 TypeConditionUsersRoles(externalUserRole.ToLite());
