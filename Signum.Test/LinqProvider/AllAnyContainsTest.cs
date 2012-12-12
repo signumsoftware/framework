@@ -100,8 +100,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ContainsListLiteIBA()
         {
-            var lites = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => a.ToLite<IIdentifiable>()).ToArray()
-                .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => a.ToLite<IIdentifiable>())).ToArray();
+            var lites = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => a.ToLite<IAuthorDN>()).ToArray()
+                .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => a.ToLite<IAuthorDN>())).ToArray();
 
             var albums = (from a in Database.Query<NoteWithDateDN>()
                           where lites.Contains(a.Target.ToLite())

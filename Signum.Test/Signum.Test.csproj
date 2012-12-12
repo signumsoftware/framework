@@ -68,9 +68,11 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Environment\MusicLoader.cs" />
+    <Compile Include="Environment\MusicLogic.cs" />
     <Compile Include="ExtensionsTest.cs" />
     <Compile Include="LinqProvider\Assert2.cs" />
-    <Compile Include="Entities.cs" />
+    <Compile Include="Environment\Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
     <Compile Include="LinqProvider\InDBTest.cs" />
     <Compile Include="LinqProvider\RetriverTest.cs" />
@@ -102,7 +104,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SaveTest.cs" />
-    <Compile Include="Starter.cs" />
+    <Compile Include="Environment\Starter.cs" />
     <Compile Include="StringDistanceTest.cs" />
   </ItemGroup>
   <ItemGroup>

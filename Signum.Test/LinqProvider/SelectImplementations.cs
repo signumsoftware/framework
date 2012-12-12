@@ -117,7 +117,7 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteUpcast()
         {
             var list = Database.Query<ArtistDN>()
-                .Select(a => a.ToLite<IAuthorDN>()).ToList();
+                .Select(a => a.ToLite()).ToList();
         }
 
         [TestMethod]
