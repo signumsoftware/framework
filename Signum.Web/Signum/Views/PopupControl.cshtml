@@ -30,6 +30,7 @@
 
         @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         {
+            SaveProtected = OperationLogic.IsSaveProtected(modifiable.GetType()),
             ViewButtons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
