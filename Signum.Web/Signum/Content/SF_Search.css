@@ -92,6 +92,12 @@
 {
     color: inherit;
 }
+.sf-search-ctxitem a.sf-disabled
+{
+    color: #aaa;
+    cursor: default;
+    text-decoration: none !important;    
+}
 .sf-search-ctxitem-header
 {
     font-weight: bold;
