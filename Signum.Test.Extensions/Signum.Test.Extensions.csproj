@@ -71,7 +71,6 @@
     <Compile Include="DemoPackageLogic.cs" />
     <Compile Include="EntityGroupsTest.cs" />
     <Compile Include="IServerSample.cs" />
-    <Compile Include="MusicGraph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
