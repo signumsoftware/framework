@@ -264,12 +264,12 @@ namespace Signum.Web.Selenium
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
         }
 
-        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, bool allowMultiple, int[] rowIndexesBase0)
+        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, int[] rowIndexesBase0)
         {
-            LineFindAndSelectElements(selenium, prefix, allowMultiple, rowIndexesBase0, -1);
+            LineFindAndSelectElements(selenium, prefix, rowIndexesBase0, -1);
         }
 
-        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, bool allowMultiple, int[] rowIndexesBase0, int elementIndexBase0)
+        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, int[] rowIndexesBase0, int elementIndexBase0)
         {
             selenium.LineFind(prefix, elementIndexBase0);
 
@@ -284,12 +284,34 @@ namespace Signum.Web.Selenium
             selenium.PopupOk(prefix);
         }
 
-        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, bool allowMultiple, int[] rowIndexesBase0)
+        public static void LineFindAndSelectElementById(this ISelenium selenium, string prefix, int elementId)
         {
-            LineFindWithImplAndSelectElements(selenium, prefix, typeToChoose, allowMultiple, rowIndexesBase0, -1);
+            LineFindAndSelectElementById(selenium, prefix, elementId, -1);
         }
 
-        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, bool allowMultiple, int[] rowIndexesBase0, int elementIndexBase0)
+        public static void LineFindAndSelectElementById(this ISelenium selenium, string prefix, int elementId, int elementIndexBase0)
+        {
+            selenium.LineFind(prefix, elementIndexBase0);
+
+            if (elementIndexBase0 != -1)
+                prefix += elementIndexBase0 + "_";
+
+            selenium.FilterSelectToken(0, "Id", false, prefix);
+            selenium.AddFilter(0, prefix);
+            selenium.Type(prefix + "value_0", elementId.ToString());
+
+            selenium.Search(prefix);
+            SearchTestExtensions.SelectRowCheckbox(selenium, 0, prefix);
+
+            selenium.PopupOk(prefix);
+        }
+
+        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, int[] rowIndexesBase0)
+        {
+            LineFindWithImplAndSelectElements(selenium, prefix, typeToChoose, rowIndexesBase0, -1);
+        }
+
+        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, int[] rowIndexesBase0, int elementIndexBase0)
         {
             selenium.LineFindWithImpl(prefix, typeToChoose, elementIndexBase0);
 
