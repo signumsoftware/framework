@@ -53,4 +53,9 @@ namespace Signum.Entities.Reports
             return ToStringExpression.Evaluate(this);
         }
     }
+
+    public enum ExcelReportOperation
+    { 
+        Save
+    }
 }

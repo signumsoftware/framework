@@ -44,7 +44,7 @@ namespace Signum.Web.Processes
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ProcessExecutionDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
+                    new EntitySettings<ProcessExecutionDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
                     new EntitySettings<ProcessDN>(EntityType.SystemString){ PartialViewName = e => ViewPrefix.Formato("Process")},
                 });
 

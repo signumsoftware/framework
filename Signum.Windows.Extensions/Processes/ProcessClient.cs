@@ -29,7 +29,7 @@ namespace Signum.Windows.Processes
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.AddSetting(new EntitySettings<ProcessDN>(EntityType.SystemString) { View = e => new ProcessUI(), Icon = Image("process.png") });
-                Navigator.AddSetting(new EntitySettings<ProcessExecutionDN>(EntityType.System) { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessExecutionDN>(EntityType.Main) { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
