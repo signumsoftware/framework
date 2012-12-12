@@ -141,7 +141,7 @@ namespace Signum.Engine.Cache
                 cachedEntities[referingType] = dic;
 
                 var lites = dic.Values.Select(a=>a.ToLite()).ToHashSet();
-                lites.AddRange(entities.OfType<Lite>().Where(l=>l.RuntimeType == typeof(T)).Select(l=>l.ToLite<T>()));
+                lites.AddRange(entities.OfType<Lite<T>>().Where(l => l.RuntimeType == typeof(T)));
                 sensibleLites[referingType] = lites;
 
                 var semis = semiControllersFor.TryGetC(typeof(T));

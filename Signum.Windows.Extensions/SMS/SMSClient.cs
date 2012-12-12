@@ -51,7 +51,7 @@ namespace Signum.Windows.SMS
 
             if (template != null)
                 Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate,
-                    template.ToLite<SMSTemplateDN>().Retrieve()));
+                    ((Lite<SMSTemplateDN>)template).Retrieve()));
 
             return null;
         }

@@ -18,6 +18,6 @@ namespace Signum.Entities.SMS
         List<string> GetLiteralsFromDataObjectProvider(TypeDN type);
 
         [OperationContract, NetDataContract]
-        List<Lite> GetAssociatedTypesForTemplates();
+        List<Lite<TypeDN>> GetAssociatedTypesForTemplates();
     }
 }

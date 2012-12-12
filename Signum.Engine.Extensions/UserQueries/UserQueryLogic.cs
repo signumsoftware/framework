@@ -105,7 +105,7 @@ namespace Signum.Engine.UserQueries
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(RoleDN));
 
             TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related));
         }
     }
 }

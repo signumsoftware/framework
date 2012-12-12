@@ -96,7 +96,7 @@ namespace Signum.Web.Chart
             Lite<UserChartDN> currentUserChart = null;
             string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UC"))
-                currentUserChart = new Lite<UserChartDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
+                currentUserChart = Lite.Create<UserChartDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
 
             foreach (var uc in UserChartLogic.GetUserCharts(queryName))
             {

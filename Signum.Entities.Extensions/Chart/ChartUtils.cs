@@ -284,11 +284,11 @@ namespace Signum.Entities.Chart
 
             var type = ct.Token.Type.UnNullify();
 
-            if (typeof(Lite).IsAssignableFrom(type))
+            if (type.IsLite())
             {
                 return r =>
                 {
-                    Lite l = (Lite)r[columnIndex];
+                    Lite<IdentifiableEntity> l = (Lite<IdentifiableEntity>)r[columnIndex];
                     return new
                     {
                         key = l.TryCC(li => li.Key()),

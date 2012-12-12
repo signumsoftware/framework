@@ -72,7 +72,7 @@ else
                     }
                     else
                     {
-                        Lite entityField = row.Entity;
+                        Lite<IdentifiableEntity> entityField = row.Entity;
                 <tr data-entity="@entityField.Key()">
                     @if (entityField != null && navigate)
                     {
