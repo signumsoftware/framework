@@ -87,34 +87,6 @@ namespace Signum.Web.Reports
             return Navigator.NormalPage(this, report);
         }
 
-        [HttpPost]
-        public ActionResult Save()
-        {
-            var context = this.ExtractEntity<ExcelReportDN>().ApplyChanges(ControllerContext, null, true).ValidateGlobal();
-
-            ExcelReportDN report = context.Value;
-
-            if (context.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(context);
-                // It's a submit, I cannot return ModelState
-                return Navigator.NormalPage(this, report);
-            }
-
-            Database.Save(report);
-
-            return Navigator.RedirectToEntity(report);
-        }
-        
-        [HttpPost]
-        public JsonResult Delete(Lite<ExcelReportDN> excelReport)
-        {
-            ExcelReportDN report = excelReport.Retrieve();
-            report.Deleted = true;
-            report.Save();
-            return JsonAction.Redirect(Navigator.NavigateRoute(report));
-        }
-
         public ActionResult DownloadTemplate(Lite<ExcelReportDN> excelReport)
         {
             ExcelReportDN report = excelReport.RetrieveAndForget();

@@ -141,7 +141,7 @@ namespace Signum.Web.Files
                 RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
 
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(prefix));
-                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.ToStrLink), file.FileName));
+                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, file is EmbeddedEntity ? EntityBaseKeys.ToStr : EntityBaseKeys.ToStrLink), file.FileName));
                 sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo), ri.ToString()));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(TypeContextUtilities.Compose(prefix, "DivNew")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "DivOld")));

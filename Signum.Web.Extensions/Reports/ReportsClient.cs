@@ -55,35 +55,18 @@ namespace Signum.Web.Reports
 
                     ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((ctx, entity) =>
                     {
-                        var buttons = new List<ToolBarButton>
-                        {
-                            new ToolBarButton 
-                            { 
-                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportSave"),
-                                Text = Signum.Web.Properties.Resources.Save, 
-                                OnClick = Js.Submit(RouteHelper.New().Action("Save", "Report")).ToJS()
-                            }
-                        };
+                        if (entity.IsNew)
+                            return null;
 
-                        if (!entity.IsNew)
+                        return new List<ToolBarButton>
                         {
-                            buttons.Add(new ToolBarButton
-                            {
-                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportDelete"),
-                                Text = Resources.Delete,
-                                OnClick = Js.Confirm(Resources.AreYouSureOfDeletingReport0.Formato(entity.DisplayName),
-                                                    Js.AjaxCall(RouteHelper.New().Action("Delete", "Report"), "{{excelReport:{0}}}".Formato(entity.Id), null)).ToJS(),
-                            });
-
-                            buttons.Add(new ToolBarButton
+                            new ToolBarButton
                             {
                                 Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportDownload"),
                                 Text = Resources.Download,
                                 OnClick = "window.open('" + RouteHelper.New().Action("DownloadTemplate", "Report", new { excelReport = entity.Id } ) + "');",
-                            });
-                        }
-
-                        return buttons.ToArray();
+                            }
+                        }.ToArray();
                     });
                 }
 

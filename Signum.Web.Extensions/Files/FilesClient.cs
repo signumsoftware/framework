@@ -141,23 +141,25 @@ namespace Signum.Web.Files
                             return null;
                         else
                         {
-                            if (runtimeInfo.IsNew)
+                            HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
+
+                            if (hpf != null && hpf.ContentLength != 0)
                             {
-                                var result = new EmbeddedFileDN();
-
-                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
-
-                                if (hpf.ContentLength != 0)
+                                return new EmbeddedFileDN()
                                 {
-                                    result.FileName = Path.GetFileName(hpf.FileName);
-                                    result.BinaryFile = hpf.InputStream.ReadAllBytes();
-                                }
-
-                                return result;
+                                    FileName = Path.GetFileName(hpf.FileName),
+                                    BinaryFile = hpf.InputStream.ReadAllBytes()
+                                };
+                            }
+                            else
+                            {
+                                var sessionFile = (EmbeddedFileDN)GetSessionFile(ctx);
+                                if (sessionFile != null)
+                                    return sessionFile;
+                                else 
+                                    return baseMapping(ctx);
                             }
                         }
-
-                        return baseMapping(ctx);
                     };
                 }
 

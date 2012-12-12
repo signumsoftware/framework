@@ -40,13 +40,6 @@ namespace Signum.Entities.Reports
             set { Set(ref file, value, () => File); }
         }
 
-        bool deleted;
-        public bool Deleted
-        {
-            get { return deleted; }
-            set { SetToStr(ref deleted, value, () => Deleted); }
-        }
-
         static readonly Expression<Func<ExcelReportDN, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
@@ -56,6 +49,7 @@ namespace Signum.Entities.Reports
 
     public enum ExcelReportOperation
     { 
-        Save
+        Save,
+        Delete
     }
 }
