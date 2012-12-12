@@ -82,4 +82,9 @@ namespace Signum.Entities.Files
             return ToStringExpression.Evaluate(this);
         }
     }
+
+    public enum FileRepositoryOperation
+    { 
+        Save
+    }
 }
