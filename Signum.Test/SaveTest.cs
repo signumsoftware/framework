@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Entities.Reflection;
+using Signum.Engine.Operations;
 
 namespace Signum.Test
 {
@@ -29,6 +30,7 @@ namespace Signum.Test
         public void SaveCycle()
         {
             using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<ArtistDN>())
             {
                 ArtistDN m = new ArtistDN() { Name = "Michael" };
                 ArtistDN f = new ArtistDN() { Name = "Frank" };
@@ -37,7 +39,7 @@ namespace Signum.Test
 
                 Database.SaveParams(m, f);
 
-                var list = Database.Query<ArtistDN>().Where(a=>a == m || a == f).ToList();
+                var list = Database.Query<ArtistDN>().Where(a => a == m || a == f).ToList();
 
                 Assert.IsTrue(list[0].Friends.Contains(list[1].ToLite()));
                 Assert.IsTrue(list[1].Friends.Contains(list[0].ToLite()));
@@ -51,6 +53,7 @@ namespace Signum.Test
         public void SaveSelfCycle()
         {
             using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<ArtistDN>())
             {
                 ArtistDN m = new ArtistDN() { Name = "Michael" };
                 m.Friends.Add(m.ToLiteFat());
@@ -70,6 +73,7 @@ namespace Signum.Test
         public void SaveMany()
         {
             using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<ArtistDN>())
             {
                 var prev =  Database.Query<ArtistDN>().Count();
 
@@ -93,6 +97,8 @@ namespace Signum.Test
         public void SaveManyMList()
         {
             using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<AlbumDN>())
+            using (OperationLogic.AllowSave<ArtistDN>())
             {
                 var prev = Database.MListQuery((AlbumDN a) => a.Songs).Count();
 

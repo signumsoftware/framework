@@ -59,7 +59,7 @@ namespace Signum.Engine.Operations
 
                         if (!result.IsNew)
                         {
-                            log.Target = result.ToLite<IIdentifiable>();
+                            log.Target = result.ToLite();
                             log.End = TimeZoneManager.Now;
                             using (ExecutionMode.Global())
                                 log.Save();

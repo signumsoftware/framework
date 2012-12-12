@@ -84,7 +84,7 @@ namespace Signum.Engine.Operations
 
                         OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
 
-                        log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
+                        log.Target = entity.ToLite(); //in case AllowsNew == true
                         log.End = TimeZoneManager.Now;
                         using (ExecutionMode.Global())
                             log.Save();
@@ -108,7 +108,7 @@ namespace Signum.Engine.Operations
                             Operation = log.Operation,
                             Start = log.Start,
                             End = TimeZoneManager.Now,
-                            Target = entity.ToLite<IIdentifiable>(),
+                            Target = entity.ToLite(),
                             Exception = exLog.ToLite(),
                             User = log.User
                         };
