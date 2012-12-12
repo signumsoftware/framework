@@ -34,7 +34,6 @@ namespace Signum.Web.Operations
                 { 
                     { "operationExecute", url.Action("Execute", "Operation") },
                     { "operationContextual", url.Action("ContextualExecute", "Operation") },
-                    { "operationContextualFromMany", url.Action("ContextualExecute", "Process") },
                     { "operationDelete", url.Action("Delete", "Operation") },
                     { "operationConstructFrom", url.Action("ConstructFrom", "Operation") },
                     { "operationConstructFromMany", url.Action("ConstructFromMany", "Operation") },
@@ -282,9 +281,7 @@ namespace Signum.Web.Operations
         }
 
         #endregion
-
-
-
+        
         public virtual ContextualItem ContextualItemsHelper_GetConstructorFromManyMenuItems(SelectedItemsMenuContext ctx)
         {
             if (ctx.Lites.IsNullOrEmpty())
@@ -409,7 +406,7 @@ namespace Signum.Web.Operations
             return new HtmlTag("a", oci.Id)
                         .Attrs(oci.HtmlProps)
                         .Attr("title", oci.AltText ?? "")
-                        .Class("sf-operation-ctxitem")
+                        .Class("sf-operation-ctxitem" + ((!oci.Enabled || string.IsNullOrEmpty(oci.OnClick)) ? " sf-disabled" : ""))
                         .SetInnerText(oci.Text)
                         .ToHtml();
         }
