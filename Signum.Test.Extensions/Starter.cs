@@ -24,6 +24,8 @@ using Signum.Engine.Cache;
 using Signum.Engine.Files;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
+using Signum.Engine.Alerts;
+using Signum.Engine.Notes;
 
 namespace Signum.Test.Extensions
 {
@@ -74,6 +76,9 @@ namespace Signum.Test.Extensions
                 sb.Schema.Settings.OverrideAttributes((ProcessExecutionDN cp) => cp.ProcessData, new ImplementedByAttribute(typeof(PackageDN), typeof(PackageOperationDN)));
                 sb.Schema.Settings.OverrideAttributes((PackageLineDN cp) => cp.Package, new ImplementedByAttribute(typeof(PackageDN), typeof(PackageOperationDN)));
 
+                sb.Schema.Settings.OverrideAttributes((OperationLogDN ol) => ol.User, new ImplementedByAttribute(typeof(UserDN)));
+                sb.Schema.Settings.OverrideAttributes((ExceptionDN e) => e.User, new ImplementedByAttribute(typeof(UserDN)));
+
                 AuthLogic.Start(sb, dqm, "System", "Anonymous");
                 UserTicketLogic.Start(sb, dqm);
                 OperationLogic.Start(sb, dqm);
@@ -97,6 +102,9 @@ namespace Signum.Test.Extensions
                 UserChartLogic.RegisterUserTypeCondition(sb, MusicGroups.UserEntities);
                 UserChartLogic.RegisterRoleTypeCondition(sb, MusicGroups.RoleEntities);
 
+                AlertLogic.Start(sb, dqm);
+                NoteLogic.Start(sb, dqm);
+
                 FilePathLogic.Start(sb, dqm);
                 ReportsLogic.Start(sb, dqm, true);
 
@@ -109,7 +117,7 @@ namespace Signum.Test.Extensions
                 {
                     Lite = true,
                     AllowsNew = false,
-                    CanExecute = a => a.LastAward != null ? "Artist cannot have already an award" : null,
+                    CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
                     Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
                 });
 
@@ -136,10 +144,17 @@ namespace Signum.Test.Extensions
 
             using (AuthLogic.Disable())
             {
-                var anonymousUserRole = new RoleDN { Name = "Anonymous" }.Save();
-                var superUserRole = new RoleDN { Name = "SuperUser" }.Save();
-                var internalUserRole = new RoleDN { Name = "InternalUser" }.Save();
-                var externalUserRole = new RoleDN { Name = "ExternalUser" }.Save();
+                RoleDN anonymousUserRole = null;
+                RoleDN superUserRole = null;
+                RoleDN internalUserRole = null;
+                RoleDN externalUserRole = null;
+                using (OperationLogic.AllowSave<RoleDN>())
+                {
+                    anonymousUserRole = new RoleDN { Name = "Anonymous" }.Save();
+                    superUserRole = new RoleDN { Name = "SuperUser" }.Save();
+                    internalUserRole = new RoleDN { Name = "InternalUser" }.Save();
+                    externalUserRole = new RoleDN { Name = "ExternalUser" }.Save();
+                }
 
                 using (OperationLogic.AllowSave<UserDN>())
                 {

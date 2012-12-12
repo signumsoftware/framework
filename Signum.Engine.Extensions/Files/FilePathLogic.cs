@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Web;
 using System.Linq.Expressions;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Files
 {
@@ -81,6 +82,12 @@ namespace Signum.Engine.Files
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
+                new BasicExecute<FileRepositoryDN>(FileRepositoryOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (fr, _) => { }
+                }.Register();
             }
         }
 
