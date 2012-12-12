@@ -246,6 +246,16 @@ namespace Signum.Web.Selenium
             return selenium.IsElementPresent("{0}:not(.sf-disabled)".Formato(EntityButtonLocator(idButton)));
         }
 
+        public static bool EntityOperationDisabled(this ISelenium selenium, Enum operationKey)
+        {
+            return selenium.EntityButtonDisabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
+        public static bool EntityButtonDisabled(this ISelenium selenium, string idButton)
+        {
+            return selenium.IsElementPresent("{0}.sf-disabled".Formato(EntityButtonLocator(idButton)));
+        }
+
         public static void EntityOperationClick(this ISelenium selenium, Enum operationKey)
         {
             selenium.EntityButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
