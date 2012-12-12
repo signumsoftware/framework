@@ -10,23 +10,6 @@ using Signum.Utilities;
 
 namespace Signum.Test.Extensions
 {
-    public enum AlbumState
-    {
-        New,
-        Saved
-    }
-
-    public enum AlbumOperation
-    {
-        Save,
-        Modify,
-        CreateFromBand,
-        Delete,
-        Clone,
-        CreateGreatestHitsAlbum,
-        CreateEmptyGreatestHitsAlbum
-    }
-
     public class AlbumGraph : Graph<AlbumDN, AlbumState>
     {
         public static void Register()
@@ -117,10 +100,5 @@ namespace Signum.Test.Extensions
                 }
             }.Register();
         }
-    }
-
-    public enum ArtistOperation
-    { 
-        AssignPersonalAward
     }
 }

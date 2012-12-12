@@ -15,6 +15,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using Signum.Utilities;
 using System.IO;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Reports
 {
@@ -37,6 +38,13 @@ namespace Signum.Engine.Reports
                                                   s.DisplayName,
                                                   s.Deleted,
                                               }).ToDynamic();
+
+                new BasicExecute<ExcelReportDN>(ExcelReportOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (er, _) => { }
+                }.Register();
             }
         }
 

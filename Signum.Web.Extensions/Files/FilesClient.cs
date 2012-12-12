@@ -40,7 +40,7 @@ namespace Signum.Web.Files
                     Navigator.AddSettings(new List<EntitySettings>
                     {
                         new EntitySettings<FileRepositoryDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
-                        new EntitySettings<FilePathDN>(EntityType.Shared),
+                        new EntitySettings<FilePathDN>(EntityType.SharedPart),
                         new EntitySettings<FileTypeDN>(EntityType.SystemString),
                     });
 
