@@ -29,9 +29,9 @@ namespace Signum.Windows.Operations
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<OperationLogDN>(EntityType.System) { View = e => new OperationLog() });
-
                 Manager = operationManager;
+
+                Navigator.AddSetting(new EntitySettings<OperationLogDN>(EntityType.System) { View = e => new OperationLog() });
 
                 NormalWindow.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
 
@@ -300,7 +300,7 @@ namespace Signum.Windows.Operations
         }
 
 
-        static HashSet<Type> SaveProtectedCache = new HashSet<Type>();
+        static HashSet<Type> SaveProtectedCache;
         protected internal virtual bool SaveProtected(Type type)
         {
             if (!type.IsIIdentifiable())
