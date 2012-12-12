@@ -161,13 +161,13 @@ namespace Signum.Web.Selenium
 
         public static void PopupCancel(this ISelenium selenium, string prefix)
         {
-            selenium.Click("jq=span.ui-dialog-title[id$='{0}Temp'] + a".Formato(prefix));
+            selenium.Click("jq=.ui-dialog-titlebar-close:visible");
             Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupCancelDiscardChanges(this ISelenium selenium, string prefix)
         {
-            selenium.Click("jq=span.ui-dialog-title[id$='{0}Temp'] + a".Formato(prefix));
+            selenium.Click("jq=.ui-dialog-titlebar-close:visible");
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
@@ -194,6 +194,11 @@ namespace Signum.Web.Selenium
         public static void MainEntityHasId(this ISelenium selenium)
         {
             Assert.IsTrue(selenium.IsElementPresent("jq=#divNormalControl[data-isnew=false]"));
+        }
+
+        public static bool PopupEntityHasUnsavedChanges(this ISelenium selenium, string prefix)
+        {
+            return selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".Formato(prefix));
         }
 
         public static string RuntimeInfoSelector(string prefix)
