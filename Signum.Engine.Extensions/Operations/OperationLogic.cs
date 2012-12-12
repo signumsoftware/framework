@@ -239,39 +239,41 @@ namespace Signum.Engine.Operations
             operations.GetOrAdd(operation.Type)[operation.Key] = operation;
         }
 
-        static OperationInfo ToOperationInfo(IOperation operation, string canExecute)
-        {
-            return new OperationInfo
-            {
-                Key = operation.Key,
-                Lite = (operation as IEntityOperation).TryCS(eo => eo.Lite),
-                Returns = operation.Returns,
-                OperationType = operation.OperationType,
-                CanExecute = canExecute,
-                ReturnType = operation.ReturnType,
-                HasStates = (operation as IGraphHasFromStatesOperation).TryCS(eo => eo.HasFromStates) ?? false,
-            };
-        }
-
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
         {
-            return (from o in TypeOperations(entityType)
-                    where OperationAllowed(o.Key, true)
-                    select ToOperationInfo(o, null)).ToList();
-        }
-
-        public static List<OperationInfo> ServiceGetEntityOperationInfos(IdentifiableEntity entity)
-        {
-            return (from o in TypeOperations(entity.GetType())
-                    let eo = o as IEntityOperation
-                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key, true)
-                    select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
+            return (from oper in TypeOperations(entityType)
+                    where OperationAllowed(oper.Key, true)
+                    select ToOperationInfo(oper)).ToList();
         }
 
         public static List<OperationInfo> GetAllOperationInfos(Type entityType)
         {
-            return TypeOperations(entityType).Select(o => ToOperationInfo(o, null)).ToList();
+            return TypeOperations(entityType).Select(o => ToOperationInfo(o)).ToList();
         }
+
+        private static OperationInfo ToOperationInfo(IOperation oper)
+        {
+            return new OperationInfo
+            {
+                Key = oper.Key,
+                Lite = (oper as IEntityOperation).TryCS(eo => eo.Lite),
+                Returns = oper.Returns,
+                OperationType = oper.OperationType,
+                ReturnType = oper.ReturnType,
+                HasStates = (oper as IGraphHasFromStatesOperation).TryCS(eo => eo.HasFromStates) ?? false,
+                HasCanExecute = (oper as IEntityOperation).TryCS(eo => eo.HasCanExecute) ?? false,
+                AllowsNew = (oper as IEntityOperation).TryCS(eo => eo.AllowsNew) ?? false,
+            };
+        }
+
+        public static Dictionary<Enum, string> ServiceCanExecute(IdentifiableEntity entity)
+        {
+            return (from o in TypeOperations(entity.GetType())
+                    let eo = o as IEntityOperation
+                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key, true)
+                    select KVP.Create(eo.Key, eo.CanExecute(entity))).ToDictionary();
+        }
+
 
         #region Execute
         public static IdentifiableEntity ServiceExecute(IIdentifiable entity, Enum operationKey, params object[] args)
@@ -520,7 +522,7 @@ namespace Signum.Engine.Operations
             return FindOperation(type, operationKey).OperationType;
         }
 
-        internal static Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys)
+        public static Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys)
         {
             Dictionary<Enum, string> result = null;
             using (ExecutionMode.Global())
@@ -584,6 +586,7 @@ namespace Signum.Engine.Operations
         bool Lite { get; }
         bool AllowsNew { get; }
         string CanExecute(IIdentifiable entity);
+        bool HasCanExecute { get; }
     }
 
 

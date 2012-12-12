@@ -599,8 +599,6 @@
     <Compile Include="Mailing\EmailClient.cs" />
     <Compile Include="Operations\JsOperations.cs" />
     <Compile Include="Operations\JsOperationOptions.cs" />
-    <Compile Include="Operations\OperationButtonFactory.cs" />
-    <Compile Include="Operations\OperationContextItem.cs" />
     <Compile Include="Operations\Controllers\OperationController.cs" />
     <Compile Include="Operations\OperationsClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />

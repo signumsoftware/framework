@@ -13,7 +13,10 @@ namespace Signum.Services
     public interface IOperationServer
     {
         [OperationContract, NetDataContract]
-        List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity lite);
+        Dictionary<Enum, string> GetCanExecute(IdentifiableEntity entity);
+
+        [OperationContract, NetDataContract]
+        Dictionary<Enum, string> GetCanExecuteLite(Lite lite);
 
         [OperationContract, NetDataContract]
         List<OperationInfo> GetOperationInfos(Type entityType);

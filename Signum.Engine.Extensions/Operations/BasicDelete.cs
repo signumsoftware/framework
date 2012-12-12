@@ -32,6 +32,8 @@ namespace Signum.Engine.Operations
 
         public bool AllowsNew { get { return false; } }
 
+        bool IEntityOperation.HasCanExecute { get { return CanDelete != null; } }
+
         public Action<T, object[]> Delete { get; set; }
         public Func<T, string> CanDelete { get; set; }
 

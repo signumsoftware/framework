@@ -30,6 +30,8 @@ namespace Signum.Engine.Operations
         bool IOperation.Returns { get { return true; } }
         Type IOperation.ReturnType { get { return typeof(T); } }
 
+        bool IEntityOperation.HasCanExecute { get { return CanConstruct != null; } }
+
         public bool AllowsNew { get; set; }
 
         public Func<F, object[], T> Construct { get; set; }
@@ -125,5 +127,6 @@ namespace Signum.Engine.Operations
         {
             return "{0} ConstructFrom {1} -> {2}".Formato(key, typeof(F), typeof(T));
         }
+      
     }
 }

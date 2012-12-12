@@ -14,6 +14,9 @@ using Signum.Web.Extensions.Properties;
 using Signum.Entities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Engine.Basics;
+using Signum.Engine;
+using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 #endregion
 
 namespace Signum.Web.Operations
@@ -27,7 +30,7 @@ namespace Signum.Web.Operations
             Manager = operationManager;
 
             Navigator.RegisterArea(typeof(OperationsClient));
-            
+
             var scripts = Navigator.Manager.DefaultScripts();
             scripts.Add("~/Operations/Scripts/SF_Operations.js");
             Navigator.Manager.DefaultScripts += () => scripts;
@@ -49,13 +52,11 @@ namespace Signum.Web.Operations
 
             ButtonBarEntityHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarElement);
 
-            Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);
-            Constructor.ConstructorManager.VisualGeneralConstructor += new Func<ConstructContext, ActionResult>(Manager.ConstructorManager_VisualGeneralConstructor); 
-            
-            ContextualItemsHelper.GetContextualItemsForLites += new GetContextualItemDelegate(CreateConstructFromManyGroup);
+            Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
+            Constructor.ConstructorManager.VisualGeneralConstructor += Manager.ConstructorManager_VisualGeneralConstructor;
 
-            if (contextualMenuInSearchWindow)
-                OperationsContextualItemsHelper.Start();
+            ContextualItemsHelper.GetContextualItemsForLites += Manager.ContextualItemsHelper_GetConstructorFromManyMenuItems;
+            ContextualItemsHelper.GetContextualItemsForLites += Manager.ContextualItemsHelper_GetEntityOperationMenuItem;
         }
 
         public static void AddSetting(OperationSettings setting)
@@ -130,65 +131,7 @@ namespace Signum.Web.Operations
             }
         }
 
-        private static ContextualItem CreateConstructFromManyGroup(SelectedItemsMenuContext ctx)
-        {
-            if (ctx.Lites.IsNullOrEmpty())
-                return null;
 
-            if (ctx.Implementations.IsByAll)
-                return null;
-
-            List<ContextualItem> operations = GetConstructFromManyOperations(ctx);
-            if (operations == null || operations.Count == 0)
-                return null;
-
-            HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-constructors")))
-            {
-                string ctxItemClass = "sf-search-ctxitem";
-
-                content.AddLine(new HtmlTag("li")
-                    .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Extensions.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
-
-                foreach (var operation in operations)
-                {
-                    content.AddLine(new HtmlTag("li")
-                        .Class(ctxItemClass)
-                        .InnerHtml(OperationsContextualItemsHelper.IndividualOperationToString(operation)));
-                }
-            }
-
-            return new ContextualItem
-            {
-                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemConstructors"),
-                Content = content.ToHtml().ToString()
-            };
-        }
-
-        private static List<ContextualItem> GetConstructFromManyOperations(SelectedItemsMenuContext ctx)
-        {
-            var contexts = (from t in ctx.Implementations.Types
-                            from oi in OperationLogic.ServiceGetOperationInfos(t)
-                            where oi.OperationType == OperationType.ConstructorFromMany
-                            let os = (ContextualOperationSettings)OperationsClient.Manager.Settings.TryGetC(oi.Key)
-                            group Tuple.Create(t, oi, os) by oi.Key into g
-                            let context = new ContextualOperationContext
-                            {
-                                OperationInfo = g.First().Item2,
-                                Prefix = ctx.Prefix,
-                                QueryName = ctx.QueryName,
-                                Entities = ctx.Lites,
-                                OperationSettings = g.First().Item3
-                            }
-                            where string.IsNullOrEmpty(context.OperationInfo.CanExecute)
-                                && (context.OperationSettings == null
-                                    || (context.OperationSettings != null && (context.OperationSettings.IsVisible == null || (context.OperationSettings.IsVisible != null && context.OperationSettings.IsVisible(context)))))
-                            select context
-                    );
-
-            return contexts.Select(op => OperationButtonFactory.CreateContextual(op)).ToList();
-        }
 
         internal static Enum GetOperationKeyAssert(string operationFullKey)
         {
@@ -204,36 +147,75 @@ namespace Signum.Web.Operations
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
 
-        internal ToolBarButton[] ButtonBar_GetButtonBarElement(EntityButtonContext ctx, ModifiableEntity entity)
+        public T GetSettings<T>(Enum key)
+            where T : OperationSettings
+        {
+            OperationSettings settings = Settings.TryGetC(key);
+            if (settings != null)
+            {
+                var result = settings as T;
+                
+                if (result == null)
+                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), OperationDN.UniqueKey(key), typeof(T).TypeName()));
+
+                return result;
+            }
+
+            return null;
+        }
+
+        ConcurrentDictionary<Type, List<OperationInfo>> operationInfoCache = new ConcurrentDictionary<Type, List<OperationInfo>>();
+        public IEnumerable<OperationInfo> OperationInfos(Type entityType)
+        {
+            var result = operationInfoCache.GetOrAdd(entityType, OperationLogic.GetAllOperationInfos);
+
+            return result.Where(oi => OperationLogic.OperationAllowed(oi.Key, true));
+        }
+
+        #region Execute ToolBarButton
+        public virtual ToolBarButton[] ButtonBar_GetButtonBarElement(EntityButtonContext ctx, ModifiableEntity entity)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
             if (ident == null)
                 return null;
 
-            var list = OperationLogic.ServiceGetEntityOperationInfos(ident);
+            Type type = ident.GetType();
 
-            var contexts =
-                    from oi in list
-                    let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
-                    let octx = new EntityOperationContext
-                    {
-                         Entity = ident,
-                         OperationSettings = os,
-                         OperationInfo = oi,
-                         PartialViewName = ctx.PartialViewName,
-                         Prefix = ctx.Prefix
-                    }
-                    where (os == null || os.IsVisible == null || os.IsVisible(octx))
-                    select octx;
+            var operations = (from oi in OperationInfos(ident.GetType())
+                              where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
+                              let os = GetSettings<EntityOperationSettings>(oi.Key)
+                              let eoc = new EntityOperationContext
+                              {
+                                  Entity = (IdentifiableEntity)entity,
+                                  OperationInfo = oi,
+                                  ViewButtons = ctx.ViewButtons,
+                                  SaveProtected = ctx.SaveProtected,
+                                  PartialViewName = ctx.PartialViewName,
+                                  Prefix = ctx.Prefix,
+                                  OperationSettings = os,
+                              }
+                              where (os != null && os.IsVisible != null) ? os.IsVisible(eoc) : ctx.SaveProtected
+                              select eoc).ToList();
 
-            List<ToolBarButton> buttons = contexts
-                .Where(oi => oi.OperationInfo.OperationType != OperationType.ConstructorFrom || 
+            if (operations.Any(eoc => eoc.OperationInfo.HasCanExecute == true))
+            {
+                Dictionary<Enum, string> canExecutes = OperationLogic.ServiceCanExecute(ident);
+                foreach (var eoc in operations)
+                {
+                    var ce = canExecutes.TryGetC(eoc.OperationInfo.Key);
+                    if (ce != null && ce.HasText())
+                        eoc.CanExecute = ce;
+                }
+            }
+
+            List<ToolBarButton> buttons = operations
+                .Where(oi => oi.OperationInfo.OperationType != OperationType.ConstructorFrom ||
                             (oi.OperationInfo.OperationType == OperationType.ConstructorFrom && oi.OperationSettings != null && !oi.OperationSettings.GroupInMenu))
-                .Select(octx => OperationButtonFactory.Create(octx))
+                .Select(octx => CreateToolBarButton(octx))
                 .ToList();
 
-            var constructFroms = contexts.Where(oi => oi.OperationInfo.OperationType == OperationType.ConstructorFrom && 
+            var constructFroms = operations.Where(oi => oi.OperationInfo.OperationType == OperationType.ConstructorFrom &&
                             (oi.OperationSettings == null || (oi.OperationSettings != null && oi.OperationSettings.GroupInMenu)));
             if (constructFroms.Any())
             {
@@ -244,19 +226,55 @@ namespace Signum.Web.Operations
                     AltText = createText,
                     Text = createText,
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
-                    Items = constructFroms.Select(octx => OperationButtonFactory.Create(octx)).ToList()
+                    Items = constructFroms.Select(octx => CreateToolBarButton(octx)).ToList()
                 });
             }
 
             return buttons.ToArray();
         }
 
-        internal ModifiableEntity ConstructorManager_GeneralConstructor(Type type)
+        protected internal virtual ToolBarButton CreateToolBarButton(EntityOperationContext ctx)
+        {
+            return new ToolBarButton
+            {
+                Id = MultiEnumDN.UniqueKey(ctx.OperationInfo.Key),
+
+                DivCssClass = " ".CombineIfNotEmpty(
+                    ToolBarButton.DefaultEntityDivCssClass,
+                    EntityOperationSettings.CssClass(ctx.OperationInfo.Key)),
+
+                AltText = ctx.CanExecute,
+                Enabled = ctx.CanExecute == null,
+
+                Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
+                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).ToJS(),
+            };
+        }
+
+
+        protected internal virtual JsInstruction DefaultClick(EntityOperationContext ctx)
+        {
+            switch (ctx.OperationInfo.OperationType)
+            {
+                case OperationType.Execute:
+                    return new JsOperationExecutor(ctx.Options()).validateAndAjax();
+                case OperationType.Delete:
+                    return new JsOperationDelete(ctx.Options()).confirmAndAjax(ctx.Entity);
+                case OperationType.ConstructorFrom:
+                    return new JsOperationConstructorFrom(ctx.Options()).validateAndAjax();
+                default:
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
+            }
+        } 
+        #endregion
+
+        #region Constructor
+        protected internal virtual ModifiableEntity ConstructorManager_GeneralConstructor(Type type)
         {
             if (!type.IsIIdentifiable())
                 return null;
 
-            OperationInfo constructor = OperationLogic.ServiceGetOperationInfos(type).SingleOrDefaultEx(a => a.OperationType == OperationType.Constructor);
+            OperationInfo constructor = OperationInfos(type).SingleOrDefaultEx(a => a.OperationType == OperationType.Constructor);
 
             if (constructor == null)
                 return null;
@@ -264,14 +282,183 @@ namespace Signum.Web.Operations
             return (ModifiableEntity)OperationLogic.ServiceConstruct(type, constructor.Key);
         }
 
-        internal ActionResult ConstructorManager_VisualGeneralConstructor(ConstructContext ctx)
+        protected internal virtual ActionResult ConstructorManager_VisualGeneralConstructor(ConstructContext ctx)
         {
-            var count = OperationLogic.ServiceGetOperationInfos(ctx.Type).Count(a => a.OperationType == OperationType.Constructor);
+            var count = OperationInfos(ctx.Type).Count(a => a.OperationType == OperationType.Constructor);
 
             if (count == 0 || count == 1)
                 return null;
 
             throw new NotImplementedException();  //show chooser
+        }
+
+        #endregion
+
+
+
+        public virtual ContextualItem ContextualItemsHelper_GetConstructorFromManyMenuItems(SelectedItemsMenuContext ctx)
+        {
+            if (ctx.Lites.IsNullOrEmpty())
+                return null;
+
+            var types = ctx.Lites.Select(a => a.RuntimeType).Distinct().ToList();
+
+            List<ContextualItem> operations =
+                (from t in types
+                 from oi in OperationInfos(t)
+                 where oi.OperationType == OperationType.ConstructorFromMany
+                 group new { t, oi } by oi.Key into g
+                 let os = GetSettings<ContextualOperationSettings>(g.Key)
+                 let coc = new ContextualOperationContext
+                 {
+                     Entities = ctx.Lites,
+                     OperationSettings = os,
+                     OperationInfo = g.First().oi,
+                     CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t)))
+                 }
+                 where os == null || os.IsVisible == null || os.IsVisible(coc)
+                 select CreateContextual(coc)).ToList();
+
+            if (operations.IsEmpty())
+                return null;
+
+            HtmlStringBuilder content = new HtmlStringBuilder();
+            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-constructors")))
+            {
+                string ctxItemClass = "sf-search-ctxitem";
+
+                content.AddLine(new HtmlTag("li")
+                    .Class(ctxItemClass + " sf-search-ctxitem-header")
+                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Extensions.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
+
+                foreach (var operation in operations)
+                {
+                    content.AddLine(new HtmlTag("li")
+                        .Class(ctxItemClass)
+                        .InnerHtml(IndividualOperationToString(operation)));
+                }
+            }
+
+            return new ContextualItem
+            {
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemConstructors"),
+                Content = content.ToHtml().ToString()
+            };
+        }
+
+
+        public virtual ContextualItem ContextualItemsHelper_GetEntityOperationMenuItem(SelectedItemsMenuContext ctx)
+        {
+            if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
+                return null;
+
+            List<ContextualOperationContext> context =
+                (from oi in OperationInfos(ctx.Lites.Single().RuntimeType)
+                 where oi.IsEntityOperation
+                 let os = GetSettings<EntityOperationSettings>(oi.Key)
+                 let coc = new ContextualOperationContext
+                 {
+                     Entities = ctx.Lites,
+                     QueryName = ctx.QueryName,
+                     OperationSettings = os == null? null: os.Contextual,
+                     OperationInfo = oi,
+                     Prefix = ctx.Prefix
+                 }
+                 where os == null ? oi.Lite == true :
+                       os.Contextual == null ? (oi.Lite == true && os.OnClick == null) :
+                       (os.Contextual.IsVisible == null || os.Contextual.IsVisible(coc))
+                 select coc).ToList();
+
+            if (context.IsEmpty())
+                return null;
+
+            if (context.Any(eomi => eomi.OperationInfo.HasCanExecute == true))
+            {
+                Dictionary<Enum, string> canExecutes = OperationLogic.ServiceCanExecute(Database.Retrieve(ctx.Lites.Single()));
+                foreach (var coc in context)
+                {
+                    var ce = canExecutes.TryGetC(coc.OperationInfo.Key);
+                    if (ce != null)
+                        coc.CanExecute = ce;
+                }
+            }
+
+            List<ContextualItem> buttons = context.Select(coc => CreateContextual(coc)).ToList();
+
+            HtmlStringBuilder content = new HtmlStringBuilder();
+            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
+            {
+                string ctxItemClass = "sf-search-ctxitem";
+
+                content.AddLine(new HtmlTag("li")
+                    .Class(ctxItemClass + " sf-search-ctxitem-header")
+                    .InnerHtml(
+                        new HtmlTag("span").InnerHtml(Resources.Search_CtxMenuItem_Operations.EncodeHtml()))
+                    );
+
+                foreach (var operation in buttons)
+                {
+                    content.AddLine(new HtmlTag("li")
+                        .Class(ctxItemClass)
+                        .InnerHtml(IndividualOperationToString(operation)));
+                }
+            }
+
+            return new ContextualItem
+            {
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemOperations"),
+                Content = content.ToHtml().ToString()
+            };
+        }
+
+
+        public virtual MvcHtmlString IndividualOperationToString(ContextualItem oci)
+        {
+            if (oci.Enabled)
+                oci.HtmlProps.Add("onclick", oci.OnClick);
+
+            return new HtmlTag("a", oci.Id)
+                        .Attrs(oci.HtmlProps)
+                        .Attr("title", oci.AltText ?? "")
+                        .Class("sf-operation-ctxitem")
+                        .SetInnerText(oci.Text)
+                        .ToHtml();
+        }
+
+        public virtual ContextualItem CreateContextual(ContextualOperationContext ctx)
+        {
+            return new ContextualItem
+            {
+                Id = MultiEnumDN.UniqueKey(ctx.OperationInfo.Key),
+
+                DivCssClass = " ".CombineIfNotEmpty(
+                    ToolBarButton.DefaultEntityDivCssClass,
+                    EntityOperationSettings.CssClass(ctx.OperationInfo.Key)),
+
+                AltText = ctx.CanExecute,
+                Enabled = ctx.CanExecute == null,
+
+                Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
+                OnClick = (ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx).ToJS() :
+                        DefaultClick(ctx).ToJS()
+            };
+        }
+
+        protected virtual JsInstruction DefaultClick(ContextualOperationContext ctx)
+        {
+            switch (ctx.OperationInfo.OperationType)
+            {
+                case OperationType.Execute:
+                    return new JsOperationExecutor(ctx.Options()).ContextualExecute();
+                case OperationType.Delete:
+                    return new JsOperationDelete(ctx.Options()).ContextualDelete(ctx.Entities);
+                case OperationType.ConstructorFrom:
+                    return new JsOperationConstructorFrom(ctx.Options()).ContextualConstruct();
+                case OperationType.ConstructorFromMany:
+                    return new JsOperationConstructorFromMany(ctx.Options()).ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.DefaultDispatcher);
+                default:
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
+            }
         }
     }
 }
