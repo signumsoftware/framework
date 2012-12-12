@@ -43,7 +43,6 @@ namespace Signum.Web.Operations
                 { 
                     { "operationExecute", url.Action("Execute", "Operation") },
                     { "operationContextual", url.Action("ContextualExecute", "Operation") },
-                    { "operationContextualFromMany", url.Action("ContextualExecute", "Process") },
                     { "operationDelete", url.Action("Delete", "Operation") },
                     { "operationConstructFrom", url.Action("ConstructFrom", "Operation") },
                     { "operationConstructFromMany", url.Action("ConstructFromMany", "Operation") },

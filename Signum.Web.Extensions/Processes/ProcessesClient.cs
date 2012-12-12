@@ -35,6 +35,14 @@ namespace Signum.Web.Processes
             {
                 Navigator.RegisterArea(typeof(ProcessesClient));
 
+                Navigator.Manager.DefaultSFUrls.Add(url =>
+                {
+                    return new Dictionary<string, string> 
+                    { 
+                       { "operationContextualFromMany", url.Action("ContextualExecute", "Process") }
+                    };
+                });
+
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<ProcessExecutionDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
@@ -83,8 +91,7 @@ namespace Signum.Web.Processes
                                 QueryName = ctx.QueryName,
                                 Entities = ctx.Lites,
                                 OperationSettings = os.TryCC(s => s.ContextualFromMany),
-                                CanExecute = "{0} is not defined for {1}".Formato(g.Key.NiceToString(),
-                                        types.Where(t => !g.Any(a => a.t == t)).CommaAnd(a => a.NiceName())),
+                                CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
                             }
                             where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFromMany :
                             os.ContextualFromMany == null ? (oi.Lite == true && os.OnClick == null && oi.OperationType != OperationType.ConstructorFrom) :
