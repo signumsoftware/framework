@@ -78,7 +78,7 @@ namespace Signum.Web.Selenium
                 id.HasValue ? id.ToString() : "");
         }
 
-        protected virtual string ViewRoute(Lite lite)
+        protected virtual string ViewRoute(Lite<IIdentifiable> lite)
         {
             return ViewRoute(lite.RuntimeType, lite.IdOrNull);
         }
