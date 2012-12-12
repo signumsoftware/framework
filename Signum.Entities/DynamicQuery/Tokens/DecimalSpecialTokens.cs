@@ -77,7 +77,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             return Parent.IsAllowed();
         }
@@ -154,7 +154,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             return Parent.IsAllowed();
         }

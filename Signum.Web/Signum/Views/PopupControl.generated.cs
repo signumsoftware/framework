@@ -257,6 +257,7 @@ WriteLiteral("        ");
             #line 37 "..\..\Signum\Views\PopupControl.cshtml"
    Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         {
+            SaveProtected = !Navigator.Manager.CanSave(modifiable.GetType()),
             ViewButtons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
@@ -270,7 +271,7 @@ WriteLiteral("\r\n    </div>\r\n    ");
 
 
             
-            #line 45 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 46 "..\..\Signum\Views\PopupControl.cshtml"
 Write(Html.ValidationSummaryAjax(Model));
 
             
@@ -280,7 +281,7 @@ WriteLiteral("\r\n    <div id=\"");
 
 
             
-            #line 46 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 47 "..\..\Signum\Views\PopupControl.cshtml"
         Write(Model.Compose("divMainControl"));
 
             
@@ -290,7 +291,7 @@ WriteLiteral("\" class=\"sf-main-control");
 
 
             
-            #line 46 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 47 "..\..\Signum\Views\PopupControl.cshtml"
                                                                  Write(modifiable.SelfModified ? " sf-changed" : "");
 
             
@@ -300,7 +301,7 @@ WriteLiteral("\" \r\n        data-prefix=\"");
 
 
             
-            #line 47 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 48 "..\..\Signum\Views\PopupControl.cshtml"
                 Write(Model.ControlID);
 
             
@@ -310,7 +311,7 @@ WriteLiteral("\" \r\n        data-runtimeinfo=\"");
 
 
             
-            #line 48 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 49 "..\..\Signum\Views\PopupControl.cshtml"
                      Write(Model.RuntimeInfo().ToString());
 
             
@@ -320,7 +321,7 @@ WriteLiteral("\">\r\n");
 
 
             
-            #line 49 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 50 "..\..\Signum\Views\PopupControl.cshtml"
            
             ViewData[ViewDataKeys.InPopup] = true;
             Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
