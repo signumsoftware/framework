@@ -62,7 +62,7 @@ namespace Signum.Engine.DynamicQuery
                 .Count();
         }
 
-        public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
+        public override Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             var ex = new _EntityColumn(EntityColumn().BuildColumnDescription());
 
@@ -73,9 +73,9 @@ namespace Signum.Engine.DynamicQuery
                 .OrderBy(request.Orders)
                 .Select(new List<Column> { ex});
 
-            var exp = Expression.Lambda<Func<object, Lite>>(Expression.Convert(ex.Token.BuildExpression(orderQuery.Context), typeof(Lite)), orderQuery.Context.Parameter);
+            var exp = Expression.Lambda<Func<object, Lite<IIdentifiable>>>(Expression.Convert(ex.Token.BuildExpression(orderQuery.Context), typeof(Lite<IIdentifiable>)), orderQuery.Context.Parameter);
 
-            return orderQuery.Query.Select(exp).Unique(request.UniqueType);
+            return (Lite<IdentifiableEntity>)orderQuery.Query.Select(exp).Unique(request.UniqueType);
         }
         public override Expression Expression
         {

@@ -29,16 +29,16 @@ namespace Signum.Services
         List<IdentifiableEntity> RetrieveAll(Type type);
 
         [OperationContract, NetDataContract]
-        List<Lite> RetrieveAllLite(Type type);
+        List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type);
 
         [OperationContract, NetDataContract]
         List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list);
 
         [OperationContract, NetDataContract]
-        List<Lite> FindAllLite(Type liteType, Implementations implementations);
+        List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations);
 
         [OperationContract, NetDataContract]
-        List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count);
+        List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count);
 
         [OperationContract, NetDataContract]
         Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root);

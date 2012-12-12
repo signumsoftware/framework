@@ -331,9 +331,9 @@
         </Border>
     </DataTemplate>
 
-    <DataTemplate x:Key="{x:Type dn:Lite}"  DataType="{x:Type dn:Lite}">
+    <!--<DataTemplate x:Key="{x:Type dn:Lite}"  DataType="{x:Type dn:Lite}">
         <TextBlock Text="{Binding}" VerticalAlignment="Center" />
-    </DataTemplate>
+    </DataTemplate>-->
 
     <Style x:Key="LinkButtonStyle" TargetType="{x:Type Button}">
         <Setter Property="SnapsToDevicePixels" Value="true" />

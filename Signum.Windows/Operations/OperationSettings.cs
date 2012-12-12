@@ -76,7 +76,7 @@ namespace Signum.Windows.Operations
 
     public class ContextualOperationContext 
     {
-        public Lite[] Entities { get; set; }
+        public Lite<IdentifiableEntity>[] Entities { get; set; }
         public SearchControl SearchControl { get; set; }
         public OperationInfo OperationInfo { get; set; }
         public string CanExecute { get; set; }

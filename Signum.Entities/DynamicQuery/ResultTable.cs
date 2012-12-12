@@ -75,8 +75,8 @@ namespace Signum.Entities.DynamicQuery
 
         private object Convert(object p)
         {
-            if (p is Lite)
-                return ((Lite)p).KeyLong();
+            if (p is Lite<IdentifiableEntity>)
+                return ((Lite<IdentifiableEntity>)p).KeyLong();
 
             return p;
         }
@@ -125,9 +125,9 @@ namespace Signum.Entities.DynamicQuery
             this.Table = table;
         }
 
-        public Lite Entity
+        public Lite<IdentifiableEntity> Entity
         {
-            get { return (Lite)Table.entityValues.GetValue(Index); }
+            get { return (Lite<IdentifiableEntity>)Table.entityValues.GetValue(Index); }
         }
 
         public T GetValue<T>(string columnName)

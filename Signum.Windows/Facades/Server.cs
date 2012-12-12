@@ -164,15 +164,6 @@ namespace Signum.Windows
             return Return((IBaseServer s) => s.Retrieve(type, id)); 
         }
 
-        public static IdentifiableEntity Retrieve(Lite lite)
-        {
-            if (lite.UntypedEntityOrNull == null)
-            {
-                lite.SetEntity(Return((IBaseServer s)=>s.Retrieve(lite.RuntimeType, lite.Id))); 
-            }
-            return lite.UntypedEntityOrNull;
-        }
-
         public static T Retrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
             if (lite.EntityOrNull == null)
@@ -180,11 +171,6 @@ namespace Signum.Windows
                 lite.SetEntity((IdentifiableEntity)(IIdentifiable)Return((IBaseServer s)=>s.Retrieve(lite.RuntimeType, lite.Id))); 
             }
             return lite.EntityOrNull;
-        }
-
-        public static IdentifiableEntity RetrieveAndForget(Lite lite)
-        {
-            return Return((IBaseServer s)=>s.Retrieve(lite.RuntimeType, lite.Id)); 
         }
 
         public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
@@ -202,7 +188,7 @@ namespace Signum.Windows
             return Return((IBaseServer s) => s.RetrieveAll(type)); 
         }
 
-        public static List<Lite> RetrieveAllLite(Type type)
+        public static List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
         {
             return Return((IBaseServer s) => s.RetrieveAllLite(type));
         }
@@ -212,14 +198,14 @@ namespace Signum.Windows
             return RetrieveAllLite(typeof(T)).Cast<Lite<T>>().ToList(); 
         }
 
-        public static List<Lite> FindAllLite(Type liteType, Implementations implementations)
+        public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
         {
-            return Return((IBaseServer s) => s.FindAllLite(liteType, implementations));
+            return Return((IBaseServer s) => s.FindAllLite(implementations));
         }
 
-        public static List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
+        public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
-            return Return((IBaseServer s) => s.FindLiteLike(liteType, implementations, subString, count)); 
+            return Return((IBaseServer s) => s.FindLiteLike(implementations, subString, count)); 
         }
 
         public static List<T> SaveList<T>(List<T> list)
@@ -252,31 +238,19 @@ namespace Signum.Windows
             if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (objType.IsLite() && type.IsAssignableFrom(((Lite)obj).RuntimeType))
+            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IIdentifiable>)obj).RuntimeType))
             {
-                Lite lite = (Lite)obj;
+                Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)obj;
                 return lite.UntypedEntityOrNull ?? RetrieveAndForget(lite);
             }
             
             if (type.IsLite())
             {
                 Type liteType = Lite.Extract(type); 
-                
-                if(objType.IsLite())
+              
+                if(liteType.IsAssignableFrom(objType))
                 {
-                    Lite lite = (Lite)obj;
-                    if (liteType.IsAssignableFrom(lite.RuntimeType))
-                    {
-                        if (lite.UntypedEntityOrNull != null)
-                            return Lite.Create(liteType, lite.UntypedEntityOrNull);
-                        else
-                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToString()); 
-                    }
-                }
-
-                else if(liteType.IsAssignableFrom(objType))
-                {
-                    return Lite.Create(liteType, (IdentifiableEntity)obj);
+                    return ((IdentifiableEntity)obj).ToLite();
                 }
             }
 
@@ -293,7 +267,7 @@ namespace Signum.Windows
             if (objType == type)
                 return true;
 
-            if (objType.IsLite() && ((Lite)obj).RuntimeType == type)
+            if (objType.IsLite() && ((Lite<IdentifiableEntity>)obj).RuntimeType == type)
             {
                 return true;
             }
@@ -330,13 +304,6 @@ namespace Signum.Windows
             lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id)));
 
            return lite;
-        }
-
-        public static Lite FillToStr(Lite lite)
-        {
-            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id)));
-
-            return lite;
         }
     }
 

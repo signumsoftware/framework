@@ -58,7 +58,7 @@ namespace Signum.Web.Controllers
 
             RuntimeInfo runtimeInfo = GetRuntimeInfoWithId(oldPrefix, operationKey);
 
-            Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            Lite<IdentifiableEntity> lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
             IdentifiableEntity entity = OperationLogic.ServiceExecuteLite(lite, operationKey);
 
             return Content("");
@@ -73,7 +73,7 @@ namespace Signum.Web.Controllers
 
             RuntimeInfo runtimeInfo = GetRuntimeInfoWithId(oldPrefix, operationKey);
 
-            Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            Lite<IIdentifiable> lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
 
             OperationLogic.ServiceDelete(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey), null);
 
@@ -129,8 +129,8 @@ namespace Signum.Web.Controllers
             
             Type type = Navigator.ResolveType(runtimeType);
             
-            List<Lite> sourceEntities = keys.Split(new [] { "," }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(key => Lite.Parse(type, key)).ToList();
+            List<Lite<IIdentifiable>> sourceEntities = keys.Split(new [] { "," }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(k => (Lite<IIdentifiable>)Lite.Parse(k)).ToList();
 
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, operationKey);
 

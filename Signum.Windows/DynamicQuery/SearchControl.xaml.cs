@@ -146,18 +146,18 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SelectedItemProperty =
-          DependencyProperty.Register("SelectedItem", typeof(Lite), typeof(SearchControl), new UIPropertyMetadata(null));
-        public Lite SelectedItem
+          DependencyProperty.Register("SelectedItem", typeof(Lite<IdentifiableEntity>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public Lite<IdentifiableEntity> SelectedItem
         {
-            get { return (Lite)GetValue(SelectedItemProperty); }
+            get { return (Lite<IdentifiableEntity>)GetValue(SelectedItemProperty); }
             set { SetValue(SelectedItemProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedItemsProperty =
-          DependencyProperty.Register("SelectedItems", typeof(Lite[]), typeof(SearchControl), new UIPropertyMetadata(null));
-        public Lite[] SelectedItems
+          DependencyProperty.Register("SelectedItems", typeof(Lite<IdentifiableEntity>[]), typeof(SearchControl), new UIPropertyMetadata(null));
+        public Lite<IdentifiableEntity>[] SelectedItems
         {
-            get { return (Lite[])GetValue(SelectedItemsProperty); }
+            get { return (Lite<IdentifiableEntity>[])GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
@@ -285,7 +285,7 @@ namespace Signum.Windows
 
         public event Func<IdentifiableEntity> Creating;
         public event Action<IdentifiableEntity> Navigating;
-        public event Action<List<Lite>> Removing;
+        public event Action<List<Lite<IdentifiableEntity>>> Removing;
         public event Action DoubleClick;
 
         public SearchControl()

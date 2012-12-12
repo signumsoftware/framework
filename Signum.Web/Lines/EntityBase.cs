@@ -143,7 +143,7 @@ namespace Signum.Web
                 if (UntypedValue == null)
                     return null;
 
-                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite).RuntimeType : UntypedValue.GetType();
+                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite<IIdentifiable>).RuntimeType : UntypedValue.GetType();
             }
         }
 
@@ -152,7 +152,7 @@ namespace Signum.Web
             get 
             {
                 return (UntypedValue as IIdentifiable).TryCS(i => i.IsNew) ??
-                       (UntypedValue as Lite).TryCS(l => l.IdOrNull==null);
+                       (UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IsNew);
             }
         }
 
@@ -161,7 +161,7 @@ namespace Signum.Web
             get
             {
                 return (UntypedValue as IIdentifiable).TryCS(i => i.IdOrNull) ??
-                       (UntypedValue as Lite).TryCS(l => l.IdOrNull);
+                       (UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IdOrNull);
             }
         }
 
@@ -170,7 +170,7 @@ namespace Signum.Web
             get 
             {
                 return (UntypedValue as IIdentifiable).TryCC(i => i.ToString()) ??
-                       (UntypedValue as Lite).TryCC(l => l.ToString());
+                       (UntypedValue as Lite<IIdentifiable>).TryCC(l => l.ToString());
             }
         }
     }

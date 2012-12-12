@@ -112,24 +112,13 @@ namespace Signum.Engine.Linq
                         return BindTake(m.Type, m.GetArgument("source"), m.GetArgument("count"));
                 }
             }
-            else if (m.Method.DeclaringType == typeof(LiteUtils) && m.Method.Name == "ToLite")
+            else if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
             {
                 Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
 
-                if (m.Method.GetParameters().FirstEx().ParameterType == typeof(Lite))
-                {
-                    LiteExpression liteRef = (LiteExpression)Visit(m.GetArgument("lite"));
-
-                    Expression entity = EntityCasting(liteRef.Reference, Lite.Extract(m.Type));
-
-                    return MakeLite(m.Type, entity, toStr);
-                }
-                else
-                {
-                    var entity = Visit(m.GetArgument("entity"));
-                    var converted = EntityCasting(entity, Lite.Extract(m.Type));
-                    return MakeLite(m.Type, converted, toStr);
-                }
+                var entity = Visit(m.GetArgument("entity"));
+                var converted = EntityCasting(entity, Lite.Extract(m.Type));
+                return MakeLite(converted, toStr);
             }
             else if (m.Method.DeclaringType.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
             {
@@ -467,7 +456,7 @@ namespace Signum.Engine.Linq
 
                 switch ((DbExpressionType)newItem.NodeType)
                 {
-                    case DbExpressionType.Lite: return SmartEqualizer.EntityIn((LiteExpression)newItem, col == null ? Enumerable.Empty<Lite>() : col.Cast<Lite>().ToList());
+                    case DbExpressionType.Lite: return SmartEqualizer.EntityIn((LiteExpression)newItem, col == null ? Enumerable.Empty<Lite<IIdentifiable>>() : col.Cast<Lite<IIdentifiable>>().ToList());
                     case DbExpressionType.Entity:
                     case DbExpressionType.ImplementedBy:
                     case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>().ToList());
@@ -1172,7 +1161,7 @@ namespace Signum.Engine.Linq
                 Expression entity = CombineWhens(whens.Select(w => new When(w.Condition,
                     ((LiteExpression)w.Value).Reference)).ToList(), Lite.Extract(returnType));
 
-                return MakeLite(returnType, entity, null);
+                return MakeLite(entity, null);
             }
 
             if (whens.Any(e => e.Value is ImplementedByAllExpression))
@@ -1367,7 +1356,7 @@ namespace Signum.Engine.Linq
                 else
                 {
                     return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null);
-                }               
+                }
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
@@ -1382,7 +1371,7 @@ namespace Signum.Engine.Linq
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
 
-                return new ImplementedByExpression(uType, fies.Select(f => new ImplementationColumn(f.Type, f)).ToReadOnly()); 
+                return new ImplementedByExpression(uType, fies.Select(f => new ImplementationColumn(f.Type, f)).ToReadOnly());
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
@@ -1394,7 +1383,16 @@ namespace Signum.Engine.Linq
                 var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id, NullId);
                 return new EntityExpression(uType, conditionalId, null, null);
             }
-            
+
+            else if (operand.NodeType == (ExpressionType)DbExpressionType.Lite)
+            {
+                LiteExpression lite = (LiteExpression)operand;
+
+                Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType));
+
+                return MakeLite(entity, null);
+            }
+
             return null;
         }
 
@@ -1869,11 +1867,11 @@ namespace Signum.Engine.Linq
 
         internal static SqlConstantExpression NullId = new SqlConstantExpression(null, typeof(int?));
 
-        public Expression MakeLite(Type type, Expression entity, Expression customToStr)
+        public Expression MakeLite(Expression entity, Expression customToStr)
         {
             Expression id = GetId(entity);
             Expression typeId = GetEntityType(entity);
-            return new LiteExpression(type, entity, id, customToStr, typeId, customToStr != null);
+            return new LiteExpression(Lite.Generate(entity.Type), entity, id, customToStr, typeId, customToStr != null);
         }
 
         public Expression GetId(Expression expression)

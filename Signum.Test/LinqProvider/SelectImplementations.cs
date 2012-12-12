@@ -124,21 +124,21 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteCastUpcast()
         {
             var list = Database.Query<ArtistDN>()
-                .SelectMany(a => a.Friends).Select(a=>a.ToLite<IAuthorDN>()).ToList();
+                .SelectMany(a => a.Friends).Select(a=>(Lite<IAuthorDN>)a).ToList();
         }
 
         [TestMethod]
         public void SelectLiteCastNocast()
         {
             var list = Database.Query<ArtistDN>()
-                .SelectMany(a => a.Friends).Select(a => a.ToLite<ArtistDN>()).ToList();
+                .SelectMany(a => a.Friends).Select(a =>(Lite<ArtistDN>)a).ToList();
         }
 
         [TestMethod]
         public void SelectLiteCastDowncast()
         {
             var list = Database.Query<AlbumDN>()
-                .Select(a => a.Author.ToLite().ToLite<ArtistDN>()).ToList();
+                .Select(a => (Lite<ArtistDN>)a.Author.ToLite()).ToList();
         }
 
 

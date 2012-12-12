@@ -65,7 +65,7 @@ namespace Signum.Engine.DynamicQuery
                 return this[request.QueryName].ExecuteQueryCount(request);
         }
 
-        public Lite ExecuteUniqueEntity(UniqueEntityRequest request)
+        public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             using (ExecutionMode.UserInterface())
                 return this[request.QueryName].ExecuteUniqueEntity(request);

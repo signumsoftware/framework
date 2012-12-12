@@ -28,7 +28,7 @@ namespace Signum.Engine.DynamicQuery
         QueryDescription GetDescription(object queryName);
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
-        Lite ExecuteUniqueEntity(UniqueEntityRequest request);
+        Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
         Expression Expression { get; } //Optional
         ResetLazy<ColumnDescriptionFactory[]> StaticColumns { get; } 
     }
@@ -66,7 +66,7 @@ namespace Signum.Engine.DynamicQuery
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
-        public abstract Lite ExecuteUniqueEntity(UniqueEntityRequest request);
+        public abstract Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
 
         public DynamicQuery()
         {

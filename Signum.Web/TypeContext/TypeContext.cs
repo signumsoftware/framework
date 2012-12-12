@@ -176,7 +176,7 @@ namespace Signum.Web
 
             Type type = this.UntypedValue.GetType();
             if (type.IsLite())
-                return new RuntimeInfo((Lite)this.UntypedValue);
+                return new RuntimeInfo((Lite<IIdentifiable>)this.UntypedValue);
 
             if (type.IsEmbeddedEntity())
                 return new RuntimeInfo((EmbeddedEntity)this.UntypedValue);

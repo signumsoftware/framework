@@ -177,7 +177,7 @@ namespace Signum.Web.Controllers
             if (typeArray == StaticInfo.ImplementedByAll)
                 throw new ArgumentException("ImplementedBy not allowed in Autocomplete");
 
-            List<Lite> lites  = AutoCompleteUtils.FindLiteLike(typeof(IdentifiableEntity), Implementations.By(typeArray), q, l);
+            List<Lite<IdentifiableEntity>> lites = AutoCompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
 
             var result = lites.Select(o => new
             {
@@ -241,7 +241,7 @@ namespace Signum.Web.Controllers
             if (string.IsNullOrEmpty(liteKeys))
                 return Content(noResults);
 
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Select(l => (Lite)l).ToList();
+            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
             object queryName = Navigator.ResolveQueryName(webQueryName);
             Implementations implementations = implementationsKey == "[All]" ? Implementations.ByAll :
                 Implementations.By(implementationsKey.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(t => Navigator.ResolveType(t)).ToArray());

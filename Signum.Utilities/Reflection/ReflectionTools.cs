@@ -215,6 +215,18 @@ namespace Signum.Utilities.Reflection
             return ex.Method;
         }
 
+
+        public static ConstructorInfo GetGenericConstructorDefinition(this ConstructorInfo ci)
+        {
+            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+        }
+
+        public static ConstructorInfo MakeGenericConstructor(this ConstructorInfo ci, params Type[] types)
+        {
+            return ci.DeclaringType.MakeGenericType(types).GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+        }
+
+
         public static Type GetReceiverType<T, R>(Expression<Func<T, R>> lambda)
         {
             Expression body = lambda.Body;

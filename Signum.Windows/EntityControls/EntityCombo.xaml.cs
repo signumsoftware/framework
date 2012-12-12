@@ -41,7 +41,7 @@ namespace Signum.Windows
             set { SetValue(SortElementsProperty, value); }
         }
 
-        public event Func<IEnumerable<Lite>> LoadData;
+        public event Func<IEnumerable<Lite<IIdentifiable>>> LoadData;
 
         static EntityCombo()
         {
@@ -136,7 +136,7 @@ namespace Signum.Windows
 
         public void LoadNow()
         {
-            IEnumerable<Lite> data;
+            IEnumerable<Lite<IIdentifiable>> data;
             if (LoadData != null)
             {
                 data = LoadData();
@@ -145,7 +145,7 @@ namespace Signum.Windows
             }
             else
             {
-                data = Server.FindAllLite(CleanType, safeImplementations.Value);
+                data = Server.FindAllLite(safeImplementations.Value);
             }
 
             if (SortElements)
@@ -155,7 +155,7 @@ namespace Signum.Windows
             {
                 changing = true;
                 combo.Items.Clear();
-                foreach (Lite lite in data)
+                foreach (Lite<IIdentifiable> lite in data)
                 {
                     combo.Items.Add(lite);
                 }

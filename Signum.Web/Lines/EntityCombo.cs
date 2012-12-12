@@ -28,7 +28,7 @@ namespace Signum.Web
         public readonly RouteValueDictionary ComboHtmlProperties = new RouteValueDictionary();
         
         public bool Preload { get; set; }
-        public IEnumerable<Lite> Data { get; set; }
+        public IEnumerable<Lite<IIdentifiable>> Data { get; set; }
         public int Size { get; set; }
 
         public EntityCombo(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)

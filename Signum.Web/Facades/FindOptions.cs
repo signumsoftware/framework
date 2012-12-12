@@ -299,7 +299,7 @@ namespace Signum.Web
             {
                 if (v.GetType().IsLite())
                 {
-                    Lite lite = (Lite)v;
+                    Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)v;
                     value = lite.Key();
                 }
                 else

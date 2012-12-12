@@ -15,7 +15,7 @@ namespace Signum.Services
         Dictionary<Enum, string> GetCanExecute(IdentifiableEntity entity);
 
         [OperationContract, NetDataContract]
-        Dictionary<Enum, string> GetCanExecuteLite(Lite lite);
+        Dictionary<Enum, string> GetCanExecuteLite(Lite<IdentifiableEntity> lite);
 
         [OperationContract, NetDataContract]
         List<OperationInfo> GetOperationInfos(Type entityType);
@@ -27,11 +27,11 @@ namespace Signum.Services
         IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args);
+        IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity Delete(Lite lite, Enum operationKey, params object[] args);
+        IdentifiableEntity Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]
@@ -42,14 +42,14 @@ namespace Signum.Services
         IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args);
+        IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args);
+        IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        Dictionary<Enum, string> GetContextualCanExecute(Lite[] lites, List<Enum> cleanKeys);
+        Dictionary<Enum, string> GetContextualCanExecute(Lite<IIdentifiable>[] lites, List<Enum> cleanKeys);
     }
 
 }

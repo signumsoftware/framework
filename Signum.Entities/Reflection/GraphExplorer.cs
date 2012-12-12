@@ -156,17 +156,17 @@ namespace Signum.Entities.Reflection
             {
                 Node = n,
 
-                Fillcolor =  n is Lite? "white": color(n.GetType()),
+                Fillcolor = n is Lite<IdentifiableEntity> ? "white" : color(n.GetType()),
                 Color =
-                    n is Lite ? color(Lite.Extract(n.GetType())) :
+                    n is Lite<IdentifiableEntity> ? color(((Lite<IdentifiableEntity>)n).GetType()) :
                     (n.SelfModified ? "red" : n.Modified == true ? "red4" :"black"),
 
-                Shape = n is Lite ? "ellipse" :
+                Shape = n is Lite<IdentifiableEntity> ? "ellipse" :
                         n is IdentifiableEntity ? "ellipse" :
                         n is EmbeddedEntity ? "box" :
                         Reflector.IsMList(n.GetType()) ? "hexagon" : "plaintext",
-                Style = n is Entity ? ", style=\"diagonals,filled,bold\"" : 
-                        n is Lite? "style=\"solid,bold\"": "",
+                Style = n is Entity ? ", style=\"diagonals,filled,bold\"" :
+                        n is Lite<IdentifiableEntity> ? "style=\"solid,bold\"" : "",
 
                 Label = n.ToString().Etc(30, "..").RemoveDiacritics()
 
@@ -195,8 +195,8 @@ namespace Signum.Entities.Reflection
         public static XDocument EntityDGML(this DirectedGraph<Modifiable> graph)
         {
             return graph.ToDGML(n =>
-                n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n): 
-                n is Lite ? GetAttributes((Lite)n):
+                n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n):
+                n is Lite<IdentifiableEntity> ? GetAttributes((Lite<IdentifiableEntity>)n) :
                 n is EmbeddedEntity ? GetAttributes((EmbeddedEntity)n):
                 n.GetType().IsMList() ? GetAttributes((IList)n) : 
                 new []
@@ -230,16 +230,16 @@ namespace Signum.Entities.Reflection
             return null;
         }
 
-        private static XAttribute[] GetAttributes(Lite lite)
+        private static XAttribute[] GetAttributes(Lite<IdentifiableEntity> lite)
         {
             return new[]
             {
-               new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified(lite)),
+               new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified((Modifiable)lite)),
                new XAttribute("TypeName", lite.GetType().TypeName()), 
-               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(Lite.Extract(lite.GetType()).FullName.GetHashCode())),
+               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(lite.RuntimeType.FullName.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.RuntimeType.FullName.GetHashCode()).Replace("#", "#44")),
-               new XAttribute("Description", " ".Combine((lite.RuntimeType == Lite.Extract(lite.GetType())? "":  lite.RuntimeType.TypeName() ),   lite.IdOrNull.TryToString() ?? "New"))
+               new XAttribute("Description", lite.IdOrNull.TryToString() ?? "New")
             };
         }
 
