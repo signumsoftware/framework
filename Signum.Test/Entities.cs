@@ -45,6 +45,10 @@ namespace Signum.Test
         }
     }
 
+    public enum NoteWithDateOperation
+    { 
+        Save
+    }
 
     public interface IAuthorDN : IIdentifiable
     {
@@ -134,6 +138,12 @@ namespace Signum.Test
         }
     }
 
+    public enum ArtistOperation
+    {
+        Save,
+        AssignPersonalAward
+    }
+
     [Flags]
     public enum Sex
     {
@@ -205,6 +215,11 @@ namespace Signum.Test
         }
     }
 
+    public enum BandOperation
+    { 
+        Save
+    }
+
     [Serializable]
     public abstract class AwardDN : Entity
     {
@@ -230,6 +245,11 @@ namespace Signum.Test
             get { return result; }
             set { Set(ref result, value, () => Result); }
         }
+    }
+
+    public enum AwardOperation
+    { 
+        Save
     }
 
     public enum AwardResult 
@@ -293,6 +313,11 @@ namespace Signum.Test
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum LabelOperation
+    { 
+        Save
     }
 
     [Serializable]
@@ -369,6 +394,23 @@ namespace Signum.Test
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum AlbumState
+    {
+        New,
+        Saved
+    }
+
+    public enum AlbumOperation
+    {
+        Save,
+        Modify,
+        CreateFromBand,
+        Delete,
+        Clone,
+        CreateGreatestHitsAlbum,
+        CreateEmptyGreatestHitsAlbum
     }
 
     [Serializable]

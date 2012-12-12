@@ -14,6 +14,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities;
 using Microsoft.SqlServer.Types;
+using Signum.Engine.Operations;
 
 namespace Signum.Test
 {
@@ -214,24 +215,24 @@ namespace Signum.Test
         
         public static void Load()
         {
-            var ama = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }.Save();
-
+            var ama = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }.Execute(AwardOperation.Save);
+            
             BandDN smashingPumpkins = new BandDN
             {
                 Name = "Smashing Pumpkins",
                 Members = "Billy Corgan, James Iha, D'arcy Wretzky, Jimmy Chamberlin"
-                .Split(',').Select(s => new ArtistDN { Name = s.Trim(), Sex = s.Contains("Wretzky") ? Sex.Female : Sex.Male, Status = s.Contains("Wretzky") ? Status.Married: (Status?)null }).ToMList(),
+                .Split(',').Select(s => new ArtistDN { Name = s.Trim(), Sex = s.Contains("Wretzky") ? Sex.Female : Sex.Male, Status = s.Contains("Wretzky") ? Status.Married: (Status?)null }.Execute(ArtistOperation.Save)).ToMList(),
                 LastAward = ama,
-            };
+            }.Execute(BandOperation.Save);
 
             CountryDN usa = new CountryDN { Name = "USA" };
             CountryDN japan = new CountryDN { Name = Japan };
 
-            smashingPumpkins.Members.ForEach(m => m.Friends = smashingPumpkins.Members.Where(a => a.Sex != m.Sex).Select(a => a.ToLiteFat()).ToMList());
+            //smashingPumpkins.Members.ForEach(m => m.Friends = smashingPumpkins.Members.Where(a => a.Sex != m.Sex).Select(a => a.ToLiteFat()).ToMList());
 
-            new NoteWithDateDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }.Save();
+            new NoteWithDateDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }.Execute(NoteWithDateOperation.Save);
 
-            LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() };
+            LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }.Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -240,7 +241,7 @@ namespace Signum.Test
                 Author = smashingPumpkins,
                 Songs = { new SongDN { Name = "Disarm" } },
                 Label = virgin
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
             AlbumDN mellon = new AlbumDN
             {
@@ -255,13 +256,11 @@ namespace Signum.Test
                 },
                 BonusTrack = new SongDN { Name = "Jellybelly" },
                 Label = virgin
-            };
+            }.Execute(AlbumOperation.Save);
 
-            mellon.Save();
+            new NoteWithDateDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }.Execute(NoteWithDateOperation.Save);
 
-            new NoteWithDateDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }.Save();
-
-            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() };
+            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }.Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -271,7 +270,7 @@ namespace Signum.Test
                 Songs = { new SongDN { Name = "Tarantula" } },
                 BonusTrack = new SongDN{Name = "1976"},
                 Label = wea,
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
             new AlbumDN
             {
@@ -280,9 +279,9 @@ namespace Signum.Test
                 Author = smashingPumpkins,
                 Songs = { new SongDN { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
                 Label = wea,
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
-            var pa  =new PersonalAwardDN { Category = "Best Artist", Year = 1983, Result = AwardResult.Won }.Save();
+            var pa = new PersonalAwardDN { Category = "Best Artist", Year = 1983, Result = AwardResult.Won }.Execute(AwardOperation.Save);
 
             ArtistDN michael = new ArtistDN
             {
@@ -290,11 +289,11 @@ namespace Signum.Test
                 Dead = true,
                 LastAward = pa,
                 Status = Status.Single,
-            };
+            }.Execute(ArtistOperation.Save); ;
 
-            new NoteWithDateDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }.Save();
+            new NoteWithDateDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }.Execute(NoteWithDateOperation.Save);
 
-            LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling()  };
+            LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling() }.Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -304,9 +303,9 @@ namespace Signum.Test
                 Songs = { new SongDN { Name = "Ben" } },
                 BonusTrack = new SongDN{Name = "Michael"},
                 Label = universal,
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
-            LabelDN sony = new LabelDN { Name = "Sony", Country = japan, Node = universal.Node.NextSibling() };
+            LabelDN sony = new LabelDN { Name = "Sony", Country = japan, Node = universal.Node.NextSibling() }.Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -317,9 +316,9 @@ namespace Signum.Test
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 BonusTrack = new SongDN{Name = "Billie Jean"},
                 Label = sony
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
-            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa, Owner = sony.ToLite(), Node = sony.Node.FirstChild() };
+            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa, Owner = sony.ToLite(), Node = sony.Node.FirstChild() }.Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -329,7 +328,7 @@ namespace Signum.Test
                 Songs = "Bad, Man in the Mirror, Dirty Diana, Smooth Criminal"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 Label = mjj
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
             new AlbumDN
             {
@@ -339,7 +338,7 @@ namespace Signum.Test
                 Songs = "Black or White, Who Is It, Give it to Me"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 Label = mjj
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
             new AlbumDN
             {
@@ -350,7 +349,7 @@ namespace Signum.Test
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 BonusTrack = new SongDN{Name="Heal The World"},
                 Label = mjj
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
             new AlbumDN
             {
@@ -360,19 +359,19 @@ namespace Signum.Test
                 Songs = "Blood on the Dance Floor, Morphine"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 Label = mjj
-            }.Save();
+            }.Execute(AlbumOperation.Save); ;
 
-            var ga = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won };
+            var ga = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }.Execute(AwardOperation.Save);
 
             BandDN sigurRos = new BandDN
             {
                 Name = "Sigur Ros",
                 Members = "Jón Þór Birgisson, Georg Hólm, Orri Páll Dýrason"
-                .Split(',').Select(s => new ArtistDN { Name = s.Trim() }).ToMList(),
+                .Split(',').Select(s => new ArtistDN { Name = s.Trim() }.Execute(ArtistOperation.Save)).ToMList(),
                 LastAward = ga,
-            };
+            }.Execute(BandOperation.Save);
 
-            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), Node = universal.Node.FirstChild() }; 
+            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), Node = universal.Node.FirstChild() }.Execute(LabelOperation.Save); 
 
             new AlbumDN
             {
@@ -383,9 +382,9 @@ namespace Signum.Test
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 BonusTrack = new SongDN { Name = "Intro" },
                 Label = fatCat,
-            }.Save();
+            }.Execute(AlbumOperation.Save);
 
-            LabelDN emi = new LabelDN { Name = "EMI", Country = usa, Node = sony.Node.NextSibling() }; 
+            LabelDN emi = new LabelDN { Name = "EMI", Country = usa, Node = sony.Node.NextSibling() }.Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -396,9 +395,8 @@ namespace Signum.Test
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 BonusTrack = new SongDN { Name = "Svo hljótt" },
                 Label = emi
-            }.Save();
-
-
+            }.Execute(AlbumOperation.Save);
+            
             new AwardNominationDN { Author = sigurRos.ToLite<IAuthorDN>(), Award = ga.ToLite<AwardDN>() }.Save();
             new AwardNominationDN { Author = michael.ToLite<IAuthorDN>(), Award = ga.ToLite<AwardDN>() }.Save();
             new AwardNominationDN { Author = smashingPumpkins.ToLite<IAuthorDN>(), Award = ga.ToLite<AwardDN>() }.Save();
