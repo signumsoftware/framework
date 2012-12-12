@@ -36,6 +36,8 @@ namespace Signum.Engine
 
         private static void AttachInvalidations(Schema s, IResetLazy lazy, params Type[] types)
         {
+            types = types.Where(Schema.Current.Tables.ContainsKey).ToArray(); //static initi of Lazies of not-initialized modules
+
             Action reset = () =>
             {
                 if (Transaction.InTestTransaction)
