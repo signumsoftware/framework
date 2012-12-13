@@ -149,5 +149,12 @@ namespace Signum.Engine.Basics
 
             return toEntity.Values; 
         }
+
+        public static IEnumerable<string> AllUniqueKeys()
+        {
+            AssertInitialized();
+
+            return toEnum.Keys;
+        }
     }
 }

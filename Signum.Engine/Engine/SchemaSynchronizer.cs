@@ -130,7 +130,7 @@ namespace Signum.Engine
                         .Select(dix => SqlBuilder.ReCreateFreeIndex(dif.Name, tab.Name, dix, columnReplacements))
                         .Combine(Spacing.Simple);
 
-                    var newFreeIndexes = Synchronizer.SynchronizeScript(tab.Columns, replacements.ApplyReplacements(dif.Colums, Replacements.KeyColumnsForTable(tn)),
+                    var newFreeIndexes = Synchronizer.SynchronizeScript(tab.Columns, replacements.ApplyReplacementsToOld(dif.Colums, Replacements.KeyColumnsForTable(tn)),
                         (cn, colModel) => colModel.ReferenceTable != null ? SqlBuilder.CreateFreeIndex(tab, colModel) : null,
                         null,
                         null,

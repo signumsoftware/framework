@@ -82,7 +82,7 @@ namespace Signum.Engine.Basics
             Table table = Schema.Current.Table<TypeDN>();
 
             Dictionary<string, TypeDN> should = GenerateSchemaTypes().ToDictionary(s => s.TableName);
-            Dictionary<string, TypeDN> current = replacements.ApplyReplacements(
+            Dictionary<string, TypeDN> current = replacements.ApplyReplacementsToOld(
                 Administrator.TryRetrieveAll<TypeDN>(replacements).ToDictionary(c => c.TableName), Replacements.KeyTables);
 
             return Synchronizer.SynchronizeScript(
