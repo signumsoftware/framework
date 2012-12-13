@@ -75,7 +75,7 @@ namespace Signum.Web.Processes
             if (ctx.Implementations.IsByAll)
                 return null;
 
-            var types = ctx.Lites.Select(a => a.RuntimeType).Distinct().ToList();
+            var types = ctx.Lites.Select(a => a.EntityType).Distinct().ToList();
 
             var contexts = (from t in types
                             from oi in OperationsClient.Manager.OperationInfos(t)

@@ -67,7 +67,7 @@ namespace Signum.Engine.Cache
                 {
                     var ci = field.FieldType.GetConstructor(new []{typeof(Type), typeof(int), typeof(string)});
                     Expression call = Expression.New(ci,
-                        Expression.Property(origin, "RuntimeType"),
+                        Expression.Property(origin, "EntityType"),
                         Expression.Property(origin, "Id"),
                         Expression.Call(origin, miToString));
 

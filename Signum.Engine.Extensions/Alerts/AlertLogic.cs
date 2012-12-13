@@ -94,7 +94,7 @@ namespace Signum.Engine.Alerts
                 CreatedBy = user ?? UserDN.Current.ToLite(),
                 Text = text,
                 Title = title,
-                Target = (Lite<IdentifiableEntity>)Lite.Create(entity.RuntimeType, entity.Id, entity.ToString()),
+                Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
                 AlertType = alertType == null ? null : AlertTypeEnumLogic.ToEntity(alertType)
             }.Execute(AlertOperation.SaveNew);
         }

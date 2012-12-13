@@ -63,7 +63,7 @@ namespace Signum.Windows.Processes
             if (sc.Implementations.IsByAll)
                 return null;
 
-            var types = sc.SelectedItems.Select(a => a.RuntimeType).Distinct().ToList();
+            var types = sc.SelectedItems.Select(a => a.EntityType).Distinct().ToList();
 
             var result = (from t in sc.Implementations.Types
                           from oi in OperationClient.Manager.OperationInfos(t)

@@ -293,7 +293,7 @@ namespace Signum.Entities.Chart
                     {
                         key = l.TryCC(li => li.Key()),
                         toStr = l.TryCC(li => li.ToString()),
-                        color = l == null ? "#555" : GetChartColor(l.RuntimeType, l.Id).TryToHtml(),
+                        color = l == null ? "#555" : GetChartColor(l.EntityType, l.Id).TryToHtml(),
                     };
                 };
             }

@@ -51,7 +51,7 @@ namespace Signum.Web.Files
                     es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.RuntimeType == null)
+                        if (runtimeInfo.EntityType == null)
                             return null;
                         else
                         {
@@ -94,7 +94,7 @@ namespace Signum.Web.Files
                     es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.RuntimeType == null)
+                        if (runtimeInfo.EntityType == null)
                             return null;
                         else
                         {
@@ -137,7 +137,7 @@ namespace Signum.Web.Files
                     es.MappingDefault = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.RuntimeType == null)
+                        if (runtimeInfo.EntityType == null)
                             return null;
                         else
                         {

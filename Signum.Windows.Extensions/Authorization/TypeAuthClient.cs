@@ -92,7 +92,7 @@ namespace Signum.Windows.Authorization
 
         public static bool IsAllowedFor(this Lite<IIdentifiable> lite, TypeAllowedBasic requested)
         {
-            TypeAllowedAndConditions tac = GetAllowed(lite.RuntimeType);
+            TypeAllowedAndConditions tac = GetAllowed(lite.EntityType);
 
             if (requested <= tac.Min().GetUI())
                 return true;

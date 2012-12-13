@@ -19,8 +19,8 @@ namespace Signum.Engine.Chart
     {
         public static readonly ResetLazy<Dictionary<Type, Dictionary<int, Color>>> Colors = GlobalLazy.Create(() =>
               Database.Query<ChartColorDN>()
-              .Select(cc => new { cc.Related.RuntimeType, cc.Related.Id, cc.Color.Argb })
-              .AgGroupToDictionary(a => a.RuntimeType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))))
+              .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
+              .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))))
         .InvalidateWith(typeof(ChartColorDN));
 
         public static readonly int Limit = 360; 
@@ -47,7 +47,7 @@ namespace Signum.Engine.Chart
 
             var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = (Lite<IdentifiableEntity>)l }).ToDictionary(a => a.Related);
 
-            dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.RuntimeType == type).ToDictionary(a=>a.Related));
+            dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.EntityType == type).ToDictionary(a=>a.Related));
 
             double[] bright = dic.Count < 18 ? new double[]{.60}:
                             dic.Count < 72 ? new double[]{.90, .60}:
@@ -141,7 +141,7 @@ namespace Signum.Engine.Chart
 
         public static Color? ColorFor(Lite<IdentifiableEntity> lite)
         {
-            return ColorFor(lite.RuntimeType, lite.Id);
+            return ColorFor(lite.EntityType, lite.Id);
         }
 
         public static Color? ColorFor(IdentifiableEntity ident)

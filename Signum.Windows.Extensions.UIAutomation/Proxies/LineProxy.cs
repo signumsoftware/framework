@@ -192,7 +192,7 @@ namespace Signum.Windows.UIAutomation
             {
                 using (var selector = new SelectorWindowProxy(win))
                 {
-                    win = selector.CheckCapture(value.RuntimeType);
+                    win = selector.CheckCapture(value.EntityType);
                 }
             }
 
