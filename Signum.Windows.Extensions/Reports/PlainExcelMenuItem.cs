@@ -28,6 +28,8 @@ namespace Signum.Windows.Reports
 
             miResult.Click += (object sender, RoutedEventArgs e)=>
             {
+                e.Handled = true;
+
                 SaveFileDialog sfd = new SaveFileDialog()
                 {
                     AddExtension = true,
