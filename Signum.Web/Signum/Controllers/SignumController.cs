@@ -158,7 +158,7 @@ namespace Signum.Web.Controllers
             else if (context.UntypedValue == null)
             {
                 RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-                newLink = Navigator.NavigateRoute(ei.RuntimeType, ident.TryCS(e => e.IdOrNull));
+                newLink = Navigator.NavigateRoute(ei.EntityType, ident.TryCS(e => e.IdOrNull));
                 newToStr = context.UntypedValue.ToString();
             }
             else
@@ -183,7 +183,7 @@ namespace Signum.Web.Controllers
             {
                 id = o.Id,
                 text = o.ToString(),
-                type = Navigator.ResolveWebTypeName(o.RuntimeType)
+                type = Navigator.ResolveWebTypeName(o.EntityType)
             }).ToList();
 
             return Json(result);

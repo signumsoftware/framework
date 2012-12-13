@@ -58,7 +58,7 @@ namespace Signum.Web.Controllers
 
             RuntimeInfo runtimeInfo = GetRuntimeInfoWithId(oldPrefix, operationKey);
 
-            Lite<IdentifiableEntity> lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            Lite<IdentifiableEntity> lite = Lite.Create(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             IdentifiableEntity entity = OperationLogic.ServiceExecuteLite(lite, operationKey);
 
             return Content("");
@@ -73,12 +73,12 @@ namespace Signum.Web.Controllers
 
             RuntimeInfo runtimeInfo = GetRuntimeInfoWithId(oldPrefix, operationKey);
 
-            Lite<IIdentifiable> lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            Lite<IIdentifiable> lite = Lite.Create(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
 
             OperationLogic.ServiceDelete(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey), null);
 
-            if (Navigator.Manager.QuerySettings.ContainsKey(runtimeInfo.RuntimeType))
-                return JsonAction.Redirect(Navigator.FindRoute(runtimeInfo.RuntimeType));
+            if (Navigator.Manager.QuerySettings.ContainsKey(runtimeInfo.EntityType))
+                return JsonAction.Redirect(Navigator.FindRoute(runtimeInfo.EntityType));
             return Content("");
         }
 

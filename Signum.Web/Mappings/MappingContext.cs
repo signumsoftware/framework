@@ -174,7 +174,7 @@ namespace Signum.Web
                     }
                     else
                     {
-                        Type cleanType = (currentEntity as Lite<IIdentifiable>).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
+                        Type cleanType = (currentEntity as Lite<IIdentifiable>).TryCC(t => t.EntityType) ?? currentEntity.GetType();
                         PropertyInfo pi = cleanType.GetProperty(property);
                         currentEntity = (Modifiable)pi.GetValue(currentEntity, null);
                     }
@@ -220,7 +220,7 @@ namespace Signum.Web
                     }
                     else
                     {
-                        Type cleanType = (currentEntity as Lite<IIdentifiable>).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
+                        Type cleanType = (currentEntity as Lite<IIdentifiable>).TryCC(t => t.EntityType) ?? currentEntity.GetType();
                         pi = cleanType.GetProperty(property);
                         currentEntity = (Modifiable)pi.GetValue(currentEntity, null);
                     }

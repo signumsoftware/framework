@@ -870,9 +870,9 @@ namespace Signum.Engine.Maps
                 return null;
 
             Lite<IIdentifiable> l = (Lite<IIdentifiable>)value;
-            return l.UntypedEntityOrNull == null ? l.RuntimeType :
+            return l.UntypedEntityOrNull == null ? l.EntityType :
                  forbidden.Contains(l.UntypedEntityOrNull) ? null :
-                 l.RuntimeType;
+                 l.EntityType;
         }
 
         static Type GetTypeForEntity(IIdentifiable value, Forbidden forbidden)

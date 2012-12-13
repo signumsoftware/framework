@@ -210,8 +210,8 @@ namespace Signum.Web
         public QuickLinkView(Lite<IdentifiableEntity> liteEntity)
         {
             lite = liteEntity;
-            IsVisible = Navigator.IsNavigable(lite.RuntimeType, isSearchEntity: false);
-            Text = lite.RuntimeType.NiceName();
+            IsVisible = Navigator.IsNavigable(lite.EntityType, isSearchEntity: false);
+            Text = lite.EntityType.NiceName();
         }
 
         public override MvcHtmlString Execute()

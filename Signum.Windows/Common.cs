@@ -612,7 +612,7 @@ namespace Signum.Windows
             if (lite != null)
             {
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[lite.RuntimeType].CleanName);
+                    return "{0};New".Formato(Server.ServerTypes[lite.EntityType].CleanName);
 
                 return lite.Key();
             }

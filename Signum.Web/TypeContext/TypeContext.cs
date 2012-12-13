@@ -172,7 +172,7 @@ namespace Signum.Web
         public RuntimeInfo RuntimeInfo()
         {
             if (this.UntypedValue == null)
-                return new RuntimeInfo() { RuntimeType = null };
+                return new RuntimeInfo() { EntityType = null };
 
             Type type = this.UntypedValue.GetType();
             if (type.IsLite())

@@ -288,7 +288,7 @@ namespace Signum.Engine.Operations
         public static IdentifiableEntity ServiceExecuteLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
             IIdentifiable entity = Database.RetrieveAndForget(lite);
-            var op = Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite();
+            var op = Find<IExecuteOperation>(lite.EntityType, operationKey).AssertLite();
             op.Execute(entity, args);
             return (IdentifiableEntity)entity;
         }
@@ -305,7 +305,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable
         {
             T entity = lite.RetrieveAndForget();
-            var op = Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite();
+            var op = Find<IExecuteOperation>(lite.EntityType, operationKey).AssertLite();
             op.Execute(entity, args);
             return entity;
         }
@@ -322,7 +322,7 @@ namespace Signum.Engine.Operations
         public static IdentifiableEntity ServiceDelete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
             IIdentifiable entity = Database.RetrieveAndForget(lite);
-            var op = Find<IDeleteOperation>(lite.RuntimeType, operationKey);
+            var op = Find<IDeleteOperation>(lite.EntityType, operationKey);
             op.Delete(entity, args);
             return (IdentifiableEntity)entity;
         }
@@ -331,7 +331,7 @@ namespace Signum.Engine.Operations
             where T : class, IIdentifiable
         {
             T entity = lite.RetrieveAndForget();
-            var op = Find<IDeleteOperation>(lite.RuntimeType, operationKey);
+            var op = Find<IDeleteOperation>(lite.EntityType, operationKey);
             op.Delete(entity, args);
         }
 
@@ -367,7 +367,7 @@ namespace Signum.Engine.Operations
 
         public static IdentifiableEntity ServiceConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
-            var op = Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite();
+            var op = Find<IConstructorFromOperation>(lite.EntityType, operationKey).AssertLite();
             return (IdentifiableEntity)op.Construct(Database.RetrieveAndForget(lite), args);
         }
 
@@ -381,7 +381,7 @@ namespace Signum.Engine.Operations
         public static T ConstructFromLite<T>(this Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
-            var op = Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite();
+            var op = Find<IConstructorFromOperation>(lite.EntityType, operationKey).AssertLite();
             return (T)op.Construct(Database.RetrieveAndForget(lite), args);
         }
         #endregion
@@ -529,7 +529,7 @@ namespace Signum.Engine.Operations
             Dictionary<Enum, string> result = null;
             using (ExecutionMode.Global())
             {
-                foreach (var grLites in lites.GroupBy(a => a.RuntimeType))
+                foreach (var grLites in lites.GroupBy(a => a.EntityType))
                 {
                     var operations = cleanKeys.Select(k => FindOperation(grLites.Key, k)).ToList();
 

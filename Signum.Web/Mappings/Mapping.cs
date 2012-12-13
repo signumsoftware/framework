@@ -350,7 +350,7 @@ namespace Signum.Web
             
             string strRuntimeInfo;
             Type runtimeType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ? 
-                RuntimeInfo.FromFormValue(strRuntimeInfo).RuntimeType: 
+                RuntimeInfo.FromFormValue(strRuntimeInfo).EntityType: 
                 ctx.Value.TryCC(t=>t.GetType());
 
             if (runtimeType == null)
@@ -511,7 +511,7 @@ namespace Signum.Web
 
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(strRuntimeInfo);
 
-            if (runtimeInfo.RuntimeType == null)
+            if (runtimeInfo.EntityType == null)
                 return null;
 
             if (typeof(T).IsEmbeddedEntity())
@@ -533,10 +533,10 @@ namespace Signum.Web
                          return Constructor.Construct<T>();
                  }
 
-                 if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.RuntimeType == identifiable.GetType())
+                 if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.EntityType == identifiable.GetType())
                      return (T)(ModifiableEntity)identifiable;
                  else
-                     return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                     return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             }
         }
  
@@ -629,7 +629,7 @@ namespace Signum.Web
 
             Lite<S> lite = (Lite<S>)ctx.Value;
 
-            if (runtimeInfo.RuntimeType == null)
+            if (runtimeInfo.EntityType == null)
                 return null;
 
             if (runtimeInfo.IsNew)
@@ -637,16 +637,16 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType)).ToLite());
+                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)Constructor.Construct(runtimeInfo.EntityType)).ToLite());
             }
 
             if (lite == null)
-                return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
+                return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value));
 
-            if (runtimeInfo.IdOrNull.Value == lite.IdOrNull && runtimeInfo.RuntimeType == lite.RuntimeType)
+            if (runtimeInfo.IdOrNull.Value == lite.IdOrNull && runtimeInfo.EntityType == lite.EntityType)
                 return TryModifyEntity(ctx, lite);
 
-            return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
+            return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value));
         }
 
         public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> lite)

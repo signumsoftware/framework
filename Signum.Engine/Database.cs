@@ -71,7 +71,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("lite");
 
            if (lite.EntityOrNull == null)
-                lite.SetEntity(Retrieve(lite.RuntimeType, lite.Id));
+                lite.SetEntity(Retrieve(lite.EntityType, lite.Id));
 
             return lite.EntityOrNull;
         }
@@ -81,7 +81,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            return (T)(object)Retrieve(lite.RuntimeType, lite.Id);
+            return (T)(object)Retrieve(lite.EntityType, lite.Id);
         }
 
         static GenericInvoker<Func<int, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<int, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
@@ -162,7 +162,7 @@ namespace Signum.Engine
             if (lite == null)
                 return null;
 
-            lite.SetToString(GetToStr(lite.RuntimeType, lite.Id));
+            lite.SetToString(GetToStr(lite.EntityType, lite.Id));
 
             return lite;
         }
@@ -358,10 +358,10 @@ namespace Signum.Engine
 
             using (Transaction tr = new Transaction())
             {
-                var dic = lites.AgGroupToDictionary(a => a.RuntimeType, gr =>
+                var dic = lites.AgGroupToDictionary(a => a.EntityType, gr =>
                     RetrieveList(gr.Key, gr.Select(a => a.Id).ToList()).ToDictionary(a => a.Id));
 
-                var result = lites.Select(l => (IdentifiableEntity)dic[l.RuntimeType][l.Id]).ToList(); // keep same order
+                var result = lites.Select(l => (IdentifiableEntity)dic[l.EntityType][l.Id]).ToList(); // keep same order
 
                 return tr.Commit(result);
             }
@@ -384,7 +384,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            giDeleteId.GetInvoker(lite.RuntimeType)(lite.Id);
+            giDeleteId.GetInvoker(lite.EntityType)(lite.Id);
         }
 
         public static void Delete<T>(this T ident)
@@ -447,7 +447,7 @@ namespace Signum.Engine
                     areNew.ToString(a => "\t{0}".Formato(a), "\r\n"));
 
 
-            var groups = collection.GroupBy(a => a.RuntimeType, a => a.Id).ToList();
+            var groups = collection.GroupBy(a => a.EntityType, a => a.Id).ToList();
 
             using (Transaction tr = new Transaction())
             {
@@ -551,7 +551,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            return (IQueryable<E>)giInDBLite.GetInvoker(typeof(E), lite.RuntimeType).Invoke(lite);
+            return (IQueryable<E>)giInDBLite.GetInvoker(typeof(E), lite.EntityType).Invoke(lite);
         }
 
         [MethodExpander(typeof(InDbExpander))]
@@ -600,7 +600,7 @@ namespace Signum.Engine
 
                 var staticType = genericArguments[0];
             
-                var runtimeType = isLite ? ((Lite<IdentifiableEntity>)value).RuntimeType : value.GetType();
+                var runtimeType = isLite ? ((Lite<IdentifiableEntity>)value).EntityType : value.GetType();
 
                 Expression query = !isLite ?
                     giInDB.GetInvoker(staticType, runtimeType)((IIdentifiable)value).Expression :

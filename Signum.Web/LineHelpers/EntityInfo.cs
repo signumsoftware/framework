@@ -102,7 +102,7 @@ namespace Signum.Web
 
     public class RuntimeInfo
     {
-        public Type RuntimeType { get; set; }
+        public Type EntityType { get; set; }
         public int? IdOrNull { get; set; }
         public bool IsNew { get; set; }
 
@@ -112,11 +112,11 @@ namespace Signum.Web
         {
             if (lite == null)
             {
-                RuntimeType = null;
+                EntityType = null;
                 return;
             }
 
-            RuntimeType = lite.RuntimeType;
+            EntityType = lite.EntityType;
             IdOrNull = lite.IdOrNull;
             IsNew = lite.IdOrNull == null;
         }
@@ -125,22 +125,22 @@ namespace Signum.Web
         {
             if (entity == null)
             {
-                RuntimeType = null;
+                EntityType = null;
                 return;
             }
 
-            RuntimeType = entity.GetType();
+            EntityType = entity.GetType();
         }
 
         public RuntimeInfo(IIdentifiable entity)
         {
             if (entity == null)
             {
-                RuntimeType = null;
+                EntityType = null;
                 return;
             }
 
-            RuntimeType = entity.GetType();
+            EntityType = entity.GetType();
             IdOrNull = entity.IdOrNull;
             IsNew = entity.IsNew;
         }
@@ -150,11 +150,11 @@ namespace Signum.Web
             if (IdOrNull != null && IsNew)
                 throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".Formato(IdOrNull));
 
-            if (RuntimeType != null && RuntimeType.IsLite())
+            if (EntityType != null && EntityType.IsLite())
                 throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
 
             return "{0};{1};{2}".Formato(
-                (RuntimeType == null) ? "" : Navigator.ResolveWebTypeName(RuntimeType),
+                (EntityType == null) ? "" : Navigator.ResolveWebTypeName(EntityType),
                 IdOrNull.TryToString(),
                 IsNew ? "n" : "o"
                 );
@@ -170,7 +170,7 @@ namespace Signum.Web
 
             return new RuntimeInfo
             {
-                RuntimeType = string.IsNullOrEmpty(runtimeTypeString) ? null : Navigator.ResolveType(runtimeTypeString),
+                EntityType = string.IsNullOrEmpty(runtimeTypeString) ? null : Navigator.ResolveType(runtimeTypeString),
                 IdOrNull = (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
                 IsNew = parts[2]=="n" ? true : false
             };
@@ -181,7 +181,7 @@ namespace Signum.Web
             if(IsNew)
                 throw new InvalidOperationException("The RuntimeInfo represents a new entity");
 
-            return Lite.Create(this.RuntimeType, this.IdOrNull.Value);
+            return Lite.Create(this.EntityType, this.IdOrNull.Value);
         }
     }
 }

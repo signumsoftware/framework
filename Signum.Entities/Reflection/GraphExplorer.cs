@@ -236,9 +236,9 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified((Modifiable)lite)),
                new XAttribute("TypeName", lite.GetType().TypeName()), 
-               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(lite.RuntimeType.FullName.GetHashCode())),
+               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(lite.EntityType.FullName.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
-               new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.RuntimeType.FullName.GetHashCode()).Replace("#", "#44")),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.EntityType.FullName.GetHashCode()).Replace("#", "#44")),
                new XAttribute("Description", lite.IdOrNull.TryToString() ?? "New")
             };
         }

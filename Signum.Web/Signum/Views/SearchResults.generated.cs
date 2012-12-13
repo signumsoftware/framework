@@ -177,7 +177,7 @@ WriteLiteral("            <td>\r\n                ");
                         new 
                         {
                             @class = "sf-td-selection", 
-                            value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString() 
+                            value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.EntityType) + "__" + entityField.ToString() 
                         }));
 
             

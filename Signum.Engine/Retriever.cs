@@ -133,7 +133,7 @@ namespace Signum.Engine
             if (lite == null)
                 return null;
 
-            IdentityTuple tuple = new IdentityTuple(lite.RuntimeType, lite.Id);
+            IdentityTuple tuple = new IdentityTuple(lite.EntityType, lite.Id);
             if (liteRequests == null)
                 liteRequests = new Dictionary<IdentityTuple, List<Lite<IIdentifiable>>>();
             liteRequests.GetOrCreate(tuple).Add(lite);

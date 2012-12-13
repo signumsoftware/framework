@@ -92,8 +92,8 @@ namespace Signum.Web
             {
                 new EntityFormatterRule(l => true, (h,l) => 
                 {
-                    if (Navigator.IsNavigable(l.RuntimeType, isSearchEntity: true ))
-                        return h.Href(Navigator.NavigateRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
+                    if (Navigator.IsNavigable(l.EntityType, isSearchEntity: true ))
+                        return h.Href(Navigator.NavigateRoute(l.EntityType, l.Id), h.Encode(Resources.View));
                     else
                         return MvcHtmlString.Empty;
                 }),

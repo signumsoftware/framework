@@ -203,7 +203,7 @@ SF.registerModule("Lines", function () {
                     containerDiv: SF.compose(this.options.prefix, self.keys.entity),
                     onOk: function () { return self.onViewingOk(_viewOptions.validationOptions); },
                     onOkClosed: function () { self.fireOnEntityChanged(true); },
-                    type: info.runtimeType(),
+                    type: info.EntityType(),
                     id: info.id(),
                     prefix: this.options.prefix,
                     requestExtraJsonData: this.extraJsonParams()
@@ -212,7 +212,7 @@ SF.registerModule("Lines", function () {
 
             onViewingOk: function (validatorOptions) {
                 var valOptions = $.extend(validatorOptions || {}, {
-                    type: this.runtimeInfo().runtimeType()
+                    type: this.runtimeInfo().EntityType()
                 });
                 return this.checkValidation(valOptions).acceptChanges;
             },
@@ -357,11 +357,11 @@ SF.registerModule("Lines", function () {
                 var separator = fullValue.indexOf(";");
                 var value = [];
                 if (separator === -1) {
-                    value.runtimeType = SF.isEmpty(fullValue) ? "" : this.staticInfo().singleType();
+                    value.EntityType = SF.isEmpty(fullValue) ? "" : this.staticInfo().singleType();
                     value.id = fullValue;
                 }
                 else {
-                    value.runtimeType = fullValue.substring(0, separator);
+                    value.EntityType = fullValue.substring(0, separator);
                     value.id = fullValue.substring(separator + 1, fullValue.length);
                 }
                 return value;
@@ -374,7 +374,7 @@ SF.registerModule("Lines", function () {
                     newEntity = newValue !== null && !SF.isEmpty(newValue.id);
 
                 if (newEntity) {
-                    newRuntimeType = newValue.runtimeType;
+                    newRuntimeType = newValue.EntityType;
                     newId = newValue.id;
                 }
                 var runtimeInfo = this.runtimeInfo();
@@ -388,7 +388,7 @@ SF.registerModule("Lines", function () {
                 if (viewOptions.navigate) {
                     var runtimeInfo = this.runtimeInfo();
                     if (!SF.isEmpty(runtimeInfo.id())) {
-                        window.open(viewOptions.controllerUrl.substring(0, viewOptions.controllerUrl.lastIndexOf("/") + 1) + runtimeInfo.runtimeType() + "/" + runtimeInfo.id(), "_blank");
+                        window.open(viewOptions.controllerUrl.substring(0, viewOptions.controllerUrl.lastIndexOf("/") + 1) + runtimeInfo.EntityType() + "/" + runtimeInfo.id(), "_blank");
                     }
                 }
                 else {
@@ -679,7 +679,7 @@ SF.registerModule("Lines", function () {
                 if (viewOptions.navigate) {
                     var itemInfo = this.itemRuntimeInfo(selectedItemPrefix);
                     if (!SF.isEmpty(itemInfo.id())) {
-                        window.open(_viewOptions.controllerUrl.substring(0, _viewOptions.controllerUrl.lastIndexOf("/") + 1) + itemInfo.runtimeType() + "/" + itemInfo.id(), "_blank");
+                        window.open(_viewOptions.controllerUrl.substring(0, _viewOptions.controllerUrl.lastIndexOf("/") + 1) + itemInfo.EntityType() + "/" + itemInfo.id(), "_blank");
                     }
                     return;
                 }
@@ -695,7 +695,7 @@ SF.registerModule("Lines", function () {
                     onOkClosed: function () { self.fireOnEntityChanged(); },
                     onCancelled: null,
                     controllerUrl: null,
-                    type: info.runtimeType(),
+                    type: info.EntityType(),
                     id: info.id(),
                     prefix: itemPrefix,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
@@ -704,7 +704,7 @@ SF.registerModule("Lines", function () {
 
             onViewingOk: function (validatorOptions, itemPrefix) {
                 var valOptions = $.extend(validatorOptions || {}, {
-                    type: this.itemRuntimeInfo(itemPrefix).runtimeType()
+                    type: this.itemRuntimeInfo(itemPrefix).EntityType()
                 });
                 var validatorResult = this.checkValidation(valOptions, itemPrefix);
                 return validatorResult.acceptChanges;
@@ -897,7 +897,7 @@ SF.registerModule("Lines", function () {
                 var info = this.itemRuntimeInfo(itemPrefix);
                 return $.extend({
                     containerDiv: this.options.detailDiv,
-                    type: info.runtimeType(),
+                    type: info.EntityType(),
                     id: info.id(),
                     prefix: itemPrefix,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)

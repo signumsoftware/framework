@@ -84,7 +84,7 @@ namespace Signum.Test.LinqProvider
         public void SelectTypeLiteIB()
         {
             var list = Database.Query<AwardNominationDN>()
-                .Select(a => a.Award.RuntimeType).ToList();
+                .Select(a => a.Award.EntityType).ToList();
         }
 
         [TestMethod]
@@ -110,7 +110,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEntityWithLiteIbRuntimeType()
         {
-            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.RuntimeType == typeof(GrammyAwardDN)).ToList();
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.EntityType == typeof(GrammyAwardDN)).ToList();
         }
 
         [TestMethod]

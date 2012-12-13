@@ -217,7 +217,7 @@ namespace Signum.Engine
 
         public IdentityTuple(Lite<IdentifiableEntity> lite)
         {
-            this.Type = lite.RuntimeType;
+            this.Type = lite.EntityType;
             this.Id = lite.Id;
         }
 

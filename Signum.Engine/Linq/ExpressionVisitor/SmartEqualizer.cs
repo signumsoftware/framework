@@ -360,7 +360,7 @@ namespace Signum.Engine.Linq
             if (collection.IsEmpty())
                 return False;
 
-            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.RuntimeType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
+            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.EntityType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
             return EntityIn(liteReference.Reference, entityIDs); 
         }
@@ -541,9 +541,9 @@ namespace Signum.Engine.Linq
 
                 Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 
-                EntityExpression ere = new EntityExpression(lite.RuntimeType, id, null, null);
+                EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null);
 
-                return new LiteExpression(Lite.Generate(lite.RuntimeType), ere, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.RuntimeType), false);
+                return new LiteExpression(Lite.Generate(lite.EntityType), ere, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.EntityType), false);
             }
 
             return null;
