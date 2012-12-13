@@ -114,7 +114,7 @@ namespace Signum.Entities.Alerts
         }
 
         static Expression<Func<AlertDN, bool>> FutureExpression = 
-            a => !a.AttendedDate.HasValue && (!a.AttendedDate.HasValue || a.AttendedDate > TimeZoneManager.Now); 
+            a => !a.AttendedDate.HasValue && (a.AlertDate == null || a.AlertDate > TimeZoneManager.Now); 
         public bool Future
         {
             get{ return FutureExpression.Evaluate(this); }

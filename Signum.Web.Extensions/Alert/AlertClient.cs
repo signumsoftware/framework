@@ -15,7 +15,7 @@ namespace Signum.Web.Alerts
     {
         public static string ViewPrefix = "~/Alert/Views/{0}.cshtml";
 
-        public static void Start(params Type[] tipos)
+        public static void Start(params Type[] types)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -28,7 +28,7 @@ namespace Signum.Web.Alerts
                 });
 
                 WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) =>
-                    SupportAlerts(entity, tipos) ? AlertWidgetHelper.CreateWidget(entity as IdentifiableEntity, partialViewName, prefix) :
+                    SupportAlerts(entity, types) ? AlertWidgetHelper.CreateWidget(entity as IdentifiableEntity, partialViewName, prefix) :
                     null;
 
                 OperationsClient.AddSettings(new List<OperationSettings>
@@ -62,8 +62,8 @@ namespace Signum.Web.Alerts
             if (ie == null || ie.IsNew)
                 return false;
 
-            if (tipos.Contains(ie.GetType()))
-                return true;
+            if (!tipos.Contains(ie.GetType()))
+                return false;
 
             return Navigator.IsFindable(typeof(AlertDN));
         }

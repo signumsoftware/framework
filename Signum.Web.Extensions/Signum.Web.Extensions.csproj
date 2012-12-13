@@ -92,7 +92,7 @@
   <ItemGroup>
     <Compile Include="Alert\AlertClient.cs" />
     <Compile Include="Alert\AlertWidgetHelper.cs" />
-    <Compile Include="Alert\Controllers\AlertsController.cs" />
+    <Compile Include="Alert\Controllers\AlertController.cs" />
     <Compile Include="Alert\Views\Alert.generated.cs">
       <DependentUpon>Alert.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -113,7 +113,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Notes\Controllers\NotesController.cs" />
+    <Compile Include="Note\Controllers\NoteController.cs" />
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
     <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
     <Compile Include="AuthAdmin\Views\FacadeMethods.generated.cs">
@@ -466,19 +466,19 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Search.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Notes\NoteClient.cs" />
-    <Compile Include="Notes\NoteWidgetHelper.cs" />
-    <Compile Include="Notes\Views\Nota.generated.cs">
-      <DependentUpon>Nota.cshtml</DependentUpon>
+    <Compile Include="Note\NoteClient.cs" />
+    <Compile Include="Note\NoteWidgetHelper.cs" />
+    <Compile Include="Note\Views\Note1.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+      <DependentUpon>Note.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Notes\Views\Web.generated.cs">
+    <Compile Include="Note\Views\Web.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Web.config</DependentUpon>
     </Compile>
-    <Compile Include="Notes\Views\_ViewStart.generated.cs">
+    <Compile Include="Note\Views\_ViewStart.generated.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1091,17 +1091,17 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChartResultsTable1.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Notes\Views\Web.config">
+    <Content Include="Note\Views\Web.config">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Web.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Notes\Views\_ViewStart.cshtml">
+    <Content Include="Note\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Notes\Views\Nota.cshtml">
+    <Content Include="Note\Views\Note.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Nota.generated.cs</LastGenOutput>
+      <LastGenOutput>Note1.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

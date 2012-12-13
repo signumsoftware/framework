@@ -11,7 +11,7 @@ using Signum.Web;
 
 namespace Signum.Web.Alerts
 {
-    public class AlertsController : Controller
+    public class AlertController : Controller
     {
         public PartialViewResult CreateAlert(string prefix)
         {

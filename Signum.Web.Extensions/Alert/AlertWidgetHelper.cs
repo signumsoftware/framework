@@ -37,7 +37,7 @@ namespace Signum.Web.Alerts
         public static string JsOnAlertCreated(string prefix, string successMessage)
         {
             return "SF.Widgets.onAlertCreated('{0}','{1}','{2}')".Formato(
-                RouteHelper.New().Action<AlertsController>(wc => wc.AlertsCount()),
+                RouteHelper.New().Action<AlertController>(wc => wc.AlertsCount()),
                 prefix,
                 successMessage);
         }
@@ -58,7 +58,7 @@ namespace Signum.Web.Alerts
             {
                 Type = typeof(AlertDN).Name,
                 Prefix = prefix,
-                ControllerUrl = RouteHelper.New().Action("CreateAlert", "Alerts"),
+                ControllerUrl = RouteHelper.New().Action<AlertController>(ac => ac.CreateAlert(prefix)),
                 RequestExtraJsonData = "function(){{ return {{ {0}: new SF.RuntimeInfo('{1}').find().val() }}; }}".Formato(EntityBaseKeys.RuntimeInfo, prefix),
                 OnOkClosed = new JsFunction() { JsOnAlertCreated(prefix, Resources.AlertCreated) }
             };
