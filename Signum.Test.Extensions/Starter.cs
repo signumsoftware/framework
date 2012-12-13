@@ -145,7 +145,7 @@ namespace Signum.Test.Extensions
                     Lite = true,
                     AllowsNew = false,
                     CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
-                    Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
+                    Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
                 }.Register();
 
                 new BasicExecute<BandDN>(BandOperation.Save)
