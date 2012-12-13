@@ -228,7 +228,11 @@ namespace Signum.Test
             CountryDN usa = new CountryDN { Name = "USA" };
             CountryDN japan = new CountryDN { Name = Japan };
 
-            //smashingPumpkins.Members.ForEach(m => m.Friends = smashingPumpkins.Members.Where(a => a.Sex != m.Sex).Select(a => a.ToLiteFat()).ToMList());
+            foreach (var member in smashingPumpkins.Members)
+            {
+                member.Friends = smashingPumpkins.Members.Where(a => a.Sex != member.Sex).Select(a => a.ToLite()).ToMList();
+                member.Execute(ArtistOperation.Save);
+            }
 
             new NoteWithDateDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }.Execute(NoteWithDateOperation.Save);
 
