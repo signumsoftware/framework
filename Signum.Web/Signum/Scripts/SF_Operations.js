@@ -161,7 +161,7 @@ SF.registerModule("Operations", function () {
                 var info = this.runtimeInfo();
                 new SF.PartialValidator({
                     prefix: this.options.prefix,
-                    type: info.EntityType(),
+                    type: info.entityType(),
                     id: info.id()
                 }).showErrors(modelState);
             }
@@ -226,7 +226,7 @@ SF.registerModule("Operations", function () {
             }
         };
 
-        this.contextualExecute = function (runtimeType, id) {
+        this.contextualExecute = function (entityType, id) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -288,7 +288,7 @@ SF.registerModule("Operations", function () {
             }
         };
 
-        this.contextualConstruct = function (runtimeType, id) {
+        this.contextualConstruct = function (entityType, id) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -313,7 +313,7 @@ SF.registerModule("Operations", function () {
             controllerUrl: SF.Urls.operationDelete
         }, _options));
 
-        this.contextualDelete = function (runtimeType, id) {
+        this.contextualDelete = function (entityType, id) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -347,7 +347,7 @@ SF.registerModule("Operations", function () {
             var serializer = new SF.Serializer()
                 .add($('#' + SF.Keys.tabId).serialize())
                 .add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize())
-                .add({ runtimeType: $(this.pf(SF.Keys.entityTypeNames)).val(),
+                .add({ entityType: $(this.pf(SF.Keys.entityTypeNames)).val(),
                     operationFullKey: this.options.operationKey,
                     prefix: newPrefix,
                     oldPrefix: this.options.prefix

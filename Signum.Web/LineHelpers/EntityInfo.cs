@@ -166,11 +166,11 @@ namespace Signum.Web
             if (parts.Length != 3)
                 throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
 
-            string runtimeTypeString = parts[0];
+            string entityTypeString = parts[0];
 
             return new RuntimeInfo
             {
-                EntityType = string.IsNullOrEmpty(runtimeTypeString) ? null : Navigator.ResolveType(runtimeTypeString),
+                EntityType = string.IsNullOrEmpty(entityTypeString) ? null : Navigator.ResolveType(entityTypeString),
                 IdOrNull = (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
                 IsNew = parts[2]=="n" ? true : false
             };

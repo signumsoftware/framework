@@ -349,17 +349,17 @@ namespace Signum.Web
                 return ctx.None();
             
             string strRuntimeInfo;
-            Type runtimeType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ? 
+            Type entityType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ? 
                 RuntimeInfo.FromFormValue(strRuntimeInfo).EntityType: 
                 ctx.Value.TryCC(t=>t.GetType());
 
-            if (runtimeType == null)
+            if (entityType == null)
                 return (T)(object)null;
 
-            if (typeof(T) == runtimeType || typeof(T).IsEmbeddedEntity())
+            if (typeof(T) == entityType || typeof(T).IsEmbeddedEntity())
                 return GetRuntimeValue<T>(ctx, ctx.PropertyRoute);
 
-            return miGetRuntimeValue.GetInvoker(runtimeType)(this, ctx, PropertyRoute.Root(runtimeType));
+            return miGetRuntimeValue.GetInvoker(entityType)(this, ctx, PropertyRoute.Root(entityType));
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue = 
