@@ -100,7 +100,7 @@ namespace Signum.Engine.Operations
                 }
                 catch (Exception e)
                 {
-                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, e);
+                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, e);
                     throw;
                 }
             }

@@ -98,7 +98,7 @@ namespace Signum.Engine.Operations
                 }
                 catch (Exception ex)
                 {
-                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
+                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, parameters, ex);
 
                     if (!entity.IsNew)
                     {

@@ -183,9 +183,11 @@ namespace Signum.Engine.Operations
                 EndOperation(operation, entity);
         }
 
-        internal static void OnErrorOperation(IOperation operation, IIdentifiable entity, Exception ex)
+        internal static void OnErrorOperation(IOperation operation, IIdentifiable entity, object[] args, Exception ex)
         {
             ex.Data["entity"] = entity;
+            if (args != null)
+                ex.Data["args"] = args;
 
             if (ErrorOperation != null)
                 ErrorOperation(operation, entity, ex);
