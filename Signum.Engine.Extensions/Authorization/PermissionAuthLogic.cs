@@ -72,7 +72,18 @@ namespace Signum.Engine.Authorization
                 RegisterPermissions(BasicPermissions.AdminRules);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Permissions", "Permission", roles, MultiEnumLogic<PermissionDN>.ToEntity, bool.Parse);
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
+                {
+                    string replacementKey = typeof(PermissionDN).Name;
+
+                    replacements.AskForReplacements(
+                        x.Element("Permissions").Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
+                        MultiEnumLogic<PermissionDN>.AllUniqueKeys().ToHashSet(),
+                        replacementKey);
+
+                    return cache.ImportXml(x, "Permissions", "Permission", roles,
+                        s => MultiEnumLogic<PermissionDN>.TryToEntity(replacements.Apply(replacementKey, s)), bool.Parse);
+                };
             }
         }
  

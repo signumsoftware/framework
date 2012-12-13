@@ -42,13 +42,29 @@ namespace Signum.Engine.Authorization
                     AuthUtils.MinBool);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Queries", "Query", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Queries", "Query", roles, s =>
+                AuthLogic.ImportFromXml += (x, roles, replacements) => 
                 {
-                    var query = QueryLogic.RetrieveOrGenerateQuery(QueryLogic.QueryNames.GetOrThrow(s, "Query with name {0} not found"));
-                    if (query.IsNew)
-                        return query.Save();
-                    return query;
-                }, bool.Parse);
+                    string replacementKey = typeof(QueryDN).Name;
+
+                    var dic = QueryLogic.RetrieveOrGenerateQueries();
+
+                    replacements.AskForReplacements(
+                        x.Element("Queries").Elements("Role").SelectMany(r => r.Elements("Query")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
+                        dic.Keys.ToHashSet(),
+                        replacementKey);
+
+                    return cache.ImportXml(x, "Queries", "Query", roles, s =>
+                    {
+                        var query = dic.TryGetC(replacements.Apply(replacementKey, s));
+                        if (query == null)
+                            return null;
+
+                        if (query.IsNew)
+                            return query.Save();
+
+                        return query;
+                    }, bool.Parse);
+                };
             }
         }
 

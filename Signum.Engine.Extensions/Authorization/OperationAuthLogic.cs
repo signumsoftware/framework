@@ -41,7 +41,18 @@ namespace Signum.Engine.Authorization
                      AuthUtils.MinOperation);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Operations", "Operation", roles, MultiEnumLogic<OperationDN>.ToEntity, EnumExtensions.ToEnum<OperationAllowed>);
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
+                {
+                    string replacementKey = typeof(OperationDN).Name;
+
+                    replacements.AskForReplacements(
+                        x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
+                        MultiEnumLogic<OperationDN>.AllUniqueKeys().ToHashSet(),
+                        replacementKey);
+
+                    return cache.ImportXml(x, "Operations", "Operation", roles,
+                        s => MultiEnumLogic<OperationDN>.TryToEntity(replacements.Apply(replacementKey, s)), EnumExtensions.ToEnum<OperationAllowed>);
+                };
             }
         }
 

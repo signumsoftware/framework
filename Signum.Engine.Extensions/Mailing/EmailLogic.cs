@@ -129,9 +129,11 @@ namespace Signum.Engine.Mailing
             Dictionary<string, EmailTemplateDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
             Dictionary<string, EmailTemplateDN> old = Administrator.TryRetrieveAll<EmailTemplateDN>(replacements).ToDictionary(c => c.FullClassName);
 
-            replacements.AskForReplacements(old, should, EmailTemplates);
+            replacements.AskForReplacements(
+                old.Keys.ToHashSet(), 
+                should.Keys.ToHashSet(), EmailTemplates);
 
-            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacements(old, EmailTemplates);
+            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacementsToOld(old, EmailTemplates);
 
             return Synchronizer.SynchronizeScript(should, current, 
                 (tn, s) => table.InsertSqlSync(s), 

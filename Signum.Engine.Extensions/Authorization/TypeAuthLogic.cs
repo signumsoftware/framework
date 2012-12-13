@@ -54,7 +54,7 @@ namespace Signum.Engine.Authorization
                     AuthUtils.MinType);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml();
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, roles);
+                AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
             }
         }
 

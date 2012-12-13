@@ -315,7 +315,7 @@ namespace Signum.Engine.Authorization
         }
 
         public static event Func<XElement> ExportToXml;
-        public static event Func<XElement, Dictionary<string, Lite<RoleDN>>, SqlPreCommand> ImportFromXml;
+        public static event Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand> ImportFromXml;
 
         public static XDocument ExportRules()
         {
@@ -331,8 +331,14 @@ namespace Signum.Engine.Authorization
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
         {
+            Replacements replacements = new Replacements();
+
             var rolesDic = roles.Value.ToDictionary(a => a.ToString());
             var rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
+
+            replacements.AskForReplacements(rolesXml.Keys.ToHashSet(), rolesDic.Keys.ToHashSet(), "Roles");
+
+            rolesDic = replacements.ApplyReplacementsToNew(rolesDic, "Roles");
 
             var xmlOnly = rolesXml.Keys.Except(rolesDic.Keys).ToList();
             if (xmlOnly.Any())
@@ -346,7 +352,7 @@ namespace Signum.Engine.Authorization
                     roles.Value.RelatedTo(r),
                     kvp.Value.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                     sr => sr.ToString(),
-                    s => s,
+                    s => rolesDic[s].ToString(),
                     (sr, s) => 0,
                     "Checking SubRoles of {0}".Formato(r));
             }
@@ -355,9 +361,14 @@ namespace Signum.Engine.Authorization
                     new SqlPreCommandSimple("-- Alien role {0} not configured!!".Formato(n))
                 ).Combine(Spacing.Simple);
 
+          
+
             var result = ImportFromXml.GetInvocationList()
-                .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, SqlPreCommand>>()
-                .Select(inv => inv(doc.Root, rolesDic)).Combine(Spacing.Triple);
+                .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand>>()
+                .Select(inv => inv(doc.Root, rolesDic, replacements)).Combine(Spacing.Triple);
+
+            if (replacements.Values.Any(a => a.Any()))
+                SafeConsole.WriteLineColor(ConsoleColor.Red, "There are renames! Remember to export after executing the script"); 
 
             if (result == null && dbOnlyWarnings == null)
                 return null;

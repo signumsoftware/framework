@@ -42,15 +42,66 @@ namespace Signum.Engine.Authorization
                 }
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => p.Type.CleanName + "|" + p.Path, pa => pa.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Properties", "Property", roles, s =>
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
-                    var arr = s.Split('|');
-                    Type type = TypeLogic.GetType(arr[0]);
-                    var property =  PropertyLogic.GetEntity(PropertyRoute.Parse(type, arr[1]));
-                    if (property.IsNew)
-                        property.Save();
-                    return property;
-                }, EnumExtensions.ToEnum<PropertyAllowed>);
+                    Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
+
+                    string replacementKey = typeof(OperationDN).Name;
+
+                    var groups =  x.Element("Properties").Elements("Role").SelectMany(r => r.Elements("Property")).Select(p => new PropertyPair(p.Attribute("Resource").Value))
+                        .AgGroupToDictionary(a=>a.Type, gr=>gr.Select(pp=> pp.Property).ToHashSet());
+
+                    foreach (var item in groups)
+                    {
+                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeof(TypeDN).Name, item.Key));
+
+                        if (type == null)
+                            continue;
+
+                        var dic = PropertyRoute.GenerateRoutes(type).ToDictionary(a => a.PropertyString());
+
+                        replacements.AskForReplacements(
+                           item.Value,
+                           dic.Keys.ToHashSet(),
+                           type.Name + " Properties");
+
+
+                        routesDicCache[type] = dic;
+                    }
+
+                    return cache.ImportXml(x, "Properties", "Property", roles, s =>
+                    {
+                        var pp = new PropertyPair(s);
+
+                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeof(TypeDN).Name, pp.Type));
+                        if (type == null)
+                            return null;
+
+                        PropertyRoute route = routesDicCache[type].TryGetC(replacements.Apply(type.Name + " Properties", pp.Property));
+
+                        if (route == null)
+                            return null;
+
+                        var property = PropertyLogic.GetEntity(route);
+                        if (property.IsNew)
+                            property.Save();
+                            
+                        return property;
+
+                    }, EnumExtensions.ToEnum<PropertyAllowed>);
+                };
+            }
+        }
+
+        struct PropertyPair
+        {
+            public readonly string Type;
+            public readonly  string Property;
+            public PropertyPair(string str)
+            {
+                var index = str.IndexOf("|");
+                Type = str.Substring(0, index);
+                Property = str.Substring(index + 1);
             }
         }
 

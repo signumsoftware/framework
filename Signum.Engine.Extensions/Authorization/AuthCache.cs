@@ -382,22 +382,25 @@ namespace Signum.Entities.Authorization
         }
 
 
-        internal SqlPreCommand ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleDN>> roles, Func<string, R> toResource, Func<string, A> parseAllowed)
+        internal SqlPreCommand ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleDN>> roles,
+            Func<string, R> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
             var should = element.Element(rootName).Elements("Role").ToDictionary(x => roles[x.Attribute("Name").Value]);
 
             Table table = Schema.Current.Table(typeof(RT));
-
+            
             return Synchronizer.SynchronizeScript(should, current, 
                 (role, x) =>
                 {
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, null, max, role);
 
-                    var dic = x.Elements(elementName).ToDictionary(
-                        xr => toResource(xr.Attribute("Resource").Value),
-                        xr => parseAllowed(xr.Attribute("Allowed").Value), "{0} rules for {1}".Formato(typeof(R).NiceName(), role));
+                    var dic =  (from xr in x.Elements(elementName)
+                               let r = toResource(xr.Attribute("Resource").Value)
+                               where r != null
+                               select KVP.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
+                               .ToDictionary("{0} rules for {1}".Formato(typeof(R).NiceName(), role));
 
                     SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RT
                     {
@@ -414,6 +417,12 @@ namespace Signum.Entities.Authorization
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, def, max, role);
+
+                    var dic = (from xr in x.Elements(elementName)
+                               let r = toResource(xr.Attribute("Resource").Value)
+                               where r != null
+                               select KVP.Create(r, xr))
+                               .ToDictionary("{0} rules for {1}".Formato(typeof(R).NiceName(), role));
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
                         x.Elements(elementName).ToDictionary(a => toResource(a.Attribute("Resource").Value)), 
