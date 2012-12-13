@@ -15,6 +15,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities;
 using Microsoft.SqlServer.Types;
 using Signum.Engine.Operations;
+using Signum.Engine.Basics;
 
 namespace Signum.Test
 {
@@ -57,6 +58,7 @@ namespace Signum.Test
             Validator.GetOrCreatePropertyPack((OperationLogDN e) => e.User).Validators.Clear();
 
             OperationLogic.Start(sb, dqm);
+            ExceptionLogic.Start(sb, dqm);
 
             MusicLogic.Start(sb, dqm);
         }
