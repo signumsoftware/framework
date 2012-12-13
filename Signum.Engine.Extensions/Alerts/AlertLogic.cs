@@ -83,7 +83,7 @@ namespace Signum.Engine.Alerts
             return CreateAlert(entity.ToLite(), text, alertType, alertDate, user, title);
         }
 
-        public static AlertDN CreateAlert<T>(this Lite<T> entity, string text, Enum alertType = null, DateTime? alertDate = null, Lite<UserDN> user = null, string titule = null) where T : class, IIdentifiable
+        public static AlertDN CreateAlert<T>(this Lite<T> entity, string text, Enum alertType = null, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
         {
             if (started == false)
                 return null;
@@ -93,7 +93,7 @@ namespace Signum.Engine.Alerts
                 AlertDate = alertDate ?? TimeZoneManager.Now,
                 CreatedBy = user ?? UserDN.Current.ToLite(),
                 Text = text,
-                Title = titule,
+                Title = title,
                 Target = (Lite<IdentifiableEntity>)Lite.Create(entity.RuntimeType, entity.Id, entity.ToString()),
                 AlertType = alertType == null ? null : AlertTypeEnumLogic.ToEntity(alertType)
             }.Execute(AlertOperation.SaveNew);
