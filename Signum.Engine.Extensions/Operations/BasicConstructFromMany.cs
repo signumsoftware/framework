@@ -73,7 +73,7 @@ namespace Signum.Engine.Operations
                 }
                 catch (Exception e)
                 {
-                    OperationLogic.OnErrorOperation(this, null, e);
+                    OperationLogic.OnErrorOperation(this, null, args, e);
                     throw;
                 }
             }
