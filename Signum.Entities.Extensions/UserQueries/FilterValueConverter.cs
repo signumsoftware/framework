@@ -368,7 +368,7 @@ namespace Signum.Entities.UserQueries
         {
             var lu = value as Lite<UserDN>;
 
-            if (lu != null  && lu.RuntimeType == typeof(UserDN) && lu.IdOrNull == UserDN.Current.Id)
+            if (lu != null  && lu.EntityType == typeof(UserDN) && lu.IdOrNull == UserDN.Current.Id)
             {
                 result = CurrentUserKey;
                 return null; 

@@ -433,7 +433,7 @@ namespace Signum.Engine.Mailing
             recipientList.Select(to => new EmailMessageDN
             {
                 State = EmailState.Created,
-                Recipient = to.ToLite<IEmailOwnerDN>(),
+                Recipient = to.ToLite(),
                 Template = template,
                 Subject = content.Subject,
                 Body = content.Body,

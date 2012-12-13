@@ -83,7 +83,7 @@ namespace Signum.Engine.SMS
                 Construct = (providers, args) =>
                 {
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
-                        .Select(pr => new { Exp = exp.Evaluate(pr), Referred = pr.ToLite<IdentifiableEntity>() }).AsEnumerable().NotNull().Distinct().ToList();
+                        .Select(pr => new { Exp = exp.Evaluate(pr), Referred = pr.ToLite() }).AsEnumerable().NotNull().Distinct().ToList();
 
                     CreateMessageParams createParams = args.GetArg<CreateMessageParams>();
 
@@ -178,7 +178,7 @@ namespace Signum.Engine.SMS
                           {
                               Phone = phoneFunc.Evaluate(p),
                               Data = func.Evaluate(p),
-                              Referred = p.ToLite<IdentifiableEntity>()
+                              Referred = p.ToLite()
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
                     SMSSendPackageDN package = new SMSSendPackageDN { NumLines = numbers.Count, }.Save();
@@ -223,7 +223,7 @@ namespace Signum.Engine.SMS
                         From = template.From,
                         DestinationNumber = GetPhoneNumber(provider),
                         State = SMSMessageState.Created,
-                        Referred = provider.ToLite<IdentifiableEntity>()
+                        Referred = provider.ToLite()
                     };
                 }
             }.Register();

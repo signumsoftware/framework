@@ -67,7 +67,7 @@ namespace Signum.Web.Files
 
             IFile file;
 
-            if (info.RuntimeType == typeof(FilePathDN))
+            if (info.EntityType == typeof(FilePathDN))
             {
                 string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
                 if (!fileType.HasText())
@@ -77,7 +77,7 @@ namespace Signum.Web.Files
             }
             else
             {
-                file = (IFile)Activator.CreateInstance(info.RuntimeType);
+                file = (IFile)Activator.CreateInstance(info.EntityType);
             }
 
             HttpPostedFileBase hpf = Request.Files[fileName] as HttpPostedFileBase;
@@ -104,7 +104,7 @@ namespace Signum.Web.Files
 
             RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Headers["X-" + TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
             IFile file;
-            if (info.RuntimeType == typeof(FilePathDN))
+            if (info.EntityType == typeof(FilePathDN))
             {
                 string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
                 if (!fileType.HasText())
@@ -114,7 +114,7 @@ namespace Signum.Web.Files
             }
             else
             {
-                file = (IFile)Activator.CreateInstance(info.RuntimeType);
+                file = (IFile)Activator.CreateInstance(info.EntityType);
             }
 
             file.FileName = fileName;
@@ -167,7 +167,7 @@ namespace Signum.Web.Files
 
             RuntimeInfo ri = RuntimeInfo.FromFormValue(file);
 
-            if (ri.RuntimeType == typeof(FilePathDN))
+            if (ri.EntityType == typeof(FilePathDN))
             {
                 FilePathDN fp = Database.Retrieve<FilePathDN>(ri.IdOrNull.Value);
 

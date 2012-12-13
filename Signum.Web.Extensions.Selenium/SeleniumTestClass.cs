@@ -80,7 +80,7 @@ namespace Signum.Web.Selenium
 
         protected virtual string ViewRoute(Lite<IIdentifiable> lite)
         {
-            return ViewRoute(lite.RuntimeType, lite.IdOrNull);
+            return ViewRoute(lite.EntityType, lite.IdOrNull);
         }
     }
 }

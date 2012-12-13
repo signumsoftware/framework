@@ -266,7 +266,7 @@ namespace Signum.Web.Chart
 
             var userChart = request.ToUserChart();
 
-            userChart.Related = UserDN.Current.ToLite<IdentifiableEntity>();
+            userChart.Related = UserDN.Current.ToLite();
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 

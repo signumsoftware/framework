@@ -205,7 +205,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package, line =>
             {
-                OperationType operationType = OperationLogic.OperationType(line.Entity.RuntimeType, operationKey);
+                OperationType operationType = OperationLogic.OperationType(line.Entity.EntityType, operationKey);
 
                 switch (operationType)
                 {
@@ -221,7 +221,7 @@ namespace Signum.Engine.Processes
                             if (result.IsNew)
                                 result.Save();
 
-                            line.Result = result.ToLite<IIdentifiable>();
+                            line.Result = result.ToLite();
                         }
                         break;
                     default:
@@ -276,7 +276,7 @@ namespace Signum.Engine.Processes
                 if (result.IsNew)
                     result.Save();
 
-                line.Result = result.ToLite<IIdentifiable>();
+                line.Result = result.ToLite();
             });
         }
     }

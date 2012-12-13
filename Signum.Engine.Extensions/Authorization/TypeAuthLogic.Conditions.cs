@@ -171,7 +171,7 @@ namespace Signum.Engine.Authorization
                 AssertAllowed(lite.UntypedEntityOrNull, allowed, inUserInterface);
 
             if (!lite.IsAllowedFor(allowed, inUserInterface))
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.RuntimeType.NiceName(), lite.Id));
+                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -211,7 +211,7 @@ namespace Signum.Engine.Authorization
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this Lite<IIdentifiable> lite, TypeAllowedBasic allowed, bool inUserInterface)
         {
-            return miIsAllowedForLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, inUserInterface);
+            return miIsAllowedForLite.GetInvoker(lite.EntityType).Invoke(lite, allowed, inUserInterface);
         }
 
         static GenericInvoker<Func<Lite<IIdentifiable>, TypeAllowedBasic, bool, bool>> miIsAllowedForLite =
@@ -266,7 +266,7 @@ namespace Signum.Engine.Authorization
         [MethodExpander(typeof(IsAllowedForDebugExpander))]
         public static DebugData IsAllowedForDebug(this Lite<IIdentifiable> lite, TypeAllowedBasic allowed, bool inUserInterface)
         {
-            return miIsAllowedForDebugLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, inUserInterface);
+            return miIsAllowedForDebugLite.GetInvoker(lite.EntityType).Invoke(lite, allowed, inUserInterface);
         }
 
         static GenericInvoker<Func<Lite<IIdentifiable>, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugLite =
@@ -463,7 +463,7 @@ namespace Signum.Engine.Authorization
                     }
 
                     return Requested <= Fallback.Get(UserInterface) ? null :
-                        "The base value for {0} is {1} (less than {2}) and {3} does not belong to any condition".Formato(Lite.RuntimeType.TypeName(), Fallback.Get(UserInterface), Requested, Lite);
+                        "The base value for {0} is {1} (less than {2}) and {3} does not belong to any condition".Formato(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested, Lite);
                 }
             }
         }
