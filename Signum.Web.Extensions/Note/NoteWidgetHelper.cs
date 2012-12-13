@@ -32,7 +32,7 @@ namespace Signum.Web.Notes
         public static string JsOnNoteCreated(string prefix, string successMessage)
         {
             return "SF.Widgets.onNoteCreated('{0}','{1}','{2}')".Formato(
-                RouteHelper.New().Action<NotesController>(wc => wc.NotesCount()), 
+                RouteHelper.New().Action<NoteController>(wc => wc.NotesCount()), 
                 prefix,
                 successMessage);
         }
@@ -61,7 +61,7 @@ namespace Signum.Web.Notes
             {
                 Type = typeof(NoteDN).Name,
                 Prefix = prefix,
-                ControllerUrl = RouteHelper.New().Action("CreateNote", "Widgets"),
+                ControllerUrl = RouteHelper.New().Action<NoteController>(nc => nc.CreateNote(prefix)),
                 RequestExtraJsonData = "function(){{ return {{ {0}: new SF.RuntimeInfo('{1}').find().val() }}; }}".Formato(EntityBaseKeys.RuntimeInfo, prefix),
                 OnOkClosed = new JsFunction() { JsOnNoteCreated(prefix, Resources.NoteCreated) }
             };

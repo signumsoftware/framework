@@ -11,9 +11,8 @@ using Signum.Web;
 
 namespace Signum.Web.Notes
 {
-    public class NotesController : Controller
+    public class NoteController : Controller
     {
-        #region Notes
         public PartialViewResult CreateNote(string prefix)
         {
             var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
@@ -28,6 +27,5 @@ namespace Signum.Web.Notes
             int count = NoteWidgetHelper.CountNotes(entity);
             return Content(count.ToString());
         }
-        #endregion
     }
 }

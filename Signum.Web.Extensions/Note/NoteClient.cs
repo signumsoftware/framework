@@ -13,9 +13,9 @@ namespace Signum.Web.Notes
 {
     public static class NoteClient
     {
-        public static string ViewPrefix = "~/Notes/Views/{0}.cshtml";
+        public static string ViewPrefix = "~/Note/Views/{0}.cshtml";
 
-        public static void Start(params Type[] tipos)
+        public static void Start(params Type[] types)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -25,13 +25,13 @@ namespace Signum.Web.Notes
                 {
                     new EntitySettings<NoteDN>(EntityType.Main) 
                     { 
-                        PartialViewName = _ => ViewPrefix.Formato("Nota"), 
+                        PartialViewName = _ => ViewPrefix.Formato("Note"), 
                         IsCreable = EntityWhen.Never 
                     },
                 });
 
                 WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) =>
-                    SupportsNotes(entity, tipos) ? NoteWidgetHelper.CreateWidget(entity as IdentifiableEntity, partialViewName, prefix) :
+                    SupportsNotes(entity, types) ? NoteWidgetHelper.CreateWidget(entity as IdentifiableEntity, partialViewName, prefix) :
                     null;
 
                 OperationsClient.AddSettings(new List<OperationSettings>
