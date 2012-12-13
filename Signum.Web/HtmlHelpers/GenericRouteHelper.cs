@@ -208,7 +208,7 @@ namespace Signum.Web
         public object Convert(object obj, Type parameterType)
         {
             Lite<IIdentifiable> lite = (Lite<IIdentifiable>)obj;
-            if (Lite.Extract(parameterType) == lite.RuntimeType)
+            if (Lite.Extract(parameterType) == lite.EntityType)
                 return lite.Id;
             else
                 return lite.Key();

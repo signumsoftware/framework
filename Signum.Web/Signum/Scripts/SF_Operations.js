@@ -161,7 +161,7 @@ SF.registerModule("Operations", function () {
                 var info = this.runtimeInfo();
                 new SF.PartialValidator({
                     prefix: this.options.prefix,
-                    type: info.runtimeType(),
+                    type: info.EntityType(),
                     id: info.id()
                 }).showErrors(modelState);
             }

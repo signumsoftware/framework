@@ -143,7 +143,7 @@ namespace Signum.Web
                 if (UntypedValue == null)
                     return null;
 
-                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite<IIdentifiable>).RuntimeType : UntypedValue.GetType();
+                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite<IIdentifiable>).EntityType : UntypedValue.GetType();
             }
         }
 

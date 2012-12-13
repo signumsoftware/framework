@@ -25,7 +25,7 @@ namespace Signum.Entities
         int Id { get; }
         bool IsNew { get;  }
         int? IdOrNull { get; }
-        Type RuntimeType { get; }
+        Type EntityType { get; }
         IdentifiableEntity UntypedEntityOrNull { get; }
 
         void ClearEntity();      
@@ -99,7 +99,7 @@ namespace Signum.Entities
             }
         }
 
-        public Type RuntimeType
+        public Type EntityType
         {
             get { return typeof(T); }
         }
@@ -124,7 +124,7 @@ namespace Signum.Entities
             if (id == null)
                 throw new InvalidOperationException("New entities are not allowed");
 
-            if (id != ei.id || RuntimeType != ei.GetType())
+            if (id != ei.id || EntityType != ei.GetType())
                 throw new InvalidOperationException("Entities do not match");
 
             this.entityOrNull = (T)ei;
@@ -186,17 +186,17 @@ namespace Signum.Entities
         {
             return this.id == null ?
                 entityOrNull.GetHashCode() ^ MagicMask :
-                this.RuntimeType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
+                this.EntityType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
         }
 
         public string Key()
         {
-            return "{0};{1}".Formato(Lite.UniqueTypeName(this.RuntimeType), this.Id);
+            return "{0};{1}".Formato(Lite.UniqueTypeName(this.EntityType), this.Id);
         }
 
         public string KeyLong()
         {
-            return "{0};{1};{2}".Formato(Lite.UniqueTypeName(this.RuntimeType), this.Id, this.ToString());
+            return "{0};{1};{2}".Formato(Lite.UniqueTypeName(this.EntityType), this.Id, this.ToString());
         }
 
         public int CompareTo(Lite<IdentifiableEntity> other)
@@ -389,7 +389,7 @@ namespace Signum.Entities
             if (lite == null || entity == null)
                 return false;
 
-            if (lite.RuntimeType != entity.GetType())
+            if (lite.EntityType != entity.GetType())
                 return false;
 
             if (lite.IdOrNull != null)
@@ -448,7 +448,7 @@ namespace Signum.Entities
             if (lite1 == null || lite2 == null)
                 return false;
 
-            if (lite1.RuntimeType != lite2.RuntimeType)
+            if (lite1.EntityType != lite2.EntityType)
                 return false;
 
             if (lite1.IdOrNull != null && lite2.IdOrNull != null)

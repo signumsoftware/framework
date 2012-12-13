@@ -171,7 +171,7 @@ namespace Signum.Web
             if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IIdentifiable>)obj).RuntimeType))
+            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IIdentifiable>)obj).EntityType))
             {
                 Lite<IIdentifiable> lite = (Lite<IIdentifiable>)obj;
                 return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);

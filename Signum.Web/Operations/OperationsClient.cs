@@ -287,7 +287,7 @@ namespace Signum.Web.Operations
             if (ctx.Lites.IsNullOrEmpty())
                 return null;
 
-            var types = ctx.Lites.Select(a => a.RuntimeType).Distinct().ToList();
+            var types = ctx.Lites.Select(a => a.EntityType).Distinct().ToList();
 
             List<ContextualItem> operations =
                 (from t in types
@@ -339,7 +339,7 @@ namespace Signum.Web.Operations
                 return null;
 
             List<ContextualOperationContext> context =
-                (from oi in OperationInfos(ctx.Lites.Single().RuntimeType)
+                (from oi in OperationInfos(ctx.Lites.Single().EntityType)
                  where oi.IsEntityOperation
                  let os = GetSettings<EntityOperationSettings>(oi.Key)
                  let coc = new ContextualOperationContext

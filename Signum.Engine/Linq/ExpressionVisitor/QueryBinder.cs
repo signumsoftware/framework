@@ -1105,7 +1105,7 @@ namespace Signum.Engine.Linq
                         }
                     }
 
-                    if (pi.Name == "RuntimeType")
+                    if (pi.Name == "EntityType")
                         return liteRef.TypeId;
                     
                     throw new InvalidOperationException("The member {0} of Lite is not accessible on queries".Formato(m.Member));

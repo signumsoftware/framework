@@ -87,7 +87,7 @@ namespace Signum.Engine.Operations
 
                         entity.Save(); //Nothing happens if already saved
 
-                        log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
+                        log.Target = entity.ToLite(); //in case AllowsNew == true
                         log.End = TimeZoneManager.Now;
                         using (ExecutionMode.Global())
                             log.Save();
@@ -113,7 +113,7 @@ namespace Signum.Engine.Operations
                                 Operation = log.Operation,
                                 Start = log.Start,
                                 User = log.User,
-                                Target = entity.ToLite<IIdentifiable>(),
+                                Target = entity.ToLite(),
                                 Exception = exLog.ToLite(),
                                 End = TimeZoneManager.Now
                             };

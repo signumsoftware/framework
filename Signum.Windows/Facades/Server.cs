@@ -168,14 +168,14 @@ namespace Signum.Windows
         {
             if (lite.EntityOrNull == null)
             {
-                lite.SetEntity((IdentifiableEntity)(IIdentifiable)Return((IBaseServer s)=>s.Retrieve(lite.RuntimeType, lite.Id))); 
+                lite.SetEntity((IdentifiableEntity)(IIdentifiable)Return((IBaseServer s)=>s.Retrieve(lite.EntityType, lite.Id))); 
             }
             return lite.EntityOrNull;
         }
 
         public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Return((IBaseServer s) => s.Retrieve(lite.RuntimeType, lite.Id)); 
+            return (T)(IIdentifiable)Return((IBaseServer s) => s.Retrieve(lite.EntityType, lite.Id)); 
         }
 
         public static List<T> RetrieveAll<T>() where T : IdentifiableEntity
@@ -238,7 +238,7 @@ namespace Signum.Windows
             if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IIdentifiable>)obj).RuntimeType))
+            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IIdentifiable>)obj).EntityType))
             {
                 Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)obj;
                 return lite.UntypedEntityOrNull ?? RetrieveAndForget(lite);
@@ -267,7 +267,7 @@ namespace Signum.Windows
             if (objType == type)
                 return true;
 
-            if (objType.IsLite() && ((Lite<IdentifiableEntity>)obj).RuntimeType == type)
+            if (objType.IsLite() && ((Lite<IdentifiableEntity>)obj).EntityType == type)
             {
                 return true;
             }
@@ -301,7 +301,7 @@ namespace Signum.Windows
 
         public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id)));
+            lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.EntityType, lite.Id)));
 
            return lite;
         }

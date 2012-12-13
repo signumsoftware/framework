@@ -601,7 +601,7 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).RuntimeType : entityOrLite.GetType();
+            Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).EntityType : entityOrLite.GetType();
 
             NormalWindow win = CreateNormalWindow();
             win.SetTitleText(Resources.Loading0.Formato(type.NiceName()));

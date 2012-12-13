@@ -60,7 +60,7 @@ namespace Signum.Web
 
         public static string NavigateRoute(Lite<IIdentifiable> lite)
         {
-            return NavigateRoute(lite.RuntimeType, lite.Id);
+            return NavigateRoute(lite.EntityType, lite.Id);
         }
 
         public static RedirectResult RedirectToEntity(IIdentifiable ie)
@@ -896,9 +896,9 @@ namespace Signum.Web
             
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             if (runtimeInfo.IdOrNull != null)
-                return Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             else
-                return (ModifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType);
+                return (ModifiableEntity)Constructor.Construct(runtimeInfo.EntityType);
         }
 
         protected internal virtual Lite<T> ExtractLite<T>(ControllerBase controller, string prefix)
@@ -910,7 +910,7 @@ namespace Signum.Web
             if (!runtimeInfo.IdOrNull.HasValue)
                 throw new ArgumentException("Could not create a Lite without an Id");
 
-            return (Lite<T>)Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            return (Lite<T>)Lite.Create(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
         }
 
         public event Func<Type, bool> IsCreable;

@@ -368,7 +368,7 @@ SF.registerModule("FindNavigator", function () {
                 else {
                     var info = new SF.RuntimeInfo(SF.compose(SF.compose(this.options.prefix, "value"), index));
                     if (info.find().length > 0) { //If it's a Lite, the value is the Id
-                        value = info.runtimeType() + ";" + info.id();
+                        value = info.EntityType() + ";" + info.id();
                         if (value == ";") {
                             value = "";
                         }

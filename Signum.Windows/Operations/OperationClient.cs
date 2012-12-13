@@ -239,7 +239,7 @@ namespace Signum.Windows.Operations
             if (sc.SelectedItems.IsNullOrEmpty())
                 return null;
 
-            var types = sc.SelectedItems.Select(a => a.RuntimeType).Distinct().ToList();
+            var types = sc.SelectedItems.Select(a => a.EntityType).Distinct().ToList();
 
             return (from t in types
                     from oi in OperationInfos(t)
@@ -267,7 +267,7 @@ namespace Signum.Windows.Operations
             if (sc.Implementations.IsByAll)
                 return null;
 
-            var operations = (from oi in OperationInfos(sc.SelectedItem.RuntimeType)
+            var operations = (from oi in OperationInfos(sc.SelectedItem.EntityType)
                               where oi.IsEntityOperation
                               let os = GetSettings<EntityOperationSettings>(oi.Key)
                               let coc = new ContextualOperationContext

@@ -44,8 +44,8 @@ namespace Signum.Web
                 Type liteType = Lite.Extract(typeContext.Type);
 
                 body = Expression.Call(miRetrieve.MakeGenericMethod(liteType), pe);
-                if (lite.RuntimeType != liteType)
-                    body = Expression.Convert(body, lite.RuntimeType);
+                if (lite.EntityType != liteType)
+                    body = Expression.Convert(body, lite.EntityType);
             }
             else
             {
