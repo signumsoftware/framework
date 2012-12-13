@@ -35,6 +35,8 @@ namespace Signum.Entities
 
         string Key();
         string KeyLong();
+
+        Lite<T> Clone(); 
     }
 
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
@@ -222,6 +224,12 @@ namespace Signum.Entities
         public override bool SelfModified
         {
             get { return false; }
+        }
+
+
+        public Lite<T> Clone()
+        {
+            return new LiteImp<T>(Id, toStr); 
         }
     }
 
