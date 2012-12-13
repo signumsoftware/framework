@@ -214,7 +214,7 @@ SF.registerModule("ViewNavigator", function () {
             var options = this.viewOptions,
                 serializer = new SF.Serializer()
                                 .add({
-                                    runtimeType: options.type,
+                                    entityType: options.type,
                                     id: options.id,
                                     prefix: options.prefix
                                 });

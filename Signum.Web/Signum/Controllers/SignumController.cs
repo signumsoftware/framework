@@ -43,16 +43,16 @@ namespace Signum.Web.Controllers
             return Navigator.NormalPage(this, entity); 
         }
 
-        public ActionResult Create(string runtimeType, string prefix)
+        public ActionResult Create(string entityType, string prefix)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
 
             return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate);
         }
 
-        public PartialViewResult PopupNavigate(string runtimeType, int? id, string prefix, string url)
+        public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
 
             IdentifiableEntity entity = null;
             if (id.HasValue)
@@ -76,9 +76,9 @@ namespace Signum.Web.Controllers
             return this.PopupOpen(new PopupNavigateOptions(tc) { PartialViewName = url });
         }
 
-        public PartialViewResult PopupView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
+        public PartialViewResult PopupView(string entityType, int? id, string prefix, bool? readOnly, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
             
             IdentifiableEntity entity = null;
             if (id.HasValue)
@@ -97,9 +97,9 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult PartialView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
+        public PartialViewResult PartialView(string entityType, int? id, string prefix, bool? readOnly, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
             
             IdentifiableEntity entity = null;
             if (id.HasValue)

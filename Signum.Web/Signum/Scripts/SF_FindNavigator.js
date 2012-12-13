@@ -368,7 +368,7 @@ SF.registerModule("FindNavigator", function () {
                 else {
                     var info = new SF.RuntimeInfo(SF.compose(SF.compose(this.options.prefix, "value"), index));
                     if (info.find().length > 0) { //If it's a Lite, the value is the Id
-                        value = info.EntityType() + ";" + info.id();
+                        value = info.entityType() + ";" + info.id();
                         if (value == ";") {
                             value = "";
                         }
@@ -768,14 +768,14 @@ SF.registerModule("FindNavigator", function () {
 
             create: function (viewOptions) {
                 var self = this;
-                var type = this.getRuntimeType(function (type) {
+                var type = this.getEntityType(function (type) {
                     self.typedCreate($.extend({
                         type: type
                     }, viewOptions || {}));
                 });
             },
 
-            getRuntimeType: function (_onTypeFound) {
+            getEntityType: function (_onTypeFound) {
                 var typeStr = $(this.pf(SF.Keys.entityTypeNames)).val();
                 var types = typeStr.split(",");
                 if (types.length == 1) {

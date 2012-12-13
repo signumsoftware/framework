@@ -600,11 +600,11 @@ namespace Signum.Engine
 
                 var staticType = genericArguments[0];
             
-                var runtimeType = isLite ? ((Lite<IdentifiableEntity>)value).EntityType : value.GetType();
+                var entityType = isLite ? ((Lite<IdentifiableEntity>)value).EntityType : value.GetType();
 
                 Expression query = !isLite ?
-                    giInDB.GetInvoker(staticType, runtimeType)((IIdentifiable)value).Expression :
-                    giInDBLite.GetInvoker(staticType, runtimeType)((Lite<IdentifiableEntity>)value).Expression;
+                    giInDB.GetInvoker(staticType, entityType)((IIdentifiable)value).Expression :
+                    giInDBLite.GetInvoker(staticType, entityType)((Lite<IdentifiableEntity>)value).Expression;
 
                 var select = Expression.Call(miSelect.MakeGenericMethod(genericArguments), query, arguments[1]);
 

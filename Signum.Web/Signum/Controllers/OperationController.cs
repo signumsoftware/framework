@@ -119,7 +119,7 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFromMany(string runtimeType, string operationFullKey, string prefix)
+        public ActionResult ConstructFromMany(string entityType, string operationFullKey, string prefix)
         {
             Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
 
@@ -127,7 +127,7 @@ namespace Signum.Web.Controllers
             if (string.IsNullOrEmpty(keys))
                 throw new ArgumentException("Construct from many operation {0} needs source Lite keys".Formato(operationFullKey));
             
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
             
             List<Lite<IIdentifiable>> sourceEntities = keys.Split(new [] { "," }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(k => (Lite<IIdentifiable>)Lite.Parse(k)).ToList();

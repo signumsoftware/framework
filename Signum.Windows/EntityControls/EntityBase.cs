@@ -273,9 +273,9 @@ namespace Signum.Windows
 
             if (View && this.NotSet(ViewProperty))
             {
-                Type runtimeType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
+                Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
 
-                return Navigator.IsViewable(runtimeType);
+                return Navigator.IsViewable(entityType);
             }
             else
                 return View;
@@ -293,9 +293,9 @@ namespace Signum.Windows
 
             if (Navigate && this.NotSet(NavigateProperty))
             {
-                Type runtimeType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
+                Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
 
-                return Navigator.IsNavigable(runtimeType, isSearchEntity: false);
+                return Navigator.IsNavigable(entityType, isSearchEntity: false);
             }
             else
                 return Navigate;
