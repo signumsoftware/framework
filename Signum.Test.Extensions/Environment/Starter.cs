@@ -44,7 +44,7 @@ namespace Signum.Test.Extensions
                 {
                     Schema.Current.InitializeUntil(InitLevel.Level0SyncEntities);
 
-                    Load();
+                    MusicExtensionsLoader.Load();
 
                     Schema.Current.Initialize();
                 }
@@ -112,7 +112,6 @@ namespace Signum.Test.Extensions
                 
                 CacheLogic.CacheTable<LabelDN>(sb);
 
-
                 TypeConditionLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(MusicLoader.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(MusicLoader.Japan));
                 TypeConditionLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.InCondition(MusicGroups.JapanEntities));
 
@@ -120,114 +119,6 @@ namespace Signum.Test.Extensions
 
                 sb.ExecuteWhenIncluded();
             }
-        }
-
-        public static void Load()
-        {
-            Administrator.TotalGeneration();
-
-            Administrator.SetSnapshotIsolation(true);
-            Administrator.MakeSnapshotIsolationDefault(true); 
-
-            using (AuthLogic.Disable())
-            {
-                RoleDN anonymousUserRole = null;
-                RoleDN superUserRole = null;
-                RoleDN internalUserRole = null;
-                RoleDN externalUserRole = null;
-                using (OperationLogic.AllowSave<RoleDN>())
-                {
-                    anonymousUserRole = new RoleDN { Name = "Anonymous" }.Save();
-                    superUserRole = new RoleDN { Name = "SuperUser" }.Save();
-                    internalUserRole = new RoleDN { Name = "InternalUser" }.Save();
-                    externalUserRole = new RoleDN { Name = "ExternalUser" }.Save();
-                }
-
-                using (OperationLogic.AllowSave<UserDN>())
-                {
-                    new UserDN
-                    {
-                        State = UserState.Created,
-                        UserName = AuthLogic.SystemUserName,
-                        PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                        Role = superUserRole
-                    }.Save();
-
-                    new UserDN
-                    {
-                        State = UserState.Created,
-                        UserName = AuthLogic.AnonymousUserName,
-                        PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                        Role = anonymousUserRole
-                    }.Save();
-
-                    new UserDN
-                    {
-                        State = UserState.Created,
-                        UserName = "su",
-                        PasswordHash = Security.EncodePassword("su"),
-                        Role = superUserRole
-                    }.Save();
-
-                    new UserDN
-                    {
-                        State = UserState.Created,
-                        UserName = "internal",
-                        PasswordHash = Security.EncodePassword("internal"),
-                        Role = internalUserRole
-                    }.Save();
-
-                    new UserDN
-                    {
-                        State = UserState.Created,
-                        UserName = "external",
-                        PasswordHash = Security.EncodePassword("external"),
-                        Role = externalUserRole
-                    }.Save();
-                }
-
-                Schema.Current.InitializeUntil(InitLevel.Level3MainEntities);
-                
-                using (AuthLogic.UnsafeUserSession("su"))
-                    MusicLoader.Load();
-
-                TypeConditionUsersRoles(externalUserRole.ToLite());
-                
-                TypeAuthLogic.Manual.SetAllowed(externalUserRole.ToLite(), typeof(LabelDN), 
-                    new TypeAllowedAndConditions(TypeAllowed.None, 
-                            new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
-
-                TypeAuthLogic.Manual.SetAllowed(externalUserRole.ToLite(), typeof(AlbumDN), 
-                    new TypeAllowedAndConditions(TypeAllowed.None,
-                            new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
-
-                TypeConditionUsersRoles(internalUserRole.ToLite());
-
-                ChartScriptLogic.ImportAllScripts(@"d:\Signum\Extensions\Signum.Engine.Extensions\Chart\ChartScripts");
-            }
-        }
-
-        private static void TypeConditionUsersRoles(Lite<RoleDN> role)
-        {
-            TypeAuthLogic.Manual.SetAllowed(role, typeof(UserQueryDN),
-                new TypeAllowedAndConditions(TypeAllowed.None,
-                        new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
-                        new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
-
-            TypeAuthLogic.Manual.SetAllowed(role, typeof(ControlPanelDN),
-                new TypeAllowedAndConditions(TypeAllowed.None,
-                        new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
-                        new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
-
-            TypeAuthLogic.Manual.SetAllowed(role, typeof(UserChartDN),
-                new TypeAllowedAndConditions(TypeAllowed.None,
-                        new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
-                        new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
-
-            TypeAuthLogic.Manual.SetAllowed(role, typeof(LinkListPartDN),
-              new TypeAllowedAndConditions(TypeAllowed.None,
-                      new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
-                      new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
         }
     }
 
