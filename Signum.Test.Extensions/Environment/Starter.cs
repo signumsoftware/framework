@@ -79,10 +79,11 @@ namespace Signum.Test.Extensions
                 sb.Schema.Settings.OverrideAttributes((OperationLogDN ol) => ol.User, new ImplementedByAttribute(typeof(UserDN)));
                 sb.Schema.Settings.OverrideAttributes((ExceptionDN e) => e.User, new ImplementedByAttribute(typeof(UserDN)));
 
+                OperationLogic.Start(sb, dqm);
+                ExceptionLogic.Start(sb, dqm);
                 AuthLogic.Start(sb, dqm, "System", "Anonymous");
                 UserTicketLogic.Start(sb, dqm);
-                OperationLogic.Start(sb, dqm);
-                
+
                 ProcessLogic.Start(sb, dqm, 1, userProcessSession: true);
                 PackageLogic.Start(sb, dqm, true, true);
                 ProcessLogic.CreateDefaultProcessSession = UserProcessSessionDN.CreateCurrent;
