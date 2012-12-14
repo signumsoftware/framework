@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,5 +60,10 @@ namespace Signum.Entities.Scheduler
         {
             return "{0} {1}".Formato(task, rule) + (suspended ? " [{0}]".Formato(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
         }
+    }
+
+    public enum ScheduledTaskOperation
+    { 
+        Save
     }
 }

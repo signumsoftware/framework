@@ -106,6 +106,20 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
+
+                new BasicExecute<EmailMessageDN>(EmailMessageOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (em, _) => { },
+                }.Register();
+
+                new BasicExecute<EmailTemplateDN>(EmailTemplateOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (et, _) => { },
+                }.Register();
             }
         }
 
@@ -234,7 +248,7 @@ namespace Signum.Engine.Mailing
                 emailMessage.State = EmailState.Sent;
                 emailMessage.Sent = TimeZoneManager.Now;
                 emailMessage.Received = null;
-                emailMessage.Save();
+                emailMessage.Execute(EmailMessageOperation.Save);
             }
             catch (Exception e)
             {
@@ -247,7 +261,7 @@ namespace Signum.Engine.Mailing
                 {
                     emailMessage.Exception = exLog;
                     emailMessage.State = EmailState.Exception;
-                    emailMessage.Save();
+                    emailMessage.Execute(EmailMessageOperation.Save);
                     tr.Commit();
                 }
 
@@ -297,7 +311,7 @@ namespace Signum.Engine.Mailing
 
                     emailMessage.Sent = null;
                     emailMessage.Received = null;
-                    emailMessage.Save();
+                    emailMessage.Execute(EmailMessageOperation.Save);
 
                     client.SafeSendMailAsync(message, args =>
                     {
@@ -333,7 +347,7 @@ namespace Signum.Engine.Mailing
                     emailMessage.Received = null;
                     emailMessage.State = EmailState.Sent;
                     emailMessage.Sent = TimeZoneManager.Now;
-                    emailMessage.Save();
+                    emailMessage.Execute(EmailMessageOperation.Save);
                 }
             }
             catch (Exception ex)

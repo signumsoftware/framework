@@ -55,8 +55,7 @@ namespace Signum.Engine.Scheduler
                 sb.Include<ScheduledTaskDN>();
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
-
-
+                
                 dqm[typeof(CalendarDN)] =
                      (from st in Database.Query<CalendarDN>()
                       select new
@@ -79,6 +78,20 @@ namespace Signum.Engine.Scheduler
                          st.Suspended,
                          st.Rule,
                      }).ToDynamic();
+
+                new BasicExecute<CalendarDN>(CalendarOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (c, _) => { },
+                }.Register();
+
+                new BasicExecute<ScheduledTaskDN>(ScheduledTaskOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (st, _) => { },
+                }.Register();
             }
         }
 

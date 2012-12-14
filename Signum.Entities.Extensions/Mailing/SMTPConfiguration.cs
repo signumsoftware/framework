@@ -8,11 +8,6 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
-    public enum SMTPConfigurationQueries
-    { 
-        NoCredentialsData
-    }
-
     [Serializable]
     public class SMTPConfigurationDN : Entity
     {
@@ -80,6 +75,16 @@ namespace Signum.Entities.Mailing
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum SMTPConfigurationQueries
+    {
+        NoCredentialsData
+    }
+
+    public enum SMTPConfigurationOperation
+    {
+        Save
     }
 
     [Serializable]

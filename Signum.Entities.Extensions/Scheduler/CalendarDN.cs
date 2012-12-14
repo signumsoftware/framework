@@ -63,6 +63,11 @@ namespace Signum.Entities.Scheduler
         }
     }
 
+    public enum CalendarOperation
+    { 
+        Save
+    }
+
     [Serializable]
     public class HolidayDN : EmbeddedEntity
     {

@@ -34,4 +34,9 @@ namespace Signum.Entities.Mailing
             return ToStringExpression.Evaluate(this);
         }
     }
+
+    public enum EmailTemplateOperation
+    { 
+        Save
+    }
 }

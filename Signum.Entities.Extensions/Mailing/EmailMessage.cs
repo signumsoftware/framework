@@ -37,7 +37,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref cc, value, () => Cc); }
         }
 
-
         Lite<EmailTemplateDN> template;
         [NotNullValidator]
         public Lite<EmailTemplateDN> Template
@@ -116,6 +115,10 @@ namespace Signum.Entities.Mailing
             };
     }
 
+    public enum EmailMessageOperation
+    { 
+        Save
+    }
 
     public enum EmailState
     {

@@ -61,15 +61,18 @@ namespace Signum.Engine.Mailing
                             Name = args.TryGetArgC<string>()
                         }.Save();
 
-                        messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()
+                        foreach(var m in messages.Select(m => m.RetrieveAndForget()))
                         {
-                            Package = emailPackage.ToLite(),
-                            Recipient = m.Recipient,
-                            Body = m.Body,
-                            Subject = m.Subject,
-                            Template = m.Template,
-                            State = EmailState.Created,
-                        }).SaveList();
+                            new EmailMessageDN()
+                            {
+                                Package = emailPackage.ToLite(),
+                                Recipient = m.Recipient,
+                                Body = m.Body,
+                                Subject = m.Subject,
+                                Template = m.Template,
+                                State = EmailState.Created
+                            }.Execute(EmailMessageOperation.Save);
+                        }
 
                         return ProcessLogic.Create(EmailProcesses.SendEmails, emailPackage);
                     }

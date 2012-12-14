@@ -30,6 +30,10 @@ namespace Signum.Entities.Authorization
         }
     }
 
+    public enum PasswordExpiresIntervalOperation
+    { 
+        Save
+    }
 
     [Serializable]
     public class PasswordExpiredException : ApplicationException
