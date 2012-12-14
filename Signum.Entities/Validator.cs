@@ -110,29 +110,13 @@ namespace Signum.Entities
         public readonly Action<object, object> SetValue;
         public readonly PropertyInfo PropertyInfo;
         public readonly List<ValidatorAttribute> Validators;
+
+        public Func<ModifiableEntity, bool> IsAplicable { get; set; }
+        public Func<ModifiableEntity, bool> IsAplicablePropertyValidation { get; set; }
+        public Func<ModifiableEntity, bool> IsAplicableExternalPropertyValidation { get; set; }
+
+        public PropertyValidationEventHandler StaticPropertyValidation { get; set; }
         
-        public bool DoNotValidate { get; set; }
-        public bool SkipPropertyValidation { get; set; }
-        public bool SkipExternalPropertyValidation { get; set; }
-        public event PropertyValidationEventHandler StaticPropertyValidation;
-
-        internal bool HasStaticPropertyValidation 
-        {
-            get { return StaticPropertyValidation != null; }
-        }
-
-        internal string OnStaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
-        {
-            foreach (PropertyValidationEventHandler item in StaticPropertyValidation.GetInvocationList())
-            {
-                string result = item(sender, pi);
-                if (result != null)
-                    return result;
-            }
-
-            return null;
-        }
-
         public void ReplaceValidators(params ValidatorAttribute[] validators)
         {
             Validators.Clear();
