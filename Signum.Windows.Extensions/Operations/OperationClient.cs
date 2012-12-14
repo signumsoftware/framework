@@ -18,6 +18,7 @@ using Signum.Entities.Reflection;
 using Signum.Windows.Extensions.Properties;
 using Signum.Utilities.ExpressionTrees;
 using System.Windows.Automation;
+using Signum.Entities.Processes;
 
 namespace Signum.Windows.Operations
 {
@@ -244,6 +245,9 @@ namespace Signum.Windows.Operations
 
         protected internal virtual IEnumerable<MenuItem> SearchControl_GetEntityOperationMenuItem(SearchControl sc)
         {
+            if (!Navigator.IsViewable(typeof(PackageOperationDN)))
+                return Enumerable.Empty<MenuItem>();
+
             if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Length != 1)
                 return null;
 
