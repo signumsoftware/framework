@@ -9,7 +9,7 @@ using System.ServiceModel;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.SystemString)]
     public class FacadeMethodDN : IdentifiableEntity
     {
         private FacadeMethodDN() { }

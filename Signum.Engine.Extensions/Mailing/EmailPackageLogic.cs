@@ -25,14 +25,14 @@ namespace Signum.Engine.Mailing
         }
 
         static Expression<Func<EmailPackageDN, IQueryable<EmailMessageDN>>> RemainingMessagesExpression =
-            p => p.Messages().Where(a => a.State == EmailState.Created);
+            p => p.Messages().Where(a => a.State == EmailMessageState.Created);
         public static IQueryable<EmailMessageDN> RemainingMessages(this EmailPackageDN p)
         {
             return RemainingMessagesExpression.Evaluate(p);
         }
 
         static Expression<Func<EmailPackageDN, IQueryable<EmailMessageDN>>> ExceptionMessagesExpression =
-            p => p.Messages().Where(a => a.State == EmailState.Exception);
+            p => p.Messages().Where(a => a.State == EmailMessageState.Exception);
         public static IQueryable<EmailMessageDN> ExceptionMessages(this EmailPackageDN p)
         {
             return ExceptionMessagesExpression.Evaluate(p);
@@ -50,9 +50,9 @@ namespace Signum.Engine.Mailing
                 dqm.RegisterExpression((EmailPackageDN ep) => ep.ExceptionMessages());
 
                 ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(EmailProcesses.SendEmails, new SendEmailProcessAlgorithm());
+                ProcessLogic.Register(EmailMessageProcesses.SendEmails, new SendEmailProcessAlgorithm());
 
-                new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
+                new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailMessageOperation.ReSendEmails)
                 {
                     Construct = (messages, args) =>
                     {
@@ -70,11 +70,11 @@ namespace Signum.Engine.Mailing
                                 Body = m.Body,
                                 Subject = m.Subject,
                                 Template = m.Template,
-                                State = EmailState.Created
+                                State = EmailMessageState.Created
                             }.Save();
                         }
 
-                        return ProcessLogic.Create(EmailProcesses.SendEmails, emailPackage);
+                        return ProcessLogic.Create(EmailMessageProcesses.SendEmails, emailPackage);
                     }
                 }.Register();
 

@@ -50,7 +50,7 @@ namespace Signum.Web.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserChartDN>(EntityType.Main) 
+                    new EntitySettings<UserChartDN>() 
                     { 
                         PartialViewName = _ => ChartClient.ViewPrefix.Formato("UserChart"),
                         MappingMain = new EntityMapping<UserChartDN>(true)

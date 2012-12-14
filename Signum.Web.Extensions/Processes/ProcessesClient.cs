@@ -44,23 +44,23 @@ namespace Signum.Web.Processes
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ProcessExecutionDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
-                    new EntitySettings<ProcessDN>(EntityType.SystemString){ PartialViewName = e => ViewPrefix.Formato("Process")},
+                    new EntitySettings<ProcessExecutionDN>(){ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
+                    new EntitySettings<ProcessDN>(){ PartialViewName = e => ViewPrefix.Formato("Process")},
                 });
 
                 if (packages || packageOperations)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageLineDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("PackageLine") });
+                    Navigator.AddSetting(new EntitySettings<PackageLineDN>() { PartialViewName = e => ViewPrefix.Formato("PackageLine") });
                 }
 
                 if (packages)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("Package") });
+                    Navigator.AddSetting(new EntitySettings<PackageDN>() { PartialViewName = e => ViewPrefix.Formato("Package") });
                 }
 
                 if (packageOperations)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageOperationDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("PackageOperation") });
+                    Navigator.AddSetting(new EntitySettings<PackageOperationDN>() { PartialViewName = e => ViewPrefix.Formato("PackageOperation") });
 
                     ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
                 }

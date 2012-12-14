@@ -35,12 +35,12 @@ namespace Signum.Web.AuthAdmin
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.EntitySettings<UserDN>().PartialViewName = _ => ViewPrefix.Formato("User");
                 else
-                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Main) { PartialViewName = _ => ViewPrefix.Formato("User") });
+                    Navigator.AddSetting(new EntitySettings<UserDN>() { PartialViewName = _ => ViewPrefix.Formato("User") });
 
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
                     Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix.Formato("Role"); 
                 else
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Shared) { PartialViewName = _ => ViewPrefix.Formato("Role") });
+                    Navigator.AddSetting(new EntitySettings<RoleDN>() { PartialViewName = _ => ViewPrefix.Formato("Role") });
 
                 if (types)
                 {
@@ -98,7 +98,7 @@ namespace Signum.Web.AuthAdmin
             where R : IdentifiableEntity
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
-                Navigator.AddSetting(new EntitySettings<R>(EntityType.SystemString));
+                Navigator.AddSetting(new EntitySettings<R>());
 
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new EmbeddedEntitySettings<T>()
@@ -119,7 +119,7 @@ namespace Signum.Web.AuthAdmin
         static void RegisterTypes()
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(TypeDN)))
-                Navigator.AddSetting(new EntitySettings<TypeDN>(EntityType.SystemString));
+                Navigator.AddSetting(new EntitySettings<TypeDN>());
 
             Navigator.AddSetting(new EmbeddedEntitySettings<TypeConditionRule>());
 

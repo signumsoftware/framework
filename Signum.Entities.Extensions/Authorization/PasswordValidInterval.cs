@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class PasswordExpiresIntervalDN : Entity
     {
         decimal days;

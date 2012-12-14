@@ -39,9 +39,9 @@ namespace Signum.Web.Files
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<FileRepositoryDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
-                        new EntitySettings<FilePathDN>(EntityType.SharedPart),
-                        new EntitySettings<FileTypeDN>(EntityType.SystemString),
+                        new EntitySettings<FileRepositoryDN>(){ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
+                        new EntitySettings<FilePathDN>(),
+                        new EntitySettings<FileTypeDN>(),
                     });
 
                     var es = Navigator.EntitySettings<FilePathDN>();
@@ -86,7 +86,7 @@ namespace Signum.Web.Files
 
                 if (file)
                 {
-                    var es = new EntitySettings<FileDN>(EntityType.SharedPart);
+                    var es = new EntitySettings<FileDN>();
                     Navigator.AddSetting(es);
 
                     var baseMapping = (Mapping<FileDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);

@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class UserTicketDN : IdentifiableEntity
     {
         Lite<UserDN> user;

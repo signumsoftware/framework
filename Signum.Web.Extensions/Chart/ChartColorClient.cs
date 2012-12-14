@@ -29,7 +29,7 @@ namespace Signum.Web.Chart
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(TypeDN)))
-                    Navigator.AddSetting(new EntitySettings<TypeDN>(EntityType.System));
+                    Navigator.AddSetting(new EntitySettings<TypeDN>());
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {

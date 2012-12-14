@@ -32,22 +32,22 @@ namespace Signum.Web.Mailing
                 Navigator.RegisterArea(typeof(MailingClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EmailMessageDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
-                    new EntitySettings<EmailPackageDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
-                    new EntitySettings<EmailTemplateDN>(EntityType.Main),
+                    new EntitySettings<EmailMessageDN>(){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
+                    new EntitySettings<EmailPackageDN>(){ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
+                    new EntitySettings<EmailTemplateDN>(),
                 });
 
                 if (smtpConfig)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMTPConfigurationDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
+                    new EntitySettings<SMTPConfigurationDN>() { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
                 });
 
                 if (newsletter)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<NewsletterDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
-                    new EntitySettings<NewsletterDeliveryDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
+                    new EntitySettings<NewsletterDN>() { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
+                    new EntitySettings<NewsletterDeliveryDN>() { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                 });
             }
         }

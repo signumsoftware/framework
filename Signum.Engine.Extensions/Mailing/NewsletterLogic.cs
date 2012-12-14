@@ -57,7 +57,7 @@ namespace Signum.Engine.Mailing
                 sb.Include<NewsletterDN>();
                 sb.Include<NewsletterDeliveryDN>();
                 ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(NewsletterOperations.Send, new NewsletterProcessAlgortihm());
+                ProcessLogic.Register(NewsletterOperation.Send, new NewsletterProcessAlgortihm());
 
 
                 dqm[typeof(NewsletterDN)] = (from n in Database.Query<NewsletterDN>()
@@ -156,7 +156,7 @@ namespace Signum.Engine.Mailing
         {
             GetState = n => n.State;
 
-            new ConstructFrom<NewsletterDN>(NewsletterOperations.Clone)
+            new ConstructFrom<NewsletterDN>(NewsletterOperation.Clone)
             {
                 ToState = NewsletterState.Created,
                 Construct = (n, _) => new NewsletterDN
@@ -169,7 +169,7 @@ namespace Signum.Engine.Mailing
                 }
             }.Register();
 
-            new Execute(NewsletterOperations.Save)
+            new Execute(NewsletterOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -178,7 +178,7 @@ namespace Signum.Engine.Mailing
                 Execute = (n, _) => n.State = NewsletterState.Saved
             }.Register();
 
-            new Execute(NewsletterOperations.AddRecipients)
+            new Execute(NewsletterOperation.AddRecipients)
             {
                 FromStates = new[] { NewsletterState.Saved },
                 ToState = NewsletterState.Saved,
@@ -196,7 +196,7 @@ namespace Signum.Engine.Mailing
                 }
             }.Register();
 
-            new Execute(NewsletterOperations.RemoveRecipients)
+            new Execute(NewsletterOperation.RemoveRecipients)
             {
                 FromStates = new[] { NewsletterState.Saved },
                 ToState = NewsletterState.Saved,
@@ -214,7 +214,7 @@ namespace Signum.Engine.Mailing
                 }
             }.Register();
 
-            new Execute(NewsletterOperations.Send)
+            new Execute(NewsletterOperation.Send)
             {
                 FromStates = new[] { NewsletterState.Saved },
                 ToState = NewsletterState.Sent,
@@ -222,7 +222,7 @@ namespace Signum.Engine.Mailing
                     d.Newsletter.RefersTo(n)) ? null : "There is not any delivery for this newsletter",
                 Execute = (n, _) =>
                 {
-                    var process = ProcessLogic.Create(NewsletterOperations.Send, n);
+                    var process = ProcessLogic.Create(NewsletterOperation.Send, n);
                     process.Execute(ProcessOperation.Execute);
 
                     n.State = NewsletterState.Sent;

@@ -16,7 +16,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class UserDN : Entity, IEmailOwnerDN, IUserDN
     {
         public static Func<string, string> ValidatePassword = p =>
@@ -25,7 +25,6 @@ namespace Signum.Entities.Authorization
                 return null;
             return Resources.ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter;
         };
-
 
         public static string OnValidatePassword(string password)
         {
@@ -63,7 +62,6 @@ namespace Signum.Entities.Authorization
             get { return passwordSetDate; }
             private set { Set(ref passwordSetDate, value, () => PasswordSetDate); }
         }
-
 
         bool passwordNeverExpires;
         public bool PasswordNeverExpires
@@ -140,7 +138,6 @@ namespace Signum.Entities.Authorization
         }
     }
 
-
     public enum UserState
     {
         [Ignore]
@@ -158,7 +155,6 @@ namespace Signum.Entities.Authorization
         Disable,
         SetPassword
     }
-
 
     [Serializable]
     public class IncorrectUsernameException : ApplicationException

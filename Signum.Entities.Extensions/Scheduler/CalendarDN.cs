@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Shared)]
     public class CalendarDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

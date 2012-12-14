@@ -16,13 +16,13 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.SystemString)]
     public class ProcessDN : MultiEnumDN
     {
        
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class ProcessExecutionDN : IdentifiableEntity
     {
         internal ProcessExecutionDN() { }
@@ -200,7 +200,7 @@ namespace Signum.Entities.Processes
     {
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class UserProcessSessionDN : Entity, ISessionDataDN
     {
         Lite<UserDN> user;

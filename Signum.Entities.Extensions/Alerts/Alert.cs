@@ -14,7 +14,7 @@ using Signum.Services;
 
 namespace Signum.Entities.Alerts
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class AlertDN : IdentifiableEntity
     {
         [ImplementedByAll]
@@ -136,7 +136,7 @@ namespace Signum.Entities.Alerts
         Unattend
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.String)]
     public class AlertTypeDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

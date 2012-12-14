@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, AvoidLocalization]
+    [Serializable, EntityType(EntityType.System), AvoidLocalization]
     public class RuleDN<R, A> : IdentifiableEntity
         where R: IdentifiableEntity
     {

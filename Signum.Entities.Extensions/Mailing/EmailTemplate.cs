@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class EmailTemplateDN : IdentifiableEntity
     {
         [NotNullable, UniqueIndex]
