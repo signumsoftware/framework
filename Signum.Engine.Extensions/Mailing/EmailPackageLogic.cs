@@ -71,7 +71,7 @@ namespace Signum.Engine.Mailing
                                 Subject = m.Subject,
                                 Template = m.Template,
                                 State = EmailState.Created
-                            }.Execute(EmailMessageOperation.Save);
+                            }.Save();
                         }
 
                         return ProcessLogic.Create(EmailProcesses.SendEmails, emailPackage);

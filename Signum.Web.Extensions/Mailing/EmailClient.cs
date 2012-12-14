@@ -32,7 +32,7 @@ namespace Signum.Web.Mailing
                 Navigator.RegisterArea(typeof(MailingClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EmailMessageDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
+                    new EntitySettings<EmailMessageDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
                     new EntitySettings<EmailPackageDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
                     new EntitySettings<EmailTemplateDN>(EntityType.Main),
                 });

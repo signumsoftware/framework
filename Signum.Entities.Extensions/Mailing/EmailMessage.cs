@@ -115,11 +115,6 @@ namespace Signum.Entities.Mailing
             };
     }
 
-    public enum EmailMessageOperation
-    { 
-        Save
-    }
-
     public enum EmailState
     {
         Created,
