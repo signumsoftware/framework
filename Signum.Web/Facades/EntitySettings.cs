@@ -31,13 +31,6 @@ namespace Signum.Web
         internal abstract bool OnIsReadonly();
 
         public abstract string OnPartialViewName(ModifiableEntity entity);
-
-        protected static List<string> SaveProtectedErrors = new List<string>();
-
-        protected static void Manager_Initializing()
-        {
-            throw new InvalidOperationException("EntitySettings inconsitencies: \r\n" + SaveProtectedErrors.Order().ToString("\r\n"));
-        }
     }
 
     public class EntitySettings<T> : EntitySettings where T : IdentifiableEntity
@@ -71,12 +64,11 @@ namespace Signum.Web
             return PartialViewName((T)entity);
         }
         
-        public EntitySettings(EntityType entityType)
+        public EntitySettings()
         {
-            switch (entityType)
+            switch (TypeLogic.GetEntityType<T>())
             {
                 case EntityType.SystemString:
-                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.Never;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
@@ -84,7 +76,6 @@ namespace Signum.Web
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
                 case EntityType.System:
-                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.Never;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -93,7 +84,6 @@ namespace Signum.Web
                     break;
 
                 case EntityType.String:
-                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
@@ -101,14 +91,12 @@ namespace Signum.Web
                     MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
                 case EntityType.Shared:
-                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
                 case EntityType.Main:
-                    AssertSaveProtected(entityType, true);
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -116,7 +104,6 @@ namespace Signum.Web
                     break;
 
                 case EntityType.Part:
-                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -124,7 +111,6 @@ namespace Signum.Web
                     break;
 
                 case EntityType.SharedPart:
-                    AssertSaveProtected(entityType, false);
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -133,18 +119,6 @@ namespace Signum.Web
              
                 default:
                     break;
-            }
-        }
-
-        void AssertSaveProtected(EntityType entityType, bool saveProtected)
-        {
-            var current = OperationLogic.IsSaveProtected(typeof(T));
-
-            if (current != saveProtected)
-            {
-                SaveProtectedErrors.Add("{0} is {1} but is {2}save protected".Formato(typeof(T).FullName, entityType, current ? "" : "NOT "));
-                Navigator.Manager.Initializing -= new Action(Manager_Initializing);
-                Navigator.Manager.Initializing += new Action(Manager_Initializing);
             }
         }
 
@@ -167,18 +141,6 @@ namespace Signum.Web
         {
             return IsReadonly;
         }
-    }
-
-
-    public enum EntityType
-    {
-        SystemString,
-        System,
-        String,
-        Shared,
-        Main,
-        Part,
-        SharedPart,
     }
 
     public class EmbeddedEntitySettings<T> : EntitySettings, IImplementationsFinder where T : EmbeddedEntity

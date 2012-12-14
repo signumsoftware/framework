@@ -141,5 +141,35 @@ namespace Signum.Engine.Basics
         {
             return Schema.Current.TypeToName.TryGetC(type);
         }
+
+        public static EntityType GetEntityType<T>() where T: IdentifiableEntity
+        {
+            return GetEntityType(typeof(T));
+        }
+
+        public static EntityType GetEntityType(Type type)
+        {
+            var attr = type.SingleAttributeInherit<EntityTypeAttribute>();
+
+            if (attr == null)
+                throw new InvalidOperationException("EntityTypeAttribute not found for {0}".Formato(type.Name));
+
+            return attr.EntityType;
+        }
+
+        public static EntityType? TryGetEntityType<T>() where T : IdentifiableEntity
+        {
+            return TryGetEntityType(typeof(T));
+        }
+
+        public static EntityType? TryGetEntityType(Type type)
+        {
+            var attr = type.SingleAttributeInherit<EntityTypeAttribute>();
+
+            if (attr == null)
+                return null;
+
+            return attr.EntityType;
+        }
     }
 }

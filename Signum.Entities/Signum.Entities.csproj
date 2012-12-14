@@ -81,11 +81,11 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="Basics\ExceptionDN.cs" />
+    <Compile Include="Basics\Exception.cs" />
     <Compile Include="Basics\IUserDN.cs" />
-    <Compile Include="Basics\MultiEnumDN.cs" />
-    <Compile Include="Basics\OperationDN.cs" />
-    <Compile Include="Basics\OperationLogDN.cs" />
+    <Compile Include="Basics\MultiEnum.cs" />
+    <Compile Include="Basics\Operation.cs" />
+    <Compile Include="Basics\OperationLog.cs" />
     <Compile Include="DynamicQuery\Tokens\BagPropertyToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DecimalSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\EntityToStringToken.cs" />
@@ -106,7 +106,7 @@
     <Compile Include="DynamicQuery\QueryUtils.cs" />
     <Compile Include="DynamicQuery\Tokens\QueryToken.cs" />
     <Compile Include="FieldAttributes.cs" />
-    <Compile Include="Basics\ColorDN.cs" />
+    <Compile Include="Basics\Color.cs" />
     <Compile Include="DynamicQuery\Meta.cs" />
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="Patterns\CorruptEntity.cs" />
@@ -132,7 +132,7 @@
     <Compile Include="Services\IDynamicQueryServer.cs" />
     <Compile Include="Services\NetDataContractAttribute.cs" />
     <Compile Include="Services\Security.cs" />
-    <Compile Include="Basics\TypeDN.cs" />
+    <Compile Include="Basics\Type.cs" />
     <Compile Include="ModifiableEntity.cs" />
     <Compile Include="Lite.cs" />
     <Compile Include="Entity.cs" />
