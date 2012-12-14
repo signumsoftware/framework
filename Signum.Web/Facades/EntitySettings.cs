@@ -36,7 +36,7 @@ namespace Signum.Web
 
         protected static void Manager_Initializing()
         {
-            throw new InvalidOperationException("EntitySettings inconsitencies: \r\n" + SaveProtectedErrors.ToString("\r\n"));
+            throw new InvalidOperationException("EntitySettings inconsitencies: \r\n" + SaveProtectedErrors.Order().ToString("\r\n"));
         }
     }
 
@@ -142,7 +142,7 @@ namespace Signum.Web
 
             if (current != saveProtected)
             {
-                SaveProtectedErrors.Add("{0} is {1} but is {2}save protected".Formato(typeof(T).Name, entityType, current ? "" : "NOT "));
+                SaveProtectedErrors.Add("{0} is {1} but is {2}save protected".Formato(typeof(T).FullName, entityType, current ? "" : "NOT "));
                 Navigator.Manager.Initializing -= new Action(Manager_Initializing);
                 Navigator.Manager.Initializing += new Action(Manager_Initializing);
             }
