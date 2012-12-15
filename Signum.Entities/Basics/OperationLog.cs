@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class OperationLogDN : IdentifiableEntity
     {
         [ImplementedByAll]

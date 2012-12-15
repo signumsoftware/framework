@@ -47,9 +47,7 @@ namespace Signum.Entities.Basics
                     OperationType == OperationType.Delete;
             }
         }
-
     }
-
 
     [Flags]
     public enum OperationType

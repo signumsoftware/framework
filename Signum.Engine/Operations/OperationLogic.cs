@@ -131,9 +131,45 @@ namespace Signum.Engine.Operations
 
                 sb.Schema.Table<OperationDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Operation_PreDeleteSqlSync);
                 sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(Type_PreDeleteSqlSync);
+
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += OperationLogic_Initializing;
             }
         }
 
+        static void OperationLogic_Initializing()
+        {
+            var errors = (from t in Schema.Current.Tables.Keys
+                          let et = TypeLogic.TryGetEntityType(t)
+                          let sp = IsSaveProtected(t)
+                          select et == null ? "{0} has no EntityTypeAttribute set".Formato(t.FullName) :
+                          sp != RequiresSaveProtected(et.Value) ? "{0} is {1} but is {2}save protected".Formato(t.FullName, et, sp ? "" : "NOT ") :
+                          null).NotNull().Order().ToString("\r\n");
+
+            if (errors.HasText())
+                throw new InvalidOperationException("EntitySetting - SaveProtected inconsistencies: \r\n" + errors);
+        }
+
+        private static bool RequiresSaveProtected(EntityType entityType)
+        {
+            switch (entityType)
+            {
+                case EntityType.SystemString:
+                case EntityType.System:
+                    return false;
+
+                case EntityType.String:
+                case EntityType.Shared:
+                case EntityType.Main:
+                    return true;
+
+                case EntityType.Part:
+                case EntityType.SharedPart:                
+                    return false;
+
+                default:
+                    throw new InvalidOperationException("Unexpected {0}".Formato(entityType)); 
+            }
+        }
         static SqlPreCommand Operation_PreDeleteSqlSync(IdentifiableEntity arg)
         {
             var t = Schema.Current.Table<OperationLogDN>();
