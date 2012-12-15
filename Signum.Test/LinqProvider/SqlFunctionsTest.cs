@@ -53,8 +53,8 @@ namespace Signum.Test.LinqProvider
             Dump((ArtistDN a) => a.Name.Substring(2).InSql());
             Dump((ArtistDN a) => a.Name.Substring(2, 2).InSql());
 
-            Dump((ArtistDN a) => a.Name.Left(2).InSql());
-            Dump((ArtistDN a) => a.Name.Right(2).InSql());
+            Dump((ArtistDN a) => a.Name.Start(2).InSql());
+            Dump((ArtistDN a) => a.Name.End(2).InSql());
             Dump((ArtistDN a) => a.Name.Reverse().InSql());
             Dump((ArtistDN a) => a.Name.Replicate(2).InSql());
         }
