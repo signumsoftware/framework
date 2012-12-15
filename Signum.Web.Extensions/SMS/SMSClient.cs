@@ -32,30 +32,30 @@ namespace Signum.Web.SMS
                 Navigator.RegisterArea(typeof(SMSClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMSMessageDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("SMSMessage")},
-                    new EntitySettings<SMSTemplateDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
-                    new EntitySettings<SMSSendPackageDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
-                    new EntitySettings<SMSUpdatePackageDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
+                    new EntitySettings<SMSMessageDN>() { PartialViewName = e => ViewPrefix.Formato("SMSMessage") },
+                    new EntitySettings<SMSTemplateDN>() { PartialViewName = e => ViewPrefix.Formato("SMSTemplate") },
+                    new EntitySettings<SMSSendPackageDN>() { PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
+                    new EntitySettings<SMSUpdatePackageDN>() { PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
 
                     new EmbeddedEntitySettings<MultipleSMSModel>() { PartialViewName = e => ViewPrefix.Formato("MultipleSMS") },
                 });
 
                 OperationsClient.AddSettings(new List<OperationSettings> 
                 {
-                    new EntityOperationSettings(SMSMessageOperations.CreateSMSMessageFromTemplate)
+                    new EntityOperationSettings(SMSMessageOperation.CreateSMSMessageFromTemplate)
                     {
                         OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMSMessageFromTemplate", "SMS"))
                         .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
                     },
 
-                    new ContextualOperationSettings(SMSProviderOperations.SendSMSMessagesFromTemplate)
+                    new ContextualOperationSettings(SMSProviderOperation.SendSMSMessagesFromTemplate)
                     {
                         RequestExtraJsonData = "function(){ return { providerWebQueryName: SF.FindNavigator.getFor('').options.webQueryName }; }",
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessagesFromTemplate","SMS"))
                                 .ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                     },
 
-                    new ContextualOperationSettings(SMSProviderOperations.SendSMSMessage)
+                    new ContextualOperationSettings(SMSProviderOperation.SendSMSMessage)
                     {
                         RequestExtraJsonData = "function(){ return { providerWebQueryName: SF.FindNavigator.getFor('').options.webQueryName }; }",
                         OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessages","SMS"))

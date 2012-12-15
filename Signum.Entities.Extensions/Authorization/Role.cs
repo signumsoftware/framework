@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Shared)]
     public class RoleDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -53,7 +53,7 @@ namespace Signum.Entities.Authorization
         ReferedBy
     }
 
-    public enum RoleOperations
+    public enum RoleOperation
     {
         Save,
         Delete

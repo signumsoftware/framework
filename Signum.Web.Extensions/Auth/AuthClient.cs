@@ -59,14 +59,14 @@ namespace Signum.Web.Auth
                 Navigator.RegisterArea(typeof(AuthClient)); 
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
-                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Main));
+                    Navigator.AddSetting(new EntitySettings<UserDN>());
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Shared));
+                    Navigator.AddSetting(new EntitySettings<RoleDN>());
 
                 if (passwordExpiration)
                 {
-                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Main) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
+                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>() { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
                 }
 
                 Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>()

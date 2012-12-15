@@ -79,7 +79,7 @@ namespace Signum.Entities.ControlPanel
         IPartDN Clone();
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class UserQueryPartDN : Entity, IPartDN
     {
         UserQueryDN userQuery;
@@ -105,7 +105,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class UserChartPartDN : Entity, IPartDN
     {
         UserChartDN userChart;
@@ -138,7 +138,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class CountSearchControlPartDN : Entity, IPartDN
     {
         [NotNullable]
@@ -198,7 +198,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class LinkListPartDN : Entity, IPartDN
     {
         [NotNullable]

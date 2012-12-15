@@ -43,7 +43,7 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class ScheduleRuleMinutelyDN : Entity, IScheduleRuleDN
     {
         DateTime startingOn = TimeZoneManager.Now.Date;
@@ -92,7 +92,7 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class ScheduleRuleHourlyDN : Entity, IScheduleRuleDN
     {
         DateTime startingOn = TimeZoneManager.Now.Date;
@@ -146,7 +146,7 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class ScheduleRuleDailyDN : ScheduleRuleDayDN
     {
         public override string ToString()
@@ -160,7 +160,7 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class ScheduleRuleWeeklyDN : ScheduleRuleDayDN
     {
         DayOfWeek dayOfTheWeek;
@@ -188,11 +188,9 @@ namespace Signum.Entities.Scheduler
 
             return result;
         }
-
     }
 
-
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class ScheduleRuleWeekDaysDN : ScheduleRuleDayDN
     {
         bool monday;

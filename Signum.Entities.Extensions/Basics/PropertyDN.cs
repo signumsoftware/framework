@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
+    [EntityType(EntityType.SystemString)]
     public class PropertyDN : IdentifiableEntity
     {
         public PropertyDN() { }

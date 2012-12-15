@@ -67,6 +67,8 @@ namespace Signum.Engine.SMS
                 if (registerGraph)
                 {
                     SMSMessageGraph.Register();
+                    OperationLogic.SetProtectedSave<SMSMessageDN>(false);
+
                     SMSTemplateGraph.Register();
                 }
             }
@@ -78,7 +80,7 @@ namespace Signum.Engine.SMS
         {
             phoneNumberProviders[typeof(T)] = exp;
 
-            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperations.SendSMSMessage)
+            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperation.SendSMSMessage)
             {
                 Construct = (providers, args) =>
                 {
@@ -160,7 +162,7 @@ namespace Signum.Engine.SMS
         {
             dataObjectProviders[typeof(T)] = func;
 
-            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperations.SendSMSMessagesFromTemplate)
+            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperation.SendSMSMessagesFromTemplate)
             {
                 Construct = (providers, args) =>
                 {
@@ -203,7 +205,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate)
+            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperation.CreateSMSMessageFromTemplate)
             {
                 Construct = (provider, args) =>
                 {
@@ -335,7 +337,7 @@ namespace Signum.Engine.SMS
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
 
-                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperations.CreateUpdateStatusPackage)
+                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperation.CreateUpdateStatusPackage)
                 {
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
@@ -406,6 +408,7 @@ namespace Signum.Engine.SMS
         {
             if (SMSSendAndGetTicketAction == null)
                 throw new InvalidOperationException("SMSSendAction was not established");
+            
             SendSMS(message, SMSSendAndGetTicketAction);
         }
 
@@ -448,6 +451,7 @@ namespace Signum.Engine.SMS
         {
             if (SMSUpdateStatusAction == null)
                 throw new InvalidOperationException("SMSUpdateStatusAction was not established");
+
             UpdateMessageStatus(message, SMSUpdateStatusAction);
         }
 
@@ -456,7 +460,6 @@ namespace Signum.Engine.SMS
         {
             message.State = updateAction(message);
         }
-
     }
 
     public class SMSMessageGraph : Graph<SMSMessageDN, SMSMessageState>
@@ -468,7 +471,7 @@ namespace Signum.Engine.SMS
         {
             GetState = m => m.State;
 
-            new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.CreateSMS)
+            new ConstructFrom<SMSTemplateDN>(SMSMessageOperation.CreateSMS)
             {
                 CanConstruct = t => !t.Active ? Resources.TheTemplateMustBeActiveToConstructSMSMessages : null,
                 ToState = SMSMessageState.Created,
@@ -480,7 +483,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new Execute(SMSMessageOperations.Send)
+            new Execute(SMSMessageOperation.Send)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -496,7 +499,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicExecute<SMSMessageDN>(SMSMessageOperations.UpdateStatus)
+            new BasicExecute<SMSMessageDN>(SMSMessageOperation.UpdateStatus)
             {
                 CanExecute = m => m.State != SMSMessageState.Created ? null : Resources.StatusCanNotBeUpdatedForNonSentMessages,
                 Execute = (t, args) => 

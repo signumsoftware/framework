@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.ControlPanel
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class ControlPanelDN : Entity
     {
         Lite<IdentifiableEntity> related;

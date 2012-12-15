@@ -41,7 +41,7 @@ namespace Signum.Web.Reports
                 {
                     string viewPrefix = "~/Reports/Views/{0}.cshtml";
                     Navigator.AddSettings(new List<EntitySettings>{
-                        new EntitySettings<ExcelReportDN>(EntityType.Main) 
+                        new EntitySettings<ExcelReportDN>() 
                         { 
                             PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
                             MappingMain = new ExcelReportMapping()
@@ -51,7 +51,7 @@ namespace Signum.Web.Reports
                     FilesClient.Start(false, false, true);
 
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
-                        Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.SystemString));
+                        Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>());
 
                     ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((ctx, entity) =>
                     {

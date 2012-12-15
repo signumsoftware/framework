@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class SessionLogDN : Entity
     {
         Lite<UserDN> user;

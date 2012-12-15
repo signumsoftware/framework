@@ -15,7 +15,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class ChartScriptDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -298,7 +298,7 @@ namespace Signum.Entities.Chart
         }
     }
 
-    public enum ChartScriptOperations
+    public enum ChartScriptOperation
     {
         Save,
         Clone,

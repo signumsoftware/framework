@@ -84,19 +84,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Alerts\Alert.cs" />
-    <Compile Include="Authorization\PasswordValidIntervalDN.cs" />
-    <Compile Include="Authorization\ResetPasswordRequestDN.cs" />
-    <Compile Include="Authorization\SessionLogDN.cs" />
-    <Compile Include="Authorization\UserTicketDN.cs" />
+    <Compile Include="Authorization\PasswordValidInterval.cs" />
+    <Compile Include="Authorization\ResetPasswordRequest.cs" />
+    <Compile Include="Authorization\SessionLog.cs" />
+    <Compile Include="Authorization\UserTicket.cs" />
     <Compile Include="Authorization\Services.cs" />
-    <Compile Include="Authorization\PermissionDN.cs" />
+    <Compile Include="Authorization\Permission.cs" />
     <Compile Include="Authorization\Rules.cs" />
-    <Compile Include="Authorization\RoleDN.cs" />
+    <Compile Include="Authorization\Role.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
-    <Compile Include="Authorization\UserDN.cs" />
+    <Compile Include="Authorization\User.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
-    <Compile Include="Basics\TypeConditionDN.cs" />
+    <Compile Include="Basics\TypeConditionName.cs" />
     <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />

@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.SMS
 {
-    public enum SMSProviderOperations
+    public enum SMSProviderOperation
     {
         SendSMSMessage,
         SendSMSMessagesFromTemplate
@@ -22,7 +22,7 @@ namespace Signum.Entities.SMS
         Failed,
     }
 
-    public enum SMSMessageOperations
+    public enum SMSMessageOperation
     {
         CreateSMS,
         Send,
@@ -37,7 +37,7 @@ namespace Signum.Entities.SMS
         UpdateStatus
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class SMSMessageDN : Entity
     {
         public static string DefaultFrom;

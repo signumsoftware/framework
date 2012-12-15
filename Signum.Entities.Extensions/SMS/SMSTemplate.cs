@@ -17,7 +17,7 @@ namespace Signum.Entities.SMS
         Modified
     }
 
-    public enum SMSTemplateOperations
+    public enum SMSTemplateOperation
     { 
         Create,
         Save,
@@ -25,7 +25,7 @@ namespace Signum.Entities.SMS
         Enable
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class SMSTemplateDN : Entity
     {
         [SqlDbType(Size = 100)]

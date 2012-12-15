@@ -110,7 +110,7 @@ namespace Signum.Engine.Disconnected
             {
                 GetState = dm => dm.State;
 
-                new Execute(DisconnectedMachineOperations.Save)
+                new Execute(DisconnectedMachineOperation.Save)
                 {
                     FromStates = new []{ DisconnectedMachineState.Connected },
                     ToState = DisconnectedMachineState.Connected,
@@ -119,7 +119,7 @@ namespace Signum.Engine.Disconnected
                     Execute = (dm, _) => { }
                 }.Register();
 
-                new Execute(DisconnectedMachineOperations.UnsafeUnlock)
+                new Execute(DisconnectedMachineOperation.UnsafeUnlock)
                 {
                     FromStates = new[] { DisconnectedMachineState.Disconnected, DisconnectedMachineState.Faulted, DisconnectedMachineState.Fixed  },
                     ToState = DisconnectedMachineState.Connected,
@@ -130,9 +130,9 @@ namespace Signum.Engine.Disconnected
                     }
                 }.Register();
 
-                new BasicConstructFrom<DisconnectedMachineDN, DisconnectedImportDN>(DisconnectedMachineOperations.FixImport)
+                new BasicConstructFrom<DisconnectedMachineDN, DisconnectedImportDN>(DisconnectedMachineOperation.FixImport)
                 {
-                    CanConstruct = dm => dm.State.InState(DisconnectedMachineOperations.FixImport, DisconnectedMachineState.Faulted),
+                    CanConstruct = dm => dm.State.InState(DisconnectedMachineOperation.FixImport, DisconnectedMachineState.Faulted),
                     Construct = (dm, _) =>
                     {
                         return ImportManager.BeginImportDatabase(dm, null).Retrieve();

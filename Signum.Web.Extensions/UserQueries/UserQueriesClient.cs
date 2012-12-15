@@ -58,7 +58,7 @@ namespace Signum.Web.UserQueries
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserQueryDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
+                    new EntitySettings<UserQueryDN>() { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
                     
                     new EmbeddedEntitySettings<QueryFilterDN>()
                     { 

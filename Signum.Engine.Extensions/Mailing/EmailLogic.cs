@@ -106,6 +106,13 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
+
+                new BasicExecute<EmailTemplateDN>(EmailTemplateOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (et, _) => { },
+                }.Register();
             }
         }
 
@@ -199,7 +206,7 @@ namespace Signum.Engine.Mailing
 
                 var result = new EmailMessageDN
                 {
-                    State = EmailState.Created,
+                    State = EmailMessageState.Created,
                     Recipient = model.To.ToLite(),
                     Bcc = model.Bcc,
                     Cc = model.Cc,
@@ -233,7 +240,7 @@ namespace Signum.Engine.Mailing
                     client.Send(message);
                 }
 
-                emailMessage.State = EmailState.Sent;
+                emailMessage.State = EmailMessageState.Sent;
                 emailMessage.Sent = TimeZoneManager.Now;
                 emailMessage.Received = null;
                 emailMessage.Save();
@@ -248,7 +255,7 @@ namespace Signum.Engine.Mailing
                 using (Transaction tr = Transaction.ForceNew())
                 {
                     emailMessage.Exception = exLog;
-                    emailMessage.State = EmailState.Exception;
+                    emailMessage.State = EmailMessageState.Exception;
                     emailMessage.Save();
                     tr.Commit();
                 }
@@ -310,13 +317,13 @@ namespace Signum.Engine.Mailing
                             updater = em => new EmailMessageDN
                             {
                                 Exception = exLog,
-                                State = EmailState.Exception
+                                State = EmailMessageState.Exception
                             };
                         }
                         else
                             updater = em => new EmailMessageDN
                             {
-                                State = EmailState.Sent,
+                                State = EmailMessageState.Sent,
                                 Sent = TimeZoneManager.Now
                             };
 
@@ -333,7 +340,7 @@ namespace Signum.Engine.Mailing
                 else
                 {
                     emailMessage.Received = null;
-                    emailMessage.State = EmailState.Sent;
+                    emailMessage.State = EmailMessageState.Sent;
                     emailMessage.Sent = TimeZoneManager.Now;
                     emailMessage.Save();
                 }
@@ -348,7 +355,7 @@ namespace Signum.Engine.Mailing
                 using (var tr = Transaction.ForceNew())
                 {
                     emailMessage.Sent = TimeZoneManager.Now;
-                    emailMessage.State = EmailState.Exception;
+                    emailMessage.State = EmailMessageState.Exception;
                     emailMessage.Exception = exLog;
                     emailMessage.Save();
                     tr.Commit();
@@ -410,7 +417,7 @@ namespace Signum.Engine.Mailing
 
             emails.Select(e => CreateEmailMessage(e, packLite)).SaveList();
 
-            var process = ProcessLogic.Create(EmailProcesses.SendEmails, emailPackage);
+            var process = ProcessLogic.Create(EmailMessageProcesses.SendEmails, emailPackage);
 
             process.Execute(ProcessOperation.Execute);
 
@@ -434,7 +441,7 @@ namespace Signum.Engine.Mailing
 
             recipientList.Select(to => new EmailMessageDN
             {
-                State = EmailState.Created,
+                State = EmailMessageState.Created,
                 Recipient = to.ToLite(),
                 Template = template,
                 Subject = content.Subject,
@@ -442,7 +449,7 @@ namespace Signum.Engine.Mailing
                 Package = lite
             }).SaveList();
 
-            var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
+            var process = ProcessLogic.Create(EmailMessageProcesses.SendEmails, package);
 
             process.Execute(ProcessOperation.Execute);
 
