@@ -35,7 +35,7 @@ namespace Signum.Windows.Basics
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ExceptionDN>(EntityType.System) { View = e => new ExceptionCtrl() });
+                Navigator.AddSetting(new EntitySettings<ExceptionDN>() { View = e => new ExceptionCtrl() });
             }
         }
     }

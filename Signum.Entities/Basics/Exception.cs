@@ -23,7 +23,6 @@ namespace Signum.Entities.Basics
             this.StackTrace = ex.StackTrace;
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
-           
         }
 
         DateTime creationDate = TimeZoneManager.Now;

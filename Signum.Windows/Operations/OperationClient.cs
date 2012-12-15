@@ -31,7 +31,7 @@ namespace Signum.Windows.Operations
             {
                 Manager = operationManager;
 
-                Navigator.AddSetting(new EntitySettings<OperationLogDN>(EntityType.System) { View = e => new OperationLog() });
+                Navigator.AddSetting(new EntitySettings<OperationLogDN>() { View = e => new OperationLog() });
 
                 NormalWindow.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
 
