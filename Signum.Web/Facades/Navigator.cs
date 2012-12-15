@@ -397,12 +397,12 @@ namespace Signum.Web
             if (!clientType.Name.EndsWith("Client"))
                 throw new InvalidOperationException("The name of clientType should end with the convention 'Client'");
 
-            RegisterArea(clientType, clientType.Name.RemoveRight("Client".Length));
+            RegisterArea(clientType, clientType.Name.RemoveEnd("Client".Length));
         }
 
         public static void RegisterArea(Type clientType, string areaName)
         {
-            if (areaName.Left(1) == "/")
+            if (areaName.Start(1) == "/")
                 throw new SystemException("Invalid start character / in {0}".Formato(areaName));
 
             CompiledViews.RegisterArea(clientType.Assembly, areaName);

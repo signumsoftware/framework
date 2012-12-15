@@ -44,19 +44,24 @@ namespace Signum.Engine.Maps
 
         public string IndexName
         {
-            get { return "IX_{0}_{1}".Formato(Table.Name, ColumnSignature()).TryLeft(Connector.Current.MaxNameLength); }
+            get { return "IX_{0}_{1}".Formato(Table.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
 
         public string ViewName
         {
             get
             {
-                if (string.IsNullOrEmpty(Where) || Schema.Current.Settings.DBMS != DBMS.SqlServer2005)
+                if (string.IsNullOrEmpty(Where))
                     return null;
 
-                return "VIX_{0}_{1}".Formato(Table.Name, ColumnSignature()).TryLeft(Connector.Current.MaxNameLength);
+                if( Schema.Current.Settings.DBMS > DBMS.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains))
+                    return null;
+
+                return "VIX_{0}_{1}".Formato(Table.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
             }
         }
+
+        static List<string> ComplexWhereKeywords = new List<string>(){"OR"};
 
         string ColumnSignature()
         {
