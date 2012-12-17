@@ -343,12 +343,12 @@ namespace Signum.Engine
         }
 
         public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites)
-         where T : class, IIdentifiable
+            where T : class, IIdentifiable
         {
-            return RetrieveFromListOfLite(lites).Cast<T>().ToList();
+            return RetrieveFromListOfLite((IEnumerable<Lite<IIdentifiable>>)lites).Cast<T>().ToList();
         }
 
-        public static List<IdentifiableEntity> RetrieveFromListOfLite(IEnumerable<Lite<IIdentifiable>> lites)
+        static List<IdentifiableEntity> RetrieveFromListOfLite(IEnumerable<Lite<IIdentifiable>> lites)
         {
             if (lites == null)
                 throw new ArgumentNullException("lites");
