@@ -337,7 +337,7 @@ namespace Signum.Entities
             }
 
             //External Validation
-            if (pp.IsAplicableExternalPropertyValidation == null || pp.IsAplicableExternalPropertyValidation(this))
+            if (ExternalPropertyValidation != null && (pp.IsAplicableExternalPropertyValidation == null || pp.IsAplicableExternalPropertyValidation(this)))
             {
                 string result = ExternalPropertyValidation(this, pp.PropertyInfo);
                 if (result != null)
