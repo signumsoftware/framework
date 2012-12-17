@@ -67,8 +67,6 @@ namespace Signum.Engine.SMS
                 if (registerGraph)
                 {
                     SMSMessageGraph.Register();
-                    OperationLogic.SetProtectedSave<SMSMessageDN>(false);
-
                     SMSTemplateGraph.Register();
                 }
             }

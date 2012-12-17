@@ -14,29 +14,6 @@ namespace Signum.Entities.SMS
         SendSMSMessagesFromTemplate
     }
 
-    public enum SMSMessageState
-    {
-        Created,
-        Sent,
-        Delivered,
-        Failed,
-    }
-
-    public enum SMSMessageOperation
-    {
-        CreateSMS,
-        Send,
-        UpdateStatus,
-        CreateUpdateStatusPackage,
-        CreateSMSMessageFromTemplate
-    }
-
-    public enum SMSMessageProcess
-    {
-        Send,
-        UpdateStatus
-    }
-
     [Serializable, EntityType(EntityType.Main)]
     public class SMSMessageDN : Entity
     {
@@ -139,5 +116,28 @@ namespace Signum.Entities.SMS
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum SMSMessageState
+    {
+        Created,
+        Sent,
+        Delivered,
+        Failed,
+    }
+
+    public enum SMSMessageOperation
+    {
+        CreateSMS,
+        Send,
+        UpdateStatus,
+        CreateUpdateStatusPackage,
+        CreateSMSMessageFromTemplate
+    }
+
+    public enum SMSMessageProcess
+    {
+        Send,
+        UpdateStatus
     }
 }
