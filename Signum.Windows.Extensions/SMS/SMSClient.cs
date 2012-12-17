@@ -24,13 +24,13 @@ namespace Signum.Windows.SMS
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMSMessageDN>(EntityType.Main) { View = e => new SMSMessage() },
-                    new EntitySettings<SMSTemplateDN>(EntityType.Main) { View = e => new SMSTemplate() },
-                    new EntitySettings<SMSSendPackageDN>(EntityType.Main) { View = e => new SMSSendPackage()},
-                    new EntitySettings<SMSUpdatePackageDN>(EntityType.Main) { View = e => new SMSUpdatePackage()},
+                    new EntitySettings<SMSMessageDN> { View = e => new SMSMessage() },
+                    new EntitySettings<SMSTemplateDN> { View = e => new SMSTemplate() },
+                    new EntitySettings<SMSSendPackageDN> { View = e => new SMSSendPackage()},
+                    new EntitySettings<SMSUpdatePackageDN> { View = e => new SMSUpdatePackage()},
                 });
 
-                OperationClient.AddSetting(new EntityOperationSettings(SMSMessageOperations.CreateSMSMessageFromTemplate)
+                OperationClient.AddSetting(new EntityOperationSettings(SMSMessageOperation.CreateSMSMessageFromTemplate)
                 {
                     Click = FindAssociatedTemplates
                 });
@@ -50,7 +50,7 @@ namespace Signum.Windows.SMS
             });
 
             if (template != null)
-                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate,
+                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSMessageFromTemplate,
                     ((Lite<SMSTemplateDN>)template).Retrieve()));
 
             return null;

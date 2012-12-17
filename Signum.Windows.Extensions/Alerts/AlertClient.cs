@@ -11,14 +11,14 @@ namespace Signum.Windows.Alerts
     {
         public static void Start(params Type[] types)
         {
-            Navigator.AddSetting(new EntitySettings<AlertDN>(EntityType.Main)
+            Navigator.AddSetting(new EntitySettings<AlertDN>
             {
                 View = e => new Alert(),
                 IsCreable = EntityWhen.Never,
                 Icon = ExtensionsImageLoader.GetImageSortName("alert.png"),
             });
 
-            Navigator.AddSetting(new EntitySettings<AlertTypeDN>(EntityType.String) { View = e => new AlertType() });
+            Navigator.AddSetting(new EntitySettings<AlertTypeDN> { View = e => new AlertType() });
 
 
             WidgetPanel.GetWidgets += (obj, mainControl) =>

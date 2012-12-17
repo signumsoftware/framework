@@ -28,12 +28,9 @@ namespace Signum.Web.Chart
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(TypeDN)))
-                    Navigator.AddSetting(new EntitySettings<TypeDN>());
-
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EmbeddedEntitySettings<ChartPaletteModel>() 
+                    new EmbeddedEntitySettings<ChartPaletteModel> 
                     { 
                         PartialViewName = _ => ChartClient.ViewPrefix.Formato("ChartPalette"),
                         MappingDefault = new EntityMapping<ChartPaletteModel>(true)

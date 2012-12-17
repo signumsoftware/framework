@@ -28,8 +28,8 @@ namespace Signum.Windows.Processes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ProcessDN>(EntityType.SystemString) { View = e => new ProcessUI(), Icon = Image("process.png") });
-                Navigator.AddSetting(new EntitySettings<ProcessExecutionDN>(EntityType.Main) { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessDN> { View = e => new ProcessUI(), Icon = Image("process.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessExecutionDN> { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
@@ -40,14 +40,14 @@ namespace Signum.Windows.Processes
                 });
 
                 if (packageOperation || package)
-                    Navigator.AddSetting(new EntitySettings<PackageLineDN>(EntityType.System) { View = e => new PackageLine(), Icon = Image("packageLine.png") });
+                    Navigator.AddSetting(new EntitySettings<PackageLineDN> { View = e => new PackageLine(), Icon = Image("packageLine.png") });
 
                 if (package)
-                    Navigator.AddSetting(new EntitySettings<PackageDN>(EntityType.System) { View = e => new Package(), Icon = Image("package.png") });
+                    Navigator.AddSetting(new EntitySettings<PackageDN> { View = e => new Package(), Icon = Image("package.png") });
 
                 if (packageOperation)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageOperationDN>(EntityType.System) { View = e => new PackageOperation(), Icon = Image("package.png") });
+                    Navigator.AddSetting(new EntitySettings<PackageOperationDN> { View = e => new PackageOperation(), Icon = Image("package.png") });
 
                     SearchControl.GetContextMenuItems += SearchControl_GetContextMenuItems;
                 }

@@ -27,8 +27,8 @@ namespace Signum.Windows.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<UserChartDN>(EntityType.Main) { View = e => new UserChart() },
-                    new EntitySettings<ChartScriptDN>(EntityType.Main) { View = e => new ChartScript() },
+                    new EntitySettings<UserChartDN> { View = e => new UserChart() },
+                    new EntitySettings<ChartScriptDN> { View = e => new ChartScript() },
                     new EmbeddedEntitySettings<ChartScriptParameterDN> { View = (e,p) => new ChartScriptParameter(p) }
                 });
 

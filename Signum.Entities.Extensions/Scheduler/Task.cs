@@ -19,7 +19,7 @@ namespace Signum.Entities.Scheduler
     {
     }
 
-    [Serializable, EntityType(EntityType.System)]
+    [Serializable, EntityType(EntityType.SystemString)]
     public class CustomTaskDN : MultiEnumDN, ITaskDN
     {
         

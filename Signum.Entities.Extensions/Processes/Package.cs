@@ -8,7 +8,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable, EntityType(EntityType.System)]
+    [Serializable, EntityType(EntityType.Part)]
     public class PackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
@@ -20,16 +20,9 @@ namespace Signum.Entities.Processes
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        Lite<UserDN> user;
-        public Lite<UserDN> User
-        {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
-        }
-
         public override string ToString()
         {
-            return "Package {0} {1}".Formato(Name, User);
+            return "Package {0}".Formato(Name);
         }
     }
 
@@ -45,7 +38,7 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            return "Package {0} {1} {2}".Formato(Operation, Name, User); ;
+            return "Package {0} {1}".Formato(Operation, Name); ;
         }
     }
 

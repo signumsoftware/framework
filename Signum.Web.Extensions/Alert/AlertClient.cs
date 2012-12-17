@@ -23,8 +23,8 @@ namespace Signum.Web.Alerts
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<AlertDN>() { PartialViewName = _ => ViewPrefix.Formato("Alert") },
-                    new EntitySettings<AlertTypeDN>() { PartialViewName = _ => ViewPrefix.Formato("AlertType") },
+                    new EntitySettings<AlertDN> { PartialViewName = _ => ViewPrefix.Formato("Alert") },
+                    new EntitySettings<AlertTypeDN> { PartialViewName = _ => ViewPrefix.Formato("AlertType") },
                 });
 
                 WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) =>

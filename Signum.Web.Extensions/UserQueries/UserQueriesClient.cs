@@ -58,9 +58,9 @@ namespace Signum.Web.UserQueries
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserQueryDN>() { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
+                    new EntitySettings<UserQueryDN> { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
                     
-                    new EmbeddedEntitySettings<QueryFilterDN>()
+                    new EmbeddedEntitySettings<QueryFilterDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryFilter"), 
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
@@ -69,7 +69,7 @@ namespace Signum.Web.UserQueries
                             .SetProperty(a=>a.TryToken, qtMapping)
                     },
 
-                    new EmbeddedEntitySettings<QueryColumnDN>()
+                    new EmbeddedEntitySettings<QueryColumnDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
@@ -77,7 +77,7 @@ namespace Signum.Web.UserQueries
                             .SetProperty(a=>a.TryToken, qtMapping)
                     },
 
-                    new EmbeddedEntitySettings<QueryOrderDN>()
+                    new EmbeddedEntitySettings<QueryOrderDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)

@@ -22,7 +22,7 @@ namespace Signum.Windows.UserQueries
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryClient.Start();
-                Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Main) { View = _ => new UserQuery() });
+                Navigator.AddSetting(new EntitySettings<UserQueryDN> { View = _ => new UserQuery() });
                 SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
             }
         }

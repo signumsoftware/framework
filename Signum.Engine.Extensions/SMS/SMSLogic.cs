@@ -299,7 +299,7 @@ namespace Signum.Engine.SMS
                     case MessageLengthExceeded.Allowed:
                         break;
                     case MessageLengthExceeded.TextPruning:
-                        return result.RemoveRight(Math.Abs(remainingLength));
+                        return result.RemoveEnd(Math.Abs(remainingLength));
                 }
             }
 

@@ -24,7 +24,7 @@ namespace Signum.Windows.Notes
                     return null;
                 };
 
-                Navigator.AddSetting(new EntitySettings<NoteDN>(EntityType.Main)
+                Navigator.AddSetting(new EntitySettings<NoteDN>
                 {
                     View = e => new Note(),
                     IsCreable = EntityWhen.Never,

@@ -32,12 +32,12 @@ namespace Signum.Web.SMS
                 Navigator.RegisterArea(typeof(SMSClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMSMessageDN>() { PartialViewName = e => ViewPrefix.Formato("SMSMessage") },
-                    new EntitySettings<SMSTemplateDN>() { PartialViewName = e => ViewPrefix.Formato("SMSTemplate") },
-                    new EntitySettings<SMSSendPackageDN>() { PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
-                    new EntitySettings<SMSUpdatePackageDN>() { PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
+                    new EntitySettings<SMSMessageDN> { PartialViewName = e => ViewPrefix.Formato("SMSMessage") },
+                    new EntitySettings<SMSTemplateDN> { PartialViewName = e => ViewPrefix.Formato("SMSTemplate") },
+                    new EntitySettings<SMSSendPackageDN> { PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
+                    new EntitySettings<SMSUpdatePackageDN> { PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
 
-                    new EmbeddedEntitySettings<MultipleSMSModel>() { PartialViewName = e => ViewPrefix.Formato("MultipleSMS") },
+                    new EmbeddedEntitySettings<MultipleSMSModel> { PartialViewName = e => ViewPrefix.Formato("MultipleSMS") },
                 });
 
                 OperationsClient.AddSettings(new List<OperationSettings> 

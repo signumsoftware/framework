@@ -37,7 +37,7 @@ namespace Signum.Entities.SMS
         UpdateStatus
     }
 
-    [Serializable, EntityType(EntityType.System)]
+    [Serializable, EntityType(EntityType.Main)]
     public class SMSMessageDN : Entity
     {
         public static string DefaultFrom;
