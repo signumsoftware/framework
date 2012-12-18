@@ -47,7 +47,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        IDynamicQuery TryGet(object queryName)
+        public IDynamicQuery TryGet(object queryName)
         {
             AssertQueryAllowed(queryName); 
             return queries.TryGetC(queryName);
@@ -115,7 +115,10 @@ namespace Signum.Engine.DynamicQuery
 
         public Dictionary<object, IDynamicQuery> GetQueries(Type entityType)
         {
-            return queries.Where(kvp => kvp.Value.EntityColumn().Implementations.Value.Types.Contains(entityType)).ToDictionary();
+            return (from kvp in queries
+                    let ec = kvp.Value.EntityColumn()
+                    where !ec.Implementations.Value.IsByAll && ec.Implementations.Value.Types.Contains(entityType)
+                    select kvp).ToDictionary();
         }
 
         public Dictionary<object, IDynamicQuery> GetQueries()

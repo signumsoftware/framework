@@ -75,8 +75,8 @@ namespace Signum.Utilities
             Console.WriteLine(question + " " + answers.ToString("/"));
             do
             {
-                var answer = Console.ReadLine().ToLower();
-                var result = answers.FirstOrDefault(a => a.StartsWith(answer, StringComparison.CurrentCultureIgnoreCase));
+                var userAnswer = Console.ReadLine().ToLower();
+                var result = answers.FirstOrDefault(a => a.StartsWith(userAnswer, StringComparison.CurrentCultureIgnoreCase));
                 if (result != null)
                     return result;
 
