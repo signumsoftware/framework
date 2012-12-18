@@ -192,8 +192,9 @@ namespace Signum.Entities
 
         public void Clear()
         {
+            if (innerList.Count > 0)
+                selfModified = true;
             innerList.Clear();
-            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
