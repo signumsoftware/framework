@@ -82,6 +82,7 @@ namespace Signum.Entities.ControlPanel
     [Serializable, EntityType(EntityType.Part)]
     public class UserQueryPartDN : Entity, IPartDN
     {
+        [NotNullable]
         UserQueryDN userQuery;
         [NotNullValidator]
         public UserQueryDN UserQuery
@@ -108,6 +109,7 @@ namespace Signum.Entities.ControlPanel
     [Serializable, EntityType(EntityType.Part)]
     public class UserChartPartDN : Entity, IPartDN
     {
+        [NotNullable]
         UserChartDN userChart;
         [NotNullValidator]
         public UserChartDN UserChart
