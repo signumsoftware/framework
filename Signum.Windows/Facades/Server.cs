@@ -31,6 +31,7 @@ namespace Signum.Windows
             {
                 ServerTypes = current.ServerTypes();
                 NameToType = ServerTypes.ToDictionary(a => a.Value.CleanName, a => a.Key);
+                EntityTypes = current.EntityTypes();
             };
         }
 
@@ -282,6 +283,7 @@ namespace Signum.Windows
         }
 
         public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
+        public static Dictionary<Type, EntityType> EntityTypes { get; private set; }
         public static Dictionary<string, Type> NameToType { get; private set; }
 
         public static Type TryGetType(string cleanName)
@@ -304,6 +306,11 @@ namespace Signum.Windows
             lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.EntityType, lite.Id)));
 
            return lite;
+        }
+
+        internal static EntityType GetEntityType(Type type)
+        {
+            return EntityTypes.GetOrThrow(type, "Type {0} not found in the Server");
         }
     }
 

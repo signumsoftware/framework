@@ -36,6 +36,8 @@ namespace Signum.Engine.Basics
             get { return Schema.Current.TypeToName; }
         }
 
+        public static Dictionary<Type, EntityType> EntityTypes { get; private set; }
+
         public static Type ToType(this TypeDN type)
         {
             return DnToType[type];
@@ -50,6 +52,15 @@ namespace Signum.Engine.Basics
         {
             Schema current = Schema.Current; 
 
+            var attributes = current.Tables.Keys.Select(t=>KVP.Create(t,t.SingleAttributeInherit<EntityTypeAttribute>())).ToList();
+
+            var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".Formato(a.Key.Name), "\r\n");
+
+            if (errors.HasText())
+                throw new InvalidOperationException(errors);
+
+            EntityTypes = attributes.Select(kvp => KVP.Create(kvp.Key, kvp.Value.EntityType)).ToDictionary();
+
             List<TypeDN> types = Database.RetrieveAll<TypeDN>();
 
             var dict = EnumerableExtensions.JoinStrict(
@@ -63,6 +74,7 @@ namespace Signum.Engine.Basics
 
             current.TypeToDN = dict;
             current.DnToType = dict.Inverse();
+
 
             Lite.SetTypeNameAndResolveType(TypeLogic.GetCleanName, TypeLogic.GetType);
 
@@ -142,34 +154,14 @@ namespace Signum.Engine.Basics
             return Schema.Current.TypeToName.TryGetC(type);
         }
 
-        public static EntityType GetEntityType<T>() where T: IdentifiableEntity
-        {
-            return GetEntityType(typeof(T));
-        }
-
         public static EntityType GetEntityType(Type type)
         {
-            var attr = type.SingleAttributeInherit<EntityTypeAttribute>();
-
-            if (attr == null)
-                throw new InvalidOperationException("EntityTypeAttribute not found for {0}".Formato(type.Name));
-
-            return attr.EntityType;
-        }
-
-        public static EntityType? TryGetEntityType<T>() where T : IdentifiableEntity
-        {
-            return TryGetEntityType(typeof(T));
+            return EntityTypes.GetOrThrow(type, "EntityType not found for {0}");
         }
 
         public static EntityType? TryGetEntityType(Type type)
         {
-            var attr = type.SingleAttributeInherit<EntityTypeAttribute>();
-
-            if (attr == null)
-                return null;
-
-            return attr.EntityType;
+            return EntityTypes.TryGetS(type);
         }
     }
 }

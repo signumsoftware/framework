@@ -52,8 +52,8 @@ namespace Signum.Windows
 
         public EntitySettings()
         {
-            EntityType entityType = EntityType.SystemString;
-            throw new NotImplementedException();
+
+            EntityType entityType = Server.GetEntityType(typeof(T));
 
             switch (entityType)
             {

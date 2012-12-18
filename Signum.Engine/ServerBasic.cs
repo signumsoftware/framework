@@ -13,6 +13,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Engine.Linq;
 using Signum.Engine.Operations;
+using Signum.Engine.Basics;
 
 namespace Signum.Services
 {
@@ -114,6 +115,13 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => Schema.Current.TypeToDN);
+        }
+
+
+        public Dictionary<Type, EntityType> EntityTypes()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                 () => TypeLogic.EntityTypes);
         }
 
         public virtual DateTime ServerNow()
@@ -247,5 +255,7 @@ namespace Signum.Services
         }
 
         #endregion
+
+
     }
 }

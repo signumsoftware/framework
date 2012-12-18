@@ -66,7 +66,7 @@ namespace Signum.Web
         
         public EntitySettings()
         {
-            switch (TypeLogic.GetEntityType<T>())
+            switch (TypeLogic.GetEntityType(typeof(T)))
             {
                 case EntityType.SystemString:
                     IsCreable = EntityWhen.Never;
@@ -75,6 +75,7 @@ namespace Signum.Web
                     IsReadonly = true;
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
+
                 case EntityType.System:
                     IsCreable = EntityWhen.Never;
                     IsViewable = true;
@@ -90,12 +91,14 @@ namespace Signum.Web
                     MappingMain = new EntityMapping<T>(true).GetValue;
                     MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
+
                 case EntityType.Shared:
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
+
                 case EntityType.Main:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
