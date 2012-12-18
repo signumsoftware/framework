@@ -41,6 +41,7 @@ namespace Signum.Engine.Authorization
                     AuthUtils.MaxBool,
                     AuthUtils.MinBool);
 
+                AuthLogic.SuggestRuleChanges += AuthLogic_SuggestRuleChanges;
                 AuthLogic.ExportToXml += () => cache.ExportXml("Queries", "Query", p => p.Key, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles, replacements) => 
                 {
@@ -66,6 +67,37 @@ namespace Signum.Engine.Authorization
                     }, bool.Parse);
                 };
             }
+        }
+
+        static Action<Lite<RoleDN>> AuthLogic_SuggestRuleChanges()
+        {
+            var queries = (from type in Schema.Current.Tables.Keys
+                           where TypeLogic.GetEntityType(type) != EntityType.Part
+                           let qs = DynamicQueryManager.Current.GetQueries(type).Keys
+                           where qs.Any()
+                           select KVP.Create(type, qs.ToList())).ToDictionary();
+
+            return r =>
+            {
+                foreach (var type in queries.Keys)
+	            {
+                    var ta = TypeAuthLogic.GetAllowed(r, type);
+
+                    if (ta.Max().GetUI() == TypeAllowedBasic.None)
+                    {
+                        foreach (var query in queries[type].Where(q => QueryAuthLogic.GetQueryAllowed(r, q)))
+                        {
+                            Console.WriteLine("Error: Query {0} is allowed but type {1} is {2}".Formato(QueryUtils.GetQueryUniqueKey(query), type.Name, ta.Max()));
+                        }
+                    }
+                    else
+                    {
+                        var qs = queries[type];
+                        if (qs.Any() && !qs.Any(q => QueryAuthLogic.GetQueryAllowed(r, q)))
+                            Console.WriteLine("Warning: Type {0} is {1} but no query is allowed");
+                    }
+	            }
+            };
         }
 
         static bool dqm_AllowQuery(object queryName)

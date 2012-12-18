@@ -55,7 +55,42 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.ExportToXml += () => cache.ExportXml();
                 AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
+                AuthLogic.SuggestRuleChanges += AuthLogic_SuggestRuleChanges;
             }
+        }
+
+        static Action<Lite<RoleDN>> AuthLogic_SuggestRuleChanges()
+        {
+            var graph = Schema.Current.ToDirectedGraph();
+            graph.RemoveAll(graph.FeedbackEdgeSet().Edges);
+            var compilationOrder = graph.CompilationOrder().ToList();
+            var entityTypes = graph.ToDictionary(t => t.Type, t => TypeLogic.GetEntityType(t.Type));
+
+            return r =>
+            {
+                var result = (from parent in compilationOrder
+                             let parentAllowed = GetAllowed(r, parent.Type)
+                             where parentAllowed.Max() > TypeAllowed.None
+                             from related in graph.RelatedTo(parent).Where(a=>a.Value == false).Select(a=>a.Key)
+                             let relAllowed = GetAllowed(r, related.Type)
+                             where relAllowed.Max() == TypeAllowed.None
+                             select new 
+                             {
+                                 parent,
+                                 parentAllowed,
+                                 related,
+                                 relAllowed
+                             }).ToList();
+
+                foreach (var tuple in result)
+	            {
+                    Console.WriteLine("Type: {0} is {1} (max) but the related entity {2} is just {3} (max)".Formato(
+                        tuple.parent.Type.Name,
+                        tuple.parentAllowed.Max(),
+                        tuple.related,
+                        tuple.relAllowed.Max()));                                                        
+	            }
+            };
         }
 
 

@@ -39,7 +39,7 @@ namespace Signum.Engine.Authorization
         }
 
         public static string AnonymousUserName { get; private set; }
-        static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.Create(() => AnonymousUserName == null ? null:
+        static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.Create(() => AnonymousUserName == null ? null :
             Database.Query<UserDN>().Where(u => u.UserName == AnonymousUserName)
             .SingleEx(() => "AnonymousUser with name '{0}' not found".Formato(AnonymousUserName)));
         public static UserDN AnonymousUser
@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
-        public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
+        public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN));
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -103,7 +103,7 @@ namespace Signum.Engine.Authorization
                 {
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (r, args) =>{}
+                    Execute = (r, args) => { }
                 }.Register();
 
                 new BasicDelete<RoleDN>(RoleOperation.Delete)
@@ -224,7 +224,7 @@ namespace Signum.Engine.Authorization
             set { gloaballyEnabled = value; }
         }
 
-        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");  
+        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");
 
         public static IDisposable Disable()
         {
@@ -269,7 +269,7 @@ namespace Signum.Engine.Authorization
                 if (user.PasswordHash != passwordHash)
                     throw new IncorrectPasswordException(Resources.IncorrectPassword);
 
-                 return user;
+                return user;
             }
         }
 
@@ -316,6 +316,32 @@ namespace Signum.Engine.Authorization
 
         public static event Func<XElement> ExportToXml;
         public static event Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand> ImportFromXml;
+        public static event Func<Action<Lite<RoleDN>>> SuggestRuleChanges;
+
+        public static void SuggestChanges()
+        {
+            if (SuggestRuleChanges == null)
+                return;
+
+            foreach (var item in SuggestRuleChanges.GetInvocationList().Cast<Func<Action<RoleDN>>>())
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.White, "{0}:".Formato(item.Method.DeclaringType.Name));
+
+                foreach (var role in RolesInOrder())
+                {
+                    SafeConsole.WriteLineColor(ConsoleColor.Gray, "Suggestions for {0}", role);
+
+                    foreach (Action<Lite<RoleDN>> action in actions)
+                    {
+                        action(role);
+                    }
+                }
+            }
+
+            var actions = SuggestRuleChanges.GetInvocationList().Cast<Func<Action<RoleDN>>>().Select(f => f()).ToList();
+
+
+        }
 
         public static XDocument ExportRules()
         {
@@ -361,14 +387,14 @@ namespace Signum.Engine.Authorization
                     new SqlPreCommandSimple("-- Alien role {0} not configured!!".Formato(n))
                 ).Combine(Spacing.Simple);
 
-          
+
 
             var result = ImportFromXml.GetInvocationList()
                 .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand>>()
                 .Select(inv => inv(doc.Root, rolesDic, replacements)).Combine(Spacing.Triple);
 
             if (replacements.Values.Any(a => a.Any()))
-                SafeConsole.WriteLineColor(ConsoleColor.Red, "There are renames! Remember to export after executing the script"); 
+                SafeConsole.WriteLineColor(ConsoleColor.Red, "There are renames! Remember to export after executing the script");
 
             if (result == null && dbOnlyWarnings == null)
                 return null;
@@ -391,7 +417,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("You want to export (e) or import (i) AuthRules? (nothing to exit)".Formato(fileName));
+            Console.WriteLine("You want to export (e), import (i) or suggest (s) AuthRules? (nothing to exit)".Formato(fileName));
 
             string answer = Console.ReadLine();
 
@@ -414,6 +440,16 @@ namespace Signum.Engine.Authorization
                     Console.WriteLine("No changes necessary!");
                 else
                     command.OpenSqlFileRetry();
+            }
+            else if (answer.ToLower() == "s")
+            {
+                SuggestChanges();
+                if (SafeConsole.Ask("Export now?", "yes", "no") == "yes")
+                {
+                    var doc = ExportRules();
+                    doc.Save(fileName);
+                    Console.WriteLine("Sucesfully exported to {0}".Formato(fileName));
+                }
             }
         }
 

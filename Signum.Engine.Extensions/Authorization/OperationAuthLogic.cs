@@ -40,6 +40,7 @@ namespace Signum.Engine.Authorization
                      AuthUtils.MaxOperation,
                      AuthUtils.MinOperation);
 
+                AuthLogic.SuggestRuleChanges += AuthLogic_SuggestRuleChanges;
                 AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", p => p.Key, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
@@ -56,6 +57,41 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        static Action<Lite<RoleDN>> AuthLogic_SuggestRuleChanges()
+        {
+            var operations = (from type in Schema.Current.Tables.Keys
+                              let ops = OperationLogic.ServiceGetOperationInfos(type).Where(oi => oi.OperationType == OperationType.Execute && oi.Lite == false).ToList()
+                              where ops.Any()
+                              select KVP.Create(type, ops.ToList())).ToDictionary();
+
+            return r =>
+            {
+                foreach (var type in operations.Keys)
+                {
+                    var ta = TypeAuthLogic.GetAllowed(r, type);
+                    var max = ta.Max();
+                    OperationAllowed typeAllowed =
+                        max.GetUI() >= TypeAllowedBasic.Modify ? OperationAllowed.Allow :
+                        max.GetDB() >= TypeAllowedBasic.Modify ? OperationAllowed.DBOnly :
+                        OperationAllowed.None;
+
+                    var ops = operations[type];
+                    foreach (var oi in ops.Where(o => GetOperationAllowed(r, o.Key) < typeAllowed))
+                    {
+                        Console.WriteLine("Error: Operation {0} ({1}) is allowed but type {1} is {2}".Formato(
+                            OperationDN.UniqueKey(oi.Key),
+                            GetOperationAllowed(r, oi.Key),
+                            type.Name,
+                            ta.Max()));
+                    }
+
+                    if (typeAllowed > OperationAllowed.None && ops.Any() && !ops.Any(o => GetOperationAllowed(r, o.Key) >= typeAllowed))
+                    {
+                        Console.WriteLine("Warning: Type {0} is {1} but not operation is allowed ({2})".Formato(type.Name, max, ops.CommaAnd(a => OperationDN.UniqueKey(a.Key))));
+                    }
+                }
+            };
+        }
         static bool OperationLogic_AllowOperation(Enum operationKey, bool inUserInterface)
         {
             return GetOperationAllowed(operationKey, inUserInterface);
@@ -77,11 +113,16 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => keys.Contains(r.Key));
         }
 
-        public static bool GetOperationAllowed(Enum operationKey, bool inUserInterface, Lite<RoleDN> role)
+        public static bool GetOperationAllowed(Lite<RoleDN> role, Enum operationKey, bool inUserInterface)
         {
-            OperationAllowed allowed = cache.GetAllowed(role, operationKey);
+            OperationAllowed allowed = GetOperationAllowed(role, operationKey);
 
             return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
+        }
+
+        public static OperationAllowed GetOperationAllowed(Lite<RoleDN> role, Enum operationKey)
+        {
+            return cache.GetAllowed(role, operationKey);
         }
 
         public static bool GetOperationAllowed(Enum operationKey, bool inUserInterface)
