@@ -595,10 +595,10 @@ namespace Signum.Engine.Cache
             {
                 new XAttribute("Label", t.Name),
                 new XAttribute("Background", GetColor(t.Type, cacheHint).ToHtml())
-            }, lite => lite ? new[]
+            }, info => new[]
             {
-                new XAttribute("StrokeDashArray",  "2 3")
-            } : new XAttribute[0]);
+                info.IsLite ? new XAttribute("StrokeDashArray",  "2 3") : null,
+            }.NotNull().ToArray());
 
             return dgml;
         }
