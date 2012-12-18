@@ -181,7 +181,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public IEnumerable<KeyValuePair<Table, bool>> DependentTables()
+        public IEnumerable<KeyValuePair<Table, RelationInfo>> DependentTables()
         {
             return Fields.Values.SelectMany(f => f.Field.GetTables());
         }
@@ -235,7 +235,7 @@ namespace Signum.Engine.Maps
             throw new InvalidOperationException("IndexType {0} not expected".Formato(IndexType));
         }
 
-        internal abstract IEnumerable<KeyValuePair<Table, bool>> GetTables(); 
+        internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables(); 
     }
 
     public enum IndexType
@@ -333,9 +333,9 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<UniqueIndex>();
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
     }
 
@@ -372,9 +372,9 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
     }
 
@@ -453,9 +453,15 @@ namespace Signum.Engine.Maps
             return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratUniqueIndexes(table));
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return EmbeddedFields.Values.SelectMany(f => f.Field.GetTables());
+            foreach (var f in EmbeddedFields.Values)
+            {
+                foreach (var kvp in f.Field.GetTables())
+                {
+                    yield return kvp;
+                }
+            }
         }
     }
 
@@ -490,9 +496,14 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            yield return KVP.Create(ReferenceTable, IsLite); 
+            yield return KVP.Create(ReferenceTable, new RelationInfo
+            {
+                 IsLite = IsLite,
+                 IsCollection = false,
+                 IsNullable = Nullable
+            }); 
         }
 
         bool clearEntityOnSaving;
@@ -525,11 +536,16 @@ namespace Signum.Engine.Maps
                 IndexType.DefaultToNull().ToString());
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
             if (ReferenceTable == null)
-                yield break; 
-            yield return KVP.Create(ReferenceTable, IsLite);
+                yield break;
+            yield return KVP.Create(ReferenceTable, new RelationInfo
+            {
+                IsLite = IsLite,
+                IsCollection = false,
+                IsNullable = Nullable
+            });
         }
     }
 
@@ -551,9 +567,14 @@ namespace Signum.Engine.Maps
             return ImplementationColumns.Values.Cast<IColumn>();
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, IsLite)).ToList();
+            return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, new RelationInfo
+            {
+                IsLite = IsLite,
+                IsCollection = false,
+                IsNullable = a.Value.Nullable
+            }));
         }
 
         bool clearEntityOnSaving;
@@ -585,9 +606,9 @@ namespace Signum.Engine.Maps
             return new[] { Column, ColumnTypes };
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
 
         bool clearEntityOnSaving;
@@ -659,9 +680,13 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<UniqueIndex>();
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return RelationalTable.Field.GetTables();
+            foreach (var kvp in RelationalTable.Field.GetTables())
+            {
+                kvp.Value.IsCollection = true;
+                yield return kvp;
+            }
         }
     }
 
