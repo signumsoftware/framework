@@ -20,6 +20,7 @@ using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Authorization
 {
@@ -323,24 +324,24 @@ namespace Signum.Engine.Authorization
             if (SuggestRuleChanges == null)
                 return;
 
-            foreach (var item in SuggestRuleChanges.GetInvocationList().Cast<Func<Action<RoleDN>>>())
+            foreach (var item in SuggestRuleChanges.GetInvocationList().Cast<Func<Action<Lite<RoleDN>>>>())
             {
-                SafeConsole.WriteLineColor(ConsoleColor.White, "{0}:".Formato(item.Method.DeclaringType.Name));
-
-                foreach (var role in RolesInOrder())
+                if (SafeConsole.Ask("{0}?".Formato(item.Method.Name.NiceName())))
                 {
-                    SafeConsole.WriteLineColor(ConsoleColor.Gray, "Suggestions for {0}", role);
+                    var action = item();
 
-                    foreach (Action<Lite<RoleDN>> action in actions)
+                    foreach (var role in RolesInOrder())
                     {
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, "Suggestions for {0}", role);
+
                         action(role);
                     }
+
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    Console.WriteLine();
                 }
             }
-
-            var actions = SuggestRuleChanges.GetInvocationList().Cast<Func<Action<RoleDN>>>().Select(f => f()).ToList();
-
-
         }
 
         public static XDocument ExportRules()
@@ -386,8 +387,6 @@ namespace Signum.Engine.Authorization
             var dbOnlyWarnings = rolesDic.Keys.Except(rolesXml.Keys).Select(n =>
                     new SqlPreCommandSimple("-- Alien role {0} not configured!!".Formato(n))
                 ).Combine(Spacing.Simple);
-
-
 
             var result = ImportFromXml.GetInvocationList()
                 .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand>>()

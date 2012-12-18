@@ -14,6 +14,7 @@ using Signum.Entities;
 using Signum.Engine.Operations;
 using System.Reflection;
 using Signum.Engine.Extensions.Properties;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Authorization
 {
@@ -40,7 +41,7 @@ namespace Signum.Engine.Authorization
                      AuthUtils.MaxOperation,
                      AuthUtils.MinOperation);
 
-                AuthLogic.SuggestRuleChanges += AuthLogic_SuggestRuleChanges;
+                AuthLogic.SuggestRuleChanges += SuggestOperationRules;
                 AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", p => p.Key, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
@@ -57,7 +58,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static Action<Lite<RoleDN>> AuthLogic_SuggestRuleChanges()
+        static Action<Lite<RoleDN>> SuggestOperationRules()
         {
             var operations = (from type in Schema.Current.Tables.Keys
                               let ops = OperationLogic.ServiceGetOperationInfos(type).Where(oi => oi.OperationType == OperationType.Execute && oi.Lite == false).ToList()
@@ -66,28 +67,67 @@ namespace Signum.Engine.Authorization
 
             return r =>
             {
+                bool? warnings = null;
+
                 foreach (var type in operations.Keys)
                 {
                     var ta = TypeAuthLogic.GetAllowed(r, type);
                     var max = ta.Max();
-                    OperationAllowed typeAllowed =
-                        max.GetUI() >= TypeAllowedBasic.Modify ? OperationAllowed.Allow :
-                        max.GetDB() >= TypeAllowedBasic.Modify ? OperationAllowed.DBOnly :
-                        OperationAllowed.None;
 
-                    var ops = operations[type];
-                    foreach (var oi in ops.Where(o => GetOperationAllowed(r, o.Key) < typeAllowed))
+
+                    if (ta.Max().GetUI() == TypeAllowedBasic.None)
                     {
-                        Console.WriteLine("Error: Operation {0} ({1}) is allowed but type {1} is {2}".Formato(
-                            OperationDN.UniqueKey(oi.Key),
-                            GetOperationAllowed(r, oi.Key),
-                            type.Name,
-                            ta.Max()));
+                        OperationAllowed typeAllowed =
+                             max.GetUI() >= TypeAllowedBasic.Modify ? OperationAllowed.Allow :
+                             max.GetDB() >= TypeAllowedBasic.Modify ? OperationAllowed.DBOnly :
+                             OperationAllowed.None;
+
+                        var ops = operations[type];
+                        foreach (var oi in ops.Where(o => GetOperationAllowed(r, o.Key) > typeAllowed))
+                        {
+                            bool isError = ta.Max().GetDB() == TypeAllowedBasic.None;
+
+                            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "{0}: Operation {1} is {2} but type {3} is [{4}]".Formato(
+                                  isError ? "Error" : "Warning",
+                                OperationDN.UniqueKey(oi.Key),
+                                GetOperationAllowed(r, oi.Key),
+                                type.Name,
+                                ta));
+
+
+                            string message = "Set {0} to {1} for {2}?".Formato(OperationDN.UniqueKey(oi.Key), typeAllowed, r);
+
+                            if (isError ? SafeConsole.Ask(message) : SafeConsole.Ask(ref warnings, message))
+                            {
+                                Manual.SetAllowed(r, oi.Key, typeAllowed);
+                                SafeConsole.WriteLineColor(ConsoleColor.Red, "Disallowed");
+                            }
+                            else
+                            {
+                                SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
+                            }
+                        }
                     }
-
-                    if (typeAllowed > OperationAllowed.None && ops.Any() && !ops.Any(o => GetOperationAllowed(r, o.Key) >= typeAllowed))
+                    else
                     {
-                        Console.WriteLine("Warning: Type {0} is {1} but not operation is allowed ({2})".Formato(type.Name, max, ops.CommaAnd(a => OperationDN.UniqueKey(a.Key))));
+                        var ops = operations[type];
+                        if (ta.Max().GetUI() > TypeAllowedBasic.Modify && ops.Any() && !ops.Any(oi => GetOperationAllowed(r, oi.Key, inUserInterface: true)))
+                        {
+                            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Warning: Type {0} is [{1}] but no save operation is allowed".Formato(type.Name, ta));
+                            var only = ops.Only();
+                            if (only != null)
+                            {
+                                if (SafeConsole.Ask(ref warnings, "Allow {0} to {1}?".Formato(OperationDN.UniqueKey(only.Key), r)))
+                                {
+                                    Manual.SetAllowed(r, only.Key, OperationAllowed.Allow);
+                                    SafeConsole.WriteLineColor(ConsoleColor.Green, "Allowed");
+                                }
+                                else
+                                {
+                                    SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
+                                }
+                            }
+                        }
                     }
                 }
             };
