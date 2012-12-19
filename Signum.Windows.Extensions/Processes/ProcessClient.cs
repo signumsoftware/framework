@@ -57,6 +57,9 @@ namespace Signum.Windows.Processes
 
         static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
         {
+            if (!Navigator.IsViewable(typeof(PackageOperationDN)))
+                return Enumerable.Empty<MenuItem>();
+
             if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Length == 1)
                 return null;
 
