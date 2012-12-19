@@ -246,23 +246,40 @@ namespace Signum.Engine
             return max / (lcs + 4f);
         }
 
+        const int MaxElements = 70;
+
         private static Selection SelectInteractive(List<string> newValues, string oldValue, string replacementsKey)
         {
+            int startingIndex = 0;
+
             Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(oldValue, replacementsKey));
-            newValues.Select((s, i) => "-{0}{1,2}: {2} ".Formato(i == 0 ? ">" : " ", i, s)).ToConsole();
+          retry:
+            newValues.Skip(startingIndex).Take(MaxElements)
+                .Select((s, i) => "-{0}{1,2}: {2} ".Formato(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
             Console.WriteLine();
+
             Console.WriteLine(Properties.Resources.NNone);
+
+            int remaining = newValues.Count - startingIndex - MaxElements;
+            if (remaining > 0)
+                SafeConsole.WriteLineColor(ConsoleColor.White, "- s: Show more values ({0} remaining)", remaining);
 
             while (true)
             {
                 string answer = Console.ReadLine().ToLower();
-                int option = 0;
+
+                if (answer == "s" && remaining > 0)
+                {
+                    startingIndex += MaxElements;
+                    goto retry;
+                }
                 if (answer == "n")
                     return new Selection(oldValue, null);
 
                 if (answer == "")
                     return new Selection(oldValue, newValues[0]);
 
+                int option = 0;
                 if (int.TryParse(answer, out option))
                     return new Selection(oldValue, newValues[option]);
 
