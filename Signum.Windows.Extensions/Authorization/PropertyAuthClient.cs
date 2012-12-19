@@ -38,7 +38,7 @@ namespace Signum.Windows.Authorization
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
 
-            if (TypeAuthClient.GetAllowed(route.RootType).Max().GetUI() == TypeAllowedBasic.None)
+            if (TypeAuthClient.GetAllowed(route.RootType).MaxUI() == TypeAllowedBasic.None)
                 return PropertyAllowed.None;
 
             return propertyRules.GetAllowed(route);
@@ -49,7 +49,7 @@ namespace Signum.Windows.Authorization
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetAllowedFor(route.Parent, requested);
 
-            if (TypeAuthClient.GetAllowed(route.RootType).Max().GetUI() == TypeAllowedBasic.None)
+            if (TypeAuthClient.GetAllowed(route.RootType).MaxUI() == TypeAllowedBasic.None)
                 return "Type {0} is set to None for {1}".Formato(route.RootType.NiceName(), RoleDN.Current);
 
             var current = propertyRules.GetAllowed(route);
