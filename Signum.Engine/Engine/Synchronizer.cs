@@ -250,6 +250,9 @@ namespace Signum.Engine
 
         private static Selection SelectInteractive(List<string> newValues, string oldValue, string replacementsKey)
         {
+            if (oldValue.Replace("s.", ".") == newValues[0])
+                return new Selection(oldValue, newValues[0]);
+
             int startingIndex = 0;
 
             Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(oldValue, replacementsKey));
