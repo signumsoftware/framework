@@ -537,14 +537,14 @@ namespace Signum.Engine.DynamicQuery
         {
             if (elementsPerPage == QueryRequest.AllElements)
             {
-                var array = query.Query.ToArray();
-                return new DEnumerableCount<T>(array, query.Context, array.Length);
+                var allList = query.Query.ToList();
+                return new DEnumerableCount<T>(allList, query.Context, allList.Count);
             }
 
             if (currentPage <= 0)
                 throw new InvalidOperationException("currentPage should be greater than zero");
 
-            int totalElements = query.Query.Count();
+            int? totalElements = null;
 
             var q = query.Query;
             if (currentPage != 1)
@@ -552,25 +552,39 @@ namespace Signum.Engine.DynamicQuery
 
             q = q.Take(elementsPerPage);
 
-            return new DEnumerableCount<T>(q.ToArray(), query.Context, totalElements);
+            var list = q.ToList();
+
+            if (list.Count < elementsPerPage && currentPage == 1)
+                totalElements = list.Count; 
+
+            return new DEnumerableCount<T>(list, query.Context, totalElements ?? query.Query.Count());
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, int? elementsPerPage, int currentPage)
         {
             if (elementsPerPage == QueryRequest.AllElements)
-                return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.Collection.Count());
+            {
+                var allList = collection.Collection.ToList();
+                return new DEnumerableCount<T>(allList, collection.Context, allList.Count);
+            }
 
             if (currentPage <= 0)
                 throw new InvalidOperationException("currentPage should be greater than zero");
 
-            int totalElements = collection.Collection.Count();
+            int? totalElements = null;
+
             var c = collection.Collection;
             if (currentPage != 1)
                 c = c.Skip((currentPage - 1) * elementsPerPage.Value);
 
             c = c.Take(elementsPerPage.Value);
 
-            return new DEnumerableCount<T>(c, collection.Context, totalElements);
+            var list = c.ToList();
+
+            if (list.Count < elementsPerPage && currentPage == 1)
+                totalElements = list.Count; 
+
+            return new DEnumerableCount<T>(c, collection.Context, totalElements ?? collection.Collection.Count());
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, int elementsPerPage, int currentPage)
