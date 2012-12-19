@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Web.Properties;
 using Signum.Web.Controllers;
 using Signum.Entities.Reflection;
+using Signum.Engine.Operations;
 #endregion
 
 namespace Signum.Web
@@ -65,11 +66,15 @@ namespace Signum.Web
                     vdd[ViewDataKeys.PartialViewName] = partialViewName;
                     vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
                     vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
+                    vdd[ViewDataKeys.ShowOperations] = true;
+                    vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
                     return helper.Partial(Navigator.Manager.PopupControlView, vdd);
                 case RenderMode.PopupInDiv:
                     vdd[ViewDataKeys.PartialViewName] = partialViewName;
                     vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
                     vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
+                    vdd[ViewDataKeys.ShowOperations] = true;
+                    vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
                         helper.Partial(Navigator.Manager.PopupControlView, vdd),
                         "",

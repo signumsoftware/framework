@@ -33,7 +33,9 @@ namespace Signum.Web
         public const string TabId = "sfTabId";
         public const string PartialViewName = "sfPartialViewName";
         public const string InPopup = "sfInPopup";
-        
+        public const string ShowOperations = "sfShowOperations";
+        public const string SaveProtected = "sfSaveProtected";
+
         public static string WindowPrefix(this HtmlHelper helper)
         {
             TypeContext tc = helper.ViewData.Model as TypeContext;
