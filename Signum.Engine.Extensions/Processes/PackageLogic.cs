@@ -129,40 +129,47 @@ namespace Signum.Engine.Processes
 
         public static void ForEachLine(this IExecutingProcess executingProcess, PackageDN package, Action<PackageLineDN> action)
         {
-            List<PackageLineDN> lines = package.RemainingLines().ToList();
+            var totalCount = package.RemainingLines().Count();
 
-            for (int i = 0; i < lines.Count; i++)
+            while (true)
             {
-                executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                List<PackageLineDN> lines = package.RemainingLines().Take(100).ToList();
+                if (lines.IsEmpty())
+                    return;
 
-                PackageLineDN pl = lines[i];
-
-                try
+                for (int i = 0; i < lines.Count; i++)
                 {
-                    using (Transaction tr = Transaction.ForceNew())
+                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
+
+                    PackageLineDN pl = lines[i];
+
+                    try
                     {
-                        action(pl);
-                        pl.FinishTime = TimeZoneManager.Now;
-                        pl.Save();
-                        tr.Commit();
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            action(pl);
+                            pl.FinishTime = TimeZoneManager.Now;
+                            pl.Save();
+                            tr.Commit();
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    if (Transaction.InTestTransaction)
-                        throw;
-
-                    var exLog = e.LogException();
-
-                    using (Transaction tr = Transaction.ForceNew())
+                    catch (Exception e)
                     {
-                        pl.Exception = exLog.ToLite();
-                        pl.Save();
-                        tr.Commit();
-                    }
-                }
+                        if (Transaction.InTestTransaction)
+                            throw;
 
-                executingProcess.ProgressChanged(i, lines.Count);
+                        var exLog = e.LogException();
+
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            pl.Exception = exLog.ToLite();
+                            pl.Save();
+                            tr.Commit();
+                        }
+                    }
+
+                    executingProcess.ProgressChanged(i, totalCount);
+                }
             }
         }
 
@@ -231,6 +238,28 @@ namespace Signum.Engine.Processes
         }
     }
 
+    public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
+    {
+        public Enum OperationKey { get; private set; }
+
+        public PackageDeleteAlgorithm(Enum operationKey)
+        {
+            if (operationKey == null)
+                throw new ArgumentNullException("operatonKey");
+
+            this.OperationKey = operationKey;
+        }
+
+        public virtual void Execute(IExecutingProcess executingProcess)
+        {
+            PackageDN package = (PackageDN)executingProcess.Data;
+
+            executingProcess.ForEachLine(package, line =>
+            {
+                ((Lite<T>)line.Entity).Delete<T>(OperationKey);
+            });
+        }
+    }
    
     public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
     {
