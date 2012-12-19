@@ -138,6 +138,7 @@ namespace Signum.Engine.Scheduler
                     List<ScheduledTaskDN> schTasks = Database.Query<ScheduledTaskDN>().Where(st => !st.Suspended).ToList();
 
                     using (AvoidReloadPlanOnSave())
+                    using (OperationLogic.AllowSave<ScheduledTaskDN>())
                     {
                         schTasks.SaveList(); //Force replanification
                     }
@@ -197,7 +198,9 @@ namespace Signum.Engine.Scheduler
                     }
 
                     using (AvoidReloadPlanOnSave())
+                    using (OperationLogic.AllowSave<ScheduledTaskDN>())
                         st.Save();
+
                     priorityQueue.Push(st);
 
                     Task.Factory.StartNew(() =>
