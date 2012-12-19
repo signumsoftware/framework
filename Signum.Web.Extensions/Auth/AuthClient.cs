@@ -56,7 +56,13 @@ namespace Signum.Web.Auth
             {
                 ResetPasswordStarted = resetPassword;
 
-                Navigator.RegisterArea(typeof(AuthClient)); 
+                Navigator.RegisterArea(typeof(AuthClient));
+
+                if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
+                    Navigator.AddSetting(new EntitySettings<UserDN>());
+
+                if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
+                    Navigator.AddSetting(new EntitySettings<RoleDN>());
 
                 if (passwordExpiration)
                 {
