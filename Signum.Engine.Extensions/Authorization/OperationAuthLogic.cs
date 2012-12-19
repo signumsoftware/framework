@@ -72,10 +72,10 @@ namespace Signum.Engine.Authorization
                 foreach (var type in operations.Keys)
                 {
                     var ta = TypeAuthLogic.GetAllowed(r, type);
-                    var max = ta.Max();
+                    var max = ta.MaxCombined();
 
 
-                    if (ta.Max().GetUI() == TypeAllowedBasic.None)
+                    if (max.GetUI() == TypeAllowedBasic.None)
                     {
                         OperationAllowed typeAllowed =
                              max.GetUI() >= TypeAllowedBasic.Modify ? OperationAllowed.Allow :
@@ -85,7 +85,7 @@ namespace Signum.Engine.Authorization
                         var ops = operations[type];
                         foreach (var oi in ops.Where(o => GetOperationAllowed(r, o.Key) > typeAllowed))
                         {
-                            bool isError = ta.Max().GetDB() == TypeAllowedBasic.None;
+                            bool isError = ta.MaxDB() == TypeAllowedBasic.None;
 
                             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "{0}: Operation {1} is {2} but type {3} is [{4}]".Formato(
                                   isError ? "Error" : "Warning",
@@ -111,7 +111,7 @@ namespace Signum.Engine.Authorization
                     else
                     {
                         var ops = operations[type];
-                        if (ta.Max().GetUI() > TypeAllowedBasic.Modify && ops.Any() && !ops.Any(oi => GetOperationAllowed(r, oi.Key, inUserInterface: true)))
+                        if (ta.MaxUI() > TypeAllowedBasic.Modify && ops.Any() && !ops.Any(oi => GetOperationAllowed(r, oi.Key, inUserInterface: true)))
                         {
                             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Warning: Type {0} is [{1}] but no save operation is allowed".Formato(type.Name, ta));
                             var only = ops.Only();

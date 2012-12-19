@@ -152,7 +152,7 @@ namespace Signum.Web.Auth
             var ident = (IdentifiableEntity)entity;
 
             if (ident == null || ident.IsNew)
-                return TypeAuthLogic.GetAllowed(type).Max().GetUI() >= TypeAllowedBasic.Read;
+                return TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
 
             return ident.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true);
         }
@@ -165,7 +165,7 @@ namespace Signum.Web.Auth
             var ident = (IdentifiableEntity)entity;
 
             if (ident == null || ident.IsNew)
-                return TypeAuthLogic.GetAllowed(type).Max().GetUI() < TypeAllowedBasic.Modify;
+                return TypeAuthLogic.GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
 
             return !ident.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true);
         }
@@ -175,7 +175,7 @@ namespace Signum.Web.Auth
             if(!typeof(IdentifiableEntity).IsAssignableFrom(type))
                 return true;
 
-            return TypeAuthLogic.GetAllowed(type).Max().GetUI() == TypeAllowedBasic.Create;
+            return TypeAuthLogic.GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
         }
 
         public static Uri SuggestedReturnUrl(this HttpRequestBase request)

@@ -70,11 +70,11 @@ namespace Signum.Engine.Authorization
             {
                 var result = (from parent in compilationOrder
                               let parentAllowed = GetAllowed(role, parent.Type)
-                              where parentAllowed.Max() > TypeAllowed.None
+                              where parentAllowed.MaxCombined() > TypeAllowed.None
                               from kvp in graph.RelatedTo(parent)
                               where !kvp.Value.IsLite && !kvp.Value.IsNullable && !kvp.Value.IsCollection && !kvp.Key.Type.IsEnumEntity()
                               let relAllowed = GetAllowed(role, kvp.Key.Type)
-                              where relAllowed.Max() == TypeAllowed.None
+                              where relAllowed.MaxCombined() == TypeAllowed.None
                               select new
                               {
                                   parent,
@@ -128,7 +128,7 @@ namespace Signum.Engine.Authorization
         {
             var allowed = GetAllowed(type);
 
-            if (allowed.Max().GetDB() == TypeAllowedBasic.None)
+            if (allowed.MaxDB() == TypeAllowedBasic.None)
                 return "Type '{0}' is set to None".Formato(type.NiceName());
 
             return null;
@@ -142,8 +142,8 @@ namespace Signum.Engine.Authorization
 
                 var requested = ident.IsNew ? TypeAllowedBasic.Create : TypeAllowedBasic.Modify;
 
-                var min = access.Min().GetDB();
-                var max = access.Max().GetDB();
+                var min = access.MinDB();
+                var max = access.MaxDB();
                 if (requested <= min)
                     return;
 
@@ -158,7 +158,7 @@ namespace Signum.Engine.Authorization
         static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident)
         {
             Type type = ident.GetType();
-            TypeAllowedBasic access = GetAllowed(type).Max().GetDB();
+            TypeAllowedBasic access = GetAllowed(type).MaxDB();
             if (access < TypeAllowedBasic.Read)
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type.NicePluralName()));
         }

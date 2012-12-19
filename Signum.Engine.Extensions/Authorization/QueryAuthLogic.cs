@@ -85,11 +85,11 @@ namespace Signum.Engine.Authorization
 	            {
                     var ta = TypeAuthLogic.GetAllowed(r, type);
 
-                    if (ta.Max().GetUI() == TypeAllowedBasic.None)
+                    if (ta.MaxUI() == TypeAllowedBasic.None)
                     {
                         foreach (var query in queries[type].Where(q => QueryAuthLogic.GetQueryAllowed(r, q)))
                         {
-                            bool isError = ta.Max().GetDB() == TypeAllowedBasic.None;
+                            bool isError = ta.MaxDB() == TypeAllowedBasic.None;
 
                             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "{0}: Query {1} is allowed but type {2} is [{3}]".Formato(
                                  isError ? "Error" : "Warning",
@@ -112,7 +112,7 @@ namespace Signum.Engine.Authorization
                     else
                     {
                         var qs = queries[type];
-                        if (ta.Max().GetUI() > TypeAllowedBasic.Modify && qs.Any() && !qs.Any(q => QueryAuthLogic.GetQueryAllowed(r, q)))
+                        if (ta.MaxUI() > TypeAllowedBasic.Modify && qs.Any() && !qs.Any(q => QueryAuthLogic.GetQueryAllowed(r, q)))
                         {
                             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Warning: Type {0} is [{1}] but no query is allowed".Formato(type.Name, ta));
 

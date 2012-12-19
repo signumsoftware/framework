@@ -225,20 +225,46 @@ namespace Signum.Entities.Authorization
             return this.fallback.GetHashCode();
         }
 
-        public TypeAllowed Min()
+        public TypeAllowed MinCombined()
         {
-            if (!conditions.Any())
-                return fallback;
-
-            return (TypeAllowed)Math.Min((int)fallback, conditions.Select(a => (int)a.Allowed).Min());
+            return TypeAllowedExtensions.Create(MinDB(), MinUI());
         }
 
-        public TypeAllowed Max()
+        public TypeAllowed MaxCombined()
+        {
+            return TypeAllowedExtensions.Create(MaxDB(), MaxUI());
+        }
+
+        public TypeAllowedBasic MinUI()
         {
             if (!conditions.Any())
-                return fallback;
+                return fallback.GetUI();
 
-            return (TypeAllowed)Math.Max((int)fallback, conditions.Select(a => (int)a.Allowed).Max());
+            return (TypeAllowedBasic)Math.Min((int)fallback.GetUI(), conditions.Select(a => (int)a.Allowed.GetUI()).Min());
+        }
+
+        public TypeAllowedBasic MaxUI()
+        {
+            if (!conditions.Any())
+                return fallback.GetUI();
+
+            return (TypeAllowedBasic)Math.Max((int)fallback.GetUI(), conditions.Select(a => (int)a.Allowed.GetUI()).Max());
+        }
+
+        public TypeAllowedBasic MinDB()
+        {
+            if (!conditions.Any())
+                return fallback.GetDB();
+
+            return (TypeAllowedBasic)Math.Min((int)fallback.GetDB(), conditions.Select(a => (int)a.Allowed.GetDB()).Min());
+        }
+
+        public TypeAllowedBasic MaxDB()
+        {
+            if (!conditions.Any())
+                return fallback.GetDB();
+
+            return (TypeAllowedBasic)Math.Max((int)fallback.GetDB(), conditions.Select(a => (int)a.Allowed.GetDB()).Max());
         }
 
         public override string ToString()
