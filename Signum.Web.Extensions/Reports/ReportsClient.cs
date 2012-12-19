@@ -50,6 +50,9 @@ namespace Signum.Web.Reports
 
                     FilesClient.Start(false, false, true);
 
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
+                        Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>());
+
                     ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((ctx, entity) =>
                     {
                         if (entity.IsNew)
