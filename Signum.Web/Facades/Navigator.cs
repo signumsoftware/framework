@@ -25,6 +25,7 @@ using System.Web.Compilation;
 using Signum.Web.PortableAreas;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.Engine.Operations;
 #endregion
 
 namespace Signum.Web
@@ -597,7 +598,9 @@ namespace Signum.Web
             
             if (controller.ViewData[ViewDataKeys.TabId] == null)
                 controller.ViewData[ViewDataKeys.TabId] = GetOrCreateTabID(controller);
-            
+
+            controller.ViewData[ViewDataKeys.ShowOperations] = options.ShowOperations;
+
             AssertViewableEntitySettings(modifiable);
             
             tc.ReadOnly = options.ReadOnly ?? Navigator.IsReadOnly(modifiable);
@@ -641,6 +644,12 @@ namespace Signum.Web
             ViewButtons buttons = viewOptions.ViewButtons;
             controller.ViewData[ViewDataKeys.ViewButtons] = buttons;
             controller.ViewData[ViewDataKeys.OkVisible] = buttons == ViewButtons.Ok;
+            controller.ViewData[ViewDataKeys.ShowOperations] = viewOptions.ShowOperations;
+            if (buttons == ViewButtons.Ok)
+            {
+                controller.ViewData[ViewDataKeys.SaveProtected] = ((PopupViewOptions)viewOptions).SaveProtected ??
+                    OperationLogic.IsSaveProtected(entity.GetType());
+            }
 
             return new PartialViewResult
             {

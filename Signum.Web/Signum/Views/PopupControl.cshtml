@@ -23,18 +23,18 @@
     <div class="sf-button-bar">
         @if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
         {
-            var saveProtected =  OperationLogic.IsSaveProtected(Model.UntypedValue.GetType()); 
+            var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
             <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
                 OK</button>                
         }
 
         @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         {
-            SaveProtected = OperationLogic.IsSaveProtected(modifiable.GetType()),
             ViewButtons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
-            Prefix = Model.ControlID
+            Prefix = Model.ControlID,
+            ShowOperations = (bool?)ViewData[ViewDataKeys.ShowOperations] ?? true,
         }, modifiable).ToString(Html)
     </div>
     @Html.ValidationSummaryAjax(Model)

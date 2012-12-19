@@ -109,7 +109,7 @@ namespace Signum.Web.Operations
         public EntityOperationSettings OperationSettings { get; internal set; }
         public string CanExecute { get; internal set; }
         public ViewButtons ViewButtons { get; internal set; }
-        public bool SaveProtected { get; internal set; }
+        public bool ShowOperations { get; set; }
 
         public JsOperationOptions Options()
         {
@@ -143,6 +143,7 @@ namespace Signum.Web.Operations
         {
             return OperationInfo.ToString();
         }
+
     }
 
     public class ContextualOperationContext : OperationContext

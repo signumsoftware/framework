@@ -154,7 +154,7 @@ WriteLiteral("</span>\r\n</div>\r\n<div class=\"sf-button-bar\">\r\n    ");
 Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     { 
         ViewButtons = ViewButtons.Save,
-        SaveProtected = OperationLogic.IsSaveProtected(modifiable.GetType()),
+        ShowOperations = (bool)ViewData[ViewDataKeys.ShowOperations],
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
         Prefix =  Model.ControlID

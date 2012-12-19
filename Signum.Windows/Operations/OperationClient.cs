@@ -261,6 +261,9 @@ namespace Signum.Windows.Operations
 
         protected internal virtual IEnumerable<MenuItem> SearchControl_GetEntityOperationMenuItem(SearchControl sc)
         {
+            if (!Navigator.IsViewable(typeof(PackageOperationDN)))
+                return Enumerable.Empty<MenuItem>();
+
             if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Length != 1)
                 return null;
 

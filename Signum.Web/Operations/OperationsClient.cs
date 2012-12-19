@@ -174,16 +174,16 @@ namespace Signum.Web.Operations
                               where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
                               let os = GetSettings<EntityOperationSettings>(oi.Key)
                               let eoc = new EntityOperationContext
-                    {
-                        Entity = (IdentifiableEntity)entity,
-                        OperationInfo = oi,
-                        ViewButtons = ctx.ViewButtons,
-                        SaveProtected = ctx.SaveProtected,
-                        PartialViewName = ctx.PartialViewName,
-                        Prefix = ctx.Prefix,
-                        OperationSettings = os,
-                    }
-                              where (os != null && os.IsVisible != null) ? os.IsVisible(eoc) : ctx.SaveProtected
+                              {
+                                  Entity = (IdentifiableEntity)entity,
+                                  OperationInfo = oi,
+                                  ViewButtons = ctx.ViewButtons,
+                                  ShowOperations = ctx.ShowOperations,
+                                  PartialViewName = ctx.PartialViewName,
+                                  Prefix = ctx.Prefix,
+                                  OperationSettings = os,
+                              }
+                              where (os != null && os.IsVisible != null) ? os.IsVisible(eoc) : ctx.ShowOperations
                               select eoc).ToList();
 
             if (operations.Any(eoc => eoc.OperationInfo.HasCanExecute == true))
