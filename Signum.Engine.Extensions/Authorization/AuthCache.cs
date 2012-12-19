@@ -425,7 +425,7 @@ namespace Signum.Entities.Authorization
                                .ToDictionary("{0} rules for {1}".Formato(typeof(R).NiceName(), role));
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
-                        x.Elements(elementName).ToDictionary(a => toResource(a.Attribute("Resource").Value)), 
+                        dic, 
                         list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), 
                         (r, xr) =>
                         {
