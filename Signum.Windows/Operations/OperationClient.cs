@@ -18,7 +18,6 @@ using Signum.Utilities.ExpressionTrees;
 using System.Windows.Automation;
 using Signum.Entities.Basics;
 using Signum.Windows.Properties;
-using Signum.Entities.Processes;
 
 namespace Signum.Windows.Operations
 {
