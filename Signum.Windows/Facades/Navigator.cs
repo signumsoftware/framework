@@ -685,17 +685,17 @@ namespace Signum.Windows
         {
             Type entityType = entity.GetType();
 
-
-            bool isReadOnly = options.ReadOnly ?? OnIsReadOnly(entityType, entity);
-            bool isSaveProtected = options.SaveProtected ??
-                (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType));
             win.MainControl = ctrl;
-            win.SaveProtected = isSaveProtected; //Matters even on Ok
+            win.ShowOperations = options.ShowOperations;
             win.ViewMode = options.ViewButtons;
             win.DataContext = options.Clone ? ((ICloneable)entity).Clone() : entity;
 
-            if (isReadOnly)
+            if (options.ReadOnly ?? OnIsReadOnly(entityType, entity))
                 Common.SetIsReadOnly(win, true);
+
+            if (options is ViewOptions)
+                win.SaveProtected = ((ViewOptions)options).SaveProtected ??
+                    (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType)); //Matters even on Ok
 
             if (TaskNormalWindow != null)
                 TaskNormalWindow(win, entity);

@@ -45,7 +45,7 @@ namespace Signum.Windows.Operations
         public ToolBarButton SenderButton { get; set; }
         public OperationInfo OperationInfo { get; set; }
         public ViewMode ViewButtons { get; set; }
-        public bool SaveProtected { get; set; }
+        public bool ShowOperations { get; set; }
         public string CanExecute { get; set; }
 
         public IdentifiableEntity Entity { get; set; }

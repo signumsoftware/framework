@@ -39,11 +39,19 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SaveProtectedProperty =
-            DependencyProperty.Register("SaveProtected", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
+            DependencyProperty.Register("SaveProtected", typeof(bool), typeof(NormalWindow), new UIPropertyMetadata(false));
         public bool SaveProtected
         {
             get { return (bool)GetValue(SaveProtectedProperty); }
             set { SetValue(SaveProtectedProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowOperationsProperty =
+            DependencyProperty.Register("ShowOperations", typeof(bool), typeof(NormalWindow), new PropertyMetadata(true));
+        public bool ShowOperations
+        {
+            get { return (bool)GetValue(ShowOperationsProperty); }
+            set { SetValue(ShowOperationsProperty, value); }
         }
 
         public static readonly DependencyProperty ViewModeProperty =
@@ -110,13 +118,12 @@ namespace Signum.Windows
                 MainControl = MainControl,
                 ViewButtons = ViewMode,
                 SaveProtected = SaveProtected,
+                ShowOperations = ShowOperations,
             };
 
             List<FrameworkElement> elements = new List<FrameworkElement>();
             if (GetButtonBarElement != null)
             {
-
-
                 elements.AddRange(GetButtonBarElement.GetInvocationList()
                     .Cast<GetButtonBarElementDelegate>()
                     .Select(d => d(e.NewValue, ctx))
@@ -275,4 +282,20 @@ namespace Signum.Windows
         Yes,
         No,
     }
+
+    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, ButtonBarEventArgs context);
+
+    public interface IHaveToolBarElements
+    {
+        List<FrameworkElement> GetToolBarElements(object dataContext, ButtonBarEventArgs ctx);
+    }
+
+    public class ButtonBarEventArgs
+    {
+        public Control MainControl { get; set; }
+        public ViewMode ViewButtons { get; set; }
+        public bool SaveProtected { get; set; }
+        public bool ShowOperations { get; set; }
+    }
+
 }

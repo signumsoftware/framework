@@ -89,19 +89,6 @@ namespace Signum.Windows
         }
     }
 
-    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, ButtonBarEventArgs context);
-
-    public interface IHaveToolBarElements
-    {
-        List<FrameworkElement> GetToolBarElements(object dataContext, ButtonBarEventArgs ctx);
-    }
-
-    public class ButtonBarEventArgs
-    {
-        public Control MainControl { get; set; }
-        public ViewMode ViewButtons { get; set; }
-        public bool SaveProtected { get; set; }
-    }
 
     public enum ViewMode
     {

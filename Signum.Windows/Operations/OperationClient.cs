@@ -141,10 +141,10 @@ namespace Signum.Windows.Operations
                                   EntityControl = ctx.MainControl,
                                   OperationInfo = oi,
                                   ViewButtons = ctx.ViewButtons,
-                                  SaveProtected = ctx.SaveProtected,
+                                  ShowOperations = ctx.ShowOperations,
                                   OperationSettings = os,
                               }
-                              where (os != null && os.IsVisible != null) ? os.IsVisible(eoc) : ctx.SaveProtected
+                              where (os != null && os.IsVisible != null) ? os.IsVisible(eoc) : ctx.ShowOperations
                               select eoc).ToList();
 
             if (operations.Any(eoc => eoc.OperationInfo.HasCanExecute == true))

@@ -11,11 +11,16 @@ namespace Signum.Windows
 {
     public abstract class ViewOptionsBase
     {
+        public ViewOptionsBase()
+        {
+            ShowOperations = true;
+        }
+
         public bool Clone {get; set;}
 
         public bool? ReadOnly { get; set; }
 
-        public bool? SaveProtected { get; set; }
+        public bool ShowOperations { get; set; }
 
         public Control View { get; set; }
 
@@ -30,6 +35,8 @@ namespace Signum.Windows
         }
 
         public PropertyRoute TypeContext { get; set; }
+
+        public bool? SaveProtected { get; set; }
 
         public AllowErrors AllowErrors { get; set; }
 
