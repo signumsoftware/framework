@@ -39,10 +39,12 @@ namespace Signum.Utilities.ExpressionTrees
         {
             if (expression != null)
             {
-                if (expression.NodeType == ExpressionType.Call && ((MethodCallExpression)expression).Method.DeclaringType == typeof(ExpressionNominatorExtensions))
+                if (expression.NodeType == ExpressionType.Call &&
+                    ((MethodCallExpression)expression).Method.DeclaringType == typeof(LinqHints) &&
+                    ((MethodCallExpression)expression).Method.Name == "InSql")
                 {
                     this.hasDependencies = true;
-                    return expression; 
+                    return expression;
                 }
 
                 bool saveHasDependencies = this.hasDependencies;
@@ -64,18 +66,16 @@ namespace Signum.Utilities.ExpressionTrees
 
 namespace Signum.Utilities
 {
-    public static class ExpressionNominatorExtensions
+    public static class LinqHints
     {
-        static MethodInfo miInSql = ReflectionTools.GetMethodInfo((int i) => i.InSql()).GetGenericMethodDefinition();
-
         public static T InSql<T>(this T value)
         {
             return value;
         }
 
-        public static MethodCallExpression InSqlExpression(this Expression expression)
+        public static T DisableQueryFilter<T>(this T value)
         {
-            return Expression.Call(null, miInSql.MakeGenericMethod(expression.Type), expression);
+            return value;
         }
     }
 }
