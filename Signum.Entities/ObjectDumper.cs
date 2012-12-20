@@ -74,9 +74,9 @@ namespace Signum.Entities
 
                 if (objects.Contains(o))
                 {
-                    if (o is IdentifiableEntity || o is Lite)
+                    if (o is IdentifiableEntity || o is Lite<IdentifiableEntity>)
                     {
-                        var id = o is IdentifiableEntity ? (o as IdentifiableEntity).IdOrNull : (o as Lite).IdOrNull;
+                        var id = o is IdentifiableEntity ? (o as IdentifiableEntity).IdOrNull : (o as Lite<IdentifiableEntity>).IdOrNull;
                         Sb.Append(id.HasValue ? "({0})".Formato(id.Value) : "");
                     }
                     Sb.Append(" /* [CICLE] {0} */".Formato(o.ToString()));
@@ -92,11 +92,11 @@ namespace Signum.Entities
                     Sb.Append(" /* {0} */".Formato(o.ToString()));
                 }
 
-                if (o is Lite)
+                if (o is Lite<IdentifiableEntity>)
                 {
-                    var l = o as Lite;
+                    var l = o as Lite<IdentifiableEntity>;
                     Sb.Append("({0}, \"{1}\")".Formato((l.IdOrNull.HasValue ? l.Id.ToString() : "null"), l.ToString()));
-                    if (((Lite)o).UntypedEntityOrNull == null)
+                    if (((Lite<IdentifiableEntity>)o).UntypedEntityOrNull == null)
                         return;
                 }
 

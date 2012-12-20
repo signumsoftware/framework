@@ -36,7 +36,7 @@ namespace Signum.Web
                 settingsModifier(ec);
 
             string viewName = ec.ViewName ??
-                Navigator.Manager.EntitySettings[Lite.Extract(context.Type) ?? context.Type].OnPartialViewName((ModifiableEntity)context.UntypedValue);
+                Navigator.Manager.EntitySettings[context.Type.CleanType()].OnPartialViewName((ModifiableEntity)context.UntypedValue);
 
             ViewDataDictionary vdd = new ViewDataDictionary(context);
             if (ec.ViewData != null)

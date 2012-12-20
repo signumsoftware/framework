@@ -57,9 +57,11 @@ namespace Signum.Engine
             where O : class
             where N : class
         {
-            replacements.AskForReplacements(oldDictionary, newDictionary, replacementsKey);
+            replacements.AskForReplacements(
+                oldDictionary.Keys.ToHashSet(), 
+                newDictionary.Keys.ToHashSet(), replacementsKey);
 
-            var repOldDictionary = replacements.ApplyReplacements(oldDictionary, replacementsKey);
+            var repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
 
             HashSet<string> set = new HashSet<string>();
             set.UnionWith(repOldDictionary.Keys);
@@ -122,9 +124,11 @@ namespace Signum.Engine
             where O : class
             where N : class
         {
-            replacements.AskForReplacements(oldDictionary, newDictionary, replacementsKey);
+            replacements.AskForReplacements(
+                oldDictionary.Keys.ToHashSet(), 
+                newDictionary.Keys.ToHashSet(), replacementsKey);
 
-            var repOldDictionary = replacements.ApplyReplacements(oldDictionary, replacementsKey);
+            var repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
 
             return newDictionary.OuterJoinDictionaryCC(repOldDictionary, (key, newVal, oldVal) =>
             {
@@ -168,7 +172,7 @@ namespace Signum.Engine
             return repDic.TryGetC(textToReplace) ?? textToReplace;
         }
 
-        public virtual Dictionary<string, O> ApplyReplacements<O>(Dictionary<string, O> oldDictionary, string replacementsKey)
+        public virtual Dictionary<string, O> ApplyReplacementsToOld<O>(Dictionary<string, O> oldDictionary, string replacementsKey)
         {
             if (!this.ContainsKey(replacementsKey))
                 return oldDictionary;
@@ -178,15 +182,23 @@ namespace Signum.Engine
             return oldDictionary.SelectDictionary(a => replacements.TryGetC(a) ?? a, v => v);
         }
 
-        public virtual void AskForReplacements<O, N>(
-             Dictionary<string, O> oldDictionary,
-             Dictionary<string, N> newDictionary,
-             string replacementsKey)
-            where O : class
-            where N : class
+        public virtual Dictionary<string, O> ApplyReplacementsToNew<O>(Dictionary<string, O> newDictionary, string replacementsKey)
         {
-            List<string> oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
-            List<string> newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
+            if (!this.ContainsKey(replacementsKey))
+                return newDictionary;
+
+            Dictionary<string, string> replacements = this[replacementsKey].Inverse();
+
+            return newDictionary.SelectDictionary(a => replacements.TryGetC(a) ?? a, v => v);
+        }
+
+        public virtual void AskForReplacements(
+             HashSet<string> oldKeys,
+             HashSet<string> newKeys,
+             string replacementsKey)
+        {
+            List<string> oldOnly = oldKeys.Where(k => !newKeys.Contains(k)).ToList();
+            List<string> newOnly = newKeys.Where(k => !oldKeys.Contains(k)).ToList();
 
             if (oldOnly.Count == 0 || newOnly.Count == 0)
                 return;
@@ -195,11 +207,7 @@ namespace Signum.Engine
 
             Dictionary<string, Dictionary<string, float>> distances = oldOnly.ToDictionary(o => o, o => newOnly.ToDictionary(n => n, n =>
             {
-                int lcs = sd.LongestCommonSubsequence(o, n);
-
-                int max = Math.Max(o.Length, n.Length);
-
-                return max / (lcs + 4f);
+                return Distance(sd, o, n);
             }));
 
             Dictionary<string, string> replacements = new Dictionary<string, string>();
@@ -229,23 +237,52 @@ namespace Signum.Engine
                 this.Add(replacementsKey, replacements);
         }
 
+        static float Distance(StringDistance sd, string o, string n)
+        {
+            int lcs = sd.LongestCommonSubsequence(o, n);
+
+            int max = Math.Max(o.Length, n.Length);
+
+            return max / (lcs + 4f);
+        }
+
+        const int MaxElements = 70;
+
         private static Selection SelectInteractive(List<string> newValues, string oldValue, string replacementsKey)
         {
+            if (oldValue.Replace("s.", ".") == newValues[0])
+                return new Selection(oldValue, newValues[0]);
+
+            int startingIndex = 0;
+
             Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(oldValue, replacementsKey));
-            newValues.Select((s, i) => "-{0}{1,2}: {2} ".Formato(i == 0 ? ">" : " ", i, s)).ToConsole();
+          retry:
+            newValues.Skip(startingIndex).Take(MaxElements)
+                .Select((s, i) => "-{0}{1,2}: {2} ".Formato(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
             Console.WriteLine();
+
             Console.WriteLine(Properties.Resources.NNone);
+
+            int remaining = newValues.Count - startingIndex - MaxElements;
+            if (remaining > 0)
+                SafeConsole.WriteLineColor(ConsoleColor.White, "- s: Show more values ({0} remaining)", remaining);
 
             while (true)
             {
                 string answer = Console.ReadLine().ToLower();
-                int option = 0;
+
+                if (answer == "s" && remaining > 0)
+                {
+                    startingIndex += MaxElements;
+                    goto retry;
+                }
                 if (answer == "n")
                     return new Selection(oldValue, null);
 
                 if (answer == "")
                     return new Selection(oldValue, newValues[0]);
 
+                int option = 0;
                 if (int.TryParse(answer, out option))
                     return new Selection(oldValue, newValues[option]);
 

@@ -11,15 +11,20 @@ namespace Signum.Windows
 {
     public abstract class ViewOptionsBase
     {
+        public ViewOptionsBase()
+        {
+            ShowOperations = true;
+        }
+
         public bool Clone {get; set;}
 
         public bool? ReadOnly { get; set; }
 
-        public bool? SaveProtected { get; set; }
+        public bool ShowOperations { get; set; }
 
         public Control View { get; set; }
 
-        public abstract ViewButtons ViewButtons { get; }
+        public abstract ViewMode ViewButtons { get; }
     }
 
     public class ViewOptions: ViewOptionsBase
@@ -31,11 +36,13 @@ namespace Signum.Windows
 
         public PropertyRoute TypeContext { get; set; }
 
+        public bool? SaveProtected { get; set; }
+
         public AllowErrors AllowErrors { get; set; }
 
-        public override ViewButtons ViewButtons
+        public override ViewMode ViewButtons
         {
-            get { return ViewButtons.Ok; }
+            get { return ViewMode.View; }
         }
     }
 
@@ -43,9 +50,9 @@ namespace Signum.Windows
     {
         public EventHandler Closed { get; set; }
 
-        public override ViewButtons ViewButtons
+        public override ViewMode ViewButtons
         {
-            get { return ViewButtons.Save; }
+            get { return ViewMode.Navigate; }
         }
     }
 }

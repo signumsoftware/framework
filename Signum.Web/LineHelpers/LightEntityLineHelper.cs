@@ -16,14 +16,14 @@ namespace Signum.Web
 {
     public static class LightEntityLineHelper
     {
-        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite lite, bool isSearchEntity)
+        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite<IIdentifiable> lite, bool isSearchEntity)
         {
             if (lite == null)
                 return MvcHtmlString.Empty;
 
             if (string.IsNullOrEmpty(lite.ToString()))
                 Database.FillToString(lite);
-            MvcHtmlString result = Navigator.IsNavigable(lite.RuntimeType, isSearchEntity) ?
+            MvcHtmlString result = Navigator.IsNavigable(lite.EntityType, isSearchEntity) ?
                 helper.Href("",
                     lite.ToString(),
                     Navigator.NavigateRoute(lite),

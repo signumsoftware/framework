@@ -814,7 +814,7 @@ namespace Signum.Engine.Maps
             return Expression.Call(mi, value, forbidden);
         }
 
-        static int? GetIdForLite(Lite lite, Forbidden forbidden)
+        static int? GetIdForLite(Lite<IIdentifiable> lite, Forbidden forbidden)
         {
             if (lite == null)
                 return null;
@@ -830,7 +830,7 @@ namespace Signum.Engine.Maps
             return lite.Id;
         }
 
-        static int? GetIdForLiteCleanEntity(Lite lite, Forbidden forbidden)
+        static int? GetIdForLiteCleanEntity(Lite<IIdentifiable> lite, Forbidden forbidden)
         {
             if (lite == null)
                 return null;
@@ -864,15 +864,15 @@ namespace Signum.Engine.Maps
             return Expression.Call(fr.IsLite ? miGetTypeForLite : miGetTypeForEntity, value, forbidden);
         }
 
-        static Type GetTypeForLite(Lite value, Forbidden forbidden)
+        static Type GetTypeForLite(Lite<IIdentifiable> value, Forbidden forbidden)
         {
             if (value == null)
                 return null;
 
-            Lite l = (Lite)value;
-            return l.UntypedEntityOrNull == null ? l.RuntimeType :
+            Lite<IIdentifiable> l = (Lite<IIdentifiable>)value;
+            return l.UntypedEntityOrNull == null ? l.EntityType :
                  forbidden.Contains(l.UntypedEntityOrNull) ? null :
-                 l.RuntimeType;
+                 l.EntityType;
         }
 
         static Type GetTypeForEntity(IIdentifiable value, Forbidden forbidden)

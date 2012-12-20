@@ -31,7 +31,7 @@ namespace Signum.Windows
     /// </summary>
     public partial class EntityLine : EntityBase
     {
-        public event Func<string, IEnumerable<Lite>> AutoCompleting;
+        public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> AutoCompleting;
 
         public static readonly DependencyProperty AutoCompleteProperty =
             DependencyProperty.Register("AutoComplete", typeof(bool), typeof(EntityLine), new FrameworkPropertyMetadata(true));
@@ -89,7 +89,7 @@ namespace Signum.Windows
             if (AutoCompleting != null)
                 value = AutoCompleting(arg);
             else
-                value = Server.FindLiteLike(CleanType, safeImplementations.Value, arg, AutoCompleteElements);  
+                value = Server.FindLiteLike(safeImplementations.Value, arg, AutoCompleteElements);  
 
             return value;
         }

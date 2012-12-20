@@ -16,6 +16,7 @@ using System.Collections;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
 using System.Threading;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine
 {
@@ -70,7 +71,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("lite");
 
            if (lite.EntityOrNull == null)
-                lite.SetEntity(Retrieve(lite.RuntimeType, lite.Id));
+                lite.SetEntity(Retrieve(lite.EntityType, lite.Id));
 
             return lite.EntityOrNull;
         }
@@ -80,26 +81,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            return (T)(object)Retrieve(lite.RuntimeType, lite.Id);
-        }
-
-        public static IdentifiableEntity Retrieve(Lite lite)
-        {
-            if (lite == null)
-                throw new ArgumentNullException("lite");
-
-            if (lite.UntypedEntityOrNull == null)
-                lite.SetEntity(Retrieve(lite.RuntimeType, lite.Id));
-
-            return lite.UntypedEntityOrNull;
-        }
-
-        public static IdentifiableEntity RetrieveAndForget(Lite lite)
-        {
-            if (lite == null)
-                throw new ArgumentNullException("lite");
-
-            return Retrieve(lite.RuntimeType, lite.Id);
+            return (T)(object)Retrieve(lite.EntityType, lite.Id);
         }
 
         static GenericInvoker<Func<int, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<int, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
@@ -131,7 +113,7 @@ namespace Signum.Engine
             return retrieved; 
         }
 
-        private static CacheController<T> CanUseCache<T>(bool onlyComplete) where T : IdentifiableEntity
+        static CacheController<T> CanUseCache<T>(bool onlyComplete) where T : IdentifiableEntity
         {
             CacheController<T> cc = Schema.Current.CacheController<T>();
 
@@ -152,66 +134,35 @@ namespace Signum.Engine
             return giRetrieve.GetInvoker(type)(id);
         }
 
-        public static Lite RetrieveLite(Type type, Type runtimeType, int id)
-        {
-            return giRetrieveLite2.GetInvoker(type, runtimeType)(id);
-        }
-
-        public static Lite RetrieveLite(Type type, int id)
+        public static Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            return RetrieveLite(type, type, id);
+            return giRetrieveLite.GetInvoker(type)(id);
         }
 
-        public static Lite<T> RetrieveLite<T>(Type runtimeType, int id) where T : class, IIdentifiable
-        {
-            if (runtimeType == null)
-                throw new ArgumentNullException("runtimeType");
-
-            return (Lite<T>)RetrieveLite(typeof(T), runtimeType, id);
-        }
-
-        static GenericInvoker<Func<int, Lite>> giRetrieveLite2 = new GenericInvoker<Func<int, Lite>>(id => RetrieveLite<IIdentifiable, IdentifiableEntity>(id));
-        public static Lite<T> RetrieveLite<T, RT>(int id)
-            where T : class, IIdentifiable
-            where RT : IdentifiableEntity, T
-        {
-            var cc = CanUseCache<RT>(true);
-            if (cc != null)
-                return new Lite<T>(typeof(RT), id, cc.GetToString(id));
-
-            var result = Database.Query<RT>().Select(a => a.ToLite<T>()).SingleOrDefaultEx(a => a.Id == id);
-            if (result == null)
-                throw new EntityNotFoundException(typeof(RT), id);
-
-            return result;
-        }
-
-        public static Lite<T> RetrieveLite<T>(int id) where T : IdentifiableEntity
+        static GenericInvoker<Func<int, Lite<IdentifiableEntity>>> giRetrieveLite = new GenericInvoker<Func<int, Lite<IdentifiableEntity>>>(id => RetrieveLite<IdentifiableEntity>(id));
+        public static Lite<T> RetrieveLite<T>(int id)
+            where T : IdentifiableEntity
         {
             var cc = CanUseCache<T>(true);
             if (cc != null)
-                return new Lite<T>(id, cc.GetToString(id));
+                return new LiteImp<T>(id, cc.GetToString(id));
 
             var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
             if (result == null)
                 throw new EntityNotFoundException(typeof(T), id);
+
             return result;
         }
 
         public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            return (Lite<T>)FillToString((Lite)lite);
-        }
-
-        public static Lite FillToString(Lite lite)
-        {
             if (lite == null)
                 return null;
 
-            lite.SetToString(GetToStr(lite.RuntimeType, lite.Id));
+            lite.SetToString(GetToStr(lite.EntityType, lite.Id));
 
             return lite;
         }
@@ -284,19 +235,19 @@ namespace Signum.Engine
             var cc = CanUseCache<T>(true);
             if (cc != null)
             {
-                return cc.GetAllIds().Select(id => new Lite<T>(id, cc.GetToString(id))).ToList();
+                return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
             }
 
             return Database.Query<T>().Select(e => e.ToLite()).ToList();
         }
 
-        public static List<Lite> RetrieveAllLite(Type type)
+        public static List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
             IList list = giRetrieveAllLite.GetInvoker(type)();
-            return list.Cast<Lite>().ToList();
+            return list.Cast<Lite<IdentifiableEntity>>().ToList();
         }
 
 
@@ -369,7 +320,7 @@ namespace Signum.Engine
             var cc = CanUseCache<T>(true);
             if (cc != null)
             {
-                return ids.Select(id => new Lite<T>(id, cc.GetToString(id))).ToList();
+                return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
             }
 
             var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToDictionary(a => a.Id);
@@ -382,22 +333,22 @@ namespace Signum.Engine
             return ids.Select(id => retrieved[id]).ToList(); //Preserve order
         }
 
-        public static List<Lite> RetrieveListLite(Type type, List<int> ids)
+        public static List<Lite<IdentifiableEntity>> RetrieveListLite(Type type, List<int> ids)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
             IList list = (IList)giRetrieveListLite.GetInvoker(type).Invoke(ids);
-            return list.Cast<Lite>().ToList();
+            return list.Cast<Lite<IdentifiableEntity>>().ToList();
         }
 
         public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites)
-         where T : class, IIdentifiable
+            where T : class, IIdentifiable
         {
-            return RetrieveFromListOfLite(lites.Cast<Lite>()).Cast<T>().ToList();
+            return RetrieveFromListOfLite((IEnumerable<Lite<IIdentifiable>>)lites).Cast<T>().ToList();
         }
 
-        public static List<IdentifiableEntity> RetrieveFromListOfLite(IEnumerable<Lite> lites)
+        static List<IdentifiableEntity> RetrieveFromListOfLite(IEnumerable<Lite<IIdentifiable>> lites)
         {
             if (lites == null)
                 throw new ArgumentNullException("lites");
@@ -407,10 +358,10 @@ namespace Signum.Engine
 
             using (Transaction tr = new Transaction())
             {
-                var dic = lites.AgGroupToDictionary(a => a.RuntimeType, gr =>
+                var dic = lites.AgGroupToDictionary(a => a.EntityType, gr =>
                     RetrieveList(gr.Key, gr.Select(a => a.Id).ToList()).ToDictionary(a => a.Id));
 
-                var result = lites.Select(l => (IdentifiableEntity)dic[l.RuntimeType][l.Id]).ToList(); // keep same order
+                var result = lites.Select(l => (IdentifiableEntity)dic[l.EntityType][l.Id]).ToList(); // keep same order
 
                 return tr.Commit(result);
             }
@@ -433,7 +384,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            giDeleteId.GetInvoker(lite.RuntimeType)(lite.Id);
+            giDeleteId.GetInvoker(lite.EntityType)(lite.Id);
         }
 
         public static void Delete<T>(this T ident)
@@ -462,7 +413,7 @@ namespace Signum.Engine
 
 
         public static void DeleteList<T>(IList<T> collection)
-            where T : IdentifiableEntity
+            where T : IIdentifiable
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -496,7 +447,7 @@ namespace Signum.Engine
                     areNew.ToString(a => "\t{0}".Formato(a), "\r\n"));
 
 
-            var groups = collection.GroupBy(a => a.RuntimeType, a => a.Id).ToList();
+            var groups = collection.GroupBy(a => a.EntityType, a => a.Id).ToList();
 
             using (Transaction tr = new Transaction())
             {
@@ -600,7 +551,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            return (IQueryable<E>)giInDBLite.GetInvoker(typeof(E), lite.RuntimeType).Invoke(lite);
+            return (IQueryable<E>)giInDBLite.GetInvoker(typeof(E), lite.EntityType).Invoke(lite);
         }
 
         [MethodExpander(typeof(InDbExpander))]
@@ -609,16 +560,16 @@ namespace Signum.Engine
             return lite.InDB().Select(selector).SingleEx();
         }
 
-        static GenericInvoker<Func<Lite, IQueryable>> giInDBLite =
-            new GenericInvoker<Func<Lite, IQueryable>>(l => InDB<IdentifiableEntity, IdentifiableEntity>((Lite<IdentifiableEntity>)l));
-        static IQueryable<S> InDB<S, RT>(Lite<S> lite)
+        static GenericInvoker<Func<Lite<IIdentifiable>, IQueryable>> giInDBLite =
+            new GenericInvoker<Func<Lite<IIdentifiable>, IQueryable>>(l => InDB<IIdentifiable, IdentifiableEntity>((Lite<IdentifiableEntity>)l));
+        static IQueryable<S> InDB<S, RT>(Lite<RT> lite)
             where S : class, IIdentifiable
             where RT : IdentifiableEntity, S
         {
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            var result = Database.Query<RT>().Where(rt => rt.ToLite() == lite.ToLite<RT>());
+            var result = Database.Query<RT>().Where(rt => rt.ToLite() == lite);
 
             if (typeof(S) == typeof(RT))
                 return result;
@@ -649,11 +600,11 @@ namespace Signum.Engine
 
                 var staticType = genericArguments[0];
             
-                var runtimeType = isLite ? ((Lite)value).RuntimeType : value.GetType();
+                var entityType = isLite ? ((Lite<IdentifiableEntity>)value).EntityType : value.GetType();
 
                 Expression query = !isLite ?
-                    giInDB.GetInvoker(staticType, runtimeType)((IIdentifiable)value).Expression :
-                    giInDBLite.GetInvoker(staticType, runtimeType)((Lite)value).Expression;
+                    giInDB.GetInvoker(staticType, entityType)((IIdentifiable)value).Expression :
+                    giInDBLite.GetInvoker(staticType, entityType)((Lite<IdentifiableEntity>)value).Expression;
 
                 var select = Expression.Call(miSelect.MakeGenericMethod(genericArguments), query, arguments[1]);
 

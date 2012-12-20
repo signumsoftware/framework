@@ -72,7 +72,7 @@ SF.registerModule("Lines", function () {
                 this.fireOnEntityChanged(false);
             },
 
-            getRuntimeType: function (_onTypeFound) {
+            getEntityType: function (_onTypeFound) {
                 var types = this.staticInfo().types().split(",");
                 if (types.length == 1) {
                     return _onTypeFound(types[0]);
@@ -83,7 +83,7 @@ SF.registerModule("Lines", function () {
 
             create: function (_viewOptions) {
                 var _self = this;
-                var type = this.getRuntimeType(function (type) {
+                var type = this.getEntityType(function (type) {
                     _self.typedCreate($.extend({ type: type }, _viewOptions));
                 });
             },
@@ -112,7 +112,7 @@ SF.registerModule("Lines", function () {
 
             find: function (_findOptions) {
                 var _self = this;
-                var type = this.getRuntimeType(function (type) {
+                var type = this.getEntityType(function (type) {
                     _self.typedFind($.extend({ webQueryName: type }, _findOptions));
                 });
             },
@@ -203,7 +203,7 @@ SF.registerModule("Lines", function () {
                     containerDiv: SF.compose(this.options.prefix, self.keys.entity),
                     onOk: function () { return self.onViewingOk(_viewOptions.validationOptions); },
                     onOkClosed: function () { self.fireOnEntityChanged(true); },
-                    type: info.runtimeType(),
+                    type: info.entityType(),
                     id: info.id(),
                     prefix: this.options.prefix,
                     requestExtraJsonData: this.extraJsonParams()
@@ -212,7 +212,7 @@ SF.registerModule("Lines", function () {
 
             onViewingOk: function (validatorOptions) {
                 var valOptions = $.extend(validatorOptions || {}, {
-                    type: this.runtimeInfo().runtimeType()
+                    type: this.runtimeInfo().entityType()
                 });
                 return this.checkValidation(valOptions).acceptChanges;
             },
@@ -247,9 +247,9 @@ SF.registerModule("Lines", function () {
                 }
             },
 
-            onCreatingOk: function (clonedElements, validatorOptions, runtimeType) {
+            onCreatingOk: function (clonedElements, validatorOptions, entityType) {
                 var valOptions = $.extend(validatorOptions || {}, {
-                    type: runtimeType
+                    type: entityType
                 });
                 var validatorResult = this.checkValidation(valOptions);
                 if (validatorResult.acceptChanges) {
@@ -260,7 +260,7 @@ SF.registerModule("Lines", function () {
                     }
                     this.newEntity(clonedElements, {
                         runtimeInfo: runtimeInfo,
-                        type: runtimeType,
+                        type: entityType,
                         toStr: validatorResult.newToStr,
                         link: validatorResult.newLink
                     });
@@ -357,11 +357,11 @@ SF.registerModule("Lines", function () {
                 var separator = fullValue.indexOf(";");
                 var value = [];
                 if (separator === -1) {
-                    value.runtimeType = SF.isEmpty(fullValue) ? "" : this.staticInfo().singleType();
+                    value.entityType = SF.isEmpty(fullValue) ? "" : this.staticInfo().singleType();
                     value.id = fullValue;
                 }
                 else {
-                    value.runtimeType = fullValue.substring(0, separator);
+                    value.entityType = fullValue.substring(0, separator);
                     value.id = fullValue.substring(separator + 1, fullValue.length);
                 }
                 return value;
@@ -369,16 +369,16 @@ SF.registerModule("Lines", function () {
 
             setSelected: function () {
                 var newValue = this.selectedValue(),
-                    newRuntimeType = "",
+                    newEntityType = "",
                     newId = "",
                     newEntity = newValue !== null && !SF.isEmpty(newValue.id);
 
                 if (newEntity) {
-                    newRuntimeType = newValue.runtimeType;
+                    newEntityType = newValue.entityType;
                     newId = newValue.id;
                 }
                 var runtimeInfo = this.runtimeInfo();
-                runtimeInfo.setEntity(newRuntimeType, newId);
+                runtimeInfo.setEntity(newEntityType, newId);
                 $(this.pf(this.keys.entity)).html(''); //Clean
                 this.fireOnEntityChanged(newEntity);
             },
@@ -388,7 +388,7 @@ SF.registerModule("Lines", function () {
                 if (viewOptions.navigate) {
                     var runtimeInfo = this.runtimeInfo();
                     if (!SF.isEmpty(runtimeInfo.id())) {
-                        window.open(viewOptions.controllerUrl.substring(0, viewOptions.controllerUrl.lastIndexOf("/") + 1) + runtimeInfo.runtimeType() + "/" + runtimeInfo.id(), "_blank");
+                        window.open(viewOptions.controllerUrl.substring(0, viewOptions.controllerUrl.lastIndexOf("/") + 1) + runtimeInfo.entityType() + "/" + runtimeInfo.id(), "_blank");
                     }
                 }
                 else {
@@ -426,18 +426,18 @@ SF.registerModule("Lines", function () {
                 }, _viewOptions);
             },
 
-            newEntity: function (runtimeType) {
-                this.runtimeInfo().setEntity(runtimeType, '');
+            newEntity: function (entityType) {
+                this.runtimeInfo().setEntity(entityType, '');
             },
 
-            onCreated: function (runtimeType) {
-                this.newEntity(runtimeType);
+            onCreated: function (entityType) {
+                this.newEntity(entityType);
                 this.fireOnEntityChanged(true);
             },
 
             find: function (_findOptions, _viewOptions) {
                 var _self = this;
-                var type = this.getRuntimeType(function (type) {
+                var type = this.getEntityType(function (type) {
                     _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
                 });
             },
@@ -624,9 +624,9 @@ SF.registerModule("Lines", function () {
                 }, _viewOptions);
             },
 
-            onCreatingOk: function (clonedElements, validatorOptions, runtimeType, itemPrefix) {
+            onCreatingOk: function (clonedElements, validatorOptions, entityType, itemPrefix) {
                 var valOptions = $.extend(validatorOptions || {}, {
-                    type: runtimeType
+                    type: entityType
                 });
                 var validatorResult = this.checkValidation(valOptions, itemPrefix);
                 if (validatorResult.acceptChanges) {
@@ -635,7 +635,7 @@ SF.registerModule("Lines", function () {
                     if ($mainControl.length > 0) {
                         runtimeInfo = $mainControl.data("runtimeinfo");
                     }
-                    this.newListItem(clonedElements, itemPrefix, { runtimeInfo: runtimeInfo, type: runtimeType, toStr: validatorResult.newToStr });
+                    this.newListItem(clonedElements, itemPrefix, { runtimeInfo: runtimeInfo, type: entityType, toStr: validatorResult.newToStr });
                 }
                 return validatorResult.acceptChanges;
             },
@@ -679,7 +679,7 @@ SF.registerModule("Lines", function () {
                 if (viewOptions.navigate) {
                     var itemInfo = this.itemRuntimeInfo(selectedItemPrefix);
                     if (!SF.isEmpty(itemInfo.id())) {
-                        window.open(_viewOptions.controllerUrl.substring(0, _viewOptions.controllerUrl.lastIndexOf("/") + 1) + itemInfo.runtimeType() + "/" + itemInfo.id(), "_blank");
+                        window.open(_viewOptions.controllerUrl.substring(0, _viewOptions.controllerUrl.lastIndexOf("/") + 1) + itemInfo.entityType() + "/" + itemInfo.id(), "_blank");
                     }
                     return;
                 }
@@ -695,7 +695,7 @@ SF.registerModule("Lines", function () {
                     onOkClosed: function () { self.fireOnEntityChanged(); },
                     onCancelled: null,
                     controllerUrl: null,
-                    type: info.runtimeType(),
+                    type: info.entityType(),
                     id: info.id(),
                     prefix: itemPrefix,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
@@ -704,7 +704,7 @@ SF.registerModule("Lines", function () {
 
             onViewingOk: function (validatorOptions, itemPrefix) {
                 var valOptions = $.extend(validatorOptions || {}, {
-                    type: this.itemRuntimeInfo(itemPrefix).runtimeType()
+                    type: this.itemRuntimeInfo(itemPrefix).entityType()
                 });
                 var validatorResult = this.checkValidation(valOptions, itemPrefix);
                 return validatorResult.acceptChanges;
@@ -897,7 +897,7 @@ SF.registerModule("Lines", function () {
                 var info = this.itemRuntimeInfo(itemPrefix);
                 return $.extend({
                     containerDiv: this.options.detailDiv,
-                    type: info.runtimeType(),
+                    type: info.entityType(),
                     id: info.id(),
                     prefix: itemPrefix,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
@@ -919,7 +919,7 @@ SF.registerModule("Lines", function () {
 
             find: function (_findOptions, _viewOptions) {
                 var _self = this;
-                var type = this.getRuntimeType(function (type) {
+                var type = this.getEntityType(function (type) {
                     _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
                 });
             },
@@ -1091,7 +1091,7 @@ SF.registerModule("Lines", function () {
 
             find: function (_findOptions, _viewOptions) {
                 var _self = this;
-                var type = this.getRuntimeType(function (type) {
+                var type = this.getEntityType(function (type) {
                     _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
                 });
             },

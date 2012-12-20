@@ -19,6 +19,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Services;
 using System.Windows.Threading;
 using System.Collections.ObjectModel;
+using Signum.Windows.Operations;
 
 namespace Signum.Windows
 {
@@ -58,7 +59,7 @@ namespace Signum.Windows
             return (Lite<T>)Manager.FindUnique(options);
         }
 
-        public static Lite FindUnique(FindUniqueOptions options)
+        public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
         {
             return Manager.FindUnique(options);
         }
@@ -79,13 +80,13 @@ namespace Signum.Windows
             return (Lite<T>)Manager.Find(options);
         }
 
-        public static Lite Find(FindOptions options)
+        public static Lite<IdentifiableEntity> Find(FindOptions options)
         {
             return Manager.Find(options);
         }
 
 
-        public static Lite[] FindMany(FindManyOptions options)
+        public static Lite<IdentifiableEntity>[] FindMany(FindManyOptions options)
         {
             return Manager.FindMany(options);
         }
@@ -93,7 +94,7 @@ namespace Signum.Windows
         public static Lite<T>[] FindMany<T>()
          where T : IdentifiableEntity
         {
-            Lite[] result = Manager.FindMany(new FindManyOptions(typeof(T)));
+            Lite<IdentifiableEntity>[] result = Manager.FindMany(new FindManyOptions(typeof(T)));
             if (result == null)
                 return null;
 
@@ -106,7 +107,7 @@ namespace Signum.Windows
             if (options.QueryName == null)
                 options.QueryName = typeof(T);
 
-            Lite[] result = Manager.FindMany(options);
+            Lite<IdentifiableEntity>[] result = Manager.FindMany(options);
             if (result == null)
                 return null;
 
@@ -426,13 +427,13 @@ namespace Signum.Windows
             return Resources.FinderOf0.Formato(QueryUtils.GetNiceName(queryName));
         }
 
-        public virtual Lite Find(FindOptions options)
+        public virtual Lite<IdentifiableEntity> Find(FindOptions options)
         {
             AssertFindable(options.QueryName);
 
             if (options.ReturnIfOne)
             {
-                Lite lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = FindUnique(new FindUniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.SingleOrMany
@@ -455,7 +456,7 @@ namespace Signum.Windows
             return null;
         }
 
-        public virtual Lite[] FindMany(FindManyOptions options)
+        public virtual Lite<IdentifiableEntity>[] FindMany(FindManyOptions options)
         {
             AssertFindable(options.QueryName);
 
@@ -473,7 +474,7 @@ namespace Signum.Windows
 
             if (options.NavigateIfOne)
             {
-                Lite lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = FindUnique(new FindUniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.Only,
@@ -494,7 +495,7 @@ namespace Signum.Windows
             sw.Show();
         }
 
-        public virtual Lite FindUnique(FindUniqueOptions options)
+        public virtual Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
         {
             AssertFindable(options.QueryName);
 
@@ -600,7 +601,7 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            Type type = entityOrLite is Lite? ((Lite)entityOrLite).RuntimeType :entityOrLite.GetType();
+            Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).EntityType : entityOrLite.GetType();
 
             NormalWindow win = CreateNormalWindow();
             win.SetTitleText(Resources.Loading0.Formato(type.NiceName()));
@@ -611,7 +612,7 @@ namespace Signum.Windows
                 ModifiableEntity entity = entityOrLite as ModifiableEntity;
                 if (entity == null)
                 {
-                    Lite lite = (Lite)entityOrLite;
+                    Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)entityOrLite;
                     entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
                 }
 
@@ -646,7 +647,7 @@ namespace Signum.Windows
             if (entity == null)
             {
                 liteType = Lite.Extract(entityOrLite.GetType());
-                entity = Server.Retrieve((Lite)entityOrLite);
+                entity = Server.Retrieve((Lite<IdentifiableEntity>)entityOrLite);
             }
 
             EntitySettings es = AssertViewableEntitySettings(entity);
@@ -669,7 +670,7 @@ namespace Signum.Windows
             object result = win.DataContext;
             if (liteType != null)
             {
-                return Lite.Create(liteType, (IdentifiableEntity)result);
+                return ((IdentifiableEntity)result).ToLite();
             }
             return result;
 
@@ -684,20 +685,17 @@ namespace Signum.Windows
         {
             Type entityType = entity.GetType();
 
-            ViewButtons buttons = options.ViewButtons;
-
-            bool isReadOnly = options.ReadOnly ?? OnIsReadOnly(entityType, entity);
-            bool isSaveProtected = options.SaveProtected ??
-                (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OnSaveProtected(entityType));
             win.MainControl = ctrl;
-            win.ButtonBar.SaveProtected = isSaveProtected; //Matters even on Ok
-            win.ButtonBar.ViewButtons = buttons;
-            win.ButtonBar.SaveVisible = buttons == ViewButtons.Save && !isReadOnly && !isSaveProtected;
-            win.ButtonBar.OkVisible = buttons == ViewButtons.Ok;
+            win.ShowOperations = options.ShowOperations;
+            win.ViewMode = options.ViewButtons;
             win.DataContext = options.Clone ? ((ICloneable)entity).Clone() : entity;
 
-            if (isReadOnly)
+            if (options.ReadOnly ?? OnIsReadOnly(entityType, entity))
                 Common.SetIsReadOnly(win, true);
+
+            if (options is ViewOptions)
+                win.SaveProtected = ((ViewOptions)options).SaveProtected ??
+                    (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType)); //Matters even on Ok
 
             if (TaskNormalWindow != null)
                 TaskNormalWindow(win, entity);
@@ -800,23 +798,6 @@ namespace Signum.Windows
         }
 
 
-        public event Func<Type, bool> SaveProtected;
-
-        public bool OnSaveProtected(Type type)
-        {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                throw new InvalidOperationException("An {0} can not be save".Formato(type.Name));
-
-            if (SaveProtected != null)
-                foreach (Func<Type, bool> sp in SaveProtected.GetInvocationList())
-                {
-                    if (sp(type))
-                        return true;
-                }
-
-            return false;
-        }
-
         public event Func<object, bool> IsFindable;
 
         internal protected virtual bool OnIsFindable(object queryName)
@@ -893,9 +874,10 @@ namespace Signum.Windows
         {
             if (entityType.IsLite())
             {
-                DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
-                if (template != null)
-                    return template;
+                return null;
+                //DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
+                //if (template != null)
+                //    return template;
             }
 
             if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())

@@ -522,7 +522,6 @@ namespace Signum.Windows
                     Converter = Converters.NullToVisibility,
                 };
                 
-                PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }
@@ -609,11 +608,11 @@ namespace Signum.Windows
                 return ident.ToLite().Key();
             }
 
-            var lite = newValue as Lite;
+            var lite = newValue as Lite<IIdentifiable>;
             if (lite != null)
             {
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[lite.RuntimeType].CleanName);
+                    return "{0};New".Formato(Server.ServerTypes[lite.EntityType].CleanName);
 
                 return lite.Key();
             }

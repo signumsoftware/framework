@@ -11,6 +11,7 @@ using Signum.Entities.DynamicQuery;
 using System.Reflection;
 using Signum.Utilities;
 using System.Collections.Concurrent;
+using Signum.Entities.Basics;
 
 
 namespace Signum.Services
@@ -28,22 +29,25 @@ namespace Signum.Services
         List<IdentifiableEntity> RetrieveAll(Type type);
 
         [OperationContract, NetDataContract]
-        List<Lite> RetrieveAllLite(Type type);
+        List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type);
 
         [OperationContract, NetDataContract]
         List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list);
 
         [OperationContract, NetDataContract]
-        List<Lite> FindAllLite(Type liteType, Implementations implementations);
+        List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations);
 
         [OperationContract, NetDataContract]
-        List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count);
+        List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count);
 
         [OperationContract, NetDataContract]
         Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root);
 
         [OperationContract, NetDataContract]
         Dictionary<Type, TypeDN> ServerTypes();
+
+        [OperationContract, NetDataContract]
+        Dictionary<Type, EntityType> EntityTypes();
 
         [OperationContract, NetDataContract]
         DateTime ServerNow();
@@ -53,5 +57,6 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         bool Exists(Type type, int id);
+
     }
 }

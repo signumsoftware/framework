@@ -115,24 +115,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Alert.
-        /// </summary>
-        public static string Alert {
-            get {
-                return ResourceManager.GetString("Alert", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Alerts.
-        /// </summary>
-        public static string Alerts {
-            get {
-                return ResourceManager.GetString("Alerts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         public static string All {
@@ -192,6 +174,15 @@ namespace Signum.Windows.Properties {
         public static string Close {
             get {
                 return ResourceManager.GetString("Close", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Constructor Selector.
+        /// </summary>
+        public static string ConstructorSelector {
+            get {
+                return ResourceManager.GetString("ConstructorSelector", resourceCulture);
             }
         }
         
@@ -397,15 +388,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New Alert.
-        /// </summary>
-        public static string NewAlert {
-            get {
-                return ResourceManager.GetString("NewAlert", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to New Column.
         /// </summary>
         public static string NewColumn {
@@ -429,15 +411,6 @@ namespace Signum.Windows.Properties {
         public static string NewFilter {
             get {
                 return ResourceManager.GetString("NewFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to New Note.
-        /// </summary>
-        public static string NewNote {
-            get {
-                return ResourceManager.GetString("NewNote", resourceCulture);
             }
         }
         
@@ -496,24 +469,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Note:.
-        /// </summary>
-        public static string Note {
-            get {
-                return ResourceManager.GetString("Note", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Notes.
-        /// </summary>
-        public static string Notes {
-            get {
-                return ResourceManager.GetString("Notes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Null value not allowed.
         /// </summary>
         public static string NullValueNotAllowed {
@@ -555,6 +510,15 @@ namespace Signum.Windows.Properties {
         public static string PleaseChooseAValueToContinue {
             get {
                 return ResourceManager.GetString("PleaseChooseAValueToContinue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please Select a Constructor.
+        /// </summary>
+        public static string PleaseSelectAConstructor {
+            get {
+                return ResourceManager.GetString("PleaseSelectAConstructor", resourceCulture);
             }
         }
         

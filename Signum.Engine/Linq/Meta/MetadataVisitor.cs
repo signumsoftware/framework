@@ -159,7 +159,7 @@ namespace Signum.Engine.Linq
                     case "FirstEx":
                     case "SingleEx":
                     case "SingleOrDefaultEx":
-                        return BindUniqueRow(m.Type, m.Method.Name.RemoveRight(2).ToEnum<UniqueFunction>(),
+                        return BindUniqueRow(m.Type, m.Method.Name.RemoveEnd(2).ToEnum<UniqueFunction>(),
                            m.GetArgument("collection"), m.TryGetArgument("predicate").StripQuotes());
                     case "Distinct":
                         return BindDistinct(m.Type, m.GetArgument("source"));
@@ -171,7 +171,7 @@ namespace Signum.Engine.Linq
             }
 
 
-            if (m.Method.DeclaringType == typeof(LiteUtils) && m.Method.Name == "ToLite")
+            if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 
             if (m.Method.DeclaringType == typeof(Math) &&

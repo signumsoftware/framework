@@ -43,16 +43,16 @@ namespace Signum.Web.Controllers
             return Navigator.NormalPage(this, entity); 
         }
 
-        public ActionResult Create(string runtimeType, string prefix)
+        public ActionResult Create(string entityType, string prefix)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
 
             return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate);
         }
 
-        public PartialViewResult PopupNavigate(string runtimeType, int? id, string prefix, string url)
+        public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
 
             IdentifiableEntity entity = null;
             if (id.HasValue)
@@ -76,9 +76,9 @@ namespace Signum.Web.Controllers
             return this.PopupOpen(new PopupNavigateOptions(tc) { PartialViewName = url });
         }
 
-        public PartialViewResult PopupView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
+        public PartialViewResult PopupView(string entityType, int? id, string prefix, bool? readOnly, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
             
             IdentifiableEntity entity = null;
             if (id.HasValue)
@@ -97,9 +97,9 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult PartialView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
+        public PartialViewResult PartialView(string entityType, int? id, string prefix, bool? readOnly, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
             
             IdentifiableEntity entity = null;
             if (id.HasValue)
@@ -121,32 +121,6 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, tc, url);
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult TrySave()
-        {
-            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
-
-            if (context.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(context);
-                return JsonAction.ModelState(ModelState);
-            }
-
-            IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
-            if (ident == null)
-                throw new ArgumentNullException("No IdentifiableEntity to save");
-
-            Navigator.AssertNotReadonly(ident);
-
-            Database.Save(ident);
-
-            string newUrl = Navigator.NavigateRoute(ident.GetType(), ident.Id);
-            if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                return Navigator.NormalPage(this, ident);
-            else
-                return JsonAction.Redirect(newUrl);
-        }
-
         [HttpPost]
         public JsonResult Validate()
         {
@@ -154,26 +128,6 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromContext(context);
             return JsonAction.ModelState(ModelState);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public JsonResult TrySavePartial(string prefix)
-        {
-            MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
-
-            this.ModelState.FromContext(context);
-
-            IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
-            if (ident != null && !context.GlobalErrors.Any())
-            {
-                Navigator.AssertNotReadonly(ident);
-
-                Database.Save(ident);
-            }
-
-            string newLink = Navigator.NavigateRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
-
-            return JsonAction.ModelState(ModelState, context.UntypedValue.ToString(), newLink);
         }
 
         [HttpPost]
@@ -204,7 +158,7 @@ namespace Signum.Web.Controllers
             else if (context.UntypedValue == null)
             {
                 RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-                newLink = Navigator.NavigateRoute(ei.RuntimeType, ident.TryCS(e => e.IdOrNull));
+                newLink = Navigator.NavigateRoute(ei.EntityType, ident.TryCS(e => e.IdOrNull));
                 newToStr = context.UntypedValue.ToString();
             }
             else
@@ -223,13 +177,13 @@ namespace Signum.Web.Controllers
             if (typeArray == StaticInfo.ImplementedByAll)
                 throw new ArgumentException("ImplementedBy not allowed in Autocomplete");
 
-            List<Lite> lites  = AutoCompleteUtils.FindLiteLike(typeof(IdentifiableEntity), Implementations.By(typeArray), q, l);
+            List<Lite<IdentifiableEntity>> lites = AutoCompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
 
             var result = lites.Select(o => new
             {
                 id = o.Id,
                 text = o.ToString(),
-                type = Navigator.ResolveWebTypeName(o.RuntimeType)
+                type = Navigator.ResolveWebTypeName(o.EntityType)
             }).ToList();
 
             return Json(result);
@@ -287,7 +241,7 @@ namespace Signum.Web.Controllers
             if (string.IsNullOrEmpty(liteKeys))
                 return Content(noResults);
 
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Select(l => (Lite)l).ToList();
+            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
             object queryName = Navigator.ResolveQueryName(webQueryName);
             Implementations implementations = implementationsKey == "[All]" ? Implementations.ByAll :
                 Implementations.By(implementationsKey.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(t => Navigator.ResolveType(t)).ToArray());

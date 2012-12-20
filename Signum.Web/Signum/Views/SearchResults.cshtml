@@ -7,7 +7,6 @@
 @{ 
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-   Type entitiesType = Lite.Extract(entityColumn.Type);
    Implementations implementations = entityColumn.Implementations.Value;
    bool viewable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true)));
    bool allowMultiple = (bool)ViewData[ViewDataKeys.AllowMultiple];
@@ -32,7 +31,7 @@
 
 @foreach (var row in queryResult.Rows)
 {
-    Lite entityField = row.Entity;
+    Lite<IIdentifiable> entityField = row.Entity;
     <tr data-entity="@entityField.Key()">
         @if (allowMultiple)
         {
@@ -42,7 +41,7 @@
                         new 
                         {
                             @class = "sf-td-selection", 
-                            value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToString() 
+                            value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.EntityType) + "__" + entityField.ToString() 
                         })
             </td>
         }

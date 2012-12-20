@@ -18,6 +18,8 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Linq;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Maps
 {
@@ -553,10 +555,17 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public DirectedEdgedGraph<Table, bool> ToDirectedGraph()
+        public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()
         {
-            return DirectedEdgedGraph<Table, bool>.Generate(Tables.Values, t => t.DependentTables());
+            return DirectedEdgedGraph<Table, RelationInfo>.Generate(Tables.Values, t => t.DependentTables());
         }
+    }
+
+    public class RelationInfo
+    {
+        public bool IsLite { get; set; }
+        public bool IsNullable { get; set; }
+        public bool IsCollection { get; set; }
     }
 
     internal interface IEntityEvents

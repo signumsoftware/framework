@@ -81,6 +81,11 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="Basics\Exception.cs" />
+    <Compile Include="Basics\IUserDN.cs" />
+    <Compile Include="Basics\MultiEnum.cs" />
+    <Compile Include="Basics\Operation.cs" />
+    <Compile Include="Basics\OperationLog.cs" />
     <Compile Include="DynamicQuery\Tokens\BagPropertyToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DecimalSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\EntityToStringToken.cs" />
@@ -101,14 +106,12 @@
     <Compile Include="DynamicQuery\QueryUtils.cs" />
     <Compile Include="DynamicQuery\Tokens\QueryToken.cs" />
     <Compile Include="FieldAttributes.cs" />
-    <Compile Include="Basics\Alert.cs" />
     <Compile Include="Basics\Color.cs" />
     <Compile Include="DynamicQuery\Meta.cs" />
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="Patterns\CorruptEntity.cs" />
     <Compile Include="DynamicQuery\Order.cs" />
     <Compile Include="DynamicQuery\QueryDescription.cs" />
-    <Compile Include="Basics\Note.cs" />
     <Compile Include="Patterns\ImmutableEntity.cs" />
     <Compile Include="Patterns\LockeableEntity.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -121,6 +124,7 @@
     <Compile Include="Reflection\GraphExplorer.cs" />
     <Compile Include="Reflection\Reflector.cs" />
     <Compile Include="Reflection\StringHashEncoder.cs" />
+    <Compile Include="Services\IOperationServer.cs" />
     <Compile Include="TimeZoneManager.cs" />
     <Compile Include="TypeAttributes.cs" />
     <Compile Include="Validator.cs" />
@@ -128,7 +132,7 @@
     <Compile Include="Services\IDynamicQueryServer.cs" />
     <Compile Include="Services\NetDataContractAttribute.cs" />
     <Compile Include="Services\Security.cs" />
-    <Compile Include="TypeDN.cs" />
+    <Compile Include="Basics\Type.cs" />
     <Compile Include="ModifiableEntity.cs" />
     <Compile Include="Lite.cs" />
     <Compile Include="Entity.cs" />

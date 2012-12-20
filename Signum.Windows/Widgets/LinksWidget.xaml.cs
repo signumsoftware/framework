@@ -43,13 +43,13 @@ namespace Signum.Windows
 
             lvQuickLinks.ItemsSource = links;
 
-            if (links.Count == 0)
+            if (links.IsNullOrEmpty())
                 Visibility = Visibility.Collapsed;
             else
             {
                 Visibility = Visibility.Visible;
-                if (ForceShow != null)
-                    ForceShow(); 
+                if (ForceShow != null && links.Any(a => !a.IsShy))
+                    ForceShow();
             }
         }
 
@@ -118,6 +118,8 @@ namespace Signum.Windows
         public string Label { get; set; }
 
         public bool IsVisible { get; set;}
+
+        public bool IsShy { get; set; }
 
         public string ToolTip { get; set; }
 

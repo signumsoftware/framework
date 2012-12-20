@@ -11,6 +11,7 @@ namespace Signum.Web
         public NavigateOptions(IRootEntity entity)
         {
             Entity = entity;
+            ShowOperations = true;
         }
 
         public bool? ReadOnly { get; set; }
@@ -18,10 +19,17 @@ namespace Signum.Web
         public string PartialViewName { get; set; }
 
         public IRootEntity Entity { get; set; }
+
+        public bool ShowOperations { get; set; }
     }
 
     public abstract class PopupOptionsBase
     {
+        public PopupOptionsBase()
+        {
+            ShowOperations = true;
+        }
+
         public bool? ReadOnly { get; set; }
 
         public string PartialViewName { get; set; }
@@ -29,6 +37,8 @@ namespace Signum.Web
         public TypeContext TypeContext { get; set; }
 
         public abstract ViewButtons ViewButtons { get; }
+
+        public bool ShowOperations { get; set; }
     }
 
     public class PopupViewOptions : PopupOptionsBase
@@ -37,6 +47,8 @@ namespace Signum.Web
         {
             TypeContext = tc;
         }
+
+        public bool? SaveProtected { get; set; }
 
         public override ViewButtons ViewButtons 
         {

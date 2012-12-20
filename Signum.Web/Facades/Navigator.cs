@@ -23,6 +23,9 @@ using Signum.Web.Controllers;
 using System.Web.Hosting;
 using System.Web.Compilation;
 using Signum.Web.PortableAreas;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
+using Signum.Engine.Operations;
 #endregion
 
 namespace Signum.Web
@@ -51,22 +54,22 @@ namespace Signum.Web
             });
         }
 
-        public static string NavigateRoute(IdentifiableEntity ie)
+        public static string NavigateRoute(IIdentifiable ie)
         {
             return NavigateRoute(ie.GetType(), ie.Id);
         }
 
-        public static string NavigateRoute(Lite lite)
+        public static string NavigateRoute(Lite<IIdentifiable> lite)
         {
-            return NavigateRoute(lite.RuntimeType, lite.Id);
+            return NavigateRoute(lite.EntityType, lite.Id);
         }
 
-        public static RedirectResult RedirectToEntity(IdentifiableEntity ie)
+        public static RedirectResult RedirectToEntity(IIdentifiable ie)
         {
             return new RedirectResult(NavigateRoute(ie));
         }
 
-        public static RedirectResult RedirectToEntity(Lite lite)
+        public static RedirectResult RedirectToEntity(Lite<IIdentifiable> lite)
         {
             return new RedirectResult(NavigateRoute(lite));
         }
@@ -164,7 +167,7 @@ namespace Signum.Web
             return Manager.PartialFind(controller, findOptions, new Context(null, prefix));
         }
 
-        public static Lite FindUnique(FindUniqueOptions options)
+        public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
         {
             return Manager.FindUnique(options);
         }
@@ -395,12 +398,12 @@ namespace Signum.Web
             if (!clientType.Name.EndsWith("Client"))
                 throw new InvalidOperationException("The name of clientType should end with the convention 'Client'");
 
-            RegisterArea(clientType, clientType.Name.RemoveRight("Client".Length));
+            RegisterArea(clientType, clientType.Name.RemoveEnd("Client".Length));
         }
 
         public static void RegisterArea(Type clientType, string areaName)
         {
-            if (areaName.Left(1) == "/")
+            if (areaName.Start(1) == "/")
                 throw new SystemException("Invalid start character / in {0}".Formato(areaName));
 
             CompiledViews.RegisterArea(clientType.Assembly, areaName);
@@ -456,7 +459,8 @@ namespace Signum.Web
             "~/signum/Scripts/SF_ViewNavigator.js",
             "~/signum/Scripts/SF_FindNavigator.js",
             "~/signum/Scripts/SF_Validator.js",
-            "~/signum/Scripts/SF_Widgets.js"
+            "~/signum/Scripts/SF_Widgets.js",
+            "~/signum/Scripts/SF_Operations.js"
         };
         public Func<List<string>> DefaultScripts = () => defaultScripts;
 
@@ -594,7 +598,9 @@ namespace Signum.Web
             
             if (controller.ViewData[ViewDataKeys.TabId] == null)
                 controller.ViewData[ViewDataKeys.TabId] = GetOrCreateTabID(controller);
-            
+
+            controller.ViewData[ViewDataKeys.ShowOperations] = options.ShowOperations;
+
             AssertViewableEntitySettings(modifiable);
             
             tc.ReadOnly = options.ReadOnly ?? Navigator.IsReadOnly(modifiable);
@@ -638,7 +644,12 @@ namespace Signum.Web
             ViewButtons buttons = viewOptions.ViewButtons;
             controller.ViewData[ViewDataKeys.ViewButtons] = buttons;
             controller.ViewData[ViewDataKeys.OkVisible] = buttons == ViewButtons.Ok;
-            controller.ViewData[ViewDataKeys.SaveVisible] = buttons == ViewButtons.Save && CanSave(cleanType) && !isReadOnly;
+            controller.ViewData[ViewDataKeys.ShowOperations] = viewOptions.ShowOperations;
+            if (buttons == ViewButtons.Ok)
+            {
+                controller.ViewData[ViewDataKeys.SaveProtected] = ((PopupViewOptions)viewOptions).SaveProtected ??
+                    OperationLogic.IsSaveProtected(entity.GetType());
+            }
 
             return new PartialViewResult
             {
@@ -697,7 +708,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual Lite FindUnique(FindUniqueOptions options)
+        protected internal virtual Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 
@@ -894,9 +905,9 @@ namespace Signum.Web
             
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             if (runtimeInfo.IdOrNull != null)
-                return Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             else
-                return (ModifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType);
+                return (ModifiableEntity)Constructor.Construct(runtimeInfo.EntityType);
         }
 
         protected internal virtual Lite<T> ExtractLite<T>(ControllerBase controller, string prefix)
@@ -908,7 +919,7 @@ namespace Signum.Web
             if (!runtimeInfo.IdOrNull.HasValue)
                 throw new ArgumentException("Could not create a Lite without an Id");
 
-            return new Lite<T>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            return (Lite<T>)Lite.Create(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
         }
 
         public event Func<Type, bool> IsCreable;
@@ -1017,27 +1028,6 @@ namespace Signum.Web
                     if (!isFindable(queryName))
                         return false;
                 }
-
-            return true;
-        }
-
-        public bool ShowSaveGlobally = true;
-
-        public event Func<Type, bool> SaveProtected;
-
-        public bool CanSave(Type type)
-        {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return false;
-
-            if (SaveProtected != null)
-            {
-                foreach (Func<Type, bool> sp in SaveProtected.GetInvocationList())
-                {
-                    if (sp(type))
-                        return false;
-                }
-            }
 
             return true;
         }

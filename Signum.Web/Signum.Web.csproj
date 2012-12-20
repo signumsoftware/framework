@@ -91,6 +91,7 @@
     </Compile>
     <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="Facades\ExceptionClient.cs" />
     <Compile Include="Facades\QueryRequestModelBinder.cs" />
     <Compile Include="Facades\ViewOptions.cs" />
     <Compile Include="HtmlHelpers\CalendarHelper.cs" />
@@ -103,6 +104,10 @@
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
     <Compile Include="MimeTypes.cs" />
+    <Compile Include="Operations\JsOperationOptions.cs" />
+    <Compile Include="Operations\JsOperations.cs" />
+    <Compile Include="Operations\OperationsClient.cs" />
+    <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">
       <SubType>Code</SubType>
@@ -127,10 +132,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Signum\Controllers\JsonConverters.cs" />
+    <Compile Include="Signum\Controllers\OperationController.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />
-    <Compile Include="Signum\Controllers\WidgetsController.cs" />
     <Compile Include="Lines\ValueLine.cs" />
     <Compile Include="Mappings\Mapping.cs">
       <SubType>Code</SubType>
@@ -142,6 +147,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Error.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Views\Exception.generated.cs">
+      <DependentUpon>Exception.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Signum\Views\FilterBuilder.generated.cs">
       <AutoGen>True</AutoGen>
@@ -203,16 +213,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ValueLineBox.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\Widgets\Alert.cs">
-      <DependentUpon>Alert.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Signum\Views\Widgets\Note.cs">
-      <DependentUpon>Note.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Signum\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -241,12 +241,8 @@
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
-    <Compile Include="Widgets\AlertWidgetHelper.cs" />
-    <Compile Include="Widgets\AlertsClient.cs" />
-    <Compile Include="Widgets\NotesClient.cs" />
-    <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
-    <Compile Include="Widgets\NoteWidgetHelper.cs" />
-    <Compile Include="Widgets\WidgetsHelper.cs" />
+    <Compile Include="TypeContext\Widgets\QuickLinkWidgetHelper.cs" />
+    <Compile Include="TypeContext\Widgets\WidgetsHelper.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
     <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
     <Compile Include="LineHelpers\EntityRepeaterHelper.cs" />
@@ -266,6 +262,12 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Signum\Scripts\SF_Operations.js" />
+    <Content Include="Signum\Views\Exception.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Exception.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </Content>
     <None Include="Signum\Views\PopupOkControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PopupOkControl.generated.cs</LastGenOutput>
@@ -326,14 +328,6 @@
     </None>
     <Content Include="Signum\Images\calendar.png" />
     <Content Include="Signum\Scripts\SF_Utils.js" />
-    <Content Include="Signum\Views\Widgets\Note.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Note.cs</LastGenOutput>
-    </Content>
-    <Content Include="Signum\Views\Widgets\Alert.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Alert.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.config" />

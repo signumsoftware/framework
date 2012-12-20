@@ -84,7 +84,7 @@ namespace Signum.Test.LinqProvider
         public void SelectTypeLiteIB()
         {
             var list = Database.Query<AwardNominationDN>()
-                .Select(a => a.Award.RuntimeType).ToList();
+                .Select(a => a.Award.EntityType).ToList();
         }
 
         [TestMethod]
@@ -110,35 +110,35 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEntityWithLiteIbRuntimeType()
         {
-            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.RuntimeType == typeof(GrammyAwardDN)).ToList();
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.EntityType == typeof(GrammyAwardDN)).ToList();
         }
 
         [TestMethod]
         public void SelectLiteUpcast()
         {
             var list = Database.Query<ArtistDN>()
-                .Select(a => a.ToLite<IAuthorDN>()).ToList();
+                .Select(a => a.ToLite()).ToList();
         }
 
         [TestMethod]
         public void SelectLiteCastUpcast()
         {
             var list = Database.Query<ArtistDN>()
-                .SelectMany(a => a.Friends).Select(a=>a.ToLite<IAuthorDN>()).ToList();
+                .SelectMany(a => a.Friends).Select(a=>(Lite<IAuthorDN>)a).ToList();
         }
 
         [TestMethod]
         public void SelectLiteCastNocast()
         {
             var list = Database.Query<ArtistDN>()
-                .SelectMany(a => a.Friends).Select(a => a.ToLite<ArtistDN>()).ToList();
+                .SelectMany(a => a.Friends).Select(a =>(Lite<ArtistDN>)a).ToList();
         }
 
         [TestMethod]
         public void SelectLiteCastDowncast()
         {
             var list = Database.Query<AlbumDN>()
-                .Select(a => a.Author.ToLite().ToLite<ArtistDN>()).ToList();
+                .Select(a => (Lite<ArtistDN>)a.Author.ToLite()).ToList();
         }
 
 
