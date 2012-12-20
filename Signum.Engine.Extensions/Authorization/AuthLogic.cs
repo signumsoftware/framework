@@ -339,7 +339,6 @@ namespace Signum.Engine.Authorization
 
                     Console.WriteLine();
                     Console.WriteLine();
-                    Console.WriteLine();
                 }
             }
         }

@@ -96,7 +96,8 @@ namespace Signum.Engine.Authorization
                                 QueryUtils.GetQueryUniqueKey(query), type.Name, ta));
 
 
-                            string message = "Disallow {0} to {1}?".Formato(QueryUtils.GetQueryUniqueKey(query), r);
+                            SafeConsole.WriteColor(ConsoleColor.DarkRed, "Disallow ");
+                            string message = "{0} to {1}?".Formato(QueryUtils.GetQueryUniqueKey(query), r);
 
                             if (isError ? SafeConsole.Ask(message) : SafeConsole.Ask(ref warnings, message))
                             {
@@ -118,7 +119,8 @@ namespace Signum.Engine.Authorization
 
                             if (qs.Contains(type))
                             {
-                                if (SafeConsole.Ask(ref warnings, "Allow {0} to {1}?".Formato(QueryUtils.GetQueryUniqueKey(type), r)))
+                                SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Allow ");
+                                if (SafeConsole.Ask(ref warnings, "{0} to {1}?".Formato(QueryUtils.GetQueryUniqueKey(type), r)))
                                 {
                                     Manual.SetAllowed(r, type, true);
                                     SafeConsole.WriteLineColor(ConsoleColor.Green, "Allowed");
