@@ -162,16 +162,100 @@ namespace Signum.Windows.Authorization
             rules.Conditions.Remove(condition); 
         }
 
+        private void btFind_Click(object sender, RoutedEventArgs e)
+        {
+            if (tbType.Text.IsEmpty())
+                return;
+            Find(this.treeView, tbType.Text);
+        }
+
+        private void btRemove_Click(object sender, RoutedEventArgs e)
+        {
+            CleanSelection(this.treeView);
+        }
+
+        private void CleanSelection(TreeView tree)
+        {
+            if (tree == null)
+                return;
+            tbType.IsReadOnly = false;
+            tbType.Text = "";
+
+            foreach (var item in tree.Items)
+            {
+                var i = item as NamespaceNode;
+                if (i != null)
+                {
+                    i.Selected = false;
+                    foreach (var subitem in i.SubNodes)
+                    {
+                            subitem.Selected = false;
+                    }
+                }
+            }
+        }
+
+        private void Find(TreeView tree, string key)
+        {
+            if (tree == null)
+                return;
+            tbType.IsReadOnly = true;
+            foreach (var item in tree.Items)
+            {
+                var i = item as NamespaceNode;
+                if (i != null)
+                { 
+                    if(i.Name.ToUpper().Contains(key.Trim().ToUpper()))
+                        i.Selected = true;
+
+                    foreach (var subitem in i.SubNodes)
+                    {
+                        if (subitem.Resource.ClassName.ToUpper().Contains(key.Trim().ToUpper()))
+                            subitem.Selected = true;
+                    }
+                }
+            }
+        }
+
+        private void tbType_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                CleanSelection(this.treeView);
+                e.Handled = true;
+            }
+            else
+                if (e.Key == Key.Enter)
+                {
+                    Find(this.treeView, tbType.Text);
+                    e.Handled = true;
+                }
+        }
     }
 
-    public class NamespaceNode
+    public class NamespaceNode : ModelEntity
     {
         public string Name { get; set; }
+
+        bool selected;
+        public bool Selected
+        {
+            get { return selected; }
+            set { Set(ref selected, value, () => Selected); }
+        }
+
         public List<TypeRuleBuilder> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
     }
 
     public class TypeRuleBuilder : ModelEntity
     {
+        bool selected;
+        public bool Selected
+        {
+            get { return selected; }
+            set { Set(ref selected, value, () => Selected); }
+        }
+
 
         [NotifyChildProperty]
         TypeAllowedBuilder allowed;
@@ -370,5 +454,11 @@ namespace Signum.Windows.Authorization
             Notify(() => None);
             Notify(() => TypeAllowed);
         }
+    }
+    public static class TypeRuleConverter
+    {
+        public static readonly IValueConverter BoolToBlueBackground = ConverterFactory.New(
+            (bool value) => value ? Brushes.Blue : Brushes.Transparent);
+
     }
 }
