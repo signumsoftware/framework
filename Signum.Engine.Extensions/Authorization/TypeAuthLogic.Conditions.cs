@@ -304,7 +304,16 @@ namespace Signum.Engine.Authorization
             if (ExecutionMode.InGlobal || !AuthLogic.IsEnabled)
                 return query;
 
-            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, ExecutionMode.InUserInterface);
+            var ui = ExecutionMode.InUserInterface;
+
+            var allowed = GetAllowed(typeof(T));
+            var max = ui ?  allowed.MaxUI(): allowed.MaxDB();
+            if (max < TypeAllowedBasic.Read)
+                throw new UnauthorizedAccessException("Type {0} is not authorized{1}{2}".Formato(typeof(T).Name,
+                    ui ? " in user interface" : null,
+                    allowed.Conditions.Any() ? " for any condition" : null));
+
+            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, ui);
         }
 
 
