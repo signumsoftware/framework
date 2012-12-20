@@ -33,6 +33,18 @@ namespace Signum.Utilities
                 Console.Write(str);
         }
 
+        public static void WriteColor(ConsoleColor color, string format, params object[] parameters)
+        {
+            string str = FormatString(format, parameters);
+            lock (SyncKey)
+            {
+                ConsoleColor old = Console.ForegroundColor;
+                Console.ForegroundColor = color;
+                Console.Write(str);
+                Console.ForegroundColor = old;
+            }
+        }
+
         public static void WriteLineColor(ConsoleColor color, string format, params object[] parameters)
         {
             string str = FormatString(format, parameters);
