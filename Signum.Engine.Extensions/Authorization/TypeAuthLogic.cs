@@ -96,7 +96,8 @@ namespace Signum.Engine.Authorization
                     {
                         var suggested = new TypeAllowedAndConditions(TypeAllowed.DBReadUINone);
 
-                        if (SafeConsole.Ask("Grant {0} for {1} to {2}?".Formato(suggested, tuple.related.Type.Name, role)))
+                        SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Grant ");
+                        if (SafeConsole.Ask("{0} for {1} to {2}?".Formato(suggested, tuple.related.Type.Name, role)))
                         {
                             Manual.SetAllowed(role, tuple.related.Type, suggested);
                             SafeConsole.WriteLineColor(ConsoleColor.Green, "Granted");

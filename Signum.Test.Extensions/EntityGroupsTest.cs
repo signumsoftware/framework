@@ -16,6 +16,7 @@ using Signum.Engine.Basics;
 using Signum.Utilities;
 using System.Xml.Linq;
 using Signum.Engine.Exceptions;
+using Signum.Engine.Operations;
 
 namespace Signum.Test.Extensions
 {
@@ -170,6 +171,7 @@ namespace Signum.Test.Extensions
         public void TypeConditionSaveOut()
         {
             using (AuthLogic.UnsafeUserSession("external"))
+            using (OperationLogic.AllowSave<LabelDN>())
             using (TypeAuthLogic.DisableQueryFilter())
             {
                 //Because of target

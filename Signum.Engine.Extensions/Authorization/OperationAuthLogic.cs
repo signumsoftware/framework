@@ -95,8 +95,8 @@ namespace Signum.Engine.Authorization
                                 ta));
 
 
-                            string message = "Set {0} to {1} for {2}?".Formato(OperationDN.UniqueKey(oi.Key), typeAllowed, r);
-
+                            SafeConsole.WriteColor(ConsoleColor.DarkRed, "Disallow ");
+                            string message = "{0} to {1} for {2}?".Formato(OperationDN.UniqueKey(oi.Key), typeAllowed, r);
                             if (isError ? SafeConsole.Ask(message) : SafeConsole.Ask(ref warnings, message))
                             {
                                 Manual.SetAllowed(r, oi.Key, typeAllowed);
@@ -117,7 +117,8 @@ namespace Signum.Engine.Authorization
                             var only = ops.Only();
                             if (only != null)
                             {
-                                if (SafeConsole.Ask(ref warnings, "Allow {0} to {1}?".Formato(OperationDN.UniqueKey(only.Key), r)))
+                                SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Allow ");
+                                if (SafeConsole.Ask(ref warnings, "{0} to {1}?".Formato(OperationDN.UniqueKey(only.Key), r)))
                                 {
                                     Manual.SetAllowed(r, only.Key, OperationAllowed.Allow);
                                     SafeConsole.WriteLineColor(ConsoleColor.Green, "Allowed");
