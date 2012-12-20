@@ -7,7 +7,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class DemoPackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
@@ -61,7 +61,7 @@ namespace Signum.Entities.Processes
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class DemoPackageLineDN : IdentifiableEntity
     {
         Lite<DemoPackageDN> package;
