@@ -12,7 +12,7 @@ using Signum.Engine.Maps;
 
 namespace Signum.Test
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Shared)]
     public class NoteWithDateDN : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
@@ -61,7 +61,7 @@ namespace Signum.Test
         bool Lonely();
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Shared)]
     public class ArtistDN : Entity, IAuthorDN
     {
         [NotNullable, SqlDbType(Size = 100)]
@@ -157,7 +157,7 @@ namespace Signum.Test
         Married, 
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class BandDN : Entity, IAuthorDN
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -220,7 +220,7 @@ namespace Signum.Test
         Save
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Shared)]
     public abstract class AwardDN : Entity
     {
         int year;
@@ -274,7 +274,7 @@ namespace Signum.Test
     }
 
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class LabelDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -320,7 +320,7 @@ namespace Signum.Test
         Save
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.SystemString)]
     public class CountryDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -338,7 +338,7 @@ namespace Signum.Test
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class AlbumDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -450,7 +450,7 @@ namespace Signum.Test
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class AwardNominationDN : Entity
     {
         [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
