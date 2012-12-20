@@ -952,7 +952,7 @@ namespace Signum.Engine.Linq
                     m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
                     m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
                 case "Math.Truncate": return TrySqlFunction(null, SqlFunction.ROUND, m.Type, m.GetArgument("d"), new SqlConstantExpression(0), new SqlConstantExpression(1));
-                case "ExpressionNominatorExtensions.InSql":
+                case "LinqHints.InSql":
                     using (ForceFullNominate())
                     {
                         return Visit(m.GetArgument("value"));
