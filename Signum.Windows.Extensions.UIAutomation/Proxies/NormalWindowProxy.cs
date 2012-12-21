@@ -75,13 +75,6 @@ namespace Signum.Windows.UIAutomation
             actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
         }
 
-        public void Save()
-        {
-            Element.WaitDataContextChangedAfter(
-            action: () => ButtonBar.SaveButton.ButtonInvoke(),
-            actionDescription: () => "Save " + EntityId);
-        }
-
         public void Reload()
         {
             Element.WaitDataContextChangedAfter(
@@ -195,11 +188,6 @@ namespace Signum.Windows.UIAutomation
         public AutomationElement OkButton
         {
             get { return Element.ChildById("btOk"); }
-        }
-
-        public AutomationElement SaveButton
-        {
-            get { return Element.ChildById("btSave"); }
         }
 
         public AutomationElement ReloadButton
