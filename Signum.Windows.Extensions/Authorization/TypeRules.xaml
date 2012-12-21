@@ -28,8 +28,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
             <Label Content="Find Type"/>
-            <TextBox x:Name="tbType" VerticalAlignment="Center" Margin="5,0,5,0" KeyDown="tbType_KeyDown" MinWidth="200"/>
-            <Button Focusable="False" x:Name="btFind" Style="{StaticResource RoundButton}" Click="btFind_Click" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
+            <TextBox x:Name="tbType" VerticalAlignment="Center" Margin="5,0,5,0" KeyUp="tbType_KeyUp"  KeyDown="tbType_KeyDown" MinWidth="200"/>
             <Button Focusable="False" x:Name="btRemove" Style="{StaticResource RoundButton}" Click="btRemove_Click" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
         </StackPanel>
         <ScrollViewer x:Name="swTop" Grid.Column="1"
@@ -76,16 +75,18 @@
             <TreeView.ItemContainerStyle>
                 <Style TargetType="TreeViewItem" BasedOn="{StaticResource TreeViewItemStyle1}">
                     <Setter Property="IsExpanded" Value="True"/>
+                    <Setter Property="Visibility" Value="{Binding Selected, Converter={x:Static m:Converters.BoolToVisibility}}"/>
+                    <Setter Property="Background" Value="{Binding SelectedFind, Converter={x:Static auth:TypeRuleConverter.BoolToYellowOrTransparent}}"/>
                 </Style>
             </TreeView.ItemContainerStyle>
 
             <TreeView.ItemTemplateSelector>
                 <m:TypeDataTemplateSelector>
-                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.GroupType}" ItemsSource="{Binding SubNodes}" >
+                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.GroupType}" ItemsSource="{Binding SubNodes}">
                         <TextBlock HorizontalAlignment="Left" FontWeight="SemiBold"  VerticalAlignment="Center" Text="{Binding Name}"/>
                     </HierarchicalDataTemplate>
 
-                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.RuleType}" ItemsSource="{Binding Conditions}" >
+                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.RuleType}" ItemsSource="{Binding Conditions}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -102,7 +103,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal" Grid.Column="0">
                                 <Button Style="{StaticResource RoundButton}"  Content="{StaticResource Create}" Visibility="{Binding CanAdd, Converter={x:Static m:Converters.BoolToVisibility}}" Click="addCondition_Click"/>
-                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Resource.CleanName}" Background="{Binding Selected, Converter={x:Static auth:TypeRuleConverter.BoolToBlueBackground}}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Resource.CleanName}"/>
                             </StackPanel>
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Create}" Style="{StaticResource SphereRadioButton}" Background="Cyan" Grid.Column="1"/>
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Modify}" Style="{StaticResource SphereRadioButton}" Background="GreenYellow" Grid.Column="2" />
@@ -158,7 +159,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal" Grid.Column="0">
                                 <Button Style="{StaticResource RoundButton}"  Content="{StaticResource Remove}" Click="removeCondition_Click"/>
-                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding ConditionNiceToString}" Grid.Column="0" Background="{Binding Selected, Converter={x:Static auth:TypeRuleConverter.BoolToBlueBackground}}" />
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding ConditionNiceToString}" Grid.Column="0"/>
                             </StackPanel>
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Create}" Style="{StaticResource SphereRadioButton}" Background="Cyan" Grid.Column="1"/>
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Modify}" Style="{StaticResource SphereRadioButton}" Background="GreenYellow" Grid.Column="2" />
