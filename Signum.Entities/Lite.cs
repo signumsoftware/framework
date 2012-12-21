@@ -39,8 +39,11 @@ namespace Signum.Entities
         Lite<T> Clone(); 
     }
 
+    [Serializable]
+    abstract class LiteImp  : Modifiable{ }
+
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
-    class LiteImp<T> : Modifiable, Lite<T>
+    class LiteImp<T> : LiteImp, Lite<T>
         where T : IdentifiableEntity
     {
         T entityOrNull;
