@@ -225,6 +225,16 @@ namespace Signum.Entities.Authorization
             return this.fallback.GetHashCode();
         }
 
+        public TypeAllowedBasic Min(bool inUserInterface)
+        {
+            return inUserInterface ? MinUI() : MinDB();
+        }
+
+        public TypeAllowedBasic Max(bool inUserInterface)
+        {
+            return inUserInterface ? MaxUI() : MaxDB();
+        }
+
         public TypeAllowed MinCombined()
         {
             return TypeAllowedExtensions.Create(MinDB(), MinUI());
