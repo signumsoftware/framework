@@ -13,7 +13,6 @@ using Signum.Entities;
 using Signum.Web;
 using Signum.Engine;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using Signum.Web.Extensions.Properties;
 using System.IO;
@@ -24,6 +23,7 @@ using System.Net;
 using Signum.Engine.Files;
 using System.Reflection;
 using Signum.Web.Controllers;
+using Signum.Web.PortableAreas;
 #endregion
 
 namespace Signum.Web.Files
@@ -44,7 +44,7 @@ namespace Signum.Web.Files
                     entity = Database.Retrieve<FilePathDN>(sfId.Value);
                 else
                 {
-                    entity = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
+                    entity = new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType));
                 }
             }
             ViewData["IdValueField"] = prefix;
@@ -59,40 +59,39 @@ namespace Signum.Web.Files
         {
             bool shouldSaveFilePath = !RuntimeInfo.FromFormValue((string)Request["fileParentRuntimeInfo"]).IsNew;
 
-            FilePathDN fp = null;
-            string formFieldId = "";
-            foreach (string file in Request.Files)
+            string fileName = Request.Files.Cast<string>().Single();
+
+            string prefix = fileName.Substring(0, fileName.IndexOf(FileLineKeys.File) - 1);
+
+            RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
+
+            IFile file;
+
+            if (info.EntityType == typeof(FilePathDN))
             {
-                RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContextUtilities.Compose(file, EntityBaseKeys.RuntimeInfo)]);
-                if (info.RuntimeType != typeof(FilePathDN))
-                    continue;
-
-                if (info.IdOrNull.HasValue)
-                    continue; //Only new files will come with content
-
-                HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
-                if (string.IsNullOrEmpty(hpf.FileName))
-                    continue; //It will have been uploaded by drag-drop
-
-                string fileType = (string)Request.Form[TypeContextUtilities.Compose(file, FileLineKeys.FileType)];
+                string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
                 if (!fileType.HasText())
-                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(file));
+                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(fileName));
 
-                formFieldId = file; //This is the uploaded file
-
-                fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
-                {
-                    FileName = Path.GetFileName(hpf.FileName),
-                    BinaryFile = hpf.InputStream.ReadAllBytes()
-                };
-
-                if (shouldSaveFilePath)
-                    fp = fp.Save();
-                else 
-                    Session[Request.Form[ViewDataKeys.TabId] + formFieldId] = fp;
+                file = new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType));
+            }
+            else
+            {
+                file = (IFile)Activator.CreateInstance(info.EntityType);
             }
 
-            return UploadResult(formFieldId, fp, shouldSaveFilePath);
+            HttpPostedFileBase hpf = Request.Files[fileName] as HttpPostedFileBase;
+
+            file.FileName = Path.GetFileName(hpf.FileName);
+            file.BinaryFile = hpf.InputStream.ReadAllBytes();
+
+            if (shouldSaveFilePath)
+                ((IdentifiableEntity)file).Save();
+            else
+                Session[Request.Form[ViewDataKeys.TabId] + prefix] = file;
+
+
+            return UploadResult(prefix, file, shouldSaveFilePath);
         }
 
         public ContentResult UploadDropped()
@@ -104,28 +103,32 @@ namespace Signum.Web.Files
             string prefix = Request.Headers["X-Prefix"];
 
             RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Headers["X-" + TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-            if (info.RuntimeType != typeof(FilePathDN))
-                throw new InvalidOperationException("Only FilePaths can be uploaded with drag and drop");
-
-            string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
-            if (!fileType.HasText())
-                throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(prefix));
-
-            FilePathDN fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
+            IFile file;
+            if (info.EntityType == typeof(FilePathDN))
             {
-                FileName = fileName,
-                BinaryFile = Request.InputStream.ReadAllBytes()
-            };
+                string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
+                if (!fileType.HasText())
+                    throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".Formato(prefix));
+
+                file = new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType));
+            }
+            else
+            {
+                file = (IFile)Activator.CreateInstance(info.EntityType);
+            }
+
+            file.FileName = fileName;
+            file.BinaryFile = Request.InputStream.ReadAllBytes();
 
             if (shouldSaveFilePath)
-                fp = fp.Save();
+                ((IdentifiableEntity)file).Save();
             else
-                Session[Request.Headers["X-" + ViewDataKeys.TabId] + prefix] = fp;
+                Session[Request.Headers["X-" + ViewDataKeys.TabId] + prefix] = file;
 
-            return UploadResult(prefix, fp, shouldSaveFilePath);
+            return UploadResult(prefix, file, shouldSaveFilePath);
         }
 
-        private ContentResult UploadResult(string prefix, FilePathDN filePath, bool shouldHaveSaved)
+        private ContentResult UploadResult(string prefix, IFile file, bool shouldHaveSaved)
         {
             StringBuilder sb = new StringBuilder();
             //Use plain javascript not to have to add also the reference to jquery in the result iframe
@@ -133,11 +136,13 @@ namespace Signum.Web.Files
             sb.AppendLine("<script type='text/javascript'>");
             sb.AppendLine("var parDoc = window.parent.document;");
 
-            if (filePath.TryCS(f => f.IdOrNull) != null || !shouldHaveSaved)
+            if (file.BinaryFile == null /* If file has been saved */ || !shouldHaveSaved)
             {
+                RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
+
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(prefix));
-                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.ToStrLink), filePath.FileName));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(filePath).ToString()));
+                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, file is EmbeddedEntity ? EntityBaseKeys.ToStr : EntityBaseKeys.ToStrLink), file.FileName));
+                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo), ri.ToString()));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(TypeContextUtilities.Compose(prefix, "DivNew")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "DivOld")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "btnRemove")));
@@ -155,32 +160,25 @@ namespace Signum.Web.Files
             return Content(sb.ToString());
         }
 
-        public FileResult Download(int? filePathID)
+        public ActionResult Download(string file)
         {
-            if (filePathID == null)
-                throw new ArgumentException("Argument 'filePathID' was not passed to the controller");
+            if (file == null)
+                throw new ArgumentException("file");
 
-            FilePathDN fp = Database.Retrieve<FilePathDN>(filePathID.Value);
+            RuntimeInfo ri = RuntimeInfo.FromFormValue(file);
 
-            if (fp == null)
-                throw new ArgumentException("Argument 'filePathID' was not passed to the controller");
-            /*
-            byte[] binaryFile;
+            if (ri.EntityType == typeof(FilePathDN))
+            {
+                FilePathDN fp = Database.Retrieve<FilePathDN>(ri.IdOrNull.Value);
 
-            binaryFile = fp.FullWebPath != null ? new WebClient().DownloadData(fp.FullWebPath)
-                : FilePathLogic.GetByteArray(fp);
+                return File(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath), fp.FileName);
+            }
+            else
+            {
+                FileDN f = Database.Retrieve<FileDN>(ri.IdOrNull.Value);
 
-            return File(binaryFile, SignumController.GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);*/
-
-            
-            //
-            //HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(path));
-            //HttpContext.Response.ContentType = 
-            //HttpContext.Response.TransmitFile(path);
-
-            string path = fp.FullPhysicalPath;
-            return File(FilePathLogic.GetByteArray(fp), MimeType.FromExtension(path), fp.FileName);
-            //return File(path,  MimeType.FromFileName(path)); <--this cannot handle dots inside path
+                return new StaticContentResult(f.BinaryFile, f.FileName);
+            }
         }
     }
 }

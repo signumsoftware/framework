@@ -29,16 +29,18 @@ namespace Signum.Web.ControlPanel
             {
                 FrontEnd = frontEnd;
                 Admin = admin;
+                FullScreenLink = false;
             }
 
             public string FrontEnd;
             public string Admin;
+            public bool FullScreenLink;
         }
 
         public static Dictionary<Type, PartViews> PanelPartViews = new Dictionary<Type, PartViews>()
         {
-            { typeof(UserChartPartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) },
-            { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) },
+            { typeof(UserChartPartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) { FullScreenLink = true } },
+            { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) { FullScreenLink = true } },
             { typeof(CountSearchControlPartDN), new PartViews(ViewPrefix.Formato("CountSearchControlPart"), AdminViewPrefix.Formato("CountSearchControlPart")) },
             { typeof(LinkListPartDN), new PartViews(ViewPrefix.Formato("LinkListPart"), AdminViewPrefix.Formato("LinkListPart")) },
         };
@@ -53,21 +55,21 @@ namespace Signum.Web.ControlPanel
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ControlPanelDN>(EntityType.Default) { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
+                    new EntitySettings<ControlPanelDN> { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
                     new EmbeddedEntitySettings<PanelPart>(),
                     
-                    new EntitySettings<UserChartPartDN>(EntityType.Default),
-                    new EntitySettings<UserQueryPartDN>(EntityType.Default),
+                    new EntitySettings<UserChartPartDN>(),
+                    new EntitySettings<UserQueryPartDN>(),
 
-                    new EntitySettings<CountSearchControlPartDN>(EntityType.Default),
-                    new EmbeddedEntitySettings<CountUserQueryElement>() { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
+                    new EntitySettings<CountSearchControlPartDN>(),
+                    new EmbeddedEntitySettings<CountUserQueryElement> { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
                     
-                    new EntitySettings<LinkListPartDN>(EntityType.Default),
-                    new EmbeddedEntitySettings<LinkElement>() { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
+                    new EntitySettings<LinkListPartDN>(),
+                    new EmbeddedEntitySettings<LinkElement> { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(
-                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite<IdentifiableEntity>() });
+                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite() });
 
                 ButtonBarEntityHelper.RegisterEntityButtons<ControlPanelDN>((ctx, panel) => 
                 {

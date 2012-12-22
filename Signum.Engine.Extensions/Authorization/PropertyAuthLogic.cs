@@ -38,19 +38,70 @@ namespace Signum.Engine.Authorization
 
                 if (queries)
                 {
-                    PropertyRoute.SetIsAllowedCallback(pp => GetPropertyAllowed(pp) > PropertyAllowed.None);
+                    PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
                 }
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => p.Type.CleanName + "|" + p.Path, pa => pa.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Properties", "Property", roles, s =>
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
-                    var arr = s.Split('|');
-                    Type type = TypeLogic.GetType(arr[0]);
-                    var property =  PropertyLogic.GetEntity(PropertyRoute.Parse(type, arr[1]));
-                    if (property.IsNew)
-                        property.Save();
-                    return property;
-                }, EnumExtensions.ToEnum<PropertyAllowed>);
+                    Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
+
+                    string replacementKey = typeof(OperationDN).Name;
+
+                    var groups =  x.Element("Properties").Elements("Role").SelectMany(r => r.Elements("Property")).Select(p => new PropertyPair(p.Attribute("Resource").Value))
+                        .AgGroupToDictionary(a=>a.Type, gr=>gr.Select(pp=> pp.Property).ToHashSet());
+
+                    foreach (var item in groups)
+                    {
+                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeof(TypeDN).Name, item.Key));
+
+                        if (type == null)
+                            continue;
+
+                        var dic = PropertyRoute.GenerateRoutes(type).ToDictionary(a => a.PropertyString());
+
+                        replacements.AskForReplacements(
+                           item.Value,
+                           dic.Keys.ToHashSet(),
+                           type.Name + " Properties");
+
+
+                        routesDicCache[type] = dic;
+                    }
+
+                    return cache.ImportXml(x, "Properties", "Property", roles, s =>
+                    {
+                        var pp = new PropertyPair(s);
+
+                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeof(TypeDN).Name, pp.Type));
+                        if (type == null)
+                            return null;
+
+                        PropertyRoute route = routesDicCache[type].TryGetC(replacements.Apply(type.Name + " Properties", pp.Property));
+
+                        if (route == null)
+                            return null;
+
+                        var property = PropertyLogic.GetEntity(route);
+                        if (property.IsNew)
+                            property.Save();
+                            
+                        return property;
+
+                    }, EnumExtensions.ToEnum<PropertyAllowed>);
+                };
+            }
+        }
+
+        struct PropertyPair
+        {
+            public readonly string Type;
+            public readonly  string Property;
+            public PropertyPair(string str)
+            {
+                var index = str.IndexOf("|");
+                Type = str.Substring(0, index);
+                Property = str.Substring(index + 1);
             }
         }
 
@@ -74,16 +125,40 @@ namespace Signum.Engine.Authorization
 
         public static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return PropertyAllowed.Modify;
 
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
 
-            if (TypeAuthLogic.GetAllowed(route.RootType).Max().Get(ExecutionContext.Current == ExecutionContext.UserInterface) == TypeAllowedBasic.None)
+            var typeRule = TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface);
+
+            if (typeRule == TypeAllowedBasic.None)
                 return PropertyAllowed.None;
 
+            if (typeRule == TypeAllowedBasic.Read)
+                return PropertyAllowed.Read;
+
             return cache.GetAllowed(RoleDN.Current.ToLite(), route);
+        }
+
+        public static string GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
+        {
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+                return null;
+
+            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                return GetAllowedFor(route.Parent, requested);
+
+            if (TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface) == TypeAllowedBasic.None)
+                return "Type {0} is set to None for {1}".Formato(route.RootType.NiceName(), RoleDN.Current);
+
+            var current = cache.GetAllowed(RoleDN.Current.ToLite(), route);
+
+            if (current < requested)
+                return "Property {0} is set to {1} for {2}".Formato(route, current, RoleDN.Current);
+
+            return null;
         }
 
         public static DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()

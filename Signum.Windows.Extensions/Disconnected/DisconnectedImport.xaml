@@ -9,6 +9,7 @@
     <StackPanel>
         <m:ValueLine m:Common.Route="CreationDate" />
         <m:EntityLine m:Common.Route="Machine" />
+        <m:ValueLine m:Common.Route="State" />
         <StackPanel m:Common.MinLabelWidth="180">
             <m:ValueLine m:Common.Route="RestoreDatabase" />
             <m:ValueLine m:Common.Route="SynchronizeSchema" />
@@ -29,6 +30,7 @@
                     </DataTemplate>
                 </m:EntityRepeater.EntityTemplate>
             </m:EntityRepeater>
+            <m:ValueLine m:Common.Route="Unlock" />
             <m:ValueLine m:Common.Route="EnableForeignKeys" />
             <m:ValueLine m:Common.Route="DropDatabase" />
         </StackPanel>

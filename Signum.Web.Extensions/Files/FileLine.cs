@@ -20,7 +20,8 @@ namespace Signum.Web.Files
 {
     public static class FileLineKeys
     {
-        public const string FileType = "FileType";
+        public const string File = "sfFile";
+        public const string FileType = "sfFileType";
     }
 
     public class FileLine : EntityBase
@@ -40,6 +41,7 @@ namespace Signum.Web.Files
 
         public string DownloadUrl { get; set; }
         public string UploadUrl { get; set; }
+        public string UploadDroppedUrl { get; set; }
 
         public string Downloading { get; set; }
         internal string GetDownloading()
@@ -69,12 +71,11 @@ namespace Signum.Web.Files
             Find = false;
             Create = false;
             Remove = false;
-            //Implementations = null;
         }
 
         public override string ToJS()
         {
-            return "new SF.FLine(" + this.OptionsJS() + ")";
+            return "$('#{0}').data('fileLine')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
@@ -82,46 +83,42 @@ namespace Signum.Web.Files
             var result = base.OptionsJSInternal();
             result.Add("asyncUpload", AsyncUpload ? "true" : "false");
             if (DownloadUrl.HasText())
-                result.Add("controllerUrl", DownloadUrl.SingleQuote());
+                result.Add("downloadUrl", DownloadUrl.SingleQuote());
             if (UploadUrl.HasText())
-                result.Add("controllerUrl", UploadUrl.SingleQuote());
+                result.Add("uploadUrl", UploadUrl.SingleQuote());
+            if (UploadDroppedUrl.HasText())
+                result.Add("uploadDroppedUrl", UploadDroppedUrl.SingleQuote());
             return result;
         }
 
         protected override string DefaultRemove()
         {
-            return FileLine.JsRemoving(this).ToJS();
+            return JsRemoving().ToJS();
         }
 
-        public static JsInstruction JsRemoving(FileLine fline)
+        public JsInstruction JsRemoving()
         {
-            return new JsInstruction(() => "{0}.remove()".Formato(fline.ToJS()));
+            return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
         }
 
         protected string DefaultDownloading()
         {
-            return FileLine.JsDownloading(this).ToJS();
+            return JsDownloading().ToJS();
         }
 
-        public static JsInstruction JsDownloading(FileLine fline)
+        public JsInstruction JsDownloading()
         {
-            if (fline.DownloadUrl == null)
-                fline.DownloadUrl = RouteHelper.New().Action("Download", "File");
-
-            return new JsInstruction(() => "javascript:{0}.download()".Formato(fline.ToJS()));
+            return new JsInstruction(() => "{0}.download()".Formato(this.ToJS()));
         }
 
         protected string DefaultOnChanged()
         {
-            return FileLine.JsOnChanged(this).ToJS();
+            return JsOnChanged().ToJS();
         }
 
-        public static JsInstruction JsOnChanged(FileLine fline)
+        public JsInstruction JsOnChanged()
         {
-            if (fline.UploadUrl == null)
-                fline.UploadUrl = RouteHelper.New().Action("Upload", "File");
-
-            return new JsInstruction(() => "javascript:{0}.onChanged()".Formato(fline.ToJS()));
+            return new JsInstruction(() => "{0}.onChanged()".Formato(this.ToJS()));
         }
 
         protected override string DefaultFind()

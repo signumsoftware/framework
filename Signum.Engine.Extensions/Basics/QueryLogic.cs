@@ -97,7 +97,7 @@ namespace Signum.Engine.Basics
                 return new QueryDN
                 {
                     Key = QueryUtils.GetQueryUniqueKey(queryName),
-                    DisplayName = QueryUtils.GetNiceName(queryName)
+                    Name = QueryUtils.GetCleanName(queryName)
                 };
             }
         }
@@ -112,17 +112,19 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<QueryDN>();
 
-            return Synchronizer.SynchronizeReplacing(replacements, QueriesKey,
-                current.ToDictionary(a => a.Key),
+            return Synchronizer.SynchronizeScriptReplacing(
+                replacements,
+                QueriesKey,
                 should.ToDictionary(a => a.Key),
+                current.ToDictionary(a => a.Key),
+                null,
                 (n, c) => table.DeleteSqlSync(c),
-                 null,
-                 (fn, c, s) =>
-                 {
-                     c.Key = s.Key;
-                     c.DisplayName = s.DisplayName;
-                     return table.UpdateSqlSync(c);
-                 }, Spacing.Double);
+                (fn, s, c) =>
+                {
+                    c.Key = s.Key;
+                    c.Name = s.Name;
+                    return table.UpdateSqlSync(c);
+                }, Spacing.Double);
         }
     }
 }

@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="TheEntity0IsNew" xml:space="preserve">
-    <value>The entity {0} is new</value>
-  </data>
   <data name="QueryOf0" xml:space="preserve">
     <value>Query of {0}</value>
   </data>
@@ -180,12 +177,6 @@
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>Username {0} is not valid</value>
-  </data>
-  <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
-    <value>Impossible to execute {0} from state {1}</value>
-  </data>
-  <data name="Operation01IsNotAuthorized" xml:space="preserve">
-    <value>Operation {0} ({1}) is not Authorized</value>
   </data>
   <data name="Date" xml:space="preserve">
     <value>date</value>
@@ -250,8 +241,8 @@
   <data name="Any" xml:space="preserve">
     <value>any</value>
   </data>
-  <data name="_0IsA1AndShowsTheProperty2" xml:space="preserve">
-    <value>{0} is a {1} and shows the property {2}</value>
+  <data name="_0IsA1AndShows2" xml:space="preserve">
+    <value>{0} is a {1} and shows {2}</value>
   </data>
   <data name="_0IsACalculated1" xml:space="preserve">
     <value>{0} is a calculated {1}</value>
@@ -288,5 +279,14 @@
   </data>
   <data name="The0WithId12IsLockedBy3" xml:space="preserve">
     <value>The {0} with Id {1} ({2}) is locked by {3}</value>
+  </data>
+  <data name="NotAllowedToSaveThis0WhileOffline" xml:space="preserve">
+    <value>Not allowed to save this {0} while offline</value>
+  </data>
+  <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
+    <value>There's not a registered user with that email address</value>
+  </data>
+  <data name="TheProperty0" xml:space="preserve">
+    <value>the property {0}</value>
   </data>
 </root>

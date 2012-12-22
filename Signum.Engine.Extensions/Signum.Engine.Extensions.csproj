@@ -90,6 +90,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alerts\AlertLogic.cs" />
     <Compile Include="Authorization\AuthCache.cs" />
     <Compile Include="Authorization\SessionLogLogic.cs" />
     <Compile Include="Authorization\TypeAuthCache.cs" />
@@ -107,7 +108,6 @@
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
-    <Compile Include="Basics\EnumLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
@@ -117,13 +117,15 @@
     <Compile Include="Chart\ChartLogic.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Chart\ChartScriptLogic.cs" />
+    <Compile Include="Chart\UserChartLogic.cs" />
     <Compile Include="ControlPanel\ControlPanelLogic.cs" />
-    <Compile Include="Deployment\DeploymentLogic.cs" />
     <Compile Include="Disconnected\DisconnectedTools.cs" />
     <Compile Include="Disconnected\LocalBackupManager.cs" />
     <Compile Include="Disconnected\ImportManager.cs" />
     <Compile Include="Disconnected\DisconnectedLogic.cs" />
     <Compile Include="Disconnected\ExportManager.cs" />
+    <Compile Include="Files\FileLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\QueryHelp.cs" />
@@ -133,21 +135,12 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
-    <Compile Include="Exceptions\ExceptionLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
+    <Compile Include="Mailing\EmailPackageLogic.cs" />
     <Compile Include="Mailing\EmailRenderer.cs" />
     <Compile Include="Mailing\NewsletterLogic.cs" />
-    <Compile Include="Mailing\NewsletterProcessAlgortihm.cs" />
-    <Compile Include="Mailing\SendEmailProcessAlgorithm.cs" />
     <Compile Include="Mailing\SmtpConfigurationLogic.cs" />
-    <Compile Include="Operations\BasicConstruct.cs" />
-    <Compile Include="Operations\BasicConstructFrom.cs" />
-    <Compile Include="Operations\BasicConstructFromMany.cs" />
-    <Compile Include="Operations\BasicDelete.cs" />
-    <Compile Include="Operations\BasicExecute.cs" />
-    <Compile Include="Operations\Graph.cs" />
-    <Compile Include="Operations\OperationLogic.cs" />
-    <Compile Include="Operations\Typle.cs" />
+    <Compile Include="Notes\NoteLogic.cs" />
     <Compile Include="Processes\PackageLogic.cs" />
     <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Profiler\ProfilerLogic.cs" />
@@ -198,7 +191,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
-    <None Include="Operations\Operations.cd" />
+    <None Include="Chart\ChartScripts\charts.psd" />
     <EmbeddedResource Include="Reports\plainExcelTemplate.xlsx" />
   </ItemGroup>
   <ItemGroup>
@@ -214,6 +207,25 @@
   <ItemGroup>
     <EmbeddedResource Include="Authorization\ResetPasswordRequestMail.htm" />
     <EmbeddedResource Include="Mailing\DefaultEmailTemplate.htm" />
+    <Content Include="Chart\ChartScripts\Bars.xml" />
+    <Content Include="Chart\ChartScripts\BoxPack.xml" />
+    <Content Include="Chart\ChartScripts\BubblePack.xml" />
+    <Content Include="Chart\ChartScripts\Bubbleplot.xml" />
+    <Content Include="Chart\ChartScripts\CalendarStream.xml" />
+    <Content Include="Chart\ChartScripts\Columns.xml" />
+    <Content Include="Chart\ChartScripts\Doughnut.xml" />
+    <Content Include="Chart\ChartScripts\Force graph.xml" />
+    <Content Include="Chart\ChartScripts\Line.xml" />
+    <Content Include="Chart\ChartScripts\MultiBars.xml" />
+    <Content Include="Chart\ChartScripts\MultiColumns.xml" />
+    <Content Include="Chart\ChartScripts\MultiLines.xml" />
+    <Content Include="Chart\ChartScripts\ParallelCordiantes.xml" />
+    <Content Include="Chart\ChartScripts\Punchcard.xml" />
+    <Content Include="Chart\ChartScripts\Scatterplot.xml" />
+    <Content Include="Chart\ChartScripts\StackedBars.xml" />
+    <Content Include="Chart\ChartScripts\StackedColumns.xml" />
+    <Content Include="Chart\ChartScripts\StackedLines.xml" />
+    <Content Include="Chart\ChartScripts\WorldMap.xml" />
     <Content Include="Reports\DocumentFormat.OpenXml.dll" />
     <Content Include="Reports\DocumentFormat.OpenXml.xml" />
   </ItemGroup>
@@ -233,6 +245,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

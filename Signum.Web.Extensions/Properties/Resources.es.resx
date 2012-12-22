@@ -133,7 +133,7 @@
     <value>El correo electrónico debe tener un valor</value>
   </data>
   <data name="ErrorSavingFile" xml:space="preserve">
-    <value>Error guardadndo el archivo</value>
+    <value>Error guardando el archivo</value>
   </data>
   <data name="HelpDocumentation" xml:space="preserve">
     <value>Documentación de ayuda</value>
@@ -363,9 +363,6 @@
   <data name="TypesAscx_Queries" xml:space="preserve">
     <value>Consultas</value>
   </data>
-  <data name="AreYouSureOfDeletingQuery0" xml:space="preserve">
-    <value>¿Está seguro de eliminar la query {0}?</value>
-  </data>
   <data name="Delete" xml:space="preserve">
     <value>Eliminar</value>
   </data>
@@ -437,9 +434,6 @@
   </data>
   <data name="AuthAdmin_RemoveCondition" xml:space="preserve">
     <value>Quitar condición</value>
-  </data>
-  <data name="Chart_AreYouSureOfDeletingUserChart0" xml:space="preserve">
-    <value>¿Está seguro de eliminar el gráfico de usuario {0}?</value>
   </data>
   <data name="Chart_Dimension" xml:space="preserve">
     <value>Dimensión</value>

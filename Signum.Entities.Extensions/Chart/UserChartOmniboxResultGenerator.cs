@@ -21,7 +21,7 @@ namespace Signum.Entities.Chart
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var userCharts = OmniboxParser.Manager.AutoComplete(typeof(UserChartDN), null, ident, AutoCompleteLimit);
+            var userCharts = OmniboxParser.Manager.AutoComplete(typeof(UserChartDN), ident, AutoCompleteLimit);
 
             foreach (var uq in userCharts)
             {
@@ -35,6 +35,19 @@ namespace Signum.Entities.Chart
                     UserChart = (Lite<UserChartDN>)uq,
                 };
             }
+        }
+
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(UserChartOmniboxResult);
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult 
+                { 
+                    Text = "'{0}'".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_UserChart), 
+                    OmniboxResultType = resultType 
+                }
+            };
         }
     }
 

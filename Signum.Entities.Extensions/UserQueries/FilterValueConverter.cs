@@ -63,8 +63,10 @@ namespace Signum.Entities.UserQueries
         {
             object result;
             string error = TryParse(stringValue, type, out result);
+            if (error.HasText())
+                throw new FormatException(error);
 
-            throw new FormatException(error);
+            return result;
         }
 
         public static string TryParse(string stringValue, Type type, out object result)
@@ -324,13 +326,13 @@ namespace Signum.Entities.UserQueries
     {
         public string TryToString(object value, Type type, out string result)
         {
-            if (!(value is Lite))
+            if (!(value is Lite<IdentifiableEntity>))
             {
                 result = null;
                 return FilterValueConverter.Continue;
             }
 
-            result = ((Lite)value).Key();
+            result = ((Lite<IdentifiableEntity>)value).Key();
             return null;
         }
 
@@ -342,8 +344,8 @@ namespace Signum.Entities.UserQueries
                 return FilterValueConverter.Continue;
             }
 
-            Lite lResult;
-            string error = Lite.TryParseLite(Lite.Extract(type), value, out lResult);
+            Lite<IdentifiableEntity> lResult;
+            string error = Lite.TryParseLite( value, out lResult);
 
             if (error == null)
             {
@@ -364,7 +366,9 @@ namespace Signum.Entities.UserQueries
 
         public string TryToString(object value, Type type, out string result)
         {
-            if (value is Lite && ((Lite)value).RuntimeType == typeof(UserDN) && ((Lite)value).IdOrNull == UserDN.Current.Id)
+            var lu = value as Lite<UserDN>;
+
+            if (lu != null  && lu.EntityType == typeof(UserDN) && lu.IdOrNull == UserDN.Current.Id)
             {
                 result = CurrentUserKey;
                 return null; 

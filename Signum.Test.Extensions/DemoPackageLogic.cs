@@ -7,7 +7,6 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.Processes;
 using Signum.Entities;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using System.Reflection;
 using Signum.Entities.Scheduler;
@@ -15,7 +14,6 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -123,7 +121,7 @@ namespace Signum.Engine.Processes
                 }
                 catch (Exception e)
                 {
-                    if (Transaction.AvoidIndependentTransactions)
+                    if (Transaction.InTestTransaction)
                         throw; 
 
                     var exLog = e.LogException();

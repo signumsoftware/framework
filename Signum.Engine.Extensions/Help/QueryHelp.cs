@@ -53,7 +53,7 @@ namespace Signum.Engine.Help
                        new XAttribute(_Info, Info),
                        new XAttribute(_Language, Language),
                        new XElement(_Description, UserDescription),
-                        Columns.Map(ps => ps == null || ps.Count == 0 ? null :
+                        Columns.Let(ps => ps == null || ps.Count == 0 ? null :
                            new XElement(_Columns,
                                ps.Select(p => new XElement(_Column,
                                    new XAttribute(_Name, p.Value.Name),

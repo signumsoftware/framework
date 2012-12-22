@@ -9,12 +9,12 @@ using System.IO;
 
 namespace Signum.Entities.Files
 {
-    [Serializable]
-    public class FileTypeDN : EnumDN
+    [Serializable, EntityType(EntityType.SystemString)]
+    public class FileTypeDN : MultiEnumDN
     {
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class FileRepositoryDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -68,6 +68,7 @@ namespace Signum.Entities.Files
             set { Set(ref active, value, () => Active); }
         }
 
+        [NotNullable]
         MList<FileTypeDN> fileTypes = new MList<FileTypeDN>();
         public MList<FileTypeDN> FileTypes
         {
@@ -80,5 +81,10 @@ namespace Signum.Entities.Files
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum FileRepositoryOperation
+    { 
+        Save
     }
 }

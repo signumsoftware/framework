@@ -63,6 +63,7 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -79,9 +80,13 @@
   <ItemGroup>
     <Compile Include="BasicExtensions.cs" />
     <Compile Include="ConditionBuilder.cs" />
+    <Compile Include="Proxies\LineUIPoxy.cs" />
+    <Compile Include="Proxies\ValueLineWindowProxy.cs" />
     <Compile Include="Proxies\LineContainer.cs" />
+    <Compile Include="Proxies\MessageBoxProxy.cs" />
+    <Compile Include="Proxies\OmniBoxProxy.cs" />
     <Compile Include="Proxies\SelectWindoProxy.cs" />
-    <Compile Include="Proxies\ValueLineProxy.cs" />
+    <Compile Include="Proxies\LineProxy.cs" />
     <Compile Include="FindExtensions.cs" />
     <Compile Include="MenuItemExtensions.cs" />
     <Compile Include="Proxies\NormalWindowProxy.cs" />
@@ -104,6 +109,10 @@
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
+      <Project>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</Project>
+      <Name>Signum.Engine.Extensions</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
       <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>

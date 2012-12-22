@@ -31,72 +31,71 @@ namespace Signum.Web.Chart
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(findOptions.QueryName));
 
-            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
 
             var request = new ChartRequest(findOptions.QueryName)
             {
+                ChartScript = ChartScriptLogic.Scripts.Value.FirstEx(() => "No ChartScript loaded in the database"),
                 Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList()
             };
 
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-
-            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Lite.Extract(entityColumn.Type);
-            Implementations implementations = entityColumn.Implementations;
-            
-            return OpenChartRequest(request, 
+            return OpenChartRequest(request,
                 findOptions.FilterOptions,
-                findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
+                findOptions.Navigate && IsNavigableEntity(request.QueryName));
         }
 
-        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool view)
-        { 
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+        public ViewResult FullScreen(string prefix)
+        {
+            var request = this.ExtractChartRequestCtx(prefix, null).Value;
 
-            ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartControlView;
-            ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
-            ViewData[ViewDataKeys.QueryDescription] = queryDescription;
-            ViewData[ViewDataKeys.FilterOptions] = filterOptions;
-            ViewData[ViewDataKeys.View] = view;
-            
-            return View(Navigator.Manager.SearchPageView,  new TypeContext<ChartRequest>(request, ""));
+            return OpenChartRequest(request,
+                request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
+                IsNavigableEntity(request.QueryName));
+        }
+
+        public bool IsNavigableEntity(object queryName)
+        {
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+
+            Type entitiesType = Lite.Extract(entityColumn.Type);
+            Implementations implementations = entityColumn.Implementations.Value;
+
+            return implementations.IsByAll || implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
         }
 
         [HttpPost]
         public PartialViewResult UpdateChartBuilder(string prefix)
         {
-            var lastToken = Request["lastTokenChanged"];
+            string lastToken = Request["lastTokenChanged"];
             
-            var request = ExtractChartRequestCtx(prefix, lastToken.HasText() ? (ChartTokenName?)lastToken.ToEnum<ChartTokenName>() : null).Value;   
+            var request = this.ExtractChartRequestCtx(prefix, lastToken.TryCS(int.Parse)).Value;   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
-            return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix).SubContext(cr => cr.Chart));
+            return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix));
         }
 
         [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
         {
-            var request = ExtractChartRequestCtx("", null).Value;
+            ChartRequest request = this.ExtractChartRequestCtx("", null).Value;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
-            List<QueryToken> subtokens = request.Chart.SubTokensFilters(QueryUtils.Parse(tokenName, qt => request.Chart.SubTokensFilters(qt, qd.Columns)), qd.Columns);
+            QueryToken token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
 
-            if (subtokens.IsEmpty())
-                return Content("");
-
-            var tokenOptions = SearchControlHelper.TokensCombo(subtokens, null);
-
-            return Content(
-                SearchControlHelper.TokenOptionsCombo(
-                    SignumController.CreateHtmlHelper(this), request.QueryName, tokenOptions, new Context(null, prefix), index + 1, true).ToHtmlString());
+            return Content(SignumController.CreateHtmlHelper(this).QueryTokenCombo(token, null,
+                new Context(null, prefix), index + 1, qd.QueryName, t => token.SubTokensChart(qd.Columns, request.GroupResults)).ToHtmlString());
         }
 
         [HttpPost]
         public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix)
         {
-            var request = ExtractChartRequestCtx(prefix, null).Value;
+            ChartRequest request = this.ExtractChartRequestCtx(prefix, null).Value;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
@@ -105,7 +104,7 @@ namespace Signum.Web.Chart
             FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
             {
-                fo.Token = QueryUtils.Parse(tokenName, qt => request.Chart.SubTokensFilters(qt, qd.Columns));
+                fo.Token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
@@ -117,7 +116,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ActionResult Draw(string prefix)
         {
-            var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
+            var requestCtx = this.ExtractChartRequestCtx(prefix, null).ValidateGlobal();
 
             if (requestCtx.GlobalErrors.Any())
             {
@@ -129,50 +128,37 @@ namespace Signum.Web.Chart
 
             var resultTable = ChartLogic.ExecuteChart(request);
 
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             var querySettings = Navigator.QuerySettings(request.QueryName);
-
-            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Lite.Extract(entityColumn.Type);
-            Implementations implementations = entityColumn.Implementations;
 
             ViewData[ViewDataKeys.Results] = resultTable;
 
-            ViewData[ViewDataKeys.View] = implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin);
+            ViewData[ViewDataKeys.Navigate] = IsNavigableEntity(request.QueryName);
             ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => querySettings.GetFormatter(c.c.Column));
 
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
         }
 
-        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, ChartTokenName? lastTokenChanged)
-        {
-            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
-                    .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
-
-            var chart = ctx.Value.Chart;
-            if (lastTokenChanged != null)
-                chart.GetToken(lastTokenChanged.Value).TokenChanged();
-
-            return ctx;
-        }
-
         public ActionResult OpenSubgroup(string prefix)
         {
-            var chartRequest = ExtractChartRequestCtx(prefix, null).Value;
+            var chartRequest = this.ExtractChartRequestCtx(prefix, null).Value;
 
-            if (chartRequest.Chart.GroupResults)
+            if (chartRequest.GroupResults)
             {
-                var filters = chartRequest.Filters.Where(a=>!(a.Token is AggregateToken)).Select(f => new FilterOption { Token = f.Token, ColumnName = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
+                var filters = chartRequest.Filters
+                    .Where(a => !(a.Token is AggregateToken))
+                    .Select(f => new FilterOption
+                    {
+                        Token = f.Token,
+                        ColumnName = f.Token.FullKey(),
+                        Value = f.Value,
+                        Operation = f.Operation
+                    }).ToList();
 
-                var chartTokenFilters = new List<FilterOption>
+                foreach (var column in chartRequest.Columns.Iterate())
                 {
-                    AddFilter(chartRequest, chartRequest.Chart.Dimension1, "d1"),
-                    AddFilter(chartRequest, chartRequest.Chart.Dimension2, "d2"),
-                    AddFilter(chartRequest, chartRequest.Chart.Value1, "v1"),
-                    AddFilter(chartRequest, chartRequest.Chart.Value2, "v2")
-                };
-
-                filters.AddRange(chartTokenFilters.NotNull());
+                    if (column.Value.ScriptColumn.IsGroupKey && column.Value.Token != null)
+                        filters.AddRange(GetFilter(column.Value, "c" + column.Position));
+                }
 
                 var findOptions = new FindOptions(chartRequest.QueryName)
                 {
@@ -194,37 +180,36 @@ namespace Signum.Web.Chart
                 var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
                 Type entitiesType = Lite.Extract(entityColumn.Type);
 
-                Lite lite = Lite.Parse(entitiesType, entity);
-                return Redirect(Navigator.ViewRoute(lite));
+                Lite<IdentifiableEntity> lite = Lite.Parse(entity);
+                return Redirect(Navigator.NavigateRoute(lite));
             }
         }
 
-        private FilterOption AddFilter(ChartRequest request, ChartTokenDN chartToken, string key)
+        private FilterOption GetFilter(ChartColumnDN chartToken, string key)
         {
-            if (chartToken == null || chartToken.Token is AggregateToken)
+            if (chartToken == null ||  chartToken.Token is AggregateToken)
                 return null;
-
-            if (key == "d1" && (request.Chart.ChartType == ChartType.StackedAreas || request.Chart.ChartType == ChartType.TotalAreas))
-                return null;
-
-            bool hasKey = Request.Params.AllKeys.Contains(key);
-            var value = hasKey ? Request.Params[key] : null;
 
             var token = chartToken.Token;
 
+            string str = Request.Params.AllKeys.Contains(key)  ? Request.Params[key] : null;
+
+            var value = str == null || str == "null" ? null :
+                FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(str), token.Type);
+            
             return new FilterOption
             {
                 ColumnName = token.FullKey(),
                 Token = token,
                 Operation = FilterOperation.EqualTo,
-                Value = hasKey ? FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(value), token.Type) : null
+                Value = value,
             };
         }
 
         [HttpPost]
         public JsonResult Validate(string prefix)
         {
-            var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
+            var requestCtx = this.ExtractChartRequestCtx(prefix, null).ValidateGlobal();
 
             ModelState.FromContext(requestCtx);
             return JsonAction.ModelState(ModelState);
@@ -246,6 +231,31 @@ namespace Signum.Web.Chart
         }
         #endregion
 
+        public MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, int? lastTokenChanged)
+        {
+            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params["webQueryName"]))
+                    .ApplyChanges(ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
+
+            ctx.Value.CleanOrderColumns();
+
+            ChartRequest chart = ctx.Value;
+            if (lastTokenChanged != null)
+                chart.Columns[lastTokenChanged.Value].TokenChanged();
+
+            return ctx;
+        }
+
+        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool navigate)
+        {
+            ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartRequestView;
+            ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
+            ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName); ;
+            ViewData[ViewDataKeys.FilterOptions] = filterOptions;
+            ViewData[ViewDataKeys.Navigate] = navigate;
+
+            return View(Navigator.Manager.SearchPageView, new TypeContext<ChartRequest>(request, ""));
+        }
+
         #region user chart
         public ActionResult CreateUserChart(string prefix)
         {
@@ -254,81 +264,37 @@ namespace Signum.Web.Chart
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));
 
-            var userChart = UserChartDN.FromRequest(request);
+            var userChart = request.ToUserChart();
 
-            userChart.Related = UserDN.Current.ToLite<IdentifiableEntity>();
+            userChart.Related = UserDN.Current.ToLite();
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
-            return Navigator.View(this, userChart);
+            return Navigator.NormalPage(this, userChart);
         }
 
         public ActionResult ViewUserChart(Lite<UserChartDN> lite)
         {
             UserChartDN uc = Database.Retrieve<UserChartDN>(lite);
 
-            ChartRequest request = UserChartDN.ToRequest(uc);
-
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-
-            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-            Type entitiesType = Lite.Extract(entityColumn.Type);
-            Implementations implementations = entityColumn.Implementations;
+            ChartRequest request = uc.ToRequest();
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
+                IsNavigableEntity(request.QueryName));
         }
 
-        public ActionResult DeleteUserChart(Lite<UserChartDN> lite)
+        [HttpPost]
+        public ActionResult DeleteUserChart(string prefix)
         {
-            var queryName = QueryLogic.ToQueryName(lite.InDB().Select(uq => uq.Query.Key).FirstEx());
+            var userChart = this.ExtractLite<UserChartDN>(prefix);
 
-            Database.Delete<UserChartDN>(lite);
+            var queryName = QueryLogic.ToQueryName(userChart.InDB().Select(uq => uq.Query.Key).FirstEx());
 
-            return Redirect(Navigator.FindRoute(queryName));
+            userChart.Delete();
+
+            return JsonAction.Redirect(Navigator.FindRoute(queryName));
         }
         #endregion
-
-        #region chart color
-
-        public ActionResult Colors(string typeName)
-        {
-            Type type = Navigator.ResolveType(typeName);
-
-            var model = ChartColorLogic.GetPalette(type);
-
-            return Navigator.View(this, model);
-        }
-
-        public ActionResult SavePalette(string typeName)
-        {
-            Type type = Navigator.ResolveType(typeName);
-
-            var ctx =  ChartColorLogic.GetPalette(type).ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
-
-            if (ctx.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(ctx);
-                return JsonAction.ModelState(ModelState);
-            }
-
-            var palette = ctx.Value;
-
-            ChartColorLogic.SavePalette(palette);
-
-            return Redirect(Url.Action<ChartController>(cc => cc.Colors(typeName)));
-        }
-
-        public ActionResult CreateNewPalette(string typeName)
-        {
-            Type type = Navigator.ResolveType(typeName);
-
-            ChartColorLogic.CreateNewPalette(type);
-
-            return Redirect(Url.Action<ChartController>(cc => cc.Colors(typeName)));
-        }
-
-        #endregion 
     }
 }

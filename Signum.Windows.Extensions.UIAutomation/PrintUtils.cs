@@ -11,23 +11,29 @@ namespace Signum.Windows.UIAutomation
     {
         public static string NiceToString(this Condition condition)
         {
-            var pc = condition as PropertyCondition;
+            {
+                var pc = condition as PropertyCondition;
+                if (pc != null)
+                    return "{0} = {1}".Formato(pc.Property.CleanPropertyName(), pc.Value.TryToString());
+            }
 
-            if (pc != null)
-                return "{0} = {1}".Formato(pc.Property.CleanPropertyName(), pc.Value.TryToString());
+            {
+                var ac = condition as AndCondition;
+                if (ac != null)
+                    return ac.GetConditions().ToString(c => c is PropertyCondition ? c.NiceToString() : "({0})".Formato(c.NiceToString()), " AND ");
+            }
 
-            var ac = condition as AndCondition;
-            if (ac != null)
-                return ac.GetConditions().ToString(c => c is PropertyCondition ? c.NiceToString() : "({0})".Formato(c.NiceToString()), " AND ");
+            {
+                var oc = condition as OrCondition;
+                if (oc != null)
+                    return oc.GetConditions().ToString(c => c is PropertyCondition ? c.NiceToString() : "({0})".Formato(c.NiceToString()), " OR ");
+            }
 
-            var oc = condition as OrCondition;
-            if (oc != null)
-                return ac.GetConditions().ToString(c => c is PropertyCondition ? c.NiceToString() : "({0})".Formato(c.NiceToString()), " OR ");
-
-            var nc = condition as NotCondition;
-            if (oc != null)
-                return "NOT ({0})".Formato(nc.NiceToString());
-
+            {
+                var nc = condition as NotCondition;
+                if (nc != null)
+                    return "NOT ({0})".Formato(nc.Condition.NiceToString());
+            }
             throw new InvalidOperationException("{0} not expected".Formato(condition.GetType().Name));
         }
 

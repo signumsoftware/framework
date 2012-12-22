@@ -23,7 +23,7 @@ namespace Signum.Web.Omnibox
 
             if (result.Id == null && result.ToStr == null)
             {
-                html = html.Concat(new MvcHtmlString("..."));
+                throw new Exception("Invalid EntityOmniboxProvider result");
             }
             else
             {
@@ -48,14 +48,19 @@ namespace Signum.Web.Omnibox
                 }
             }
 
-            html = html.Concat(ColoredSpan(" ({0})".Formato(Signum.Web.Properties.Resources.View), "dodgerblue"));
+            html = html.Concat(Icon());
 
             if (result.Lite != null)
                 html = new HtmlTag("a")
-                    .Attr("href", Navigator.ViewRoute(result.Lite))
+                    .Attr("href", Navigator.NavigateRoute(result.Lite))
                     .InnerHtml(html).ToHtml();
 
             return html;
+        }
+
+        public override MvcHtmlString Icon()
+        {
+            return ColoredSpan(" ({0})".Formato(Signum.Web.Properties.Resources.View), "dodgerblue");
         }
     }
 }

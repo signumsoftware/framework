@@ -6,7 +6,6 @@ using System.Xml.Linq;
 using Signum.Entities.Reflection;
 using System.Reflection;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.Reflection;
 using Signum.Entities.DynamicQuery;
@@ -65,7 +64,7 @@ namespace Signum.Engine.Help
                        new XAttribute(_FullName, Type.FullName),
                        new XAttribute(_Language, Language),
                        new XElement(_Description, Description),
-                       Properties.Map(ps => ps == null || ps.Count == 0 ? null : 
+                       Properties.Let(ps => ps == null || ps.Count == 0 ? null : 
                            new XElement(_Properties,
                                ps.Select(p => new XElement(_Property, 
                                    new XAttribute(_Name, p.Key), 
@@ -73,7 +72,7 @@ namespace Signum.Engine.Help
                                    p.Value.UserDescription))
                            )
                        ),
-                       Operations.Map(os => os == null || os.Count == 0 ? null : 
+                       Operations.Let(os => os == null || os.Count == 0 ? null : 
                            new XElement(_Operations,
                                os.Select(o => new XElement(_Operation, 
                                    new XAttribute(_Key, OperationDN.UniqueKey(o.Key)),

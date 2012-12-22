@@ -1,4 +1,15 @@
-﻿.sf-chart-builder
+﻿.sf-chartscript-columns .sf-line-detail-field
+{
+    border:none;
+    padding:0px;
+}
+
+.sf-chartscript-columns .sf-repeater-element legend
+{
+    float:left;
+}
+
+.sf-chart-builder
 {
     width: 100%;    
     margin-top: 2px;
@@ -15,8 +26,6 @@
 }
 .sf-chart-img
 {
-    background-image: url('../Images/chartType.png');
-    background-repeat: no-repeat;
     height: 40px;
     width: 40px;
     float: left;
@@ -30,25 +39,6 @@
 {
     background-color: #81bffc;    
 }
-.sf-chart-img-pie { background-position: 0 0 }
-.sf-chart-img-doughnout { background-position: 0 -40px }
-.sf-chart-img-points { background-position: 0 -80px }
-.sf-chart-img-bubbles { background-position: 0 -120px }
-
-.sf-chart-img-columns { background-position: -40px 0 }
-.sf-chart-img-multicolumns { background-position: -40px -40px }
-.sf-chart-img-stackedcolumns { background-position: -40px -80px }
-.sf-chart-img-totalcolumns { background-position: -40px -120px }
-
-.sf-chart-img-bars { background-position: -80px 0 }
-.sf-chart-img-multibars { background-position: -80px -40px }
-.sf-chart-img-stackedbars { background-position: -80px -80px }
-.sf-chart-img-totalbars { background-position: -80px -120px }
-
-.sf-chart-img-lines { background-position: -120px 0 }
-.sf-chart-img-multilines { background-position: -120px -40px }
-.sf-chart-img-stackedareas { background-position: -120px -80px }
-.sf-chart-img-totalareas { background-position: -120px -120px }
 
 .sf-chart-tokens table
 {
@@ -109,26 +99,6 @@
 .sf-chart-container svg
 {
     shape-rendering: crispEdges;         
-}
-.sf-chart-container line.x-ruler, .sf-chart-container line.y-ruler
-{
-    stroke: #ccc;   
-}
-.sf-chart-container line.x-axis, .sf-chart-container line.y-axis, .sf-chart-container line.x-axis-tick, .sf-chart-container line.y-axis-tick
-{
-    stroke: #000;    
-}
-.sf-chart-container text.x-axis-token-label, .sf-chart-container text.y-axis-token-label, text.sf-chart-strong
-{
-    font-weight: bold;    
-}
-.sf-chart-code-container
-{
-    padding: 5px;    
-}
-.sf-chart-code textarea
-{
-    width: 100%;
 }
 
 .sf-chart-color-table

@@ -28,8 +28,12 @@ namespace Signum.Engine.Help
                 .Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute).Value);
 
             Replacements replacements = new Replacements();
-            replacements.AskForReplacements(loadedDictionary, createdDictionary, replacementsKey);
-            var repLoadedDictionary = replacements.ApplyReplacements(loadedDictionary, replacementsKey);
+
+            replacements.AskForReplacements(
+                loadedDictionary.Keys.ToHashSet(), 
+                createdDictionary.Keys.ToHashSet(), replacementsKey);
+
+            var repLoadedDictionary = replacements.ApplyReplacementsToOld(loadedDictionary, replacementsKey);
 
             foreach (var k in loadedDictionary.Keys.Except(createdDictionary.Keys))
                 notify(SyncAction.Removed, k);
@@ -72,9 +76,11 @@ namespace Signum.Engine.Help
             where O : class
             where N : class
         {
-            replacements.AskForReplacements(oldDictionary, newDictionary, replacementsKey);
+            replacements.AskForReplacements(
+                oldDictionary.Keys.ToHashSet(),
+                newDictionary.Keys.ToHashSet(), replacementsKey);
 
-            var repOldDictionary = replacements.ApplyReplacements(oldDictionary, replacementsKey);
+            var repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
 
             HashSet<string> set = new HashSet<string>();
             set.UnionWith(repOldDictionary.Keys);

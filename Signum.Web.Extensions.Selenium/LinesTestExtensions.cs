@@ -75,9 +75,15 @@ namespace Signum.Web.Selenium
             }
         }
 
+        public static string RepeaterItemsContainerSelector(string prefix)
+        {
+            return "jq=#{0}sfItemsContainer".Formato(prefix);
+        }
+
         public static string RepeaterItemSelector(string prefix, int elementIndexBase0)
         {
-            return "jq=#{0}sfItemsContainer > #{0}{1}_sfRepeaterItem".Formato(prefix, elementIndexBase0);
+            return "{0} > #{1}{2}_sfRepeaterItem".Formato(
+                RepeaterItemsContainerSelector(prefix), prefix, elementIndexBase0);
         }
 
         public static void RepeaterItemExists(this ISelenium selenium, string prefix, int elementIndexBase0, bool exists)
@@ -97,6 +103,13 @@ namespace Signum.Web.Selenium
         public static void RepeaterWaitUntilItemLoaded(this ISelenium selenium, string repeaterPrefix, int itemIndexBase0)
         {
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RepeaterItemSelector(repeaterPrefix, itemIndexBase0)));
+        }
+
+        public static void RepeaterItemMove(this ISelenium selenium, bool up, string prefix, int elementIndexBase0)
+        {
+            selenium.Click("{0} > legend .sf-move-{1}".Formato(
+                RepeaterItemSelector(prefix, elementIndexBase0),
+                up ? "up" : "down"));
         }
 
         public static string LineCreateSelector(string prefix)
@@ -169,7 +182,7 @@ namespace Signum.Web.Selenium
 
         public static string ListLineSelector(string prefix)
         {
-            return "jq=#" + prefix;
+            return "jq=#{0}sfList".Formato(prefix);
         }
 
         public static string ListLineOptionId(string prefix, int itemIndexBase0)
@@ -180,9 +193,9 @@ namespace Signum.Web.Selenium
         public static void ListLineSelectElement(this ISelenium selenium, string prefix, int itemIndexBase0, bool multiSelect)
         {
             if (multiSelect)
-                selenium.AddSelection(ListLineSelector(prefix).RemoveRight(1), "id={0}".Formato(ListLineOptionId(prefix, itemIndexBase0)));
+                selenium.AddSelection(ListLineSelector(prefix), "id={0}".Formato(ListLineOptionId(prefix, itemIndexBase0)));
             else
-                selenium.Select(ListLineSelector(prefix).RemoveRight(1), "id={0}".Formato(ListLineOptionId(prefix, itemIndexBase0)));
+                selenium.Select(ListLineSelector(prefix), "id={0}".Formato(ListLineOptionId(prefix, itemIndexBase0)));
         }
 
         public static void ListLineViewElement(this ISelenium selenium, string prefix, int itemIndexBase0, bool opensEntity)
@@ -251,12 +264,12 @@ namespace Signum.Web.Selenium
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
         }
 
-        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, bool allowMultiple, int[] rowIndexesBase0)
+        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, int[] rowIndexesBase0)
         {
-            LineFindAndSelectElements(selenium, prefix, allowMultiple, rowIndexesBase0, -1);
+            LineFindAndSelectElements(selenium, prefix, rowIndexesBase0, -1);
         }
 
-        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, bool allowMultiple, int[] rowIndexesBase0, int elementIndexBase0)
+        public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, int[] rowIndexesBase0, int elementIndexBase0)
         {
             selenium.LineFind(prefix, elementIndexBase0);
 
@@ -265,23 +278,40 @@ namespace Signum.Web.Selenium
 
             selenium.Search(prefix);
 
-            if (allowMultiple)
-            {
-                foreach (int index in rowIndexesBase0)
-                    SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
-            }
-            else
-                SearchTestExtensions.SelectRowRadioButton(selenium, rowIndexesBase0[0], prefix);
+            foreach (int index in rowIndexesBase0)
+                SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
+            
+            selenium.PopupOk(prefix);
+        }
+
+        public static void LineFindAndSelectElementById(this ISelenium selenium, string prefix, int elementId)
+        {
+            LineFindAndSelectElementById(selenium, prefix, elementId, -1);
+        }
+
+        public static void LineFindAndSelectElementById(this ISelenium selenium, string prefix, int elementId, int elementIndexBase0)
+        {
+            selenium.LineFind(prefix, elementIndexBase0);
+
+            if (elementIndexBase0 != -1)
+                prefix += elementIndexBase0 + "_";
+
+            selenium.FilterSelectToken(0, "Id", false, prefix);
+            selenium.AddFilter(0, prefix);
+            selenium.Type(prefix + "value_0", elementId.ToString());
+
+            selenium.Search(prefix);
+            SearchTestExtensions.SelectRowCheckbox(selenium, 0, prefix);
 
             selenium.PopupOk(prefix);
         }
 
-        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, bool allowMultiple, int[] rowIndexesBase0)
+        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, int[] rowIndexesBase0)
         {
-            LineFindWithImplAndSelectElements(selenium, prefix, typeToChoose, allowMultiple, rowIndexesBase0, -1);
+            LineFindWithImplAndSelectElements(selenium, prefix, typeToChoose, rowIndexesBase0, -1);
         }
 
-        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, bool allowMultiple, int[] rowIndexesBase0, int elementIndexBase0)
+        public static void LineFindWithImplAndSelectElements(this ISelenium selenium, string prefix, string typeToChoose, int[] rowIndexesBase0, int elementIndexBase0)
         {
             selenium.LineFindWithImpl(prefix, typeToChoose, elementIndexBase0);
 
@@ -290,18 +320,11 @@ namespace Signum.Web.Selenium
 
             selenium.Search(prefix);
 
-            if (allowMultiple)
-            {
-                foreach (int index in rowIndexesBase0)
-                    SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
-            }
-            else
-                SearchTestExtensions.SelectRowRadioButton(selenium, rowIndexesBase0[0], prefix);
-
+            foreach (int index in rowIndexesBase0)
+                SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
+            
             selenium.PopupOk(prefix);
         }
-
-
 
         public static string LineRemoveSelector(string prefix)
         {

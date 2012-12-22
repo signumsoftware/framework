@@ -9,6 +9,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Engine.Mailing;
 using Signum.Engine.Extensions.Properties;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Authorization
 {
@@ -31,6 +32,13 @@ namespace Signum.Engine.Authorization
                          e.DaysWarning
                      }).ToDynamic();
 
+                new BasicExecute<PasswordExpiresIntervalDN>(PasswordExpiresIntervalOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (pei, _) => { },
+                }.Register();
+
                 AuthLogic.UserLogingIn += (u =>
                 {
                     if (u.PasswordNeverExpires)
@@ -42,7 +50,6 @@ namespace Signum.Engine.Authorization
 
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days))
                         throw new PasswordExpiredException(Signum.Engine.Extensions.Properties.Resources.ExpiredPassword);
-
                 });
 
                 AuthLogic.LoginMessage += (() =>
@@ -58,8 +65,6 @@ namespace Signum.Engine.Authorization
                     
                     if (ivp == null)
                         return null;
-
-
 
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days).AddDays((double)-ivp.DaysWarning))
                         return Resources.PasswordNearExpired;

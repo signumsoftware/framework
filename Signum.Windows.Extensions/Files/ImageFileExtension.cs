@@ -67,6 +67,7 @@ namespace Signum.Windows.Files
             {".ppt", ppt},
             {".pptx", ppt}
         };
+
         public static IValueConverter Converter = ConverterFactory.New((string fileName) =>
             imagenes.TryGetC(Path.GetExtension(fileName).ToLower()) ?? unknown);
     }

@@ -1,0 +1,10 @@
+﻿@using Signum.Entities.Chart
+@using (var cc = Html.TypeContext<ChartScriptParameterDN>())
+{
+    using (Html.FieldInline())
+    {
+    @Html.ValueLine(cc, c => c.Name)
+    @Html.ValueLine(cc, c => c.Type) 
+    @Html.ValueLine(cc, c => c.ValueDefinition)
+    }
+}

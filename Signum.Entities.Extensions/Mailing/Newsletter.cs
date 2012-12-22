@@ -7,28 +7,13 @@ using Signum.Entities.Processes;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
-using Signum.Entities.Exceptions;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class NewsletterDN : Entity, IProcessDataDN
     {
-        int numLines;
-        public int NumLines
-        {
-            get { return numLines; }
-            set { SetToStr(ref numLines, value, () => NumLines); }
-        }
-
-        int numErrors;
-        public int NumErrors
-        {
-            get { return numErrors; }
-            set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
         [NotNullable, SqlDbType(Size = 100)]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -38,7 +23,7 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        NewsletterState  state = NewsletterState.Created;
+        NewsletterState state = NewsletterState.Created;
         public NewsletterState State
         {
             get { return state; }
@@ -106,7 +91,7 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class NewsletterDeliveryDN : Entity
     {
         bool sent;
@@ -147,13 +132,13 @@ namespace Signum.Entities.Mailing
     }
 
 
-    public enum NewsletterOperations
+    public enum NewsletterOperation
     {
         Save,
         Send,
         AddRecipients,
         RemoveRecipients,
-        CreateFromThis,
+        Clone,
     }
 
     public enum NewsletterState

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web.Selenium
 {
@@ -160,14 +161,29 @@ namespace Signum.Web.Selenium
 
         public static void PopupCancel(this ISelenium selenium, string prefix)
         {
-            selenium.Click("jq=span.ui-dialog-title[id$='{0}Temp'] + a".Formato(prefix));
+            selenium.Click("jq=.ui-dialog-titlebar-close:visible");
+            Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
+        }
+
+        public static void PopupCancelDiscardChanges(this ISelenium selenium, string prefix)
+        {
+            selenium.Click("jq=.ui-dialog-titlebar-close:visible");
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupOk(this ISelenium selenium, string prefix)
         {
+            PopupOk(selenium, prefix, false);
+        }
+
+        public static void PopupOk(this ISelenium selenium, string prefix, bool submit)
+        {
             selenium.Click("jq=#{0}btnOk".Formato(prefix));
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
+            if (submit)
+                selenium.WaitForPageToLoad(DefaultPageLoadTimeout);
+            else 
+                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
 
         public static void PopupSave(this ISelenium selenium, string prefix)
@@ -178,6 +194,11 @@ namespace Signum.Web.Selenium
         public static void MainEntityHasId(this ISelenium selenium)
         {
             Assert.IsTrue(selenium.IsElementPresent("jq=#divNormalControl[data-isnew=false]"));
+        }
+
+        public static bool PopupEntityHasUnsavedChanges(this ISelenium selenium, string prefix)
+        {
+            return selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".Formato(prefix));
         }
 
         public static string RuntimeInfoSelector(string prefix)
@@ -222,9 +243,17 @@ namespace Signum.Web.Selenium
 
         public static bool EntityButtonEnabled(this ISelenium selenium, string idButton)
         {
-            string locator = EntityButtonLocator(idButton);
-            return selenium.IsElementPresent(locator) && 
-                  !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
+            return selenium.IsElementPresent("{0}:not(.sf-disabled)".Formato(EntityButtonLocator(idButton)));
+        }
+
+        public static bool EntityOperationDisabled(this ISelenium selenium, Enum operationKey)
+        {
+            return selenium.EntityButtonDisabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
+        public static bool EntityButtonDisabled(this ISelenium selenium, string idButton)
+        {
+            return selenium.IsElementPresent("{0}.sf-disabled".Formato(EntityButtonLocator(idButton)));
         }
 
         public static void EntityOperationClick(this ISelenium selenium, Enum operationKey)
@@ -234,7 +263,7 @@ namespace Signum.Web.Selenium
 
         public static void EntityButtonClick(this ISelenium selenium, string idButton)
         {
-            selenium.Click(EntityButtonLocator(idButton));
+            selenium.Click("{0}:not(.sf-disabled)".Formato(EntityButtonLocator(idButton)));
         }
 
         public static void EntityMenuConstructFromClick(this ISelenium selenium, Enum constructFromKey)

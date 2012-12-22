@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Authorization
 {

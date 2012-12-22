@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ChartScript GroupBy="Optional">
+  <Columns>
+    <Column DisplayName="Bubble" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Size" ColumnType="Magnitude">
+      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log" />
+    </Column>
+  </Columns>
+  <Icon FileName="bubblepack.png"><![CDATA[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]]></Icon>
+  <Script><![CDATA[function DrawChart(chart, data){
+
+  var color = d3.scale.category20c($.map(data.rows, function(v) { return v.c0; }));
+  
+  var format = d3.format(",d");
+  
+  var size = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 1);
+  
+  var bubble = d3.layout.pack()
+     .sort(null)
+     .size([width, height])
+     .padding(2)
+     .value(function(r){return size(r.c1);});
+  
+  var tree = {
+    children: data.rows
+  }  
+  
+  var node = chart.selectAll("g.node")
+      .data(bubble.nodes(tree).filter(function(d) { return !d.children; }))
+    .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  node.append("title")
+      .text(function(d) { return d.c0.niceToString() + ": " + d.c1.niceToString(); });
+
+  node.append("circle")
+      .attr('shape-rendering', 'initial')
+      .attr("r", function(d) { return d.r; })
+      .style("fill", function(d) { return d.c0.color || color(d.c0); })
+      .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
+      .append('svg:title')
+    .text(function(d) { return d.c0 + ': ' + d.c1;});
+
+  node.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", ".3em")
+      .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
+      .text(function(d) { return d.c0.niceToString().substring(0, d.r / 4); });
+  
+}]]></Script>
+</ChartScript>

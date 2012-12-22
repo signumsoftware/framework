@@ -14,7 +14,7 @@ using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.UserQueries
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class UserQueryDN : Entity
     {
         public UserQueryDN() { }
@@ -123,16 +123,22 @@ namespace Signum.Entities.UserQueries
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(description);
+                    f.ParseData(description, this);
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(description);
+                    c.ParseData(description, this);
 
             if (Orders != null)
                 foreach (var o in Orders)
-                    o.ParseData(description);
+                    o.ParseData(description, this);
         }
+    }
+
+    public enum UserQueryOperation
+    { 
+        Save, 
+        Delete
     }
 
     [Serializable]
@@ -149,16 +155,35 @@ namespace Signum.Entities.UserQueries
 
         [Ignore]
         protected QueryToken token;
-        [NotNullValidator]
+        [HiddenProperty]
         public QueryToken Token
+        {
+            get
+            {
+                if (parseException != null)
+                    throw parseException;
+                return token;
+            }
+            set { if (Set(ref token, value, () => Token)) TokenChanged(); }
+        }
+
+        public QueryToken TryToken
         {
             get { return token; }
             set { if (Set(ref token, value, () => Token)) TokenChanged(); }
         }
 
+        [Ignore]
+        protected Exception parseException;
+        [HiddenProperty]
+        public Exception ParseException
+        {
+            get { return parseException; }
+        }
+
         public virtual void TokenChanged()
         {
-
+            parseException = null;
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -166,17 +191,35 @@ namespace Signum.Entities.UserQueries
             tokenString = token.FullKey();
         }
 
-        public void ParseData(QueryDescription desc)
+        public virtual void ParseData(QueryDescription desc, IdentifiableEntity context)
         {
-            ParseData(t => QueryUtils.SubTokens(t, desc.Columns)); 
+            ParseData(t => QueryUtils.SubTokens(t, desc.Columns), context);
         }
 
-        public abstract void ParseData(Func<QueryToken, List<QueryToken>> subTokens);
+        public abstract void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context);
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Token) && parseException != null)
+            {
+                return parseException.Message;
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 
     [Serializable]
     public class QueryOrderDN : QueryTokenDN
     {
+        public QueryOrderDN() {}
+
+        public QueryOrderDN(string columnName, OrderType type)
+        {
+            this.TokenString = columnName;
+            orderType = type;
+        }
+
         int index;
         public int Index
         {
@@ -191,9 +234,16 @@ namespace Signum.Entities.UserQueries
             set { Set(ref orderType, value, () => OrderType); }
         }
 
-        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
+        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
         {
-            Token = QueryUtils.Parse(tokenString, subTokens);
+            try
+            {
+                Token = QueryUtils.Parse(tokenString, subTokens);
+            }
+            catch (Exception e)
+            {
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
+            }
             CleanSelfModified();
         }
 
@@ -204,10 +254,15 @@ namespace Signum.Entities.UserQueries
     {
         public QueryColumnDN(){}
 
+        public QueryColumnDN(string columnName)
+        {
+            this.TokenString = columnName;
+        }
+
         public QueryColumnDN(Column col)
         {
             Token = col.Token;
-            if(col.DisplayName != col.Token.NiceName())
+            if (col.DisplayName != col.Token.NiceName())
                 DisplayName = col.DisplayName;
         }
 
@@ -221,9 +276,16 @@ namespace Signum.Entities.UserQueries
         }
 
 
-        public override void ParseData(Func<QueryToken,List<QueryToken>> subTokens)
+        public override void ParseData(Func<QueryToken,List<QueryToken>> subTokens, IdentifiableEntity context)
         {
-            Token = QueryUtils.Parse(tokenString, subTokens);
+            try
+            {
+                Token = QueryUtils.Parse(tokenString, subTokens);
+            }
+            catch (Exception e)
+            {
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
+            }
             CleanSelfModified();
         }
     }
@@ -269,25 +331,35 @@ namespace Signum.Entities.UserQueries
             set { this.value = value; }
         }
 
-        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens)
+        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
         {
-            Token = QueryUtils.Parse(tokenString, subTokens);
-
-            if (value != null)
+            try
             {
-                if (valueString.HasText())
-                    throw new InvalidOperationException("Value and ValueString defined at the same time");
-
-                ValueString = FilterValueConverter.ToString(value, Token.Type);
+                Token = QueryUtils.Parse(tokenString, subTokens);
             }
-            else
+            catch (Exception e)
             {
-                object val;
-                string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
-                if (string.IsNullOrEmpty(error))
-                    Value = val; //Executed on server only
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
+            }
 
-                CleanSelfModified();
+            if (token != null)
+            {
+                if (value != null)
+                {
+                    if (valueString.HasText())
+                        throw new InvalidOperationException("Value and ValueString defined at the same time");
+
+                    ValueString = FilterValueConverter.ToString(value, Token.Type);
+                }
+                else
+                {
+                    object val;
+                    string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
+                    if (string.IsNullOrEmpty(error))
+                        Value = val; //Executed on server only
+
+                    CleanSelfModified();
+                }
             }
         }
 
@@ -295,11 +367,13 @@ namespace Signum.Entities.UserQueries
         {
             Notify(() => Operation);
             Notify(() => ValueString);
+
+            base.TokenChanged();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (Token != null)
+            if (token != null)
             {
                 FilterType filterType = QueryUtils.GetFilterType(Token.Type);
 

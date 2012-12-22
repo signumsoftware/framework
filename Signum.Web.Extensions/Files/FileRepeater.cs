@@ -36,17 +36,19 @@ namespace Signum.Web.Files
 
         public override string ToJS()
         {
-            return "new SF.FRep(" + this.OptionsJS() + ")";
+            return "$('#{0}').data('fileRepeater')".Formato(ControlID);
         }
 
         protected override string DefaultCreate()
         {
-            return FileRepeater.JsCreate(this, DefaultJsViewOptions()).ToJS();
+            return JsCreate(DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsCreate(FileRepeater frep, JsViewOptions viewOptions)
+        public new JsInstruction JsCreate(JsViewOptions viewOptions)
         {
-            return new JsInstruction(() => "{0}.create({1})".Formato(frep.ToJS(), viewOptions.TryCC(v => v.ToJS())));
+            return new JsInstruction(() => "{0}.create({1})".Formato(
+                this.ToJS(),
+                viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
     }
 }

@@ -61,7 +61,7 @@ namespace Signum.Web.Reports
 
             if (query.IsNew) //If the Query is new there won't be any reports associated => navigate directly to create one
             {
-                return Navigator.View(this, new ExcelReportDN { Query = query });
+                return Navigator.NormalPage(this, new ExcelReportDN { Query = query });
             }
             else
             {
@@ -84,35 +84,7 @@ namespace Signum.Web.Reports
         public ViewResult Create(Lite<QueryDN> query)
         {
             ExcelReportDN report = new ExcelReportDN { Query = query.Retrieve() };
-            return Navigator.View(this, report);
-        }
-
-        [HttpPost]
-        public ActionResult Save()
-        {
-            var context = this.ExtractEntity<ExcelReportDN>().ApplyChanges(ControllerContext, null, true).ValidateGlobal();
-
-            ExcelReportDN report = context.Value;
-
-            if (context.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(context);
-                // It's a submit, I cannot return ModelState
-                return Navigator.View(this, report);
-            }
-
-            Database.Save(report);
-
-            return Navigator.RedirectToEntity(report);
-        }
-        
-        [HttpPost]
-        public JsonResult Delete(Lite<ExcelReportDN> excelReport)
-        {
-            ExcelReportDN report = excelReport.Retrieve();
-            report.Deleted = true;
-            report.Save();
-            return JsonAction.Redirect(Navigator.ViewRoute(report));
+            return Navigator.NormalPage(this, report);
         }
 
         public ActionResult DownloadTemplate(Lite<ExcelReportDN> excelReport)

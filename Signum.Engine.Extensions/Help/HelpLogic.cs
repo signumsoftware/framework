@@ -8,7 +8,6 @@ using System.Reflection;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
@@ -24,6 +23,7 @@ using Signum.Utilities.Reflection;
 using System.Diagnostics;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
+using Signum.Entities.Basics;
 
 
 namespace Signum.Engine.Help
@@ -108,7 +108,7 @@ namespace Signum.Engine.Help
         
         public static string QueryUrl(Enum query)
         {
-            return HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType())
+            return HelpLogic.EntityUrl(GetQueryType(query))
                 + "#" + "q-" + QueryUtils.GetQueryUniqueKey(query).ToString().Replace(".", "_");
         }
 
@@ -222,7 +222,7 @@ namespace Signum.Engine.Help
 
         public static Type GetQueryType(object query)
         {
-            return DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType();
+            return DynamicQueryManager.Current[query].EntityColumn().Implementations.Value.Types.FirstEx();
         }
 
         private static List<FileXDocument> LoadDocuments(string subdirectory)
@@ -291,7 +291,7 @@ namespace Signum.Engine.Help
                 }
             }
 
-            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()).ToArray();
+            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
 
             foreach (Type type in types)
             {
@@ -317,7 +317,7 @@ namespace Signum.Engine.Help
                 Directory.CreateDirectory(HelpDirectory);
             }
 
-            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()).ToArray();
+            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
             var entitiesDocuments = LoadDocuments(EntitiesDirectory);
             var namespacesDocuments = LoadDocuments(NamespacesDirectory);
             var queriesDocuments = LoadDocuments(QueriesDirectory);

@@ -40,6 +40,12 @@ namespace Signum.Windows.Chart
 
         void UserChart_Loaded(object sender, RoutedEventArgs e)
         {
+            if (QueryDescription == null)
+            {
+                UserChartDN uq = (UserChartDN)DataContext;
+
+                QueryDescription = Navigator.Manager.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
+            }
             chartBuilder.Description = QueryDescription;
         }
 
@@ -49,7 +55,7 @@ namespace Signum.Windows.Chart
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
-            return cr.Chart.SubTokensFilters(token, QueryDescription.Columns);
+            return token.SubTokensChart(QueryDescription.Columns, cr.GroupResults);
         }
 
         private List<QueryToken> QueryTokenBuilderOrders_SubTokensEvent(QueryToken token)
@@ -58,7 +64,7 @@ namespace Signum.Windows.Chart
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
-            return cr.Chart.SubTokensOrders(token, QueryDescription.Columns);
+            return token.SubTokensChart(QueryDescription.Columns, cr.GroupResults);
         }
     }
 }

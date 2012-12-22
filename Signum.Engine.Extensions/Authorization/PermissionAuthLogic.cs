@@ -61,18 +61,29 @@ namespace Signum.Engine.Authorization
 
                 sb.Include<PermissionDN>();
 
-                EnumLogic<PermissionDN>.Start(sb, () => RegisteredPermission.ToHashSet());
+                MultiEnumLogic<PermissionDN>.Start(sb, () => RegisteredPermission.ToHashSet());
 
                 cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
-                    EnumLogic<PermissionDN>.ToEnum,
-                    EnumLogic<PermissionDN>.ToEntity,
+                    MultiEnumLogic<PermissionDN>.ToEnum,
+                    MultiEnumLogic<PermissionDN>.ToEntity,
                     AuthUtils.MaxBool,
                     AuthUtils.MinBool);
 
                 RegisterPermissions(BasicPermissions.AdminRules);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Permissions", "Permission", roles, EnumLogic<PermissionDN>.ToEntity, bool.Parse);
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
+                {
+                    string replacementKey = typeof(PermissionDN).Name;
+
+                    replacements.AskForReplacements(
+                        x.Element("Permissions").Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
+                        MultiEnumLogic<PermissionDN>.AllUniqueKeys().ToHashSet(),
+                        replacementKey);
+
+                    return cache.ImportXml(x, "Permissions", "Permission", roles,
+                        s => MultiEnumLogic<PermissionDN>.TryToEntity(replacements.Apply(replacementKey, s)), bool.Parse);
+                };
             }
         }
  
@@ -82,9 +93,17 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
+        public static string IsAuthorizedString(this Enum permissionKey)
+        {
+            if (!IsAuthorized(permissionKey))
+                return "Permission '{0}' is denied".Formato(permissionKey);
+
+            return null;
+        }
+
         public static bool IsAuthorized(this Enum permissionKey)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal || cache == null)
                 return true;
 
             return cache.GetAllowed(RoleDN.Current.ToLite(), permissionKey);
@@ -103,7 +122,7 @@ namespace Signum.Engine.Authorization
         public static PermissionRulePack GetPermissionRules(Lite<RoleDN> roleLite)
         {
             var result = new PermissionRulePack { Role = roleLite };
-            cache.GetRules(result, EnumLogic<PermissionDN>.AllEntities());
+            cache.GetRules(result, MultiEnumLogic<PermissionDN>.AllEntities());
             return result;
         }
 

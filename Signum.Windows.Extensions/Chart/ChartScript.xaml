@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="Signum.Windows.Chart.ChartScript"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:f="clr-namespace:Signum.Windows.Files"
+    xmlns:d="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
+    xmlns:swsh="clr-namespace:Signum.Windows.SyntaxHighlight"
+    xmlns:swc ="clr-namespace:Signum.Windows.Chart"
+    m:Common.TypeContext="d:ChartScriptDN"
+    MinWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <m:ValueLine m:Common.Route="Name" Grid.Row="0" />
+        <f:FileLine m:Common.Route="Icon" Grid.Row="1" />
+        <Border Margin="5" BorderBrush="Black"  Padding="2" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" HorizontalAlignment="Left">
+            <Image Source="{Binding Icon, Converter={x:Static swc:ChartScript.ImageConverter}}"  Stretch="None"  />
+        </Border>
+
+        <m:ValueLine m:Common.Route="GroupBy"  Grid.Row="2" Grid.ColumnSpan="2"/>
+
+        <m:EntityRepeater m:Common.Route="Columns" Grid.IsSharedSizeScope="true" Margin="4" MinHeight="100" Grid.Row="3" Grid.ColumnSpan="2">
+            <m:EntityRepeater.EntityTemplate>
+                <DataTemplate>
+                    <Grid HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="A"/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="B"/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="C"/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="D"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <m:ValueLine m:Common.Route="DisplayName" Grid.Column="0" />
+                        <m:ValueLine m:Common.Route="ColumnType" Grid.Column="1"/>
+                        <m:ValueLine m:Common.Route="IsGroupKey" Grid.Column="2"/>
+                        <m:ValueLine m:Common.Route="IsOptional" Grid.Column="3"/> 
+                        
+                        <m:EntityDetail m:Common.Route="Parameter1" Grid.Row="1" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
+                        <m:EntityDetail m:Common.Route="Parameter2" Grid.Row="2" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
+                        <m:EntityDetail m:Common.Route="Parameter3" Grid.Row="3" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </DataTemplate>
+            </m:EntityRepeater.EntityTemplate>
+        </m:EntityRepeater>
+
+        <m:ShyBorder Vertical="True" Horizontal="True"  MinHeight="300" MinWidth="300" Grid.Row="4" Grid.ColumnSpan="2" >
+            <swsh:SyntaxHighlightBox IsLineNumbersMarginVisible="True" x:Name="box"
+                                 Text="{Binding Script, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True,  NotifyOnValidationError=True}" />
+        </m:ShyBorder>
+    </Grid>
+</UserControl>

@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class DisconnectedMachineDN : Entity
     {
         DateTime creationDate = TimeZoneManager.Now;
@@ -27,11 +27,11 @@ namespace Signum.Entities.Disconnected
             set { Set(ref machineName, value, () => MachineName); }
         }
 
-        bool isOffline;
-        public bool IsOffline
+        DisconnectedMachineState state;
+        public DisconnectedMachineState State
         {
-            get { return isOffline; }
-            set { Set(ref isOffline, value, () => IsOffline); }
+            get { return state; }
+            set { Set(ref state, value, () => State); }
         }
 
         int seedMin;
@@ -63,10 +63,19 @@ namespace Signum.Entities.Disconnected
         }
     }
 
-    public enum DisconnectedMachineOperations
+    public enum DisconnectedMachineState
+    {
+        Connected,
+        Disconnected,
+        Faulted,
+        Fixed,
+    }
+
+    public enum DisconnectedMachineOperation
     {
         Save,
-        UnsafeUnlock 
+        UnsafeUnlock,
+        FixImport,
     }
 
     public interface IDisconnectedEntity : IIdentifiable

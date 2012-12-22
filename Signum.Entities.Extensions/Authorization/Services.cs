@@ -6,6 +6,7 @@ using System.ServiceModel;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.Basics;
 
 namespace Signum.Services
 {
@@ -44,7 +45,7 @@ namespace Signum.Services
         DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes();
 
         [OperationContract, NetDataContract]
-        bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed);
+        bool IsAllowedForInUserInterface(Lite<IIdentifiable> lite, TypeAllowedBasic allowed);
 
         [OperationContract, NetDataContract]
         byte[] DownloadAuthRules();
@@ -113,6 +114,6 @@ namespace Signum.Services
 
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<Enum, bool> OperationRules();
+        DefaultDictionary<Enum, OperationAllowed> OperationRules();
     }
 }

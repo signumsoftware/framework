@@ -6,6 +6,9 @@ using System.Windows.Automation;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Engine.Basics;
+using System.Windows;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -39,6 +42,16 @@ namespace Signum.Windows.UIAutomation
             SearchControl.Search();
         }
 
+        public void WaitSearch()
+        {
+            SearchControl.WaitSearch();
+        }
+
+        public NormalWindowProxy<T> Create<T>() where T : IdentifiableEntity
+        {
+            return SearchControl.Create<T>();
+        }
+
         public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
             return SearchControl.ViewElementAt<T>(index); 
@@ -63,6 +76,41 @@ namespace Signum.Windows.UIAutomation
         {
             OkButton.ButtonInvoke();
         }
+
+        public AutomationElement OkCapture(int? timeout = null)
+        {
+            return Element.CaptureWindow(
+                () => OkButton.ButtonInvoke(),
+                () => "Accept button on search window", timeout);
+        }
+
+        public static void Select(AutomationElement element, int index = 0)
+        {
+            using (var searchWindow = new SearchWindowProxy(element))
+            {
+                if (searchWindow.SearchControl.SearchButton.Current.IsEnabled == true)
+                    searchWindow.Search();
+                else
+                    searchWindow.WaitSearch();
+
+                searchWindow.SelectElementAt(index);
+                searchWindow.Ok();
+            }
+        }
+
+        public static AutomationElement SearchAndSelectWindow(AutomationElement element, int index = 0)
+        {
+            using (var searchWindow = new SearchWindowProxy(element))
+            {
+                if (searchWindow.SearchControl.SearchButton.Current.IsEnabled == true)
+                    searchWindow.Search();
+                else
+                    searchWindow.WaitSearch();
+
+                searchWindow.SelectElementAt(index);
+                return searchWindow.OkCapture();
+            }
+        }
     }
 
     public class SearchControlProxy
@@ -72,6 +120,10 @@ namespace Signum.Windows.UIAutomation
         public SearchControlProxy(AutomationElement element)
         {
             this.Element = element;
+            this.HeaderMap = new ResetLazy<Dictionary<string, int>>(() =>
+                HeaderItems
+                .Select((e, i) => KVP.Create(e.Current.ItemStatus, i))
+                .AgGroupToDictionary(a => a.Key, gr => gr.First().Value));
         }
 
         public void SelectToken(string token)
@@ -108,7 +160,7 @@ namespace Signum.Windows.UIAutomation
             if (filterLine == null)
                 throw new ElementNotAvailableException("Last FilterLine not found");
 
-            return new FilterOptionProxy(filterLine);
+            return new FilterOptionProxy(filterLine, this);
         }
 
         public AutomationElement FilterBuilderControl
@@ -121,17 +173,28 @@ namespace Signum.Windows.UIAutomation
             get{ return Element.ChildById("btFind");}
         }
 
+        public List<AutomationElement> HeaderItems
+        {
+            get 
+            {
+                return Element.Descendants(e => e.Current.ControlType == ControlType.HeaderItem);
+            }
+        
+        }
+
         public void Search()
         {
             SearchButton.ButtonInvoke();
-
             WaitSearch();
         }
 
-        private void WaitSearch()
+        public void WaitSearch()
         {
             Element.Wait(
-                () => SearchButton.Current.IsEnabled,
+                () =>{
+                        Element.AssertMessageBoxChild();
+                        return SearchButton.Current.IsEnabled;
+                     },
                 () => "Waiting after search on SearchControl {0}".Formato(Element.Current.ItemStatus));
         }
 
@@ -154,7 +217,7 @@ namespace Signum.Windows.UIAutomation
         {
             SelectToken(token);
 
-            var win = Element.GetModalWindowAfter(() => Element.ChildById("btCreateColumn").ButtonInvoke(),
+            var win = Element.CaptureChildWindow(() => Element.ChildById("btCreateColumn").ButtonInvoke(),
                 () => "Adding new column for {0} on SearchControl {1}".Formato(token, Element.Current.ItemStatus));
 
             using(WindowProxy wp = new WindowProxy(win))
@@ -166,10 +229,10 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public NormalWindowProxy<T> View<T>(int? timeOut = null) where T : IdentifiableEntity
+        public NormalWindowProxy<T> Navigate<T>(int? timeOut = null) where T : IdentifiableEntity
         {
-            var win = Element.GetWindowAfter(
-                () => Element.ChildById("btView").ButtonInvoke(),
+            var win = Element.CaptureWindow(
+                () => NavigateButton.ButtonInvoke(),
                 () => "View selected entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
 
             return new NormalWindowProxy<T>(win);
@@ -177,16 +240,28 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> Create<T>() where T:IdentifiableEntity
         {
-            return new NormalWindowProxy<T>(CreateBasic());
+            return new NormalWindowProxy<T>(CreateCapture());
         }
 
-        private AutomationElement CreateBasic(int? timeOut = null)
+        public AutomationElement CreateCapture(int? timeOut = null)
         {
-            var win = Element.GetWindowAfter(
-                () => Element.ChildById("btCreate").ButtonInvoke(),
+            var win = Element.CaptureWindow(
+                () => CreateButton.ButtonInvoke(),
                 () => "Create a new entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
+
             return win;
         }
+
+        public AutomationElement CreateButton
+        {
+            get{return Element.ChildById("btCreate");}
+        }
+
+        public AutomationElement NavigateButton
+        {
+            get { return Element.ChildById("btNavigate"); }
+        }
+
 
         public AutomationElement Menu
         {
@@ -220,21 +295,62 @@ namespace Signum.Windows.UIAutomation
             return Results.Children(c => c.Current.ControlType == ControlType.DataItem);
         }
 
+        public bool HasRows()
+        {
+            return Results.TryChild(c => c.Current.ControlType == ControlType.DataItem) != null;
+        }
+
         public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
             SelectElementAt(index);
 
-            return View<T>();
+            return Navigate<T>();
         }
 
+        ResetLazy<Dictionary<string, int>> HeaderMap;
+
         public void SelectElementAt(int index)
+        {
+            var row = ElementAtPrivate(index);
+            row.Pattern<SelectionItemPattern>().Select();
+        }
+
+        public class ListViewItemProxy
+        {
+            public ListViewItemProxy( AutomationElement element, SearchControlProxy sc)
+            {
+                this.Element = element;
+                this.SearchControl = sc; 
+                this.Columns = element.Children(a=>a.Current.ClassName =="ContentPresenter");
+            }
+
+            public SearchControlProxy SearchControl { get; private set; }
+
+            public AutomationElement Element { get; private set; }
+
+            public List<AutomationElement> Columns { get; private set; }
+
+            public AutomationElement Column(string tokenName)
+            {
+                return Columns[SearchControl.HeaderMap.Value.GetOrThrow(tokenName,
+                    tb => new KeyNotFoundException("{0} not found on query {1}".Formato(tb, SearchControl.Element.Current.ItemStatus)))];
+            }
+        }
+
+        AutomationElement ElementAtPrivate(int index)
         {
             var rows = GetRows();
 
             if (rows.Count <= index)
                 throw new IndexOutOfRangeException("Row with index {0} not found, only {1} results on SearchControl {2}".Formato(index, rows.Count, Element.Current.ItemStatus));
 
-            rows[index].Pattern<SelectionItemPattern>().Select();
+            var row = rows[index];
+            return row;
+        }
+
+        public ListViewItemProxy ElementAt(int index)
+        {
+            return new ListViewItemProxy(ElementAtPrivate(index), this);
         }
 
         public string GetNumResults()
@@ -249,7 +365,7 @@ namespace Signum.Windows.UIAutomation
 
         public PagerProxy Pager
         {
-            get { return new PagerProxy(Element.ChildById("pageSelector"), this); }
+            get { return new PagerProxy(Element.ChildById("pageSelector")); }
         }
 
         public int? ElementsPerPage
@@ -263,16 +379,70 @@ namespace Signum.Windows.UIAutomation
                 var item = value != null ? combo.Child(a => a.Current.Name == value.Value.ToString()) : combo.ChildrenAll().Last();
 
                 item.Pattern<SelectionItemPattern>().Select();
+
+                WaitSearch();
             }
         }
 
+        public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
+        {
+            var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
+
+            return Element.CaptureWindow(
+                () => GetOperationButton(operationKey).ButtonInvoke(),
+                () => "Finding a window after {0} from SearchControl {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), QueryName, time), timeOut);
+        }
+
+        public string QueryNameKey
+        {
+            get { return Element.Current.ItemStatus; }
+        }
+
+        public object QueryName
+        {
+            get { return QueryLogic.QueryNames[QueryNameKey]; }
+        }
+
+        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T : IdentifiableEntity
+        {
+            AutomationElement element = ConstructFrom(operationKey, timeOut);
+
+            return new NormalWindowProxy<T>(element);
+        }
+
+        public AutomationElement GetOperationButton(Enum operationKey)
+        {
+            return Element.Child(a => a.Current.ItemStatus == OperationDN.UniqueKey(operationKey));
+        }
+
+        public void ValidateHeadersItems()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var columnHeader in HeaderItems)
+	        {
+                try
+                {
+                    columnHeader.ButtonInvoke();
+                    WaitSearch();
+                }
+                catch (MessageBoxErrorException e)
+                {
+                    sb.AppendFormat("{0} ==> {1}\r\n", columnHeader.Current.ItemStatus, e.Message);
+                }
+	        }
+
+            if (sb.Length > 0)
+                throw new MessageBoxErrorException(sb.ToString());
+        
+        }
     }
 
     public class PagerProxy
     {
         public AutomationElement Element { get; private set; }
 
-        public PagerProxy(AutomationElement element, SearchControlProxy searchControl)
+        public PagerProxy(AutomationElement element)
         {
             this.Element = element;
         }
@@ -297,10 +467,12 @@ namespace Signum.Windows.UIAutomation
     public class FilterOptionProxy
     {
         public AutomationElement Element { get; private set; }
+        SearchControlProxy searchControl;
 
-        public FilterOptionProxy(AutomationElement element)
+        public FilterOptionProxy(AutomationElement element, SearchControlProxy searchControl)
         {
             this.Element = element;
+            this.searchControl = searchControl;
         }
 
         public void SetOperation(FilterOperation operation)
@@ -328,6 +500,23 @@ namespace Signum.Windows.UIAutomation
         public void Remove()
         {
             Element.ChildById("btRemove").ButtonInvoke();
+        }
+    }
+
+    public static class SearchControlExtensions
+    {
+        public static SearchControlProxy GetSearchControl(this AutomationElement element)
+        {
+            var sc = element.Descendant(a => a.Current.ClassName == "SearchControl");
+
+            return new SearchControlProxy(sc);
+        }
+
+        public static SearchControlProxy GetSearchControl(this AutomationElement element, object queryName)
+        {
+            var sc = element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.ItemStatus == QueryUtils.GetQueryUniqueKey(queryName));
+
+            return new SearchControlProxy(sc);
         }
     }
 }

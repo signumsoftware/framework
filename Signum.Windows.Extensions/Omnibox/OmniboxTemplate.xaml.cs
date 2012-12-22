@@ -15,6 +15,8 @@ using Signum.Entities.Omnibox;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Basics;
+using System.Windows.Automation;
+using System.Text.RegularExpressions;
 
 namespace Signum.Windows.Omnibox
 {
@@ -43,7 +45,61 @@ namespace Signum.Windows.Omnibox
             if (result == null)
                 return;
 
-            OmniboxClient.RenderLines.Invoke(result, lines);
+            if (result is HelpOmniboxResult)
+            {
+                var helpResult = result as HelpOmniboxResult;
+
+                lines.Add(new Italic(GetTextSpan(helpResult)));
+
+                if (helpResult.OmniboxResultType != null)
+                {
+                    lines.Add(" ");
+                    lines.Add(OmniboxClient.Providers.GetOrThrow(helpResult.OmniboxResultType).GetIcon());
+                }
+                AutomationProperties.SetItemStatus(this, "Help");
+            }
+            else
+            {
+                var provider = OmniboxClient.Providers.GetOrThrow(result.GetType());
+
+                provider.RenderLinesBase(result, lines);
+
+                lines.Add(" ");
+
+                lines.Add(provider.GetIcon());
+
+                AutomationProperties.SetItemStatus(this, provider.GetItemStatusBase(result));
+            }
+        }
+
+        private static Span GetTextSpan(HelpOmniboxResult helpResult)
+        {
+            var span = new Span();
+
+            for (int i = 0; i < helpResult.Text.Length; )
+            {
+                var start = helpResult.Text.IndexOf('(', i);
+                if (start == -1)
+                {
+                    span.Inlines.Add(helpResult.Text.Substring(i));
+                    break;
+                }
+
+                span.Inlines.Add(helpResult.Text.Substring(i, start - i));
+                start++;
+
+                var end = helpResult.Text.IndexOf(')', start);
+                if (end == -1)
+                {
+                    span.Inlines.Add(helpResult.Text.Substring(start));
+                    break;
+                }
+
+                span.Inlines.Add(new Bold(new Run(helpResult.Text.Substring(start, end - start ))));
+
+                i = end + 1;
+            }
+            return span;
         }
     }
 }

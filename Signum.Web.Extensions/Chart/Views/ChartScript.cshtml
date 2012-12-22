@@ -1,0 +1,28 @@
+﻿@using Signum.Entities.Chart
+@using Signum.Web.Files
+@using Signum.Engine
+@Html.ScriptCss(
+    "~/Chart/Content/SF_Chart.css")
+@using (var cc = Html.TypeContext<ChartScriptDN>())
+{
+    <div>
+        <div style="float: left">
+            @Html.ValueLine(cc, c => c.Name)
+            @Html.FileLine(cc, c => c.Icon.TryCC(i => i.Retrieve()), a => { a.LabelVisible = true; a.LabelText = Html.PropertyNiceName(() => cc.Value.Icon); })
+        </div>
+        @if (cc.Value.Icon != null && !cc.Value.Icon.IsNew)
+        {
+            <div style="float: left">
+                <img src="@Url.Action((FileController fc) => fc.Download(new RuntimeInfo(cc.Value.Icon).ToString()))" />
+            </div>
+        }
+        <div class="clearall" />
+    </div>
+ 
+    @Html.ValueLine(cc, c => c.GroupBy)
+    <div class="sf-chartscript-columns">
+        @Html.EntityRepeater(cc, c => c.Columns)
+    </div>
+    
+    @Html.Partial(Signum.Web.Chart.ChartClient.ChartScriptCodeView, cc)
+}

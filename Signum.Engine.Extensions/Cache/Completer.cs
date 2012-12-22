@@ -52,8 +52,6 @@ namespace Signum.Engine.Cache
         static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<IdentifiableEntity>(0, typeof(IdentifiableEntity))).GetGenericMethodDefinition();
         static MethodInfo miGetType = ReflectionTools.GetMethodInfo((IdentifiableEntity ie) => ie.GetType());
 
-        static MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
-
         private static Expression Clone(Expression origin, Field field, ParameterExpression retriever)
         {
             if (field is FieldValue || field is FieldEnum)
@@ -65,11 +63,7 @@ namespace Signum.Engine.Cache
 
                 if(((IFieldReference)field).IsLite)
                 {
-                    var ci = field.FieldType.GetConstructor(new []{typeof(Type), typeof(int), typeof(string)});
-                    Expression call = Expression.New(ci,
-                        Expression.Property(origin, "RuntimeType"),
-                        Expression.Property(origin, "Id"),
-                        Expression.Call(origin, miToString));
+                    Expression call = Expression.Call(origin,  field.FieldType.GetMethod("Clone"));
 
                     return Expression.Condition(Expression.Equal(origin, nullref), nullref,  call);
                 }

@@ -39,7 +39,7 @@
         internal static CodeExpression CodeSnippet(Expression expression, string[] importedNamespaces)
         {
             string str = expression.GenerateCSharpCode(importedNamespaces);
-            str = str.Indent(12).RemoveLeft(12);
+            str = str.Indent(12).RemoveStart(12);
             return new CodeSnippetExpression(str);
         }
     }

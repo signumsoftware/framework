@@ -3,9 +3,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
-    xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
+    xmlns:sce="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" x:Class="Signum.Windows.Chart.ChartBuilder"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    x:Class="Signum.Windows.Chart.ChartBuilder"
     mc:Ignorable="d" x:Name="me" m:Common.DelayedRoutes="True">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -14,25 +15,25 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid  Grid.Row="2">
+    <Grid Grid.Row="2">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <GroupBox Header="Type of Chart" Style="{DynamicResource EntityGroupBox}" Margin="2,0,2,2">
-            <ListBox x:Name="buttons" SelectedValue="{Binding ChartType}" SelectedValuePath="ChartType" ItemsSource="{x:Static dn:ChartUtils.ChartTypePosition}"  BorderThickness="0">
+        <GroupBox Header="Chart scripts" Style="{DynamicResource EntityGroupBox}" Margin="2,0,2,2">
+            <ListBox x:Name="buttons" SelectedValue="{Binding ChartScript}" ItemsSource="{Binding ChartScripts, ElementName=me}"  BorderThickness="0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border>
                             <Border.Background>
                                 <MultiBinding Converter="{x:Static c:ChartBuilder.ChartTypeBackground}">
-                                    <Binding Path="ChartResultType"/>
-                                    <Binding Path="DataContext.ChartResultType" ElementName="me"/>
+                                    <Binding Path=""/>
+                                    <Binding Path="DataContext" ElementName="me"/>
                                     <Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType={x:Type ListBoxItem}}" />
                                 </MultiBinding>
                             </Border.Background>
-                            <Image Source="{Binding ChartType, Converter={x:Static c:ChartBuilder.ChartTypeToImage}}" 
-                                       ToolTip="{Binding ChartType, Converter={x:Static m:Converters.EnumDescriptionConverter}}" Stretch="None" />
+                            <Image Source="{Binding Icon, Converter={x:Static c:ChartBuilder.ChartTypeToImage}}" 
+                                   ToolTip="{Binding Name}" Stretch="None" />
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -41,8 +42,6 @@
                     <Style TargetType="{x:Type ListBoxItem}">
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="Margin" Value="1" />
-                        <Setter Property="Grid.Row" Value="{Binding Row}" />
-                        <Setter Property="Grid.Column" Value="{Binding Column}" />
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="{x:Type ListBoxItem}">
@@ -62,21 +61,8 @@
 
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Grid IsItemsHost="True" >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                        </Grid>
+                        <WrapPanel IsItemsHost="True" MaxWidth="300" >
+                        </WrapPanel>
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
             </ListBox>
@@ -84,24 +70,15 @@
         </GroupBox>
 
         <GroupBox Grid.Column="1" Header="Chart Settings" Style="{DynamicResource EntityGroupBox}" Margin="0,0,2,2" Background="{DynamicResource BlueBackground}">
-            <StackPanel Grid.IsSharedSizeScope="True" Margin="5" HorizontalAlignment="Stretch">
-                <c:ChartToken x:Name="qtbDimension1"
-                        m:Common.Route="Dimension1"
-                        GroupResults="{Binding DataContext.GroupResults, ElementName=me}"
-                        Visibility="{Binding Converter={x:Static m:Converters.NullToVisibility}}"/>
-                <c:ChartToken x:Name="qtbDimension2"
-                        m:Common.Route="Dimension2"  
-                        GroupResults="{Binding DataContext.GroupResults, ElementName=me}"
-                        Visibility="{Binding Converter={x:Static m:Converters.NullToVisibility}}"/>
-                <c:ChartToken x:Name="qtbValue1"
-                        m:Common.Route="Value1"
-                        GroupResults="{Binding DataContext.GroupResults, ElementName=me}"
-                        Visibility="{Binding Converter={x:Static m:Converters.NullToVisibility}}"/>
-                <c:ChartToken x:Name="qtbValue2"
-                        m:Common.Route="Value2"  
-                        GroupResults="{Binding DataContext.GroupResults, ElementName=me}"
-                        Visibility="{Binding Converter={x:Static m:Converters.NullToVisibility}}"/>
-            </StackPanel>
+            <ItemsControl Grid.IsSharedSizeScope="True" HorizontalAlignment="Stretch" ItemsSource="{Binding Columns}" x:Name="columnsControl">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type sce:ChartColumnDN}">
+                    <c:ChartColumn
+                        m:Common.TypeContext="{m:ContinueRoute Columns/}"
+                        GroupResults="{Binding DataContext.GroupResults, ElementName=me}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </GroupBox>
 
     </Grid>

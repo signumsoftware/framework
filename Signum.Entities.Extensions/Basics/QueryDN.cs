@@ -10,16 +10,16 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.SystemString)]
     public class QueryDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string displayName;
+        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string DisplayName
+        public string Name
         {
-            get { return displayName; }
-            set { SetToStr(ref displayName, value, () => DisplayName); }
+            get { return name; }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -31,7 +31,7 @@ namespace Signum.Entities.Basics
             set { SetToStr(ref key, value, () => Key); }
         }
 
-        static readonly Expression<Func<QueryDN, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<QueryDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

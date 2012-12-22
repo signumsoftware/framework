@@ -7,11 +7,24 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Files
 {
-    public interface IFile
+    public interface IFile 
     {
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }
         string FullWebPath { get; }
+    }
+
+
+    [Serializable, ForceLocalization]
+    public class WebImage
+    {
+        public string FullWebPath;
+    }
+
+    [Serializable, ForceLocalization]
+    public class WebDownload
+    {
+        public string FullWebPath;
     }
 
     [Serializable]

@@ -8,5 +8,6 @@
 
 @using(var tc = Html.TypeContext<UserChartPartDN>())
 {
-    @Html.EntityLine(tc, pp => pp.UserChart, el => el.Create = false)
+    @Html.EntityLine(tc, ucp => ucp.UserChart, el => el.Create = false)
+    @Html.ValueLine(tc, ucp => ucp.OnlyData)
 }

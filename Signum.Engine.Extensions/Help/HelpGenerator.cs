@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
@@ -15,6 +14,8 @@ using System.Reflection;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using System.IO;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Help
 {
@@ -24,20 +25,22 @@ namespace Signum.Engine.Help
         {
             string validations = Validator.GetOrCreatePropertyPack(pr).Validators.CommaAnd(v => v.HelpMessage);
 
-            Implementations imp = Schema.Current.FindImplementations(pr); 
-
             if (validations.HasText())
                 validations = Resources.Should + validations;
 
             if (Reflector.IsIIdentifiable(pr.Type))
             {
-                return EntityProperty(pr, pr.Type, pr.Type.TypeLinks(imp)) + validations;
+                Implementations imp = Schema.Current.FindImplementations(pr); 
+
+                return EntityProperty(pr, pr.Type, imp.TypeLinks(pr.Type)) + validations;
             }
             else if (pr.Type.IsLite())
             {
                 Type cleanType = Lite.Extract(pr.Type);
 
-                return EntityProperty(pr, cleanType, cleanType.TypeLinks(imp)) + validations;
+                Implementations imp = Schema.Current.FindImplementations(pr); 
+
+                return EntityProperty(pr, cleanType, imp.TypeLinks(cleanType)) + validations;
             }
             else if (Reflector.IsEmbeddedEntity(pr.Type))
             {
@@ -49,11 +52,15 @@ namespace Signum.Engine.Help
 
                 if (elemType.IsIIdentifiable())
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), elemType.TypeLinks(imp)) + validations;
+                    Implementations imp = Schema.Current.FindImplementations(pr.Add("Item")); 
+
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
                 }
                 else if (elemType.IsLite())
-                {
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), Lite.Extract(elemType).TypeLinks(imp)) + validations;
+                {   
+                    Implementations imp = Schema.Current.FindImplementations(pr.Add("Item"));
+
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(Lite.Extract(elemType))) + validations;
                 }
                 else if (Reflector.IsEmbeddedEntity(elemType))
                 {
@@ -109,13 +116,12 @@ namespace Signum.Engine.Help
             return typeName.Add(" ", unit != null ? Resources.ExpressedIn + unit : null).Add(" ", orNull);
         }
 
-        static string TypeLinks(this Type type, Implementations implementations)
+        static string TypeLinks(this Implementations implementations, Type type)
         {
-            if (implementations == null)
-                return type.TypeLink();
             if (implementations.IsByAll)
                 return Resources.Any + " " + type.TypeLink();
-            return ((ImplementedByAttribute)implementations).ImplementedTypes.CommaOr(TypeLink);
+
+            return implementations.Types.CommaOr(TypeLink);
         }
 
         static string TypeLink(this Type type)
@@ -193,7 +199,7 @@ namespace Signum.Engine.Help
         {
             ColumnDescriptionFactory cdf = dynamicQuery.EntityColumn();
 
-            return Resources.QueryOf0.Formato(cdf.Type.CleanType().TypeLinks(cdf.Implementations));
+            return Resources.QueryOf0.Formato(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)));
         }
 
         internal static string GetQueryColumnHelp(ColumnDescriptionFactory kvp)
@@ -201,7 +207,9 @@ namespace Signum.Engine.Help
             string typeDesc = QueryColumnType(kvp);
 
             if (kvp.PropertyRoutes != null)
-                return Resources._0IsA1AndShowsTheProperty2.Formato(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.ToString(pr=>PropertyLink(pr), ", "));
+                return Resources._0IsA1AndShows2.Formato(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.CommaAnd(pr =>
+                    pr.PropertyRouteType == PropertyRouteType.Root ? TypeLink(pr.RootType) :
+                    Resources.TheProperty0.Formato(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent: pr))));
             else
                 return Resources._0IsACalculated1.Formato(kvp.DisplayName(), typeDesc);
         }
@@ -212,7 +220,7 @@ namespace Signum.Engine.Help
 
             if (Reflector.IsIIdentifiable(cleanType))
             {
-                return cleanType.TypeLinks(kvp.Implementations);
+                return kvp.Implementations.Value.TypeLinks(cleanType);
             }
             else if (Reflector.IsEmbeddedEntity(kvp.Type))
             {

@@ -111,10 +111,10 @@ SF.Profiler = (function () {
         labelsTop.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
         labelsBottom.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
 
-        $('g.entry').on('click', '.shape,.shape-before,.label', function (evt) {
+        $('g.entry').on('click', function (evt) {
             var $this = $(this);
             var url = $this.closest('.sf-profiler-chart').attr('data-detail-url');
-            url = url + (url.indexOf("?") >= 0 ? "&indices=" : "?indices=") + $this.closest('.entry').attr('data-full-index');
+            url = url + (url.indexOf("?") >= 0 ? "&indices=" : "?indices=") + $this.attr('data-full-index');
             if (evt.ctrlKey) {
                 window.open(url);
             }
@@ -196,10 +196,10 @@ SF.Profiler = (function () {
         labelsLeft.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
         labelsRight.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
 
-        $('g.entry').on('click', '.left-background,.label,.right-background,.shape', function (evt) {
+        $('g.entry').on('click', function (evt) {
             var $this = $(this);
             var url = $this.closest('.sf-profiler-chart').attr('data-detail-url');
-            url = url + (url.indexOf("?") >= 0 ? "&indices=" : "?indices=") + $this.closest('.entry').attr('data-full-index');
+            url = url + (url.indexOf("?") >= 0 ? "&indices=" : "?indices=") + $this.attr('data-full-index');
             if (evt.ctrlKey) {
                 window.open(url);
             }

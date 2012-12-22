@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
-using Signum.Entities.Exceptions;
 using System.Linq.Expressions;
 using System.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class DisconnectedExportDN : IdentifiableEntity
     {
         DateTime creationDate = TimeZoneManager.Now;
@@ -59,6 +59,7 @@ namespace Signum.Entities.Disconnected
             set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
         }
 
+        [NotNullable]
         MList<DisconnectedExportTableDN> copies = new MList<DisconnectedExportTableDN>();
         public MList<DisconnectedExportTableDN> Copies
         {
@@ -198,6 +199,31 @@ namespace Signum.Entities.Disconnected
         {
             return CalculateTotalExpression.Evaluate(this);
         }
+
+        internal DisconnectedExportDN Clone()
+        {
+            return new DisconnectedExportDN
+            {
+                Machine = machine,
+                Lock = Lock,
+                CreateDatabase = CreateDatabase,
+                DisableForeignKeys = DisableForeignKeys,
+                Copies = Copies.Select(c=>new DisconnectedExportTableDN
+                {
+                    Type = c.Type,
+                    CopyTable = c.CopyTable,
+                    MaxIdInRange = c.MaxIdInRange,
+                    Errors = c.Errors,
+                }).ToMList(),
+                EnableForeignKeys = EnableForeignKeys,
+                ReseedIds = ReseedIds,
+                BackupDatabase = BackupDatabase,
+                DropDatabase = DropDatabase,
+                Total = Total,
+                State = State,
+                Exception = Exception
+            };
+        }
     }
 
     public enum DisconnectedExportState
@@ -224,6 +250,13 @@ namespace Signum.Entities.Disconnected
         {
             get { return copyTable; }
             set { Set(ref copyTable, value, () => CopyTable); }
+        }
+
+        int? maxIdInRange;
+        public int? MaxIdInRange
+        {
+            get { return maxIdInRange; }
+            set { Set(ref maxIdInRange, value, () => MaxIdInRange); }
         }
 
         [SqlDbType(Size = int.MaxValue)]

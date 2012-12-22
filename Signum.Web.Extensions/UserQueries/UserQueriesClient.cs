@@ -20,6 +20,8 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
+using Signum.Web.Operations;
+using Signum.Web.Basic;
 
 namespace Signum.Web.UserQueries
 {
@@ -33,6 +35,8 @@ namespace Signum.Web.UserQueries
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                QueryClient.Start();
+
                 Navigator.RegisterArea(typeof(UserQueriesClient));
 
                 RouteTable.Routes.MapRoute(null, "UQ/{webQueryName}/{lite}",
@@ -54,65 +58,48 @@ namespace Signum.Web.UserQueries
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserQueryDN>(EntityType.AdminNotSaving) { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
+                    new EntitySettings<UserQueryDN> { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
                     
-                    new EmbeddedEntitySettings<QueryFilterDN>()
+                    new EmbeddedEntitySettings<QueryFilterDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryFilter"), 
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
                             .CreateProperty(a=>a.Operation)
                             .CreateProperty(a=>a.ValueString)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.TryToken, qtMapping)
                     },
 
-                    new EmbeddedEntitySettings<QueryColumnDN>()
+                    new EmbeddedEntitySettings<QueryColumnDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
                             .CreateProperty(a=>a.DisplayName)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.TryToken, qtMapping)
                     },
 
-                    new EmbeddedEntitySettings<QueryOrderDN>()
+                    new EmbeddedEntitySettings<QueryOrderDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)
                             .CreateProperty(a=>a.OrderType)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.TryToken, qtMapping)
                     },
                 });
-                
-
-                if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
-                    Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
-                ButtonBarEntityHelper.RegisterEntityButtons<UserQueryDN>((ctx, entity) =>
+                OperationsClient.AddSettings(new List<OperationSettings>
                 {
-                    var buttons = new List<ToolBarButton>
+                    new EntityOperationSettings(UserQueryOperation.Save)
                     {
-                        new ToolBarButton 
-                        { 
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebUserQuerySave"),
-                            Text = Signum.Web.Properties.Resources.Save, 
-                            OnClick = JsValidator.EntityIsValid(ctx.Prefix, 
-                                Js.Submit(RouteHelper.New().Action<UserQueriesController>(uqc => uqc.Save()))).ToJS()
-                        }
-                    };
-
-                    if (!entity.IsNew)
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("Save", "UserQueries"))
+                            .ajax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                    },
+                    new EntityOperationSettings(UserQueryOperation.Delete)
                     {
-                        buttons.Add(new ToolBarButton
-                        {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebUserQueryDelete"),
-                            Text = Resources.Delete,
-                            OnClick = Js.Confirm(Resources.AreYouSureOfDeletingQuery0.Formato(entity.DisplayName), 
-                                                Js.Submit(RouteHelper.New().Action<UserQueriesController>(uqc => uqc.Delete(entity.ToLite())))).ToJS()
-                        });
+                        OnClick = ctx => new JsOperationDelete(ctx.Options("Delete", "UserQueries"))
+                            .confirmAndAjax(ctx.Entity)
                     }
-
-                    return buttons.ToArray();
                 });
             }
         }
@@ -122,8 +109,7 @@ namespace Signum.Web.UserQueries
             if (ctx.Prefix.HasText())
                 return null;
 
-
-            if (!Navigator.IsViewable(typeof(UserQueryDN), EntitySettingsContext.Admin))
+            if (!Navigator.IsNavigable(typeof(UserQueryDN), isSearchEntity: true))
                 return null;
 
             var items = new List<ToolBarButton>();
@@ -131,7 +117,7 @@ namespace Signum.Web.UserQueries
             Lite<UserQueryDN> currentUserQuery = null;
             string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                currentUserQuery = new Lite<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
+                currentUserQuery = Lite.Create<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName))
             {
@@ -147,7 +133,7 @@ namespace Signum.Web.UserQueries
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
-            if (Navigator.IsCreable(typeof(UserQueryDN), EntitySettingsContext.Admin))
+            if (Navigator.IsCreable(typeof(UserQueryDN), isSearchEntity:true))
             {
                 string uqNewText = Resources.UserQueries_CreateNew;
                 items.Add(new ToolBarButton
@@ -155,12 +141,12 @@ namespace Signum.Web.UserQueries
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), new JsFindNavigator(ctx.Prefix).requestData()).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), JsFindNavigator.GetFor(ctx.Prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }
 
-            if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
+            if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string uqEditText = Resources.UserQueries_Edit;
                 items.Add(new ToolBarButton
@@ -168,7 +154,7 @@ namespace Signum.Web.UserQueries
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
                     AltText = uqEditText,
                     Text = uqEditText,
-                    Href = Navigator.ViewRoute(currentUserQuery),
+                    Href = Navigator.NavigateRoute(currentUserQuery),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }
@@ -203,6 +189,7 @@ namespace Signum.Web.UserQueries
             findOptions.ColumnOptions.Clear();
             findOptions.ColumnOptions.AddRange(userQuery.Columns.Select(qc => new ColumnOption
             {
+                Token = qc.Token,
                 ColumnName = qc.TokenString,                
                 DisplayName = qc.DisplayName,
             }));

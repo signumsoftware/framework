@@ -29,15 +29,10 @@ namespace Signum.Web.Files
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (fileLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (sb.Surround(new HtmlTag("div").Id(fileLine.ControlID).Class("sf-field")))
             using (fileLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 sb.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/SF_Files.css") }).ToHtmlSelf());
-
-                sb.AddLine(new HtmlTag("script")
-                    .Attr("type", "text/javascript")
-                    .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
-                    .ToHtml());
 
                 if (value != null)
                     sb.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
@@ -83,7 +78,6 @@ namespace Signum.Web.Files
                 var divNew = new HtmlTag("div", fileLine.Compose("DivNew"))
                     .Class("sf-file-line-new")
                     .Attr("style", "display:" + (hasEntity ? "none" : "block"))
-                    .Attr("data-drop-url", RouteHelper.New().Action<FileController>(fc => fc.UploadDropped()))
                     .Attr("data-parent-prefix", filesParentPrefix.HasText() ? filesParentPrefix : "");
 
                 using (sb.Surround(divNew))
@@ -97,14 +91,14 @@ namespace Signum.Web.Files
                         if (filePath != null)
                         {
                             sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
-                                EnumDN.UniqueKey(filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
+                                MultiEnumDN.UniqueKey(filePath.FileTypeEnum ?? MultiEnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
                         }
                         else
                         {
                             if (fileLine.FileType == null)
                                 throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
 
-                            sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), EnumDN.UniqueKey(fileLine.FileType)));
+                            sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), MultiEnumDN.UniqueKey(fileLine.FileType)));
                         }
                     }
 
@@ -115,7 +109,7 @@ namespace Signum.Web.Files
 
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
-                        sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID)));
+                        sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.GetOnChanged(), fileLine.Compose(FileLineKeys.File))));
                         sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
                         
                         if (fileLine.ValueFirst)
@@ -124,8 +118,25 @@ namespace Signum.Web.Files
                 }
 
                 if (fileLine.ShowValidationMessage)
-                    sb.AddLine(helper.ValidationMessage(fileLine.ControlID));
+                    sb.AddLine(helper.ValidationMessage(fileLine.Compose(FileLineKeys.File)));
             }
+
+            sb.AddLine(helper.RegisterUrls(new Dictionary<string,string>
+            {
+                { "uploadFile", RouteHelper.New().Action<FileController>(fc => fc.Upload()) },
+                { "uploadDroppedFile", RouteHelper.New().Action<FileController>(fc => fc.UploadDropped()) },
+                { "downloadFile", RouteHelper.New().Action("Download", "File") },
+            }));            
+
+            sb.AddLine(new HtmlTag("script")
+                .Attr("type", "text/javascript")
+                .InnerHtml(MvcHtmlString.Create("$(function(){ " +
+                    "SF.Loader.loadJs('{0}', function(){{ $('#{1}').fileLine({2}); }});".Formato(
+                        RouteHelper.New().Content("~/Files/Scripts/SF_Files.js"),
+                        fileLine.ControlID,
+                        fileLine.OptionsJS()) +
+                    "});"))
+                .ToHtml());
 
             return sb.ToHtml();
         }
@@ -143,6 +154,8 @@ namespace Signum.Web.Files
 
             FileLine fl = new FileLine(context.Type, context.UntypedValue, context, "", context.PropertyRoute);
 
+            EntityBaseHelper.ConfigureEntityBase(fl, fl.Type.CleanType());
+
             Common.FireCommonTasks(fl);
 
             if (settingsModifier != null)
@@ -159,7 +172,7 @@ namespace Signum.Web.Files
             if (fp.FileTypeEnum != null)
                 return fp.FileTypeEnum;
             else if (fp.FileType != null)
-                return EnumLogic<FileTypeDN>.ToEnum(fp.FileType);
+                return MultiEnumLogic<FileTypeDN>.ToEnum(fp.FileType);
 
             return null;
         }

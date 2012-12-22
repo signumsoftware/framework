@@ -112,15 +112,15 @@ namespace Signum.Entities.Chart
             return Parent.GetPropertyRoute(); 
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return null;
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             if (AggregateFunction == Chart.AggregateFunction.Count)
-                return true;
+                return null;
 
             return Parent.IsAllowed();
         }
@@ -148,5 +148,14 @@ namespace Signum.Entities.Chart
 
             return null;
         }
+    }
+
+    public enum AggregateFunction
+    {
+        Count,
+        Average,
+        Sum,
+        Min,
+        Max,
     }
 }

@@ -17,7 +17,7 @@ namespace Signum.Entities.Chart
         static Dictionary<string, object> queries;
         public ChartOmniboxResultGenerator(IEnumerable<object> queryNames)
         {
-            queries = queryNames.ToDictionary(OmniboxParser.Manager.CleanQueryName);
+            queries = queryNames.ToDictionary(QueryUtils.GetCleanName);
         }
 
         public string Keyword = "Chart";
@@ -47,7 +47,7 @@ namespace Signum.Entities.Chart
 
                 bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-                foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase))
+                foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
                 {
                     var queryName = match.Value;
                     if (OmniboxParser.Manager.AllowedQuery(queryName))
@@ -56,6 +56,19 @@ namespace Signum.Entities.Chart
                     }
                 }
             }
+        }
+
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(ChartOmniboxResult);
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult 
+                { 
+                    Text = "Chart {0}".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_Query), 
+                    OmniboxResultType = resultType 
+                }
+            };
         }
     }
 
@@ -71,7 +84,7 @@ namespace Signum.Entities.Chart
             if (QueryName == null)
                 return KeywordMatch.Value.ToString();
 
-            return "{0} {1}".Formato(KeywordMatch.Value, OmniboxParser.Manager.CleanQueryName(QueryName));
+            return "{0} {1}".Formato(KeywordMatch.Value, QueryUtils.GetCleanName(QueryName));
         }
     }
 }

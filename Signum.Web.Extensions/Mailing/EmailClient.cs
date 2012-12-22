@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Entities;
 using System.Web;
@@ -33,22 +32,22 @@ namespace Signum.Web.Mailing
                 Navigator.RegisterArea(typeof(MailingClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
-                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
-                    new EntitySettings<EmailTemplateDN>(EntityType.ServerOnly),
+                    new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
+                    new EntitySettings<EmailPackageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
+                    new EntitySettings<EmailTemplateDN>(),
                 });
 
                 if (smtpConfig)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMTPConfigurationDN>(EntityType.Admin) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
+                    new EntitySettings<SMTPConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
                 });
 
                 if (newsletter)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<NewsletterDN>(EntityType.AdminNotSaving) { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
-                    new EntitySettings<NewsletterDeliveryDN>(EntityType.ServerOnly) { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
+                    new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
+                    new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                 });
             }
         }

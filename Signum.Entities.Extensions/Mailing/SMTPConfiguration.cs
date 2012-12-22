@@ -8,12 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
-    public enum SMTPConfigurationQueries
-    { 
-        NoCredentialsData
-    }
-
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class SMTPConfigurationDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -67,6 +62,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref enableSSL, value, () => EnableSSL); }
         }
 
+        [NotNullable]
         MList<ClientCertificationFileDN> clientCertificationFiles = new MList<ClientCertificationFileDN>();
         public MList<ClientCertificationFileDN> ClientCertificationFiles
         {
@@ -81,7 +77,17 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    [Serializable]
+    public enum SMTPConfigurationQueries
+    {
+        NoCredentialsData
+    }
+
+    public enum SMTPConfigurationOperation
+    {
+        Save
+    }
+
+    [Serializable, EntityType(EntityType.System)]
     public class ClientCertificationFileDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

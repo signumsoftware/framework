@@ -13,7 +13,6 @@ using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
-using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Engine.Extensions.Properties;
 using System.Net;
@@ -24,7 +23,6 @@ using System.Web;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Linq.Expressions;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Mailing
@@ -108,6 +106,13 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
+
+                new BasicExecute<EmailTemplateDN>(EmailTemplateOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (et, _) => { },
+                }.Register();
             }
         }
 
@@ -131,21 +136,22 @@ namespace Signum.Engine.Mailing
             Dictionary<string, EmailTemplateDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
             Dictionary<string, EmailTemplateDN> old = Administrator.TryRetrieveAll<EmailTemplateDN>(replacements).ToDictionary(c => c.FullClassName);
 
-            replacements.AskForReplacements(old, should, EmailTemplates);
+            replacements.AskForReplacements(
+                old.Keys.ToHashSet(), 
+                should.Keys.ToHashSet(), EmailTemplates);
 
-            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacements(old, EmailTemplates);
+            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacementsToOld(old, EmailTemplates);
 
-            return Synchronizer.SynchronizeScript(
-                current,
-                should,
-                (tn, c) => table.DeleteSqlSync(c),
-                (tn, s) => table.InsertSqlSync(s),
-                (tn, c, s) =>
+            return Synchronizer.SynchronizeScript(should, current, 
+                (tn, s) => table.InsertSqlSync(s), 
+                (tn, c) => table.DeleteSqlSync(c), 
+                (tn, s, c) =>
                 {
                     c.FullClassName = s.FullClassName;
                     c.FriendlyName = s.FriendlyName;
                     return table.UpdateSqlSync(c);
-                }, Spacing.Double);
+                }, 
+                Spacing.Double);
         }
 
         static SqlPreCommand Schema_Generating()
@@ -167,32 +173,6 @@ namespace Signum.Engine.Mailing
             return lista;
         }
         #endregion
-
-        public static void StarProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                sb.Include<EmailPackageDN>();
-
-                ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(EmailProcesses.SendEmails, new SendEmailProcessAlgorithm());
-
-                new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
-                {
-                    Construct = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
-                }.Register();
-
-                dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
-                                               select new
-                                               {
-                                                   Entity = e,
-                                                   e.Id,
-                                                   e.Name,
-                                                   e.NumLines,
-                                                   e.NumErrors,
-                                               }).ToDynamic();
-            }
-        }
 
         public static void RegisterTemplate<T>(Func<T, EmailContent> template)
             where T : IEmailModel
@@ -226,7 +206,7 @@ namespace Signum.Engine.Mailing
 
                 var result = new EmailMessageDN
                 {
-                    State = EmailState.Created,
+                    State = EmailMessageState.Created,
                     Recipient = model.To.ToLite(),
                     Bcc = model.Bcc,
                     Cc = model.Cc,
@@ -260,14 +240,14 @@ namespace Signum.Engine.Mailing
                     client.Send(message);
                 }
 
-                emailMessage.State = EmailState.Sent;
+                emailMessage.State = EmailMessageState.Sent;
                 emailMessage.Sent = TimeZoneManager.Now;
                 emailMessage.Received = null;
                 emailMessage.Save();
             }
             catch (Exception e)
             {
-                if (Transaction.AvoidIndependentTransactions)
+                if (Transaction.InTestTransaction)
                     throw; 
 
                 var exLog = e.LogException().ToLite();
@@ -275,7 +255,7 @@ namespace Signum.Engine.Mailing
                 using (Transaction tr = Transaction.ForceNew())
                 {
                     emailMessage.Exception = exLog;
-                    emailMessage.State = EmailState.SentError;
+                    emailMessage.State = EmailMessageState.Exception;
                     emailMessage.Save();
                     tr.Commit();
                 }
@@ -323,25 +303,51 @@ namespace Signum.Engine.Mailing
                 if (message != null)
                 {
                     SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder(emailMessage);
-                    client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
 
                     emailMessage.Sent = null;
                     emailMessage.Received = null;
                     emailMessage.Save();
 
-                    client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
+                    client.SafeSendMailAsync(message, args =>
+                    {
+                        Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
+                        if (args.Error != null)
+                        {
+                            var exLog = args.Error.LogException().ToLite();
+                            updater = em => new EmailMessageDN
+                            {
+                                Exception = exLog,
+                                State = EmailMessageState.Exception
+                            };
+                        }
+                        else
+                            updater = em => new EmailMessageDN
+                            {
+                                State = EmailMessageState.Sent,
+                                Sent = TimeZoneManager.Now
+                            };
+
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (emailMessage.InDB().UnsafeUpdate(updater) > 0)
+                                return;
+
+                            if (i != 3)
+                                Thread.Sleep(3000);
+                        }
+                    }); 
                 }
                 else
                 {
                     emailMessage.Received = null;
-                    emailMessage.State = EmailState.Sent;
+                    emailMessage.State = EmailMessageState.Sent;
                     emailMessage.Sent = TimeZoneManager.Now;
                     emailMessage.Save();
                 }
             }
             catch (Exception ex)
             {
-                if (Transaction.AvoidIndependentTransactions)
+                if (Transaction.InTestTransaction)
                     throw; 
 
                 var exLog = ex.LogException().ToLite();
@@ -349,7 +355,7 @@ namespace Signum.Engine.Mailing
                 using (var tr = Transaction.ForceNew())
                 {
                     emailMessage.Sent = TimeZoneManager.Now;
-                    emailMessage.State = EmailState.SentError;
+                    emailMessage.State = EmailMessageState.Exception;
                     emailMessage.Exception = exLog;
                     emailMessage.Save();
                     tr.Commit();
@@ -357,37 +363,25 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
+        public static void SafeSendMailAsync(this SmtpClient client, MailMessage message, Action<AsyncCompletedEventArgs> onComplete)
         {
-            EmailUser emailUser = (EmailUser)e.UserState;
-            using (AuthLogic.UserSession(emailUser.User))
+            client.SendCompleted += (object sender, AsyncCompletedEventArgs e) =>
             {
-                Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
-                if (e.Error != null)
+                client.Dispose();
+                message.Dispose();
+                using (AuthLogic.Disable())
                 {
-                    var exLog = e.Error.LogException().ToLite();
-                    updater = em => new EmailMessageDN
+                    try
                     {
-                        Exception = exLog,
-                        State = EmailState.SentError
-                    };
+                        onComplete(e);
                 }
-                else
-                    updater = em => new EmailMessageDN
+                    catch (Exception ex)
                     {
-                        State = EmailState.Sent,
-                        Sent = TimeZoneManager.Now
-                    };
-
-                for (int i = 0; i < 4; i++)
-                {
-                    if (emailUser.EmailMessage.InDB().UnsafeUpdate(updater) > 0)
-                        return;
-
-                    if (i != 3)
-                        Thread.Sleep(3000);
+                        ex.LogException();
                 }
             }
+            };
+            client.SendAsync(message, null);
         }
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
@@ -415,16 +409,15 @@ namespace Signum.Engine.Mailing
         public static ProcessExecutionDN SendAll<T>(List<T> emails)
             where T : IEmailModel
         {
-            EmailPackageDN package = new EmailPackageDN
+            EmailPackageDN emailPackage = new EmailPackageDN
             {
-                NumLines = emails.Count
             }.Save();
 
-            var packLite = package.ToLite();
+            var packLite = emailPackage.ToLite();
 
             emails.Select(e => CreateEmailMessage(e, packLite)).SaveList();
 
-            var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
+            var process = ProcessLogic.Create(EmailMessageProcesses.SendEmails, emailPackage);
 
             process.Execute(ProcessOperation.Execute);
 
@@ -442,22 +435,21 @@ namespace Signum.Engine.Mailing
 
             EmailPackageDN package = new EmailPackageDN
             {
-                NumLines = recipientList.Count,
             }.Save();
 
             var lite = package.ToLite();
 
             recipientList.Select(to => new EmailMessageDN
             {
-                State = EmailState.Created,
-                Recipient = to.ToLite<IEmailOwnerDN>(),
+                State = EmailMessageState.Created,
+                Recipient = to.ToLite(),
                 Template = template,
                 Subject = content.Subject,
                 Body = content.Body,
                 Package = lite
             }).SaveList();
 
-            var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
+            var process = ProcessLogic.Create(EmailMessageProcesses.SendEmails, package);
 
             process.Execute(ProcessOperation.Execute);
 

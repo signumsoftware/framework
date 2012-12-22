@@ -1,0 +1,29 @@
+﻿@using System.Configuration
+@using Signum.Web.Properties
+@using Signum.Entities.ControlPanel
+@using Signum.Web.ControlPanel
+@model PanelPart
+           
+@{ 
+    string prefix = "r{0}c{1}".Formato(Model.Row, Model.Column);
+    ControlPanelClient.PartViews config = ControlPanelClient.PanelPartViews[Model.Content.GetType()];
+}
+<div class="ui-widget ui-widget-content ui-corner-all sf-ftbl-part">
+    <div class="ui-widget-header ui-corner-all sf-ftbl-part-header">
+        @Model.ToString()
+        @Html.TextBox(prefix + "Title", Model.Title, new { style = "display:none" })
+        @if (config.FullScreenLink)
+        {
+            <a id="@TypeContextUtilities.Compose(prefix, "sfFullScreen")" class="sf-ftbl-header-fullscreen">
+                <span class="ui-icon ui-icon-extlink">fullscreen</span>
+            </a>
+        }
+    </div>
+    <div>
+        @{ Html.RenderPartial(config.FrontEnd, Model); }
+    </div>
+    <div>
+        @Html.Hidden(prefix + "Row", Model.Row, new { @class = "sf-ftbl-part-row" })
+        @Html.Hidden(prefix + "Column", Model.Column, new { @class = "sf-ftbl-part-col" })
+    </div>
+</div>

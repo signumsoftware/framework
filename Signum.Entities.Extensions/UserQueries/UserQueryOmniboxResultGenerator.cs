@@ -21,7 +21,7 @@ namespace Signum.Entities.UserQueries
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var userQueries = OmniboxParser.Manager.AutoComplete(typeof(UserQueryDN), null, ident, AutoCompleteLimit);
+            var userQueries = OmniboxParser.Manager.AutoComplete(typeof(UserQueryDN), ident, AutoCompleteLimit);
 
             foreach (var uq in userQueries)
             {
@@ -37,6 +37,15 @@ namespace Signum.Entities.UserQueries
             }
         }
 
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(UserQueryOmniboxResult);
+            var userQuery = Signum.Entities.Extensions.Properties.Resources.Omnibox_UserQuery;
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult { Text = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }
+            };
+        }
     }
 
     public class UserQueryOmniboxResult : OmniboxResult

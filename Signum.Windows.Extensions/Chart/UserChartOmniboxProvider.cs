@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
 using Signum.Entities.DynamicQuery;
+using System.Windows;
 
 namespace Signum.Windows.Chart
 {
@@ -24,24 +25,33 @@ namespace Signum.Windows.Chart
         public override void RenderLines(UserChartOmniboxResult result, InlineCollection lines)
         {
             lines.AddMatch(result.ToStrMatch);
-
-            lines.Add(new Run(" ({0})".Formato(typeof(UserChartDN).NiceName())) { Foreground = Brushes.DarkViolet });
         }
 
-        public override void OnSelected(UserChartOmniboxResult result)
+        public override Run GetIcon()
         {
-            UserChartDN uc = result.UserChart.RetrieveAndForget();
+            return new Run("({0})".Formato(typeof(UserChartDN).NiceName())) { Foreground = Brushes.DarkViolet };
+        }
 
-            var query = QueryClient.queryNames[uc.Query.Key];
+        public override void OnSelected(UserChartOmniboxResult result, Window window)
+        {
+            UserChartDN uq = result.UserChart.RetrieveAndForget();
 
-            ChartWindow window = new ChartWindow()
+            var query = QueryClient.queryNames[uq.Query.Key];
+
+            using (UserChartMenuItem.AutoSet(uq))
             {
-                DataContext = new ChartRequest(query)
-            };
+                ChartRequestWindow cw = new ChartRequestWindow()
+                {
+                    DataContext = new ChartRequest(query)
+                };
 
-            ChartClient.SetUserChart(window, uc);
+                cw.Show();
+            }
+        }
 
-            window.Show();
+        public override string GetItemStatus(UserChartOmniboxResult result)
+        {
+            return "UC:" + result.UserChart.Key();
         }
     }
 }

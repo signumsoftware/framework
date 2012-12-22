@@ -1,0 +1,102 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+@using Signum.Engine.Authorization;
+@using Signum.Entities.Authorization;
+@helper ColorLink(Type type)
+    {
+        var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
+        
+    @Html.Field(Signum.Entities.Extensions.Properties.Resources.ColorsFor0.Formato(type.NiceName()),
+                 Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? Resources.ViewPalette : Resources.CreatePalette,
+                          (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType))));
+}
+@using (var tc = Html.TypeContext<ChartColumnDN>())
+{
+    if (tc.Value == null)
+    {
+        tc.Value = new ChartColumnDN();
+    }
+    
+    <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnDN>)tc.Parent).Index)">
+        <td>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional ? "?" : ""))
+        </td>
+        <td>
+            @if (tc.Value.GroupByVisible)
+            {
+                var groupCheck = new HtmlTag("input")
+                    .IdName(tc.Compose("group"))
+                    .Attr("type", "checkbox")
+                    .Attr("value", "True")
+                    .Class("sf-chart-group-trigger");
+
+                if (!tc.Value.GroupByEnabled)
+                {
+                    groupCheck.Attr("disabled", "disabled");
+                }
+
+                bool groupResults = tc.Value.GroupByChecked;
+                if (groupResults)
+                {
+                    groupCheck.Attr("checked", "checked");
+                }
+                @groupCheck.ToHtmlSelf()
+                @Html.Hidden(tc.Compose("group"), groupResults)
+            }
+        </td>
+        <td>
+            <div class="sf-query-token">
+                @Html.ChartTokenBuilder(tc.Value, tc.Value.ParentChart, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], tc)
+            </div>
+            <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
+        </td>
+    </tr>
+    
+   
+    
+    <tr class="sf-chart-token-config" style="display: none">
+        <td>
+        </td>
+        <td colspan="2">
+            @using (Html.FieldInline())
+            { 
+                @Html.ValueLine(tc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange")
+                @Html.ValueLine(tc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter1))
+                @Html.ValueLine(tc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter2))
+                @Html.ValueLine(tc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter3))
+                if (tc.Value.TryToken!= null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
+                {
+                    var type = tc.Value.Token.Type.CleanType();
+
+                    if (type.IsEnum)
+                    {
+                @ColorLink(type);
+                    }
+                    else
+                    {
+                        var imp = tc.Value.Token.GetImplementations();
+
+                        if (imp != null && !imp.Value.IsByAll)
+                        {
+                            foreach (var item in imp.Value.Types.Iterate())
+                            {
+                                if (!item.IsFirst)
+                                {
+                <text> | </text>
+                                }
+                                
+                @ColorLink(item.Value);
+                            }
+                        }
+                    }
+                }
+            }
+        </td>
+    </tr>
+}

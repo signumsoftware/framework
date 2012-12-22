@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ChartScript GroupBy="Always">
+  <Columns>
+    <Column DisplayName="Bars" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Width" ColumnType="Positionable">
+      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
+    </Column>
+  </Columns>
+  <Icon FileName="bars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAlxJREFUeNrsmL8vBEEUx2f2VEqdRCSikmhEoUJodAo9nU4n8V+IQqsRhX9ASDSU/AMKkWj9BxJm3vN+zNzO3XG3zhwb2bnMzdvZ2Z3PfN/b2Ze1iGjqXApT89IAZgHc3j/DRsH/CjgWjYfjSSwI13Jny+rJljGtIZcwPrVqJjbObTbA6eWDShcguGB4+gNqXGlDsBHM6/NFXgUrgxEIQyBw6z6xnQBmd/GXYDyZTJiCQQLD4Kg2JPaoAUuw/u5MwXj8ryhY2Z0MkoLGxYwKsBMMSzUGuRMTt2eE6wBUOAUb7E7T9UAE92aG61KwjztZKf/WqWbizlGA9QA+3hxlvfHM/FpewMX9F2tqWJpkoQGsTbq1tXeaJau2lqs1RUGVWhvbjr5C2tWlWbOzuWArAa6vLAzOaOQdjbKXA6DxZHhPlfZL77U6sdE476nSOad9wH20bwJtnUD75jtdf3v3xIB50i15WdAPBI4g+DWcAJVw1IYa+0AWoZUXyIvjwgvLkg+KYgwHqqAPEwpEql4EA2wf+wgoYGDS7wQ85keAGODErcDqlXBRHYbgiZ1LAQM0X8PnMSyu6/4/UjCFkwkQNKaSmONjR0EV40yVTGKSwwA1LHrxjIwdLh9EvR20VQOxe+LNlSqmDwgrKtdy24cBhlEQ5WfVPTxhCGoPpQshqkdPqj6xwa0QFwNB+f6TfysGMUgHaMWdGj/BXQwHumV40O1DYk7G6DGEMRGuykczgG+4+PL6/lfeDFY2bW03VuaqA16d7Dbp1v9OFur0Ce7scLsdbrb5Rt0A/nH5EGAAuxjsP4eQmj4AAAAASUVORK5CYII=]]></Icon>
+  <Script><![CDATA[function DrawChart(chart, data){
+
+   var xRule = rule({
+    _1 : 5,
+    title : 15,
+    _2 : 10, 
+    ticks: 4,
+    content: '*',
+    _4: 5,
+  }, width);
+  //xRule.debugX(chart)
+  
+  var yRule = rule({
+    _1 : 5,
+    content: '*',
+    ticks: 4,
+    _2 : 5,
+    labels: 10,
+    _3 : 10,
+    title: 15,
+    _4 : 5,
+  }, height);
+  //yRule.debugY(chart);
+  
+
+  var x = scaleFor(data.columns.c1, data.rows.map(function (e) { return e.c1; }), 0, xRule.size('content'));
+  
+  var y = d3.scale.ordinal()
+      .domain($.map(data.rows, function (e) { return e.c0; }))
+      .rangeBands([0, yRule.size('content')]);
+
+  var xTicks = x.ticks(width / 50);
+  var xTickFormat = x.tickFormat(width / 50);
+  
+  chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+    .enterData(xTicks, 'line', 'y-lines')
+    .attr('x1', function(t) { return x(t); })
+    .attr('x2', function(t) { return x(t); })
+    .attr('y1', yRule.size('content'))
+  	.style('stroke', 'LightGray');
+  
+  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content'), yRule.start('ticks')))
+    .enterData(xTicks, 'line', 'x-tick')
+    .attr('x1', x)
+    .attr('x2', x)
+    .attr('y2', yRule.size('ticks'))
+    .style('stroke', 'Black');
+  
+  chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('labels')))
+    .enterData(xTicks, 'text', 'x-label')
+    .attr('x', x)
+    .attr('text-anchor', 'middle')
+    .text(xTickFormat);
+  
+  chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
+    .append('svg:text').attr('class', 'x-title')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+  	.text(data.columns.c1.title);
+
+
+  chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
+	.enterData(data.rows, 'line', 'y-tick')
+	.attr('x2', xRule.size('ticks'))
+	.attr('y1', function (v) { return -y(v.c0); })
+	.attr('y2', function (v) { return -y(v.c0); })
+  	.style('stroke', 'Black');
+
+  chart.append('svg:g').attr('class', 'y-title').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
+    .append('svg:text').attr('class', 'y-title')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .text(data.columns.c0.title);
+
+  var color = d3.scale.category20().domain($.map(data.rows, function (v) { return v.c0; }));
+  //PAINT GRAPH
+  chart.append('svg:g').attr('class', 'shape').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+	.enterData(data.rows, 'rect', 'shape')
+	.attr('width', function (v) { return x(v.c1); })
+	.attr('height', y.rangeBand)
+	.attr('y', function (v) { return y(v.c0); })
+	.attr('fill', function (v) { return v.c0.color || color(v.c0); })
+	.attr('stroke', '#fff')
+	.attr('data-click', function (v) { return getClickKeys(v, data.columns); })
+	.append('svg:title')
+	.text(function (d) { return d.c0.niceToString() + ': ' + d.c1.niceToString(); });
+
+  if (y.rangeBand() > 15) 
+  {
+    var xHalf = xRule.size('content') / 2;
+    var labelMargin = 10;
+    chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.start('content') + labelMargin, yRule.start('content') + y.rangeBand() / 2))
+      .enterData(data.rows, 'text', 'y-label')
+      .attr('x', function (v) { var posx = x(v.c1); return posx >= xHalf ? 0 : posx; })
+      .attr('y', function (v) { return y(v.c0); })
+      .attr('fill', function (v) { return x(v.c1) >= xHalf ? '#fff' : (v.c0.color || color(v.c0)); })
+      .attr('dominant-baseline', 'middle')
+      .attr('font-weight', 'bold')
+      .text(function (v) { return v.c0.niceToString(); });
+  }
+  
+
+  chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
+     .append('svg:line')
+     .attr('class', 'x-axis')
+     .attr('x2', xRule.size('content'))
+     .style('stroke', 'Black');
+  
+  chart.append('svg:g').attr('class', 'y-axis').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+    .append('svg:line')
+    .attr('class', 'y-axis')
+    .attr('y2', yRule.size('content'))
+    .style('stroke', 'Black');
+}
+]]></Script>
+</ChartScript>

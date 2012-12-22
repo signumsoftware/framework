@@ -41,7 +41,7 @@ namespace Signum.Windows.Files
         {
             if (DataContext == null)
             {
-                MessageBox.Show("FilePathDn is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Window.GetWindow(this), "FilePath is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
             Process.Start(((FilePathDN)DataContext).FullPhysicalPath);
@@ -51,7 +51,7 @@ namespace Signum.Windows.Files
         {
             if (DataContext == null)
             {
-                MessageBox.Show("FilePathDn is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(Window.GetWindow(this), "FilePath is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
             System.Diagnostics.Process.Start(((FilePathDN)DataContext).FullWebPath);
@@ -59,7 +59,8 @@ namespace Signum.Windows.Files
 
         #region IHaveToolBarElements Members
 
-        public List<FrameworkElement> GetToolBarElements(object dataContext, ViewButtons buttons)
+
+        public List<FrameworkElement> GetToolBarElements(object dataContext, ButtonBarEventArgs ctx)
         {
             ToolBarButton button = new ToolBarButton()
             {
@@ -74,7 +75,7 @@ namespace Signum.Windows.Files
 
         private FilePathDN Fp
         {
-            get { return (FilePathDN)DataContext; }        
+            get { return (FilePathDN)DataContext; }
         }
 
         private byte[] file = null;
@@ -85,7 +86,7 @@ namespace Signum.Windows.Files
         }
 
         public static void OpenFile(FilePathDN fp, byte[] file)
-        { 
+        {
             if (fp == null || fp.IsNew)
                 return;
 
@@ -103,7 +104,7 @@ namespace Signum.Windows.Files
                 loop++;
             } while (File.Exists(fullPath));
             File.WriteAllBytes(fullPath, file);
-            Process.Start(fullPath);        
+            Process.Start(fullPath);
         }
 
         #endregion

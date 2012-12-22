@@ -12,6 +12,11 @@ using Signum.Windows.Authorization;
 using System.Windows;
 using Signum.Utilities;
 using Signum.Windows.Properties;
+using Microsoft.Win32;
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Controls;
+using System.Windows;
 
 namespace Signum.Windows.Chart
 {
@@ -20,6 +25,7 @@ namespace Signum.Windows.Chart
         public static readonly DependencyProperty UserChartProperty =
             DependencyProperty.RegisterAttached("UserChart", typeof(UserChartDN), typeof(ChartClient), new UIPropertyMetadata(null));
         public static UserChartDN GetUserChart(DependencyObject obj)
+        public static void Start()
         {
             return (UserChartDN)obj.GetValue(UserChartProperty);
         }
@@ -28,18 +34,31 @@ namespace Signum.Windows.Chart
             obj.SetValue(UserChartProperty, value);
         }
 
-        static Func<ChartRendererBase> RendererConstructor; 
-
-        public static void Start(Func<ChartRendererBase> rendererConstructor)
         {
-            if(Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (rendererConstructor == null)
-                    throw new ArgumentNullException("rendererConstructor"); 
-
-                RendererConstructor = rendererConstructor; 
-
                 QueryClient.Start();
+
+                Navigator.AddSettings(new List<EntitySettings>()
+                {
+                    new EntitySettings<UserChartDN> { View = e => new UserChart() },
+                    new EntitySettings<ChartScriptDN> { View = e => new ChartScript() },
+                    new EmbeddedEntitySettings<ChartScriptParameterDN> { View = (e,p) => new ChartScriptParameter(p) }
+                });
+
+                SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
+
+                UserChartDN.SetConverters(query => QueryClient.GetQueryName(query.Key), queryname => QueryClient.GetQuery(queryname));
+
+                string processName = Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName);
+
+                var main = Registry.CurrentUser
+                    .OpenSubKey("Software")
+                    .OpenSubKey("Microsoft")
+                    .OpenSubKey("Internet Explorer")
+                    .OpenSubKey("Main", true)
+                    .CreateSubKey("FeatureControl")
+                    .CreateSubKey("FEATURE_BROWSER_EMULATION");
                 
                 Navigator.AddSetting(new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart(), IsCreable = a => a });
                 Constructor.Register<UserChartDN>(win =>
@@ -52,49 +71,38 @@ namespace Signum.Windows.Chart
                 }); 
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
 
-                UserChartDN.SetConverters(query => QueryClient.GetQueryName(query.Key), queryname => QueryClient.GetQuery(queryname));
+                ChartUtils.RemoveNotNullValidators();
             }
         }
 
-        static SearchControlMenuItem SearchControl_GetCustomMenuItems(object queryName, Type entityType)
-        {
-            if (ChartPermissions.ViewCharting.IsAuthorized())
-                return new ChartMenuItem();
 
-            return null; 
-        }
-
-        internal static ChartRendererBase GetChartRenderer()
+        static MenuItem SearchControl_GetCustomMenuItems(SearchControl sc)
         {
-            return RendererConstructor(); 
-        }
-    }
+            if (!ChartPermissions.ViewCharting.IsAuthorized())
+                return null;
 
-    internal class ChartMenuItem : SearchControlMenuItem
-    {
-        public ChartMenuItem()
-        {
-        }
-
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
-            Header = Signum.Windows.Extensions.Properties.Resources.Chart;
-            Icon = ExtensionsImageLoader.GetImageSortName("charts/chartIcon.png").ToSmallImage();
-        }
-
-        protected override void OnClick()
-        {
-            ChartWindow window = new ChartWindow()
+            var miResult = new MenuItem
             {
-                FilterOptions = this.SearchControl.FilterOptions,
-                DataContext = new ChartRequest(this.SearchControl.QueryName)
-                {
-                    Filters = this.SearchControl.FilterOptions.Select(fo=>fo.ToFilter()).ToList(),
-                }
+
+                Header = Signum.Windows.Extensions.Properties.Resources.Chart,
+                Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png").ToSmallImage()
             };
 
-            window.Show(); 
+            miResult.Click += delegate
+            {
+                ChartRequestWindow window = new ChartRequestWindow()
+                {
+                    FilterOptions = sc.FilterOptions,
+                    DataContext = new ChartRequest(sc.QueryName)
+                    {
+                        Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
+                    }
+                };
+
+                window.Show();
+            };
+
+            return miResult;
         }
     }
 }

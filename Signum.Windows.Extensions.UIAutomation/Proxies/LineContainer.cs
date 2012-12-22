@@ -13,11 +13,11 @@ namespace Signum.Windows.UIAutomation
     {
         public PropertyRoute PreviousRoute { get; set; }
         public AutomationElement Element { get; set;  }
+        public WindowProxy ParentWindow { get; set; }
     }
 
     public interface ILineContainer<T> : ILineContainer where T : ModifiableEntity
     {
-
     }
 
     public interface ILineContainer
@@ -28,9 +28,14 @@ namespace Signum.Windows.UIAutomation
 
     public static class LineContainerExtensions
     {
+        //public static bool IsVisible(this ILineContainer container, PropertyRoute route)
+        //{
+        //    return container.Element.Descendant(a => a.Current.ItemStatus == route.ToString()) != null;
+        //}
+
         public static ValueLineProxy ValueLine(this ILineContainer container, PropertyRoute route)
         {
-            var valueLine = container.Element.Descendant(a => a.Current.ClassName == "ValueLine" && a.Current.ItemStatus == route.ToString());
+            var valueLine = container.Element.Descendant(a =>( a.Current.ClassName == "ValueLine"  ||  a.Current.ClassName == "TextArea") && a.Current.ItemStatus == route.ToString());
 
             return new ValueLineProxy(valueLine, route);
         }
@@ -89,6 +94,11 @@ namespace Signum.Windows.UIAutomation
             return new LineContainer<C> { Element = subContainer, PreviousRoute = typeof(C).IsEmbeddedEntity() ? route : null };
         }
 
+        //public static bool ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        //{
+        //    return container.Element.Descendant(a => a.Current.ItemStatus == route.ToString()) != null;
+        //}
+
         public static ValueLineProxy ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
@@ -129,6 +139,15 @@ namespace Signum.Windows.UIAutomation
             PropertyRoute route = container.GetRoute(property);
 
             return container.EntityDetail(route);
+        }
+
+        public static ILineContainer<S> EntityDetailControl<T, S>(this ILineContainer<T> container, Expression<Func<T, S>> property)
+            where T : ModifiableEntity
+            where S : ModifiableEntity
+        {
+            PropertyRoute route = container.GetRoute(property);
+
+            return container.EntityDetail(route).GetDetailControl().ToLineContainer<S>();
         }
 
         public static EntityListProxy EntityList<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity

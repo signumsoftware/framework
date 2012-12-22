@@ -3,13 +3,14 @@
 @using Signum.Web
 @using Signum.Web.Chart
 @using Signum.Entities.Chart
+@using Signum.Entities.DynamicQuery
 @using (var e = Html.TypeContext<QueryFilterDN>())
 {
     using (var style = e.SubContext())
     {
         style.OnlyValue = true;
         <div style="float: left">
-            @Html.ChartTokenCombo(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value.Chart, ViewData[ViewDataKeys.QueryName], e)
+            @Html.ChartTokenBuilder(e.Value, ((TypeContext<UserChartDN>)e.Parent.Parent).Value, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], e)
         </div>
         @Html.ValueLine(style, f => f.Operation)
         @Html.ValueLine(style, f => f.ValueString, vl => vl.ValueHtmlProps["size"] = 20)

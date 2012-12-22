@@ -5,10 +5,11 @@ using System.Text;
 using Signum.Utilities;
 using System.Reflection;
 using System.Linq.Expressions;
+using System.ServiceModel;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.SystemString)]
     public class FacadeMethodDN : IdentifiableEntity
     {
         private FacadeMethodDN() { }
@@ -16,7 +17,8 @@ namespace Signum.Entities.Basics
         public FacadeMethodDN(MethodInfo mi)
         {
             InterfaceName = mi.DeclaringType.Name;
-            MethodName = mi.Name;
+            var oca = mi.SingleAttribute<OperationContractAttribute>();
+            MethodName = oca.Name ?? mi.Name;
         }
 
         [NotNullable, SqlDbType(Size = 100)]

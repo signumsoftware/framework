@@ -16,7 +16,7 @@ namespace Signum.Web.Omnibox
 {
     public static class OmniboxClient
     {
-        public static Polymorphic<Func<OmniboxResult, MvcHtmlString>> RenderHtml = new Polymorphic<Func<OmniboxResult, MvcHtmlString>>();
+        static Dictionary<Type, OmniboxProviderBase> Providers = new Dictionary<Type, OmniboxProviderBase>();
 
         public static void Start()
         {
@@ -31,7 +31,28 @@ namespace Signum.Web.Omnibox
         public static void Register<T>(this OmniboxProvider<T> provider) where T : OmniboxResult
         {
             OmniboxParser.Generators.Add(provider.CreateGenerator());
-            RenderHtml.Register(new Func<T, MvcHtmlString>(provider.RenderHtml));
+            Providers[typeof(T)] = provider;
+        }
+
+        public static MvcHtmlString Render(OmniboxResult result)
+        {
+            var helpResult = result as HelpOmniboxResult;
+            if (helpResult != null)
+            {
+                var innerHtml = MvcHtmlString.Create(helpResult.Text.Replace("(", "<b>").Replace(")", "</b>"));
+                
+                if (helpResult.OmniboxResultType != null)
+                {
+                    var icon = Providers[helpResult.OmniboxResultType].Icon();
+                    innerHtml = innerHtml.Concat(icon);
+                }
+
+                return new HtmlTag("span").InnerHtml(innerHtml)
+                    .Attr("style", "color: gray; font-style: italic; padding: .2em .4em; line-height: 1.6em;")
+                    .ToHtml();
+            }
+            else
+                return Providers[result.GetType()].RenderHtmlBase(result);
         }
 
         public static MvcHtmlString ToHtml(this OmniboxMatch match)
@@ -46,14 +67,28 @@ namespace Signum.Web.Omnibox
             return html;
         }
 
-        public abstract class OmniboxProvider<T> where T : OmniboxResult
+        public abstract class OmniboxProviderBase
+        {
+            public abstract MvcHtmlString Icon();
+
+            public abstract MvcHtmlString RenderHtmlBase(OmniboxResult result);
+            
+            public MvcHtmlString ColoredSpan(string text, string colorName)
+            { 
+                return new HtmlTag("span")
+                    .InnerHtml(new MvcHtmlString(text))
+                    .Attr("style", "color:{0}; padding: .2em .4em; line-height: 1.6em;".Formato(colorName)).ToHtml(); 
+            }
+        }
+
+        public abstract class OmniboxProvider<T>: OmniboxProviderBase where T : OmniboxResult
         {
             public abstract OmniboxResultGenerator<T> CreateGenerator();
             public abstract MvcHtmlString RenderHtml(T result);
-
-            public MvcHtmlString ColoredSpan(string text, string colorName)
-            { 
-                return new HtmlTag("span").InnerHtml(new MvcHtmlString(text)).Attr("style", "color:{0}".Formato(colorName)).ToHtml(); 
+            
+            public override MvcHtmlString RenderHtmlBase(OmniboxResult result)
+            {
+                return RenderHtml((T)result);
             }
         }
 
@@ -61,10 +96,10 @@ namespace Signum.Web.Omnibox
         {
             public override bool AllowedType(Type type)
             {
-                return Navigator.IsViewable(type, EntitySettingsContext.Admin);
+                return Navigator.IsNavigable(type, true);
             }
 
-            public override Lite RetrieveLite(Type type, int id)
+            public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
             {
                 if (!Database.Exists(type, id))
                     return null;
@@ -81,12 +116,12 @@ namespace Signum.Web.Omnibox
                 return DynamicQueryManager.Current.QueryDescription(queryName);
             }
 
-            public override List<Lite> AutoComplete(Type cleanType, Implementations implementations, string subString, int count)
+            public override List<Lite<IdentifiableEntity>> AutoComplete(Implementations implementations, string subString, int count)
             {
                 if (string.IsNullOrEmpty(subString))
-                    return new List<Lite>();
+                    return new List<Lite<IdentifiableEntity>>();
 
-                return AutoCompleteUtils.FindLiteLike(cleanType, implementations, subString, 5);
+                return AutoCompleteUtils.FindLiteLike(implementations, subString, 5);
             }
         }
     }

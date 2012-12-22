@@ -19,7 +19,7 @@ namespace Signum.Entities.Omnibox
 
         public DynamicQueryOmniboxResultGenerator(IEnumerable<object> queryNames)
         {
-            queries = queryNames.ToDictionary(OmniboxParser.Manager.CleanQueryName);
+            queries = queryNames.ToDictionary(QueryUtils.GetCleanName);
         }
 
 
@@ -35,7 +35,7 @@ namespace Signum.Entities.Omnibox
             }).ToList();
         }
          
-        Regex regex = new Regex(@"^I(?<filter>(?<token>I(\.I)*)(\.|((?<op>=)(?<val>(I;N)|[NSI])?))?)*$", RegexOptions.ExplicitCapture);
+        Regex regex = new Regex(@"^I(?<filter>(?<token>I(\.I)*)(\.|((?<op>=)(?<val>[ENSI])?))?)*$", RegexOptions.ExplicitCapture);
        
         public override IEnumerable<DynamicQueryOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {   
@@ -50,7 +50,7 @@ namespace Signum.Entities.Omnibox
 
             List<FilterSyntax> syntaxSequence = null;
 
-            foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase))
+            foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
             {
                 var queryName = match.Value;
                 if (OmniboxParser.Manager.AllowedQuery(queryName))
@@ -210,14 +210,14 @@ namespace Signum.Entities.Omnibox
             var ft = QueryUtils.GetFilterType(queryToken.Type);
             switch (ft)
             {
-                case FilterType.Number:
-                case FilterType.DecimalNumber: return new[] { new ValueTuple { Value = 0, Match = null } };
+                case FilterType.Integer:
+                case FilterType.Decimal: return new[] { new ValueTuple { Value = Activator.CreateInstance(queryToken.Type.UnNullify()), Match = null } };
                 case FilterType.String: return new[] { new ValueTuple { Value = "", Match = null } };
                 case FilterType.DateTime: return new[] { new ValueTuple { Value = DateTime.Today, Match = null } };
                 case FilterType.Lite:
                 case FilterType.Embedded: break;
                 case FilterType.Boolean: return new[] { new ValueTuple { Value = true, Match = null }, new ValueTuple { Value = false, Match = null } };
-                case FilterType.Enum: return EnumProxy.GetValues(queryToken.Type.UnNullify()).Select(e => new ValueTuple { Value = e, Match = null }).ToArray();
+                case FilterType.Enum: return EnumEntity.GetValues(queryToken.Type.UnNullify()).Select(e => new ValueTuple { Value = e, Match = null }).ToArray();
                 case FilterType.Guid: break;
             }
 
@@ -234,8 +234,8 @@ namespace Signum.Entities.Omnibox
             var ft = QueryUtils.GetFilterType(queryToken.Type);
             switch (ft)
             {
-                case FilterType.Number:
-                case FilterType.DecimalNumber:
+                case FilterType.Integer:
+                case FilterType.Decimal:
                     if (omniboxToken.Type == OmniboxTokenType.Number)
                     {
                         object result;
@@ -261,24 +261,27 @@ namespace Signum.Entities.Omnibox
                     {
                         var patten = OmniboxUtils.CleanCommas(omniboxToken.Value);
 
-                        var result = OmniboxParser.Manager.AutoComplete(queryToken.Type.CleanType(), queryToken.Implementations(), patten, AutoCompleteLimit);
+                        var result = OmniboxParser.Manager.AutoComplete(queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
 
                         return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();  
+                    }
+                    else if (omniboxToken.Type == OmniboxTokenType.Entity)
+                    {
+                        Lite<IdentifiableEntity> lite;
+                        var error = Lite.TryParseLite(omniboxToken.Value, out lite);
+                        if(string.IsNullOrEmpty(error))
+                            return new []{new ValueTuple { Value = lite }}; 
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Number)
                     {
                         int id;
                         if (int.TryParse(omniboxToken.Value, out id))
                         {
-                            var imp = queryToken.Implementations();
-
-                            if(imp == null)
-                                return new []{ new ValueTuple { Value = CreateLite(queryToken.Type.CleanType(), id), Match = null}};
+                            var imp = queryToken.GetImplementations().Value;
 
                             if (!imp.IsByAll)
                             {
-                                return ((ImplementedByAttribute)imp).ImplementedTypes.Select(t=>
-                                    new ValueTuple { Value =  CreateLite(t, id) }).ToArray();
+                                return imp.Types.Select(t =>new ValueTuple { Value = CreateLite(t, id) }).ToArray();
                             }
                         }
                     }break;
@@ -294,7 +297,7 @@ namespace Signum.Entities.Omnibox
                     {
                         string value = omniboxToken.Type == OmniboxTokenType.Identifier ? omniboxToken.Value : OmniboxUtils.CleanCommas(omniboxToken.Value);
                         bool isPascalValue = OmniboxUtils.IsPascalCasePattern(value);
-                        var dic = EnumProxy.GetValues(queryToken.Type.UnNullify()).ToDictionary(a => a.ToString(), a => (object)a);
+                        var dic = EnumEntity.GetValues(queryToken.Type.UnNullify()).ToDictionary(a => a.ToString(), a => (object)a);
 
                         var result = OmniboxUtils.Matches(dic, e => ((Enum)e).NiceToString(), value, isPascalValue)
                             .Select(m => new ValueTuple { Value = m.Value, Match = m })
@@ -318,9 +321,9 @@ namespace Signum.Entities.Omnibox
             return new[] { new ValueTuple { Value = UnknownValue, Match = null } };
         }
 
-        Lite CreateLite(Type type, int id)
+        Lite<IdentifiableEntity> CreateLite(Type type, int id)
         {
-            return Lite.Create(type, id, type, "{0} {1}".Formato(type.NiceName(), id));
+            return Lite.Create(type, id, "{0} {1}".Formato(type.NiceName(), id));
         }
 
         bool? ParseBool(string val)
@@ -416,12 +419,12 @@ namespace Signum.Entities.Omnibox
 
             switch (QueryUtils.GetFilterType(p.GetType()))
             {
-                case FilterType.Number:
-                case FilterType.DecimalNumber: return p.ToString();
+                case FilterType.Integer:
+                case FilterType.Decimal: return p.ToString();
 
                 case FilterType.String: return "\"" + p.ToString() + "\"";
                 case FilterType.DateTime: return "'" + p.ToString() + "'";
-                case FilterType.Lite: return ((Lite)p).Key();
+                case FilterType.Lite: return ((Lite<IdentifiableEntity>)p).Key();
                 case FilterType.Embedded: throw new InvalidOperationException("Impossible to translate not null Embedded entity to string");
                 case FilterType.Boolean: return p.ToString();
                 case FilterType.Enum: return p.ToString();
@@ -431,6 +434,21 @@ namespace Signum.Entities.Omnibox
             throw new InvalidOperationException("Unexpected value type {0}".Formato(p.GetType()));
         }
 
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(DynamicQueryOmniboxResult);
+
+            var queryName = Signum.Entities.Extensions.Properties.Resources.Omnibox_Query;
+            var field = Signum.Entities.Extensions.Properties.Resources.Omnibox_Field;
+            var value = Signum.Entities.Extensions.Properties.Resources.Omnibox_Value;
+
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult { Text = "{0}".Formato(queryName), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} {1}='{2}'".Formato(queryName, field, value), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} {1}1='{2}1' {1}2='{2}2'".Formato(queryName, field, value), OmniboxResultType = resultType },
+            };
+        }
     }
 
     public class DynamicQueryOmniboxResult : OmniboxResult
@@ -441,7 +459,7 @@ namespace Signum.Entities.Omnibox
 
         public override string ToString()
         {
-            string queryName = OmniboxParser.Manager.CleanQueryName(QueryName);
+            string queryName = QueryUtils.GetCleanName(QueryName);
 
             string filters = Filters.ToString(" ");
 

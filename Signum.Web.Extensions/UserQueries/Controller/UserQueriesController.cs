@@ -23,6 +23,7 @@ using Signum.Engine.Basics;
 using Signum.Entities.Authorization;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
+using Signum.Engine.Operations;
 #endregion
 
 namespace Signum.Web.UserQueries
@@ -45,9 +46,9 @@ namespace Signum.Web.UserQueries
 
             var userQuery = ToUserQuery(request);
 
-            userQuery.Related = UserDN.Current.ToLite<IdentifiableEntity>();
+            userQuery.Related = UserDN.Current.ToLite();
 
-            return Navigator.View(this, userQuery);
+            return Navigator.NormalPage(this, userQuery);
         }
 
         public static UserQueryDN ToUserQuery(QueryRequest request)
@@ -57,22 +58,39 @@ namespace Signum.Web.UserQueries
                 QueryLogic.RetrieveOrGenerateQuery(request.QueryName), FindOptions.DefaultElementsPerPage);
         }
 
-        public ActionResult Delete(Lite<UserQueryDN> lite)
+        [HttpPost]
+        public ActionResult Save()
         {
-            var queryName = QueryLogic.ToQueryName(lite.InDB().Select(uq => uq.Query.Key).FirstEx());
+            UserQueryDN userQuery = null;
+            
+            try
+            {
+                userQuery = this.ExtractEntity<UserQueryDN>();
+            }
+            catch(Exception){}
 
-            Database.Delete<UserQueryDN>(lite);
+            var context = userQuery.ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
 
-            return Redirect(Navigator.FindRoute(queryName));
+            if (context.GlobalErrors.Any())
+            {
+                ModelState.FromContext(context);
+                return JsonAction.ModelState(ModelState);
+            }
+
+            userQuery = context.Value.Execute(UserQueryOperation.Save);
+            return JsonAction.Redirect(Navigator.NavigateRoute(userQuery.ToLite()));
         }
 
-        public RedirectResult Save()
+        [HttpPost]
+        public ActionResult Delete(string prefix)
         {
-            var context = this.ExtractEntity<UserQueryDN>().ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
+            var userQuery = this.ExtractLite<UserQueryDN>(prefix);
+            
+            var queryName = QueryLogic.ToQueryName(userQuery.InDB().Select(uq => uq.Query.Key).SingleEx());
 
-            var userQuery = context.Value.Save();
+            userQuery.Delete();
 
-            return Redirect(Navigator.ViewRoute(userQuery.ToLite()));
+            return JsonAction.Redirect(Navigator.FindRoute(queryName));
         }
     }
 }

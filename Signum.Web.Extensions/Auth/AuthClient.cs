@@ -15,7 +15,6 @@ using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
-using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
@@ -57,22 +56,20 @@ namespace Signum.Web.Auth
             {
                 ResetPasswordStarted = resetPassword;
 
-                Navigator.RegisterArea(typeof(AuthClient)); 
+                Navigator.RegisterArea(typeof(AuthClient));
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
-                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default));
-
-                Navigator.EntitySettings<UserDN>().ShowSave = false;
+                    Navigator.AddSetting(new EntitySettings<UserDN>());
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default));
+                    Navigator.AddSetting(new EntitySettings<RoleDN>());
 
                 if (passwordExpiration)
                 {
-                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
+                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
                 }
 
-                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>()
+                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>
                 {
                     PartialViewName = _ => ViewPrefix.Formato("SetPassword"),
                     MappingDefault = new EntityMapping<SetPasswordModel>(false)
@@ -83,28 +80,19 @@ namespace Signum.Web.Auth
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
 
+                
+                var manager = Navigator.Manager;
                 if (types)
                 {
-                    Navigator.Manager.Initializing += () =>
-                    {
-                        foreach (EntitySettings item in Navigator.Manager.EntitySettings.Values.Where(a=>a.StaticType.IsIdentifiableEntity()))
-                        {
-                            miAttachEvents.GetInvoker(item.GetType().GetGenericArguments())(item); 
+                    manager.IsCreable += manager_IsCreable;
+                    manager.IsReadOnly += manager_IsReadOnly;
+                    manager.IsViewable += manager_IsViewable;
                         }
-
-                    };
-                }
 
                 if (queries)
                 {
-                    Navigator.Manager.Initializing += () =>
-                    {
-                        foreach (QuerySettings qs in Navigator.Manager.QuerySettings.Values)
-                        {
-                            qs.IsFindable += QueryAuthLogic.GetQueryAllowed;
+                    manager.IsFindable += QueryAuthLogic.GetQueryAllowed;
                         }
-                    };
-                }
 
                 AuthenticationRequiredAttribute.Authenticate = context =>
                 { 
@@ -145,7 +133,6 @@ namespace Signum.Web.Auth
                     { 
                         OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("SetPassword","Auth"))
                             .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
-                        IsContextualVisible = _ => false
                     },
 
                     new EntityOperationSettings(UserOperation.SaveNew) 
@@ -158,10 +145,43 @@ namespace Signum.Web.Auth
                     { 
                         OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveUser","Auth"))
                             .validateAndAjax(),
-                        IsContextualVisible = _ => false
                     },
                 });
             }
+        }
+
+        static bool manager_IsViewable(Type type, ModifiableEntity entity)
+        {
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+                return true;
+
+            var ident = (IdentifiableEntity)entity;
+
+            if (ident == null || ident.IsNew)
+                return TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
+
+            return ident.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true);
+        }
+
+        static bool manager_IsReadOnly(Type type, ModifiableEntity entity)
+        {
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+                return false;
+
+            var ident = (IdentifiableEntity)entity;
+
+            if (ident == null || ident.IsNew)
+                return TypeAuthLogic.GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
+
+            return !ident.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true);
+        }
+
+        static bool manager_IsCreable(Type type)
+        {
+            if(!typeof(IdentifiableEntity).IsAssignableFrom(type))
+                return true;
+
+            return TypeAuthLogic.GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
         }
 
         public static Uri SuggestedReturnUrl(this HttpRequestBase request)
@@ -193,19 +213,6 @@ namespace Signum.Web.Auth
 
         }
 
-        static GenericInvoker<Action<EntitySettings>> miAttachEvents = new GenericInvoker<Action<EntitySettings>>(es => AttachEvents<TypeDN>((EntitySettings<TypeDN>)es));
-        static void AttachEvents<T>(EntitySettings<T> settings) where T : IdentifiableEntity
-        {
-            settings.IsCreable += admin => TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() == TypeAllowedBasic.Create;
-
-            settings.IsReadOnly += (entity, admin) => entity == null || entity.IsNew ?
-                TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() < TypeAllowedBasic.Modify : 
-                !entity.IsAllowedFor(TypeAllowedBasic.Modify);
-
-            settings.IsViewable += (entity, admin) => entity == null || entity.IsNew ? 
-                TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() >= TypeAllowedBasic.Read: 
-                entity.IsAllowedFor(TypeAllowedBasic.Read);
-        }
 
         static void TaskAuthorizeProperties(BaseLine bl)
         {

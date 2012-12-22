@@ -15,7 +15,7 @@ namespace Signum.Entities.Omnibox
 
         public EntityOmniboxResultGenenerator(IEnumerable<Type> schemaTypes)
         {
-            types = schemaTypes.Where(t => !t.IsEnumProxy()).ToDictionary(t => Lite.UniqueTypeName(t));
+            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(Lite.UniqueTypeName);
         }
 
         public int AutoCompleteLimit = 5;
@@ -39,15 +39,7 @@ namespace Signum.Entities.Omnibox
 
             if (tokens.Count == 1)
             {
-                foreach (var match in matches)
-                {
-                    yield return new EntityOmniboxResult
-                    {
-                        Type = (Type)match.Value,
-                        TypeMatch = match,
-                        Distance = match.Distance,
-                    };
-                }
+                yield break;
             }
             else if (tokens[1].Type == OmniboxTokenType.Number)
             {
@@ -55,9 +47,9 @@ namespace Signum.Entities.Omnibox
                 if (!int.TryParse(tokens[1].Value, out id))
                     yield break;
 
-                foreach (var match in matches)
+                foreach (var match in matches.OrderBy(ma => ma.Distance))
                 {
-                    Lite lite = OmniboxParser.Manager.RetrieveLite((Type)match.Value, id);
+                    Lite<IdentifiableEntity> lite = OmniboxParser.Manager.RetrieveLite((Type)match.Value, id);
 
                     yield return new EntityOmniboxResult
                     {
@@ -73,25 +65,26 @@ namespace Signum.Entities.Omnibox
             {
                 string pattern = OmniboxUtils.CleanCommas(tokens[1].Value);
 
-                foreach (var match in matches)
+                foreach (var match in matches.OrderBy(ma => ma.Distance))
                 {
-                    var autoComplete = OmniboxParser.Manager.AutoComplete((Type)match.Value, null, pattern, AutoCompleteLimit);
+                    var autoComplete = OmniboxParser.Manager.AutoComplete((Type)match.Value, pattern, AutoCompleteLimit);
 
                     if (autoComplete.Any())
                     {
-                        foreach (Lite lite in autoComplete)
+                        foreach (Lite<IdentifiableEntity> lite in autoComplete)
                         {
                             OmniboxMatch distance = OmniboxUtils.Contains(lite, lite.ToString(), pattern);
 
-                            yield return new EntityOmniboxResult
-                            {
-                                Type = (Type)match.Value,
-                                TypeMatch = match,
-                                ToStr = pattern,
-                                Lite = lite,
-                                Distance = match.Distance + distance.Distance,
-                                ToStrMatch = distance,
-                            };
+                            if (distance != null)
+                                yield return new EntityOmniboxResult
+                                {
+                                    Type = (Type)match.Value,
+                                    TypeMatch = match,
+                                    ToStr = pattern,
+                                    Lite = lite,
+                                    Distance = match.Distance + distance.Distance,
+                                    ToStrMatch = distance,
+                                };
                         }
                     }
                     else
@@ -109,6 +102,17 @@ namespace Signum.Entities.Omnibox
             }
         }
 
+        public override List<HelpOmniboxResult> GetHelp()
+        {
+            var resultType = typeof(EntityOmniboxResult);
+            var entityTypeName = Signum.Entities.Extensions.Properties.Resources.Omnibox_Type;
+
+            return new List<HelpOmniboxResult>
+            {
+                new HelpOmniboxResult { Text = "{0} Id".Formato(entityTypeName), OmniboxResultType = resultType },
+                new HelpOmniboxResult { Text = "{0} 'ToStr'".Formato(entityTypeName), OmniboxResultType = resultType }
+            };
+        }
     }
 
     public class EntityOmniboxResult : OmniboxResult
@@ -121,7 +125,7 @@ namespace Signum.Entities.Omnibox
         public string ToStr { get; set; }
         public OmniboxMatch ToStrMatch { get; set; }
 
-        public Lite Lite { get; set; }
+        public Lite<IdentifiableEntity> Lite { get; set; }
 
         public override string ToString()
         {

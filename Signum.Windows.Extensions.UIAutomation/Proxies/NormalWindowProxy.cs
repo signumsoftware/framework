@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Windows.Automation;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using Signum.Entities;
 using System.Windows;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.UIAutomation
 {
-    public class NormalWindowProxy<T>: WindowProxy, ILineContainer<T> where T: ModifiableEntity
+    public class NormalWindowProxy<T> : WindowProxy, ILineContainer<T> where T : ModifiableEntity
     {
+        public WindowProxy ParentWindow { get { return this; } }
         public PropertyRoute PreviousRoute { get; set; }
 
         AutomationElement ILineContainer.Element
@@ -24,6 +25,7 @@ namespace Signum.Windows.UIAutomation
         public NormalWindowProxy(AutomationElement element)
             : base(element)
         {
+            Element.WaitDataContextSet(() => "DataContextSet for {0}".Formato(typeof(T).Name));
         }
 
         public ButtonBarProxy ButtonBar
@@ -33,7 +35,12 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement LeftExpander
         {
-            get { return Element.ChildById("expander"); }
+            get { return Element.ChildById("widgetPanel").ChildById("expander"); }
+        }
+
+        public AutomationElement LeftExpanderButton
+        {
+            get { return LeftExpander.ChildById("HeaderSite"); }
         }
 
         AutomationElement mainControl;
@@ -56,23 +63,37 @@ namespace Signum.Windows.UIAutomation
         public void Ok()
         {
             ButtonBar.OkButton.ButtonInvoke();
+
+            Element.Wait(() => IsClosed,
+            actionDescription: () => "Waiting to close window after OK {0}".Formato(EntityId));
+        }
+
+        public AutomationElement OkCapture()
+        {
+            return Element.CaptureWindow(
+            action: () => ButtonBar.OkButton.ButtonInvoke(),
+            actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
         }
 
         public void Save()
         {
-            ButtonBar.SaveButton.ButtonInvoke();
+            Element.WaitDataContextChangedAfter(
+            action: () => ButtonBar.SaveButton.ButtonInvoke(),
+            actionDescription: () => "Save " + EntityId);
         }
 
         public void Reload()
         {
-            ButtonBar.ReloadButton.ButtonInvoke();
+            Element.WaitDataContextChangedAfter(
+            action: () => ButtonBar.ReloadButton.ButtonInvoke(),
+            actionDescription: () => "Reload " + EntityId);
         }
 
         public void Reload(bool confirm)
         {
             ButtonBar.ReloadButton.ButtonInvoke();
 
-            using (var mb = WaitCurrentMessageBox())
+            using (var mb = Element.WaitMessageBoxChild())
             {
                 if (confirm)
                     mb.OkButton.ButtonInvoke();
@@ -80,28 +101,41 @@ namespace Signum.Windows.UIAutomation
                     mb.CancelButton.ButtonInvoke();
             }
         }
-
-        public static int ExecuteTimeout = 3 * 1000;
-
         public void Execute(Enum operationKey, int? timeOut = null)
         {
-            var time = timeOut ?? ExecuteTimeout;
+            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
 
-            ButtonBar.GetOperationButton(operationKey).ButtonInvoke();
-            if (!Element.Pattern<WindowPattern>().WaitForInputIdle(time))
-                throw new TimeoutException("Reloading entity after {0} took more than {1} ms".Formato(OperationDN.UniqueKey(operationKey), time));
+            Element.WaitDataContextChangedAfter(
+            action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
+            actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
         }
 
-        public static int ConstructFromTimeout = 2 * 1000;
+        public AutomationElement ExecuteCapture(Enum operationKey, int? timeOut = null)
+        {
+            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
+
+            return Element.CaptureWindow(
+            action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
+            actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), EntityId));
+        }
+
 
         public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
         {
-            var time = timeOut ?? ConstructFromTimeout;
+            var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
 
-            return Element.GetWindowAfter(
+            return Element.CaptureWindow(
                 () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
-                () => "Executing {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time), time);
+                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time));
         }
+
+        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T : IdentifiableEntity
+        {
+            AutomationElement element = ConstructFrom(operationKey, timeOut);
+
+            return new NormalWindowProxy<T>(element);
+        }
+
 
         public override void Dispose()
         {
@@ -111,10 +145,10 @@ namespace Signum.Windows.UIAutomation
 
                 Element.Wait(() =>
                 {
-                    if (Element.Current.IsOffscreen)
+                    if (IsClosed)
                         return true;
 
-                    confirmation = TryGetCurrentMessageBox();
+                    confirmation = Element.TryMessageBoxChild();
 
                     if (confirmation != null)
                         return true;
@@ -123,15 +157,31 @@ namespace Signum.Windows.UIAutomation
                 }, () => "Waiting for normal window to close or show confirmation dialog");
 
 
-                if (confirmation != null)
+                if (confirmation != null && !confirmation.IsError)
                 {
-                    confirmation.NoButton.ButtonInvoke();
+                    confirmation.OkButton.ButtonInvoke();
                 }
             }
+
+            OnDisposed();
         }
     }
 
-  
+    public static class NormalWindowExtensions
+    {
+        public static NormalWindowProxy<T> ToNormalWindow<T>(this AutomationElement element) where T : IdentifiableEntity
+        {
+            return new NormalWindowProxy<T>(element);
+        }
+    }
+
+
+    public class OperationTimeouts
+    {
+        public static int ExecuteTimeout = 3 * 1000;
+        public static int ConstructFromTimeout = 2 * 1000;
+    }
+
 
     public class ButtonBarProxy
     {
@@ -163,5 +213,5 @@ namespace Signum.Windows.UIAutomation
         }
     }
 
-    
+
 }

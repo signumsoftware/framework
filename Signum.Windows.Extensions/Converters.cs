@@ -49,6 +49,6 @@ namespace Signum.Windows.Extensions
 
 
         public static readonly IValueConverter NotNullToRedBrush = ConverterFactory.New(
-            (object d) => d == null ? null : Brushes.Pink);
+            (object d) => d == null ? null : Brushes.Pink);      
     }
 }

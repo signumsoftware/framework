@@ -11,6 +11,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using System.Drawing;
 using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Chart
 {
@@ -18,8 +19,8 @@ namespace Signum.Engine.Chart
     {
         public static readonly ResetLazy<Dictionary<Type, Dictionary<int, Color>>> Colors = GlobalLazy.Create(() =>
               Database.Query<ChartColorDN>()
-              .Select(cc => new { cc.Related.RuntimeType, cc.Related.Id, cc.Color.Argb })
-              .AgGroupToDictionary(a => a.RuntimeType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))))
+              .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
+              .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))))
         .InvalidateWith(typeof(ChartColorDN));
 
         public static readonly int Limit = 360; 
@@ -44,9 +45,9 @@ namespace Signum.Engine.Chart
         {
             AssertFewEntities(type);
 
-            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = l.ToLite<IdentifiableEntity>() }).ToDictionary(a => a.Related);
+            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = (Lite<IdentifiableEntity>)l }).ToDictionary(a => a.Related);
 
-            dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.RuntimeType == type).ToDictionary(a=>a.Related));
+            dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.EntityType == type).ToDictionary(a=>a.Related));
 
             double[] bright = dic.Count < 18 ? new double[]{.60}:
                             dic.Count < 72 ? new double[]{.90, .60}:
@@ -112,7 +113,7 @@ namespace Signum.Engine.Chart
         static int DeleteColors<T>() where T : IdentifiableEntity
         {
             return (from t in Database.Query<T>() // To filter by type conditions
-                    join cc in Database.Query<ChartColorDN>() on t.ToLite<IdentifiableEntity>() equals cc.Related
+                    join cc in Database.Query<ChartColorDN>() on t.ToLite() equals cc.Related
                     select cc).UnsafeDelete();
         }
 
@@ -127,18 +128,25 @@ namespace Signum.Engine.Chart
                 Type = type.ToTypeDN(),
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorDN
                 {
-                    Related = l.ToLite<IdentifiableEntity>(),
+                    Related = (Lite<IdentifiableEntity>)l,
                     Color = dic.TryGetS(l.Id).TrySC(c => new ColorDN { Argb = c.ToArgb() })
                 }).ToMList()
             };
         }
 
-        public static Color? ColorFor(Lite lite)
+        public static Color? ColorFor(Type type, int id)
         {
-            if (lite == null)
-                return null;
+            return Colors.Value.TryGetC(type).TryGetS(id);
+        }
 
-            return Colors.Value.TryGetC(lite.RuntimeType).TryGetS(lite.Id);
+        public static Color? ColorFor(Lite<IdentifiableEntity> lite)
+        {
+            return ColorFor(lite.EntityType, lite.Id);
+        }
+
+        public static Color? ColorFor(IdentifiableEntity ident)
+        {
+            return ColorFor(ident.GetType(), ident.Id);
         }
     }
 }

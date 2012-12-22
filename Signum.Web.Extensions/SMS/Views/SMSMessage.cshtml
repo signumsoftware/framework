@@ -27,7 +27,7 @@
             vl.ValueHtmlProps["rows"] = "6";
             vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
         })
-    if(e.Value.State == SMSMessageState.Created) {
+    if(e.Value.State == SMSMessageState.Created && e.Value.EditableMessage) {
         <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
             <p><span>@Signum.Web.Extensions.Properties.Resources.RemainingCharacters</span>: <span id="sfCharsLeft"></span></p>
         </div>

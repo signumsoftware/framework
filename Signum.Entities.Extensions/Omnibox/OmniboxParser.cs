@@ -29,7 +29,8 @@ namespace Signum.Entities.Omnibox
         public static List<IOmniboxResultGenerator> Generators = new List<IOmniboxResultGenerator>();
 
         static readonly Regex tokenizer = new Regex(
-@"(?<space>\s+)|
+@"(?<entity>[a-zA-Z_][a-zA-Z0-9_]*;\d+)|
+(?<space>\s+)|
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
@@ -38,42 +39,73 @@ namespace Signum.Entities.Omnibox
 (?<comparer>(==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=))", 
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace);
 
+        public static int MaxResults = 20;
+
+        static bool IsHelp(string omniboxQuery)
+        {
+            var rawQuery = omniboxQuery.ToLower();
+            return rawQuery == "help" || 
+                rawQuery == Signum.Entities.Extensions.Properties.Resources.Omnibox_Help.ToLower() || 
+                rawQuery == "?";
+        }
 
         public static List<OmniboxResult> Results(string omniboxQuery, CancellationToken ct)
         {
             List<OmniboxResult> result = new List<OmniboxResult>();
 
-            List<OmniboxToken> tokens = new List<OmniboxToken>();
-
-            foreach (Match m in tokenizer.Matches(omniboxQuery))
+            if (IsHelp(omniboxQuery))
             {
-                if (ct.IsCancellationRequested)
-                    return result;
+                foreach (var generator in Generators)
+                {
+                    if (ct.IsCancellationRequested)
+                        return result;
 
-                AddTokens(tokens, m, "ident", OmniboxTokenType.Identifier);
-                AddTokens(tokens, m, "dot", OmniboxTokenType.Dot);
-                AddTokens(tokens, m, "semicolon", OmniboxTokenType.Semicolon);
-                AddTokens(tokens, m, "comparer", OmniboxTokenType.Comparer);
-                AddTokens(tokens, m, "number", OmniboxTokenType.Number);
-                AddTokens(tokens, m, "string", OmniboxTokenType.String);
-                AddTokens(tokens, m, "date", OmniboxTokenType.String);
+                    result.AddRange(generator.GetHelp());
+                }
+
+                string matchingOptions = Signum.Entities.Extensions.Properties.Resources.Omnibox_MatchingOptions;
+                result.Add(new HelpOmniboxResult { Text = matchingOptions });
+
+                string databaseAccess = Signum.Entities.Extensions.Properties.Resources.Omnibox_DatabaseAccess;
+                result.Add(new HelpOmniboxResult { Text = databaseAccess });
+
+                string disambiguate = Signum.Entities.Extensions.Properties.Resources.Omnibox_Disambiguate;
+                result.Add(new HelpOmniboxResult { Text = disambiguate });
+
+                return result.ToList();
             }
-
-            tokens.Sort(a => a.Index);
-
-            var tokenPattern = new string(tokens.Select(t => Char(t.Type)).ToArray());
-
-            foreach (var generator in Generators)
+            else
             {
-                if (ct.IsCancellationRequested)
-                    return result;
+                List<OmniboxToken> tokens = new List<OmniboxToken>();
 
-                result.AddRange(generator.GetResults(omniboxQuery, tokens, tokenPattern));
+                foreach (Match m in tokenizer.Matches(omniboxQuery))
+                {
+                    if (ct.IsCancellationRequested)
+                        return result;
+
+                    AddTokens(tokens, m, "ident", OmniboxTokenType.Identifier);
+                    AddTokens(tokens, m, "dot", OmniboxTokenType.Dot);
+                    AddTokens(tokens, m, "semicolon", OmniboxTokenType.Semicolon);
+                    AddTokens(tokens, m, "comparer", OmniboxTokenType.Comparer);
+                    AddTokens(tokens, m, "number", OmniboxTokenType.Number);
+                    AddTokens(tokens, m, "string", OmniboxTokenType.String);
+                    AddTokens(tokens, m, "entity", OmniboxTokenType.Entity);
+                }
+
+                tokens.Sort(a => a.Index);
+
+                var tokenPattern = new string(tokens.Select(t => Char(t.Type)).ToArray());
+
+                foreach (var generator in Generators)
+                {
+                    if (ct.IsCancellationRequested)
+                        return result;
+
+                    result.AddRange(generator.GetResults(omniboxQuery, tokens, tokenPattern).Take(MaxResults));
+                }
+
+                return result.OrderBy(a => a.Distance).Take(MaxResults).ToList();
             }
-
-            result.Sort(a => a.Distance);
-
-            return result;
         }
 
         static void AddTokens(List<OmniboxToken> tokens, Match m, string groupName, OmniboxTokenType type)
@@ -96,11 +128,10 @@ namespace Signum.Entities.Omnibox
                 case OmniboxTokenType.Comparer: return '=';
                 case OmniboxTokenType.Number: return 'N';
                 case OmniboxTokenType.String: return 'S';
+                case OmniboxTokenType.Entity: return 'E';
                 default: return '?';
             }
         }
-
-
     }
 
     public abstract class OmniboxManager
@@ -110,25 +141,31 @@ namespace Signum.Entities.Omnibox
         public abstract bool AllowedQuery(object queryName);
         public abstract QueryDescription GetDescription(object queryName);
 
-        public abstract Lite RetrieveLite(Type type, int id);
+        public abstract Lite<IdentifiableEntity> RetrieveLite(Type type, int id);
 
-        public abstract List<Lite> AutoComplete(Type cleanType, Implementations implementations, string subString, int count);
-
-        internal string CleanQueryName(object queryName)
+        public List<Lite<IdentifiableEntity>> AutoComplete(Type type, string subString, int count)
         {
-            return (queryName is Type ? Reflector.CleanTypeName((Type)queryName) : queryName.ToString());
+            return AutoComplete(Implementations.By(type), subString, count);
         }
+
+        public abstract List<Lite<IdentifiableEntity>> AutoComplete(Implementations implementations, string subString, int count);
     }
 
     public abstract class OmniboxResult
     {
         public float Distance;
+    }
 
+    public class HelpOmniboxResult : OmniboxResult
+    {
+        public string Text { get; set; }
+        public Type OmniboxResultType { get; set; }
     }
 
     public interface IOmniboxResultGenerator
     {
-        IEnumerable<OmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern); 
+        IEnumerable<OmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern);
+        List<HelpOmniboxResult> GetHelp();
     }
 
     public abstract class OmniboxResultGenerator<T> : IOmniboxResultGenerator where T : OmniboxResult
@@ -139,6 +176,8 @@ namespace Signum.Entities.Omnibox
         {
             return GetResults(rawQuery, tokens, tokenPattern);
         }
+
+        public abstract List<HelpOmniboxResult> GetHelp();
     }
 
     public struct OmniboxToken
@@ -184,5 +223,6 @@ namespace Signum.Entities.Omnibox
         Comparer,
         Number,
         String,
+        Entity,
     }
 }

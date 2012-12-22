@@ -1,0 +1,99 @@
+﻿@using Signum.Entities.DynamicQuery
+@using Signum.Entities.Reflection
+@using Signum.Web.Properties
+@using Signum.Engine
+@using System.Web.Mvc
+@using Signum.Entities
+@using Signum.Web
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+@model TypeContext<ChartRequest>
+@{ 
+    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
+    bool navigate = (bool)ViewData[ViewDataKeys.Navigate];
+    var formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
+}
+@if (queryResult == null)
+{ 
+    @Resources.Signum_noResults
+}
+else
+{
+    <table id="@Model.Compose("tblResults")" class="sf-search-results">
+        <thead class="ui-widget-header ui-corner-top">
+            <tr>
+                @if (!Model.Value.GroupResults && navigate)
+                {
+                    <th class="ui-state-default sf-th-entity">
+                    </th>
+                }
+                @if (queryResult.Columns.Any())
+                {
+                    foreach (ResultColumn col in queryResult.Columns)
+                    {
+                        var order = Model.Value.Orders.FirstOrDefault(oo => oo.Token.FullKey() == col.Column.Name);
+                        OrderType? orderType = null;
+                        if (order != null)
+                        {
+                            orderType = order.OrderType;
+                        }
+                    <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
+                        <input type="hidden" value="@col.Column.Name" />
+                        @col.Column.DisplayName
+                    </th>
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody class="ui-widget-content">
+            @if (!queryResult.Rows.Any())
+            {
+                <tr>
+                    <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@Resources.Signum_noResults
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var row in queryResult.Rows)
+                {
+                    if (Model.Value.GroupResults)
+                    {
+                <tr>
+                    @foreach (var col in queryResult.Columns)
+                    {
+                        CellFormatter ft = formatters[col.Index];
+                        var value = row[col];
+                            <td @ft.WriteDataAttribute(value)>
+                            @ft.Formatter(Html, value)
+                        </td>
+                    }
+                </tr>
+                    }
+                    else
+                    {
+                        Lite<IdentifiableEntity> entityField = row.Entity;
+                <tr data-entity="@entityField.Key()">
+                    @if (entityField != null && navigate)
+                    {
+                        <td>
+                            @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)
+                        </td>
+                    }
+                    @foreach (var col in queryResult.Columns)
+                    {
+                        var value = row[col];
+                        var ft = formatters[col.Index];
+                        <td @ft.WriteDataAttribute(value)>
+                            @ft.Formatter(Html, value)
+                        </td>
+                    }
+                </tr>
+                    }
+                }
+            }
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+}

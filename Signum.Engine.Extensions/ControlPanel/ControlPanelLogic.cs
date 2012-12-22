@@ -13,6 +13,7 @@ using Signum.Utilities;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.UserQueries;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.ControlPanel
 {
@@ -49,7 +50,38 @@ namespace Signum.Engine.ControlPanel
                                                    ToStr = cp.ToString(),
                                                    Links = cp.UserQueries.Count
                                                }).ToDynamic(); 
+
+                RegisterOperations();
             }
+        }
+
+        private static void RegisterOperations()
+        {
+            new BasicExecute<ControlPanelDN>(ControlPanelOperation.Save)
+            {
+                AllowsNew = true,
+                Lite = false,
+                Execute = (cp, _) => { }
+            }.Register();
+
+            new BasicDelete<ControlPanelDN>(ControlPanelOperation.Delete)
+            {
+                Lite = false,
+                Delete = (cp, _) =>
+                {
+                    var parts = cp.Parts.Select(a => a.Content).ToList();
+                    cp.Delete();
+                    Database.DeleteList(parts);
+
+                }
+            }.Register();
+
+            new BasicConstructFrom<ControlPanelDN, ControlPanelDN>(ControlPanelOperation.Clone)
+            {
+                Lite = true,
+                AllowsNew = false,
+                Construct = (cp, _) => cp.Clone()
+            }.Register();
         }
 
         public static ControlPanelDN GetHomePageControlPanel()
@@ -85,7 +117,7 @@ namespace Signum.Engine.ControlPanel
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
 
             TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));

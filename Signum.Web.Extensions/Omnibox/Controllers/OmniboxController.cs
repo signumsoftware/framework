@@ -16,7 +16,7 @@ namespace Signum.Web.Omnibox
             var result = OmniboxParser.Results(text, new System.Threading.CancellationToken())
                 .Select(or => new
                 {
-                    label = OmniboxClient.RenderHtml.Invoke(or).ToString(),
+                    label = OmniboxClient.Render(or).ToString(),
                     cleanText = or.ToString()
                 });
 

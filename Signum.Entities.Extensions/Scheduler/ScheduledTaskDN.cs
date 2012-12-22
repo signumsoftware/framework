@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +10,7 @@ using Signum.Entities.Processes;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Main)]
     public class ScheduledTaskDN : IdentifiableEntity
     {
         [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN), typeof(ScheduleRuleMinutelyDN), typeof(ScheduleRuleHourlyDN))]
@@ -23,7 +22,7 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref rule, value, () => Rule); }
         }
 
-        [ImplementedBy(typeof(CustomTaskDN), typeof(ProcessDN))]
+        [ImplementedBy(typeof(CustomTaskDN))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task
@@ -61,5 +60,10 @@ namespace Signum.Entities.Scheduler
         {
             return "{0} {1}".Formato(task, rule) + (suspended ? " [{0}]".Formato(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
         }
+    }
+
+    public enum ScheduledTaskOperation
+    { 
+        Save
     }
 }

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Exceptions;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class DisconnectedImportDN : IdentifiableEntity
     {
         DateTime creationDate = TimeZoneManager.Now;
@@ -49,6 +49,7 @@ namespace Signum.Entities.Disconnected
             set { Set(ref disableForeignKeys, value, () => DisableForeignKeys); }
         }
 
+        [NotNullable]
         MList<DisconnectedImportTableDN> copies = new MList<DisconnectedImportTableDN>();
         public MList<DisconnectedImportTableDN> Copies
         {
@@ -108,9 +109,8 @@ namespace Signum.Entities.Disconnected
 
             double result = 0;
 
-            if (!RestoreDatabase.HasValue)
-                return result;
-            result += (orientative.RestoreDatabase.Value) / total;
+            if ((RestoreDatabase.HasValue || SynchronizeSchema.HasValue) && orientative.RestoreDatabase.HasValue) //Optional
+                result += (orientative.RestoreDatabase.Value) / total;
 
             if (!SynchronizeSchema.HasValue)
                 return result;
@@ -230,14 +230,6 @@ namespace Signum.Entities.Disconnected
         {
             get { return order; }
             set { Set(ref order, value, () => Order); }
-        }
-
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string errors;
-        public string Errors
-        {
-            get { return errors; }
-            set { Set(ref errors, value, () => Errors); }
         }
     }
 }

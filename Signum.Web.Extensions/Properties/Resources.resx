@@ -177,9 +177,6 @@
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>You must repeat the new password</value>
   </data>
-  <data name="EmailNotExistsDatabase" xml:space="preserve">
-    <value>The provided email address does not belong to any registered used</value>
-  </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Reset Password</value>
   </data>
@@ -261,8 +258,8 @@
   <data name="OperationsAscx_Allow" xml:space="preserve">
     <value>Allow</value>
   </data>
-  <data name="OperationsAscx_Deny" xml:space="preserve">
-    <value>Deny</value>
+  <data name="OperationsAscx_None" xml:space="preserve">
+    <value>None</value>
   </data>
   <data name="OperationsAscx_Operation" xml:space="preserve">
     <value>Operation</value>
@@ -312,9 +309,6 @@
   <data name="ViewsChecker" xml:space="preserve">
     <value>Views Checker</value>
   </data>
-  <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
-    <value>There's not a registered user with that email address</value>
-  </data>
   <data name="EmailSent" xml:space="preserve">
     <value>Email sent</value>
   </data>
@@ -348,17 +342,8 @@
   <data name="User" xml:space="preserve">
     <value>User</value>
   </data>
-  <data name="AreYouSureOfDeletingQuery0" xml:space="preserve">
-    <value>Are you sure of deleting query {0}?</value>
-  </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
-  </data>
-  <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
-    <value>Please confirm you'd like to delete the entity from the system</value>
-  </data>
-  <data name="Create" xml:space="preserve">
-    <value>Create</value>
   </data>
   <data name="ExcelAdminister" xml:space="preserve">
     <value>Administer</value>
@@ -374,9 +359,6 @@
   </data>
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
     <value>We received a request to create an account. You can create it following the link below:</value>
-  </data>
-  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
-    <value>Please confirm you'd like to execute the operation {0} to the entity {1} ({2}-{3})</value>
   </data>
   <data name="Appendices" xml:space="preserve">
     <value>Appendices</value>
@@ -395,9 +377,6 @@
   </data>
   <data name="PasswordsAreDifferent" xml:space="preserve">
     <value>Passwords are different</value>
-  </data>
-  <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
-    <value>Operations</value>
   </data>
   <data name="UserQueries_CreateNew" xml:space="preserve">
     <value>Create</value>
@@ -444,9 +423,6 @@
   <data name="UserChart_UserCharts" xml:space="preserve">
     <value>User charts</value>
   </data>
-  <data name="Chart_AreYouSureOfDeletingUserChart0" xml:space="preserve">
-    <value>Are you sure of deleting user chart {0}?</value>
-  </data>
   <data name="_0Rules" xml:space="preserve">
     <value>{0} rules</value>
   </data>
@@ -479,5 +455,11 @@
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>Unknown</value>
+  </data>
+  <data name="ChartScript_Edit" xml:space="preserve">
+    <value>Edit Script</value>
+  </data>
+  <data name="OperationsAscx_DBOnly" xml:space="preserve">
+    <value>DB Only</value>
   </data>
 </root>

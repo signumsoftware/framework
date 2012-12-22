@@ -20,7 +20,7 @@ using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
-//using Signum.Entities.Extensions.Authorization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Authorization
 {
@@ -30,21 +30,25 @@ namespace Signum.Engine.Authorization
         public static event Func<string> LoginMessage;
 
 
-        public static string SystemUserName { get; set; }
-        static UserDN systemUser;
+        public static string SystemUserName { get; private set; }
+        static ResetLazy<UserDN> systemUserLazy = GlobalLazy.Create(() => SystemUserName == null ? null :
+            Database.Query<UserDN>().Where(u => u.UserName == SystemUserName)
+            .SingleEx(() => "SystemUser with name '{0}' not found".Formato(SystemUserName)));
         public static UserDN SystemUser
         {
-            get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
+            get { return systemUserLazy.Value; }
         }
 
-        public static string AnonymousUserName { get; set; }
-        static UserDN anonymousUser;
+        public static string AnonymousUserName { get; private set; }
+        static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.Create(() => AnonymousUserName == null ? null :
+            Database.Query<UserDN>().Where(u => u.UserName == AnonymousUserName)
+            .SingleEx(() => "AnonymousUser with name '{0}' not found".Formato(AnonymousUserName)));
         public static UserDN AnonymousUser
         {
-            get { return string.IsNullOrEmpty(AnonymousUserName) ? null : anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
+            get { return anonymousUserLazy.Value; }
         }
 
-        static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN)); 
+        public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache).InvalidateWith(typeof(RoleDN));
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -61,7 +65,6 @@ namespace Signum.Engine.Authorization
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
 
-                sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_Initializing;
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
@@ -97,28 +100,20 @@ namespace Signum.Engine.Authorization
 
                 UserGraph.Register();
 
-                new BasicDelete<RoleDN>(RoleOperations.Delete)
+                new BasicExecute<RoleDN>(RoleOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (r, args) => { }
+                }.Register();
+
+                new BasicDelete<RoleDN>(RoleOperation.Delete)
                 {
                     Delete = (r, args) =>
                     {
                         r.Delete();
                     }
                 }.Register();
-            }
-        }
-
-        static void Schema_Initializing()
-        {
-            var r = roles.Value;
-
-            if (SystemUserName != null || AnonymousUserName != null)
-            {
-                using (new EntityCache())
-                using (AuthLogic.Disable())
-                {
-                    if (SystemUserName != null) systemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
-                    if (AnonymousUserName != null) anonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName);
-                }
             }
         }
 
@@ -230,7 +225,7 @@ namespace Signum.Engine.Authorization
             set { gloaballyEnabled = value; }
         }
 
-        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");  
+        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");
 
         public static IDisposable Disable()
         {
@@ -284,7 +279,7 @@ namespace Signum.Engine.Authorization
             var userEntity = RetrieveUser(username, passwordHash);
             userEntity.PasswordHash = newPasswordHash;
             using (AuthLogic.Disable())
-                userEntity.Save();
+                userEntity.Execute(UserOperation.Save);
 
             return Login(username, newPasswordHash);
         }
@@ -294,7 +289,7 @@ namespace Signum.Engine.Authorization
             var userEntity = user.RetrieveAndForget();
             userEntity.PasswordHash = newPasswordHash;
             using (AuthLogic.Disable())
-                userEntity.Save();
+                userEntity.Execute(UserOperation.Save);
         }
 
         public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] serviceInterfaces)
@@ -321,7 +316,32 @@ namespace Signum.Engine.Authorization
         }
 
         public static event Func<XElement> ExportToXml;
-        public static event Func<XElement, Dictionary<string, Lite<RoleDN>>, SqlPreCommand> ImportFromXml;
+        public static event Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand> ImportFromXml;
+        public static event Func<Action<Lite<RoleDN>>> SuggestRuleChanges;
+
+        public static void SuggestChanges()
+        {
+            if (SuggestRuleChanges == null)
+                return;
+
+            foreach (var item in SuggestRuleChanges.GetInvocationList().Cast<Func<Action<Lite<RoleDN>>>>())
+            {
+                if (SafeConsole.Ask("{0}?".Formato(item.Method.Name.NiceName())))
+                {
+                    var action = item();
+
+                    foreach (var role in RolesInOrder())
+                    {
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, "Suggestions for {0}", role);
+
+                        action(role);
+                    }
+
+                    Console.WriteLine();
+                    Console.WriteLine();
+                }
+            }
+        }
 
         public static XDocument ExportRules()
         {
@@ -337,8 +357,14 @@ namespace Signum.Engine.Authorization
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
         {
+            Replacements replacements = new Replacements();
+
             var rolesDic = roles.Value.ToDictionary(a => a.ToString());
             var rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
+
+            replacements.AskForReplacements(rolesXml.Keys.ToHashSet(), rolesDic.Keys.ToHashSet(), "Roles");
+
+            rolesDic = replacements.ApplyReplacementsToNew(rolesDic, "Roles");
 
             var xmlOnly = rolesXml.Keys.Except(rolesDic.Keys).ToList();
             if (xmlOnly.Any())
@@ -352,7 +378,7 @@ namespace Signum.Engine.Authorization
                     roles.Value.RelatedTo(r),
                     kvp.Value.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                     sr => sr.ToString(),
-                    s => s,
+                    s => rolesDic[s].ToString(),
                     (sr, s) => 0,
                     "Checking SubRoles of {0}".Formato(r));
             }
@@ -362,8 +388,11 @@ namespace Signum.Engine.Authorization
                 ).Combine(Spacing.Simple);
 
             var result = ImportFromXml.GetInvocationList()
-                .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, SqlPreCommand>>()
-                .Select(inv => inv(doc.Root, rolesDic)).Combine(Spacing.Triple);
+                .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand>>()
+                .Select(inv => inv(doc.Root, rolesDic, replacements)).Combine(Spacing.Triple);
+
+            if (replacements.Values.Any(a => a.Any()))
+                SafeConsole.WriteLineColor(ConsoleColor.Red, "There are renames! Remember to export after executing the script");
 
             if (result == null && dbOnlyWarnings == null)
                 return null;
@@ -386,7 +415,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("You want to export (e), import (i) or exit (nothing) {0}?".Formato(fileName));
+            Console.WriteLine("You want to export (e), import (i) or suggest (s) AuthRules? (nothing to exit)".Formato(fileName));
 
             string answer = Console.ReadLine();
 
@@ -409,6 +438,16 @@ namespace Signum.Engine.Authorization
                     Console.WriteLine("No changes necessary!");
                 else
                     command.OpenSqlFileRetry();
+            }
+            else if (answer.ToLower() == "s")
+            {
+                SuggestChanges();
+                if (SafeConsole.Ask("Export now?", "yes", "no") == "yes")
+                {
+                    var doc = ExportRules();
+                    doc.Save(fileName);
+                    Console.WriteLine("Sucesfully exported to {0}".Formato(fileName));
+                }
             }
         }
 

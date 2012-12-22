@@ -54,8 +54,61 @@ namespace Signum.Engine.Authorization
                     AuthUtils.MinType);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml();
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, roles);
+                AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
+                AuthLogic.SuggestRuleChanges += SuggestTypeRules;
             }
+        }
+
+        static Action<Lite<RoleDN>> SuggestTypeRules()
+        {
+            var graph = Schema.Current.ToDirectedGraph();
+            graph.RemoveAll(graph.FeedbackEdgeSet().Edges);
+            var compilationOrder = graph.CompilationOrder().ToList();
+            var entityTypes = graph.ToDictionary(t => t.Type, t => TypeLogic.GetEntityType(t.Type));
+
+            return role =>
+            {
+                var result = (from parent in compilationOrder
+                              let parentAllowed = GetAllowed(role, parent.Type)
+                              where parentAllowed.MaxCombined() > TypeAllowed.None
+                              from kvp in graph.RelatedTo(parent)
+                              where !kvp.Value.IsLite && !kvp.Value.IsNullable && !kvp.Value.IsCollection && !kvp.Key.Type.IsEnumEntity()
+                              let relAllowed = GetAllowed(role, kvp.Key.Type)
+                              where relAllowed.MaxCombined() == TypeAllowed.None
+                              select new
+                              {
+                                  parent,
+                                  parentAllowed,
+                                  related = kvp.Key,
+                                  relAllowed
+                              }).ToList();
+
+                foreach (var tuple in result)
+	            {
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Type: {0} is [{1}] but the related entity {2} is just [{3}]".Formato(
+                        tuple.parent.Type.Name,
+                        tuple.parentAllowed,
+                        tuple.related.Type.Name,
+                        tuple.relAllowed                       
+                        ));
+
+                    if (tuple.relAllowed.Conditions.IsNullOrEmpty() && tuple.relAllowed.Conditions.IsNullOrEmpty())
+                    {
+                        var suggested = new TypeAllowedAndConditions(TypeAllowed.DBReadUINone);
+
+                        SafeConsole.WriteColor(ConsoleColor.DarkGreen, "Grant ");
+                        if (SafeConsole.Ask("{0} for {1} to {2}?".Formato(suggested, tuple.related.Type.Name, role)))
+                        {
+                            Manual.SetAllowed(role, tuple.related.Type, suggested);
+                            SafeConsole.WriteLineColor(ConsoleColor.Green, "Granted");
+                        }
+                        else
+                        {   
+                            SafeConsole.WriteLineColor(ConsoleColor.White, "Skipped");
+                        }
+                    }
+	            }
+            };
         }
 
 
@@ -76,7 +129,7 @@ namespace Signum.Engine.Authorization
         {
             var allowed = GetAllowed(type);
 
-            if (allowed.Max().GetDB() == TypeAllowedBasic.None)
+            if (allowed.MaxDB() == TypeAllowedBasic.None)
                 return "Type '{0}' is set to None".Formato(type.NiceName());
 
             return null;
@@ -90,8 +143,8 @@ namespace Signum.Engine.Authorization
 
                 var requested = ident.IsNew ? TypeAllowedBasic.Create : TypeAllowedBasic.Modify;
 
-                var min = access.Min().GetDB();
-                var max = access.Max().GetDB();
+                var min = access.MinDB();
+                var max = access.MaxDB();
                 if (requested <= min)
                     return;
 
@@ -106,7 +159,7 @@ namespace Signum.Engine.Authorization
         static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident)
         {
             Type type = ident.GetType();
-            TypeAllowedBasic access = GetAllowed(type).Max().GetDB();
+            TypeAllowedBasic access = GetAllowed(type).MaxDB();
             if (access < TypeAllowedBasic.Read)
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type.NicePluralName()));
         }
@@ -115,7 +168,7 @@ namespace Signum.Engine.Authorization
         {
             var result = new TypeRulePack { Role = roleLite };
 
-            cache.GetRules(result, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(a => a.Value));
+            cache.GetRules(result, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumEntity()).Select(a => a.Value));
 
             foreach (TypeAllowedRule r in result.Rules)
             {
@@ -142,11 +195,14 @@ namespace Signum.Engine.Authorization
 
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return AuthUtils.MaxType.BaseAllowed;
 
             if (!TypeLogic.TypeToDN.ContainsKey(type))
                 return AuthUtils.MaxType.BaseAllowed;
+
+            if (EnumEntity.Extract(type) != null)
+                return new TypeAllowedAndConditions(TypeAllowed.Read);
 
             TypeAllowed? temp = TypeAuthLogic.GetTemporallyAllowed(type);
             if (temp.HasValue)
@@ -208,6 +264,25 @@ namespace Signum.Engine.Authorization
                 return null;
 
             return acum.Value ? AuthThumbnail.All : AuthThumbnail.None;
+        }
+
+        public static AuthThumbnail? Collapse(this IEnumerable<OperationAllowed> values)
+        {
+            OperationAllowed? acum = null;
+            foreach (var item in values)
+            {
+                if (acum == null)
+                    acum = item;
+                else if (acum.Value != item)
+                    return AuthThumbnail.Mix;
+            }
+
+            if (acum == null)
+                return null;
+
+            return
+               acum.Value == OperationAllowed.None ? AuthThumbnail.None :
+               acum.Value == OperationAllowed.DBOnly ? AuthThumbnail.Mix : AuthThumbnail.All;
         }
 
         public static AuthThumbnail? Collapse(this IEnumerable<PropertyAllowed> values)

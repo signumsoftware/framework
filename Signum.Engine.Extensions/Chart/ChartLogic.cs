@@ -18,6 +18,7 @@ using Signum.Entities.Reports;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Entities.Reflection;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Chart
 {
@@ -32,80 +33,12 @@ namespace Signum.Engine.Chart
                 PermissionAuthLogic.RegisterTypes(typeof(ChartPermissions));
 
                 ChartColorLogic.Start(sb, dqm);
+                ChartScriptLogic.Start(sb, dqm);
+                UserChartLogic.Start(sb, dqm);
 
-                sb.Include<UserChartDN>();
-
-                dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()
-                                            select new
-                                            {
-                                                Entity = uq,
-                                                uq.Query,
-                                                uq.Id,
-                                                uq.DisplayName,
-                                                Filters = uq.Filters.Count,
-                                                uq.Chart.ChartType,
-                                                uq.Chart.ChartResultType,
-                                                uq.Chart.GroupResults,
-                                            }).ToDynamic();
-
-                sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
+                ChartUtils.RemoveNotNullValidators();
             }
         }
-
-        public static UserChartDN ParseData(this UserChartDN userChart)
-        {
-            if (!userChart.IsNew || userChart.queryName == null)
-                throw new InvalidOperationException("userChart should be new and have queryName");
-
-            userChart.Query = QueryLogic.RetrieveOrGenerateQuery(userChart.queryName);
-
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
-
-            userChart.ParseData(description);
-
-            return userChart;
-        }
-
-        static void ChartLogic_Retrieved(UserChartDN userQuery)
-        {
-            object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
-
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            foreach (var item in userQuery.Chart.ChartTokens())
-            {
-                item.parentChart = userQuery.Chart;
-            }
-
-            userQuery.ParseData(description);
-        }
-
-        public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
-        {
-            return (from er in Database.Query<UserChartDN>()
-                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
-                    select er.ToLite()).ToList();
-        }
-
-        public static void RemoveUserChart(Lite<UserChartDN> lite)
-        {
-            Database.Delete(lite);
-        }
-
-        public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
-        {
-            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(UserDN));
-
-            TypeConditionLogic.Register<UserChartDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current));
-        }
-
-        public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
-        {
-            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(RoleDN));
-
-            TypeConditionLogic.Register<UserChartDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
-        }
-
 
         public static ResultTable ExecuteChart(ChartRequest request)
         {
@@ -113,7 +46,8 @@ namespace Signum.Engine.Chart
 
             if (dq.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(DynamicQuery<>))))
             {
-                return miExecuteChart.GetInvoker(dq.GetType().GetGenericArguments()[0])(request, dq);
+                using (ExecutionMode.UserInterface())
+                    return miExecuteChart.GetInvoker(dq.GetType().GetGenericArguments()[0])(request, dq);
             }
 
             throw new NotImplementedException(); 
@@ -148,7 +82,7 @@ namespace Signum.Engine.Chart
             return new DQueryable<T>(resultQuery, newContext);
         }
 
-        private static LambdaExpression ResultSelectSelectorAndContext(BuildExpressionContext context, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens, Type keyTupleType, out BuildExpressionContext newContext)
+        static LambdaExpression ResultSelectSelectorAndContext(BuildExpressionContext context, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens, Type keyTupleType, out BuildExpressionContext newContext)
         {
             Dictionary<QueryToken, Expression> resultExpressions = new Dictionary<QueryToken, Expression>();
             ParameterExpression pk = Expression.Parameter(keyTupleType, "key");
@@ -168,10 +102,10 @@ namespace Signum.Engine.Chart
             return Expression.Lambda(Expression.Convert(resultConstructor, typeof(object)), pk, pe);
         }
 
-        private static LambdaExpression KeySelector(BuildExpressionContext context, HashSet<QueryToken> keyTokens)
+        static LambdaExpression KeySelector(BuildExpressionContext context, HashSet<QueryToken> keyTokens)
         {
             var keySelector = Expression.Lambda(
-              TupleReflection.TupleChainConstructor(keyTokens.Select(t => t.BuildExpression(context))),
+              TupleReflection.TupleChainConstructor(keyTokens.Select(t => t.BuildExpression(context)).ToList()),
               context.Parameter);
             return keySelector;
         }
@@ -201,12 +135,11 @@ namespace Signum.Engine.Chart
         static GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>> miExecuteChart = new GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQuery<int>)dq));
         static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQuery<T> dq)
         {
-            ChartTokenDN[] chartTokens = request.ChartTokens().ToArray();
-            List<Column> columns = chartTokens.Select(t => t.CreateColumn()).ToList();
+            List<Column> columns = request.Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
 
             var multiplications = request.Multiplications;;
 
-            if (!request.Chart.GroupResults)
+            if (!request.GroupResults)
             {
                 columns.Add(new _EntityColumn(dq.EntityColumn().BuildColumnDescription()));
 
@@ -273,7 +206,7 @@ namespace Signum.Engine.Chart
             }
         }
 
-        private static ResultTable ResultTable(object[] values, List<Column> columns, BuildExpressionContext context)
+        static ResultTable ResultTable(object[] values, List<Column> columns, BuildExpressionContext context)
         {
             var cols = columns.Select(c => Tuple.Create(c,
                 Expression.Lambda(c.Token.BuildExpression(context), context.Parameter))).ToList();

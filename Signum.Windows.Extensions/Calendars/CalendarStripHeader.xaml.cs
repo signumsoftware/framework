@@ -13,6 +13,9 @@ using System.Globalization;
 using System.Collections.Generic;
 using Signum.Windows;
 using Signum.Utilities.DataStructures;
+using System.ComponentModel;
+
+#pragma warning disable 0067
 
 namespace Signum.Windows.Calendars
 {
@@ -111,7 +114,7 @@ namespace Signum.Windows.Calendars
             {Part.DayWeekLabel, d => 28 < d},
         };
 
-        public class MonthGroup
+        public class MonthGroup : INotifyPropertyChanged
         {
             public int Month { get; set; }
             public int Year { get; set; }
@@ -126,17 +129,21 @@ namespace Signum.Windows.Calendars
             {
                 get { return monthNames[Month-1]; }
             }
+
+            public event PropertyChangedEventHandler PropertyChanged;
         }
 
-        public class YearGroup
+        public class YearGroup : INotifyPropertyChanged
         {
             public int Year { get; set; }
             public int  Count{ get; set; }
 
             public string YearName { get { return Year.ToString(); } }
+
+            public event PropertyChangedEventHandler PropertyChanged;
         }
 
-        public class Day
+        public class Day : INotifyPropertyChanged
         {
             public DateTime Value;
             public string DayFullName
@@ -166,9 +173,11 @@ namespace Signum.Windows.Calendars
                     return normalLabel;
                 }
             }
+
+            public event PropertyChangedEventHandler PropertyChanged;
         }
 
-        public class WeekGroup
+        public class WeekGroup : INotifyPropertyChanged
         {
             public int Min{get;set;}
             public int Max{get;set;}
@@ -177,21 +186,23 @@ namespace Signum.Windows.Calendars
             {
                 get { return "{0}-{1}".Formato(Min, Max); }
             }
+
+            public event PropertyChangedEventHandler PropertyChanged;
         }
 
         private void ReconstruirDatos()
         {
             DateTime[] days = Min.For(d => d <= Max, d => d.AddDays(1)).ToArray();
 
-            icYears.ItemsSource = days.GroupCount(a => a.Year).Select(p => new YearGroup { Year = p.Key, Count = p.Value }).ToList();
+            icYears.ItemsSource = days.GroupCount(a => a.Year).Select(p => new YearGroup { Year = p.Key, Count = p.Value }).ToObservableCollection();
 
-            var months = days.GroupCount(a => new { a.Month, a.Year }).Select(p => new MonthGroup { Month = p.Key.Month, Year = p.Key.Year, Count = p.Value }).ToList();
+            var months = days.GroupCount(a => new { a.Month, a.Year }).Select(p => new MonthGroup { Month = p.Key.Month, Year = p.Key.Year, Count = p.Value }).ToObservableCollection();
             icMonthsDown.ItemsSource = months;
             icMonthsUp.ItemsSource = months;
 
-            icDays.ItemsSource = days.Select(a => new Day { Value = a }).ToList();
-            
-            icWeeks.ItemsSource = days.GroupCount(d => GetWeek(d)).Select(p => new WeekGroup { Min = p.Key.Item1.Day, Max = p.Key.Item2.Day, Count = p.Value }).ToList();
+            icDays.ItemsSource = days.Select(a => new Day { Value = a }).ToObservableCollection();
+
+            icWeeks.ItemsSource = days.GroupCount(d => GetWeek(d)).Select(p => new WeekGroup { Min = p.Key.Item1.Day, Max = p.Key.Item2.Day, Count = p.Value }).ToObservableCollection();
         }
 
         public Binding BindingToDayWidth<T>(Func<double,T> converter )
@@ -318,3 +329,5 @@ namespace Signum.Windows.Calendars
         }
 	}
 }
+
+#pragma warning restore 0067

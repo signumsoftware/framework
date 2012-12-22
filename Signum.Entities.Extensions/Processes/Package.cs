@@ -2,25 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Operations;
 using Signum.Utilities;
-using Signum.Entities.Exceptions;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.Part)]
     public class PackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
         string name;
-        [StringLengthValidator(AllowNulls = true , Max = 200)]
+        [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string Name
         {
             get { return name; }
             set { SetToStr(ref name, value, () => Name); }
-        }        
+        }
 
+        public override string ToString()
+        {
+            return "Package {0}".Formato(Name);
+        }
+    }
+
+    [Serializable, EntityType(EntityType.System)]
+    public class PackageOperationDN : PackageDN
+    {
         OperationDN operation;
         public OperationDN Operation
         {
@@ -28,50 +36,36 @@ namespace Signum.Entities.Processes
             set { SetToStr(ref operation, value, () => Operation); }
         }
 
-        int numLines;
-        public int NumLines
-        {
-            get { return numLines; }
-            set { SetToStr(ref numLines, value, () => NumLines); }
-        }
-
-        int numErrors;
-        public int NumErrors
-        {
-            get { return numErrors; }
-            set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
-
-        Lite<UserDN> user;
-        public Lite<UserDN> User
-        {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
-        }
-
         public override string ToString()
         {
-            return "{0} {1} ({2} lines{3})".Formato(Operation, Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
+            return "Package {0} {1}".Formato(Operation, Name); ;
         }
     }
 
-    [Serializable]
+    public enum PackageOperationProcess
+    {
+        PackageOperation
+    }
+
+    [Serializable, EntityType(EntityType.System)]
     public class PackageLineDN : IdentifiableEntity
     {
+        [NotNullable]
         Lite<PackageDN> package;
+        [NotNullValidator]
         public Lite<PackageDN> Package
         {
             get { return package; }
             set { Set(ref package, value, () => Package); }
         }
 
-        [ImplementedByAll]
-        Lite<IIdentifiable> target;
-        public Lite<IIdentifiable> Target
+        [NotNullable, ImplementedByAll]
+        Lite<IIdentifiable> entity;
+        [NotNullValidator]
+        public Lite<IIdentifiable> Entity
         {
-            get { return target; }
-            set { Set(ref target, value, () => Target); }
+            get { return entity; }
+            set { Set(ref entity, value, () => Entity); }
         }
 
         [ImplementedByAll]

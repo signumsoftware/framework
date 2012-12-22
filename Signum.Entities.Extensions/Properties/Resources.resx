@@ -324,4 +324,34 @@
   <data name="ControlPanelDN_TitleMustBeSpecifiedFor0" xml:space="preserve">
     <value>Title must be specified for {0}</value>
   </data>
+  <data name="Omnibox_Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="Omnibox_DatabaseAccess" xml:space="preserve">
+    <value>Searching between 'apostrophe' will make queries to the database</value>
+  </data>
+  <data name="Omnibox_Field" xml:space="preserve">
+    <value>Field</value>
+  </data>
+  <data name="Omnibox_MatchingOptions" xml:space="preserve">
+    <value>You can match results by (st)art, mid(dle) or (U)pper(C)ase</value>
+  </data>
+  <data name="Omnibox_Query" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="Omnibox_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Omnibox_UserChart" xml:space="preserve">
+    <value>UserChart</value>
+  </data>
+  <data name="Omnibox_UserQuery" xml:space="preserve">
+    <value>UserQuery</value>
+  </data>
+  <data name="Omnibox_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Omnibox_Disambiguate" xml:space="preserve">
+    <value>With Shift+Enter you disambiguate you query</value>
+  </data>
 </root>

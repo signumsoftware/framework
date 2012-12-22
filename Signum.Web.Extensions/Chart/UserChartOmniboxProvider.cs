@@ -23,13 +23,18 @@ namespace Signum.Web.Chart
         {
             MvcHtmlString html = result.ToStrMatch.ToHtml();
 
-            html = html.Concat(ColoredSpan(" ({0})".Formato(typeof(UserChartDN).NiceName()), "darkviolet"));
+            html = html.Concat(Icon());
 
             html = new HtmlTag("a")
                 .Attr("href", RouteHelper.New().Action<ChartController>(cc => cc.ViewUserChart(result.UserChart)))
                 .InnerHtml(html);
                 
             return html;
+        }
+
+        public override MvcHtmlString Icon()
+        {
+            return ColoredSpan(" ({0})".Formato(typeof(UserChartDN).NiceName()), "darkviolet");
         }
     }
 }

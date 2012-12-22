@@ -8,41 +8,50 @@
 @using Signum.Entities.Chart
 @using Signum.Web.Chart
 @using Signum.Engine.Basics
-
 @Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js")
 @Html.ScriptCss("~/Chart/Content/SF_Chart.css")
-
 <style type="text/css">
-.sf-chart-control .sf-repeater-element
-{
-    padding: 2px 10px;
-}
-.sf-chart-control .sf-repeater-element legend
-{
-    float: left;
-    margin-right: 10px;
-}
+    .sf-chart-control .sf-repeater-element
+    {
+        padding: 2px 10px;
+    }
+    .sf-chart-control .sf-repeater-element legend
+    {
+        float: left;
+        margin-right: 10px;
+    }
 </style>
-
-<div class="sf-chart-control" data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" data-add-filter-url="@Url.Action("AddFilter", "Chart")" data-prefix="@Model.ControlID">
+<div class="sf-chart-control" 
+    data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" 
+    data-add-filter-url="@Url.Action("AddFilter", "Chart")" 
+    data-prefix="@Model.ControlID">
     @using (var uc = Html.TypeContext<UserChartDN>())
     {
+        
         object queryName = QueryLogic.ToQueryName(uc.Value.Query.Key);
-        ViewData[ViewDataKeys.QueryName] = queryName; //To be use inside Repeaters
-        @Html.Hidden(uc.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryName))
+
+        QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+        if (queryDescription == null)
+        {
+            queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+            ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+        }
+        
+        @Html.Hidden("webQueryName", Navigator.ResolveWebQueryName(queryName))
 
         using (var query = uc.SubContext(tc => tc.Query))
         {
-            @Html.HiddenRuntimeInfo(query)
+        @Html.HiddenRuntimeInfo(query)
         
-            @Html.Hidden(query.Compose("Key"), query.Value.Key)
-            @Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)
+        @Html.Hidden(query.Compose("Key"), query.Value.Key)
+        @Html.Hidden(query.Compose("Name"), query.Value.Name)
 
-            @Html.Field("Query", Navigator.IsFindable(queryName) ?
-                new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.DisplayName.EncodeHtml()).ToHtml() :
-                Html.Span("spanQuery", query.Value.DisplayName, "sf-value-line"))
+        @Html.Field("Query", Navigator.IsFindable(queryName) ?
+                new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.Name.EncodeHtml()).ToHtml() :
+                Html.Span("spanQuery", query.Value.Name, "sf-value-line"))
 
-            <div class="clearall"></div>
+        <div class="clearall">
+        </div>
         }
     
         @Html.EntityLine(uc, tc => tc.Related, el => el.Create = false)
@@ -52,10 +61,12 @@
 
         @Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; })
 
-        using (var chart = uc.SubContext(tc => tc.Chart))
-        {
-            @Html.HiddenRuntimeInfo(chart)
-            Html.RenderPartial(ChartClient.ChartBuilderView, chart);
-        }
+        <div id="@uc.Compose("sfChartBuilderContainer")">
+            @Html.Partial(ChartClient.ChartBuilderView, uc.Value)
+        </div>
+        <script type="text/javascript">
+                $('#@uc.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@uc.ControlID' }, @MvcHtmlString.Create(uc.Value.ToJS())));
+        </script>
+        
     }
 </div>

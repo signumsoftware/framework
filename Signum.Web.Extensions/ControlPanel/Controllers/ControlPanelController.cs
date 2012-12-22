@@ -32,12 +32,12 @@ namespace Signum.Web.ControlPanel
                 Row = higherRowFirstColumn + 1,
                 Column = 1,
                 Title = "",
-                Content = (IPanelPartContent)Activator.CreateInstance(Navigator.ResolveType(partType))
+                Content = (IPartDN)Activator.CreateInstance(Navigator.ResolveType(partType))
             };
 
             cp.Parts.Add(newPart);
 
-            return Navigator.View(this, cp);
+            return Navigator.NormalPage(this, cp);
         }
     }
 }

@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Basics;
-using Signum.Entities.Operations;
 using System.Text.RegularExpressions;
 using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, AvoidLocalization]
+    [Serializable, EntityType(EntityType.System), AvoidLocalization]
     public class RuleDN<R, A> : IdentifiableEntity
         where R: IdentifiableEntity
     {
@@ -57,7 +56,7 @@ namespace Signum.Entities.Authorization
     public class RulePermissionDN : RuleDN<PermissionDN, bool> { }
 
     [Serializable]
-    public class RuleOperationDN : RuleDN<OperationDN, bool> { }
+    public class RuleOperationDN : RuleDN<OperationDN, OperationAllowed> { }
 
     [Serializable]
     public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
@@ -65,7 +64,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> 
     {
-        [ValidateChildProperty]
+        [ValidateChildProperty, NotNullable]
         MList<RuleTypeConditionDN> conditions = new MList<RuleTypeConditionDN>();
         public MList<RuleTypeConditionDN> Conditions
         {
@@ -124,6 +123,13 @@ namespace Signum.Entities.Authorization
         {
             return "{0} ({1})".Formato(condition, allowed);
         }
+    }
+
+    public enum OperationAllowed
+    {
+        None = 0, 
+        DBOnly = 1,
+        Allow = 2,
     }
 
     public enum PropertyAllowed

@@ -15,6 +15,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using Signum.Utilities;
 using System.IO;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Reports
 {
@@ -35,15 +36,27 @@ namespace Signum.Engine.Reports
                                                   s.Query,
                                                   s.File.FileName,
                                                   s.DisplayName,
-                                                  s.Deleted,
                                               }).ToDynamic();
+
+                new BasicExecute<ExcelReportDN>(ExcelReportOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (er, _) => { }
+                }.Register();
+
+                new BasicDelete<ExcelReportDN>(ExcelReportOperation.Delete)
+                {
+                    Lite = true,
+                    Delete = (er, _) => { er.Delete(); }
+                }.Register();
             }
         }
 
         public static List<Lite<ExcelReportDN>> GetExcelReports(object queryName)
         {
             return (from er in Database.Query<ExcelReportDN>()
-                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName) && !er.Deleted
+                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
                     select er.ToLite()).ToList();
         }
 

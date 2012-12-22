@@ -32,11 +32,11 @@ namespace Signum.Windows.Chart
             set { SetValue(CurrentUserChartProperty, value); }
         }
 
-        public ChartWindow ChartWindow { get; set; }
+        public ChartRequestWindow ChartWindow { get; set; }
 
         public UserChartMenuItem()
         {
-            if (!Navigator.IsViewable(typeof(UserChartDN), true))
+            if (!Navigator.IsViewable(typeof(UserChartDN)))
                 Visibility = System.Windows.Visibility.Hidden;
 
             this.Loaded += new RoutedEventHandler(UserChartMenuItem_Loaded);
@@ -161,7 +161,7 @@ namespace Signum.Windows.Chart
         {
             CurrentUserChart = uc;
 
-            this.ChartRequest = UserChartDN.ToRequest(CurrentUserChart);
+            this.ChartRequest = CurrentUserChart.ToRequest();
 
             this.ChartWindow.UpdateFiltersOrdersUserInterface();
 
@@ -172,7 +172,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            UserChartDN userChart = UserChartDN.FromRequest(ChartRequest);
+            UserChartDN userChart = ChartRequest.ToUserChart();
 
             userChart = Navigator.View(userChart, new ViewOptions
             {
@@ -194,7 +194,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            Navigator.Navigate(CurrentUserChart, new NavigateOptions
+            Navigator.Navigate(CurrentUserChart, new NavigateOptions()
             {
                 View = new UserChart { QueryDescription = Description },
                 Closed = (s, args) => Initialize()
@@ -205,7 +205,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            if (MessageBox.Show(Prop.Resources.AreYouSureToRemove0.Formato(CurrentUserChart), Prop.Resources.RemoveUserQuery,
+            if (MessageBox.Show(Window.GetWindow(this), Prop.Resources.AreYouSureToRemove0.Formato(CurrentUserChart), Prop.Resources.RemoveUserQuery,
                 MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
             {
                 Server.Execute((IChartServer s) => s.RemoveUserChart(CurrentUserChart.ToLite()));

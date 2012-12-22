@@ -35,22 +35,21 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<PropertyDN>();
 
-            return Synchronizer.SynchronizeScript(
-                current, should,
-                null, null,
-                (tn, dicCurr, dicShould) =>
-                    Synchronizer.SynchronizeReplacing(replacements, FieldsForKey.Formato(tn),
-                        dicCurr,
-                        dicShould,
-                        (fn, c) => table.DeleteSqlSync(c),
-                        null,
-                        (fn, c, s) =>
-                        {
-                            c.Path = s.Path;
-                            return table.UpdateSqlSync(c);
-                        },
-                        Spacing.Simple),
-                 Spacing.Double);
+            return Synchronizer.SynchronizeScript(should, current,
+                null,
+                null,
+                (tn, dicShould, dicCurr) =>
+                    Synchronizer.SynchronizeScriptReplacing(replacements, FieldsForKey.Formato(tn),
+                    dicShould,
+                    dicCurr,
+                    null,
+                    (fn, c) => table.DeleteSqlSync(c),
+                    (fn, s, c) =>
+                    {
+                        c.Path = s.Path;
+                        return table.UpdateSqlSync(c);
+                    }, Spacing.Simple),
+                Spacing.Double);
         }
 
         public static List<PropertyDN> RetrieveOrGenerateProperties(TypeDN typeDN)

@@ -23,13 +23,18 @@ namespace Signum.Web.UserQueries
         {
             MvcHtmlString html = result.ToStrMatch.ToHtml();
 
-            html = html.Concat(ColoredSpan(" ({0})".Formato(typeof(UserQueryDN).NiceName()), "dodgerblue"));
+            html = html.Concat(Icon());
 
             html = new HtmlTag("a")
                 .Attr("href", RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(result.UserQuery)))
                 .InnerHtml(html);
                 
             return html;
+        }
+
+        public override MvcHtmlString Icon()
+        {
+            return ColoredSpan(" ({0})".Formato(typeof(UserQueryDN).NiceName()), "dodgerblue");
         }
     }
 }

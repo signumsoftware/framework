@@ -12,6 +12,9 @@ else {
         var doubleCharacters;
 
         var init = function () {
+            if (!editable()) {
+                return;
+            }
             loadLists($('#sfCharactersLeft').attr("data-url"));
             remainingCharacters();
             fillLiterals();
@@ -21,7 +24,7 @@ else {
             });
 
             $('#sfRemoveNoSMSChars').click(function () {
-                var $textarea = $('#Message');
+                var $textarea = $control();
                 $.ajax({
                     dataType: "text",
                     url: $(this).attr("data-url"),
@@ -42,7 +45,18 @@ else {
             });
         };
 
+        var $control = function () {
+            return $('#Message');
+        };
+
+        var editable = function () {
+            return $control().length > 0;
+        };
+
         var charactersToEnd = function ($textarea) {
+            if (!editable()) {
+                return;
+            }
             var text = $textarea.val();
             var count = text.length;
             var maxLength = SMSMaxTextLength;
@@ -78,7 +92,7 @@ else {
         };
 
         var remainingCharacters = function () {
-            var $textarea = $('#Message');
+            var $textarea = $control();
             var $remainingChars = $('#sfCharsLeft');
             var $remainingCharacters = $('#sfCharactersLeft > p');
 
@@ -109,7 +123,7 @@ else {
                 return;
             }
             var runtimeInfo = new SF.RuntimeInfo(prefix);
-            if (SF.isEmpty(runtimeInfo.runtimeType())) {
+            if (SF.isEmpty(runtimeInfo.entityType())) {
                 $list.html("");
                 return;
             }
@@ -132,12 +146,12 @@ else {
                 alert("No element selected");
                 return;
             }
-            var $message = $('#Message');
+            var $message = $control();
             $message.val($message.val() + selected);
         };
 
         return {
-            init: init, 
+            init: init,
             fillLiterals: fillLiterals
         };
     })();

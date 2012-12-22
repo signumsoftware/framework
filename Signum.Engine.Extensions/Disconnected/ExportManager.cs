@@ -16,12 +16,13 @@ using Signum.Utilities.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Linq.Expressions;
-using Signum.Engine.Exceptions;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Authorization;
 using System.Threading;
 using System.Reflection;
 using Signum.Engine.Operations;
+using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Disconnected
 {
@@ -68,17 +69,18 @@ namespace Signum.Engine.Disconnected
                 }).ToMList()
             }.Save().ToLite();
 
-            var threadContext = Statics.ExportThreadContext();
-
             var cancelationSource = new CancellationTokenSource();
+
+            UserDN user = UserDN.Current;
 
             var token = cancelationSource.Token;
 
             var task = Task.Factory.StartNew(()=>
             {
-                Statics.ImportThreadContext(threadContext);
-
-                StartExporting(machine);
+                using (AuthLogic.UserSession(user))
+                {
+                    OnStartExporting(machine);
+                    DisconnectedMachineDN.Current = machine.ToLite();
 
                 try
                 {
@@ -109,7 +111,7 @@ namespace Signum.Engine.Disconnected
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DisableForeignKeys = l })))
                     using (Connector.Override(newDatabase))
                     {
-                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumProxy()))
+                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
                         {
                             token.ThrowIfCancellationRequested();
 
@@ -120,19 +122,27 @@ namespace Signum.Engine.Disconnected
                     foreach (var tuple in downloadTables)
                     {
                         token.ThrowIfCancellationRequested();
+                        int ms = 0;
+                        using (token.MeasureTime(l => ms = l))
+                        {
+                            tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabase, machine);
+                        }
 
-                        using (token.MeasureTime(l => ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e => 
+                        int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
+                        
+                        ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e =>
                             new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
                             {
-                                Element = { CopyTable = l }
-                            })))
-                        {
-                            tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabase, machine); 
-                        }
+                                Element =
+                                {
+                                    CopyTable = ms,
+                                    MaxIdInRange = maxId,
+                                }
+                            });
                     }
 
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { EnableForeignKeys = l })))
-                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumProxy()))
+                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
                         {
                             token.ThrowIfCancellationRequested();
 
@@ -150,6 +160,12 @@ namespace Signum.Engine.Disconnected
                         }
                     }
 
+                    CopyExport(export, newDatabase);
+
+                    machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+                    using(SqlConnector.Override(newDatabase))
+                        machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+
                     using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
                         BackupDatabase(machine, export, newDatabase);
 
@@ -159,22 +175,22 @@ namespace Signum.Engine.Disconnected
                     token.ThrowIfCancellationRequested();
 
                     export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
-
-                    machine.IsOffline = true;
-                    using (OperationLogic.AllowSave<DisconnectedMachineDN>())
-                        machine.Save();
                 }
                 catch (Exception e)
                 {
                     var ex = e.LogException();
 
                     export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Exception = ex.ToLite(), State = DisconnectedExportState.Error });
+
+                        OnExportingError(machine, export, e);
                 }
                 finally
                 {
                     runningExports.Remove(export);
+                        DisconnectedMachineDN.Current = null;
 
-                    EndExporting();
+                        OnEndExporting();
+                }
                 }
             });
 
@@ -184,21 +200,37 @@ namespace Signum.Engine.Disconnected
             return export;
         }
 
+       
 
-        protected virtual void StartExporting(DisconnectedMachineDN machine)
+        private void CopyExport(Lite<DisconnectedExportDN> export, SqlConnector newDatabase)
         {
-            DisconnectedMachineDN.Current = machine.ToLite();
+            var clone = export.Retrieve().Clone();
+
+            using (Connector.Override(newDatabase))
+            {
+                clone.Save();
+            }
         }
 
-        protected virtual void EndExporting()
+
+        protected virtual void OnStartExporting(DisconnectedMachineDN machine)
         {
-            DisconnectedMachineDN.Current = null;
+            
+        }
+
+        protected virtual void OnEndExporting()
+        {
+            
+        }
+
+        protected virtual void OnExportingError(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Exception exception)
+        {
         }
 
         readonly MethodInfo miUnsafeLock;
         protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : IdentifiableEntity, IDisconnectedEntity, new()
         {
-            using (Schema.Current.GlobalMode())
+            using (ExecutionMode.Global())
             {
                 var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.DisconnectedMachine != null).Select(a =>
                     "{0} locked in {1}".Formato(a.Id, a.DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
@@ -253,6 +285,8 @@ namespace Signum.Engine.Disconnected
             string fileName = DatabaseFileName(machine);
             string logFileName = DatabaseLogFileName(machine);
 
+            DisconnectedTools.CreateDatabaseDirectory(fileName);
+            DisconnectedTools.CreateDatabaseDirectory(logFileName);
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
             return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName);
@@ -285,7 +319,7 @@ namespace Signum.Engine.Disconnected
         protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
-
+            DisconnectedTools.CreateDatabaseDirectory(backupFileName);
             DisconnectedTools.BackupDatabase(newDatabase.DatabaseName(), backupFileName);
         }
 

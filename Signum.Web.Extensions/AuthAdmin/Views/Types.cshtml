@@ -1,5 +1,6 @@
 ﻿@using Signum.Web.AuthAdmin
 @using Signum.Entities.Basics
+@using Signum.Engine.Basics
 @Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
 <script type="text/javascript">
@@ -66,7 +67,7 @@
                         <span class="sf-auth-namespace-name">@iter.Value.Key</span> </a>
                 </td>
             </tr>
-            foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.FriendlyName).Iterate())
+            foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.CleanName).Iterate())
             {
                 var item = iter2.Value;
             <tr class="sf-auth-type" data-ns="@iter.Value.Key" @Html.Raw(item.Value.AvailableConditions.Any() ? ("data-type=\"" + item.Value.Resource.ClassName  + "\"") : "")>
@@ -79,11 +80,11 @@
                     {
                         <a title="@Resources.AuthAdmin_AddCondition" class="sf-line-button sf-create" data-icon="ui-icon-circle-plus" data-text="false" style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
                         </a>
-                        <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(EnumDN.UniqueKey(ac), ac.NiceToString()), ",")" />
+                        <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(TypeConditionNameDN.UniqueKey(ac), ac.NiceToString()), ",")" />
                     }
-                    <span class="sf-auth-label">@item.Value.Resource.FriendlyName</span>
+                    <span class="sf-auth-label">@item.Value.Resource.ToType().NiceName()</span>
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
-                    @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(EnumDN.UniqueKey(a.ConditionName), a.Allowed.ToStringParts()), ";"))))
+                    @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(TypeConditionNameDN.UniqueKey(a.ConditionName), a.Allowed.ToStringParts()), ";"))))
                 </td>
                 @using (var fallback = item.SubContext(a => a.Allowed.Fallback))
                 {
@@ -158,7 +159,7 @@
                         var condition = conditionIter.Value.Condition;
                         var controlId = conditionIter.Value.ControlId;
                         
-            <tr class="sf-auth-condition" data-ns="@iter.Value.Key" data-type="@item.Value.Resource.ClassName" data-condition="@EnumDN.UniqueKey(condition.ConditionName)" data-index="@conditionIter.Value.Index">
+            <tr class="sf-auth-condition" data-ns="@iter.Value.Key" data-type="@item.Value.Resource.ClassName" data-condition="@TypeConditionNameDN.UniqueKey(condition.ConditionName)" data-index="@conditionIter.Value.Index">
                 <td>
                     <div class="sf-auth-tree @(iter.IsLast ? "sf-auth-blank" : "sf-auth-line")">
                     </div>
@@ -168,7 +169,7 @@
                     </div>
                     <a title="@Resources.AuthAdmin_RemoveCondition" class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false">
                     </a><span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
-                    @Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), EnumDN.UniqueKey(condition.ConditionName))
+                    @Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName))
                 </td>
                 
                 @{var allowed = TypeContextUtilities.Compose(controlId, "Allowed");}

@@ -22,6 +22,10 @@ using Signum.Engine.Chart;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Reflection;
+using System.Diagnostics;
+using System.Text;
+using Signum.Entities.Files;
+using Signum.Web.UserQueries;
 
 namespace Signum.Web.Chart
 {
@@ -29,81 +33,28 @@ namespace Signum.Web.Chart
     {
         public static string ViewPrefix = "~/Chart/Views/{0}.cshtml";
 
-        public static string ChartControlView = ViewPrefix.Formato("ChartControl");
+        public static string ChartRequestView = ViewPrefix.Formato("ChartRequestView");
         public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");
         public static string ChartResultsView = ViewPrefix.Formato("ChartResults");
+        public static string ChartResultsTableView = ViewPrefix.Formato("ChartResultsTable");
+        public static string ChartScriptCodeView = ViewPrefix.Formato("ChartScriptCode");
 
         public static void Start()
         {
+            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(FileDN)))
+                throw new InvalidOperationException("Call FileDN first"); 
+
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(ChartClient));
 
-                Mapping<QueryToken> qtMapping = ctx =>
-                {
-                    string tokenStr = "";
-                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
-                        tokenStr += ctx.Parent.Inputs[key] + ".";
-                    while (tokenStr.EndsWith("."))
-                        tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
-
-                    string queryKey = ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                    object queryName = QueryLogic.ToQueryName(queryKey);
-            
-                    var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue).Chart;
-
-                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qt => chart.SubTokensChart(qt, qd.Columns, true));
-                };
-
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EmbeddedEntitySettings<ChartRequest>(),
-                    new EmbeddedEntitySettings<ChartBase>(),
-                    new EmbeddedEntitySettings<ChartTokenDN> { PartialViewName = _ => ViewPrefix.Formato("ChartToken") },
-
-                    new EntitySettings<UserChartDN>(EntityType.Default) 
-                    { 
-                        PartialViewName = _ => ViewPrefix.Formato("UserChart"),
-                        MappingAdmin = new EntityMapping<UserChartDN>(true)
-                            .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
-                                .SetProperty(cb => cb.Dimension1, mappingChartToken)
-                                .SetProperty(cb => cb.Dimension2, mappingChartToken)
-                                .SetProperty(cb => cb.Value1, mappingChartToken)
-                                .SetProperty(cb => cb.Value2, mappingChartToken))
-                            .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterDN>
-                            {
-                                ElementMapping = new EntityMapping<QueryFilterDN>(false)
-                                    .CreateProperty(a=>a.Operation)
-                                    .CreateProperty(a=>a.ValueString)
-                                    .SetProperty(a=>a.Token, qtMapping)
-                            })
-                            .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
-                            {
-                                ElementMapping = new EntityMapping<QueryOrderDN>(false)
-                                    .CreateProperty(a=>a.OrderType)
-                                    .SetProperty(a=>a.Token, qtMapping)
-                            })
-                    },
-
-                    new EmbeddedEntitySettings<ChartPaletteModel>() 
-                    { 
-                        ShowSave = false,
-                        PartialViewName = _ => ViewPrefix.Formato("ChartPalette"),
-                        MappingDefault = new EntityMapping<ChartPaletteModel>(true)
-                            .SetProperty(a => a.Colors, new MListDictionaryMapping<ChartColorDN, Lite<IdentifiableEntity>>(cc=>cc.Related, "Related",
-                                new EntityMapping<ChartColorDN>(false)
-                                    .SetProperty(m => m.Color, ctx=>
-                                    {
-                                        var input = ctx.Inputs["Rgb"];
-                                        int rgb;
-                                        if(input.HasText() && int.TryParse(input, System.Globalization.NumberStyles.HexNumber, null, out rgb))
-                                            return ColorDN.FromARGB(255, rgb);
-
-                                        return null;
-                                    })
-                                    .CreateProperty(c => c.Related)))
-                    }
+                    new EmbeddedEntitySettings<ChartColumnDN> { PartialViewName = _ => ViewPrefix.Formato("ChartColumn") },
+                    new EmbeddedEntitySettings<ChartScriptColumnDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptColumn") },
+                    new EmbeddedEntitySettings<ChartScriptParameterDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptParameter") },
+                    new EntitySettings<ChartScriptDN> { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
                 });
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
@@ -111,53 +62,13 @@ namespace Signum.Web.Chart
                 RouteTable.Routes.MapRoute(null, "ChartFor/{webQueryName}",
                     new { controller = "Chart", action = "Index", webQueryName = "" });
 
-                RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
-                     new { controller = "Chart", action = "ViewUserChart" });
-
-                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname => QueryLogic.RetrieveOrGenerateQuery(queryname));
-
-                ButtonBarEntityHelper.RegisterEntityButtons<UserChartDN>((ctx, entity) =>
-                {
-                    var buttons = new List<ToolBarButton> {};
-                    
-                    if (!entity.IsNew)
-                    {
-                        buttons.Add(new ToolBarButton
-                        {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebUserChartDelete"),
-                            Text = Resources.Delete,
-                            OnClick = Js.Confirm(Resources.Chart_AreYouSureOfDeletingUserChart0.Formato(entity.DisplayName),
-                                Js.Submit(RouteHelper.New().Action<ChartController>(cc => cc.DeleteUserChart(entity.ToLite())))).ToJS()
-                        });
-                    }
-
-                    return buttons.ToArray();
-                });
-
-                ButtonBarEntityHelper.RegisterEntityButtons<ChartPaletteModel>((ctx, entity) =>
-                {
-                    var typeName = Navigator.ResolveWebTypeName(entity.Type.ToType());
-                    return new []
-                    {
-                        new ToolBarButton
-                        {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorSave"),
-                            Text = "Save palette",
-                            OnClick = "SF.ChartColors.savePalette('{0}')".Formato(RouteHelper.New().Action((ChartController pc) => pc.SavePalette(typeName)))
-                        },
-                        new ToolBarButton
-                        {
-                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorCreate"),
-                            Text = "New palette",
-                            Href = RouteHelper.New().Action<ChartController>(cc => cc.CreateNewPalette(typeName))
-                        }
-                    };
-                });
+                UserChartClient.Start();
+                ChartColorClient.Start();
             }
         }
 
-        static EntityMapping<ChartTokenDN> mappingChartToken = new EntityMapping<ChartTokenDN>(true)
-            .SetProperty(ct => ct.Token, ctx =>
+        public static EntityMapping<ChartColumnDN> MappingChartColumn = new EntityMapping<ChartColumnDN>(true)
+            .SetProperty(ct => ct.TryToken, ctx =>
             {
                 var tokenName = "";
 
@@ -176,12 +87,16 @@ namespace Signum.Web.Chart
                     return ctx.None();
 
                 var qd = DynamicQueryManager.Current.QueryDescription(
-                    Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+                    Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
-                var chartToken = (ChartTokenDN)ctx.Parent.UntypedValue;
-                var chart = (ChartBase)ctx.Parent.Parent.UntypedValue;
+                var chartToken = (ChartColumnDN)ctx.Parent.UntypedValue;
 
-                return QueryUtils.Parse(tokenName, qt => chart.SubTokensChart(qt, qd.Columns, true));
+                var token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, true /* chartToken.ParentChart.GroupResults*/));
+
+                if (token is AggregateToken && !chartToken.ParentChart.GroupResults)
+                    token = token.Parent;
+
+                return token;
             })
             .SetProperty(ct => ct.DisplayName, ctx =>
             {
@@ -191,35 +106,67 @@ namespace Signum.Web.Chart
                 return ctx.Input;
             });
 
-        public static EntityMapping<ChartBase> MappingChartBase = new EntityMapping<ChartBase>(true)
-            .SetProperty(cb => cb.Dimension1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-            .SetProperty(cb => cb.Dimension2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-            .SetProperty(cb => cb.Value1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
-            .SetProperty(cb => cb.Value2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); });
-
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
-            .SetProperty(cr => cr.Chart, MappingChartBase);
-                 
-        static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
+            .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnDN>(MappingChartColumn));
+
+
+        public class MListCorrelatedOrDefaultMapping<S> : MListMapping<S>
+        {
+            public MListCorrelatedOrDefaultMapping()
+                : base()
             {
+            }
+
+            public MListCorrelatedOrDefaultMapping(Mapping<S> elementMapping)
+                : base(elementMapping)
+            {
+            }
+
+            public override MList<S> GetValue(MappingContext<MList<S>> ctx)
+            {
+                MList<S> list = ctx.Value;
+                int i = 0;
+
+                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx).OrderBy(mc => mc.ControlID.Substring(mc.ControlID.LastIndexOf("_") + 1).ToInt().Value))
+                {
+                    if (i < list.Count)
+                    {
+                        itemCtx.Value = list[i];
+                        itemCtx.Value = ElementMapping(itemCtx);
+
+                        ctx.AddChild(itemCtx);
+                        list[i] = itemCtx.Value;
+                    }
+                    i++;
+                }
+
+                return list;
+            }
+        }
+
+        static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
+        {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+                Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
-            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToFilter()).ToList();
+            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qt => qt.SubTokensChart(qd.Columns, chartRequest.GroupResults))
+                .Select(fo => fo.ToFilter()).ToList();
         }
 
         static List<Order> ExtractChartOrders(MappingContext<List<Order>> ctx)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+                Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
-            
-            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qt => chartRequest.Chart.SubTokensFilters(qt, qd.Columns)).Select(fo => fo.ToOrder()).ToList();
+
+            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, 
+                        qt => qt.SubTokensChart(qd.Columns, true/*chartRequest.GroupResults*/))
+                    .Select(fo => fo.ToOrder()).ToList();
         }
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
@@ -229,6 +176,8 @@ namespace Signum.Web.Chart
 
             return new[] { ChartQueryButton(ctx.Prefix) };
         }
+
+
 
         public static ToolBarButton ChartQueryButton(string prefix)
         {
@@ -243,342 +192,95 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbChartNew"),
                     AltText = chartNewText,
                     Text = chartNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(prefix).requestData()).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), JsFindNavigator.GetFor(prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 };
         }
 
-        public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
+
+        public static MvcHtmlString ChartTokenBuilder(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, QueryDescription qd, Context context)
         {
-            if (!Navigator.IsViewable(typeof(UserChartDN), EntitySettingsContext.Admin))
-                return null;
-            
-            var items = new List<ToolBarButton>();
+            bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.IsGroupKey == false) ?? true;
 
-            Lite<UserChartDN> currentUserChart = null;
-            string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
-            if (url.HasText() && url.Contains("UC"))
-                currentUserChart = new Lite<UserChartDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
-
-            foreach (var uc in ChartLogic.GetUserCharts(queryName))
-            {
-                items.Add(new ToolBarButton
-                {
-                    Text = uc.ToString(),
-                    AltText = uc.ToString(),
-                    Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc)),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
-                });
-            }
-
-            if (items.Count > 0)
-                items.Add(new ToolBarSeparator());
-
-            if (Navigator.IsCreable(typeof(UserChartDN), EntitySettingsContext.Admin))
-            {
-                string uqNewText = Resources.UserChart_CreateNew;
-                items.Add(new ToolBarButton
-                {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
-                    AltText = uqNewText,
-                    Text = uqNewText,
-                    OnClick = Js.Submit(RouteHelper.New().Action("CreateUserChart", "Chart"), "SF.Chart.Builder.requestProcessedData({0})".Formato(prefix)).ToJS(),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
-                });
-            }
-
-            if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
-            {
-                string ucEditText = Resources.UserChart_Edit;
-                items.Add(new ToolBarButton
-                {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
-                    AltText = ucEditText,
-                    Text = ucEditText,
-                    Href = Navigator.ViewRoute(currentUserChart),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
-                });
-            }
-
-            string ucUserChartText = Resources.UserChart_UserCharts;
-            var buttons = new List<ToolBarButton> 
-            {
-                new ToolBarMenu
-                {
-                    Id = TypeContextUtilities.Compose(prefix, "tmUserCharts"),
-                    AltText = ucUserChartText,
-                    Text = ucUserChartText,
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass,
-                    Items = items
-                }
-            };
-
-            if (ReportsClient.ToExcelPlain)
-            {
-                string ucExportDataText = Resources.UserChart_ExportData;
-                buttons.Add(new ToolBarButton
-                {
-                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
-                    AltText = ucExportDataText,
-                    Text = ucExportDataText,
-                    OnClick = "SF.Chart.Builder.exportData('{0}', '{1}', '{2}')".Formato(prefix, RouteHelper.New().Action("Validate", "Chart"), RouteHelper.New().Action("ExportData", "Chart")),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
-                });
-            }
-
-            return buttons;
+            return helper.QueryTokenDNBuilder(chartToken, context, qd.QueryName, t =>
+                t.SubTokensChart(qd.Columns, chart.GroupResults && canAggregate)
+            );
         }
 
-        public static object DataJson(ChartRequest request, ResultTable resultTable)
+        public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptDN current, ChartScriptDN script)
         {
-            var chart = request.Chart;
-            
+            string css = "sf-chart-img";
 
-            switch (chart.ChartResultType)
-            {
-                case ChartResultType.TypeValue:
-                    {
-                        var d1Converter = chart.Dimension1.Converter(true);
-                        var v1Converter = chart.Value1.Converter(false);
-                        return new
-                        {
-                            labels = new
-                            {
-                                dimension1 = chart.Dimension1.GetTitle(),
-                                value1 = chart.Value1.GetTitle()
-                            },
-                            serie = chart.GroupResults ?
-                                resultTable.Rows.Select(r => new Dictionary<string, object>
-                            { 
-                                { "dimension1", d1Converter(r[0]) }, 
-                                { "value1", v1Converter(r[1]) }
-                            }).ToList() :
-                                resultTable.Rows.Select(r => new Dictionary<string, object>
-                            { 
-                                { "dimension1", d1Converter(r[0]) }, 
-                                { "value1", v1Converter(r[1]) },
-                                { "entity", r.Entity.Key() }
-                            }).ToList()
-                        };
-                    }
-                case ChartResultType.TypeTypeValue:
-                    {
-                        var d1Converter = chart.Dimension1.Converter(false);
-                        var d2Converter = chart.Dimension2.Converter(true);
-                        var v1Converter = chart.Value1.Converter(false);
-
-                        object NullValue = "- None -";
-                        List<object> dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
-                        Dictionary<object, Dictionary<object, object>> dic1dic0 = resultTable.Rows.AgGroupToDictionary(r => r[1] ?? NullValue, gr => gr.ToDictionary(r => r[0] ?? NullValue, r => r[2]));
-
-                        return new
-                        {
-                            labels = new
-                            {
-                                dimension1 = chart.Dimension1.GetTitle(),
-                                dimension2 = chart.Dimension2.GetTitle(),
-                                value1 = chart.Value1.GetTitle()
-                            },
-                            dimension1 = dimension1Values.Select(d1Converter).ToList(),
-                            series = dic1dic0.Select(kvp => new
-                            {
-                                dimension2 = d2Converter(kvp.Key == NullValue ? null : kvp.Key),
-                                values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1 ?? NullValue)).ToList(),
-                            }).ToList()
-                        };
-                    }
-                case ChartResultType.Points:
-                    {
-                        var d1Converter = chart.Dimension1.Converter(false);
-                        var d2Converter = chart.Dimension2.Converter(false);
-                        var v1Converter = chart.Value1.Converter(true);
-
-                        return new
-                        {
-                            labels = new
-                            {
-                                value1 = chart.Value1.GetTitle(),
-                                dimension1 = chart.Dimension1.GetTitle(),
-                                dimension2 = chart.Dimension2.GetTitle(),
-                            },
-                            points = resultTable.Rows.Select(r => new
-                            {
-                                value1 = v1Converter(r[2]),
-                                dimension1 = d1Converter(r[0]),
-                                dimension2 = d2Converter(r[1])
-                            }).ToList()
-                        };
-                    }
-
-                case ChartResultType.Bubbles:
-                    {
-                        var d1Converter = chart.Dimension1.Converter(false);
-                        var d2Converter = chart.Dimension2.Converter(false);
-                        var v1Converter = chart.Value1.Converter(true);
-                        var v2Converter = chart.Value2.Converter(false);
-
-                        return new
-                        {
-                            labels = new
-                            {
-                                value1 = chart.Value1.GetTitle(),
-                                dimension1 = chart.Dimension1.GetTitle(),
-                                dimension2 = chart.Dimension2.GetTitle(),
-                                value2 = chart.Value2.GetTitle()
-                            },
-                            points = resultTable.Rows.Select(r => new
-                            {
-                                value1 = v1Converter(r[2]),
-                                dimension1 = d1Converter(r[0]),
-                                dimension2 = d2Converter(r[1]),
-                                value2 = v2Converter(r[3])
-                            }).ToList()
-                        };
-                    }
-                default:
-                    throw new NotImplementedException("");
-            }
-        }
-
-        private static Func<object,object> Converter(this ChartTokenDN ct, bool color)
-        {
-            if (ct == null)
-                return null;
-
-            var type = ct.Token.Type.UnNullify();
-
-            if (typeof(Lite).IsAssignableFrom(type))
-            {
-                if(color)
-                    return p =>
-                    {
-                        Lite l = (Lite)p;
-                        return new
-                        {
-                            key = l.TryCC(li => li.Key()),
-                            toStr = l.TryCC(li => li.ToString()),
-                            color = l == null ? "#555" : ChartColorLogic.ColorFor(l).TryToHtml(),
-                        };
-                    };
-                else
-                    return p =>
-                    {
-                        Lite l = (Lite)p;
-                        return new
-                        {
-                            key = l.TryCC(li => li.Key()),
-                            toStr = l.TryCC(li => li.ToString())
-                        };
-                    };
-            }
-            else if (type.IsEnum)
-            {
-                var dic = ChartColorLogic.Colors.Value.TryGetC(EnumProxy.Generate(type));
-
-                if (color)
-                    return p =>
-                    {
-                        Enum e = (Enum)p;
-                        return new
-                        {
-                            key = e.TryToString(),
-                            toStr = e.TryCC(en => en.NiceToString()),
-                            color = e == null ? "#555" : dic.TryGetS(Convert.ToInt32(e)).TryToHtml(),
-                        };
-                    };
-                else
-                    return p =>
-                    {
-                        Enum e = (Enum)p;
-                        return new
-                        {
-                            key = e.TryToString(),
-                            toStr = e.TryCC(en => en.NiceToString())
-                        };
-                    };
-            }
-            else if (typeof(DateTime) == type)
-            {
-                return p =>
-                {
-                    DateTime? e = (DateTime?)p;
-                    if (e != null)
-                        e = e.Value.ToUserInterface();
-                    return new
-                    {
-                        key = e.TryToString("s"),
-                        toStr = ct.Token.Format.HasText() ? e.TryToString(ct.Token.Format) : p.TryToString()
-                    };
-                };
-            }
-            else if (typeof(IFormattable).IsAssignableFrom(type) && ct.Token.Format.HasText())
-            {
-                return p =>
-                {
-                    return new
-                    {
-                        key = p,
-                        toStr = ((IFormattable)p).TryToString(ct.Token.Format)
-                    };
-                };
-            }
-            else
-                return p => p;
-        }
-
-        public static string ChartTypeImgClass(ChartBase chart, ChartType type)
-        {
-            string css = "sf-chart-img sf-chart-img-" + type.ToString().ToLower();
-
-            if (ChartUtils.GetChartResultType(type) == chart.ChartResultType)
+            if (!chartBase.Columns.Any(a=>a.ParseException != null) && script.IsCompatibleWith(chartBase))
                 css += " sf-chart-img-equiv";
 
-            if (type == chart.ChartType)
+            if (script.Is(current))
                 css += " sf-chart-img-curr";
-            
+
             return css;
         }
 
-        public static MvcHtmlString ChartTokenCombo(this HtmlHelper helper, QueryTokenDN chartToken, ChartBase chart, object queryName, Context context)
+        public static string ToJS(this ChartRequest request)
         {
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            var tokenPath = chartToken.Token.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
-
-            QueryToken queryToken = chartToken.Token;
-            if (tokenPath.Count > 0)
-                queryToken = tokenPath[0];
-
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            bool canAggregate = (chartToken as ChartTokenDN).TryCS(ct => ct.ShouldAggregate) ?? true;
-
-            var rootTokens = chart.SubTokensChart(null, qd.Columns, canAggregate);
-
-            sb.AddLine(SearchControlHelper.TokenOptionsCombo(
-                helper, qd.QueryName, SearchControlHelper.TokensCombo(rootTokens, queryToken), context, 0, false));
-            
-            for (int i = 0; i < tokenPath.Count; i++)
+            return new JsOptionsBuilder(true)
             {
-                QueryToken t = tokenPath[i];
-                List<QueryToken> subtokens = chart.SubTokensChart(t, qd.Columns, canAggregate);
-                if (!subtokens.IsEmpty())
-                {
-                    bool moreTokens = i + 1 < tokenPath.Count;
-                    sb.AddLine(SearchControlHelper.TokenOptionsCombo(
-                        helper, queryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
-                }
-            }
-            
-            return sb.ToHtml();
+                { "webQueryName", request.QueryName.TryCC(q => Navigator.ResolveWebQueryName(q).SingleQuote()) },
+                { "orders", request.Orders.IsEmpty() ? null : ("[" + request.Orders.ToString(oo => oo.ToJS().SingleQuote(), ",") + "]") }
+            }.ToJS();
         }
 
-        public static MvcHtmlString ChartRootTokens(this HtmlHelper helper, ChartBase chart, QueryDescription qd, Context context)
+        public static string ToJS(this Order order)
         {
-            var subtokens = chart.SubTokensChart(null, qd.Columns, true);
+            return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.FullKey();
+        }
 
-            return SearchControlHelper.TokenOptionsCombo(
-                helper, qd.QueryName, SearchControlHelper.TokensCombo(subtokens, null), context, 0, false);
+        public static string ToJS(this UserChartDN userChart)
+        {
+            return new JsOptionsBuilder(true)
+            {
+                { "webQueryName", userChart.QueryName.TryCC(q => Navigator.ResolveWebQueryName(q).SingleQuote()) },
+                { "orders", userChart.Orders.IsEmpty() ? null : ("[" + userChart.Orders.ToString(oo => oo.ToJS().SingleQuote(), ",") + "]") }
+            }.ToJS();
+        }
+
+        public static string ToJS(this QueryOrderDN order)
+        {
+            return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.FullKey();
+        }
+
+        public static void SetupParameter(ValueLine vl, ChartColumnDN column, ChartScriptParameterDN scriptParameter)
+        {
+            if (scriptParameter == null)
+            {
+                vl.Visible = false;
+                return;
+            }
+
+            vl.LabelText = scriptParameter.Name;
+
+            if (scriptParameter.Type == ChartParameterType.Number ||scriptParameter.Type == ChartParameterType.String)
+            {
+                vl.ValueLineType = ValueLineType.TextBox;
+            }
+            else if (scriptParameter.Type == ChartParameterType.Enum)
+            {
+                vl.ValueLineType = ValueLineType.Combo;
+
+                var compatible = scriptParameter.GetEnumValues().Where(a => a.CompatibleWith(column.Token)).ToList();
+                vl.ReadOnly = compatible.Count <= 1;
+                vl.EnumComboItems = compatible.Select(ev => new SelectListItem
+                {
+                    Value = ev.Name,
+                    Text = ev.Name,
+                    Selected = ((string)vl.UntypedValue) == ev.Name
+                }).ToList();
+
+                if (!vl.ValueHtmlProps.IsNullOrEmpty())
+                    vl.ValueHtmlProps.Clear();
+            }
+
+
+            vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange";
         }
     }
 }

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Entities;
 using System.Web;
@@ -17,6 +16,9 @@ using System.IO;
 using Signum.Engine.Basics;
 using Signum.Engine.Files;
 using Signum.Engine;
+using System.Linq.Expressions;
+using Signum.Engine.DynamicQuery;
+using Signum.Utilities.ExpressionTrees;
 #endregion
 
 namespace Signum.Web.Files
@@ -25,7 +27,7 @@ namespace Signum.Web.Files
     {
         public static string ViewPrefix = "~/Files/Views/{0}.cshtml";
 
-        public static void Start(bool filePath, bool embeddedFile)
+        public static void Start(bool filePath, bool file, bool embeddedFile)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -37,39 +39,37 @@ namespace Signum.Web.Files
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<FileRepositoryDN>(EntityType.Admin){PartialViewName = e => ViewPrefix.Formato("FileRepository")},
-                        new EntitySettings<FilePathDN>(EntityType.Default),
-                        new EntitySettings<FileTypeDN>(EntityType.ServerOnly),
+                        new EntitySettings<FileRepositoryDN>{ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
+                        new EntitySettings<FilePathDN>(),
+                        new EntitySettings<FileTypeDN>(),
                     });
 
                     var es = Navigator.EntitySettings<FilePathDN>();
                      
-                    var baseMapping = (Mapping<FilePathDN>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+                    var baseMapping = (Mapping<FilePathDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
-                    es.MappingDefault = ctx =>
+                    es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.RuntimeType == null)
+                        if (runtimeInfo.EntityType == null)
                             return null;
                         else
                         {
                             if (runtimeInfo.IsNew)
                             {
-                                string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
-
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
                                 if (hpf != null)
                                 {
-                                    fp.FileName = Path.GetFileName(hpf.FileName);
-                                    fp.BinaryFile = hpf.InputStream.ReadAllBytes();
-
-                                    return fp;
+                                    string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                    return new FilePathDN(MultiEnumLogic<FileTypeDN>.ToEnum(fileType))
+                                    {
+                                        FileName = Path.GetFileName(hpf.FileName),
+                                        BinaryFile = hpf.InputStream.ReadAllBytes(),
+                                    };
                                 }
                                 else
-                                { 
-                                    FilePathDN filePathInSession = (FilePathDN)ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
-                                    return filePathInSession;
+                                {
+                                    return (FilePathDN)GetSessionFile(ctx);
                                 }
                             }
                         }
@@ -77,7 +77,54 @@ namespace Signum.Web.Files
                         return baseMapping(ctx);
                     };
 
-                    es.MappingAdmin = es.MappingDefault;
+                    es.MappingMain = es.MappingLine;
+
+                    var lm = new LiteMapping<FilePathDN>();
+                    lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
+                    Mapping.RegisterValue<Lite<FilePathDN>>(lm.GetValue);
+                }
+
+                if (file)
+                {
+                    var es = new EntitySettings<FileDN>();
+                    Navigator.AddSetting(es);
+
+                    var baseMapping = (Mapping<FileDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+
+                    es.MappingLine = ctx =>
+                    {
+                        RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                        if (runtimeInfo.EntityType == null)
+                            return null;
+                        else
+                        {
+                            if (runtimeInfo.IsNew)
+                            {
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
+
+                                if (hpf != null)
+                                {
+                                    return new FileDN
+                                    {
+                                        FileName = Path.GetFileName(hpf.FileName),
+                                        BinaryFile = hpf.InputStream.ReadAllBytes()
+                                    };
+                                }
+                                else
+                                {
+                                    return (FileDN)GetSessionFile(ctx);
+                                }
+                            }
+                        }
+
+                        return baseMapping(ctx);
+                    };
+
+                    FileLogic.DownloadFileUrl = DownloadFileUrl;
+
+                    var lm = new LiteMapping<FileDN>();
+                    lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
+                    Mapping.RegisterValue<Lite<FileDN>>(lm.GetValue);
                 }
 
                 if (embeddedFile)
@@ -90,31 +137,34 @@ namespace Signum.Web.Files
                     es.MappingDefault = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.RuntimeType == null)
+                        if (runtimeInfo.EntityType == null)
                             return null;
                         else
                         {
-                            if (runtimeInfo.IsNew)
+                            HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
+
+                            if (hpf != null && hpf.ContentLength != 0)
                             {
-                                var result = new EmbeddedFileDN();
-
-                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
-
-                                if (hpf.ContentLength != 0)
+                                return new EmbeddedFileDN()
                                 {
-                                    result.FileName = Path.GetFileName(hpf.FileName);
-                                    result.BinaryFile = hpf.InputStream.ReadAllBytes();
-                                }
-
-                                return result;
+                                    FileName = Path.GetFileName(hpf.FileName),
+                                    BinaryFile = hpf.InputStream.ReadAllBytes()
+                                };
+                            }
+                            else
+                            {
+                                var sessionFile = (EmbeddedFileDN)GetSessionFile(ctx);
+                                if (sessionFile != null)
+                                    return sessionFile;
+                                else 
+                                    return baseMapping(ctx);
                             }
                         }
-
-                        return baseMapping(ctx);
                     };
                 }
 
-
+                var dqm = DynamicQueryManager.Current;
+               
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebImage),
                        col => (help, obj) => ((WebImage)obj).FullWebPath == null ? null :
@@ -132,6 +182,30 @@ namespace Signum.Web.Files
 
             }
 
+            
+
+        }
+
+        private static object GetSessionFile(MappingContext ctx)
+        {
+            return ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
+        }
+
+        private static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
+        {
+            string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
+            HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
+            return hpf;
+        }
+
+
+        static string DownloadFileUrl(Lite<FileDN> file)
+        {
+            if (file == null)
+                return null;
+
+            return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(file).ToString())); 
         }
     }
+
 }

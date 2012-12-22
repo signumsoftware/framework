@@ -22,7 +22,7 @@ namespace Signum.Windows.Authorization
 
             Common.RouteTask += Common_RouteTask;
             Common.LabelOnlyRouteTask += Common_RouteTask;
-            PropertyRoute.SetIsAllowedCallback(pr => GetPropertyAllowed(pr) >= PropertyAllowed.Read);
+            PropertyRoute.SetIsAllowedCallback(pr => pr.GetAllowedFor(PropertyAllowed.Read));
 
             AuthClient.UpdateCacheEvent += new Action(AuthClient_UpdateCacheEvent);
         }
@@ -33,15 +33,30 @@ namespace Signum.Windows.Authorization
         }
 
 
-        static PropertyAllowed GetPropertyAllowed(PropertyRoute route)
+        static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
         {
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
 
-            if (TypeAuthClient.GetAllowed(route.RootType).Max().GetUI() == TypeAllowedBasic.None)
+            if (TypeAuthClient.GetAllowed(route.RootType).MaxUI() == TypeAllowedBasic.None)
                 return PropertyAllowed.None;
 
             return propertyRules.GetAllowed(route);
+        }
+
+        static string GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
+        {
+            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                return GetAllowedFor(route.Parent, requested);
+
+            if (TypeAuthClient.GetAllowed(route.RootType).MaxUI() == TypeAllowedBasic.None)
+                return "Type {0} is set to None for {1}".Formato(route.RootType.NiceName(), RoleDN.Current);
+
+            var current = propertyRules.GetAllowed(route);
+            if (requested > current)
+                return "Property {0} is set to {1} for {2}".Formato(route, current, RoleDN.Current);
+            
+            return null;
         }
 
 

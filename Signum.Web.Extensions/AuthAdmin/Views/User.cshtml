@@ -3,21 +3,19 @@
     @Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50)
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
-    <label class="sf-label-line">@Resources.ChangePasswordAspx_NewPassword</label>
-    @Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } })
-    @Html.ValidationMessage(UserMapping.NewPasswordKey)
-    <div class="clearall">
-    </div>
-        
-    <label class="sf-label-line">@Resources.ChangePasswordAspx_ConfirmNewPassword</label>
-    @Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } })
-    @Html.ValidationMessage(UserMapping.NewPasswordBisKey)
+        @Html.Field(Resources.ChangePasswordAspx_NewPassword,
+            Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }).Concat(
+            Html.ValidationMessage(UserMapping.NewPasswordKey) ?? MvcHtmlString.Empty))
+    
+        @Html.Field(Resources.ChangePasswordAspx_ConfirmNewPassword, 
+            Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }).Concat(
+            Html.ValidationMessage(UserMapping.NewPasswordBisKey) ?? MvcHtmlString.Empty))
     }
-     @Html.ValueLine(e, f => f.PasswordNeverExpires)
-     @Html.ValueLine(e, f => f.PasswordSetDate)
+    @Html.ValueLine(e, f => f.PasswordNeverExpires)
+    @Html.ValueLine(e, f => f.PasswordSetDate)
 
     @Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30)
     @Html.EntityLine(e, f => f.Role)
     @Html.ValueLine(e, f => f.State, v => v.ReadOnly = true)
     @Html.EntityLine(e, f => f.Related)
-} 
+}

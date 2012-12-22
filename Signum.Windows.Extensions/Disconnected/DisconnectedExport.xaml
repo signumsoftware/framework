@@ -9,6 +9,7 @@
     <StackPanel>
         <m:ValueLine m:Common.Route="CreationDate" />
         <m:EntityLine m:Common.Route="Machine" />
+        <m:ValueLine m:Common.Route="State" />
         <StackPanel m:Common.MinLabelWidth="180">
             <m:ValueLine m:Common.Route="Lock" />
             <m:ValueLine m:Common.Route="CreateDatabase" />

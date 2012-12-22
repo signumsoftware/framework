@@ -96,7 +96,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal" Grid.Column="0">
                                 <Button Style="{StaticResource RoundButton}"  Content="{StaticResource Create}" Visibility="{Binding CanAdd, Converter={x:Static m:Converters.BoolToVisibility}}" Click="addCondition_Click"/>
-                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Resource.FriendlyName}"  />
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Resource.CleanName}"  />
                             </StackPanel>
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Create}" Style="{StaticResource SphereRadioButton}" Background="Cyan" Grid.Column="1"/>
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Modify}" Style="{StaticResource SphereRadioButton}" Background="GreenYellow" Grid.Column="2" />

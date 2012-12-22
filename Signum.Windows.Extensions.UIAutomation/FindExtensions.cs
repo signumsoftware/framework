@@ -28,6 +28,12 @@ namespace Signum.Windows.UIAutomation
             return parent.FindFirst(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
         }
 
+        public static AutomationElement TryNormalizeById(this AutomationElement parent, string automationId)
+        {
+            TreeWalker tw = new TreeWalker(new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
+
+            return tw.Normalize(parent);
+        }
 
         public static AutomationElement DescendantById(this AutomationElement parent, string automationId)
         {
@@ -49,6 +55,18 @@ namespace Signum.Windows.UIAutomation
             return result;
         }
 
+        public static AutomationElement NormalizeById(this AutomationElement parent, string automationId)
+        {
+            TreeWalker tw = new TreeWalker(new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
+
+            var result = tw.Normalize(parent);
+
+            if (result == null)
+                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
+
+            return result;
+        }
+
         public static AutomationElement TryDescendantByCondition(this AutomationElement parent, Condition condition)
         {
             return parent.TryElementByCondition(TreeScope.Descendants, condition);
@@ -61,7 +79,7 @@ namespace Signum.Windows.UIAutomation
 
         public static AutomationElement TryElementByCondition(this AutomationElement parent, TreeScope scope, Condition condition)
         {
-            return parent.FindFirst(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, condition));
+            return parent.FindFirst(scope, condition);
         }
 
 
@@ -81,6 +99,18 @@ namespace Signum.Windows.UIAutomation
 
             if (result == null)
                 throw new KeyNotFoundException("No AutomationElement found: {0}".Formato(condition.NiceToString()));
+
+            return result;
+        }
+
+        public static AutomationElement NormalizeByCondition(this AutomationElement parent, Condition condition)
+        {
+            TreeWalker tw = new TreeWalker(condition);
+
+            var result = tw.Normalize(parent);
+
+            if (result == null)
+                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
 
             return result;
         }
@@ -140,6 +170,20 @@ namespace Signum.Windows.UIAutomation
             return result;
         }
 
+        public static AutomationElement Normalize(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
+        {
+            var c = ConditionBuilder.ToCondition(condition);
+
+            TreeWalker tw = new TreeWalker(c);
+
+            var result = tw.Normalize(parent);
+
+            if (result == null)
+                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
+
+            return result;
+        }
+
 
         public static List<AutomationElement> Descendants(this AutomationElement parent, Expression<Func<AutomationElement, bool>> condition)
         {
@@ -158,9 +202,6 @@ namespace Signum.Windows.UIAutomation
 
             return parent.FindAll(scope, c).Cast<AutomationElement>().ToList();
         }
-
-
-
 
         public static List<AutomationElement> DescendantsAll(this AutomationElement parent)
         {

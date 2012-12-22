@@ -9,6 +9,5 @@
         <m:EntityLine m:Common.Route="Query"  m:Common.IsReadOnly="true" />
         <m:ValueLine m:Common.Route="DisplayName" />
 		<m2:FileLine m:Common.Route="File" />
-        <m:ValueLine m:Common.Route="Deleted" />
 	</StackPanel>
 </UserControl>

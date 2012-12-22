@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="otcontrolpanel" storage="d:\signum\extensions\signum.web.extensions.sample.test\otcontrolpanel.orderedtest" id="7745224e-b953-4e63-aa93-a3ccd1d96bff" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
-  <Execution timeOut="2147483647" />
-  <TestLinks>
-    <TestLink id="2b44bae5-b20b-2efc-d913-65ad635596f3" name="ControlPanel001_Create" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  </TestLinks>
-</OrderedTest>

@@ -12,7 +12,7 @@ using System.Web;
 
 namespace Signum.Entities.Files
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.SharedPart)]
     public class FilePathDN : ImmutableEntity, IFile
     {
         public FilePathDN() { }
@@ -112,7 +112,6 @@ namespace Signum.Entities.Files
             fp.Repository != null && fp.Repository.WebPrefix.HasText() ?
                 fp.Repository.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
                 null;
-
         public string FullWebPath
         {
             get
@@ -125,18 +124,6 @@ namespace Signum.Entities.Files
         {
             return "{0} - {1}".Formato(FileName, ((long)FileLength).ToComputerSize(true));
         }
-    }
-
-    [Serializable, ForceLocalization]
-    public class WebImage
-    {
-        public string FullWebPath;
-    }
-
-    [Serializable, ForceLocalization]
-    public class WebDownload
-    {
-        public string FullWebPath;
     }
 
     public class HttpFilePathUtils

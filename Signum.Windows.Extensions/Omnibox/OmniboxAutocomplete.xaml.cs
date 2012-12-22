@@ -42,8 +42,8 @@ namespace Signum.Windows.Omnibox
 
             if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
                 autoCompleteTb.SelectEnd();
-            else if (selected != null)
-                OmniboxClient.OnResultSelected.Invoke(selected);
+            else if (selected != null && !(selected is HelpOmniboxResult))
+                OmniboxClient.Providers.GetOrThrow(selected.GetType()).OnSelectedBase(selected, Window.GetWindow((DependencyObject)sender));
         }
     }
 }

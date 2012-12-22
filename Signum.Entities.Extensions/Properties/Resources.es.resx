@@ -1318,7 +1318,7 @@
     <value>Paquete de actualización</value>
   </data>
   <data name="SMSMessageOperations_CreateSMSMessageFromTemplate" xml:space="preserve">
-    <value>Crear SMSMessage desde plantilla</value>
+    <value>Crear SMS desde plantilla</value>
   </data>
   <data name="SMSMessageOperations_CreateUpdateStatusPackage" xml:space="preserve">
     <value>Crear paquete de actualización de estado</value>
@@ -1339,10 +1339,10 @@
     <value>Num lineas</value>
   </data>
   <data name="SMSProviderOperations_SendSMSMessage" xml:space="preserve">
-    <value>Enviar mensaje SMS</value>
+    <value>Enviar SMS</value>
   </data>
   <data name="SMSProviderOperations_SendSMSMessagesFromTemplate" xml:space="preserve">
-    <value>Enviar mensajes SMS de plantilla</value>
+    <value>Enviar SMS desde plantilla</value>
   </data>
   <data name="SMSSendPackageDN" xml:space="preserve">
     <value>Paquete de envios SMS</value>
@@ -1562,5 +1562,35 @@
   </data>
   <data name="TypeAllowed_DBReadUINone" xml:space="preserve">
     <value>DBRead UINone</value>
+  </data>
+  <data name="Omnibox_DatabaseAccess" xml:space="preserve">
+    <value>Buscar entre 'comillas' hace consultas en base de datos</value>
+  </data>
+  <data name="Omnibox_Field" xml:space="preserve">
+    <value>Campo</value>
+  </data>
+  <data name="Omnibox_Help" xml:space="preserve">
+    <value>Ayuda</value>
+  </data>
+  <data name="Omnibox_MatchingOptions" xml:space="preserve">
+    <value>Puedes buscar por (ini)cio, mi(ta)d o (L)etras(M)ayusculas</value>
+  </data>
+  <data name="Omnibox_Query" xml:space="preserve">
+    <value>Consulta</value>
+  </data>
+  <data name="Omnibox_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="Omnibox_UserChart" xml:space="preserve">
+    <value>GraficoUsuario</value>
+  </data>
+  <data name="Omnibox_UserQuery" xml:space="preserve">
+    <value>ConsultaUsuario</value>
+  </data>
+  <data name="Omnibox_Value" xml:space="preserve">
+    <value>Valor</value>
+  </data>
+  <data name="Omnibox_Disambiguate" xml:space="preserve">
+    <value>Con Shift+Enter desambiguas tu consulta</value>
   </data>
 </root>

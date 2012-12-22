@@ -14,12 +14,26 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Web;
 using System.Linq.Expressions;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Files
 {
-
     public static class FilePathLogic
     {
+        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
+            fp => new WebImage { FullWebPath = fp.FullWebPath };
+        public static WebImage WebImage(this FilePathDN fp)
+        {
+            return WebImageExpression.Evaluate(fp);
+        }
+
+        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
+           fp => new WebDownload { FullWebPath = fp.FullWebPath };
+        public static WebDownload WebDownload(this FilePathDN fp)
+        {
+            return WebDownloadExpression.Evaluate(fp);
+        }
+
         static Dictionary<Enum, FileTypeAlgorithm> fileTypes = new Dictionary<Enum, FileTypeAlgorithm>();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -28,10 +42,10 @@ namespace Signum.Engine.Files
             {
                 sb.Include<FilePathDN>();
 
-                EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
+                MultiEnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
-                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete +=new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
+                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete += new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
 
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
                                                  select new
@@ -67,23 +81,17 @@ namespace Signum.Engine.Files
 
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
+
+                new BasicExecute<FileRepositoryDN>(FileRepositoryOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (fr, _) => { }
+                }.Register();
             }
         }
 
-        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
-            fp => new WebImage { FullWebPath = fp.FullWebPath }; 
-        public static WebImage WebImage(this FilePathDN fp)
-        {
-            return WebImageExpression.Evaluate(fp);
-        }
-
-        static Expression<Func<FilePathDN, WebDownload>> WebDownloadExpression =
-           fp => new WebDownload { FullWebPath = fp.FullWebPath };
-        public static WebDownload WebDownload(this FilePathDN fp)
-        {
-            return WebDownloadExpression.Evaluate(fp);
-        }
-
+        
         static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
         {
             var list = query.Select(a => a.FullPhysicalPath).ToList();
@@ -135,11 +143,11 @@ namespace Signum.Engine.Files
                 {
                     //set typedn from enum
                     if (fp.FileType == null)
-                        fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
+                        fp.FileType = MultiEnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
 
                     //set enum from typedn
                     if (fp.FileTypeEnum == null)
-                        fp.SetFileTypeEnum(EnumLogic<FileTypeDN>.ToEnum(fp.FileType));
+                        fp.SetFileTypeEnum(MultiEnumLogic<FileTypeDN>.ToEnum(fp.FileType));
 
                     FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
                     string sufix = alg.CalculateSufix(fp);

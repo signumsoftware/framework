@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Automation;
+using System.Runtime.InteropServices;
+using Signum.Utilities;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -18,21 +20,54 @@ namespace Signum.Windows.UIAutomation
             wp = element.Pattern<WindowPattern>();
         }
 
+        public event Action Disposed;
+
         public virtual void Dispose()
         {
             Close();
+            OnDisposed();
         }
 
-        public void Wait(int milliseconds)
+        protected void OnDisposed()
         {
-            wp.WaitForInputIdle(milliseconds);
+            if (Disposed != null)
+                Disposed();
+        }
+
+        public bool WaitForInputIdle(int? timeOut = null)
+        {
+            return wp.WaitForInputIdle(timeOut ?? WaitExtensions.DefaultTimeOut);
+        }
+
+
+        public virtual bool IsClosed
+        {
+            get
+            {
+                try
+                {
+                    return Element.Current.IsOffscreen;
+                }
+                catch (ElementNotAvailableException)
+                {
+                    return true;
+                }
+                catch (InvalidOperationException)
+                {
+                    return true;
+                }
+                catch (COMException)
+                {
+                    return true;
+                }
+            }
         }
 
         public virtual bool Close()
         {
             try
             {
-                if (Element.Current.IsOffscreen)
+                if (IsClosed)
                     return false;
 
                 wp.Close();
@@ -48,49 +83,35 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public MessageBoxProxy TryGetCurrentMessageBox()
+       
+
+        public static AutomationElement Normalize(AutomationElement element)
         {
-            var win = Element.TryChild(a => a.Current.ControlType == ControlType.Window && a.Current.ClassName == "#32770");
+            TreeWalker walker = new TreeWalker(ConditionBuilder.ToCondition(a => a.Current.ControlType == ControlType.Window));
 
-            if (win != null)
-                return new MessageBoxProxy(win);
-
-            return null;
-        }
-
-        public MessageBoxProxy WaitCurrentMessageBox()
-        {
-            var win = Element.WaitChild(a => a.Current.ControlType == ControlType.Window && a.Current.ClassName == "#32770");
-
-            return new MessageBoxProxy(win);
+            return walker.Normalize(element);
         }
     }
 
-
-    public class MessageBoxProxy : WindowProxy
+    public static class WindowExtensions
     {
-        public MessageBoxProxy(AutomationElement element): base(element)
+        public static T Next<F, T>(this F from, Func<F, T> wizarAction)
+            where F : WindowProxy
+            where T : WindowProxy
         {
+            using (from)
+            {
+                return wizarAction(from);
+            }
         }
 
-        public AutomationElement OkButton
+        public static void End<F>(this F from, Action<F> wizarAction)
+            where F : WindowProxy
         {
-            get { return Element.TryChildById("1") ?? Element.ChildById("2"); }
-        }
-
-        public AutomationElement CancelButton
-        {
-            get { return Element.ChildById("2"); }//Warning!!
-        }
-
-        public AutomationElement YesButton
-        {
-            get { return Element.ChildById("6"); }
-        }
-
-        public AutomationElement NoButton
-        {
-            get { return Element.ChildById("7"); }
+            using (from)
+            {
+                wizarAction(from);
+            }
         }
     }
 }

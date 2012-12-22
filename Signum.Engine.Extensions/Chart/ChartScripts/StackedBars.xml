@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ChartScript GroupBy="Always">
+  <Columns>
+    <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true">
+      <Parameter1 Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette " />
+      <Parameter2 Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse" />
+    </Column>
+    <Column DisplayName="Split Bars" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
+    <Column DisplayName="Width" ColumnType="Magnitude" />
+    <Column DisplayName="Width 2" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Width 3" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Width 4" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Width 5" ColumnType="Magnitude" IsOptional="true" />
+  </Columns>
+  <Icon FileName="stackedbars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAw9JREFUeNrsmEFrFDEUx5PZfokiCFIF9SYVehCtXtRT9QtUP0Sh30KKFE9ehIIHv4TiqSLiQauVtYJQULx5srtJ3vPl5SWT2V23sxjoQieQyWQm7Pzm/5K8/45GRDXPpVJzXjrAIoDrGzvYKdgBnlBZiCefthexIlztL/Z0uNlTqievsP37mep/+6E03dJ0qCqq1OrYNq5V6ubKefXw3hVdDPDs9c2xm4hAB6oK1Oenh+r2rav1PTkAbfRAQ4AOjsY6i8rS+cvdvgcsp+A4lGIwukBdSwCYjREwqs7FFrh6OGvDedEQ52oxAbUIcg0dA3pGFDAgMAe+BihWzgM6F2ChMKBCm9QK/QAWQC2DeSAQlTywZUgXwFi1EF4PCMUVdGYECgK0n2gScmNcUMyJctYlIA9ooQ61AyysIJgxMFYTbFwSamBC+GIYTZp3mMLK6km/rIIwDOqRWjwfIYMUBQdDI4Ch5iFlOPDjZY5C8RAPBIo79aJhuKDg0dCJSi6FmVcxbzEBLgWkdIgP3jyfOvDCuTW192H/2B/UvGkrdXf1clnA5Y2fU3f95S4Xd4Cn3W59ebKIk2xWr/L+KgzT7McWFC9TerfUp/L415ba7x+2tmO+XV1ZUg/WpluyBHjm2uZ/venH19+THUPZB0HMhN/AjZXNndqhDfn71e5XDzib3WpbEJuZIm7MbMU8GMZ8jbyxMyD4FkMOt66V45noB7WuagD8149AbQ6jYmJeY4aJ9ssbCSPnxkR71s4zZrnYZpC28fAIhJPeWDwkinl1gClXBxvmApyHlNC6LH/PlovHHjyuVOrzEGj0OT+zy6k9okkKOjG1LhhdMRsz2636wTkc5P9EGi+Rz8WokI1zrhFSOhfDy66npePJFDyqAeShjXnYmIs4EZJXp5WweqctcDb6RvGKscw2B+2fJsAo5KQFk6yYzgBdI7TRM3rlYORTXxtLVtutty+mpxwd7VQ4D5uu3KP9+uLSffX+3V5rO+bbOzculbNbx5WtU5+L5+kT3M6j9RRN3X2j7gBPuPwVYADS+ixYpGUkHwAAAABJRU5ErkJggg==]]></Icon>
+  <Script><![CDATA[function DrawChart(chart, data){
+  
+   var pStack = data.columns.c0.parameter1;
+   var pOrder = data.columns.c0.parameter2;
+  
+   var dim0, series, title;
+  
+   if(data.columns.c1.token == null)
+   {   
+      dim0 = data.rows.map(function(r){return r.c0;});     
+      series = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){
+           var col = data.columns[cn];
+            return {
+              key : cn,
+              color : null,
+              niceName : col.title,
+              points : data.rows.map(function(r){
+                var v = r[cn];
+                return {
+                  rowClick : r,
+                  value: v,
+                  niceToString : v == null ? null: (r.c0.niceToString() + ', ' + col.title + ': ' + v.niceToString()),
+                  dim0 : r.c0,
+                };
+              }) 
+            };        
+        });
+    
+     title = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return data.columns[cn].title; })
+        .join(" | ")
+   }
+   else
+   {
+      var errors = ['c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return "'" + data.columns[cn].displayName + "'"; });
+     
+     if(errors.length > 0)
+      throw errors.join() + " not compatible with '" + data.columns.c1.displayName + "'";  
+    
+     dim0 = d3.nest()
+      .key(function(r){return r.c0.toString(); })
+      .rollup(function(r){return r[0].c0 })
+      .entries(data.rows)
+      .map(function(g){return g.values;});
+
+  
+     series = d3.nest()
+      .key(function(r){return r.c1; })
+      .rollup(function(list){ 
+        var obj = d3.nest()
+            .key(function(r){return r.c0.toString(); })
+            .rollup(function(r){return r[0] })
+            .map(list);
+        
+        var c1 = list[0].c1;
+        return {
+          key : c1.key,
+          color: c1.color,
+          niceName : c1.niceToString(),
+          points : dim0.map(function(dim0){ 
+            var row = obj[dim0];
+            return {
+              rowClick: row, 
+              value: row == null ? null: row.c2,
+              niceToString : row == null ? null: (row.c0.niceToString() + ', ' + row.c1.niceToString() + ': ' + row.c2.niceToString()),
+              dim0: dim0
+          	}; })
+        };
+      })
+      .entries(data.rows)
+      .map(function(g){return g.values;});
+     
+     title = data.columns.c2.title + " by " + data.columns.c1.title
+   }
+  
+  
+  var xRule = rule({
+    _1 : 5,
+    title : 15,
+    _2 : 10, 
+    ticks: 4,
+    content: '*',
+    _4: 5,
+  }, width);
+  //xRule.debugX(chart)
+  
+  var yRule = rule({
+    _1 : 5,
+    legend : 15,
+    _2 : 5,
+    content: '*',
+    ticks: 4,
+    _3 : 5,
+    labels: 10,
+    _4 : 10,
+    title: 15,
+    _5 : 5,
+  }, height);
+  //yRule.debugY(chart);
+
+  
+  var y = d3.scale.ordinal()
+      .domain($.map(dim0, function (v) { return v; }))
+       .rangeBands([0, yRule.size('content')]);
+  
+  var stack = d3.layout.stack()
+      .offset(pStack)
+      .order(pOrder)
+      .values(function(d) { return d.points; })
+      .y(function(p){return p.value == undefined ? 0: p.value.key;})
+      .x(function(p){return y(p.dim0);});
+  
+  stack(series);
+  
+  var flattened = $.map(series, function(s){return s.points});
+  
+  var maxDim0 = d3.nest()      
+      .key(function(r){return r.dim0; })
+      .rollup(function(list){ return { dim0: list[0].dim0, max: d3.max(list, function(a){return a.y0 + a.y;})};})
+      .entries(flattened)
+      .map(function(g){return g.values;});
+  
+  var max = d3.max(flattened, function(v){return v.y0 + v.y;});   
+  
+  var x = d3.scale.linear()
+      .domain([0, max])
+      .range([0, xRule.size('content')]);
+
+  var xTicks = x.ticks(width/50);
+  
+  chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+    .enterData(xTicks, 'line', 'y-lines')
+    .attr('x1', function(t) { return x(t); })
+    .attr('x2', function(t) { return x(t); })
+    .attr('y1', yRule.size('content'))
+  	.style('stroke', 'LightGray');
+  
+  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content'), yRule.start('ticks')))
+    .enterData(xTicks, 'line', 'x-tick')
+    .attr('x1', x)
+    .attr('x2', x)
+    .attr('y2', yRule.size('ticks'))
+    .style('stroke', 'Black');
+  
+  var formatter = pStack == "expand" ? function(t){return (t*100 + "%");} : 
+    		      pStack == "zero" ? function(t){return t;} : 
+                  function(t){return t + "?";};  
+  
+  chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('labels')))
+    .enterData(xTicks, 'text', 'x-label')
+    .attr('x', x)
+    .attr('text-anchor', 'middle')
+    .text(formatter);
+  
+  chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
+    .append('svg:text').attr('class', 'x-title')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+  	.text(title);
+  
+  
+  chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
+	.enterData(dim0, 'line', 'y-tick')
+	.attr('x2', xRule.size('ticks'))
+	.attr('y1', function (v) { return -y(v); })
+	.attr('y2', function (v) { return -y(v); })
+  	.style('stroke', 'Black');
+
+  chart.append('svg:g').attr('class', 'y-title').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
+    .append('svg:text').attr('class', 'y-title')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .text(data.columns.c0.title);
+
+  var color = d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
+  
+  //PAINT GRAPH
+  chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+    .each(function(s){
+      d3.select(this).enterData(function (s) { return s.points; }, 'rect', 'shape')
+      .filter(function (r) {return r.value != undefined;})
+      .attr('stroke', '#fff')
+      .attr('fill', function (r) { return s.color || color(s.key); })
+      .attr('transform', function (r) { return translate(0,  y(r.dim0)); })
+      .attr('height', y.rangeBand())
+      .attr('width', function (r) { return x(r.y); })
+      .attr('x', function (r) { return x(r.y0)})
+      .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
+      .append('svg:title')
+      .text(function (r) { return r.niceToString; })
+    });
+
+  
+  if (y.rangeBand() > 15 && series.length > 0) {
+    
+    var xHalf = xRule.size('content') / 2;
+    var labelMargin = 5;
+    chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', translate(xRule.start('content'), yRule.start('content') + y.rangeBand() / 2))
+      .enterData(maxDim0,'text', 'y-axis-tick-label sf-chart-strong')
+      .attr('x', function (v) { var posx = x(v.max); return posx >= xHalf ? posx - labelMargin : posx + labelMargin; })
+      .attr('y', function (v) { return y(v.dim0); })
+      .attr('text-anchor', function (v) { var posx = x(v.max); return posx >= xHalf ? 'end' : 'start'; })
+      .attr('fill', function (v) { var posx = x(v.max); return posx >= xHalf ? '#fff' : '#000'; })
+      .attr('dominant-baseline', 'middle')
+      .attr('font-weight', 'bold')
+      .text(function (v, i) { return v.dim0.niceToString(); });
+  }
+  
+  var legendScale = d3.scale.ordinal()
+      	.domain($.map(series, function (s, i) { return i; }))
+      	.rangeBands([0, xRule.size('content')]);
+  
+  if (legendScale.rangeBand() > 50) {
+      var legendMargin = yRule.size('legend') + 4;
+      chart.append('svg:g').attr('class', 'color-legend').attr('transform', translate(xRule.start('content'), yRule.start('legend')))
+      .enterData(series, 'rect', 'color-rect')
+      .attr('x', function (e, i) { return legendScale(i); })
+      .attr('width', yRule.size('legend'))
+      .attr('height', yRule.size('legend'))
+      .attr('fill', function (s) { return s.color || color(s.key); });
+  
+      chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
+      .enterData(series, 'text', 'color-text')
+      .attr('x', function (e, i) { return legendScale(i); })
+      .attr('dominant-baseline', 'middle')
+      .text(function (s) { return s.niceName; });
+  }
+
+  chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
+     .append('svg:line')
+     .attr('class', 'x-axis')
+     .attr('x2', xRule.size('content'))
+     .style('stroke', 'Black');
+  
+  chart.append('svg:g').attr('class', 'y-axis').attr('transform', translate(xRule.start('content'), yRule.start('content')))
+    .append('svg:line')
+    .attr('class', 'y-axis')
+    .attr('y2', yRule.size('content'))
+    .style('stroke', 'Black');
+}
+]]></Script>
+</ChartScript>

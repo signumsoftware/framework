@@ -26,7 +26,7 @@ namespace Signum.Web.Chart
             if (result.QueryNameMatch != null)
                 html = html.Concat(" {0}".FormatHtml(result.QueryNameMatch.ToHtml()));
 
-            html = html.Concat(ColoredSpan(" ({0})".Formato(Resources.Chart_Chart), "violet"));
+            html = html.Concat(Icon());
             
             if (result.QueryNameMatch != null)
                 html = new HtmlTag("a")
@@ -34,6 +34,11 @@ namespace Signum.Web.Chart
                     .InnerHtml(html);
                 
             return html;
+        }
+
+        public override MvcHtmlString Icon()
+        {
+            return ColoredSpan(" ({0})".Formato(Resources.Chart_Chart), "violet");
         }
     }
 }

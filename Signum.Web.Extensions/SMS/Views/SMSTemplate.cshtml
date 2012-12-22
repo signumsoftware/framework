@@ -1,9 +1,10 @@
 ﻿@using Signum.Engine
-@using Signum.Entities.SMS;
-@using Signum.Web;
-@using Signum.Web.SMS;
-@using Signum.Engine.SMS;
-@using Signum.Utilities;
+@using Signum.Entities.SMS
+@using Signum.Entities
+@using Signum.Web
+@using Signum.Web.SMS
+@using Signum.Engine.SMS
+@using Signum.Utilities
 @Html.ScriptCss("~/SMS/Content/SMS.css")
 @using (var e = Html.TypeContext<SMSTemplateDN>())
 {   
@@ -32,7 +33,7 @@
         {
             @Html.EntityCombo(e, s => s.AssociatedType, ec =>
             {
-                ec.Data = SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList();
+                ec.Data = SMSLogic.RegisteredDataObjectProviders();
                 ec.OnEntityChanged = "SF.SMS.fillLiterals()";
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
                 ec.ComboHtmlProperties["data-url"] = Url.Action<SMSController>(s => s.GetLiteralsForType(ec.ControlID));

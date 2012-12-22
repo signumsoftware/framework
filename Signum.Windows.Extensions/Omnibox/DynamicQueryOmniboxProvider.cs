@@ -20,7 +20,7 @@ namespace Signum.Windows.Omnibox
             return new DynamicQueryOmniboxResultGenerator(QueryClient.queryNames.Values);
         }
 
-        public override void OnSelected(DynamicQueryOmniboxResult r)
+        public override void OnSelected(DynamicQueryOmniboxResult r, Window window)
         {
             Navigator.Explore(new ExploreOptions(r.QueryNameMatch.Value)
             {
@@ -31,20 +31,20 @@ namespace Signum.Windows.Omnibox
                     var operation = f.Operation;
                     if (operation != null && !QueryUtils.GetFilterOperations(ft).Contains(f.Operation.Value))
                     {
-                        MessageBox.Show("Operation {0} not compatible with {1}".Formato(operation, f.QueryToken.ToString()));
+                        MessageBox.Show(window, "Operation {0} not compatible with {1}".Formato(operation, f.QueryToken.ToString()));
                         operation = FilterOperation.EqualTo;
                     }
 
                     object value = f.Value;
                     if (value == DynamicQueryOmniboxResultGenerator.UnknownValue)
                     {
-                        MessageBox.Show("Unknown value for {0}".Formato(f.QueryToken.ToString()));
+                        MessageBox.Show(window, "Unknown value for {0}".Formato(f.QueryToken.ToString()));
                         value = null;
                     }
                     else
                     {
-                        if (value is Lite)
-                            Server.FillToStr((Lite)value);
+                        if (value is Lite<IIdentifiable>)
+                            Server.FillToStr((Lite<IIdentifiable>)value);
                     }
 
                     return new FilterOption
@@ -108,7 +108,16 @@ namespace Signum.Windows.Omnibox
                 }
             }
 
-            lines.Add(new Run(" ({0})".Formato(typeof(QueryDN).NiceName())) { Foreground = Brushes.Orange });
+        }
+
+        public override Run GetIcon()
+        {
+            return new Run("({0})".Formato(typeof(QueryDN).NiceName())) { Foreground = Brushes.Orange };
+        }
+
+        public override string GetItemStatus(DynamicQueryOmniboxResult result)
+        {
+            return "Q:" + QueryUtils.GetQueryUniqueKey(result.QueryName);
         }
     }
 }

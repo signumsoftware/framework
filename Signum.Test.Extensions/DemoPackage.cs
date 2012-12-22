@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Operations;
 using Signum.Utilities;
-using Signum.Entities.Exceptions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class DemoPackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
@@ -62,7 +61,7 @@ namespace Signum.Entities.Processes
         }
     }
 
-    [Serializable]
+    [Serializable, EntityType(EntityType.System)]
     public class DemoPackageLineDN : IdentifiableEntity
     {
         Lite<DemoPackageDN> package;

@@ -43,16 +43,18 @@ namespace Signum.Windows.Authorization
 
                 UpdateCache();
 
-                Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Admin) { View = e => new User(), ShowSave = false, });
-                Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default) { View = e => new Role() });
-                Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Admin) { View = e => new PasswordExpiresInterval() });
+                Navigator.AddSetting(new EntitySettings<UserDN> { View = e => new User() });
+                Navigator.AddSetting(new EntitySettings<RoleDN> { View = e => new Role() });
 
-                OperationClient.AddSetting(new EntityOperationSettings<UserDN>(UserOperation.SaveNew)
+                if (defaultPasswordExpiresLogic)
+                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { View = e => new PasswordExpiresInterval() });
+
+                OperationClient.AddSetting(new EntityOperationSettings(UserOperation.SaveNew)
                 {
                     IsVisible = e=>e.Entity.IsNew,
                 });
 
-                OperationClient.AddSetting(new EntityOperationSettings<UserDN>(UserOperation.Save)
+                OperationClient.AddSetting(new EntityOperationSettings(UserOperation.Save)
                 {
                     IsVisible = e => !e.Entity.IsNew,
                 }); 

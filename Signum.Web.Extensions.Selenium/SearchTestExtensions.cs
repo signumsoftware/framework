@@ -46,8 +46,8 @@ namespace Signum.Web.Selenium
 
         public static void ToggleFilters(this ISelenium selenium, bool show, string prefix)
         {
-            selenium.Click("jq=#{0}divSearchControl .sf-filters-header".Formato(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}divSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
+            selenium.Click("jq=#{0}sfSearchControl .sf-filters-header".Formato(prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
         }
 
         public static void FilterSelectToken(this ISelenium selenium, int tokenSelectorIndexBase0, string itemSelector, bool willExpand)
@@ -59,17 +59,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Select("{0}ddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0), itemSelector);
             if (willExpand)
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}lblddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0 + 1)));
-        }
-
-        public static void ExpandTokens(this ISelenium selenium, int tokenSelectorIndexBase0)
-        {
-            ExpandTokens(selenium, tokenSelectorIndexBase0, "");
-        }
-
-        public static void ExpandTokens(this ISelenium selenium, int tokenSelectorIndexBase0, string prefix)
-        {
-            selenium.Click("jq=#{0}lblddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}ddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0 + 1)));
         }
 
         public static string FilterOperationSelector(int filterIndexBase0)
@@ -137,7 +127,7 @@ namespace Signum.Web.Selenium
             string cellSelector = SearchTestExtensions.CellSelector(selenium, rowIndexBase1, columnIndexBase1, prefix);
             selenium.ContextMenu(cellSelector);
             
-            string quickFilterSelector = "{0} .quickfilter".Formato(cellSelector);
+            string quickFilterSelector = "{0} .sf-quickfilter > span".Formato(cellSelector);
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(quickFilterSelector));
             selenium.Click(quickFilterSelector);
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
@@ -152,7 +142,7 @@ namespace Signum.Web.Selenium
         {
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
             selenium.ContextMenu(headerSelector);
-            selenium.Click("{0} .quickfilter-header".Formato(headerSelector));
+            selenium.Click("{0} .sf-quickfilter-header > span".Formato(headerSelector));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
         }
 
@@ -167,7 +157,7 @@ namespace Signum.Web.Selenium
             Assert.IsTrue(selenium.IsElementPresent(lastHeaderSelector));
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
             selenium.ContextMenu(headerSelector);
-            selenium.Click("{0} .remove-column".Formato(headerSelector));
+            selenium.Click("{0} .sf-remove-column > span".Formato(headerSelector));
             selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(lastHeaderSelector));
         }
 
@@ -180,7 +170,7 @@ namespace Signum.Web.Selenium
         {
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
             selenium.ContextMenu(headerSelector);
-            selenium.Click("{0} .edit-column".Formato(headerSelector));
+            selenium.Click("{0} .sf-edit-column > span".Formato(headerSelector));
 
             string popupPrefix = prefix + "newName_";
             string popupSelector = SeleniumExtensions.PopupSelector(popupPrefix);
@@ -192,20 +182,6 @@ namespace Signum.Web.Selenium
             Assert.IsTrue(selenium.IsElementPresent("{0}:contains('{1}')".Formato(headerSelector, newName)));
         }
 
-        public static bool CanMoveColumn(this ISelenium selenium, int columnIndexBase1, bool left)
-        {
-            return CanMoveColumn(selenium, columnIndexBase1, left, "");
-        }
-
-        public static bool CanMoveColumn(this ISelenium selenium, int columnIndexBase1, bool left, string prefix)
-        {
-            string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
-            selenium.ContextMenu(headerSelector);
-            bool result = selenium.IsElementPresent("{0} .move-column-{1}".Formato(headerSelector, left ? "left" : "right"));
-            selenium.ContextMenu(headerSelector); //close it
-            return result;
-        }
-
         public static void MoveColumn(this ISelenium selenium, int columnIndexBase1, string columnName, bool left)
         {
             MoveColumn(selenium, columnIndexBase1, columnName, left, "");
@@ -214,8 +190,11 @@ namespace Signum.Web.Selenium
         public static void MoveColumn(this ISelenium selenium, int columnIndexBase1, string columnName, bool left, string prefix)
         {
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
-            selenium.ContextMenu(headerSelector);
-            selenium.Click("{0} .move-column-{1}".Formato(headerSelector, left ? "left" : "right"));
+            string targetSelector = left ? 
+                "{0} .sf-header-droppable-left".Formato(SearchTestExtensions.TableHeaderSelector(columnIndexBase1 - 1, prefix)) :
+                "{0} .sf-header-droppable-right".Formato(SearchTestExtensions.TableHeaderSelector(columnIndexBase1 + 1, prefix));
+            
+            selenium.DragAndDropToObject(headerSelector, targetSelector);
 
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:contains('{1}')".Formato(
                 SearchTestExtensions.TableHeaderSelector((left ? (columnIndexBase1 - 1) : (columnIndexBase1 + 1)), prefix),
@@ -253,16 +232,6 @@ namespace Signum.Web.Selenium
         public static string CellSelector(ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string prefix)
         {
             return "{0} > td:nth-child({1})".Formato(RowSelector(selenium, rowIndexBase1, prefix), columnIndexBase1);
-        }
-
-        public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0)
-        {
-            SelectRowRadioButton(selenium, rowIndexBase0, "");
-        }
-
-        public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0, string prefix)
-        {
-            selenium.Click("{0} > input:radio".Formato(CellSelector(selenium, rowIndexBase0 + 1, 1, prefix)));
         }
 
         public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0)
@@ -432,7 +401,12 @@ namespace Signum.Web.Selenium
 
         public static void EntityClick(this ISelenium selenium, string liteKey, string prefix)
         {
-            selenium.Click("{0} > td:first > a".Formato(EntityRowSelector(liteKey, prefix)));
+            EntityClick(selenium, liteKey, prefix, true);
+        }
+
+        public static void EntityClick(this ISelenium selenium, string liteKey, string prefix, bool allowMultiple)
+        {
+            selenium.Click("{0} > td:nth-child({1}) > a".Formato(EntityRowSelector(liteKey, prefix), allowMultiple ? 2 : 1));
         }
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1)
@@ -442,11 +416,12 @@ namespace Signum.Web.Selenium
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix)
         {
-            selenium.EntityClick(rowIndexBase1, false, prefix);
+            selenium.EntityClick(rowIndexBase1, prefix, true);
         }
-        public static void EntityClick(this ISelenium selenium, int rowIndexBase1,bool multiSel, string prefix)
+
+        public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix, bool allowMultiple)
         {
-            if (multiSel)
+            if (allowMultiple)
                 selenium.Click("{0} > a".Formato(CellSelector(selenium, rowIndexBase1, 2, prefix)));
             else
                 selenium.Click("{0} > a".Formato(CellSelector(selenium, rowIndexBase1, 1, prefix)));

@@ -30,7 +30,7 @@ namespace Signum.Windows.Authorization
         public static Type RuleType = typeof(TypeRuleBuilder);
         public static Type GroupType = typeof(NamespaceNode);
         public static Type ConditionType = typeof(TypeConditionRuleBuilder);
-
+        
         public Lite<RoleDN> Role
         {
             get { return (Lite<RoleDN>)GetValue(RoleProperty); }

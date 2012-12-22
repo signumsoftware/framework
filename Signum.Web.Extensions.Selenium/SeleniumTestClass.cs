@@ -6,6 +6,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Selenium;
 using System.Diagnostics;
 using System.Threading;
+using Signum.Engine;
+using Signum.Utilities;
+using Signum.Entities.Reflection;
+using Signum.Entities;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Selenium
 {
@@ -61,6 +66,21 @@ namespace Signum.Web.Selenium
             }
         }
 
+        protected virtual string FindRoute(Type tipo)
+        {
+            return "Find/" + (TypeLogic.TypeToName.TryGetC(tipo) ?? Reflector.CleanTypeName(tipo));
+        }
 
+        protected virtual string ViewRoute(Type tipo, int? id)
+        {
+            return "View/{0}/{1}".Formato(
+                TypeLogic.TypeToName.TryGetC(tipo) ?? Reflector.CleanTypeName(tipo),
+                id.HasValue ? id.ToString() : "");
+        }
+
+        protected virtual string ViewRoute(Lite<IIdentifiable> lite)
+        {
+            return ViewRoute(lite.EntityType, lite.IdOrNull);
+        }
     }
 }

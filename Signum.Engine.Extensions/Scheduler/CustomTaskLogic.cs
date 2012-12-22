@@ -15,7 +15,6 @@ using Signum.Engine.Extensions.Properties;
 using System.Reflection;
 using Signum.Entities.Authorization;
 using System.Linq.Expressions;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Scheduler
@@ -42,17 +41,17 @@ namespace Signum.Engine.Scheduler
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                EnumLogic<CustomTaskDN>.Start(sb, () => tasks.Keys.ToHashSet());
+                MultiEnumLogic<CustomTaskDN>.Start(sb, () => tasks.Keys.ToHashSet());
 
                 sb.Include<CustomTaskExecutionDN>();
 
                 new BasicExecute<CustomTaskDN>(CustomTaskOperation.Execute)
                 {
-                    Execute = (ct, _) => Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key))
+                    Execute = (ct, _) => Execute(MultiEnumLogic<CustomTaskDN>.ToEnum(ct.Key))
                 }.Register();
 
                 SchedulerLogic.ExecuteTask.Register((CustomTaskDN ct) =>
-                    Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key)));
+                    Execute(MultiEnumLogic<CustomTaskDN>.ToEnum(ct.Key)));
 
                 dqm[typeof(CustomTaskDN)] =
                       (from ct in Database.Query<CustomTaskDN>()
@@ -84,7 +83,7 @@ namespace Signum.Engine.Scheduler
         {
             CustomTaskExecutionDN cte = new CustomTaskExecutionDN
             {
-                CustomTask = EnumLogic<CustomTaskDN>.ToEntity(key),
+                CustomTask = MultiEnumLogic<CustomTaskDN>.ToEntity(key),
                 StartTime = TimeZoneManager.Now,
             };
 
@@ -104,7 +103,7 @@ namespace Signum.Engine.Scheduler
             }
             catch (Exception ex)
             {
-                if (Transaction.AvoidIndependentTransactions)
+                if (Transaction.InTestTransaction)
                     throw; 
 
                 var exLog = ex.LogException().ToLite();

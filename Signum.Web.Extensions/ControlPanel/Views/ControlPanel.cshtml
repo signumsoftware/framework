@@ -6,6 +6,7 @@
 @section head
 {
     @Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray())
+    @Html.RegisterSFUrls(Url)
     @Html.ScriptCss("~/ControlPanel/Content/SF_FlowTable.css",
                     "~/ControlPanel/Content/SF_ControlPanel.css")
 
@@ -22,7 +23,7 @@
 {
     ControlPanelDN cp = (ControlPanelDN)Model;
     <h1>
-        <a href="@Navigator.ViewRoute(typeof(ControlPanelDN), cp.Id)">@cp.DisplayName</a>
+        <a href="@Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id)">@cp.DisplayName</a>
     </h1>
     Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), cp);
     <div class="clearall"></div>   

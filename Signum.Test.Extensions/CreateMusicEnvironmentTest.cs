@@ -17,6 +17,7 @@ using Signum.Test.Extensions.Properties;
 using Signum.Engine.Cache;
 using System.Threading;
 using System.Threading.Tasks;
+using Signum.Engine.Operations;
 
 namespace Signum.Test.Extensions
 {
@@ -40,6 +41,7 @@ namespace Signum.Test.Extensions
             Assert.IsTrue(Schema.Current.EntityEvents<LabelDN>().CacheController.Enabled);
 
             using(AuthLogic.Disable())
+            using (OperationLogic.AllowSave<LabelDN>())
             using (Transaction tr = new Transaction())
             {
                 Assert.IsTrue(Schema.Current.EntityEvents<LabelDN>().CacheController.Enabled);

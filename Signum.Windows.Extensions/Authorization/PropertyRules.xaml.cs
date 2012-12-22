@@ -14,6 +14,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Authorization
 {
@@ -47,7 +48,7 @@ namespace Signum.Windows.Authorization
         void Test_Loaded(object sender, RoutedEventArgs e)
         {
             Load();
-            this.Title = "Property Rules for {0}".Formato(Type.FriendlyName);
+            this.Title = "Property Rules for {0}".Formato(Type.CleanName);
         }
 
         private void Load()

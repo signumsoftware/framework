@@ -12,8 +12,6 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
-using Signum.Entities.Operations;
-using Signum.Engine.Operations;
 using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Entities.Chart;
@@ -29,16 +27,15 @@ using Signum.Engine.Exceptions;
 using System.IO;
 using System.Xml;
 using Signum.Engine.Profiler;
-using Signum.Entities.ControlPanel;
-using Signum.Engine.ControlPanel;
-
+using Signum.Entities.Processes;
+using Signum.Engine.Processes;
+using Signum.Engine.Operations;
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, 
-        IChartServer, IExcelReportServer, IUserQueryServer, IControlPanelServer,
-        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, 
-        ISmsServer,
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IControlPanelServer
+        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer,
+        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
         protected override T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
@@ -46,7 +43,7 @@ namespace Signum.Services
             try
             {
                 using (ScopeSessionFactory.OverrideSession(session))
-                using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
+                using (ExecutionMode.Global())
                 {
                     if (checkLogin)
                         FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
@@ -62,6 +59,7 @@ namespace Signum.Services
                     el.ActionName = mi.Name;
                     el.QueryString = description;
                     el.Version = Schema.Current.Version.ToString();
+                    el.Data = e.Data.Dump();
                 });
                 throw new FaultException(e.Message);
             }
@@ -120,70 +118,15 @@ namespace Signum.Services
 
         #endregion
 
-        #region IOperationServer Members
-        public List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
+        #region IProcessServer
+        public ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
         {
-            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
-                () => OperationLogic.ServiceGetEntityOperationInfos(entity));
-        }
-
-        public List<OperationInfo> GetQueryOperationInfos(Type entityType)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.ServiceGetQueryOperationInfos(entityType));
-        }
-
-        public List<OperationInfo> GetConstructorOperationInfos(Type entityType)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.ServiceGetConstructorOperationInfos(entityType));
-        }
-
-        public IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-               () => OperationLogic.ServiceExecute(entity, operationKey, args));
-        }
-
-        public IIdentifiable ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
-        }
-
-        public IIdentifiable Delete(Lite lite, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceDelete(lite, operationKey, args));
-        }
-
-        public IIdentifiable Construct(Type type, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceConstruct(type, operationKey, args));
-        }
-
-        public IIdentifiable ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
-        }
-
-        public IIdentifiable ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
-        }
-
-        public IIdentifiable ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-              () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
+            return Return(MethodInfo.GetCurrentMethod(), null,
+                () => PackageLogic.CreatePackageOperation(lites, operationKey));
         }
         #endregion
 
         #region IQueryServer Members
-        [SuggestUserInterface]
         public QueryDN RetrieveOrGenerateQuery(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -232,10 +175,10 @@ namespace Signum.Services
               () => TypeAuthLogic.AuthorizedTypes());
         }
 
-        public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
+        public bool IsAllowedForInUserInterface(Lite<IIdentifiable> lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => TypeAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
+                () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface: true));
         }
 
         public byte[] DownloadAuthRules()
@@ -338,7 +281,7 @@ namespace Signum.Services
                () => OperationAuthLogic.SetOperationRules(rules));
         }
 
-        public DefaultDictionary<Enum, bool> OperationRules()
+        public DefaultDictionary<Enum, OperationAllowed> OperationRules()
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => OperationAuthLogic.OperationRules());
@@ -346,46 +289,40 @@ namespace Signum.Services
         #endregion
 
         #region IChartServer
-        [SuggestUserInterface]
         public ResultTable ExecuteChart(ChartRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                () => ChartLogic.ExecuteChart(request));
         }
 
-        [SuggestUserInterface]
         public List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => ChartLogic.GetUserCharts(queryName));
+            () => UserChartLogic.GetUserCharts(queryName));
         }
 
-        [SuggestUserInterface]
         public void RemoveUserChart(Lite<UserChartDN> lite)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-              () => ChartLogic.RemoveUserChart(lite));
+              () => UserChartLogic.RemoveUserChart(lite));
         }
 
         #endregion
 
         #region IExcelReportServer Members
 
-        [SuggestUserInterface]
         public List<Lite<ExcelReportDN>> GetExcelReports(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => ReportsLogic.GetExcelReports(queryName));
         }
 
-        [SuggestUserInterface]
         public byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => ReportsLogic.ExecuteExcelReport(excelReport, request));
         }
 
-        [SuggestUserInterface]
         public byte[] ExecutePlainExcel(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -395,14 +332,12 @@ namespace Signum.Services
         #endregion
 
         #region IUserQueriesServer
-        [SuggestUserInterface]
         public List<Lite<UserQueryDN>> GetUserQueries(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => UserQueryLogic.GetUserQueries(queryName));
         }
 
-        [SuggestUserInterface]
         public void RemoveUserQuery(Lite<UserQueryDN> lite)
         {
             Execute(MethodInfo.GetCurrentMethod(),
@@ -421,12 +356,12 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType()));
-        }    
-    
-        public List<Lite> GetAssociatedTypesForTemplates()
+        }
+
+        public List<Lite<TypeDN>> GetAssociatedTypesForTemplates()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList());
+                () => SMSLogic.RegisteredDataObjectProviders());
         }
 
         #endregion
@@ -435,7 +370,7 @@ namespace Signum.Services
         public void PushProfilerEntries(List<HeavyProfilerEntry> entries)
         {
             Execute(MethodInfo.GetCurrentMethod(), () =>
-                ProfilerLogic.ProfilerEntries(entries)); 
+                ProfilerLogic.ProfilerEntries(entries));
         }
         #endregion
 
