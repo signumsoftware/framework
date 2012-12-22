@@ -96,6 +96,11 @@ namespace Signum.Web
             return new JsInstruction(() => "SF.submit({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
         }
 
+        public static JsInstruction SubmitOnly<T>(Expression<Action<T>> action, JsInstruction requestExtraJsonData) where T : Controller
+        {
+            return SubmitOnly(RouteHelper.New().Action(action), requestExtraJsonData);
+        }
+
         public static JsInstruction SubmitOnly(JsValue<string> controllerUrl, JsInstruction requestExtraJsonData)
         {
             if (requestExtraJsonData == null)
@@ -123,6 +128,16 @@ namespace Signum.Web
         public static JsInstruction Confirm(JsValue<string> message, JsInstruction onSuccess)
         {
             return new JsInstruction(() => "if(confirm({0})) {1}".Formato(message.ToJS(), onSuccess.ToJS()));
+        }
+
+        public static JsInstruction SerializePopup(string prefix)
+        {
+            return new JsInstruction(() => "SF.Popup.serializeJson('{0}')".Formato(prefix));
+        }
+
+        public static JsInstruction SerializePopupFunction(string prefix)
+        {
+            return new JsInstruction(() => "function() {{ return SF.Popup.serializeJson('{0}'); }}".Formato(prefix));
         }
     }
 }

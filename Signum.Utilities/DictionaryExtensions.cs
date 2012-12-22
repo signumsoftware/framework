@@ -7,6 +7,7 @@ using System.Collections.Specialized;
 using Signum.Utilities.Properties;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 
 namespace Signum.Utilities
 {
@@ -67,6 +68,11 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static V GetOrAdd<K, V>(this ConcurrentDictionary<K, V> dictionary, K key) where V : new()
+        {
+            return dictionary.GetOrAdd(key, k => new V());
+        }
+
         public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, V value)
         {
             V result;
@@ -113,10 +119,10 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string message)
+        public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string messageWithFormat)
         {
             if (dictionary.ContainsKey(key))
-                throw new ArgumentException(message.Formato(key));
+                throw new ArgumentException(messageWithFormat.Formato(key));
 
             dictionary.Add(key, value);
         }
@@ -135,6 +141,13 @@ namespace Signum.Utilities
         {
             var result = new Dictionary<K, V>();
             result.AddRange<K, V>(collection);
+            return result;
+        }
+
+        public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string errorContext)
+        {
+            var result = new Dictionary<K, V>();
+            result.AddRange<K, V>(collection, errorContext);
             return result;
         }
 

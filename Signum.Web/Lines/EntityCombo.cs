@@ -18,12 +18,17 @@ using System.Web.Routing;
 
 namespace Signum.Web
 {
+    public static class EntityComboKeys
+    {
+        public const string Combo = "sfCombo";
+    }
+
     public class EntityCombo : EntityBase
     {
         public readonly RouteValueDictionary ComboHtmlProperties = new RouteValueDictionary();
         
         public bool Preload { get; set; }
-        public IEnumerable<Lite> Data { get; set; }
+        public IEnumerable<Lite<IIdentifiable>> Data { get; set; }
         public int Size { get; set; }
 
         public EntityCombo(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
@@ -47,57 +52,37 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "new SF.ECombo(" + this.OptionsJS() + ")";
-        }
-
-        public override JsViewOptions DefaultJsViewOptions()
-        {
-            var voptions = base.DefaultJsViewOptions();
-            voptions.ValidationOptions = new JsValidatorOptions { ControllerUrl = RouteHelper.New().SignumAction("ValidatePartial") };
-            return voptions;
+            return "$('#{0}').data('entityCombo')".Formato(ControlID);
         }
 
         protected override string DefaultView()
         {
-            return EntityCombo.JsView(this, DefaultJsViewOptions()).ToJS();
+            return JsView(DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsView(EntityCombo ecombo, JsViewOptions viewOptions)
+        public JsInstruction JsView(JsViewOptions viewOptions)
         {
-            if (ecombo.ViewMode == ViewMode.Navigate)
+            if (Navigate)
             {
                 viewOptions.Navigate = true;
-                viewOptions.ControllerUrl = Navigator.ViewRoute(ecombo.Type.CleanType(), null);
+                viewOptions.ControllerUrl = Navigator.NavigateRoute(Type.CleanType(), null);
             }
-            else if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
-
+            
             return new JsInstruction(() => "{0}.view({1})".Formato(
-                    ecombo.ToJS(),
-                    viewOptions.TryCC(v => v.ToJS()) ?? ""
-                ));
+                    this.ToJS(),
+                    viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultCreate()
         {
-            return EntityCombo.JsCreate(this, DefaultJsViewOptions()).ToJS();
+            return JsCreate(DefaultJsViewOptions()).ToJS();
         }
 
-        private static JsInstruction JsCreate(EntityCombo ecombo, JsViewOptions viewOptions)
+        private JsInstruction JsCreate(JsViewOptions viewOptions)
         {
-            if (ecombo.ViewMode == ViewMode.Navigate)
-            {
-                viewOptions.Navigate = true;
-                viewOptions.ControllerUrl = Navigator.ViewRoute(ecombo.Type.CleanType(), null);
-            }
-            else if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
-
-            string createParams = ",".Combine(
-                viewOptions.TryCC(v => v.ToJS()),
-                ecombo.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
-
-            return new JsInstruction(() => "{0}.create({1})".Formato(ecombo.ToJS(), createParams));
+            return new JsInstruction(() => "{0}.create({1})".Formato(
+                this.ToJS(),
+                viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultFind()

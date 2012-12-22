@@ -39,6 +39,10 @@ namespace Signum.Engine
             set { connectionString = value; }
         }
 
+
+        public override bool SupportsScalarSubquery { get { return false; } }
+        public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
+
         SqlCeConnection EnsureConnection()
         {
             if (Transaction.HasTransaction)
@@ -94,7 +98,7 @@ namespace Signum.Engine
                 {
                     if (cmd.CommandText.EndsWith(selecctInsertedId))
                     {
-                        cmd.CommandText = cmd.CommandText.RemoveRight(selecctInsertedId.Length);
+                        cmd.CommandText = cmd.CommandText.RemoveEnd(selecctInsertedId.Length);
 
                         cmd.ExecuteNonQuery();
 
@@ -109,7 +113,7 @@ namespace Signum.Engine
                     }
                     else if (cmd.CommandText.EndsWith(selectRowCount))
                     {
-                        cmd.CommandText = cmd.CommandText.RemoveRight(selectRowCount.Length);
+                        cmd.CommandText = cmd.CommandText.RemoveEnd(selectRowCount.Length);
 
                         cmd.ExecuteNonQuery();
 

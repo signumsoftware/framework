@@ -104,15 +104,20 @@ namespace Signum.Windows
             var task = Task.Factory.StartNew<IEnumerable>(()=>AutoCompleting(text, source.Token), source.Token);
             task.ContinueWith(res =>
             {
-                lstBox.ItemsSource = res.Result;
-                if (lstBox.Items.Count > 0)
-                {
-                    lstBox.SelectedIndex = -1;
-                    pop.IsOpen = true;
-                }
+                if (res.IsFaulted)
+                    Async.ExceptionHandler(res.Exception.InnerExceptions.FirstEx());
                 else
                 {
-                    pop.IsOpen = false;
+                    lstBox.ItemsSource = res.Result;
+                    if (lstBox.Items.Count > 0)
+                    {
+                        lstBox.SelectedIndex = -1;
+                        pop.IsOpen = true;
+                    }
+                    else
+                    {
+                        pop.IsOpen = false;
+                    }
                 }
             }, source.Token, TaskContinuationOptions.NotOnCanceled, TaskScheduler.FromCurrentSynchronizationContext()); 
         }

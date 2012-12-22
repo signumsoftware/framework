@@ -14,7 +14,7 @@ namespace Signum.Web
     {
         public override IEnumerable<Type> SupportedTypes
         {
-            get { return new[] { typeof(Lite) }; }
+            get { return new[] { typeof(LiteImp) }; }
         }
 
         public override object Deserialize(IDictionary<string, object> dictionary, Type type, JavaScriptSerializer serializer)
@@ -22,10 +22,10 @@ namespace Signum.Web
             if (dictionary == null)
                 throw new ArgumentNullException("dictionary");
 
-            if (type == typeof(Lite))
+            if (type == typeof(Lite<IdentifiableEntity>))
             {
                 string liteKey = (string)dictionary["Key"];
-                return Lite.Parse(typeof(IdentifiableEntity), liteKey);
+                return Lite.Parse(liteKey);
             }
 
             return null;
@@ -34,8 +34,8 @@ namespace Signum.Web
         public override IDictionary<string, object> Serialize(object obj, JavaScriptSerializer serializer)
         {
             var result = new Dictionary<string, object>();
-            
-            Lite lite = obj as Lite;
+
+            Lite<IdentifiableEntity> lite = obj as Lite<IdentifiableEntity>;
             if (lite != null)
             {
                 result["Key"] = lite.Key();

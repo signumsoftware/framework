@@ -25,12 +25,20 @@ namespace Signum.Utilities
             return threadVariables.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UntypedValue);
         }
 
-        public static void ImportThreadContext(Dictionary<string, object> context)
+        public static IDisposable SetThreadContext(Dictionary<string, object> context)
         {
             foreach (var kvp in context)
             {
                 threadVariables[kvp.Key].UntypedValue = kvp.Value;
             }
+
+            return new Disposable(() =>
+            {
+                foreach (var v in threadVariables.Values)
+                {
+                    v.Clean();
+                }
+            });
         }
 
         public static void CleanThreadContextAndAssert()
@@ -45,7 +53,6 @@ namespace Signum.Utilities
             if (errors.HasText())
                 throw new InvalidOperationException("The thread variable \r\n" + errors);
         }
-
 
         static Dictionary<string, IUntypedVariable> sessionVariables = new Dictionary<string, IUntypedVariable>();
 

@@ -38,8 +38,8 @@ namespace Signum.Entities.DynamicQuery
         {
             List<CollectionElementToken> allAny = Token.FollowC(a => a.Parent)
                 .OfType<CollectionElementToken>()
-                .Where(a => a.ElementType == CollectionElementType.Any ||
-                            a.ElementType == CollectionElementType.All).ToList();
+                .Where(a => a.CollectionElementType == CollectionElementType.Any ||
+                            a.CollectionElementType == CollectionElementType.All).ToList();
 
             if (allAny.IsEmpty())
                 return GetConditionBasic(context);
@@ -116,8 +116,8 @@ namespace Signum.Entities.DynamicQuery
 
     public enum FilterType
     {
-        Number,
-        DecimalNumber,
+        Integer,
+        Decimal,
         String, 
         DateTime,
         Lite,

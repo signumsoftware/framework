@@ -9,8 +9,18 @@ namespace Signum.Utilities
 {
     public class ProgressEnumerator<T>: IEnumerable<T>, IEnumerator<T>, IProgressInfo
     {
-        DateTime start = DateTime.UtcNow;
- 
+        static long fiveSecconds = PerfCounter.FrequencyMilliseconds * 5 * 1000;
+
+        long start;
+
+        long lastTicks;
+        int lastCurrent;
+
+        long lastLastTick;
+        int lastLastCurrent; 
+
+        int countStep;
+
         int count;
         int current = 0; 
 
@@ -19,7 +29,18 @@ namespace Signum.Utilities
         public ProgressEnumerator(IEnumerable<T> source, int count)
         {
             enumerator = source.GetEnumerator();
-            this.count = count; 
+            this.count = count;
+            this.lastCurrent = this.lastLastCurrent = 0;
+            this.lastTicks = this.lastLastTick = this.start = PerfCounter.Ticks;
+            this.countStep = GetCountStep(countStep);
+        }
+
+        public static int GetCountStep(int num)
+        {
+            if (num < 0x1000)
+                return 0xFF;
+
+            return 0xFFF;
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -42,10 +63,22 @@ namespace Signum.Utilities
             get { return current; }
         }
 
+        object syncLock = new object();
+
         public bool MoveNext()
         {
             if (enumerator.MoveNext())
             {
+                if ((current & countStep) == 0)
+                {
+                    var now = PerfCounter.Ticks;
+                    lastLastTick = lastTicks;
+                    lastLastCurrent = lastCurrent;
+
+                    lastTicks = now;
+                    lastCurrent = current;
+                }
+
                 current++;
 
                 return true;
@@ -70,20 +103,38 @@ namespace Signum.Utilities
 
         double IProgressInfo.Ratio
         {
-            get { return count == 0 ? 0 : current  / (double)count; }
+            get { return SafeDiv(current, count); }
+        }
+
+        private double SafeDiv(int current, int count)
+        {
+            if (count == 0)
+                return 0;
+
+            return current / (double)count;
         }
 
         TimeSpan IProgressInfo.Elapsed
         {
-            get { return DateTime.UtcNow - start; }
+            get { return TimeSpan.FromMilliseconds((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds); }
         }
 
         TimeSpan IProgressInfo.Remaining
         {
             get
             {
-                double ratio = ((IProgressInfo)this).Ratio;
-                return ratio == 0 ? TimeSpan.Zero : new TimeSpan((long)((((IProgressInfo)this).Elapsed.Ticks / ratio) * (1 - ratio)));
+                double ratio = SafeDiv(current - lastLastCurrent, count - lastLastCurrent);
+
+                if (ratio == 0)
+                    return TimeSpan.Zero;
+
+                var now = PerfCounter.Ticks;
+
+                long lastToNow = (now - lastLastTick);
+
+                long lastToFinish = (long)(lastToNow / ratio);
+
+                return TimeSpan.FromMilliseconds((lastToFinish - lastToNow) / PerfCounter.FrequencyMilliseconds);
             }
         }
 
@@ -95,8 +146,12 @@ namespace Signum.Utilities
         public override string ToString()
         {
             IProgressInfo me = (IProgressInfo)this;
-            TimeSpan ts = me.Remaining;
-            return "{0:0.00}% | {1}h {2:D2}m {3:D2}s -> {4}".Formato(me.Percentage, ts.Hours, ts.Minutes, ts.Seconds, me.EstimatedFinish);
+            TimeSpan rem = me.Remaining;
+            TimeSpan ela = me.Elapsed;
+            return "{0:0.00}% | {1}/{2} | Elap: {3}  + Rem: {4}  = Total: {5} -> Finish: {6}  {7}".Formato(
+                me.Percentage, current, count,  
+                ela, rem, ela + rem,
+                (DateTime.UtcNow + rem).ToLocalTime(), current - lastLastCurrent);
         }
     }
 

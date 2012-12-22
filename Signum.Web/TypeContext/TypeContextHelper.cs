@@ -15,38 +15,35 @@ namespace Signum.Web
 {
     public static class TypeContextHelper
     {
-        public static TypeContext<T> TypeContext<T>(this HtmlHelper helper) where T : ModifiableEntity
+        public static TypeContext<T> TypeContext<T>(this HtmlHelper helper) where T : class
         {
             TypeContext<T> tc = helper.ViewData.Model as TypeContext<T>;
             if (tc != null)
                 return tc;
 
             T element = helper.ViewData.Model as T;
-            if (element == null)
-                throw new InvalidCastException("Impossible to convert object {0} from {1} to {2}".Formato(
-                    helper.ViewData.Model,
-                    helper.ViewData.Model.GetType().TypeName(),
-                    typeof(TypeContext<T>).TypeName()));
+            if (element != null)
+                return new TypeContext<T>(element, null);
 
-            return new TypeContext<T>(element, null);
+
+            TypeContext stc = helper.ViewData.Model as TypeContext;
+            if (stc != null)
+            {
+                if (!typeof(T).IsAssignableFrom(stc.Type))
+                    throw new InvalidOperationException("{0} is not convertible to {1}".Formato(stc.GetType().TypeName(), typeof(TypeContext<T>).TypeName()));
+
+                return new TypeContext<T>((T)stc.UntypedValue, stc.ControlID);
+            }
+
+            throw new InvalidCastException("Impossible to convert object {0} of type {1} to {2}".Formato(
+                helper.ViewData.Model,
+                helper.ViewData.Model.GetType().TypeName(),
+                typeof(TypeContext<T>).TypeName()));
         }
 
         public static MvcHtmlString NormalPageHeader(this HtmlHelper helper)
         {
             return helper.HiddenRuntimeInfo((TypeContext)helper.ViewData.Model);
-        }
-
-        public static MvcHtmlString PopupHeader(this HtmlHelper helper)
-        {   
-            if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
-            {
-                var entityInfo = helper.HiddenRuntimeInfo((TypeContext)helper.ViewData.Model);
-                helper.ViewData.Remove(ViewDataKeys.WriteSFInfo);
-
-                return entityInfo;
-            }
-
-            return null;
         }
     }
 }

@@ -108,7 +108,7 @@ namespace Signum.Engine.Linq
 
             var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
 
-            var expanded = binder.ApplyExpansions(result);
+            var expanded = binder.ApplyExpansionsProjection(result);
 
             return expanded;
         }

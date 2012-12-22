@@ -61,11 +61,21 @@ namespace Signum.Engine.Linq
             });
         }
 
-        internal static Expression JustVisit(LambdaExpression expression, Type type)
+       
+
+        //internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
+        //{
+        //    if (route.Type.IsLite())
+        //        route = route.Add("Entity");
+
+        //    return JustVisit(expression, ));
+        //}
+
+        internal static Expression JustVisit(LambdaExpression expression, MetaExpression metaExpression)
         {
             var cleaned = MetaEvaluator.Clean(expression);
 
-            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, Expression.Constant(null, type)));
+            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, metaExpression));
 
             return new MetadataVisitor().Visit(replaced);
         }
@@ -92,7 +102,8 @@ namespace Signum.Engine.Linq
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Queryable) ||
-                m.Method.DeclaringType == typeof(Enumerable))
+                m.Method.DeclaringType == typeof(Enumerable) || 
+                m.Method.DeclaringType == typeof(EnumerableUniqueExtensions))
             {
                 switch (m.Method.Name)
                 {
@@ -145,6 +156,11 @@ namespace Signum.Engine.Linq
                     case "SingleOrDefault":
                         return BindUniqueRow(m.Type, m.Method.Name.ToEnum<UniqueFunction>(),
                             m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes());
+                    case "FirstEx":
+                    case "SingleEx":
+                    case "SingleOrDefaultEx":
+                        return BindUniqueRow(m.Type, m.Method.Name.RemoveEnd(2).ToEnum<UniqueFunction>(),
+                           m.GetArgument("collection"), m.TryGetArgument("predicate").StripQuotes());
                     case "Distinct":
                         return BindDistinct(m.Type, m.GetArgument("source"));
                     case "Take":
@@ -155,7 +171,7 @@ namespace Signum.Engine.Linq
             }
 
 
-            if (m.Method.DeclaringType == typeof(LiteUtils) && m.Method.Name == "ToLite")
+            if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 
             if (m.Method.DeclaringType == typeof(Math) &&
@@ -338,16 +354,24 @@ namespace Signum.Engine.Linq
                 return null;
 
             Type t = value.GetType();
-            return t.IsInstantiationOf(typeof(Query<>)) ?
+            return typeof(IQueryable).IsAssignableFrom(t) ?
                 t.GetGenericArguments()[0] :
                 null;
+        }
+
+        protected override Expression Visit(Expression exp)
+        {
+            if (exp is MetaExpression)
+                return exp; 
+
+            return base.Visit(exp);
         }
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
             Type type = TableType(c.Value);
             if (type != null)
-                return new MetaProjectorExpression(c.Type, new MetaExpression(type, null));
+                return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(new[] { PropertyRoute.Root(type) })));
 
             return MakeVoidMeta(c.Type);
         }
@@ -390,7 +414,7 @@ namespace Signum.Engine.Linq
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
             {
-                var pi = member as PropertyInfo ??  Reflector.TryFindPropertyInfo((FieldInfo)member);
+                var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
 
                 if (pi == null)
                     return new MetaExpression(memberType, null);
@@ -425,14 +449,17 @@ namespace Signum.Engine.Linq
 
         private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
         {
-            Implementations imp = route.GetImplementations();
+            if (route.PropertyRouteType == PropertyRouteType.Root)
+                return new[] { PropertyRoute.Root(type).Add(piName) };
 
-            if (imp == null)
+            Implementations? imp = route.TryGetImplementations();
+
+            if (imp == null) //Embedded
                 return new[] { route.Add(piName) };
-            else if (imp.IsByAll)
-                throw new InvalidOperationException("Metas doesn't work on ImplementedByAll");
-            else
-                return ((ImplementedByAttribute)imp).ImplementedTypes.Where(t=>type.IsAssignableFrom(t)).Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
+
+            var fimp = ColumnDescriptionFactory.CastImplementations(imp.Value, type);
+
+            return fimp.Types.Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
         }
 
         protected override Expression VisitTypeIs(TypeBinaryExpression b)

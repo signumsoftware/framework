@@ -25,7 +25,8 @@ namespace Signum.Web
         public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Autocomplete = true;        
+            Autocomplete = true;
+            Navigate = true;
         }
 
         protected override void SetReadOnly()
@@ -35,81 +36,57 @@ namespace Signum.Web
             Create = false;
             Remove = false;
             Autocomplete = false;
-            //Implementations = null;
         }
 
         public override string ToJS()
         {
-            return "new SF.ELine(" + this.OptionsJS() + ")";
-        }
-
-        public override JsViewOptions DefaultJsViewOptions()
-        {
-            var voptions = base.DefaultJsViewOptions();
-            voptions.ValidationOptions = new JsValidatorOptions { ControllerUrl = RouteHelper.New().SignumAction("ValidatePartial") };
-            return voptions;
+            return "$('#{0}').data('entityLine')".Formato(ControlID);
         }
 
         protected override string DefaultView()
         {
-            return EntityLine.JsView(this, DefaultJsViewOptions()).ToJS();
+            return JsView(DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsView(EntityLine eline, JsViewOptions viewOptions)
+        public JsInstruction JsView(JsViewOptions viewOptions)
         {
-            if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
-
             return new JsInstruction(() => "{0}.view({1})".Formato(
-                    eline.ToJS(),
-                    viewOptions.TryCC(v => v.ToJS()) ?? ""
-                ));
+                    this.ToJS(),
+                    viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultCreate()
         {
-            return EntityLine.JsCreate(this, DefaultJsViewOptions()).ToJS();
+            return JsCreate(DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsCreate(EntityLine eline, JsViewOptions viewOptions)
+        public JsInstruction JsCreate(JsViewOptions viewOptions)
         {
-            if (eline.ViewMode == ViewMode.Navigate)
-            {
-                viewOptions.Navigate = true;
-                viewOptions.ControllerUrl = Navigator.ViewRoute(eline.Type.CleanType(), null);
-            }
-            else if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
-            
-            string createParams = ",".Combine(
-                viewOptions.TryCC(v => v.ToJS()),
-                eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
-
-            return new JsInstruction(() => "{0}.create({1})".Formato(eline.ToJS(), createParams));
+            return new JsInstruction(() => "{0}.create({1})".Formato(
+                this.ToJS(), 
+                viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultFind()
         {
-            return EntityLine.JsFind(this, DefaultJsfindOptions()).ToJS();
+            return JsFind(DefaultJsfindOptions()).ToJS();
         }
 
-        public static JsInstruction JsFind(EntityLine eline, JsFindOptions findOptions)
+        public JsInstruction JsFind(JsFindOptions findOptions)
         {
-            string findParams = ",".Combine(
-                findOptions.TryCC(v => v.ToJS()),
-                eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
-
-            return new JsInstruction(() => "{0}.find({1})".Formato(eline.ToJS(), findParams));
+            return new JsInstruction(() => "{0}.find({1})".Formato(
+                this.ToJS(), 
+                findOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultRemove()
         {
-            return EntityLine.JsRemove(this).ToJS();
+            return JsRemove().ToJS();
         }
 
-        public static JsInstruction JsRemove(EntityLine eline)
+        public JsInstruction JsRemove()
         {
-            return new JsInstruction(() => "{0}.remove()".Formato(eline.ToJS()));
+            return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
         }
     }
 }

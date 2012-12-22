@@ -38,7 +38,7 @@ namespace Signum.Entities.Reflection
         static Reflector()
         {
             DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
-            DescriptionManager.CleanType = LiteUtils.CleanType; //To allow Lite<T>
+            DescriptionManager.CleanType = t=> EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
         }
 
         public static string CleanTypeName(Type t)
@@ -74,9 +74,9 @@ namespace Signum.Entities.Reflection
             return typeof(ModifiableEntity).IsAssignableFrom(type);
         }
 
-        public static bool IsModifiableOrInterface(this Type t)
+        public static bool IsModifiableIdentifiableOrLite(this Type t)
         {
-            return IsModifiable(t) || IsIIdentifiable(t);
+            return t.IsModifiable() || t.IsIIdentifiable() || t.IsLite();
         }
 
         public static bool IsIdentifiableEntity(this Type ft)

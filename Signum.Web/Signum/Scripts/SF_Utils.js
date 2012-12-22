@@ -242,6 +242,7 @@ SF.Notify = (function () {
     };
 
     var info = function (s, t, cssClass) {
+        SF.Notify.clear();
         css = (cssClass != undefined ? cssClass : "sf-info");
         $messageArea = $("#sfMessageArea");
         if ($messageArea.length == 0) {
@@ -448,7 +449,7 @@ SF.NewContentProcessor = {
         $newContent.find(".sf-entity-autocomplete").each(function (i, val) {
             var $txt = $(val);
             var data = $txt.data();
-            SF.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url, count: 5 });
+            $.SF.entityLine.prototype.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url || SF.Urls.autocomplete, count: 5 });
         });
     },
 
@@ -487,5 +488,14 @@ SF.NewContentProcessor = {
         $newContent.find(".sf-search-results-container").each(function (i, val) {
             new SF.slider(jQuery(val));
         });
-    }
+    },
+
+    defaultModifiedChecker: function ($newContent) { 
+        $newContent.find(":input").on("change", function() {
+            var $mainControl = $(this).closest(".sf-main-control"); 
+            if ($mainControl.length > 0) {
+                $mainControl.addClass("sf-changed");
+            }
+        });
+    },
 };

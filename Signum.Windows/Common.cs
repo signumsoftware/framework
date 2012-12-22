@@ -21,6 +21,7 @@ using Signum.Utilities.Reflection;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using System.Windows.Automation;
+using System.Diagnostics;
 
 namespace Signum.Windows
 {
@@ -335,7 +336,7 @@ namespace Signum.Windows
         {
             if (context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                if(context.IsAllowed())
+                if(context.IsAllowed() == null)
                 {
                     VoteVisible(fe);
                 }
@@ -504,7 +505,7 @@ namespace Signum.Windows
             {
                 PropertyRoute entityContext = eb.GetEntityTypeContext();
 
-                if (entityContext != null)
+                if (entityContext != null && entityContext.Type.CleanType().IsIIdentifiable())
                 {
                     eb.Implementations = entityContext.GetImplementations();
                 }
@@ -515,18 +516,12 @@ namespace Signum.Windows
         {
             if (GetCollapseIfNull(fe) && fe.NotSet(UIElement.VisibilityProperty))
             {
-                var dp = ValueProperty(fe);
-
-                if (dp == null)
-                    throw new InvalidOperationException("Unknown value property of {0}".Formato(fe.GetType().Name));
-
-                Binding b = new Binding()
+                Binding b = new Binding(route)
                 {
-                    Path = new PropertyPath(dp.Name),
-                    Source = fe,
                     Mode = BindingMode.OneWay,
                     Converter = Converters.NullToVisibility,
                 };
+                
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }
@@ -539,7 +534,7 @@ namespace Signum.Windows
                 if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
                    Validator.GetOrCreatePropertyPack(context).Validators.OfType<NotNullableAttribute>().Any())
                 {
-                    vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify());
+                    vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).ToObservableCollection();
                 }
             }
         }
@@ -550,6 +545,79 @@ namespace Signum.Windows
             {
                 AutomationProperties.SetItemStatus(fe, context.TryToString() ?? "");
             }
+        }
+
+        public static readonly DependencyProperty AutomationHelpTextFromDataContextProperty =
+           DependencyProperty.RegisterAttached("AutomationHelpTextFromDataContext", typeof(bool), typeof(Common), new UIPropertyMetadata(false, RegisterUpdater));
+        public static bool GetAutomationHelpTextFromDataContext(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(AutomationHelpTextFromDataContextProperty);
+        }
+
+        public static void SetAutomationHelpTextFromDataContext(DependencyObject obj, bool value)
+        {
+            obj.SetValue(AutomationHelpTextFromDataContextProperty, value);
+        }
+
+        static void RegisterUpdater(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            var fe = (FrameworkElement)sender;
+
+            if ((bool)args.NewValue)
+            {
+                fe.DataContextChanged += Common_DataContextChanged;
+
+                AutomationProperties.SetHelpText(fe, GetEntityStringAndHascode(fe.DataContext));
+            }
+            else
+            {
+                fe.DataContextChanged -= Common_DataContextChanged;
+
+                AutomationProperties.SetHelpText(fe, "");
+            }
+        }
+
+        static void Common_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            AutomationProperties.SetHelpText((DependencyObject)sender, GetEntityStringAndHascode(e.NewValue));
+        }
+
+
+        public static string GetEntityStringAndHascode(object newValue)
+        {
+            if (newValue == null)
+                return "";
+
+            return GetEntityString(newValue) + " Hash: " + ReferenceEqualityComparer<object>.Default.GetHashCode(newValue).ToString("x");
+        }
+
+        static string GetEntityString(object newValue)
+        {
+            if (newValue == null)
+                return "";
+
+            if (newValue is EmbeddedEntity)
+                return newValue.GetType().Name;
+
+            var ident = newValue as IdentifiableEntity;
+            if (ident != null)
+            {
+                if (ident.IsNew)
+                    return "{0};New".Formato(Server.ServerTypes[ident.GetType()].CleanName);
+
+                return ident.ToLite().Key();
+            }
+
+            var lite = newValue as Lite<IIdentifiable>;
+            if (lite != null)
+            {
+                if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
+                    return "{0};New".Formato(Server.ServerTypes[lite.EntityType].CleanName);
+
+                return lite.Key();
+            }
+
+            return "";
         }
 
         #endregion

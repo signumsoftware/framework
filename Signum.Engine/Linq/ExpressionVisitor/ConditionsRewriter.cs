@@ -204,7 +204,13 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
-       
+        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => MakeSqlValue(Visit(a)));
+            if (args != sqlFunction.Arguments)
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
+            return sqlFunction;
+        }
 
         protected override Expression VisitCase(CaseExpression cex)
         {
@@ -213,7 +219,7 @@ namespace Signum.Engine.Linq
                 var result = cex.Whens.Select(a => Expression.And(MakeSqlCondition(Visit(a.Condition)), MakeSqlCondition(Visit(a.Value)))).AggregateOr();
 
                 if (cex.DefaultValue == null)
-                    return null;
+                    return result;
 
                 return Expression.Or(result, MakeSqlCondition(Visit(cex.DefaultValue)));
             }

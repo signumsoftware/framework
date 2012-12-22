@@ -31,7 +31,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("sf-field")): null)
+            using (sb.Surround(new HtmlTag("div").Id(entityCombo.ControlID).Class("sf-field")))
             using (entityCombo.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityCombo.ValueFirst)
@@ -56,13 +56,15 @@ namespace Signum.Web
                         {
                             int? id = entityCombo.IdOrNull;
 
-                            IEnumerable<Lite> data = entityCombo.Data ?? AutoCompleteUtils.RetrieveAllLite(entityCombo.Type.CleanType(), entityCombo.Implementations);
+                            IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutoCompleteUtils.FindAllLite(entityCombo.Implementations.Value);
+
+                            bool complexCombo = entityCombo.Implementations.Value.IsByAll || entityCombo.Implementations.Value.Types.Count() > 1;
 
                             items.AddRange(
                                 data.Select(lite => new SelectListItem()
                                     {
                                         Text = lite.ToString(),
-                                        Value = entityCombo.Implementations != null ? lite.Key() : lite.Id.ToString(),
+                                        Value = complexCombo ? lite.Key() : lite.Id.ToString(),
                                         Selected = lite.IdOrNull == entityCombo.IdOrNull
                                     })
                                 );
@@ -82,7 +84,7 @@ namespace Signum.Web
                         }
 
                         sb.AddLine(helper.DropDownList(
-                                entityCombo.ControlID,
+                                entityCombo.Compose(EntityComboKeys.Combo),
                                 items,
                                 entityCombo.ComboHtmlProperties));
                     }
@@ -100,6 +102,10 @@ namespace Signum.Web
                 if (entityCombo.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
             }
+
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityCombo({1})".Formato(entityCombo.ControlID, entityCombo.OptionsJS())))
+                .ToHtml());
 
             return sb.ToHtml();
         }
@@ -138,7 +144,7 @@ namespace Signum.Web
             return builder.ToHtml();
         }
 
-        public static SelectListItem ToSelectListItem(this Lite lite, bool selected)
+        public static SelectListItem ToSelectListItem(this Lite<IIdentifiable> lite, bool selected)
         {
             return new SelectListItem { Text = lite.ToString(), Value = lite.Id.ToString(), Selected = selected };
         }

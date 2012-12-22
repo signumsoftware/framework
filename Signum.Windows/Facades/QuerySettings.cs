@@ -23,28 +23,17 @@ namespace Signum.Windows
         public int? Top { get; set; }
         public ImageSource Icon { get; set; }
 
-        public Func<object, bool> IsFindable;
 
         internal QueryDescription QueryDescription { get; set; }
 
         public QuerySettings(object queryName)
         {
-            this.QueryName = queryName; 
+            this.QueryName = queryName;
+            this.IsFindable = true;
         }
 
-        internal bool OnIsFindable()
-        {
-            if (IsFindable != null)
-                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
-                {
-                    if (!isFindable(QueryName))
-                        return false;
-                }
-
-            return true;
-        }
-
-
+        public bool IsFindable { get; set; }
+    
         public static Dictionary<PropertyRoute, Func<Binding, DataTemplate>> PropertyFormatters { get; set; }
         public static List<FormatterRule> FormatRules { get; set; }
 
@@ -59,33 +48,18 @@ namespace Signum.Windows
         {
             FormatRules = new List<FormatterRule>
             {
-                new FormatterRule(FormatterPriority.Default, "Default",
-                    c=>true, 
-                    c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, null)),
+                new FormatterRule("Default", c=>true, c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, null)),
 
-                new FormatterRule(FormatterPriority.Type, "Checkbox",
-                    c=>c.Type.UnNullify() == typeof(bool), 
-                    c=> b => FormatTools.CheckBoxTemplate(b, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
+                new FormatterRule("Checkbox", c=>c.Type.UnNullify() == typeof(bool), c=> b => FormatTools.CheckBoxTemplate(b, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
 
-                new FormatterRule(FormatterPriority.Type, "Enum",
-                    c=>c.Type.UnNullify().IsEnum, 
-                    c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, Converters.EnumDescriptionConverter)),
-                new FormatterRule(FormatterPriority.Type, "Number",
-                    c=> Reflector.IsNumber(c.Type), 
-                    c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
-                new FormatterRule(FormatterPriority.Type, "DateTime",
-                    c=>c.Type.UnNullify() == typeof(DateTime), 
-                    c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),    
-                new FormatterRule(FormatterPriority.Type, "TimeSpan",
-                    c=>c.Type.UnNullify() == typeof(TimeSpan), 
-                    c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
-                new FormatterRule(FormatterPriority.Type, "Lite",
-                    c=>c.Type.IsLite(), //Not on entities! 
+                new FormatterRule("Enum", c=>c.Type.UnNullify().IsEnum, c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, Converters.EnumDescriptionConverter)),
+                new FormatterRule("Number", c=> Reflector.IsNumber(c.Type), c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
+                new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),    
+                new FormatterRule("TimeSpan", c=>c.Type.UnNullify() == typeof(TimeSpan), c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
+                new FormatterRule("Lite", c=>c.Type.IsLite(), //Not on entities! 
                     c=> b=> FormatTools.LightEntityLineTemplate(b)),
 
-                new FormatterRule(FormatterPriority.DecoratedType, "NumberUnit",
-                    c=> Reflector.IsNumber(c.Type) && c.Unit != null,
-                    c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format,c.Unit))))
+                new FormatterRule("NumberUnit", c=> Reflector.IsNumber(c.Type) && c.Unit != null, c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format,c.Unit))))
             };
 
             PropertyFormatters = new Dictionary<PropertyRoute, Func<Binding, DataTemplate>>();
@@ -111,33 +85,25 @@ namespace Signum.Windows
                     return formatter;
             }
 
-            FormatterRule fr = FormatRules.Where(cfr => cfr.IsApplicable(column)).WithMax(a => a.Priority);
+            FormatterRule fr = FormatRules.Last(cfr => cfr.IsApplicable(column));
 
             return fr.Formatter(column);
         }
 
         public Func<QueryDescription, ISimpleFilterBuilder> SimpleFilterBuilder;
-    }
 
-    public class FormatterPriority
-    {
-        public const int Default = 0;
-        public const int Type = 100;
-        public const int DecoratedType = 150; 
-        public const int Property = 200;
+        
     }
 
     public class FormatterRule
     {
-        public int Priority { get; set; }
         public string Name { get; set; }
 
         public Func<Column, Func<Binding, DataTemplate>> Formatter { get; set; }
         public Func<Column, bool> IsApplicable { get; set; }
 
-        public FormatterRule(int priority, string name, Func<Column, bool> isApplicable, Func<Column, Func<Binding, DataTemplate>> formatter)
+        public FormatterRule(string name, Func<Column, bool> isApplicable, Func<Column, Func<Binding, DataTemplate>> formatter)
         {
-            Priority = priority;
             Name = name;
             IsApplicable = isApplicable;
             Formatter = formatter;
@@ -145,7 +111,7 @@ namespace Signum.Windows
 
         public override string ToString()
         {
-            return "{0} ({1})".Formato(Name, Priority);
+            return Name;
         }
     }
 

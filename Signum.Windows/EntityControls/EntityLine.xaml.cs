@@ -31,7 +31,7 @@ namespace Signum.Windows
     /// </summary>
     public partial class EntityLine : EntityBase
     {
-        public event Func<string, IEnumerable<Lite>> AutoCompleting;
+        public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> AutoCompleting;
 
         public static readonly DependencyProperty AutoCompleteProperty =
             DependencyProperty.Register("AutoComplete", typeof(bool), typeof(EntityLine), new FrameworkPropertyMetadata(true));
@@ -65,7 +65,7 @@ namespace Signum.Windows
         {
             base.OnLoad(sender, e);
 
-            if (Common.GetIsReadOnly(this) || Implementations != null && Implementations.IsByAll)
+            if (Implementations == null || Implementations.Value.IsByAll)
                 AutoComplete = false;
         }
 
@@ -74,9 +74,14 @@ namespace Signum.Windows
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
             btView.Visibility = CanView() ? Visibility.Visible : Visibility.Collapsed;
+            btNavigate.Visibility = CanNavigate() ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        public bool CanAutoComplete()
+        {
+            return !Common.GetIsReadOnly(this) && AutoComplete;
+        }
 
         private IEnumerable autoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
         {
@@ -84,14 +89,13 @@ namespace Signum.Windows
             if (AutoCompleting != null)
                 value = AutoCompleting(arg);
             else
-                value = Server.FindLiteLike(CleanType, safeImplementations, arg, AutoCompleteElements);  
+                value = Server.FindLiteLike(safeImplementations.Value, arg, AutoCompleteElements);  
 
             return value;
         }
 
         private void autoCompleteTextBox_SelectedItemChanged(object sender, RoutedEventArgs e)
         {
-        
             autoCompleteTextBox.Visibility = Visibility.Hidden;
             cc.Focus();
         }
@@ -100,7 +104,9 @@ namespace Signum.Windows
         {
             if (e.IsCommit)
             {
-                SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
+                if (CanAutoComplete())
+                    SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
+
                 autoCompleteTextBox.Visibility = Visibility.Hidden;
                 cc.Focus();
             }
@@ -113,7 +119,7 @@ namespace Signum.Windows
 
         public void ActivateAutoComplete()
         {
-            if (AutoComplete && autoCompleteTextBox.Visibility != Visibility.Visible)
+            if (CanAutoComplete() && autoCompleteTextBox.Visibility != Visibility.Visible)
             {
                 autoCompleteTextBox.Visibility = Visibility.Visible;
                 autoCompleteTextBox.Text = Entity.TryCC(a => a.ToString());

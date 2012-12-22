@@ -49,23 +49,23 @@ namespace Signum.Windows
 
         public static Control GetValueControl(FilterOption f)
         {
-            Implementations implementations = f.Token.Implementations();
             Type type = f.Token.Type;
             if (type.IsLite())
             {
-                Lite lite = f.RealValue as Lite;
+                Implementations implementations = f.Token.GetImplementations().Value;
+
+                Lite<IIdentifiable> lite = f.RealValue as Lite<IIdentifiable>;
 
                 if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                     Server.FillToStr(lite);
 
                 Type cleanType = Lite.Extract(type);
 
-                if (Reflector.IsLowPopulation(cleanType) && !(implementations is ImplementedByAllAttribute))
+                if (Reflector.IsLowPopulation(cleanType) && !implementations.IsByAll)
                 {
                     EntityCombo ec = new EntityCombo
                     {
                         Type = type,
-                        //Style = (Style)FindResource("toolTip"),
                         Implementations = implementations
                     };
 
@@ -109,7 +109,7 @@ namespace Signum.Windows
                     AutoComplete = false,
                     Find = false,
                     HideAutoCompleteOnLostFocus = false,
-                    Implementations = implementations
+                    Implementations = null
                 };
 
                 el.SetBinding(EntityLine.EntityProperty, new Binding
@@ -135,7 +135,7 @@ namespace Signum.Windows
 
                 if (type.UnNullify().IsEnum)
                 {
-                    vl.ItemSource = EnumProxy.GetValues(type.UnNullify()).PreAndNull(type.IsNullable());
+                    vl.ItemSource = EnumEntity.GetValues(type.UnNullify()).PreAndNull(type.IsNullable()).ToObservableCollection();
                 }
 
                 vl.SetBinding(ValueLine.ValueProperty, new Binding

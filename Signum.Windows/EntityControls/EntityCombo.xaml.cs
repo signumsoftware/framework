@@ -25,8 +25,6 @@ namespace Signum.Windows
 {
     public partial class EntityCombo : EntityBase
     {
-        public static readonly Lite[] EmptyList = new Lite[0];
-
         public static readonly DependencyProperty LoadDataTriggerProperty =
             DependencyProperty.Register("LoadDataTrigger", typeof(LoadDataTrigger), typeof(EntityCombo), new UIPropertyMetadata(LoadDataTrigger.OnExpand));
         public LoadDataTrigger LoadDataTrigger
@@ -43,12 +41,13 @@ namespace Signum.Windows
             set { SetValue(SortElementsProperty, value); }
         }
 
-        public event Func<IEnumerable<Lite>> LoadData;
+        public event Func<IEnumerable<Lite<IIdentifiable>>> LoadData;
 
         static EntityCombo()
         {
             RemoveProperty.OverrideMetadata(typeof(EntityCombo), new FrameworkPropertyMetadata(false));
             FindProperty.OverrideMetadata(typeof(EntityCombo), new FrameworkPropertyMetadata(false));
+            NavigateProperty.OverrideMetadata(typeof(EntityCombo), new FrameworkPropertyMetadata(false));
         }
 
         protected override void UpdateVisibility()
@@ -56,6 +55,7 @@ namespace Signum.Windows
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
             btView.Visibility = CanView() ? Visibility.Visible : Visibility.Collapsed;
+            btNavigate.Visibility = CanNavigate() ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -136,7 +136,7 @@ namespace Signum.Windows
 
         public void LoadNow()
         {
-            IEnumerable<Lite> data;
+            IEnumerable<Lite<IIdentifiable>> data;
             if (LoadData != null)
             {
                 data = LoadData();
@@ -145,7 +145,7 @@ namespace Signum.Windows
             }
             else
             {
-                data = Server.RetrieveAllLite(CleanType, safeImplementations);
+                data = Server.FindAllLite(safeImplementations.Value);
             }
 
             if (SortElements)
@@ -155,7 +155,7 @@ namespace Signum.Windows
             {
                 changing = true;
                 combo.Items.Clear();
-                foreach (Lite lite in data)
+                foreach (Lite<IIdentifiable> lite in data)
                 {
                     combo.Items.Add(lite);
                 }

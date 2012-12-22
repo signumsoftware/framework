@@ -34,7 +34,7 @@ namespace Signum.Entities.DynamicQuery
         public string Unit { get; internal set; }
         public string Format { get; internal set; }
 
-        public Implementations Implementations { get; internal set; }
+        public Implementations? Implementations { get; internal set; }
 
         public PropertyRoute[] PropertyRoutes { get; set; }
 

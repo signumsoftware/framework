@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Windows;
 using System.Globalization;
 using Signum.Utilities;
+using System.ComponentModel;
 
 namespace Signum.Windows
 {
@@ -30,5 +31,26 @@ namespace Signum.Windows
 
             return parameter;
         }
+    }
+
+    public static class EnumWindowsExtensions
+    {
+        public static IEnumerable<Enum> PreAndNull(this IEnumerable<Enum> collection)
+        {
+            return collection.PreAnd(VoidEnum.Instance);
+        }
+
+        public static IEnumerable<Enum> PreAndNull(this IEnumerable<Enum> collection, bool isNullable)
+        {
+            if (isNullable)
+                return collection.PreAnd(VoidEnum.Instance);
+            return collection;
+        }
+    }
+
+    public enum VoidEnum
+    {
+        [Description("-")]
+        Instance
     }
 }

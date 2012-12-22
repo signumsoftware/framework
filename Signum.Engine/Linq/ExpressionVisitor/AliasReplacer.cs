@@ -35,7 +35,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitTable(TableExpression table)
         {
             if (aliasMap.ContainsKey(table.Alias))
-                return new TableExpression(aliasMap[table.Alias], table.Name);
+                return new TableExpression(aliasMap[table.Alias], table.Table);
             return table;
         }
 

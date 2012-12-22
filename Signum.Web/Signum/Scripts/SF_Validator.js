@@ -53,7 +53,7 @@ SF.registerModule("Validator", function () {
             var returnValue = false;
             var self = this;
             $.ajax({
-                url: this.valOptions.controllerUrl,
+                url: this.valOptions.controllerUrl || SF.Urls.trySave,
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
@@ -87,7 +87,7 @@ SF.registerModule("Validator", function () {
             var returnValue = false;
             var self = this;
             $.ajax({
-                url: this.valOptions.controllerUrl,
+                url: this.valOptions.controllerUrl || SF.Urls.validate,
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
@@ -222,6 +222,15 @@ SF.registerModule("Validator", function () {
             id: null
         }, _pvalOptions));
 
+        this.checkOrAddRuntimeInfo = function ($formChildren, serializer) {
+            //Check runtimeInfo present => if it's a popup from a LineControl it will not be
+            var myRuntimeInfoKey = SF.compose(this.valOptions.prefix, SF.Keys.runtimeInfo);
+            if ($formChildren.filter("#" + myRuntimeInfoKey).length == 0) {
+                var $mainControl = $(".sf-main-control[data-prefix=" + this.valOptions.prefix + "]");
+                serializer.add(myRuntimeInfoKey, $mainControl.data("runtimeinfo"));
+            }
+        };
+
         this.constructRequestDataForSaving = function () {
             SF.log("PartialValidator constructRequestDataForSaving");
             var prefix = this.valOptions.prefix;
@@ -235,10 +244,7 @@ SF.registerModule("Validator", function () {
                 serializer.add("prefix", prefix);
             }
 
-            if (formChildren.filter(this.pf(SF.Keys.runtimeInfo)).length === 0) {
-                serializer.add(SF.compose(prefix, SF.Keys.runtimeInfo),
-                    new SF.RuntimeInfo(prefix).createValue(this.valOptions.type, '', 'n'));
-            }
+            this.checkOrAddRuntimeInfo(formChildren, serializer);
 
             serializer.add(this.valOptions.requestExtraJsonData);
 
@@ -260,7 +266,7 @@ SF.registerModule("Validator", function () {
             var validatorResult = null;
             var self = this;
             $.ajax({
-                url: this.valOptions.controllerUrl,
+                url: this.valOptions.controllerUrl || SF.Urls.trySavePartial,
                 async: false,
                 data: this.constructRequestDataForSaving(),
                 success: function (result) {
@@ -306,30 +312,7 @@ SF.registerModule("Validator", function () {
 
             var serializer = new SF.Serializer().add(formChildren.serialize());
 
-            var myRuntimeInfoKey = SF.compose(this.valOptions.prefix, SF.Keys.runtimeInfo);
-            if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length === 0) {
-                var info = new SF.RuntimeInfo(this.valOptions.prefix);
-                var infoField = info.find();
-
-                var value;
-
-                if (SF.isEmpty(this.valOptions.type)) {
-                    value = SF.isEmpty(info.runtimeType())
-                        ? info.createValue(SF.StaticInfo(this.valOptions.prefix).singleType(), info.id(), 'n')
-                        : infoField.val();
-                }
-                else {
-                    if (infoField.length === 0) {
-                        value = info.createValue(this.valOptions.type, SF.isEmpty(!this.valOptions.id) ? this.valOptions.id : '', 'n');
-                    }
-                    else {
-                        var mixedVal = new SF.RuntimeInfo("Temp");
-                        value = mixedVal.createValue(this.valOptions.type, this.valOptions.id, null);
-                    }
-                }
-
-                serializer.add(myRuntimeInfoKey, value);
-            }
+            this.checkOrAddRuntimeInfo(formChildren, serializer);
 
             serializer.add("prefix", this.valOptions.prefix);
             serializer.add(this.valOptions.requestExtraJsonData);
@@ -342,7 +325,7 @@ SF.registerModule("Validator", function () {
             var validatorResult = null;
             var self = this;
             $.ajax({
-                url: this.valOptions.controllerUrl,
+                url: this.valOptions.controllerUrl || SF.Urls.validatePartial,
                 async: false,
                 data: this.constructRequestDataForValidating(),
                 success: function (result) {
@@ -365,11 +348,7 @@ SF.registerModule("Validator", function () {
             isValid = new SF.Validator(validationOptions).validate();
         }
         else {
-            var info = new SF.RuntimeInfo(validationOptions.prefix);
-            isValid = new SF.PartialValidator($.extend(validationOptions, {
-                type: info.runtimeType(),
-                id: info.id()
-            })).validate().isValid;
+            isValid = new SF.PartialValidator(validationOptions).validate().isValid;
         }
 
         if (isValid) {

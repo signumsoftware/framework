@@ -14,14 +14,18 @@ namespace Signum.Entities.DynamicQuery
 {
     public static class QueryUtils
     {
-        public static string GetQueryUniqueKey(object queryKey)
+        public static string GetQueryUniqueKey(object queryName)
         {
             return
-                queryKey is Type ? ((Type)queryKey).FullName :
-                queryKey is Enum ? "{0}.{1}".Formato(queryKey.GetType().Name, queryKey.ToString()) :
-                queryKey.ToString();
+                queryName is Type ? ((Type)queryName).FullName :
+                queryName is Enum ? "{0}.{1}".Formato(queryName.GetType().Name, queryName.ToString()) :
+                queryName.ToString();
         }
 
+        public static string GetCleanName(object queryName)
+        {
+            return (queryName is Type ? Reflector.CleanTypeName((Type)queryName) : queryName.ToString());
+        }
 
         public static string GetNiceName(object queryName)
         {
@@ -63,7 +67,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.Double:
                 case TypeCode.Decimal:
                 case TypeCode.Single:
-                    return FilterType.DecimalNumber;
+                    return FilterType.Decimal;
                 case TypeCode.Byte:
                 case TypeCode.SByte:
                 case TypeCode.Int16:
@@ -72,7 +76,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
-                    return FilterType.Number;
+                    return FilterType.Integer;
                 case TypeCode.DateTime:
                     return FilterType.DateTime;
 
@@ -130,7 +134,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             },
             { 
-                FilterType.Number, new List<FilterOperation>
+                FilterType.Integer, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 
@@ -141,7 +145,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             },
             { 
-                FilterType.DecimalNumber, new List<FilterOperation>
+                FilterType.Decimal, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 
@@ -218,7 +222,9 @@ namespace Signum.Entities.DynamicQuery
 
                 foreach (var part in parts.Skip(1))
                 {
-                    result = subTokens(result).Select(t => t.MatchPart(part)).NotNull().SingleEx(
+                    var list = subTokens(result);
+
+                    result = list.Select(t => t.MatchPart(part)).NotNull().SingleEx(
                           () => "Token with key '{0}' not found on {1}".Formato(part, result),
                           () => "More than one token with key '{0}' found on {1}".Formato(part, result));
                 }

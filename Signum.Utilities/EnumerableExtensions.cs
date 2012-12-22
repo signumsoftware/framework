@@ -337,6 +337,14 @@ namespace Signum.Utilities
 
     public static class EnumerableExtensions
     {
+        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> collection)
+        {
+            if (collection == null)
+                return Enumerable.Empty<T>();
+
+            return collection;
+        }
+
         public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
             foreach (var item in collection)
@@ -537,6 +545,24 @@ namespace Signum.Utilities
             {
                 for (int i = 0; i < members.Count; i++)
                     result[i, j] = members[i].Getter(item).TryCC(a => a.ToString()) ?? "";
+                j++;
+            }
+
+            return result;
+        }
+
+        public static string[,] ToStringTable(this DataTable table)
+        {
+            string[,] result = new string[table.Columns.Count, table.Rows.Count + 1];
+
+            for (int i = 0; i < table.Columns.Count; i++)
+                result[i, 0] = table.Columns[i].ColumnName;
+
+            int j = 1;
+            foreach (DataRow row in table.Rows)
+            {
+                for (int i = 0; i < table.Columns.Count; i++)
+                    result[i, j] = row[i].TryCC(a => a.ToString()) ?? "";
                 j++;
             }
 
@@ -894,6 +920,38 @@ namespace Signum.Utilities
             }
         }
 
+        public static IEnumerable<R> ZipOrDefault<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> resultSelector)
+        {
+            bool okA = true, okB = true;
+
+            using (var enumA = colA.GetEnumerator())
+            using (var enumB = colB.GetEnumerator())
+            {
+                while (okA & (okA = enumA.MoveNext()) | okB & (okB = enumB.MoveNext()))
+                {
+                    yield return resultSelector(
+                        okA ? enumA.Current : default(A),
+                        okB ? enumB.Current : default(B));
+                }
+            }
+        }
+
+        public static IEnumerable<Tuple<A, B>> ZipOrDefault<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
+        {
+            bool okA = true, okB = true;
+
+            using (var enumA = colA.GetEnumerator())
+            using (var enumB = colB.GetEnumerator())
+            {
+                while ((okA &= enumA.MoveNext()) || (okB &= enumB.MoveNext()))
+                {
+                    yield return new Tuple<A, B>(
+                        okA ? enumA.Current : default(A),
+                        okB ? enumB.Current : default(B));
+                }
+            }
+        }
+
         public static void ZipForeach<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB, Action<A, B> actions)
         {
             using (var enumA = colA.GetEnumerator())
@@ -974,6 +1032,13 @@ namespace Signum.Utilities
                 (collection as List<T> ?? collection.ToList()).AsReadOnly();
         }
 
+        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
+        {
+            return collection == null ? null :
+              collection as ObservableCollection<T> ??
+              new ObservableCollection<T>(collection);
+        }
+
         public static IEnumerable<T> AsThreadSafe<T>(this IEnumerable<T> source)
         {
             return new TreadSafeEnumerator<T>(source);
@@ -1039,7 +1104,7 @@ namespace Signum.Utilities
                 if (lacking.Count != 0)
                     throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, lacking.ToString(", ")));
 
-            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
+           return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
 
 

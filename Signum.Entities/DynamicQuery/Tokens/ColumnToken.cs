@@ -76,14 +76,14 @@ namespace Signum.Entities.DynamicQuery
             return SubTokensBase(Column.Type, Column.Implementations);
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return Column.Implementations;
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
-            return true;  //If it wasn't, sould be filtered before
+            return null;  //If it wasn't, sould be filtered before
         }
 
         public override PropertyRoute GetPropertyRoute()

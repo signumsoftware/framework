@@ -23,15 +23,133 @@ namespace Signum.Entities
         public bool AllowMultipleNulls { get; set; }
     }
 
+    
+
     [Serializable]
-    public abstract class Implementations : Attribute
+    public struct Implementations : IEquatable<Implementations>
     {
-        public abstract bool IsByAll { get; }
-        public abstract bool ImplementedBy(Type type);
+        object arrayOrType;
+
+        public bool IsByAll { get { return arrayOrType == null; } }
+        public IEnumerable<Type> Types
+        {
+            get
+            {
+                if (arrayOrType == null)
+                    throw new InvalidOperationException("ImplementedByAll");
+
+                return Enumerate();
+            }
+        }
+
+        private IEnumerable<Type> Enumerate()
+        {
+            if (arrayOrType is Type)
+            {
+                yield return (Type)arrayOrType;
+            }
+            else
+            {
+                foreach (var item in ((Type[])arrayOrType))
+                    yield return item;
+            }
+        }
+
+        public static Implementations? TryFromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        {
+            ImplementedByAttribute ib = fieldAttributes.OfType<ImplementedByAttribute>().SingleOrDefaultEx();
+            ImplementedByAllAttribute iba = fieldAttributes.OfType<ImplementedByAllAttribute>().SingleOrDefaultEx();
+
+            if (ib != null && iba != null)
+                throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
+
+            if (ib != null) return Implementations.By(ib.ImplementedTypes);
+            if (iba != null) return Implementations.ByAll;
+
+            if (Error(t) == null)
+                return Implementations.By(t);
+
+            return null;
+        }
+
+
+        public static Implementations FromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        {
+            Implementations? imp = TryFromAttributes(t, fieldAttributes, route);
+
+            if (imp == null)
+                throw new InvalidOperationException(Error(t) + ". Set implementations for {0}".Formato(route));
+
+            return imp.Value;
+        }
+
+        public static Implementations ByAll { get { return new Implementations(); } }
+
+        public static Implementations By(Type type)
+        {
+            var error = Error(type);
+
+            if (error.HasText())
+                throw new InvalidOperationException(error);
+
+            return new Implementations { arrayOrType = type };
+        }
+
+        public static Implementations By(params Type[] types)
+        {
+            if (types == null || types.Length == 0)
+                return new Implementations { arrayOrType = types ?? new Type[0] };
+
+            if (types.Length == 1)
+                return By(types[0]);
+
+           var error = types.Select(Error).NotNull().ToString("\r\n");
+
+           if (error.HasText())
+               throw new InvalidOperationException(error);
+
+           return new Implementations { arrayOrType = types };
+        }
+
+        static string Error(Type type)
+        {
+            if(!type.IsIdentifiableEntity())
+                return  "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
+
+            if (type.IsAbstract)
+                return "{0} is abstract".Formato(type.Name);
+            
+            return null;
+        }
+
+        public override string ToString()
+        {
+            if (IsByAll)
+                return "ImplementedByAll";
+
+            return "ImplementedBy({0})".Formato(Types.ToString(t => t.Name, ", "));
+        }
+
+        public override bool Equals(object obj)
+        {
+            return  obj is Implementations || Equals((Implementations)obj);
+        }
+        
+        public bool Equals(Implementations other)
+        {
+            return IsByAll && other.IsByAll || 
+                arrayOrType == other.arrayOrType ||
+                Enumerable.SequenceEqual(Types, other.Types);
+        }
+
+        public override int GetHashCode()
+        {
+            return arrayOrType == null ? 0 : Types.Aggregate(0, (acum, type) => acum ^ type.GetHashCode());
+        }
     }
 
     [Serializable, AttributeUsage(AttributeTargets.Field)]
-    public sealed class ImplementedByAttribute : Implementations
+    public sealed class ImplementedByAttribute : Attribute
     {
         Type[] implementedTypes;
 
@@ -42,38 +160,15 @@ namespace Signum.Entities
 
         public ImplementedByAttribute(params Type[] types)
         {
-            if (types.Any(t => !t.IsIdentifiableEntity()))
-                throw new InvalidOperationException("{0} are not {1}".Formato(types.Where(t => !t.IsIdentifiableEntity()).CommaOr(a => a.Name), typeof(IdentifiableEntity).Name));
-
             implementedTypes = types;
-        }
-
-        public override bool IsByAll
-        {
-            get { return false; }
-        }
-
-        public override bool ImplementedBy(Type type)
-        {
-            return implementedTypes.Contains(type); 
         }
     }
 
     [Serializable, AttributeUsage(AttributeTargets.Field)]
-    public sealed class ImplementedByAllAttribute : Implementations
+    public sealed class ImplementedByAllAttribute : Attribute
     {
         public ImplementedByAllAttribute()
         {
-        }
-
-        public override bool IsByAll
-        {
-            get { return true; }
-        }
-
-        public override bool ImplementedBy(Type type)
-        {
-            return false;
         }
     }
 

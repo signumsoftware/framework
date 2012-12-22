@@ -12,10 +12,12 @@ using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Engine.Linq;
+using Signum.Engine.Operations;
+using Signum.Engine.Basics;
 
 namespace Signum.Services
 {
-    public abstract class ServerBasic : IBaseServer, IDynamicQueryServer
+    public abstract class ServerBasic : IBaseServer, IDynamicQueryServer, IOperationServer
     {
         protected Dictionary<string, object> session = new Dictionary<string, object>();
 
@@ -29,7 +31,6 @@ namespace Signum.Services
             try
             {
                 using (ScopeSessionFactory.OverrideSession(session))
-                using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
                 {
                     return function();
                 }
@@ -54,55 +55,31 @@ namespace Signum.Services
             Return(mi, description, () => { action(); return true; }, checkLogin);
         }
 
-        public static ExecutionContext GetDefaultExecutionContext(MethodBase mi, string desc)
-        {
-            return SuggestUserInterfaceAttribute.Suggests(mi) == true ? ExecutionContext.UserInterface : null;
-        }
-
         #region IBaseServer
-        [SuggestUserInterface]
         public virtual IdentifiableEntity Retrieve(Type type, int id)
         {
             return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () =>Database.Retrieve(type, id));
         }
 
-        [SuggestUserInterface]
         public virtual IdentifiableEntity Save(IdentifiableEntity entidad)
         {
             return Return(MethodInfo.GetCurrentMethod(), entidad.GetType().Name,
-                () =>Database.Save(entidad));
+                () => Database.Save(entidad));
         }
 
-        [SuggestUserInterface]
-        public virtual List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), liteType.Name,
-                () =>AutoCompleteUtils.RetrieveAllLite(liteType, implementations));
-        }
-
-        [SuggestUserInterface]
-        public virtual List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), liteType.Name,
-                () =>AutoCompleteUtils.FindLiteLike(liteType, implementations, subString, count));
-        }
-
-        [SuggestUserInterface]
-        public Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), root.Name,
-                () => Schema.Current.FindAllImplementations(root));
-        }
-
-        [SuggestUserInterface]
         public virtual List<IdentifiableEntity> RetrieveAll(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () => Database.RetrieveAll(type));
         }
 
-        [SuggestUserInterface]
+        public virtual List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), type.Name,
+                () => Database.RetrieveAllLite(type));
+        }
+
         public virtual List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list)
         {
             Execute(MethodInfo.GetCurrentMethod(),
@@ -110,28 +87,49 @@ namespace Signum.Services
             return list;
         }
 
-        [SuggestUserInterface]
-        public bool Exists(Type type, int id)
+        public virtual List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
+                () => AutoCompleteUtils.FindAllLite(implementations));
+        }
+
+        public virtual List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
+                () => AutoCompleteUtils.FindLiteLike(implementations, subString, count));
+        }
+
+        public virtual Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), root.Name,
+                () => Schema.Current.FindAllImplementations(root));
+        }
+
+        public virtual bool Exists(Type type, int id)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                   () => Database.Exists(type, id));
         }
 
-        [SuggestUserInterface]
         public virtual Dictionary<Type, TypeDN> ServerTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => Schema.Current.TypeToDN);
         }
 
-        [SuggestUserInterface]
+
+        public Dictionary<Type, EntityType> EntityTypes()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                 () => TypeLogic.EntityTypes);
+        }
+
         public virtual DateTime ServerNow()
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => TimeZoneManager.Now);
         }
 
-        [SuggestUserInterface]
         public virtual string GetToStr(Type type, int id)
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -140,55 +138,124 @@ namespace Signum.Services
         #endregion
 
         #region IDynamicQueryServer
-        [SuggestUserInterface]
         public virtual QueryDescription GetQueryDescription(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => DynamicQueryManager.Current.QueryDescription(queryName));
         }
 
-        [SuggestUserInterface]
         public virtual ResultTable ExecuteQuery(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQuery(request));
         }
 
-        [SuggestUserInterface]
         public virtual int ExecuteQueryCount(QueryCountRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQueryCount(request));
         }
 
-        [SuggestUserInterface]
-        public virtual Lite ExecuteUniqueEntity(UniqueEntityRequest request)
+        public virtual Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteUniqueEntity(request));
         }
 
-        [SuggestUserInterface]
         public virtual List<object> GetQueryNames()
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => DynamicQueryManager.Current.GetQueryNames());
         }
 
-        [SuggestUserInterface]
-        public virtual List<QueryToken> ExternalQueryToken(Type type, QueryToken parent)
+        public virtual List<QueryToken> ExternalQueryToken(QueryToken parent)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-               () => DynamicQueryManager.Current.GetExtensions(type, parent).ToList());
+               () => DynamicQueryManager.Current.GetExtensions(parent).ToList());
         }
 
-        [SuggestUserInterface]
-        public object[] BatchExecute(BaseQueryRequest[] requests)
+        public virtual object[] BatchExecute(BaseQueryRequest[] requests)
         {
             return Return(MethodInfo.GetCurrentMethod(),
              () => DynamicQueryManager.Current.BatchExecute(requests));
         }
         #endregion
-       
+
+        #region IOperationServer Members
+        public Dictionary<Enum, string> GetCanExecute(IdentifiableEntity entity)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
+                () => OperationLogic.ServiceCanExecute(entity));
+        }
+
+        public Dictionary<Enum, string> GetCanExecuteLite(Lite<IdentifiableEntity> lite)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), lite.EntityType.Name,
+                () => OperationLogic.ServiceCanExecute(Database.Retrieve(lite)));
+        }
+
+        public List<OperationInfo> GetOperationInfos(Type entityType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => OperationLogic.ServiceGetOperationInfos(entityType));
+        }
+
+        public HashSet<Type> GetSaveProtectedTypes()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => OperationLogic.GetSaveProtectedTypes());
+        }
+
+        public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceExecute(entity, operationKey, args));
+        }
+
+        public IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
+        }
+
+        public IdentifiableEntity Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceDelete(lite, operationKey, args));
+        }
+
+        public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceConstruct(type, operationKey, args));
+        }
+
+        public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
+        }
+
+        public IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
+        }
+
+        public IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
+        }
+
+        public Dictionary<Enum, string> GetContextualCanExecute(Lite<IIdentifiable>[] lite, List<Enum> cleanKeys)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), null,
+                () => OperationLogic.GetContextualCanExecute(lite, cleanKeys));
+        }
+
+        #endregion
+
+
     }
 }

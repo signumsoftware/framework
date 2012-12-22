@@ -10,6 +10,7 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Linq
 {
@@ -21,6 +22,9 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
+            if (disableQueryFilter)
+                return base.VisitConstant(c);
+
             if (typeof(IQueryable).IsAssignableFrom(c.Type))
             {
                 IQueryable query = (IQueryable)c.Value;
@@ -49,6 +53,23 @@ namespace Signum.Engine.Linq
             }
 
             return base.VisitConstant(c);
+        }
+
+        bool disableQueryFilter = false;
+
+        protected override Expression VisitMethodCall(MethodCallExpression m)
+        {
+            if (m.Method.DeclaringType == typeof(LinqHints) && m.Method.Name == "DisableQueryFilter")
+            {
+                var old = disableQueryFilter;
+                disableQueryFilter = true;
+                var result = Visit(m.Arguments[0]);
+                disableQueryFilter = old;
+
+                return result;
+            }
+            else 
+                return base.VisitMethodCall(m);
         }
 
         

@@ -38,19 +38,19 @@ namespace Signum.Windows
 
             if (error.HasText())
             {
-                MessageBox.Show(Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Window.GetWindow(element), Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
         }
 
-        public static bool AssertErrors(Modifiable mod)
+        public static bool AssertErrors(Modifiable mod, Window window)
         {
             string error = GetErrors(mod); 
 
             if (error.HasText())
             {
-                MessageBox.Show(Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(window, Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
@@ -62,7 +62,20 @@ namespace Signum.Windows
             if (geh != null)
                 return geh.GetErrors();
 
-            return GetErrors((Modifiable)element.DataContext);
+            var visualErrors = VisualErrors(element).DefaultText(null);
+
+            var entityErrors = GetErrors((Modifiable)element.DataContext).DefaultText(null);
+
+            return "\r\n".Combine(visualErrors, entityErrors).DefaultText(null);
+        }
+
+        private static string VisualErrors(FrameworkElement element)
+        {
+            var visualErrors = (from c in element.Children<DependencyObject>(Validation.GetHasError, WhereFlags.NonRecursive | WhereFlags.BreathFirst | WhereFlags.VisualTree)
+                                from e in Validation.GetErrors(c)
+                                where !(e.RuleInError is DataErrorValidationRule)
+                                select DoubleListConverter.CleanErrorMessage(e)).ToString("\r\n");
+            return visualErrors;
         }
 
         public static string GetErrors(Modifiable mod)

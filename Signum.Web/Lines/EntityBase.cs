@@ -38,15 +38,14 @@ namespace Signum.Web
         {
             get 
             {
-                return Implementations != null && !Implementations.IsByAll && ((ImplementedByAttribute)Implementations).ImplementedTypes.Length > 1;
+                return Implementations != null && !Implementations.Value.IsByAll && Implementations.Value.Types.Count() > 1;
             }
         }
 
-        public Implementations Implementations { get; set; }
+        public Implementations? Implementations { get; set; }
 
-        public ViewMode ViewMode { get; set; } 
-        
-        public virtual bool View { get; set; }
+        public bool View { get; set; }
+        public bool Navigate { get; set; }
         public bool Create { get; set; }
         public bool Find { get; set; }
         public bool Remove { get; set; }
@@ -75,16 +74,25 @@ namespace Signum.Web
 
         protected virtual JsOptionsBuilder OptionsJSInternal()
         {
-            return new JsOptionsBuilder(false)
+            var options = new JsOptionsBuilder(false)
             {
-                {"prefix", ControlID.SingleQuote()},
-                {"onEntityChanged", "function(){ " + OnEntityChanged + " }"}, 
+                {"prefix", ControlID.SingleQuote()}
             };
+
+            if (OnEntityChanged.HasText())
+                options.Add("onEntityChanged", "function(){ " + OnEntityChanged + " }");
+            
+            return options;
         }
 
         public virtual JsViewOptions DefaultJsViewOptions()
         {
-            return new JsViewOptions { PartialViewName = this.PartialViewName };
+            var options = new JsViewOptions();
+
+            if (PartialViewName.HasText())
+                options.PartialViewName = this.PartialViewName;
+            
+            return options;
         }
 
         public JsFindOptions DefaultJsfindOptions()
@@ -135,7 +143,7 @@ namespace Signum.Web
                 if (UntypedValue == null)
                     return null;
 
-                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite).RuntimeType : UntypedValue.GetType();
+                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite<IIdentifiable>).EntityType : UntypedValue.GetType();
             }
         }
 
@@ -144,7 +152,7 @@ namespace Signum.Web
             get 
             {
                 return (UntypedValue as IIdentifiable).TryCS(i => i.IsNew) ??
-                       (UntypedValue as Lite).TryCS(l => l.IdOrNull==null);
+                       (UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IsNew);
             }
         }
 
@@ -153,7 +161,7 @@ namespace Signum.Web
             get
             {
                 return (UntypedValue as IIdentifiable).TryCS(i => i.IdOrNull) ??
-                       (UntypedValue as Lite).TryCS(l => l.IdOrNull);
+                       (UntypedValue as Lite<IIdentifiable>).TryCS(l => l.IdOrNull);
             }
         }
 
@@ -162,19 +170,8 @@ namespace Signum.Web
             get 
             {
                 return (UntypedValue as IIdentifiable).TryCC(i => i.ToString()) ??
-                       (UntypedValue as Lite).TryCC(l => l.ToString());
+                       (UntypedValue as Lite<IIdentifiable>).TryCC(l => l.ToString());
             }
         }
-
-        protected internal virtual EntitySettingsContext EntitySettingsContext
-        {
-            get { return ViewMode == Web.ViewMode.Popup ? Web.EntitySettingsContext.Content : Web.EntitySettingsContext.Default; }
-        }
-    }
-
-    public enum ViewMode
-    {
-        Popup,
-        Navigate
     }
 }

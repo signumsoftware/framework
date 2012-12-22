@@ -146,18 +146,18 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SelectedItemProperty =
-          DependencyProperty.Register("SelectedItem", typeof(Lite), typeof(SearchControl), new UIPropertyMetadata(null));
-        public Lite SelectedItem
+          DependencyProperty.Register("SelectedItem", typeof(Lite<IdentifiableEntity>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public Lite<IdentifiableEntity> SelectedItem
         {
-            get { return (Lite)GetValue(SelectedItemProperty); }
+            get { return (Lite<IdentifiableEntity>)GetValue(SelectedItemProperty); }
             set { SetValue(SelectedItemProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedItemsProperty =
-          DependencyProperty.Register("SelectedItems", typeof(Lite[]), typeof(SearchControl), new UIPropertyMetadata(null));
-        public Lite[] SelectedItems
+          DependencyProperty.Register("SelectedItems", typeof(Lite<IdentifiableEntity>[]), typeof(SearchControl), new UIPropertyMetadata(null));
+        public Lite<IdentifiableEntity>[] SelectedItems
         {
-            get { return (Lite[])GetValue(SelectedItemsProperty); }
+            get { return (Lite<IdentifiableEntity>[])GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
@@ -185,12 +185,12 @@ namespace Signum.Windows
             set { SetValue(IsAdminProperty, value); }
         }
 
-        public static readonly DependencyProperty ViewProperty =
-           DependencyProperty.Register("View", typeof(bool), typeof(SearchControl), new FrameworkPropertyMetadata(true, (d, e) => ((SearchControl)d).UpdateVisibility()));
-        public bool View
+        public static readonly DependencyProperty NavigateProperty =
+           DependencyProperty.Register("Navigate", typeof(bool), typeof(SearchControl), new FrameworkPropertyMetadata(true, (d, e) => ((SearchControl)d).UpdateVisibility()));
+        public bool Navigate
         {
-            get { return (bool)GetValue(ViewProperty); }
-            set { SetValue(ViewProperty, value); }
+            get { return (bool)GetValue(NavigateProperty); }
+            set { SetValue(NavigateProperty, value); }
         }
 
         public static readonly DependencyProperty CreateProperty =
@@ -209,12 +209,12 @@ namespace Signum.Windows
             set { SetValue(RemoveProperty, value); }
         }
 
-        public static readonly DependencyProperty ViewOnCreateProperty =
-          DependencyProperty.Register("ViewOnCreate", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
-        public bool ViewOnCreate
+        public static readonly DependencyProperty NavigateOnCreateProperty =
+          DependencyProperty.Register("NavigateOnCreate", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool NavigateOnCreate
         {
-            get { return (bool)GetValue(ViewOnCreateProperty); }
-            set { SetValue(ViewOnCreateProperty, value); }
+            get { return (bool)GetValue(NavigateOnCreateProperty); }
+            set { SetValue(NavigateOnCreateProperty, value); }
         }
 
         public static readonly DependencyProperty FilterColumnProperty =
@@ -266,7 +266,7 @@ namespace Signum.Windows
 
         public Implementations Implementations
         {
-            get { return entityColumn.Implementations; }
+            get { return entityColumn.Implementations.Value; }
         }
 
         public static readonly DependencyProperty CollapseOnNoResultsProperty =
@@ -284,8 +284,8 @@ namespace Signum.Windows
         }
 
         public event Func<IdentifiableEntity> Creating;
-        public event Action<IdentifiableEntity> Viewing;
-        public event Action<List<Lite>> Removing;
+        public event Action<IdentifiableEntity> Navigating;
+        public event Action<List<Lite<IdentifiableEntity>>> Removing;
         public event Action DoubleClick;
 
         public SearchControl()
@@ -296,7 +296,6 @@ namespace Signum.Windows
             OrderOptions = new ObservableCollection<OrderOption>();
             ColumnOptions = new ObservableCollection<ColumnOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
-            this.DataContextChanged += new DependencyPropertyChangedEventHandler(SearchControl_DataContextChanged);
         }
 
         public static readonly DependencyProperty HideIfNotFindableProperty =
@@ -337,7 +336,7 @@ namespace Signum.Windows
 
             entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             if (entityColumn == null)
-                throw new InvalidOperationException("Entity Column not found");
+                throw new InvalidOperationException("Entity Column not found on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
 
 
@@ -385,12 +384,13 @@ namespace Signum.Windows
                     SearchOnLoad = true;
             }
 
+            if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
+                Navigate = Implementations.IsByAll ? true :
+                           Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
 
-            if (this.NotSet(ViewProperty) && View && entityColumn.Implementations == null)
-                View = Navigator.IsViewable(EntityType, IsAdmin);
-
-            if (this.NotSet(CreateProperty) && Create && entityColumn.Implementations == null)
-                Create = Navigator.IsCreable(EntityType, IsAdmin);
+            if (this.NotSet(EntityBase.CreateProperty) && Create)
+                Create = Implementations.IsByAll ? false :
+                         Implementations.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: true));
 
             GenerateListViewColumns();
 
@@ -416,8 +416,12 @@ namespace Signum.Windows
             UpdateVisibility();
 
             AutomationProperties.SetItemStatus(this, QueryUtils.GetQueryUniqueKey(QueryName));
-        }
 
+            foreach (var item in FilterOptions)
+            {
+                item.BindingValueChanged += new DependencyPropertyChangedEventHandler(item_BindingValueChanged);
+            }
+        }
 
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -443,14 +447,13 @@ namespace Signum.Windows
             filterBuilder.AddFilter(tokenBuilder.Token);
         }
 
-        void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        void item_BindingValueChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (resultTable != null)
+            if (hasBeenLoaded && e.NewValue != null)
             {
                 Search();
             }
         }
-
 
         void SearchControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -465,22 +468,53 @@ namespace Signum.Windows
             }
         }
 
+        public static event Func<SearchControl, MenuItem> GetMenuItems;
+        public static event Func<SearchControl, IEnumerable<MenuItem>> GetContextMenuItems;
+
         private void FillMenuItems()
         {
-            if (GetCustomMenuItems != null)
+            if (GetMenuItems != null)
             {
-                MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
+                List<MenuItem> items = GetMenuItems.GetInvocationList().Cast<Func<SearchControl, MenuItem>>().Select(d => d(this)).NotNull().ToList();
                 menu.Items.Clear();
-                foreach (MenuItem mi in menus)
-                {
+                foreach (MenuItem mi in items)
                     menu.Items.Add(mi);
+            }
+        }
+
+        private void contextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            FillContextMenuItems();
+        }
+
+        private void FillContextMenuItems()
+        {
+            if (GetContextMenuItems != null)
+            {
+                contextMenu.Items.Clear();
+
+                foreach (var fun in GetContextMenuItems.GetInvocationList().Cast<Func<SearchControl, IEnumerable<MenuItem>>>())
+                {
+                    var items = fun(this).TryCC(a => a.ToList());
+
+                    if (items.IsNullOrEmpty())
+                        continue;
+
+                    if (contextMenu.Items.Count > 0)
+                        contextMenu.Items.Add(new Separator());
+
+                    foreach (var item in items)
+                        contextMenu.Items.Add(item);
                 }
+
+                if (contextMenu.Items.Count == 0)
+                    contextMenu.Items.Add(new MenuItem { Header = new TextBlock(new Italic(new Run(Signum.Windows.Properties.Resources.NoActionsFound))), IsEnabled = false });
             }
         }
 
         void UpdateViewSelection()
         {
-            btView.Visibility = View && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
+            btNavigate.Visibility = Navigate && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = Remove && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
 
             SelectedItem = ((ResultRow)lvResult.SelectedItem).TryCC(r => r.Entity);
@@ -544,6 +578,9 @@ namespace Signum.Windows
             Search();
         }
 
+
+        bool hasBeenLoaded = false;
+
         public void Search()
         {
             ClearResults();
@@ -555,6 +592,8 @@ namespace Signum.Windows
             DynamicQueryBachRequest.Enqueue(request,          
                 obj =>
                 {
+                    hasBeenLoaded = true;
+
                     resultTable = (ResultTable)obj;
 
                     if (resultTable != null)
@@ -689,10 +728,10 @@ namespace Signum.Windows
 
         void btView_Click(object sender, RoutedEventArgs e)
         {
-            OnViewClicked();
+            OnNavigateClicked();
         }
 
-        void OnViewClicked()
+        void OnNavigateClicked()
         {
             ResultRow row = (ResultRow)lvResult.SelectedItem;
 
@@ -701,7 +740,7 @@ namespace Signum.Windows
 
             IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(row.Entity, EntityType);
 
-            OnViewing(entity);
+            OnNavigating(entity);
         }
 
         void btCreate_Click(object sender, RoutedEventArgs e)
@@ -711,12 +750,10 @@ namespace Signum.Windows
 
         public Type SelectType()
         {
-            if (Implementations == null)
-                return EntityType;
-            else if (Implementations.IsByAll)
+            if (Implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
-            else
-                return Navigator.SelectType(Window.GetWindow(this), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+
+            return Navigator.SelectType(Window.GetWindow(this), Implementations.Types);
         }
 
 
@@ -730,21 +767,21 @@ namespace Signum.Windows
             if (result == null)
                 return;
 
-            if (ViewOnCreate)
+            if (NavigateOnCreate)
             {
-                OnViewing(result);
+                OnNavigating(result);
             }
         }
 
-        protected void OnViewing(IdentifiableEntity entity)
+        protected void OnNavigating(IdentifiableEntity entity)
         {
-            if (!View)
+            if (!Navigate)
                 return;
 
-            if (this.Viewing == null)
-                Navigator.NavigateUntyped(entity, new NavigateOptions { Admin = IsAdmin });
+            if (this.Navigating == null)
+                Navigator.NavigateUntyped(entity);
             else
-                this.Viewing(entity);
+                this.Navigating(entity);
         }
 
         void btRemove_Click(object sender, RoutedEventArgs e)
@@ -770,7 +807,7 @@ namespace Signum.Windows
             if (DoubleClick != null)
                 DoubleClick();
             else
-                OnViewClicked();
+                OnNavigateClicked();
             e.Handled = true;
         }
 
@@ -793,7 +830,7 @@ namespace Signum.Windows
             Search();
         }
 
-        public static event MenuItemForQueryName GetCustomMenuItems;
+
 
         FilterOption CreateFilter(SortGridViewColumnHeader header)
         {
@@ -927,70 +964,9 @@ namespace Signum.Windows
         {
             rowFilters.Height = new GridLength(); //Auto
         }
+
+      
     }
-
-    public delegate SearchControlMenuItem MenuItemForQueryName(object queryName, Type entityType);
-
-    public class SearchControlMenuItem : MenuItem
-    {
-        public SearchControl SearchControl { get; set; }
-
-        public SearchControlMenuItem() { }
-        public SearchControlMenuItem(RoutedEventHandler onClick)
-        {
-            this.Click += onClick;
-        }
-
-        protected override void OnInitialized(EventArgs e)
-        {
-            this.Loaded += new RoutedEventHandler(SearchControlMenuItem_Loaded);
-            base.OnInitialized(e);
-        }
-
-        void SearchControlMenuItem_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.Loaded -= SearchControlMenuItem_Loaded;
-            if (this.Parent != null)
-            {
-                SearchControl result = this.LogicalParents().OfType<SearchControl>().FirstEx();
-             
-                if (result is SearchControl)
-                {
-                    SearchControl = (SearchControl)result;
-
-                    SearchControl.QueryResultChanged += new RoutedEventHandler(searchControl_QueryResultChanged);
-
-                    Initialize();
-                }
-            }
-        }
-
-        void searchControl_QueryResultChanged(object sender, RoutedEventArgs e)
-        {
-            QueryResultChanged();
-        }
-
-        public virtual void Initialize()
-        {
-            foreach (var item in Items.OfType<SearchControlMenuItem>())
-            {
-                item.SearchControl = this.SearchControl;
-                item.Initialize();
-            }
-        }
-
-        public virtual void QueryResultChanged()
-        {
-            foreach (var item in Items.OfType<SearchControlMenuItem>())
-            {
-                item.QueryResultChanged();
-            }
-        }
-
-
-    }
-
-    
 
     public interface ISimpleFilterBuilder
     {

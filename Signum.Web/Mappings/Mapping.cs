@@ -167,7 +167,9 @@ namespace Signum.Web
         { 
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
-            EntityListBaseKeys.Index,
+            EntityComboKeys.Combo,
+            EntityListBaseKeys.Indexes,
+            EntityListBaseKeys.List
         };
 
         static GenericInvoker<Func<Delegate>> giForAutoEntity = new GenericInvoker<Func<Delegate>>(() => ForAutoEntity<IIdentifiable>());
@@ -290,7 +292,7 @@ namespace Signum.Web
         public static List<string> IndexPrefixes(this IDictionary<string, string> inputs)
         {
             return inputs.Keys
-                .Where(k => k != EntityListBaseKeys.ListPresent)
+                .Where(k => k != EntityListBaseKeys.ListPresent && k != EntityListBaseKeys.List)
                 .Select(str => str.Substring(0, str.IndexOf(TypeContext.Separator)))
                 .Distinct()
                 .OrderBy(a => int.Parse(a))
@@ -347,17 +349,17 @@ namespace Signum.Web
                 return ctx.None();
             
             string strRuntimeInfo;
-            Type runtimeType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ? 
-                RuntimeInfo.FromFormValue(strRuntimeInfo).RuntimeType: 
+            Type entityType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ? 
+                RuntimeInfo.FromFormValue(strRuntimeInfo).EntityType: 
                 ctx.Value.TryCC(t=>t.GetType());
 
-            if (runtimeType == null)
+            if (entityType == null)
                 return (T)(object)null;
 
-            if (typeof(T) == runtimeType || typeof(T).IsEmbeddedEntity())
+            if (typeof(T) == entityType || typeof(T).IsEmbeddedEntity())
                 return GetRuntimeValue<T>(ctx, ctx.PropertyRoute);
 
-            return miGetRuntimeValue.GetInvoker(runtimeType)(this, ctx, PropertyRoute.Root(runtimeType));
+            return miGetRuntimeValue.GetInvoker(entityType)(this, ctx, PropertyRoute.Root(entityType));
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue = 
@@ -370,7 +372,7 @@ namespace Signum.Web
                 return (R)(object)ctx.None(Resources.Type0NotAllowed.Formato(typeof(R)));
             }
 
-            Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingDefault);
+            Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
             SubContext<R> sc = new SubContext<R>(ctx.ControlID, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
             sc.Value = mapping(sc);
             ctx.SupressChange = sc.SupressChange;
@@ -383,27 +385,37 @@ namespace Signum.Web
     {
         abstract class PropertyMapping
         {
+            public readonly PropertyPack PropertyPack;
+
+            protected PropertyMapping(PropertyPack pp)
+            {
+                this.PropertyPack = pp;
+            }
+
             public static PropertyMapping Create(PropertyPack pp)
             {
                 return (PropertyMapping)Activator.CreateInstance(typeof(PropertyMapping<>).MakeGenericType(typeof(T), pp.PropertyInfo.PropertyType), pp);
             }
 
             public abstract void SetProperty(MappingContext<T> parent);
+
+            public override string ToString()
+            {
+                return PropertyPack.PropertyInfo.PropertyName();
+            }
         }
 
         class PropertyMapping<P> : PropertyMapping
         {
             public readonly Func<T, P> GetValue;
             public readonly Action<T, P> SetValue;
-            public readonly PropertyPack PropertyPack;
 
             public Mapping<P> Mapping { get; set; }
 
-            public PropertyMapping(PropertyPack pp)
+            public PropertyMapping(PropertyPack pp)  : base( pp)
             {
                 GetValue = ReflectionTools.CreateGetter<T, P>(pp.PropertyInfo);
                 SetValue = ReflectionTools.CreateSetter<T, P>(pp.PropertyInfo);
-                PropertyPack = pp;
                 Mapping = Signum.Web.Mapping.New<P>();
             }
 
@@ -499,7 +511,7 @@ namespace Signum.Web
 
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(strRuntimeInfo);
 
-            if (runtimeInfo.RuntimeType == null)
+            if (runtimeInfo.EntityType == null)
                 return null;
 
             if (typeof(T).IsEmbeddedEntity())
@@ -521,10 +533,10 @@ namespace Signum.Web
                          return Constructor.Construct<T>();
                  }
 
-                 if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.RuntimeType == identifiable.GetType())
+                 if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.EntityType == identifiable.GetType())
                      return (T)(ModifiableEntity)identifiable;
                  else
-                     return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                     return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             }
         }
  
@@ -591,6 +603,8 @@ namespace Signum.Web
         public LiteMapping()
         {
             EntityMapping = Mapping.New<S>();
+
+            EntityHasChanges = AnyNonSpecialImput; 
         }
 
         public Lite<S> GetValue(MappingContext<Lite<S>> ctx)
@@ -615,7 +629,7 @@ namespace Signum.Web
 
             Lite<S> lite = (Lite<S>)ctx.Value;
 
-            if (runtimeInfo.RuntimeType == null)
+            if (runtimeInfo.EntityType == null)
                 return null;
 
             if (runtimeInfo.IsNew)
@@ -623,35 +637,43 @@ namespace Signum.Web
                 if (lite != null && lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return TryModifyEntity(ctx, lite);
 
-                return TryModifyEntity(ctx, new Lite<S>((S)(IIdentifiable)Constructor.Construct(runtimeInfo.RuntimeType)));
+                return TryModifyEntity(ctx, (Lite<S>)((IdentifiableEntity)Constructor.Construct(runtimeInfo.EntityType)).ToLiteFat());
             }
 
             if (lite == null)
-                return TryModifyEntity(ctx, Database.RetrieveLite<S>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
+                return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value));
 
-            if (runtimeInfo.IdOrNull.Value == lite.IdOrNull && runtimeInfo.RuntimeType == lite.RuntimeType)
+            if (runtimeInfo.IdOrNull.Value == lite.IdOrNull && runtimeInfo.EntityType == lite.EntityType)
                 return TryModifyEntity(ctx, lite);
 
-            return TryModifyEntity(ctx, Database.RetrieveLite<S>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
+            return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value));
         }
 
-        public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> newLite)
+        public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> lite)
         {
-            if (!ctx.Inputs.Keys.Except(Mapping.specialProperties).Any())
-                return newLite; // If form does not contains changes to the entity
+            //commented out because of Lite<FileDN/FilePathDN>
+            if (!EntityHasChanges(ctx))
+                return lite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
-                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(newLite.TryToString()));
+                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(lite.TryToString()));
 
-            var sc = new SubContext<S>(ctx.ControlID, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = newLite.Retrieve() };
+            var sc = new SubContext<S>(ctx.ControlID, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = lite.Retrieve() };
             sc.Value = EntityMapping(sc);
 
             ctx.AddChild(sc);
 
             if (sc.SupressChange)
-                return newLite;
+                return lite;
 
             return sc.Value.ToLite(sc.Value.IsNew);
+        }
+
+        public Func<MappingContext<Lite<S>>, bool> EntityHasChanges;
+
+        private static bool AnyNonSpecialImput(MappingContext<Lite<S>> ctx)
+        {
+            return ctx.Inputs.Keys.Except(Mapping.specialProperties).Any();
         }
     }
 
@@ -673,7 +695,9 @@ namespace Signum.Web
         {
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
-            foreach (var index in ctx.Inputs.IndexPrefixes())
+            var indexPrefixes = ctx.Inputs.IndexPrefixes();
+
+            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.ControlID, ip, EntityListBaseKeys.Indexes)).TryCC(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
             {
                 SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), null, route, ctx);
 
@@ -707,7 +731,7 @@ namespace Signum.Web
             {
                 Debug.Assert(!itemCtx.Empty());
 
-                int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Index).ToInt();
+                int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).TryCC(s => s.Split(new [] {';'})[0]).ToInt();
 
                 if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
                     itemCtx.Value = oldList[oldIndex.Value];

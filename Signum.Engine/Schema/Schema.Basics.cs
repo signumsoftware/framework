@@ -42,7 +42,13 @@ namespace Signum.Engine.Maps
         void GenerateColumns();
     }
 
-    public partial class Table : IFieldFinder, ITable
+    interface ITablePrivate
+    {
+        ColumnExpression GetPrimaryOrder(Alias alias);
+    }
+      
+
+    public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         public Type Type { get; private set; }
 
@@ -175,7 +181,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public IEnumerable<KeyValuePair<Table, bool>> DependentTables()
+        public IEnumerable<KeyValuePair<Table, RelationInfo>> DependentTables()
         {
             return Fields.Values.SelectMany(f => f.Field.GetTables());
         }
@@ -184,7 +190,6 @@ namespace Signum.Engine.Maps
         {
             return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
         }
-
     }
 
     public class EntityField
@@ -230,7 +235,7 @@ namespace Signum.Engine.Maps
             throw new InvalidOperationException("IndexType {0} not expected".Formato(IndexType));
         }
 
-        internal abstract IEnumerable<KeyValuePair<Table, bool>> GetTables(); 
+        internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables(); 
     }
 
     public enum IndexType
@@ -287,6 +292,7 @@ namespace Signum.Engine.Maps
     public interface IFieldReference
     {
         bool IsLite { get; }
+        bool ClearEntityOnSaving { get; set; }
         Type FieldType { get; }
     }
 
@@ -327,9 +333,9 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<UniqueIndex>();
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
     }
 
@@ -339,7 +345,7 @@ namespace Signum.Engine.Maps
         public bool Nullable { get; set; }
         public SqlDbType SqlDbType { get; set; }
         public string UdtTypeName { get; set; }
-        bool IColumn.PrimaryKey { get { return false; } }
+        public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
         public int? Size { get; set; }
         public int? Scale { get; set; }
@@ -366,9 +372,9 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
     }
 
@@ -447,9 +453,15 @@ namespace Signum.Engine.Maps
             return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratUniqueIndexes(table));
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return EmbeddedFields.Values.SelectMany(f => f.Field.GetTables());
+            foreach (var f in EmbeddedFields.Values)
+            {
+                foreach (var kvp in f.Field.GetTables())
+                {
+                    yield return kvp;
+                }
+            }
         }
     }
 
@@ -465,7 +477,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
 
-        public bool IsLite { get; set; }
+        public bool IsLite { get; internal set; }
 
         public FieldReference(Type fieldType) : base(fieldType) { }
 
@@ -484,9 +496,29 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            yield return KVP.Create(ReferenceTable, IsLite); 
+            yield return KVP.Create(ReferenceTable, new RelationInfo
+            {
+                 IsLite = IsLite,
+                 IsCollection = false,
+                 IsNullable = Nullable
+            }); 
+        }
+
+        bool clearEntityOnSaving;
+        public bool ClearEntityOnSaving
+        {
+            get
+            {
+                this.AssertIsLite();
+                return this.clearEntityOnSaving;
+            }
+            set
+            {
+                this.AssertIsLite();
+                this.clearEntityOnSaving = value;
+            }
         }
     }
 
@@ -504,17 +536,22 @@ namespace Signum.Engine.Maps
                 IndexType.DefaultToNull().ToString());
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
             if (ReferenceTable == null)
-                yield break; 
-            yield return KVP.Create(ReferenceTable, IsLite);
+                yield break;
+            yield return KVP.Create(ReferenceTable, new RelationInfo
+            {
+                IsLite = IsLite,
+                IsCollection = false,
+                IsNullable = Nullable
+            });
         }
     }
 
     public partial class FieldImplementedBy : Field, IFieldReference
     {
-        public bool IsLite { get; set; }
+        public bool IsLite { get; internal set; }
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }
 
@@ -530,15 +567,35 @@ namespace Signum.Engine.Maps
             return ImplementationColumns.Values.Cast<IColumn>();
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, IsLite)).ToList();
+            return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, new RelationInfo
+            {
+                IsLite = IsLite,
+                IsCollection = false,
+                IsNullable = a.Value.Nullable
+            }));
+        }
+
+        bool clearEntityOnSaving;
+        public bool ClearEntityOnSaving
+        {
+            get
+            {
+                this.AssertIsLite();
+                return this.clearEntityOnSaving;
+            }
+            set
+            {
+                this.AssertIsLite();
+                this.clearEntityOnSaving = value;
+            }
         }
     }
 
     public partial class FieldImplementedByAll : Field, IFieldReference
     {
-        public bool IsLite { get; set; }
+        public bool IsLite { get; internal set; }
         public ImplementationColumn Column { get; set; }
         public ImplementationColumn ColumnTypes { get; set; }
 
@@ -549,9 +606,24 @@ namespace Signum.Engine.Maps
             return new[] { Column, ColumnTypes };
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
+        }
+
+        bool clearEntityOnSaving;
+        public bool ClearEntityOnSaving
+        {
+            get
+            {
+                this.AssertIsLite();
+                return this.clearEntityOnSaving;
+            }
+            set
+            {
+                this.AssertIsLite();
+                this.clearEntityOnSaving = value;
+            }
         }
     }
 
@@ -608,13 +680,17 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<UniqueIndex>();
         }
 
-        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return RelationalTable.Field.GetTables();
+            foreach (var kvp in RelationalTable.Field.GetTables())
+            {
+                kvp.Value.IsCollection = true;
+                yield return kvp;
+            }
         }
     }
 
-    public partial class RelationalTable : ITable, IFieldFinder
+    public partial class RelationalTable : ITable, IFieldFinder, ITablePrivate
     {
         public class PrimaryKeyColumn : IColumn
         {
@@ -665,12 +741,12 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public Field GetField(MemberInfo mi)
+        public Field GetField(MemberInfo member)
         {
-            Field result = TryGetField(mi); 
+            Field result = TryGetField(member); 
 
             if(result  == null)
-                throw new InvalidOperationException("'{0}' not found".Formato(mi.Name));
+                throw new InvalidOperationException("'{0}' not found".Formato(member.Name));
 
             return result;
         }

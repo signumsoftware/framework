@@ -30,7 +30,7 @@ namespace Signum.Windows
     /// </summary>
     [TemplatePart(Name = "PART_EditableTextBox", Type = typeof(TextBox))]
     [TemplatePart(Name = "PART_DatePickerCalendar", Type = typeof(System.Windows.Controls.Calendar))]
-    public class DateTimePicker: Control
+    public class DateTimePicker : Control
     {
         public static readonly DependencyProperty IsEditableProperty =
             DependencyProperty.Register("IsEditable", typeof(bool), typeof(DateTimePicker), new FrameworkPropertyMetadata(true, (d, e) => ((DateTimePicker)d).UpdateVisibility()));
@@ -73,7 +73,7 @@ namespace Signum.Windows
 
         public DateTimePicker()
         {
-      
+
         }
 
         internal TextBox textBox;
@@ -83,7 +83,7 @@ namespace Signum.Windows
         public override void OnApplyTemplate()
         {
             if (textBox != null)
-                BindingOperations.ClearBinding(textBox, TextBox.TextProperty); 
+                BindingOperations.ClearBinding(textBox, TextBox.TextProperty);
 
             textBox = (TextBox)GetTemplateChild("PART_EditableTextBox");
 
@@ -101,7 +101,7 @@ namespace Signum.Windows
                 }.Do(b => b.ValidationRules.Add(DateTimeConverter)));
 
 
-            if(pickerBase != null)
+            if (pickerBase != null)
                 pickerBase.DropDownOpened -= pickerBase_DropDownOpened;
 
             pickerBase = (PickerBase)GetTemplateChild("PART_PickerBase");
@@ -114,7 +114,7 @@ namespace Signum.Windows
             if (monthCalendar != null)
             {
                 monthCalendar.SelectedDatesChanged -= monthCalendar_SelectedDatesChanged;
-                BindingOperations.ClearBinding(monthCalendar, System.Windows.Controls.Calendar.SelectedDateProperty); 
+                BindingOperations.ClearBinding(monthCalendar, System.Windows.Controls.Calendar.SelectedDateProperty);
             }
 
             monthCalendar = (System.Windows.Controls.Calendar)GetTemplateChild("PART_DatePickerCalendar");
@@ -192,6 +192,8 @@ namespace Signum.Windows
         //}
     }
 
+
+
     class DateTimePickerAutomationPeer : FrameworkElementAutomationPeer
     {
         public DateTimePickerAutomationPeer(DateTimePicker dateTimePicker)
@@ -212,9 +214,12 @@ namespace Signum.Windows
             if (button != null)
                 childrenCore.Add(button);
 
-            AutomationPeer month = UIElementAutomationPeer.CreatePeerForElement(dtp.monthCalendar);
-            if (month != null)
-                childrenCore.Add(month);
+            if (dtp.pickerBase.IsDropDownOpen && dtp.monthCalendar != null)
+            {
+                AutomationPeer calendar = UIElementAutomationPeer.CreatePeerForElement(dtp.monthCalendar);
+                if (calendar != null)
+                    childrenCore.Add(calendar);
+            }
 
             return childrenCore;
         }

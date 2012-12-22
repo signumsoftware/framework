@@ -19,11 +19,21 @@ namespace Signum.Entities
             set { OverrideTimeZoneVariable.Value = value; }
         }
 
-        public static readonly SessionVariable<DateTime?> OverrideNowVariable = Statics.SessionVariable<DateTime?>("now");
-        public static DateTime? OverrideNow
+        public static readonly ThreadVariable<DateTime?> OverrideNowVariable = Statics.ThreadVariable<DateTime?>("now");
+        public static IDisposable OverrideNow(DateTime newNow)
         {
-            get { return OverrideNowVariable.Value; }
-            set { OverrideNowVariable.Value = value; }
+            var old = OverrideNowVariable.Value;
+
+            OverrideNowVariable.Value = newNow;
+            return new Disposable(() => OverrideNowVariable.Value = old);
+        }
+
+        public static void IncrementOverridenNow(TimeSpan ts)
+        {
+            if (OverrideNowVariable.Value == null)
+                throw new InvalidOperationException("OverridenNow is not set");
+
+            OverrideNowVariable.Value += ts;
         }
   
 
@@ -31,8 +41,10 @@ namespace Signum.Entities
         {
             get
             {
-                if (OverrideNow.HasValue)
-                    return OverrideNow.Value;
+                var overriden = OverrideNowVariable.Value;
+
+                if (overriden.HasValue)
+                    return overriden.Value;
 
                 if (Mode == TimeZoneMode.Local)
                     return DateTime.Now;

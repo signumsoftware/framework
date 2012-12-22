@@ -348,4 +348,10 @@
   <data name="IdentifiableEntity_ToStr" xml:space="preserve">
     <value>Text</value>
   </data>
+  <data name="DayOfYear" xml:space="preserve">
+    <value>Day of year</value>
+  </data>
+  <data name="DayOfWeek" xml:space="preserve">
+    <value>Day of week</value>
+  </data>
 </root>

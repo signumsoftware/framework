@@ -61,7 +61,6 @@ namespace Signum.Utilities.Synchronization
 
         public void Dispose()
         {
-            current.Dispose();
         }
     }
 }

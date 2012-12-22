@@ -25,7 +25,7 @@ namespace Signum.Utilities
 
         public void Add(K key, V value)
         {
-            dictionary.Add(key.ToString(), Tuple.Create(value, ToString(value)));
+            dictionary.AddOrThrow(key.ToString(), Tuple.Create(value, ToString(value)), "Key {0} already in ConsoleSwitch");
         }
 
         public void Add(K key, V value, string str)

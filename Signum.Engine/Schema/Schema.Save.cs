@@ -536,9 +536,6 @@ namespace Signum.Engine.Maps
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
         {   
-            if(comment == null)
-                comment = ident.ToString();
-
             bool dirty = false;
             ident.PreSaving(ref dirty);
             if (SetToStrField(ident)) 
@@ -800,24 +797,57 @@ namespace Signum.Engine.Maps
     {
         static MethodInfo miGetIdForLite = ReflectionTools.GetMethodInfo(() => GetIdForLite(null, new Forbidden()));
         static MethodInfo miGetIdForEntity = ReflectionTools.GetMethodInfo(() => GetIdForEntity(null, new Forbidden()));
+        static MethodInfo miGetIdForLiteCleanEntity = ReflectionTools.GetMethodInfo(() => GetIdForLiteCleanEntity(null, new Forbidden()));
+
+        public static void AssertIsLite(this IFieldReference fr)
+        {
+            if (!fr.IsLite)
+                throw new InvalidOperationException("The field is not a lite");
+        }
 
         public static Expression GetIdFactory(this IFieldReference fr, Expression value, Expression forbidden)
         {
-            return Expression.Call(fr.IsLite ? miGetIdForLite : miGetIdForEntity, value, forbidden); 
+            var mi = !fr.IsLite ? miGetIdForEntity :
+                fr.ClearEntityOnSaving ? miGetIdForLiteCleanEntity :
+                miGetIdForLite;
+
+            return Expression.Call(mi, value, forbidden);
         }
 
-        static int? GetIdForLite(object value, Forbidden forbidden)
+        static int? GetIdForLite(Lite<IIdentifiable> lite, Forbidden forbidden)
         {
-            if (value == null)
+            if (lite == null)
                 return null;
 
-            Lite l = (Lite)value;
-            return l.UntypedEntityOrNull == null ? l.Id :
-                   forbidden.Contains(l.UntypedEntityOrNull) ? (int?)null :
-                   l.RefreshId();
+            if (lite.UntypedEntityOrNull == null)
+                return lite.Id;
+
+            if (forbidden.Contains(lite.UntypedEntityOrNull))
+                return null;
+
+            lite.RefreshId();
+
+            return lite.Id;
         }
 
-        static int? GetIdForEntity(object value, Forbidden forbidden)
+        static int? GetIdForLiteCleanEntity(Lite<IIdentifiable> lite, Forbidden forbidden)
+        {
+            if (lite == null)
+                return null;
+
+            if (lite.UntypedEntityOrNull == null)
+                return lite.Id;
+
+            if (forbidden.Contains(lite.UntypedEntityOrNull))
+                return null;
+
+            lite.RefreshId();
+            lite.ClearEntity();
+
+            return lite.Id;
+        }
+
+        static int? GetIdForEntity(IIdentifiable value, Forbidden forbidden)
         {
             if (value == null)
                 return null;
@@ -834,18 +864,18 @@ namespace Signum.Engine.Maps
             return Expression.Call(fr.IsLite ? miGetTypeForLite : miGetTypeForEntity, value, forbidden);
         }
 
-        static Type GetTypeForLite(object value, Forbidden forbidden)
+        static Type GetTypeForLite(Lite<IIdentifiable> value, Forbidden forbidden)
         {
             if (value == null)
                 return null;
 
-            Lite l = (Lite)value;
-            return l.UntypedEntityOrNull == null ? l.RuntimeType :
+            Lite<IIdentifiable> l = (Lite<IIdentifiable>)value;
+            return l.UntypedEntityOrNull == null ? l.EntityType :
                  forbidden.Contains(l.UntypedEntityOrNull) ? null :
-                 l.RuntimeType;
+                 l.EntityType;
         }
 
-        static Type GetTypeForEntity(object value, Forbidden forbidden)
+        static Type GetTypeForEntity(IIdentifiable value, Forbidden forbidden)
         {
             if (value == null)
                 return null;

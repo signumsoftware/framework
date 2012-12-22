@@ -106,7 +106,7 @@ namespace Signum.Web
             }
 
             if (preferredStyle == VisualConstructStyle.Navigate)
-                return JsonAction.Redirect(Navigator.ViewRoute(type, null));
+                return JsonAction.Redirect(Navigator.NavigateRoute(type, null));
 
             ModifiableEntity entity = Constructor.Construct(type);
             return EncapsulateView(controller, entity, prefix, preferredStyle); 
@@ -117,22 +117,20 @@ namespace Signum.Web
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
             if (ident == null)
-                throw new InvalidOperationException("Visual Constructor doesn't work with EmbeddedEntities"); 
+                throw new InvalidOperationException("Visual Constructor doesn't work with EmbeddedEntities");
 
             AddFilterProperties(entity, controller);
 
             switch (preferredStyle)
             {
                 case VisualConstructStyle.PopupView:
-                    TypeContext tc = TypeContextUtilities.UntypedNew(ident, prefix);
-                    return Navigator.PopupOpen(controller, new ViewOkOptions(tc));
-                case VisualConstructStyle.PopupCreate:
-                    TypeContext t = TypeContextUtilities.UntypedNew(ident, prefix);
-                    return Navigator.PopupOpen(controller, new ViewSaveOptions(t));
+                    return Navigator.PopupOpen(controller, new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)));
+                case VisualConstructStyle.PopupNavigate:
+                    return Navigator.PopupOpen(controller, new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix)));
                 case VisualConstructStyle.PartialView:
                     return Navigator.PartialView(controller, ident, prefix);
                 case VisualConstructStyle.View:
-                    return Navigator.View(controller, ident); 
+                    return Navigator.NormalPage(controller, ident);
                 default:
                     throw new InvalidOperationException();
             }
@@ -171,8 +169,8 @@ namespace Signum.Web
     public enum VisualConstructStyle
     {
         PopupView, 
-        PopupCreate,
-        PartialView,
+        PopupNavigate,
+        PartialView,  
         View,
         Navigate
     }

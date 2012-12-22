@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,11 +42,12 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("DROP VIEW {0}".Formato(view.SqlScape()));
         }
 
-        public static SqlPreCommand DropViewIndex(string view, string index)
+        static SqlPreCommand DropViewIndex(string view, string index)
         {
             return new[]{
                  DropIndex(view, index),
-                 DropView(view)}.Combine(Spacing.Simple);
+                 DropView(view)
+            }.Combine(Spacing.Simple);
         }
 
         internal static SqlPreCommand AlterTableDropColumn(string table, string columnName)
@@ -129,39 +130,61 @@ namespace Signum.Engine
         public static SqlPreCommand AlterTableForeignKeys(ITable t)
         {
             return t.Columns.Values.Select(c =>
-                c.ReferenceTable == null? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
+                c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand CreateAllIndices(ITable t)
         {
-            return CreateAllIndices(t, t.GeneratUniqueIndexes()); 
+            return CreateAllIndices(t, t.GeneratUniqueIndexes());
         }
 
         public static SqlPreCommand CreateAllIndices(ITable t, IEnumerable<UniqueIndex> tableIndexes)
         {
-            var uniqueIndices = tableIndexes.Select(ix => CreateUniqueIndex(ix)).Combine(Spacing.Simple); 
+            var uniqueIndices = tableIndexes.Select(ix => CreateUniqueIndex(ix)).Combine(Spacing.Simple);
 
-            var freeIndexes = t.Columns.Values.Where(c=>c.ReferenceTable != null).Select(c=>CreateMultipleIndex(t, c)).Combine(Spacing.Simple); 
+            var freeIndexes = t.Columns.Values.Where(c => c.ReferenceTable != null).Select(c => CreateFreeIndex(t, c)).Combine(Spacing.Simple);
 
-            return new []{uniqueIndices, freeIndexes}.Combine(Spacing.Simple); 
+            return new[] { uniqueIndices, freeIndexes }.Combine(Spacing.Simple);
         }
 
-        internal static SqlPreCommand DropIndex(string table, string indexName)
+        internal static SqlPreCommand DropIndex(string table, DiffIndex index)
+        {
+            if (index.ViewName == null)
+                return DropIndex(table, index.IndexName);
+            else
+                return DropViewIndex(index.ViewName, index.IndexName);
+        }
+
+        static SqlPreCommand DropIndex(string table, string indexName)
         {
             return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(table.SqlScape(), indexName.SqlScape()));
         }
 
-        internal static SqlPreCommand DropIndexCommented(string table, string indexName)
+        public static SqlPreCommand ReCreateFreeIndex(string oldTable, string table, DiffIndex index, Dictionary<string, string> tableReplacements)
         {
-            return new SqlPreCommandSimple("-- DROP INDEX {0}.{1}".Formato(table.SqlScape(), indexName.SqlScape()));
+            if (index.IsControlledIndex)
+                throw new InvalidOperationException("The Index is not a free index");
+
+            var onlyColumn = index.Columns.Only();
+
+            string indexName = onlyColumn != null && index.IndexName.StartsWith("FIX_") ? "FIX_{0}_{1}".Formato(table, (tableReplacements.TryGetC(onlyColumn) ?? onlyColumn)) :
+                tableReplacements == null ? index.IndexName.Replace(oldTable, table) :
+                index.IndexName.Replace(tableReplacements).Replace(oldTable, table);
+
+            string columns = index.Columns.ToString(c => (tableReplacements.TryGetC(c) ?? c).SqlScape(), ", ");
+
+            return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
+                 indexName.SqlScape(),
+                 table.SqlScape(),
+                 columns));
         }
-        
-        public static SqlPreCommand CreateMultipleIndex(ITable table, IColumn column)
+
+        public static SqlPreCommand CreateFreeIndex(ITable table, IColumn column)
         {
             string indexName = "FIX_{0}_{1}".Formato(table.Name, column.Name);
 
             return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
-                 indexName,
+                 indexName.SqlScape(),
                  table.Name.SqlScape(),
                  column.Name.SqlScape()));
         }
@@ -183,12 +206,12 @@ namespace Signum.Engine
                 string viewName = index.ViewName;
 
                 SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM dbo.{2} WHERE {3}"
-                    .Formato(viewName.SqlScape(), columns, index.Table.Name.SqlScape(), index.Where));
+                    .Formato(viewName.SqlScape(), columns, index.Table.Name.SqlScape(), index.Where)) { AddGo = true };
 
                 SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
                     .Formato(index.IndexName, viewName.SqlScape(), index.Columns.ToString(c => c.Name.SqlScape(), ", ")));
 
-                return SqlPreCommand.Combine(Spacing.Simple , viewSql, indexSql);
+                return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
             }
             else
             {
@@ -201,9 +224,15 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableDropConstraint(string table, string constraintName)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1} ".Formato(
+            return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".Formato(
                 table.SqlScape(),
-                constraintName.SqlScape()));
+                constraintName.SqlScape())) { AddGo = true };
+        }
+
+        public static SqlPreCommand AlterTableAddDefaultConstraint(string table, string column, string constraintName, string definition)
+        {
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
+                        .Formato(table.SqlScape(), constraintName.SqlScape(), definition, column.SqlScape()));
         }
 
         public static SqlPreCommand AlterTableAddConstraintForeignKey(string table, string fieldName, string foreignTable)
@@ -255,7 +284,8 @@ namespace Signum.Engine
 
         internal static SqlPreCommandSimple SelectRowCount()
         {
-            return new SqlPreCommandSimple("select @@rowcount;"); 
+            return new SqlPreCommandSimple("select @@rowcount;");
         }
+
     }
 }

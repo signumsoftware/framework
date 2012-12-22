@@ -164,11 +164,6 @@ fieldset.sf-repeater-field
     border-style: solid;
 }
 
-.sf-repeater-element legend .sf-line-button
-{
-    display: block !important;
-}
-
 /* errors */
 .sf-field-validation-error {
     color:#ff0000;

@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -17,6 +18,14 @@
     </AssemblyOriginatorKeyFile>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,7 +62,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Microsoft ASP.NET\ASP.NET MVC 3\Assemblies\System.Web.Mvc.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.WebPages" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -64,6 +72,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.WebPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.WebPages.Razor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.WorkflowServices" />
     <Reference Include="System.Xml.Linq" />
@@ -82,6 +91,7 @@
     </Compile>
     <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="Facades\ExceptionClient.cs" />
     <Compile Include="Facades\QueryRequestModelBinder.cs" />
     <Compile Include="Facades\ViewOptions.cs" />
     <Compile Include="HtmlHelpers\CalendarHelper.cs" />
@@ -90,11 +100,14 @@
     <Compile Include="HtmlHelpers\PagerExtensions.cs" />
     <Compile Include="HtmlHelpers\ScriptHtmlHelper.cs" />
     <Compile Include="ButtonBar\ContextualItem.cs" />
-    <Compile Include="ControllerAttributes\ExecutionContextAttribute.cs" />
     <Compile Include="ControllerAttributes\SignumExceptionHandlerAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
     <Compile Include="MimeTypes.cs" />
+    <Compile Include="Operations\JsOperationOptions.cs" />
+    <Compile Include="Operations\JsOperations.cs" />
+    <Compile Include="Operations\OperationsClient.cs" />
+    <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">
       <SubType>Code</SubType>
@@ -119,10 +132,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Signum\Controllers\JsonConverters.cs" />
+    <Compile Include="Signum\Controllers\OperationController.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />
-    <Compile Include="Signum\Controllers\WidgetsController.cs" />
     <Compile Include="Lines\ValueLine.cs" />
     <Compile Include="Mappings\Mapping.cs">
       <SubType>Code</SubType>
@@ -130,86 +143,80 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateExtensions.cs" />
     <Compile Include="ButtonBar\ToolBarButton.cs" />
-    <Compile Include="Signum\Views\ChooserPopup.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ChooserPopup.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Signum\Views\Error.cs">
+    <Compile Include="Signum\Views\Error.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Error.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\FilterBuilder.cs">
+    <Compile Include="Signum\Views\Exception.generated.cs">
+      <DependentUpon>Exception.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Signum\Views\FilterBuilder.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>FilterBuilder.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\NormalControl.cs">
+    <Compile Include="Signum\Views\NormalControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>NormalControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\NormalPage.cs">
+    <Compile Include="Signum\Views\NormalPage.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>NormalPage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\Pagination.cs">
+    <Compile Include="Signum\Views\Pagination.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Pagination.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\PopupControl.cs">
+    <Compile Include="Signum\Views\PopupCancelControl.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PopupCancelControl.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Views\PopupControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PopupControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\PopupOkControl1.cs">
+    <Compile Include="Signum\Views\PopupOkControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PopupOkControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\SearchControl.cs">
+    <Compile Include="Signum\Views\SearchControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControl.cshtml</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="Signum\Views\SearchPopupControl.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SearchPopupControl.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Signum\Views\SearchResults.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SearchResults.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Signum\Views\SearchPage.cs">
+    <Compile Include="Signum\Views\SearchPage.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchPage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\ValueLineBox.cs">
+    <Compile Include="Signum\Views\SearchPopupControl.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SearchPopupControl.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Views\SearchResults.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SearchResults.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Signum\Views\ValueLineBox.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ValueLineBox.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\Widgets\Alert.cs">
-      <DependentUpon>Alert.cshtml</DependentUpon>
+    <Compile Include="Signum\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Signum\Views\Widgets\Note.cs">
-      <DependentUpon>Note.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Signum\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="TypeContext\TypeContext.cs" />
     <Compile Include="TypeContext\TypeContextExpression.cs" />
@@ -234,12 +241,8 @@
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
-    <Compile Include="Widgets\AlertWidgetHelper.cs" />
-    <Compile Include="Widgets\AlertsClient.cs" />
-    <Compile Include="Widgets\NotesClient.cs" />
-    <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
-    <Compile Include="Widgets\NoteWidgetHelper.cs" />
-    <Compile Include="Widgets\WidgetsHelper.cs" />
+    <Compile Include="TypeContext\Widgets\QuickLinkWidgetHelper.cs" />
+    <Compile Include="TypeContext\Widgets\WidgetsHelper.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
     <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
     <Compile Include="LineHelpers\EntityRepeaterHelper.cs" />
@@ -259,44 +262,58 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum\Views\PopupOkControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>PopupOkControl1.cs</LastGenOutput>
+    <Content Include="Signum\Scripts\SF_Operations.js" />
+    <Content Include="Signum\Views\Exception.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Exception.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </Content>
-    <Content Include="Signum\Views\Pagination.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Pagination.cs</LastGenOutput>
-    </Content>
+    <None Include="Signum\Views\PopupOkControl.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PopupOkControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </None>
+    <None Include="Signum\Views\Pagination.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Pagination.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </None>
     <None Include="Signum\Views\SearchResults.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchResults.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SearchResults.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\FilterBuilder.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>FilterBuilder.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>FilterBuilder.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Content\SF_Widgets.css" />
     <Content Include="Signum\Scripts\SF_Widgets.js" />
-    <Content Include="Signum\Views\SearchControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchControl.cs</LastGenOutput>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <None Include="Signum\Views\SearchPage.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchPage.cs</LastGenOutput>
+    <None Include="Signum\Views\SearchControl.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SearchControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <None Include="Signum\Views\ChooserPopup.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ChooserPopup.cs</LastGenOutput>
+    <None Include="Signum\Views\SearchPage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SearchPage.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </None>
+    <None Include="Signum\Views\PopupCancelControl.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PopupCancelControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\PopupControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>PopupControl.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>PopupControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\NormalPage.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>NormalPage.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>NormalPage.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Content\reset.css" />
     <Content Include="Signum\Content\SF_Lines.css" />
@@ -304,20 +321,13 @@
     <Content Include="Signum\Content\SF_Notify.css" />
     <Content Include="Signum\Content\SF_Search.css" />
     <Content Include="Signum\Scripts\SF_Slider.js" />
-    <Content Include="Signum\Views\_ViewStart.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>_ViewStart.cs</LastGenOutput>
-    </Content>
+    <None Include="Signum\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </None>
     <Content Include="Signum\Images\calendar.png" />
     <Content Include="Signum\Scripts\SF_Utils.js" />
-    <Content Include="Signum\Views\Widgets\Note.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Note.cs</LastGenOutput>
-    </Content>
-    <Content Include="Signum\Views\Widgets\Alert.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Alert.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.config" />
@@ -333,12 +343,14 @@
     <Content Include="Signum\Images\sign_error.gif" />
     <Content Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.js" />
     <None Include="Signum\Views\NormalControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>NormalControl.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>NormalControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\ValueLineBox.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>ValueLineBox.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ValueLineBox.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Scripts\SF_FindNavigator.js" />
     <Content Include="Signum\Scripts\SF_Lines.js" />
@@ -346,8 +358,9 @@
     <Content Include="Signum\Scripts\SF_Validator.js" />
     <Content Include="Signum\Scripts\SF_ViewNavigator.js" />
     <None Include="Signum\Views\Error.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>Error.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Error.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <EmbeddedResource Include="Properties\Resources.es.resx">
       <SubType>Designer</SubType>
@@ -360,8 +373,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Signum\Views\SearchPopupControl.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchPopupControl.cs</LastGenOutput>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SearchPopupControl.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <EmbeddedResource Include="Properties\Resources.de.resx" />
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
@@ -380,8 +394,13 @@
       <Name>Signum.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="BeforeBuild">
     <ItemGroup>
       <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js" />

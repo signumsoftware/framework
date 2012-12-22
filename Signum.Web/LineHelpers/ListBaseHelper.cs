@@ -28,13 +28,10 @@ namespace Signum.Web
 
             Type type = listBase.ElementType.CleanType();
 
-            if (listBase.ViewMode == ViewMode.Navigate && (!Navigator.IsViewable(type, EntitySettingsContext.Admin) || !type.IsIIdentifiable()))
-                return MvcHtmlString.Empty;
-
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", listBase.GetCreating() },
-                { "data-icon", listBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-plus" : "ui-icon-plusthick" },
+                { "data-icon", "ui-icon-circle-plus" },
                 { "data-text", false}
             };
 
@@ -54,13 +51,10 @@ namespace Signum.Web
             if (!listBase.View)
                 return MvcHtmlString.Empty;
 
-            if (listBase.ViewMode == ViewMode.Navigate && !listBase.ElementType.CleanType().IsIIdentifiable())
-                return MvcHtmlString.Empty;
-
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", listBase.GetViewing() },
-                { "data-icon", listBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-arrow-e" : "ui-icon-arrowthick-1-e" },
+                { "data-icon", "ui-icon-circle-arrow-e" },
                 { "data-text", false}
             };
 
@@ -72,9 +66,29 @@ namespace Signum.Web
                   htmlAttr);
         }
 
+        public static MvcHtmlString NavigateButton(HtmlHelper helper, EntityListBase listBase)
+        {
+            if (!listBase.View)
+                return MvcHtmlString.Empty;
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetViewing() },
+                { "data-icon", "ui-icon-arrowthick-1-e" },
+                { "data-text", false}
+            };
+
+            return helper.Href(listBase.Compose("btnNavigate"),
+                  Resources.LineButton_Navigate,
+                  "",
+                  Resources.LineButton_Navigate,
+                  "sf-line-button sf-navigate",
+                  htmlAttr);
+        }
+
         public static MvcHtmlString FindButton(HtmlHelper helper, EntityListBase listBase)
         {
-            if ((!listBase.Find) || !listBase.ElementType.CleanType().IsIIdentifiable())
+            if (!listBase.Find)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
@@ -115,7 +129,63 @@ namespace Signum.Web
                   Resources.LineButton_Remove,
                   "sf-line-button sf-remove",
                   htmlAttr);
+        }
 
+        public static MvcHtmlString MoveUpButton(HtmlHelper helper, EntityListBase listBase)
+        {
+            if (!listBase.Reorder)
+                return MvcHtmlString.Empty;
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetMovingUp() },
+                { "data-icon", "ui-icon-triangle-1-n" },
+                { "data-text", false}
+            };
+
+            IList list = (IList)listBase.UntypedValue;
+
+            if (list == null || list.Count == 0)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(listBase.Compose("btnUp"),
+                  Resources.Signum_entityRepeater_moveUp,
+                  "",
+                  Resources.Signum_entityRepeater_moveUp,
+                  "sf-line-button move-up",
+                  htmlAttr);
+        }
+
+        public static MvcHtmlString MoveDownButton(HtmlHelper helper, EntityListBase listBase)
+        {
+            if (!listBase.Reorder)
+                return MvcHtmlString.Empty;
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetMovingDown() },
+                { "data-icon", "ui-icon-triangle-1-s" },
+                { "data-text", false}
+            };
+
+            IList list = (IList)listBase.UntypedValue;
+
+            if (list == null || list.Count == 0)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(listBase.Compose("btnDown"),
+                  Resources.Signum_entityRepeater_moveDown,
+                  "",
+                  Resources.Signum_entityRepeater_moveDown,
+                  "sf-line-button move-down",
+                  htmlAttr);
+        }
+
+        public static MvcHtmlString WriteIndex(HtmlHelper helper, EntityListBase listBase, TypeContext itemTC, int itemIndex)
+        {
+            return helper.Hidden(itemTC.Compose(EntityListBaseKeys.Indexes), "{0};{1}".Formato(
+                listBase.ShouldWriteOldIndex(itemTC) ? itemIndex.ToString() : "", 
+                itemIndex.ToString()));
         }
     }
 }

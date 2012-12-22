@@ -20,12 +20,10 @@ namespace Signum.Engine
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
     public sealed class SqlViewColumnAttribute : Attribute
     {
+        public bool PrimaryKey { get; set; }
+
         public string Name { get; private set;}
 
-        public SqlViewColumnAttribute(string name)
-        {
-            this.Name = name;
-        }
     }
 
     public interface IView: IRootEntity { }

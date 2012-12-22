@@ -23,6 +23,9 @@ namespace Signum.Windows
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
+            if (item == null)
+                return null;
+
             return templates.SingleOrDefaultEx(t => t.DataType as Type == item.GetType());
         }
     }

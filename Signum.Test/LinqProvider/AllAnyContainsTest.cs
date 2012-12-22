@@ -74,8 +74,8 @@ namespace Signum.Test.LinqProvider
         {
             var bands = new List<Lite<IAuthorDN>>
             {
-                new Lite<IAuthorDN>(typeof(ArtistDN), 5),
-                new Lite<IAuthorDN>(typeof(BandDN), 1)
+                Lite.Create<ArtistDN>(5),
+                Lite.Create<BandDN>(1)
             };
 
             var albums = (from a in Database.Query<AlbumDN>()
@@ -100,8 +100,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void ContainsListLiteIBA()
         {
-            var lites = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => a.ToLite<IIdentifiable>()).ToArray()
-                .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => a.ToLite<IIdentifiable>())).ToArray();
+            var lites = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => a.ToLite<IAuthorDN>()).ToArray()
+                .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => a.ToLite<IAuthorDN>())).ToArray();
 
             var albums = (from a in Database.Query<NoteWithDateDN>()
                           where lites.Contains(a.Target.ToLite())
@@ -161,6 +161,14 @@ namespace Signum.Test.LinqProvider
         public void RetrieveBand()
         {
             BandDN sigur = Database.Query<BandDN>().SingleEx(b => b.Name.StartsWith("Sigur"));
+        }
+
+        [TestMethod]
+        public void ArtistsAny()
+        {
+            List<Lite<ArtistDN>> artists = Database.Query<ArtistDN>().Where(a=>a.Sex == Sex.Male).Select(a => a.ToLite()).ToList();
+
+            var query = Database.Query<ArtistDN>().Where(a => artists.Any(b => b.RefersTo(a)));
         }
     }
 }

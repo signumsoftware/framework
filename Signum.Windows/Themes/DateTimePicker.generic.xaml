@@ -14,7 +14,7 @@
 					Background="{TemplateBinding Background}" 
 					BorderBrush="{TemplateBinding BorderBrush}">
 						<m:PickerBase.PopupContent>
-							<Calendar x:Name="PART_DatePickerCalendar"
+                            <Calendar x:Name="PART_DatePickerCalendar"
 							 IsEnabled="{TemplateBinding IsReadOnly}" 
                              SelectionMode="SingleDate"/> <!--SelectedDate="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedDate, Mode=TwoWay}"-->
 						</m:PickerBase.PopupContent>

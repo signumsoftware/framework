@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Signum.Utilities
 {
@@ -97,10 +98,10 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("{0} is not a {1}".Formato(type.Name, minimumType.Name));
         }
 
-        public Polymorphic(PolymorphicMerger<T> merger, Type type)
+        public Polymorphic(PolymorphicMerger<T> merger, Type minimumType)
         {
             this.merger = merger;
-            this.minimumType = type;
+            this.minimumType = minimumType;
         }
 
         public Polymorphic(PolymorphicMerger<T> merger): this(merger, GetDefaultType(typeof(T)))
@@ -168,7 +169,7 @@ namespace Signum.Utilities
             return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), interfaces.Select(inter => KVP.Create(inter, TryGetValue(inter))).ToList()); 
         }
 
-        public void Add(Type type, T value)
+        public void SetDefinition(Type type, T value)
         {
             AssertAllowed(type);
 
@@ -193,6 +194,7 @@ namespace Signum.Utilities
         }
     }
 
+    [DebuggerStepThrough]
     public static class PolymorphicExtensions
     {
         public static T GetOrAdd<T>(this Polymorphic<T> polymorophic, Type type) where T : class, new()
@@ -204,7 +206,7 @@ namespace Signum.Utilities
 
             value = new T();
 
-            polymorophic.Add(type, value);
+            polymorophic.SetDefinition(type, value);
 
             return value;
         }
@@ -212,106 +214,116 @@ namespace Signum.Utilities
 
         public static void Register<T, S>(this Polymorphic<Action<T>> polymorphic, Action<S> action) where S:T
         {
-            polymorphic.Add(typeof(S), t => action((S)t));
+            polymorphic.SetDefinition(typeof(S), t => action((S)t));
         }
 
         public static void Register<T, S, P0>(this Polymorphic<Action<T, P0>> polymorphic, Action<S, P0> action) where S : T
         {
-            polymorphic.Add(typeof(S), (t, p0) => action((S)t, p0));
+            polymorphic.SetDefinition(typeof(S), (t, p0) => action((S)t, p0));
         }
 
         public static void Register<T, S, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, Action<S, P0, P1> action) where S : T
         {
-            polymorphic.Add(typeof(S), (t, p0, p1) => action((S)t, p0, p1));
+            polymorphic.SetDefinition(typeof(S), (t, p0, p1) => action((S)t, p0, p1));
         }
 
         public static void Register<T, S, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, Action<S, P0, P1, P2> action) where S : T
         {
-            polymorphic.Add(typeof(S), (t, p0, p1, p2) => action((S)t, p0, p1, p2));
+            polymorphic.SetDefinition(typeof(S), (t, p0, p1, p2) => action((S)t, p0, p1, p2));
         }
 
         public static void Register<T, S, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, Action<S, P0, P1, P2, P3> action) where S : T
         {
-            polymorphic.Add(typeof(S), (t, p0, p1, p2, p3) => action((S)t, p0, p1, p2, p3));
+            polymorphic.SetDefinition(typeof(S), (t, p0, p1, p2, p3) => action((S)t, p0, p1, p2, p3));
         }
 
 
         public static void Register<T, S, R>(this Polymorphic<Func<T, R>> polymorphic, Func<S, R> func) where S : T
         {
-            polymorphic.Add(typeof(S), t => func((S)t));
+            polymorphic.SetDefinition(typeof(S), t => func((S)t));
         }
 
         public static void Register<T, S, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, Func<S, P0, R> func) where S : T
         {
-            polymorphic.Add(typeof(S), (t, p0) => func((S)t, p0));
+            polymorphic.SetDefinition(typeof(S), (t, p0) => func((S)t, p0));
         }
 
         public static void Register<T, S, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, Func<S, P0, P1, R> func) where S : T
         {
-            polymorphic.Add(typeof(S), (t, p0, p1) => func((S)t, p0, p1));
+            polymorphic.SetDefinition(typeof(S), (t, p0, p1) => func((S)t, p0, p1));
         }
 
         public static void Register<T, S, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, Func<S, P0, P1, P2, R> func) where S : T
         {
-            polymorphic.Add(typeof(S), (t, p0, p1, p2) => func((S)t, p0, p1, p2));
+            polymorphic.SetDefinition(typeof(S), (t, p0, p1, p2) => func((S)t, p0, p1, p2));
         }
 
         public static void Register<T, S, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, Func<S, P0, P1, P2, P3, R> func) where S : T
         {
-            polymorphic.Add(typeof(S), (t, p0, p1, p2, p3) => func((S)t, p0, p1, p2, p3));
+            polymorphic.SetDefinition(typeof(S), (t, p0, p1, p2, p3) => func((S)t, p0, p1, p2, p3));
         }
 
 
         public static void Invoke<T>(this Polymorphic<Action<T>> polymorphic, T instance)
         {
-            polymorphic.GetValue(instance.GetType())(instance);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance);
         }
 
         public static void Invoke<T, P0>(this Polymorphic<Action<T, P0>> polymorphic, T instance, P0 p0)
         {
-            polymorphic.GetValue(instance.GetType())(instance, p0);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance, p0);
         }
 
         public static void Invoke<T, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, T instance, P0 p0, P1 p1)
         {
-            polymorphic.GetValue(instance.GetType())(instance, p0, p1);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance, p0, p1);
         }
 
         public static void Call<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
         {
-            polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance, p0, p1, p2);
         }
 
         public static void Invoke<T, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3)
         {
-            polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2, p3);
+            var action = polymorphic.GetValue(instance.GetType());
+            action(instance, p0, p1, p2, p3);
         }
 
 
 
         public static R Invoke<T, R>(this Polymorphic<Func<T, R>> polymorphic, T instance)
         {
-            return polymorphic.GetValue(instance.GetType())(instance);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance);
         }
 
         public static R Invoke<T, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, T instance, P0 p0)
         {
-            return polymorphic.GetValue(instance.GetType())(instance, p0);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance, p0);
         }
 
         public static R Invoke<T, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, T instance, P0 p0, P1 p1)
         {
-            return polymorphic.GetValue(instance.GetType())(instance, p0, p1);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance, p0, p1);
         }
 
         public static R Invoke<T, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
         {
-            return polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance, p0, p1, p2);
         }
 
         public static R Invoke<T, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3)
         {
-            return polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2, p3);
+            var func = polymorphic.GetValue(instance.GetType());
+            return func(instance, p0, p1, p2, p3);
         }
     }
 }

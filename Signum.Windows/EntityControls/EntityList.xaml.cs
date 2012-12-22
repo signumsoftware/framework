@@ -46,6 +46,7 @@ namespace Signum.Windows
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
             btView.Visibility = CanView() ? Visibility.Visible : Visibility.Collapsed;
+            btNavigate.Visibility = CanNavigate() ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
             btUp.Visibility = Move ? (CanMoveUp() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
             btDown.Visibility = Move ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
@@ -76,19 +77,6 @@ namespace Signum.Windows
             return Entity != null && Entities.IndexOf(Entity) < Entities.Count - 1;
         }
      
-        public override void EntitiesChanged(DependencyPropertyChangedEventArgs e)
-        {
-            if (e.NewValue != null && CleanType != null)
-            {
-                EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(CleanType);
-                if (es!= null && es.CollectionViewOperations != null)
-                {
-                    var colView = CollectionViewSource.GetDefaultView(e.NewValue);
-                    es.CollectionViewOperations(CleanLite, colView);
-                }
-            }
-        }
-    
         public EntityList()
         {
             InitializeComponent();

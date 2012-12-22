@@ -2,47 +2,70 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Signum.Entities;
 
 namespace Signum.Web
 {
-    public abstract class ViewOptionsBase
+    public class NavigateOptions
     {
-        public bool? ReadOnly { get; set; }
+        public NavigateOptions(IRootEntity entity)
+        {
+            Entity = entity;
+            ShowOperations = true;
+        }
 
-        public EntitySettingsContext Context { get; set; }
+        public bool? ReadOnly { get; set; }
 
         public string PartialViewName { get; set; }
 
+        public IRootEntity Entity { get; set; }
+
+        public bool ShowOperations { get; set; }
+    }
+
+    public abstract class PopupOptionsBase
+    {
+        public PopupOptionsBase()
+        {
+            ShowOperations = true;
+        }
+
+        public bool? ReadOnly { get; set; }
+
+        public string PartialViewName { get; set; }
+    
         public TypeContext TypeContext { get; set; }
 
-        internal abstract ViewButtons GetViewButtons();
+        public abstract ViewButtons ViewButtons { get; }
+
+        public bool ShowOperations { get; set; }
     }
 
-    public class ViewOkOptions : ViewOptionsBase
+    public class PopupViewOptions : PopupOptionsBase
     {
-        public ViewOkOptions(TypeContext tc)
+        public PopupViewOptions(TypeContext tc)
         {
             TypeContext = tc;
-            Context = EntitySettingsContext.Content;
         }
 
-        internal override ViewButtons GetViewButtons()
+        public bool? SaveProtected { get; set; }
+
+        public override ViewButtons ViewButtons 
         {
-            return ViewButtons.Ok;
+            get { return Web.ViewButtons.Ok; } 
         }
     }
 
-    public class ViewSaveOptions : ViewOptionsBase
+    public class PopupNavigateOptions : PopupOptionsBase
     {
-        public ViewSaveOptions(TypeContext tc)
+        public PopupNavigateOptions(TypeContext tc)
         {
             TypeContext = tc;
-            Context = EntitySettingsContext.Content;
         }
 
-        internal override ViewButtons GetViewButtons()
+        public override ViewButtons ViewButtons
         {
-            return ViewButtons.Save;
+            get { return Web.ViewButtons.Save; }
         }
     }
 

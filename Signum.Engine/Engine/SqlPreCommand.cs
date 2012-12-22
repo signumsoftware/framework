@@ -25,6 +25,8 @@ namespace Signum.Engine
 
     public abstract class SqlPreCommand
     {
+        protected internal abstract bool EndsWithGo { get; }
+
         public abstract IEnumerable<SqlPreCommandSimple> Leaves();
 
         protected internal abstract void GenerateScript(StringBuilder sb);
@@ -79,27 +81,25 @@ namespace Signum.Engine
      
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
-            command.OpenSqlFile();
-            Console.WriteLine("Open again?");
-            string val = Console.ReadLine();
-            if (!val.StartsWith("y") && !val.StartsWith("Y"))
-                return;
-
-            command.OpenSqlFile();
+            string file = command.OpenSqlFile();
+            if (SafeConsole.Ask("Open again?"))
+                Process.Start(file);
         }
 
-        public static void OpenSqlFile(this SqlPreCommand command)
+        public static string OpenSqlFile(this SqlPreCommand command)
         {
-            OpenSqlFile(command, "Sync {0:dd-MM-yyyy}.sql".Formato(DateTime.Now));
+            return OpenSqlFile(command, "Sync {0:dd-MM-yyyy hh_mm_ss}.sql".Formato(DateTime.Now));
         }
 
-        public static void OpenSqlFile(this SqlPreCommand command, string fileName)
+        public static string OpenSqlFile(this SqlPreCommand command, string fileName)
         {
             Save(command, fileName);
 
             Thread.Sleep(1000);
 
-            Process.Start(fileName); 
+            Process.Start(fileName);
+
+            return fileName;
         }
 
         public static void Save(this SqlPreCommand command, string fileName)
@@ -112,6 +112,15 @@ namespace Signum.Engine
 
     public class SqlPreCommandSimple : SqlPreCommand
     {
+        internal const string GO = ";\r\nGO";
+
+        protected internal override bool EndsWithGo
+        {
+            get { return AddGo; }
+        }
+
+        public bool AddGo { get; set; }
+
         public string Sql { get; private set; }
         public List<DbParameter> Parameters { get; private set; }
 
@@ -134,6 +143,9 @@ namespace Signum.Engine
         protected internal override void GenerateScript(StringBuilder sb)
         {
             sb.Append(Sql);
+
+            if (AddGo)
+                sb.Append(GO);
         }
 
         protected internal override void GenerateParameters(List<DbParameter> list)
@@ -210,6 +222,7 @@ namespace Signum.Engine
 
             return this;
         }
+
     }
 
     public class SqlPreCommandConcat : SqlPreCommand
@@ -231,15 +244,21 @@ namespace Signum.Engine
         protected internal override void GenerateScript(StringBuilder sb)
         {
             string sep = separators[Spacing];
-            bool borrar = false;
-            foreach (SqlPreCommand com in Commands)
+            for (int i = 0; i < Commands.Length - 1; i++)
             {
-                com.GenerateScript(sb);
+                var cmd = Commands[i];
+                cmd.GenerateScript(sb);
+
+                if (!cmd.EndsWithGo)
+                    sb.Append(";");
+
                 sb.Append(sep);
-                borrar = true;
             }
 
-            if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
+            if (Commands.Length > 0)
+            {
+                Commands[Commands.Length - 1].GenerateScript(sb);
+            }
         }
 
         protected internal override void GenerateParameters(List<DbParameter> list)
@@ -261,9 +280,9 @@ namespace Signum.Engine
 
         static Dictionary<Spacing, string> separators = new Dictionary<Spacing, string>()
         {
-            {Spacing.Simple, ";\r\n"},
-            {Spacing.Double, ";\r\n\r\n"},
-            {Spacing.Triple, ";\r\n\r\n\r\n"},
+            {Spacing.Simple, "\r\n"},
+            {Spacing.Double, "\r\n\r\n"},
+            {Spacing.Triple, "\r\n\r\n\r\n"},
         };
 
         protected internal override int NumParameters
@@ -288,6 +307,11 @@ namespace Signum.Engine
         public override SqlPreCommand Clone()
         {
             return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());  
+        }
+
+        protected internal override bool EndsWithGo
+        {
+            get { return Commands.Any() && Commands.Last().EndsWithGo; }
         }
     }
 

@@ -92,6 +92,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Administrator.cs" />
+    <Compile Include="Basics\ExceptionLogic.cs" />
     <Compile Include="Connection\Connector.cs" />
     <Compile Include="Connection\Executor.cs" />
     <Compile Include="Connection\FieldReader.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
     <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
+    <Compile Include="Engine\ProgressExtensions.cs" />
     <Compile Include="Engine\SchemaGenerator.cs" />
     <Compile Include="Engine\SqlUtils.cs" />
     <Compile Include="Exceptions.cs" />
@@ -148,6 +150,7 @@
     <Compile Include="Linq\Meta\MetaExpression.cs" />
     <Compile Include="Linq\ProjectionReader.cs" />
     <Compile Include="Linq\Meta\MetadataVisitor.cs" />
+    <Compile Include="Linq\ExpressionVisitor\ScalarSubqueryRewriter.cs" />
     <Compile Include="Linq\TranslateResult.cs" />
     <Compile Include="Engine\Saver.cs">
       <SubType>Code</SubType>
@@ -155,6 +158,15 @@
     <Compile Include="Engine\SqlPreCommand.cs" />
     <Compile Include="Linq\ViewAttributes.cs" />
     <Compile Include="Engine\SchemaSynchronizer.cs" />
+    <Compile Include="Basics\MultiEnumLogic.cs" />
+    <Compile Include="Operations\BasicConstruct.cs" />
+    <Compile Include="Operations\BasicConstructFrom.cs" />
+    <Compile Include="Operations\BasicConstructFromMany.cs" />
+    <Compile Include="Operations\BasicDelete.cs" />
+    <Compile Include="Operations\BasicExecute.cs" />
+    <Compile Include="Operations\Graph.cs" />
+    <Compile Include="Operations\OperationLogic.cs" />
+    <Compile Include="Operations\Typle.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -166,6 +178,7 @@
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
     <Compile Include="Schema\Schema.Save.cs" />
+    <Compile Include="Schema\SchemaAssets.cs" />
     <Compile Include="Schema\SchemaBuilder\SchemaBuilder.cs" />
     <Compile Include="Schema\SchemaBuilder\SchemaBuilderSettings.cs" />
     <Compile Include="Schema\SchemaBuilder\NameSequence.cs" />
@@ -174,9 +187,10 @@
     <Compile Include="Engine\SqlBuilder.cs" />
     <Compile Include="Schema\UniqueIndex.cs" />
     <Compile Include="ServerBasic.cs" />
-    <Compile Include="TypesLogic.cs" />
+    <Compile Include="Basics\TypesLogic.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Operations\Operations.cd" />
     <None Include="Schema\Schema.cd" />
   </ItemGroup>
   <ItemGroup>

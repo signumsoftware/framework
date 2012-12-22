@@ -1,0 +1,46 @@
+﻿@using Signum.Entities.Basics
+@using (var e = Html.TypeContext<ExceptionDN>())
+{
+    <table>
+        <tr>
+            <td>
+                @Html.ValueLine(e, f => f.Environment)
+                @Html.ValueLine(e, f => f.CreationDate)<text>(</text>@e.Value.CreationDate.ToUserInterface().ToAgoString()<text>)</text>
+                @Html.EntityLine(e, f => f.User)
+                @Html.ValueLine(e, f => f.Version)
+                @Html.ValueLine(e, f => f.ThreadId)
+            </td>
+            <td>
+                @Html.ValueLine(e, f => f.ActionName)
+                @Html.ValueLine(e, f => f.ControllerName)
+                @Html.ValueLine(e, f => f.UserHostAddress)
+                @Html.ValueLine(e, f => f.UserHostName)
+                @Html.ValueLine(e, f => f.UserAgent)
+            </td>
+        </tr>
+    </table>
+    
+    @Html.ValueLine(e, f => f.RequestUrl)
+    @Html.ValueLine(e, f => f.UrlReferer)
+    
+    <h3>
+        QueryString</h3>
+    <pre>@e.Value.QueryString</pre>
+    
+    <h3>
+        Form</h3>
+    <pre>@e.Value.Form</pre>
+
+    <h3>
+        Session</h3>
+    <pre>@e.Value.Session</pre>
+
+    <h3 style="color: rgb(139,0,0)">@e.Value.ExceptionType</h3>
+    <pre>@e.Value.ExceptionMessage</pre>
+    <h3>
+        StackTrace</h3>
+    <pre>@e.Value.StackTrace</pre>
+    <h3>
+        Data</h3>
+    <pre>@e.Value.Data</pre>
+}

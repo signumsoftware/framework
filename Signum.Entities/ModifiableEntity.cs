@@ -274,7 +274,11 @@ namespace Signum.Entities
 
         public string IntegrityCheck()
         {
-            return Validator.GetPropertyPacks(GetType()).Select(k => PropertyCheck(k.Value)).NotNull().ToString("\r\n");
+            var packs = Validator.GetPropertyPacks(GetType());
+
+            var result = packs.Select(k => PropertyCheck(k.Value)).NotNull().ToString("\r\n");
+
+            return result;
         }
 
         //override for per-property checks
@@ -308,7 +312,7 @@ namespace Signum.Entities
 
         public string PropertyCheck(PropertyPack pp)
         {
-            if (pp.DoNotValidate)
+            if (pp.IsAplicable != null && !pp.IsAplicable(this))
                 return null;
 
             if (pp.Validators.Count > 0)
@@ -325,7 +329,7 @@ namespace Signum.Entities
             }
 
             //Internal Validation
-            if (!pp.SkipPropertyValidation)
+            if (pp.IsAplicablePropertyValidation == null || pp.IsAplicablePropertyValidation(this))
             {
                 string result = PropertyValidation(pp.PropertyInfo);
                 if (result != null)
@@ -333,7 +337,7 @@ namespace Signum.Entities
             }
 
             //External Validation
-            if (!pp.SkipExternalPropertyValidation && ExternalPropertyValidation != null)
+            if (ExternalPropertyValidation != null && (pp.IsAplicableExternalPropertyValidation == null || pp.IsAplicableExternalPropertyValidation(this)))
             {
                 string result = ExternalPropertyValidation(this, pp.PropertyInfo);
                 if (result != null)
@@ -341,11 +345,14 @@ namespace Signum.Entities
             }
 
             //Static validation
-            if (pp.HasStaticPropertyValidation)
+            if (pp.StaticPropertyValidation != null)
             {
-                string result = pp.OnStaticPropertyValidation(this, pp.PropertyInfo);
-                if (result != null)
-                    return result;
+                foreach (PropertyValidationEventHandler item in pp.StaticPropertyValidation.GetInvocationList())
+                {
+                    string result = item(this, pp.PropertyInfo);
+                    if (result != null)
+                        return result;
+                }
             }
             return null;
         }

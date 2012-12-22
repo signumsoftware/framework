@@ -15,6 +15,11 @@ using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using System.Collections;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Linq;
+using Signum.Entities.DynamicQuery;
+using Signum.Engine.DynamicQuery;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Maps
 {
@@ -45,6 +50,8 @@ namespace Signum.Engine.Maps
         }
 
         public SchemaSettings Settings { get; private set; }
+
+        public SchemaAssets Assets { get; private set; }
 
         Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
         public Dictionary<Type, Table> Tables
@@ -355,13 +362,13 @@ namespace Signum.Engine.Maps
 
         public void Initialize()
         {
-            using (GlobalMode())
+            using (ExecutionMode.Global())
                 Initializing.InitializeUntil(InitLevel.Level4BackgroundProcesses);
         }
 
         public void InitializeUntil(InitLevel level)
         {
-            using (GlobalMode())
+            using (ExecutionMode.Global())
                 Initializing.InitializeUntil(level);
         }
 
@@ -376,15 +383,16 @@ namespace Signum.Engine.Maps
         internal Schema(SchemaSettings settings)
         {
             this.Settings = settings;
+            this.Assets = new SchemaAssets();   
 
             Generating += SchemaGenerator.CreateTablesScript;
             Generating += SchemaGenerator.InsertEnumValuesScript;
             Generating += TypeLogic.Schema_Generating;
-
+            Generating += Assets.Schema_Generating;
 
             Synchronizing += SchemaSynchronizer.SynchronizeSchemaScript;
-            Synchronizing += SchemaSynchronizer.SynchronizeEnumsScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
+            Synchronizing += Assets.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
             Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.GlobalLazy_Initialize;
@@ -449,30 +457,76 @@ namespace Signum.Engine.Maps
 
             var table = Table(root);
 
-            return PropertyRoute.GenerateRoutes(root).Select(r=> KVP.Create(r, FindImplementations(r))).Where(r=>r.Value != null).ToDictionary();
+            return PropertyRoute.GenerateRoutes(root)
+                .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
+                .Where(r => r.Type.CleanType().IsIIdentifiable())
+                .ToDictionary(r => r, r => FindImplementations(r));
         }
 
         public Implementations FindImplementations(PropertyRoute route)
         {
-            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+            if (route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 route = route.Parent;
 
             Type type = route.RootType;
 
             if (!Tables.ContainsKey(type))
-                return null;
+                return Implementations.By(route.Type.CleanType());
 
             Field field = TryFindField(Table(type), route.Members);
 
+            FieldReference refField = field as FieldReference;
+            if (refField != null)
+                return Implementations.By(refField.FieldType.CleanType());
+            
             FieldImplementedBy ibField = field as FieldImplementedBy;
             if (ibField != null)
-                return new ImplementedByAttribute(ibField.ImplementationColumns.Keys.ToArray());
+                return Implementations.By(ibField.ImplementationColumns.Keys.ToArray());
 
             FieldImplementedByAll ibaField = field as FieldImplementedByAll;
             if (ibaField != null)
-                return new ImplementedByAllAttribute();
+                return Implementations.ByAll;
 
-            return null;
+            Implementations? implementations = CalculateExpressionImplementations(route);
+
+            if (implementations != null)
+                return implementations.Value;
+
+            var ss = Schema.Current.Settings;
+            if (route.FollowC(r => r.Parent).SelectMany(r => ss.Attributes(r)).Any(a => a is IgnoreAttribute))
+            {
+                var atts = ss.Attributes(route);
+
+                return Implementations.TryFromAttributes(route.GetType().CleanType(), atts, route) ?? Implementations.By();
+            }
+
+            throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(route, typeof(IIdentifiable).Name));
+        }
+
+        private Implementations? CalculateExpressionImplementations(PropertyRoute route)
+        {
+            if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
+                return null;
+
+            var lambda = ExpressionCleaner.GetFieldExpansion(route.Parent.Type, route.PropertyInfo);
+            if (lambda == null)
+                return null;
+
+            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(new[] { route.Parent })));
+
+            MetaExpression me = e as MetaExpression;
+            if (me == null)
+                return null;
+
+            CleanMeta cm = me.Meta as CleanMeta;
+            if (cm == null)
+                return null;
+
+            var imp = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, me.Type.CleanType());
+            if (imp == null)
+                return null;
+
+            return imp.Value;
         }
 
         /// <summary>
@@ -490,30 +544,28 @@ namespace Signum.Engine.Maps
             return tables.Values.ToString(t => t.Type.TypeName(), "\r\n\r\n");
         }
 
-        internal Dictionary<string, ITable> GetDatabaseTables()
+        internal IEnumerable<ITable> GetDatabaseTables()
         {
-            return Schema.Current.Tables.Values
-                .SelectMany(t => t.RelationalTables().Cast<ITable>().PreAnd(t))
-                .ToDictionary(a => a.Name);
+            foreach (var table in Schema.Current.Tables.Values)
+            {
+                yield return table;
+
+                foreach (var subTable in table.RelationalTables().Cast<ITable>())
+                    yield return subTable;
+            }
         }
 
-        public DirectedEdgedGraph<Table, bool> ToDirectedGraph()
+        public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()
         {
-            return DirectedEdgedGraph<Table, bool>.Generate(Tables.Values, t => t.DependentTables());
+            return DirectedEdgedGraph<Table, RelationInfo>.Generate(Tables.Values, t => t.DependentTables());
         }
+    }
 
-        ThreadLocal<bool> inGlobalMode = new ThreadLocal<bool>(() => false);
-        public bool InGlobalMode
-        {
-            get { return inGlobalMode.Value; }
-        }
-
-        public IDisposable GlobalMode()
-        {
-            var oldValue = inGlobalMode.Value; 
-            inGlobalMode.Value = true;
-            return new Disposable(() => inGlobalMode.Value = oldValue);
-        }
+    public class RelationInfo
+    {
+        public bool IsLite { get; set; }
+        public bool IsNullable { get; set; }
+        public bool IsCollection { get; set; }
     }
 
     internal interface IEntityEvents
@@ -536,6 +588,7 @@ namespace Signum.Engine.Maps
         IEnumerable<int> GetAllIds();
 
         event Action Invalidation;
+        event Action Disabled; 
 
         bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
 
@@ -551,6 +604,7 @@ namespace Signum.Engine.Maps
 
         public abstract IEnumerable<int> GetAllIds();
         public abstract event Action Invalidation;
+        public abstract event Action Disabled;
 
         bool ICacheController.CompleteCache(IdentifiableEntity entity, IRetriever retriver)
         {

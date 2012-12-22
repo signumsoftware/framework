@@ -82,12 +82,12 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
 
-            return SubTokensBase(PropertyInfo.PropertyType, Implementations());
+            return SubTokensBase(PropertyInfo.PropertyType, GetImplementations());
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
-            return GetPropertyRoute().GetImplementations();
+            return GetPropertyRoute().TryGetImplementations();
         }
 
         public override string Format
@@ -100,32 +100,31 @@ namespace Signum.Entities.DynamicQuery
             get { return PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName); }
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
-            PropertyRoute route = GetPropertyRoute();
+            PropertyRoute pr = GetPropertyRoute();
 
-            return Parent.IsAllowed() && (route == null || route.IsAllowed());
+            string parent = Parent.IsAllowed();
+
+            string route = pr == null ? null : pr.IsAllowed();
+
+            if (parent.HasText() && route.HasText())
+                return Resources.And.Combine(parent, route);
+
+            return parent ?? route;
         }
 
         public override PropertyRoute GetPropertyRoute()
         {
-            PropertyRoute parent = Parent.GetPropertyRoute();
-            if (parent == null)
-            {
-                Type type = Lite.Extract(Parent.Type); //Because Parent.Type is always a lite
-                if (type != null)
-                    return PropertyRoute.Root(type).Add(PropertyInfo);
+            Type type = Lite.Extract(Parent.Type); //Because Add doesn't work with lites
+            if (type != null)
+                return PropertyRoute.Root(type).Add(PropertyInfo);
 
+            PropertyRoute pr = Parent.GetPropertyRoute();
+            if (pr == null)
                 return null;
-            }
-            else
-            {
-                Type type = Lite.Extract(parent.Type); //Because Add doesn't work with lites
-                if (type != null)
-                    return PropertyRoute.Root(type).Add(PropertyInfo);
 
-                return parent.Add(PropertyInfo);
-            }
+            return pr.Add(PropertyInfo);
         }
 
         public override string NiceName()

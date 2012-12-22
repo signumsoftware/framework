@@ -12,24 +12,28 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
 using Signum.Web.Properties;
+using System.Web.Routing;
 #endregion
 
 namespace Signum.Web
 {
     public class EntityListDetail : EntityListBase
     {
-        public string DefaultDetailDiv{get; private set;}
+        public readonly RouteValueDictionary ListHtmlProps = new RouteValueDictionary();
+
+        public string DefaultDetailDiv { get; private set; }
         public string DetailDiv { get; set; }
 
         public EntityListDetail(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
             DefaultDetailDiv = DetailDiv = this.Compose(EntityBaseKeys.Detail);
+            Reorder = false;
         }
 
         public override string ToJS()
         {
-            return "new SF.EDList(" + this.OptionsJS() + ")";
+            return "$('#{0}').data('entityListDetail')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
@@ -42,65 +46,70 @@ namespace Signum.Web
 
         protected override string DefaultView()
         {
-            return EntityListDetail.JsView(this, DefaultJsViewOptions()).ToJS();
+            return JsView(DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsView(EntityListDetail edlist, JsViewOptions viewOptions)
+        public JsInstruction JsView(JsViewOptions viewOptions)
         {
-            if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
-
             return new JsInstruction(() => "{0}.view({1})".Formato(
-                    edlist.ToJS(),
-                    viewOptions.TryCC(v => v.ToJS()) ?? ""
-                ));
+                    this.ToJS(),
+                    viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultCreate()
         {
-            return EntityListDetail.JsCreate(this, DefaultJsViewOptions()).ToJS();
+            return JsCreate(DefaultJsViewOptions()).ToJS();
         }
 
-        private static JsInstruction JsCreate(EntityListDetail edlist, JsViewOptions viewOptions)
+        private JsInstruction JsCreate(JsViewOptions viewOptions)
         {
-            if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
-
-            string createParams = ",".Combine(
-                viewOptions.TryCC(v => v.ToJS()),
-                edlist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
-
-            return new JsInstruction(() => "{0}.create({1})".Formato(edlist.ToJS(), createParams));
+            return new JsInstruction(() => "{0}.create({1})".Formato(
+                this.ToJS(),
+                viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultFind()
         {
-            return EntityListDetail.JsFind(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
+            return JsFind(DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsFind(EntityListDetail edlist, JsFindOptions findOptions, JsViewOptions viewOptions)
+        public JsInstruction JsFind(JsFindOptions findOptions, JsViewOptions viewOptions)
         {
             string findParams = ",".Combine(
-                findOptions.TryCC(f => f.ToJS()),
-                viewOptions.TryCC(v => v.ToJS()),
-                edlist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+                findOptions.TryCC(v => v.ToJS()),
+                viewOptions.TryCC(v => v.ToJS()));
 
-            return new JsInstruction(() => "{0}.find({1})".Formato(edlist.ToJS(), findParams));            
+            return new JsInstruction(() => "{0}.find({1})".Formato(this.ToJS(), findParams));  
         }
 
         protected override string DefaultRemove()
         {
-            return EntityListDetail.JsRemove(this).ToJS();
+            return JsRemove().ToJS();
         }
 
-        public static JsInstruction JsRemove(EntityListDetail edlist)
+        public JsInstruction JsRemove()
         {
-            return new JsInstruction(() => "{0}.remove()".Formato(edlist.ToJS()));
+            return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
         }
 
-        protected internal override EntitySettingsContext EntitySettingsContext
+        protected override string DefaultMoveUp()
         {
-            get { return EntitySettingsContext.Content; }
+            return JsMoveUp().ToJS();
+        }
+
+        public JsInstruction JsMoveUp()
+        {
+            return new JsInstruction(() => "{0}.moveUp()".Formato(this.ToJS()));
+        }
+
+        protected override string DefaultMoveDown()
+        {
+            return JsMoveDown().ToJS();
+        }
+
+        public JsInstruction JsMoveDown()
+        {
+            return new JsInstruction(() => "{0}.moveDown()".Formato(this.ToJS()));
         }
     }
 }

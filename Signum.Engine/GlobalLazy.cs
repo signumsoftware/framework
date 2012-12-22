@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Threading;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine
 {
@@ -35,7 +36,18 @@ namespace Signum.Engine
 
         private static void AttachInvalidations(Schema s, IResetLazy lazy, params Type[] types)
         {
-            Action a = () => lazy.Reset();
+            types = types.Where(Schema.Current.Tables.ContainsKey).ToArray(); //static initi of Lazies of not-initialized modules
+
+            Action reset = () =>
+            {
+                if (Transaction.InTestTransaction)
+                {
+                    lazy.Reset();
+                    Transaction.Rolledback += () => lazy.Reset();
+                }
+
+                Transaction.PostRealCommit += dic => lazy.Reset();
+            };
 
             List<Type> cached = new List<Type>();
             foreach (var type in types)
@@ -43,7 +55,7 @@ namespace Signum.Engine
                 var cc = s.CacheController(type);
                 if (cc != null && cc.IsComplete)
                 {
-                    cc.Invalidation += a;
+                    cc.Disabled += reset;
                     cached.Add(type);
                 }
             }
@@ -53,7 +65,7 @@ namespace Signum.Engine
             {
                 foreach (var type in nonCached)
                 {
-                    giAttachInvalidations.GetInvoker(type)(s, a);
+                    giAttachInvalidations.GetInvoker(type)(s, reset);
                 }
 
                 var dgIn = DirectedGraph<Table>.Generate(types.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
@@ -61,7 +73,7 @@ namespace Signum.Engine
 
                 foreach (var table in dgIn.Except(dgOut))
                 {
-                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, a);
+                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, reset);
                 }
             }
         }
@@ -94,20 +106,26 @@ namespace Signum.Engine
             ee.PreUnsafeDelete += q => action();
         }
 
-        static Dictionary<IResetLazy, Type[]> registeredLazyList = new Dictionary<IResetLazy, Type[]>();
+        static ConcurrentDictionary<IResetLazy, Type[]> registeredLazyList = new ConcurrentDictionary<IResetLazy, Type[]>();
         public static ResetLazy<T> Create<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T:class
         {
             var result = new ResetLazy<T>(() =>
             {
-                using (Schema.Current.GlobalMode())
+                using (ExecutionMode.Global())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
+                using (Transaction tr = Transaction.InTestTransaction ? null:  Transaction.ForceNew())
                 using (new EntityCache(true))
                 {
-                    return func();
+                    var value = func();
+
+                    if (tr != null)
+                        tr.Commit();
+
+                    return value;
                 }
             }, mode);
 
-            registeredLazyList.Add(result, null);
+            registeredLazyList.GetOrAdd(result, (Type[])null);
 
             return result;
         }
@@ -115,9 +133,9 @@ namespace Signum.Engine
         public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T:class
         {
             if (!registeredLazyList.ContainsKey(lazy))
-                throw new InvalidOperationException("The lazy is not a GlobalLazy");
+                throw new InvalidOperationException("The lazy of type '{0}', declared in '{1}' not a GlobalLazy".Formato(typeof(T).TypeName(), lazy.DeclaredType.TypeName()));
 
-            registeredLazyList[lazy] = types;
+            registeredLazyList.AddOrUpdate(lazy, types, (k, v) => types);
 
             if (initialized)
                 AttachInvalidations(Schema.Current, lazy, types);

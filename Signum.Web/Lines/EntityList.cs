@@ -12,94 +12,90 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
 using Signum.Web.Properties;
+using System.Web.Routing;
 #endregion
 
 namespace Signum.Web
 {
     public class EntityList : EntityListBase
     {
+        public readonly RouteValueDictionary ListHtmlProps = new RouteValueDictionary();
+        
         public EntityList(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
+            Reorder = false;
         }
 
         public override string ToJS()
         {
-            return "new SF.EList(" + this.OptionsJS() + ")";
-        }
-
-        public override JsViewOptions DefaultJsViewOptions()
-        {
-            var voptions = base.DefaultJsViewOptions();
-            voptions.ValidationOptions = new JsValidatorOptions { ControllerUrl = RouteHelper.New().SignumAction("ValidatePartial") };
-            return voptions;
+            return "$('#{0}').data('entityList')".Formato(ControlID);
         }
 
         protected override string DefaultView()
         {
-            return EntityList.JsView(this, DefaultJsViewOptions()).ToJS();
+            return JsView(DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsView(EntityList elist, JsViewOptions viewOptions)
+        public JsInstruction JsView(JsViewOptions viewOptions)
         {
-            if (elist.ViewMode == ViewMode.Navigate)
-            {
-                viewOptions.Navigate = true;
-                viewOptions.ControllerUrl = Navigator.ViewRoute(elist.ElementType.CleanType(), null);
-            }
-            else if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
-
             return new JsInstruction(() => "{0}.view({1})".Formato(
-                     elist.ToJS(),
-                     viewOptions.TryCC(v => v.ToJS()) ?? ""
-                 ));
+                     this.ToJS(),
+                     viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultCreate()
         {
-            return EntityList.JsCreate(this, DefaultJsViewOptions()).ToJS();
+            return JsCreate(DefaultJsViewOptions()).ToJS();
         }
 
-        private static JsInstruction JsCreate(EntityList elist, JsViewOptions viewOptions)
+        private JsInstruction JsCreate(JsViewOptions viewOptions)
         {
-            if (elist.ViewMode == ViewMode.Navigate)
-            {
-                viewOptions.Navigate = true;
-                viewOptions.ControllerUrl = Navigator.ViewRoute(elist.ElementType.CleanType(), null);
-            }
-            else if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
-
-            string createParams = ",".Combine(
-                viewOptions.TryCC(v => v.ToJS()),
-                elist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
-
-            return new JsInstruction(() => "{0}.create({1})".Formato(elist.ToJS(), createParams));
+            return new JsInstruction(() => "{0}.create({1})".Formato(
+                this.ToJS(),
+                viewOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultFind()
         {
-            return EntityList.JsFind(this, DefaultJsfindOptions()).ToJS();
+            return JsFind(DefaultJsfindOptions()).ToJS();
         }
 
-        public static JsInstruction JsFind(EntityList elist, JsFindOptions findOptions)
+        public JsInstruction JsFind(JsFindOptions findOptions)
         {
-            string findParams = ",".Combine(
-                findOptions.TryCC(v => v.ToJS()),
-                elist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
-
-            return new JsInstruction(() => "{0}.find({1})".Formato(elist.ToJS(), findParams));
+            return new JsInstruction(() => "{0}.find({1})".Formato(
+                this.ToJS(),
+                findOptions.TryCC(v => v.ToJS()) ?? ""));
         }
 
         protected override string DefaultRemove()
         {
-            return EntityList.JsRemove(this).ToJS();
+            return JsRemove().ToJS();
         }
 
-        public static JsInstruction JsRemove(EntityList elist)
+        public JsInstruction JsRemove()
         {
-            return new JsInstruction(() => "{0}.remove()".Formato(elist.ToJS()));
+            return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
+        }
+
+        protected override string DefaultMoveUp()
+        {
+            return JsMoveUp().ToJS();
+        }
+
+        public JsInstruction JsMoveUp()
+        {
+            return new JsInstruction(() => "{0}.moveUp()".Formato(this.ToJS()));
+        }
+
+        protected override string DefaultMoveDown()
+        {
+            return JsMoveDown().ToJS();
+        }
+
+        public JsInstruction JsMoveDown()
+        {
+            return new JsInstruction(() => "{0}.moveDown()".Formato(this.ToJS()));
         }
     }
 }

@@ -10,6 +10,7 @@ using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Windows.Input;
 using System.Windows.Automation;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Windows
 {
@@ -37,12 +38,12 @@ namespace Signum.Windows
             }
         }
 
-        protected Implementations safeImplementations;
+        protected Implementations? safeImplementations;
         public static readonly DependencyProperty ImplementationsProperty =
-            DependencyProperty.Register("Implementations", typeof(Implementations), typeof(EntityBase), new UIPropertyMetadata((d, e) => ((EntityBase)d).safeImplementations = (Implementations)e.NewValue));
-        public Implementations Implementations
+            DependencyProperty.Register("Implementations", typeof(Implementations?), typeof(EntityBase), new UIPropertyMetadata(null, (d, e) => ((EntityBase)d).safeImplementations = (Implementations)e.NewValue));
+        public Implementations? Implementations
         {
-            get { return (Implementations)GetValue(ImplementationsProperty); }
+            get { return (Implementations?)GetValue(ImplementationsProperty); }
             set { SetValue(ImplementationsProperty, value); }
         }
 
@@ -71,11 +72,19 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ViewButtonsProperty =
-            DependencyProperty.Register("ViewButtons", typeof(ViewButtons), typeof(EntityBase), new UIPropertyMetadata(ViewButtons.Ok));
-        public ViewButtons ViewButtons
+            DependencyProperty.Register("ViewButtons", typeof(ViewMode?), typeof(EntityBase), new UIPropertyMetadata(null));
+        public ViewMode? ViewButtons
         {
-            get { return (ViewButtons)GetValue(ViewButtonsProperty); }
+            get { return (ViewMode?)GetValue(ViewButtonsProperty); }
             set { SetValue(ViewButtonsProperty, value); }
+        }
+
+        public static readonly DependencyProperty NavigateProperty =
+            DependencyProperty.Register("Navigate", typeof(bool), typeof(EntityBase), new UIPropertyMetadata(true));
+        public bool Navigate
+        {
+            get { return (bool)GetValue(NavigateProperty); }
+            set { SetValue(NavigateProperty, value); }
         }
 
         public static readonly DependencyProperty FindProperty =
@@ -105,6 +114,7 @@ namespace Signum.Windows
         public event Func<object> Creating;
         public event Func<object> Finding;
         public event Func<object, object> Viewing;
+        public event Action<object> Navigating; 
         public event Func<object, bool> Removing;
 
         public event EntityChangedEventHandler EntityChanged;
@@ -205,25 +215,37 @@ namespace Signum.Windows
                 EntityTemplate = Navigator.FindDataTemplate(this, type);
             }
 
-            if (this.NotSet(EntityBase.CreateProperty) && Create && Implementations == null)
-                Create = Navigator.IsCreable(CleanType, false);
+            if (this.NotSet(EntityBase.ImplementationsProperty) && CleanType.IsIdentifiableEntity() && !CleanType.IsAbstract)
+                Implementations = Signum.Entities.Implementations.By(CleanType);
 
-            if (this.NotSet(EntityBase.ViewProperty) && View && Implementations == null)
-                View = Navigator.IsViewable(CleanType, false);
+            if (this.NotSet(EntityBase.CreateProperty) && Create)
+                Create =
+                    CleanType.IsEmbeddedEntity() ? Navigator.IsCreable(CleanType ) : 
+                    Implementations.Value.IsByAll ? false:
+                    Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: false));
+
+            if (this.NotSet(EntityBase.ViewProperty) && View)
+                View = CleanType.IsEmbeddedEntity() ? Navigator.IsViewable(CleanType) :
+                    Implementations.Value.IsByAll ? true :
+                    Implementations.Value.Types.Any(t => Navigator.IsViewable(t));
+
+            if (this.NotSet(EntityBase.NavigateProperty) && Navigate)
+            {
+                if (View)
+                    Navigate = false;
+                else
+                    Navigate = CleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(CleanType, isSearchEntity: false) :
+                        Implementations.Value.IsByAll ? true :
+                        Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: false));
+            }
 
             if (this.NotSet(EntityBase.FindProperty) && Find)
-            {
-                if (Implementations == null)
-                    Find = Navigator.IsFindable(CleanType);
-                if (Implementations is ImplementedByAllAttribute)
-                    Find = false;
-            }
+                Find = CleanType.IsEmbeddedEntity() ? false:
+                    Implementations.Value.IsByAll ? false :
+                    Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
 
             if (this.NotSet(EntityBase.ViewOnCreateProperty) && ViewOnCreate && !View)
                 ViewOnCreate = false;
-
-            if (this.NotSet(EntityBase.ViewButtonsProperty) && CleanLite)
-                ViewButtons = ViewButtons.Save;
 
             UpdateVisibility();
         }
@@ -249,14 +271,34 @@ namespace Signum.Windows
             if (entity == null)
                 return false;
 
-            if (View && this.NotSet(ViewProperty) && Implementations != null)
+            if (View && this.NotSet(ViewProperty))
             {
-                Type runtimeType = CleanLite ? ((Lite)entity).RuntimeType : entity.GetType();
+                Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
 
-                return Navigator.IsViewable(runtimeType, false);
+                return Navigator.IsViewable(entityType);
             }
             else
                 return View;
+        }
+
+        protected bool CanNavigate()
+        {
+            return CanNavigate(Entity);
+        }
+
+        protected virtual bool CanNavigate(object entity)
+        {
+            if (entity == null)
+                return false;
+
+            if (Navigate && this.NotSet(NavigateProperty))
+            {
+                Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
+
+                return Navigator.IsNavigable(entityType, isSearchEntity: false);
+            }
+            else
+                return Navigate;
         }
 
         protected virtual bool CanFind()
@@ -287,10 +329,15 @@ namespace Signum.Windows
 
         protected virtual void btView_Click(object sender, RoutedEventArgs e)
         {
-            object entity = OnViewing(Entity, false);
+            object entity = OnViewing(Entity, creating: false);
 
             if (entity != null)
                 SetEntityUserInteraction(entity);
+        }
+
+        protected virtual void btNavigate_Click(object sender, RoutedEventArgs e)
+        {
+            OnNavigating(Entity);
         }
 
         protected virtual void btRemove_Click(object sender, RoutedEventArgs e)
@@ -304,48 +351,21 @@ namespace Signum.Windows
             if (EntityChanged != null)
                 EntityChanged(this, isUserInteraction, oldValue, newValue);
 
-            AutomationProperties.SetHelpText(this, GetEntityString(newValue));
+            AutomationProperties.SetHelpText(this, Common.GetEntityStringAndHascode(newValue));
 
             UpdateVisibility();
         }
 
-        private string GetEntityString(object newValue)
-        {
-            if (newValue == null)
-                return "";
-
-            if (newValue is EmbeddedEntity)
-                return newValue.GetType().Name;
-
-            var ident = newValue as IdentifiableEntity;
-            if (ident != null)
-            {
-                if (ident.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[ident.GetType()].CleanName);
-
-                return ident.ToLite().Key();
-            }
-
-            var lite = newValue as Lite;
-            if (lite != null)
-            {
-                if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[lite.RuntimeType].CleanName);
-
-                return lite.Key();
-            }
-
-            throw new InvalidOperationException("Unexpected entity of type {0}".Formato(newValue.GetType()));
-        }
 
         public Type SelectType()
         {
-            if (Implementations == null)
+            if (CleanType.IsEmbeddedEntity())
                 return CleanType;
-            else if (Implementations.IsByAll)
+
+            if (Implementations.Value.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
-            else
-                return Navigator.SelectType(Window.GetWindow(this), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+
+            return Navigator.SelectType(Window.GetWindow(this), Implementations.Value.Types);
         }
 
         protected object OnCreate()
@@ -372,7 +392,7 @@ namespace Signum.Windows
 
             if (ViewOnCreate)
             {
-                value = OnViewing(value, true);
+                value = OnViewing(value, creating: true);
             }
 
             return value;
@@ -414,30 +434,34 @@ namespace Signum.Windows
             if (Viewing != null)
                 return Viewing(entity);
 
-            bool isReadOnly = Common.GetIsReadOnly(this) && !creating;
-
-            if (ViewButtons == ViewButtons.Ok)
+            var options = new ViewOptions
             {
-                var options = new ViewOptions
-                {
-                    TypeContext = CleanType.IsEmbeddedEntity() ? GetEntityTypeContext() : null, 
-                };
+                TypeContext = CleanType.IsEmbeddedEntity() ? GetEntityTypeContext() : null,
+            };
 
-                if (isReadOnly)
-                    options.ReadOnly = isReadOnly;
+            bool isReadOnly = Common.GetIsReadOnly(this) && !creating;
+            if (isReadOnly)
+                options.ReadOnly = isReadOnly;
 
-                return Navigator.ViewUntyped(entity, options);
-            }
+            return Navigator.ViewUntyped(entity, options);
+        }
+
+        protected void OnNavigating(object entity)
+        {
+            if (!CanNavigate(entity))
+                return;
+
+            if (Navigating != null)
+                Navigating(entity);
             else
             {
                 var options = new NavigateOptions();
 
+                bool isReadOnly = Common.GetIsReadOnly(this);
                 if (isReadOnly)
                     options.ReadOnly = isReadOnly;
 
                 Navigator.NavigateUntyped(entity, options);
-
-                return null;
             }
         }
 

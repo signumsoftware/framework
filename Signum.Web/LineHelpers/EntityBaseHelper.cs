@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Web.Properties;
 using Signum.Web.Controllers;
 using Signum.Entities.Reflection;
+using Signum.Engine.Operations;
 #endregion
 
 namespace Signum.Web
@@ -35,10 +36,10 @@ namespace Signum.Web
 
         public static MvcHtmlString RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
         {
-            Type cleanRuntimeType = (typeContext.UntypedValue as Lite).TryCC(l => l.RuntimeType) ?? typeContext.UntypedValue.GetType();
+            Type cleanEntityType = (typeContext.UntypedValue as Lite<IIdentifiable>).TryCC(l => l.EntityType) ?? typeContext.UntypedValue.GetType();
 
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType)
-                .ThrowIfNullC("There's no EntitySettings registered for type {0}".Formato(cleanRuntimeType));
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanEntityType)
+                .ThrowIfNullC("There's no EntitySettings registered for type {0}".Formato(cleanEntityType));
 
             TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
 
@@ -65,11 +66,15 @@ namespace Signum.Web
                     vdd[ViewDataKeys.PartialViewName] = partialViewName;
                     vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
                     vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
+                    vdd[ViewDataKeys.ShowOperations] = true;
+                    vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
                     return helper.Partial(Navigator.Manager.PopupControlView, vdd);
                 case RenderMode.PopupInDiv:
                     vdd[ViewDataKeys.PartialViewName] = partialViewName;
                     vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
                     vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
+                    vdd[ViewDataKeys.ShowOperations] = true;
+                    vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
                         helper.Partial(Navigator.Manager.PopupControlView, vdd),
                         "",
@@ -91,16 +96,13 @@ namespace Signum.Web
 
         public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.View || (entityBase is EntityLine && entityBase.ViewMode == ViewMode.Navigate))
-                return MvcHtmlString.Empty;
-
-            if (entityBase.ViewMode == ViewMode.Navigate && !entityBase.Type.CleanType().IsIIdentifiable())
+            if (!entityBase.View)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", entityBase.GetViewing() },
-                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-arrow-e" : "ui-icon-arrowthick-1-e" },
+                { "onclick", new MvcHtmlString(entityBase.GetViewing()) },
+                { "data-icon",  "ui-icon-circle-arrow-e" },
                 { "data-text", false}
             };
 
@@ -115,6 +117,29 @@ namespace Signum.Web
                   htmlAttr);
         }
 
+        public static MvcHtmlString NavigateButton(HtmlHelper helper, EntityBase entityBase)
+        {
+            if (!entityBase.Navigate)
+                return MvcHtmlString.Empty;
+
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", new MvcHtmlString(entityBase.GetViewing()) },
+                { "data-icon", "ui-icon-arrowthick-1-e" },
+                { "data-text", false}
+            };
+
+            if (entityBase.UntypedValue == null)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(entityBase.Compose("btnView"),
+                  Resources.LineButton_Navigate,
+                  "",
+                  Resources.LineButton_Navigate,
+                  "sf-line-button sf-view",
+                  htmlAttr);
+        }
+
         public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.Create)
@@ -122,13 +147,10 @@ namespace Signum.Web
 
             Type type = entityBase.Type.CleanType();
 
-            if (entityBase.ViewMode == ViewMode.Navigate && (!Navigator.IsViewable(type, EntitySettingsContext.Admin) || !type.IsIIdentifiable()))
-                return MvcHtmlString.Empty;
-
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.GetCreating() },
-                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-plus" : "ui-icon-plusthick" },
+                { "data-icon", "ui-icon-circle-plus" },
                 { "data-text", false}
             };
 
@@ -145,7 +167,7 @@ namespace Signum.Web
 
         public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.Find || !entityBase.Type.CleanType().IsIIdentifiable())
+            if (!entityBase.Find)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
@@ -196,24 +218,34 @@ namespace Signum.Web
                                 EntityBaseHelper.JsEscape(template.ToHtmlString())));
         }
 
-        public static void ConfigureEntityBase(EntityBase eb, Type entityType)
+        public static void ConfigureEntityBase(EntityBase eb, Type cleanType)
         {
             Common.TaskSetImplementations(eb);
 
-            ConfigureEntityButtons(eb, entityType);
+            ConfigureEntityButtons(eb, cleanType);
         }
 
-        public static void ConfigureEntityButtons(EntityBase eb, Type entityType)
+        public static void ConfigureEntityButtons(EntityBase eb, Type cleanType)
         {
-            if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
-            {
-                eb.Create = eb.Create && Navigator.IsCreable(entityType, eb.EntitySettingsContext);
-                eb.View = eb.View && Navigator.IsViewable(entityType, eb.EntitySettingsContext);
-                eb.Find = eb.Find && Navigator.IsFindable(entityType);
+           eb.Create &= 
+                cleanType.IsEmbeddedEntity() ? Navigator.IsCreable(cleanType, isSearchEntity: false) :
+                eb.Implementations.Value.IsByAll ? false :
+                eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: false));
+                
+            eb.View &=
+                cleanType.IsEmbeddedEntity() ? Navigator.IsViewable(cleanType) :
+                eb.Implementations.Value.IsByAll ? true :
+                eb.Implementations.Value.Types.Any(t => Navigator.IsViewable(t));
 
-                bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
-                eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
-            }
+            eb.Navigate &=
+              cleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(cleanType, isSearchEntity: false) :
+              eb.Implementations.Value.IsByAll ? true :
+              eb.Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: false));
+
+            eb.Find &=
+                cleanType.IsEmbeddedEntity() ? false :
+                eb.Implementations.Value.IsByAll ? false :
+                eb.Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
         }
     }
 

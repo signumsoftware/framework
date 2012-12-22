@@ -32,7 +32,7 @@ namespace Signum.Web
         internal readonly PropertyPack PropertyPack;
         internal readonly PropertyRoute PropertyRoute; 
 
-        internal void AddChild(MappingContext context)
+        public void AddChild(MappingContext context)
         {
             Debug.Assert(context.Parent == this && context.Next == null);
 
@@ -174,13 +174,13 @@ namespace Signum.Web
                     }
                     else
                     {
-                        Type cleanType = (currentEntity as Lite).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
+                        Type cleanType = (currentEntity as Lite<IIdentifiable>).TryCC(t => t.EntityType) ?? currentEntity.GetType();
                         PropertyInfo pi = cleanType.GetProperty(property);
                         currentEntity = (Modifiable)pi.GetValue(currentEntity, null);
                     }
-               
-                    if (currentEntity is Lite)
-                        currentEntity = Database.Retrieve((Lite)currentEntity);
+
+                    if (currentEntity is Lite<IIdentifiable>)
+                        currentEntity = Database.Retrieve((Lite<IdentifiableEntity>)currentEntity);
 
                     if (currentEntity == null)
                         return null;
@@ -220,13 +220,13 @@ namespace Signum.Web
                     }
                     else
                     {
-                        Type cleanType = (currentEntity as Lite).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
+                        Type cleanType = (currentEntity as Lite<IIdentifiable>).TryCC(t => t.EntityType) ?? currentEntity.GetType();
                         pi = cleanType.GetProperty(property);
                         currentEntity = (Modifiable)pi.GetValue(currentEntity, null);
                     }
-               
-                    if (currentEntity is Lite)
-                        currentEntity = Database.Retrieve((Lite)currentEntity);
+
+                    if (currentEntity is Lite<IIdentifiable>)
+                        currentEntity = Database.Retrieve((Lite<IdentifiableEntity>)currentEntity);
 
                     if (currentEntity == null)
                         currentEntity = (Modifiable)Constructor.Construct(pi.PropertyType);

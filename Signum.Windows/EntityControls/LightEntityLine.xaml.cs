@@ -40,15 +40,15 @@ namespace Signum.Windows
         {
             if (Entity != null)
             {
-                btView.Visibility = Visibility.Visible;
+                btNavigate.Visibility = Visibility.Visible;
 
-                Type cleanType = Entity is Lite ? ((Lite)Entity).RuntimeType : Entity.GetType(); 
+                Type cleanType = Entity is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)Entity).EntityType : Entity.GetType();
 
-                btView.IsEnabled = Navigator.IsViewable(cleanType, false);
+                btNavigate.IsEnabled = Navigator.IsNavigable(cleanType, isSearchEntity: false);
             }
             else
             {
-                btView.Visibility = Visibility.Collapsed;
+                btNavigate.Visibility = Visibility.Collapsed;
             }
         }
 

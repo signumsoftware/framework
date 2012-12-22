@@ -36,8 +36,8 @@ namespace Signum.Entities.DynamicQuery
         protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
         public abstract PropertyRoute GetPropertyRoute();
-        public abstract Implementations Implementations();
-        public abstract bool IsAllowed();
+        public abstract Implementations? GetImplementations();
+        public abstract string IsAllowed();
 
         public abstract QueryToken Clone();
 
@@ -57,36 +57,62 @@ namespace Signum.Entities.DynamicQuery
         {
             var result = this.SubTokensInternal();
 
+            result.AddRange(OnEntityExtension(this));
+
             if (result.IsEmpty())
                 return new List<QueryToken>();
 
-            return result.Where(t => t.IsAllowed()).ToList();
+            result.RemoveAll(t => t.IsAllowed() != null);
+
+            result.Sort((a, b) =>
+            {
+                return
+                    PriorityCompare(a.Key, b.Key, s => s == "Id") ??
+                    PriorityCompare(a.Key, b.Key, s => s == "ToString") ??
+                    PriorityCompare(a.Key, b.Key, s => s.StartsWith("(")) ??
+                    string.Compare(a.ToString(), b.ToString());
+            }); 
+
+            return result;
         }
 
-        protected List<QueryToken> SubTokensBase(Type type, Implementations implementations)
+        public int? PriorityCompare(string a, string b, Func<string, bool> isPriority)
         {
-            if (type.UnNullify() == typeof(DateTime))
+            if (isPriority(a))
             {
-                return DateTimeProperties(this, DateTimePrecision.Milliseconds);
+                if (isPriority(b))
+                    return string.Compare(a, b);
+                return -1;
             }
+
+            if (isPriority(b))
+                return 1;
+
+            return null;
+        }
+
+        protected List<QueryToken> SubTokensBase(Type type, Implementations? implementations)
+        {
+            var ut = type.UnNullify();
+            if (ut == typeof(DateTime))
+                return DateTimeProperties(this, DateTimePrecision.Milliseconds);
+
+            if (ut == typeof(float) || ut == typeof(double) || ut == typeof(decimal))
+                return DecimalProperties(this);
 
             Type cleanType = type.CleanType();
             if (cleanType.IsIIdentifiable())
             {
-                if (implementations != null)
-                {
-                    if (implementations.IsByAll)
-                        return new List<QueryToken>(); // new[] { EntityPropertyToken.IdProperty(this) };
+                if (implementations.Value.IsByAll)
+                    return new List<QueryToken>(); // new[] { EntityPropertyToken.IdProperty(this) };
 
-                    return ((ImplementedByAttribute)implementations).ImplementedTypes.Select(t => (QueryToken)new AsTypeToken(this, t))
-                        .Concat(OnEntityExtension(cleanType, this).OrderBy(a => a.ToString())).ToList();
+                var onlyType = implementations.Value.Types.Only();
 
-                    //return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
-                    //    .Concat(asPropesties).Concat(EntityProperties(cleanType)).ToArray();
-                }
+                if (onlyType != null && onlyType == cleanType)
+                    return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
+                        .Concat(EntityProperties(onlyType)).ToList();
 
-                return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
-                    .Concat(EntityProperties(cleanType).Concat(OnEntityExtension(cleanType, this)).OrderBy(a => a.ToString())).ToList();
+                return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList();
             }
 
             if (type.IsEmbeddedEntity())
@@ -107,15 +133,15 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>();
         }
 
-        public static IEnumerable<QueryToken> OnEntityExtension(Type type, QueryToken parent)
+        public static IEnumerable<QueryToken> OnEntityExtension(QueryToken parent)
         {
             if (EntityExtensions == null)
                 throw new InvalidOperationException("QuertToken.EntityExtensions function not set");
 
-            return EntityExtensions(type, parent);
+            return EntityExtensions(parent);
         }
 
-        public static Func<Type, QueryToken, IEnumerable<QueryToken>>  EntityExtensions;
+        public static Func<QueryToken, IEnumerable<QueryToken>>  EntityExtensions;
         
 
         public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precission)
@@ -127,13 +153,25 @@ namespace Signum.Entities.DynamicQuery
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + Resources.Year), 
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + Resources.Month), 
                 new MonthStartToken(parent), 
+
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), utc + Resources.Day),
+                new DayOfYearToken(parent), 
+                new DayOfWeekToken(parent), 
                 new DateToken(parent), 
                 precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), utc + Resources.Hour), 
                 precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), utc + Resources.Minute), 
                 precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), utc + Resources.Second), 
                 precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), utc + Resources.Millisecond), 
             }.NotNull().ToList();
+        }
+
+        public static List<QueryToken> DecimalProperties(QueryToken parent)
+        {
+            return new List<QueryToken>
+            {
+                new CeilToken(parent),
+                new FloorToken(parent),
+            }; 
         }
 
         public static List<QueryToken> CollectionProperties(QueryToken parent)

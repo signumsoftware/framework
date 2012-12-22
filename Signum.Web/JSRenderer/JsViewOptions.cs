@@ -31,7 +31,7 @@ namespace Signum.Web
                 {
                     {"prefix", Prefix.TryCC(a=>a.ToJS())},
                     {"containerDiv", ContainerDiv.TryCC(a=>a.ToJS())},
-                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS()) ?? RouteHelper.New().SignumAction("PopupView").SingleQuote()},
+                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS()) },
                     {"validationOptions", ValidationOptions.TryCC(a => a.ToJS()) },
                     {"onOk", OnOk.TryCC(a=>a.ToJS())},
                     {"onSave", OnSave.TryCC(a=>a.ToJS())},

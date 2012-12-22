@@ -35,7 +35,7 @@ namespace Signum.Test
         public void RawEntity()
         {
             var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>());
-            Assert.IsNull(dic);
+            Assert.IsNotNull(dic);
         }
 
         [TestMethod]

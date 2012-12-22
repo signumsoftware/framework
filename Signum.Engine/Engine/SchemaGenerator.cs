@@ -12,7 +12,7 @@ namespace Signum.Engine
     {
         public static SqlPreCommand CreateTablesScript()
         {
-            IEnumerable<ITable> tables = Schema.Current.GetDatabaseTables().Values;
+            List<ITable> tables = Schema.Current.GetDatabaseTables().ToList();
 
             SqlPreCommand createTables = tables.Select(t => SqlBuilder.CreateTableSql(t)).Combine(Spacing.Double);
 
@@ -26,9 +26,9 @@ namespace Signum.Engine
         public static SqlPreCommand InsertEnumValuesScript()
         {
             return (from t in Schema.Current.Tables.Values
-                    let enumType = EnumProxy.Extract(t.Type)
+                    let enumType = EnumEntity.Extract(t.Type)
                     where enumType != null
-                    select (from ie in EnumProxy.GetEntities(enumType)
+                    select (from ie in EnumEntity.GetEntities(enumType)
                             select t.InsertSqlSync(ie)).Combine(Spacing.Simple)).Combine(Spacing.Double);
         }
     }

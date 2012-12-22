@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace Signum.Windows
 {
@@ -36,18 +38,18 @@ namespace Signum.Windows
         void LinksWidget_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             IdentifiableEntity ident = e.NewValue as IdentifiableEntity;
-            
-            List<QuickLink> links = ident != null && !ident.IsNew ? Links.GetForEntity(ident, Control) : new List<QuickLink>();
+
+            ObservableCollection<QuickLink> links = ident != null && !ident.IsNew ? Links.GetForEntity(ident, Control) : new ObservableCollection<QuickLink>();
 
             lvQuickLinks.ItemsSource = links;
 
-            if (links.Count == 0)
+            if (links.IsNullOrEmpty())
                 Visibility = Visibility.Collapsed;
             else
             {
                 Visibility = Visibility.Visible;
-                if (ForceShow != null)
-                    ForceShow(); 
+                if (ForceShow != null && links.Any(a => !a.IsShy))
+                    ForceShow();
             }
         }
 
@@ -56,7 +58,7 @@ namespace Signum.Windows
             if (e.OriginalSource is Button) //Not to capture the mouseDown of the scrollbar buttons
             {
                 Button b = (Button)e.OriginalSource;
-                ((QuickLink)b.Tag).Execute();
+                ((QuickLink)b.DataContext).Execute();
             }
         }
 
@@ -82,9 +84,9 @@ namespace Signum.Windows
             globalLinks.Add(getQuickLinks);
         }
 
-        public static List<QuickLink> GetForEntity(IdentifiableEntity ident, Control control)
+        public static ObservableCollection<QuickLink> GetForEntity(IdentifiableEntity ident, Control control)
         {
-            List<QuickLink> links = new List<QuickLink>();
+            ObservableCollection<QuickLink> links = new ObservableCollection<QuickLink>();
 
             links.AddRange(globalLinks.SelectMany(a => a(ident, control).NotNull()));
 
@@ -92,11 +94,10 @@ namespace Signum.Windows
             if (list != null)
                 links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(ident, control)));
 
-            links = links.Where(l => l.IsVisible).ToList();
+            links.RemoveAll(a => !a.IsVisible);
 
             return links;
         }
-
     }
 
     ///// <summary>
@@ -110,7 +111,7 @@ namespace Signum.Windows
     /// <summary>
     /// Represents an item of the left navigation panel
     /// </summary>
-    public abstract class QuickLink
+    public abstract class QuickLink : INotifyPropertyChanged // http://www.benbarefield.com/blog/?p=59
     {
         protected QuickLink() { }
 
@@ -118,11 +119,17 @@ namespace Signum.Windows
 
         public bool IsVisible { get; set;}
 
+        public bool IsShy { get; set; }
+
         public string ToolTip { get; set; }
 
         public ImageSource Icon { get; set; }
 
         public abstract void Execute();
+
+
+        void Never() { PropertyChanged(null, null); }
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public class QuickLinkAction : QuickLink
@@ -208,7 +215,7 @@ namespace Signum.Windows
             FindUniqueOptions = options;
             Label = typeof(T).NiceName();
             Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
-            IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsViewable(typeof(T), false);
+            IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearchEntity: false);
         }
 
         public override void Execute()

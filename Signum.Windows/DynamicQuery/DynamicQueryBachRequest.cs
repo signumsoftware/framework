@@ -19,6 +19,11 @@ namespace Signum.Windows
             public BaseQueryRequest Request;
             public Action<object> OnResult;
             public Action Finally;
+
+            public override string ToString()
+            {
+                return Request.ToString();
+            }
         }
 
         static List<RequestTuple> tuples = new List<RequestTuple>(); 

@@ -105,5 +105,16 @@ namespace Signum.Utilities
                 this.valueCreated = false;
             }
         }
+
+        public Type DeclaredType
+        {
+            get
+            {
+                if (valueFactory == null) 
+                    return null;
+
+                return valueFactory.Method.DeclaringType;
+            }
+        }
     }
 }

@@ -149,6 +149,17 @@ namespace Signum.Utilities
             return tracer;
         }
 
+        public static T LogValue<T>(string role, Func<T> valueFactory)
+        {
+            if (!enabled)
+                return valueFactory();
+
+            using (HeavyProfiler.LogNoStackTrace(role))
+            {
+                return valueFactory();
+            }
+        }
+
         public static Tracer LogNoStackTrace(string role)
         {
             if (!enabled)
@@ -262,7 +273,7 @@ namespace Signum.Utilities
 
             return new XDocument(
                 new XElement("Logs", new XAttribute("TotalTime", timeSpan.NiceToString()),
-                    Entries.Select(e => e.FullXml(timeSpan)))); 
+                    Entries.Select(e => e.FullXml(timeSpan.TotalMilliseconds)))); 
         }
 
         public static XDocument SqlStatisticsXDocument()
@@ -306,7 +317,7 @@ namespace Signum.Utilities
                 return null;
 
             if (fileName.Length > 70)
-                fileName = "..." + fileName.TryRight(67);
+                fileName = "..." + fileName.TryEnd(67);
 
             return fileName + " ({0})".Formato(frame.GetFileLineNumber());
         }
@@ -374,7 +385,15 @@ namespace Signum.Utilities
         {
             get
             {
-                return TimeSpan.FromMilliseconds(((End - Start) - Descendants().Sum(a => a.BeforeStart - a.Start)) / PerfCounter.FrequencyMilliseconds);
+                return TimeSpan.FromMilliseconds(ElapsedMilliseconds);
+            }
+        }
+
+        public double ElapsedMilliseconds
+        {
+            get
+            {
+                return ((End - Start) - Descendants().Sum(a => a.BeforeStart - a.Start)) / (double)PerfCounter.FrequencyMilliseconds;
             }
         }
 
@@ -410,15 +429,17 @@ namespace Signum.Utilities
             return "{0} {1}".Formato(Elapsed.NiceToString(), Role);
         }
 
-        public XElement FullXml(TimeSpan elapsedParent)
+        public XElement FullXml(double elapsedParent)
         {
+            var elapsedMs = ElapsedMilliseconds; 
+
             return new XElement("Log",
-                new XAttribute("Ratio", "{0:p}".Formato(this.Elapsed.Ticks / (double)elapsedParent.Ticks)),
-                new XAttribute("Time", Elapsed.NiceToString()),
+                new XAttribute("Time", elapsedMs < 10 ? "{0:.00}ms".Formato(elapsedMs): TimeSpan.FromMilliseconds(elapsedMs).NiceToString()),
+                new XAttribute("Ratio", "{0:p}".Formato(elapsedMs / elapsedParent)),
                 new XAttribute("Role", Role ?? ""),
-                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryLeft(100)),
                 new XAttribute("FullIndex", this.FullIndex()),
-                Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(this.Elapsed))
+                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryStart(100)),
+                Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(elapsedMs))
                 );
         }
 
@@ -458,6 +479,11 @@ namespace Signum.Utilities
                 QueryPerformanceCounter(out count);
                 return count;
             }
+        }
+
+        public static long ToMilliseconds(long t1, long t2)
+        {
+            return (t2 - t1) / FrequencyMilliseconds;
         }
     }
 

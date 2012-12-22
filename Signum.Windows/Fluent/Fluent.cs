@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Windows.Data;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
+using System.ComponentModel;
 
 namespace Signum.Windows
 {
@@ -127,6 +128,34 @@ namespace Signum.Windows
         public static FrameworkElementFactory GetFrameworkElementFactory(System.Linq.Expressions.Expression<Func<FrameworkElement>> constructor)
         {
             return FrameworkElementFactoryGenerator.Generate(constructor);
+        }
+
+        public static void OnDataContextPropertyChanged(this FrameworkElement fe, PropertyChangedEventHandler propertyChanged)
+        {
+            fe.DataContextChanged += (object sender, DependencyPropertyChangedEventArgs e) =>
+            {
+                INotifyPropertyChanged oldDC = e.OldValue as INotifyPropertyChanged;
+                if (oldDC != null)
+                    oldDC.PropertyChanged -= propertyChanged;
+
+                INotifyPropertyChanged newDC = e.OldValue as INotifyPropertyChanged;
+                if (newDC != null)
+                    newDC.PropertyChanged += propertyChanged;
+            }; 
+        }
+
+        public static void OnEntityPropertyChanged(this EntityBase eb, PropertyChangedEventHandler propertyChanged)
+        {
+            eb.EntityChanged += (object sender, bool userInteraction, object oldValue, object newValue) =>
+            {
+                INotifyPropertyChanged oldDC = oldValue as INotifyPropertyChanged;
+                if (oldDC != null)
+                    oldDC.PropertyChanged -= propertyChanged;
+
+                INotifyPropertyChanged newDC = newValue as INotifyPropertyChanged;
+                if (newDC != null)
+                    newDC.PropertyChanged += propertyChanged;
+            };
         }
     }
 

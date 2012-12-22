@@ -48,10 +48,10 @@ namespace Signum.Engine
 
         static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout");
         public static int? ScopeTimeout { get { return scopeTimeout.Value; } }
-        public static IDisposable CommandTimeoutScope(int? timeout)
+        public static IDisposable CommandTimeoutScope(int? timeoutMilliseconds)
         {
             var old = scopeTimeout.Value;
-            scopeTimeout.Value = timeout;
+            scopeTimeout.Value = timeoutMilliseconds;
             return new Disposable(() => scopeTimeout.Value = old);
         }
 
@@ -119,7 +119,12 @@ namespace Signum.Engine
         public abstract void CleanDatabase();
 
         public abstract bool AllowsMultipleQueries { get; }
+
+        public abstract bool SupportsScalarSubquery { get; }
+        public abstract bool SupportsScalarSubqueryInAggregates { get; }
     }
+
+  
 
     public abstract class ParameterBuilder
     {

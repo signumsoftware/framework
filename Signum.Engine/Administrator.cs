@@ -184,11 +184,6 @@ namespace Signum.Engine
             Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(Connector.Current.DatabaseName(), value));
         }
 
-        public static SqlPreCommand RenameFreeIndexesScript()
-        {
-            return SchemaSynchronizer.RenameFreeIndexes();
-        }
-
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
            where T : IdentifiableEntity
         {
@@ -221,12 +216,21 @@ namespace Signum.Engine
             return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
         }
 
-        public static SqlPreCommandSimple UnsafeUpdatePreCommand<T>(this IQueryable<T> query, Expression<Func<T, T>> updateConstructor)
+        public static SqlPreCommandSimple UnsafeUpdatePreCommand<E>(this IQueryable<E> query, Expression<Func<E, E>> updateConstructor)
+            where E : IdentifiableEntity
+        {
+            var prov = ((DbQueryProvider)query.Provider);
+
+            return prov.Update(query, null, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+        }
+
+
+        public static SqlPreCommandSimple UnsafeUpdatePartPreCommand<T, E>(this IQueryable<T> query, Expression<Func<T, E>> entitySelector, Expression<Func<T, E>> updateConstructor)
             where T : IdentifiableEntity
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Update(query, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount:true);
+            return prov.Update(query, entitySelector, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeUpdatePreCommand<E, V>(this IQueryable<MListElement<E, V>> query, Expression<Func<MListElement<E, V>, MListElement<E, V>>> updateConstructor)
@@ -234,7 +238,7 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Update(query, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+            return prov.Update(query, null, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
         }
     }
 }

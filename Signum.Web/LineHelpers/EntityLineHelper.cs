@@ -27,7 +27,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (entityLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (sb.Surround(new HtmlTag("div").Id(entityLine.ControlID).Class("sf-field")))
             using (entityLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityLine.ValueFirst)
@@ -36,7 +36,7 @@ namespace Signum.Web
                 using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                 {
                     sb.AddLine(helper.HiddenEntityInfo(entityLine));
-
+                    
                     if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
                     {
                         if (EntityBaseHelper.RequiresLoadAll(helper, entityLine))
@@ -44,7 +44,7 @@ namespace Signum.Web
                         else if (entityLine.UntypedValue != null)
                             sb.AddLine(helper.Div(entityLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-                        if (entityLine.Autocomplete && entityLine.Implementations != null && entityLine.Implementations.IsByAll)
+                        if (entityLine.Autocomplete && entityLine.Implementations.Value.IsByAll)
                             throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
 
                         var htmlAttr = new Dictionary<string, object>
@@ -58,7 +58,6 @@ namespace Signum.Web
                         {
                             htmlAttr.AddRange(new Dictionary<string, object>
                             {
-                                { "data-url", helper.UrlHelper().Action("Autocomplete", "Signum") },
                                 { "data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(t => Navigator.ResolveWebTypeName(t), ",") }
                             });
                         }
@@ -69,11 +68,11 @@ namespace Signum.Web
                             htmlAttr));
 
                         int? id = entityLine.IdOrNull;
-                        if (id != null && entityLine.View && Navigator.IsViewable(entityLine.CleanRuntimeType, EntitySettingsContext.Admin))
+                        if (id != null && entityLine.Navigate && Navigator.IsNavigable(entityLine.CleanRuntimeType, isSearchEntity: false))
                         {
                             sb.AddLine(
                                 helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                    entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
+                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
                                     new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                         }
                         else
@@ -108,12 +107,15 @@ namespace Signum.Web
                     {
                         sb.AddLine(helper.ValidationMessage(entityLine.ControlID));
                     }
-
                 }
 
                 if (entityLine.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
             }
+
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityLine({1})".Formato(entityLine.ControlID, entityLine.OptionsJS())))
+                .ToHtml());
 
             return sb.ToHtml();
         }
@@ -131,7 +133,7 @@ namespace Signum.Web
 
             EntityBaseHelper.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType());
 
-            if (el.Implementations.TryCS(i => i.IsByAll) == true)
+            if (el.Implementations == null || el.Implementations.Value.IsByAll)
                 el.Autocomplete = false;
 
             Common.FireCommonTasks(el);

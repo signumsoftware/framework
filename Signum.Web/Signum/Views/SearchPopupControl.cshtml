@@ -1,11 +1,22 @@
 ﻿@model Context
 @{  FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];}
-<div id="@Model.Compose("panelPopup")" data-title="@ViewBag.Title">
+<div id="@Model.Compose("panelPopup")">
+    <span class="sf-popup-title">
+        <span style="float:left; display:block">@ViewBag.Title</span>
+        @{
+            <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen">
+                <span class="ui-icon ui-icon-extlink">fullscreen</span>
+            </a>
+        }
+    </span>
     <div class="sf-query-button-bar">
         <input type="button" id="@Model.Compose("btnOk")" class="sf-query-button sf-ok-button" value="OK" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null) />
     </div>
     <div class="sf-popup-body">
-        @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
+        @{ 
+            ViewData[ViewDataKeys.InPopup] = true;
+            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
+        }
         @Html.ValidationSummaryAjax(Model)
     </div>
 </div>

@@ -30,6 +30,7 @@ namespace Signum.Web
         public string PopupViewPrefix { get; set; }
         public WriteQueryName WriteQueryName { get; set; }
         public string QueryLabelText { get; set; }
+        public string Href { get; set; }
     }
 
     public enum WriteQueryName
@@ -52,8 +53,13 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(options);
 
-            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
-            Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
+
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
+            Navigator.SetTokens(queryDescription, findOptions.OrderOptions);
+            Navigator.SetTokens(queryDescription, findOptions.ColumnOptions);
+            Navigator.SetSearchViewableAndCreable(findOptions);
 
             var viewData = new ViewDataDictionary(context);
             viewData[ViewDataKeys.FindOptions] = findOptions;
@@ -100,7 +106,7 @@ namespace Signum.Web
             {
                 sb.Add(new HtmlTag("a")
                     .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
-                    .Attr("href", foptions.FindOptions.ToString())
+                    .Attr("href", options.Href.HasText() ? options.Href : foptions.FindOptions.ToString())
                     .SetInnerText(count.ToString()));
             }
             else
@@ -114,7 +120,7 @@ namespace Signum.Web
             {
                 var htmlAttr = new Dictionary<string, object>
                     {
-                        { "onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()) },
+                        { "onclick", "SF.FindNavigator.openFinder({0});".Formato(foptions.ToJS()) },
                         { "data-icon", "ui-icon-circle-arrow-e" },
                         { "data-text", false}
                     };
@@ -156,7 +162,7 @@ namespace Signum.Web
                         {
                             { "data-icon", "ui-icon-close" },
                             { "data-text", false},
-                            { "onclick", "new SF.FindNavigator({{prefix:\"{0}\"}}).deleteFilter(this);".Formato(context.ControlID) },
+                            { "onclick", "SF.FindNavigator.deleteFilter(this)" },
                         };
                         sb.AddLine(helper.Href(
                             context.Compose("btnDelete", index.ToString()),
@@ -208,27 +214,18 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString RootTokensCombo(QueryDescription queryDescription, QueryToken queryToken)
+        public static Func<QueryToken, bool> AllowSubTokens = null; 
+
+        public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken previous, QueryToken selected, Context context, int index, object queryName, Func<QueryToken, List<QueryToken>> subTokens)
         {
-            var columns = new HtmlStringBuilder();
-            columns.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
-            foreach (var c in queryDescription.Columns)
-            {
-                var option = new HtmlTag("option")
-                    .Attr("value", c.Name)
-                    .SetInnerText(c.DisplayName);
+            if (previous != null && AllowSubTokens != null && !AllowSubTokens(previous))
+                return MvcHtmlString.Create("");
 
-                if (queryToken != null && c.Name == queryToken.Key)
-                    option.Attr("selected", "selected");
+            var queryTokens = subTokens(previous);
 
-                columns.AddLine(option.ToHtml());
-            }
+            if (queryTokens.IsEmpty())
+                return MvcHtmlString.Create("");
 
-            return columns.ToHtml();
-        }
-
-        public static MvcHtmlString TokensCombo(List<QueryToken> queryTokens, QueryToken selected)
-        {
             var options = new HtmlStringBuilder();
             options.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
             foreach (var qt in queryTokens)
@@ -251,80 +248,50 @@ namespace Signum.Web
                 options.AddLine(option.ToHtml());
             }
 
-            return options.ToHtml();
-        }
-
-        public static MvcHtmlString TokenOptionsCombo(this HtmlHelper helper, object queryName, MvcHtmlString options, Context context, int index, bool writeExpander)
-        {
-            MvcHtmlString expander = null;
-            if (writeExpander)
-                expander = helper.TokensComboExpander(context, index);
-
             HtmlTag dropdown = new HtmlTag("select").IdName(context.Compose("ddlTokens_" + index))
-                .InnerHtml(options)
-                .Attr("onchange", "new SF.FindNavigator({{prefix:'{0}',webQueryName:'{1}'}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) +
-                    ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');");
+                  .InnerHtml(options.ToHtml())
+                  .Attr("onchange", "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2})".Formato(Navigator.ResolveWebQueryName(queryName), context.ControlID, index));
 
-            if (writeExpander)
-                dropdown.Attr("style", "display:none");
-
-            MvcHtmlString drop = dropdown.ToHtml();
-
-            return expander == null ? drop : expander.Concat(drop);
+            return dropdown.ToHtml();
         }
 
-        static MvcHtmlString TokensComboExpander(this HtmlHelper helper, Context context, int index)
+        public static MvcHtmlString QueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, QueryDescription desc)
         {
-            return helper.Span(
-                context.Compose("lblddlTokens_" + index),
-                "[...]",
-                "sf-subtokens-expander",
-                null);
+            return helper.QueryTokenBuilder(queryToken, context, desc.QueryName, qt => QueryUtils.SubTokens(qt, desc.Columns));
         }
 
-        public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken queryToken, object queryName, Context context)
+        public static MvcHtmlString QueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, object queryName, Func<QueryToken, List<QueryToken>> subTokens)
         {
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-
             var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
-
-            if (tokenPath.Count > 0)
-                queryToken = tokenPath[0];
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(SearchControlHelper.TokenOptionsCombo(
-                helper, queryName, SearchControlHelper.RootTokensCombo(qd, queryToken), context, 0, false));
-
             for (int i = 0; i < tokenPath.Count; i++)
             {
-                QueryToken t = tokenPath[i];
-                List<QueryToken> subtokens = t.SubTokens();
-                if (!subtokens.IsEmpty())
-                {
-                    bool moreTokens = i + 1 < tokenPath.Count;
-                    sb.AddLine(SearchControlHelper.TokenOptionsCombo(
-                        helper, queryName, SearchControlHelper.TokensCombo(subtokens, moreTokens ? tokenPath[i + 1] : null), context, i + 1, !moreTokens));
-                }
+                sb.AddLine(helper.QueryTokenCombo(i == 0 ? null : tokenPath[i - 1], tokenPath[i], context, i, queryName, subTokens));
             }
+
+            sb.AddLine(helper.QueryTokenCombo(queryToken, null, context, tokenPath.Count, queryName, subTokens));
 
             return sb.ToHtml();
         }
 
         private static MvcHtmlString PrintValueField(HtmlHelper helper, Context parent, FilterOption filterOption)
         {
+            var implementations = filterOption.Token.GetImplementations(); 
+
             if (filterOption.Token.Type.IsLite())
             {
-                Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type);
+                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                     Database.FillToString(lite);
 
                 Type cleanType = Lite.Extract(filterOption.Token.Type);
-                if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))
+                if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !implementations.Value.IsByAll)
                 {
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        Implementations = filterOption.Token.Implementations(),
+                        Implementations = implementations.Value,
                     };
                     EntityBaseHelper.ConfigureEntityButtons(ec, filterOption.Token.Type.CleanType());
                     ec.LabelVisible = false;
@@ -336,9 +303,10 @@ namespace Signum.Web
                 {
                     EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        Implementations = filterOption.Token.Implementations(),
+                        Implementations = implementations.Value,
                     };
-                    if (el.Implementations.TryCS(i => i.IsByAll) == true)
+
+                    if (el.Implementations.Value.IsByAll)
                         el.Autocomplete = false;
 
                     EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
@@ -354,7 +322,7 @@ namespace Signum.Web
                 EmbeddedEntity lite = (EmbeddedEntity)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                 {
-                    Implementations = filterOption.Token.Implementations(),
+                    Implementations = null,
                 };
                 EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
                 el.LabelVisible = false;

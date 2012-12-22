@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Signum.Utilities
 {
     public static class TreeHelper
     {
-        public static List<Node<T>> ToTreeC<T>(IEnumerable<T> collection, Func<T, T> getParent)
+        public static ObservableCollection<Node<T>> ToTreeC<T>(IEnumerable<T> collection, Func<T, T> getParent)
             where T : class
         {
             Node<T> top = new Node<T>();
@@ -33,7 +35,7 @@ namespace Signum.Utilities
             return top.Children;
         }
 
-        public static List<Node<T>> ToTreeS<T>(IEnumerable<T> collection, Func<T, T?> getParent)
+        public static ObservableCollection<Node<T>> ToTreeS<T>(IEnumerable<T> collection, Func<T, T?> getParent)
             where T : struct
         {
             Node<T> top = new Node<T>();
@@ -83,14 +85,14 @@ namespace Signum.Utilities
             }
         }
 
-        public static List<Node<S>> SelectTree<T, S>(List<Node<T>> nodes, Func<T, S> selector)
+        public static ObservableCollection<Node<S>> SelectTree<T, S>(ObservableCollection<Node<T>> nodes, Func<T, S> selector)
         {
-            return nodes.Select(n => new Node<S>(selector(n.Value), SelectTree(n.Children, selector))).ToList();
+            return nodes.Select(n => new Node<S>(selector(n.Value), SelectTree(n.Children, selector))).ToObservableCollection();
         }
 
-        public static List<Node<S>> SelectSimplifyTreeC<T, S>(List<Node<T>> nodes, Func<T, S> selector) where S : class
+        public static ObservableCollection<Node<S>> SelectSimplifyTreeC<T, S>(ObservableCollection<Node<T>> nodes, Func<T, S> selector) where S : class
         {
-            List<Node<S>> result = new List<Node<S>>();
+            ObservableCollection<Node<S>> result = new ObservableCollection<Node<S>>();
 
             foreach (var item in nodes)
             {
@@ -105,9 +107,9 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static List<Node<S>> SelectSimplifyTreeS<T, S>(List<Node<T>> nodes, Func<T, S?> selector) where S : struct
+        public static ObservableCollection<Node<S>> SelectSimplifyTreeS<T, S>(ObservableCollection<Node<T>> nodes, Func<T, S?> selector) where S : struct
         {
-            List<Node<S>> result = new List<Node<S>>();
+            ObservableCollection<Node<S>> result = new ObservableCollection<Node<S>>();
 
             foreach (var item in nodes)
             {
@@ -123,26 +125,26 @@ namespace Signum.Utilities
         }
     }
 
-    public class Node<T>
+    public class Node<T> : INotifyPropertyChanged
     {
         public T Value { get; set; }
-        public List<Node<T>> Children { get; set; }
+        public ObservableCollection<Node<T>> Children { get; set; }
 
-        public Node(T value, List<Node<T>> children)
+        public Node(T value, ObservableCollection<Node<T>> children)
         {
             Value = value;
-            Children = children?? new List<Node<T>>();
+            Children = children ?? new ObservableCollection<Node<T>>();
         }
 
         public Node(T value)
         {
             Value = value;
-            Children = new List<Node<T>>();
+            Children = new ObservableCollection<Node<T>>();
         }
 
         public Node()
         {
-            Children = new List<Node<T>>();
+            Children = new ObservableCollection<Node<T>>();
         }
 
 
@@ -150,5 +152,11 @@ namespace Signum.Utilities
         {
             return "{0} Children: {1}".Formato(Children.Count, Value);
         }
+
+        void Never()
+        {
+            PropertyChanged(null, null); 
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

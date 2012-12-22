@@ -145,7 +145,6 @@ namespace Signum.Web
                 HttpContext.Current.Items[resourceKey] = resources;
                 return resources;
             }
-
         }
 
         internal static string[] FilterAndInclude(string[] urls)
@@ -154,6 +153,23 @@ namespace Signum.Web
             var toInclude = urls.Except(loaded).ToArray();
             loaded.AddRange(toInclude);
             return toInclude;
+        }
+
+        public static MvcHtmlString RegisterSFUrls(this HtmlHelper html, UrlHelper url)
+        {
+            return RegisterUrls(html, Navigator.Manager.GetDefaultSFUrls(url));
+        }
+
+        public static MvcHtmlString RegisterUrls(this HtmlHelper html, Dictionary<string, string> namedUrls)
+        { 
+            return new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString(
+                    "var SF = SF || {}; " +
+                    "SF.Urls = $.extend(SF.Urls || {}, { " + 
+                    namedUrls.ToString(kvp => "{0}:'{1}'".Formato(kvp.Key, kvp.Value), ", ") + 
+                    "});"
+                    ))
+                .ToHtml();
         }
     }
 

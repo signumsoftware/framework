@@ -82,6 +82,8 @@ namespace Signum.Engine.Linq
                     return CompareSqlCast((SqlCastExpression)a, (SqlCastExpression)b);
                 case DbExpressionType.SqlFunction:
                     return CompareSqlFunction((SqlFunctionExpression)a, (SqlFunctionExpression)b);
+                case DbExpressionType.SqlTableValuedFunction:
+                    return CompareTableValuedSqlFunction((SqlTableValuedFunctionExpression)a, (SqlTableValuedFunctionExpression)b);
                 case DbExpressionType.SqlConstant:
                     return CompareSqlConstant((SqlConstantExpression)a, (SqlConstantExpression)b);
                 case DbExpressionType.Case:
@@ -280,6 +282,14 @@ namespace Signum.Engine.Linq
             return a.SqlFunction == b.SqlFunction
                 && Compare(a.Object, b.Object)
                 && CompareList(a.Arguments, b.Arguments, Compare);
+        }
+
+
+        private bool CompareTableValuedSqlFunction(SqlTableValuedFunctionExpression a, SqlTableValuedFunctionExpression b)
+        {
+            return a.Table == b.Table
+              && CompareAlias(a.Alias, b.Alias)
+              && CompareList(a.Arguments, b.Arguments, Compare);
         }
 
         protected virtual bool CompareSqlConstant(SqlConstantExpression a, SqlConstantExpression b)

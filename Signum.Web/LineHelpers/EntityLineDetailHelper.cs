@@ -25,7 +25,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Class("sf-line-detail-field")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(entityDetail.ControlID).Class("sf-line-detail-field")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {
@@ -56,8 +56,11 @@ namespace Signum.Web
                             "$('#" + entityDetail.DetailDiv + "').html(" + controlHtml + ");\n" +
                             "});\n" +
                             "</script>"));
-
             }
+
+            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString("$('#{0}').entityLineDetail({1})".Formato(entityDetail.ControlID, entityDetail.OptionsJS())))
+                .ToHtml());
 
             return sb.ToHtml();
         }

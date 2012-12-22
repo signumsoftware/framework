@@ -7,27 +7,41 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="332.993" 
     
     Style="{DynamicResource toolTip}">
-	<m:EntityBase.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="../Resources.xaml"/>
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
-	</m:EntityBase.Resources>
+    <m:EntityBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </m:EntityBase.Resources>
 
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="Auto"/>
-			<ColumnDefinition/>
-			<ColumnDefinition Width="Auto"/>
-		</Grid.ColumnDefinitions>
-		<Label Content="{Binding Path=LabelText, ElementName=me, Mode=Default}" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="{Binding Path=LabelText, ElementName=me, Mode=Default}" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
 		Target="{Binding ElementName=cc, Mode=OneWay}" MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=me, Mode=OneWay}"
 		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
-		<Border Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" Padding="3,0,3,0"  
-                SnapsToDevicePixels="True" BorderBrush="{DynamicResource BlueBorder}" 
-                BorderThickness="1,1,1,1" CornerRadius="3,3,3,3" Background="{DynamicResource BlueBackground}" 
+
+
+        <Border Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" Padding="3,0,3,0"  
+                SnapsToDevicePixels="True"  
+                BorderThickness="1,1,1,1" CornerRadius="3,3,3,3" 
                 x:Name="border" Grid.IsSharedSizeScope="False">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="{DynamicResource BlueBackground}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BlueBorder}"/>
+                    <Style.Triggers>
+                        <Trigger  Property="m:Common.IsReadOnly" Value="true">
+                            <Setter Property="Background" Value="{DynamicResource GrayBackground}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BlackBorder}"/>
+                         </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Grid>
                 <ContentControl 
                     x:Name="cc" Focusable="True" 
@@ -49,13 +63,14 @@
             </Grid>
             <!--HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"  />-->
-		</Border>
-		<StackPanel Orientation="Horizontal" Grid.Column="2" x:Name="buttons">
-			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
-			<Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
-			<Button Focusable="False" x:Name="btView" Click="btView_Click" Style="{StaticResource RoundButton}" Content="{StaticResource View}" ToolTip="{m:Loc View}"/>
-			<Button Focusable="False" x:Name="btRemove" Click="btRemove_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
-		</StackPanel>
-	</Grid>
+        </Border>
+        <StackPanel Orientation="Horizontal" Grid.Column="2" x:Name="buttons">
+            <Button Focusable="False" x:Name="btCreate" Style="{StaticResource RoundButton}" Click="btCreate_Click"  Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
+            <Button Focusable="False" x:Name="btFind" Style="{StaticResource RoundButton}" Click="btFind_Click" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
+            <Button Focusable="False" x:Name="btView" Style="{StaticResource RoundButton}" Click="btView_Click"  Content="{StaticResource View}" ToolTip="{m:Loc View}"/>
+            <Button Focusable="False" x:Name="btNavigate" Style="{StaticResource RoundButton}" Click="btNavigate_Click" Content="{StaticResource Navigate}" ToolTip="{m:Loc Navigate}"/>
+            <Button Focusable="False" x:Name="btRemove" Style="{StaticResource RoundButton}" Click="btRemove_Click" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
+        </StackPanel>
+    </Grid>
 
 </m:EntityBase>

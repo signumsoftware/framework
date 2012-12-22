@@ -45,6 +45,7 @@ namespace Signum.Windows
         static EntityDetail()
         {
             ViewProperty.OverrideMetadata(typeof(EntityDetail), new FrameworkPropertyMetadata(false));
+            NavigateProperty.OverrideMetadata(typeof(EntityDetail), new FrameworkPropertyMetadata(false));
         }
 
         protected override void UpdateVisibility()
@@ -52,6 +53,7 @@ namespace Signum.Windows
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
             btView.Visibility = CanView() ? Visibility.Visible : Visibility.Collapsed;
+            btNavigate.Visibility = CanNavigate() ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -70,7 +72,22 @@ namespace Signum.Windows
 
         void ChangeEntity(object sender, ChangeDataContextEventArgs e)
         {
-            this.Entity = e.NewDataContext;
+            if (e.Refresh)
+            {
+                var lite = (Entity as IIdentifiable).ToLite();
+
+                if (lite != null)
+                {
+                    this.Entity = null;
+                    this.Entity = lite.Retrieve();
+                }
+            }
+            else
+            {
+                this.Entity = null;
+                this.Entity = e.NewDataContext;
+            }
+          
             e.Handled = true;
         }
 

@@ -16,7 +16,7 @@ namespace Signum.Web
 {
     public static class EntityInfoHelper
     {
-        public static MvcHtmlString HiddenLite(this HtmlHelper helper, string name, Lite lite)
+        public static MvcHtmlString HiddenLite(this HtmlHelper helper, string name, Lite<IIdentifiable> lite)
         {
             return helper.Hidden(name, lite.Key());
         }
@@ -50,7 +50,7 @@ namespace Signum.Web
         public static readonly Type[] ImplementedByAll = new Type[0];
         public static readonly string ImplementedByAllKey = "[All]";
 
-        public StaticInfo(Type staticType, Implementations implementations)
+        public StaticInfo(Type staticType, Implementations? implementations)
         {
             if (staticType.IsEmbeddedEntity())
             {
@@ -61,9 +61,8 @@ namespace Signum.Web
             }
             else
             {
-                Types = implementations == null ? new[] { staticType.CleanType() } :
-                        implementations.IsByAll ? ImplementedByAll :
-                        ((ImplementedByAttribute)implementations).ImplementedTypes;
+                Types = implementations.Value.IsByAll ? ImplementedByAll :
+                        implementations.Value.Types.ToArray();
             }
         }
 
@@ -103,21 +102,21 @@ namespace Signum.Web
 
     public class RuntimeInfo
     {
-        public Type RuntimeType { get; set; }
+        public Type EntityType { get; set; }
         public int? IdOrNull { get; set; }
         public bool IsNew { get; set; }
 
         public RuntimeInfo() { }
 
-        public RuntimeInfo(Lite lite)
+        public RuntimeInfo(Lite<IIdentifiable> lite)
         {
             if (lite == null)
             {
-                RuntimeType = null;
+                EntityType = null;
                 return;
             }
 
-            RuntimeType = lite.RuntimeType;
+            EntityType = lite.EntityType;
             IdOrNull = lite.IdOrNull;
             IsNew = lite.IdOrNull == null;
         }
@@ -126,22 +125,22 @@ namespace Signum.Web
         {
             if (entity == null)
             {
-                RuntimeType = null;
+                EntityType = null;
                 return;
             }
 
-            RuntimeType = entity.GetType();
+            EntityType = entity.GetType();
         }
 
         public RuntimeInfo(IIdentifiable entity)
         {
             if (entity == null)
             {
-                RuntimeType = null;
+                EntityType = null;
                 return;
             }
 
-            RuntimeType = entity.GetType();
+            EntityType = entity.GetType();
             IdOrNull = entity.IdOrNull;
             IsNew = entity.IsNew;
         }
@@ -151,11 +150,11 @@ namespace Signum.Web
             if (IdOrNull != null && IsNew)
                 throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".Formato(IdOrNull));
 
-            if (RuntimeType != null && RuntimeType.IsLite())
+            if (EntityType != null && EntityType.IsLite())
                 throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
 
             return "{0};{1};{2}".Formato(
-                (RuntimeType == null) ? "" : Navigator.ResolveWebTypeName(RuntimeType),
+                (EntityType == null) ? "" : Navigator.ResolveWebTypeName(EntityType),
                 IdOrNull.TryToString(),
                 IsNew ? "n" : "o"
                 );
@@ -167,22 +166,22 @@ namespace Signum.Web
             if (parts.Length != 3)
                 throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
 
-            string runtimeTypeString = parts[0];
+            string entityTypeString = parts[0];
 
             return new RuntimeInfo
             {
-                RuntimeType = string.IsNullOrEmpty(runtimeTypeString) ? null : Navigator.ResolveType(runtimeTypeString),
+                EntityType = string.IsNullOrEmpty(entityTypeString) ? null : Navigator.ResolveType(entityTypeString),
                 IdOrNull = (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
                 IsNew = parts[2]=="n" ? true : false
             };
         }
 
-        public Lite<T> ToLite<T>()  where T : class, IIdentifiable
+        public Lite<IdentifiableEntity> ToLite()
         {
             if(IsNew)
                 throw new InvalidOperationException("The RuntimeInfo represents a new entity");
 
-            return new Lite<T>(this.RuntimeType, this.IdOrNull.Value);
+            return Lite.Create(this.EntityType, this.IdOrNull.Value);
         }
     }
 }

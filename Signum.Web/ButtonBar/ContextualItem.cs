@@ -9,7 +9,16 @@ using Signum.Entities;
 
 namespace Signum.Web
 {
-    public delegate ContextualItem GetContextualItemDelegate(ControllerContext controllerContext, Lite lite, object queryName, string prefix);
+    public class SelectedItemsMenuContext
+    {
+        public ControllerContext ControllerContext { get; set; }
+        public List<Lite<IdentifiableEntity>> Lites { get; set; }
+        public object QueryName { get; set; }
+        public Implementations Implementations { get; set; }
+        public string Prefix { get; set; }
+    }
+
+    public delegate ContextualItem GetContextualItemDelegate(SelectedItemsMenuContext context);
 
     public class ContextualItem : ToolBarMenu
     {
@@ -23,23 +32,38 @@ namespace Signum.Web
 
     public static class ContextualItemsHelper
     {
-        public static bool EntityCtxMenuInSearchPage = false;
-        public static event GetContextualItemDelegate GetContextualItemsForLite;
+        public static bool SelectedItemsMenuInSearchPage = false;
+        public static event GetContextualItemDelegate GetContextualItemsForLites;
 
         public static void Start()
         {
-            EntityCtxMenuInSearchPage = true;
+            SelectedItemsMenuInSearchPage = true;
+
+            ButtonBarQueryHelper.RegisterGlobalButtons(ctx =>
+            {
+                var selectedText = Properties.Resources.Signum_searchControlMenuSelected;
+                return new ToolBarButton[]
+                {
+                    new ToolBarMenu
+                    {
+                        Id = TypeContextUtilities.Compose(ctx.Prefix, "sfTmSelected"),
+                        DivCssClass = ToolBarMenu.DefaultQueryCssClass + " sf-tm-selected",
+                        Text = selectedText + " (0)",
+                        AltText = selectedText,
+                    }
+                };
+            });
         }
 
-        public static List<ContextualItem> GetContextualItemListForLite(ControllerContext controllerContext, Lite lite, object queryName, string prefix)
+        public static List<ContextualItem> GetContextualItemListForLites(SelectedItemsMenuContext ctx)
         {
             List<ContextualItem> items = new List<ContextualItem>();
-            if (lite != null)
+            if (!ctx.Lites.IsNullOrEmpty())
             {
-                if (GetContextualItemsForLite != null)
-                    items.AddRange(GetContextualItemsForLite.GetInvocationList()
+                if (GetContextualItemsForLites != null)
+                    items.AddRange(GetContextualItemsForLites.GetInvocationList()
                         .Cast<GetContextualItemDelegate>()
-                        .Select(d => d(controllerContext, lite, queryName, prefix))
+                        .Select(d => d(ctx))
                         .NotNull().ToList());
             }
             return items;

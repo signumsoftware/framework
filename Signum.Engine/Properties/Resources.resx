@@ -136,7 +136,7 @@
     <value>Concurrency error on the databe, Table = {0}, Id = {1}</value>
   </data>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
-    <value>'{0}' has been renamed in {1}?</value>
+    <value>     '{0}' has been renamed in {1}?</value>
   </data>
   <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
     <value>There are '{0}' that refer to this entity</value>
@@ -146,5 +146,17 @@
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Unautorized access to {0} because {1}</value>
+  </data>
+  <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
+    <value>Impossible to execute {0} from state {1}</value>
+  </data>
+  <data name="InUserInterface" xml:space="preserve">
+    <value>(in user interface)</value>
+  </data>
+  <data name="Operation01IsNotAuthorized" xml:space="preserve">
+    <value>Operation {0} ({1}) is not Authorized</value>
+  </data>
+  <data name="TheEntity0IsNew" xml:space="preserve">
+    <value>The entity {0} is new</value>
   </data>
 </root>

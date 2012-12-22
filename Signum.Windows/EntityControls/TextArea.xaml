@@ -6,7 +6,7 @@
     x:Class="Signum.Windows.TextArea"
     x:Name="me" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    mc:Ignorable="d" d:DesignWidth="540.993" d:DesignHeight="140" Style="{DynamicResource toolTip}">
+    mc:Ignorable="d" d:DesignWidth="540.993" d:DesignHeight="140" Style="{DynamicResource toolTip}" Background="White">
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

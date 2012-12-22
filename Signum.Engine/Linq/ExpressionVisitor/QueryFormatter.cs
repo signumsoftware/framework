@@ -388,6 +388,8 @@ namespace Signum.Engine.Linq
                     sb.Append("1");
                 else if (c.Value.Equals(false))
                     sb.Append("0");
+                else if (c.Value is string)
+                    sb.Append(((string)c.Value == "") ? "''" : ("'" + c.Value + "'"));
                 else
                     sb.Append(c.ToString());
             }
@@ -534,6 +536,22 @@ namespace Signum.Engine.Linq
             return sqlFunction;
         }
 
+        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            sb.Append(sqlFunction.SqlFunction);
+            sb.Append("(");
+            for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
+            {
+                Expression exp = sqlFunction.Arguments[i];
+                if (i > 0)
+                    sb.Append(", ");
+                this.Visit(exp);
+            }
+            sb.Append(")");
+
+            return sqlFunction;
+        }
+
         private void AppendColumn(ColumnDeclaration column)
         {
             ColumnExpression c = this.Visit(column.Expression) as ColumnExpression;
@@ -556,7 +574,7 @@ namespace Signum.Engine.Linq
         {
             if (source is SourceWithAliasExpression)
             {
-                if (source is TableExpression)
+                if (source is TableExpression || source is SqlTableValuedFunctionExpression)
                     Visit(source);
                 else
                 {

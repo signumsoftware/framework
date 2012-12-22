@@ -1,6 +1,7 @@
 ﻿@section head
 {
     @Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray())
+    @Html.RegisterSFUrls(Url)
 }
 @using (Html.BeginForm())
 {

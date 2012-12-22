@@ -31,7 +31,7 @@ namespace Signum.Web.Controllers
             Type t = Navigator.ResolveType(webTypeName);
 
             if (id.HasValue)
-                return Navigator.View(this, Database.Retrieve(t, id.Value)); 
+                return Navigator.NormalPage(this, Database.Retrieve(t, id.Value)); 
 
             IdentifiableEntity entity = null;
             object result = Constructor.Construct(t);
@@ -40,41 +40,45 @@ namespace Signum.Web.Controllers
             else
                 throw new InvalidOperationException("Invalid result type for a Constructor");
              
-            return Navigator.View(this, entity); 
+            return Navigator.NormalPage(this, entity); 
         }
 
-        public ActionResult Create(string runtimeType, string prefix)
+        public ActionResult Create(string entityType, string prefix)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
 
             return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate);
         }
 
-        public PartialViewResult PopupCreate(string runtimeType, string prefix, string url)
+        public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
 
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
+            IdentifiableEntity entity = null;
+            if (id.HasValue)
+                entity = Database.Retrieve(type, id.Value);
+            else
+            {
+                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupNavigate);
+                if (result.GetType() == typeof(PartialViewResult))
+                    return (PartialViewResult)result;
 
-            object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupCreate);
-            if (result.GetType() == typeof(PartialViewResult))
-                return (PartialViewResult)result;
+                if (result.GetType().IsEmbeddedEntity())
+                    throw new InvalidOperationException("PopupNavigate cannot be called for EmbeddedEntity {0}".Formato(result.GetType()));
 
-            if (result.GetType().IsEmbeddedEntity())
-                throw new InvalidOperationException("PopupCreate cannot be called for EmbeddedEntity {0}".Formato(result.GetType()));
+                if (!typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
+                    throw new InvalidOperationException("Invalid result type for a Constructor");
 
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
-                throw new InvalidOperationException("Invalid result type for a Constructor");
-
-            IdentifiableEntity entity = (IdentifiableEntity)result;
+                entity = (IdentifiableEntity)result;
+            }
 
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc) { PartialViewName = url });
+            return this.PopupOpen(new PopupNavigateOptions(tc) { PartialViewName = url });
         }
 
-        public PartialViewResult PopupView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
+        public PartialViewResult PopupView(string entityType, int? id, string prefix, bool? readOnly, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
             
             IdentifiableEntity entity = null;
             if (id.HasValue)
@@ -89,13 +93,13 @@ namespace Signum.Web.Controllers
             }
             
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
-            return this.PopupOpen(new ViewOkOptions(tc) { PartialViewName = url, ReadOnly = readOnly.HasValue });
+            return this.PopupOpen(new PopupViewOptions(tc) { PartialViewName = url, ReadOnly = readOnly.HasValue });
         }
 
         [HttpPost]
-        public PartialViewResult PartialView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
+        public PartialViewResult PartialView(string entityType, int? id, string prefix, bool? readOnly, string url)
         {
-            Type type = Navigator.ResolveType(runtimeType);
+            Type type = Navigator.ResolveType(entityType);
             
             IdentifiableEntity entity = null;
             if (id.HasValue)
@@ -117,30 +121,6 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, tc, url);
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult TrySave()
-        {
-            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
-
-            if (context.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(context);
-                return JsonAction.ModelState(ModelState);
-            }
-
-            IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
-            if (ident == null)
-                throw new ArgumentNullException("No IdentifiableEntity to save");
-
-            Database.Save(ident);
-
-            string newUrl = Navigator.ViewRoute(ident.GetType(), ident.Id);
-            if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                return Navigator.View(this, ident);
-            else
-                return JsonAction.Redirect(newUrl);
-        }
-
         [HttpPost]
         public JsonResult Validate()
         {
@@ -148,22 +128,6 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromContext(context);
             return JsonAction.ModelState(ModelState);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public JsonResult TrySavePartial(string prefix)
-        {
-            MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
-
-            this.ModelState.FromContext(context);
-
-            IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
-            if (ident != null && !context.GlobalErrors.Any())
-                Database.Save(ident);
-
-            string newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
-
-            return JsonAction.ModelState(ModelState, context.UntypedValue.ToString(), newLink);
         }
 
         [HttpPost]
@@ -194,12 +158,12 @@ namespace Signum.Web.Controllers
             else if (context.UntypedValue == null)
             {
                 RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-                newLink = Navigator.ViewRoute(ei.RuntimeType, ident.TryCS(e => e.IdOrNull));
+                newLink = Navigator.NavigateRoute(ei.EntityType, ident.TryCS(e => e.IdOrNull));
                 newToStr = context.UntypedValue.ToString();
             }
             else
             {
-                newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
+                newLink = Navigator.NavigateRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
                 newToStr = context.UntypedValue.ToString();
             }
             
@@ -213,13 +177,13 @@ namespace Signum.Web.Controllers
             if (typeArray == StaticInfo.ImplementedByAll)
                 throw new ArgumentException("ImplementedBy not allowed in Autocomplete");
 
-            List<Lite> lites  = AutoCompleteUtils.FindLiteLike(typeof(IdentifiableEntity), typeArray, q, l);
+            List<Lite<IdentifiableEntity>> lites = AutoCompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
 
             var result = lites.Select(o => new
             {
                 id = o.Id,
                 text = o.ToString(),
-                type = Navigator.ResolveWebTypeName(o.RuntimeType)
+                type = Navigator.ResolveWebTypeName(o.EntityType)
             }).ToList();
 
             return Json(result);
@@ -237,7 +201,7 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult Search(QueryRequest queryRequest, bool? allowMultiple, bool view, FilterMode filterMode, string prefix)
+        public PartialViewResult Search(QueryRequest queryRequest, bool allowMultiple, bool view, FilterMode filterMode, string prefix)
         {
             return Navigator.Search(this, queryRequest, allowMultiple, view, filterMode, prefix);
         }
@@ -268,18 +232,33 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public ContentResult GetContextualPanel(string lite, string webQueryName, string prefix)
+        public ContentResult SelectedItemsContextMenu(string liteKeys, string webQueryName, string implementationsKey, string prefix)
         {
-            string[] liteParts = lite.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+            var noResults = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results")
+                .InnerHtml(new HtmlTag("span").InnerHtml(Resources.NoResults.EncodeHtml()).ToHtml())
+                .ToHtml().ToString();
 
+            if (string.IsNullOrEmpty(liteKeys))
+                return Content(noResults);
+
+            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
             object queryName = Navigator.ResolveQueryName(webQueryName);
+            Implementations implementations = implementationsKey == "[All]" ? Implementations.ByAll :
+                Implementations.By(implementationsKey.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(t => Navigator.ResolveType(t)).ToArray());
             
-            string result = ContextualItemsHelper.GetContextualItemListForLite(this.ControllerContext, Lite.Create(Navigator.ResolveType(liteParts[0]), int.Parse(liteParts[1])) , queryName, prefix).ToString("");
+            string result = ContextualItemsHelper.GetContextualItemListForLites(new SelectedItemsMenuContext
+            {
+                ControllerContext = this.ControllerContext,
+                Lites = lites,
+                QueryName = queryName,
+                Implementations = implementations,
+                Prefix = prefix,
+            }).ToString("");
 
             if (string.IsNullOrEmpty(result))
-                result = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results").InnerHtml(Resources.NoResults.EncodeHtml()).ToHtml().ToString();
-
-            return Content(result);
+                return Content(noResults); 
+            else 
+                return Content(result);
         }
 
         [HttpPost]
@@ -307,8 +286,6 @@ namespace Signum.Web.Controllers
             return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
         }
 
-        public static Func<QueryToken, bool> AllowSubTokens = null;
-
         [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
         {
@@ -316,17 +293,10 @@ namespace Signum.Web.Controllers
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             var token = QueryUtils.Parse(tokenName, t => QueryUtils.SubTokens(t, qd.Columns));
 
-            if (AllowSubTokens != null && !AllowSubTokens(token))
-                return Content("");
+            var combo = CreateHtmlHelper(this).QueryTokenCombo(token, null, new Context(null, prefix), index + 1, queryName,
+                qt => QueryUtils.SubTokens(qt, qd.Columns));
 
-            List<QueryToken> subtokens = token.SubTokens();
-            if (subtokens.IsEmpty())
-                return Content("");
-
-            var tokenOptions = SearchControlHelper.TokensCombo(subtokens, null);
-
-            return Content(
-                SearchControlHelper.TokenOptionsCombo(CreateHtmlHelper(this), queryName, tokenOptions, new Context(null, prefix), index + 1, true).ToHtmlString());
+            return Content(combo.ToHtmlString());
         }
 
         [HttpPost]
@@ -356,7 +326,7 @@ namespace Signum.Web.Controllers
             ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
             ViewData[ViewDataKeys.Title] = Resources.ChooseAType;
 
-            return PartialView(Navigator.Manager.ChooserPopupView);
+            return PartialView(Navigator.Manager.PopupCancelControlView);
         }
 
         [HttpPost]
@@ -383,7 +353,7 @@ namespace Signum.Web.Controllers
             if (title.HasText())
                 ViewData[ViewDataKeys.Title] = title;
 
-            return PartialView(Navigator.Manager.ChooserPopupView);
+            return PartialView(Navigator.Manager.PopupCancelControlView);
         }
 
         public static HtmlHelper CreateHtmlHelper(Controller c)

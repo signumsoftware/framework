@@ -195,4 +195,7 @@
   <data name="Ago" xml:space="preserve">
     <value>{0} ago </value>
   </data>
+  <data name="In" xml:space="preserve">
+    <value>In {0}</value>
+  </data>
 </root>

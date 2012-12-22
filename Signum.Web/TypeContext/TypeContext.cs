@@ -101,7 +101,6 @@ namespace Signum.Web
             ShowValidationMessage = true,
             ReadOnly = false,
             ValueFirst = false,
-            ShowFieldDiv = true,
             OnlyValue = false
         };
 
@@ -143,12 +142,6 @@ namespace Signum.Web
             set { this[BoolStyles.ValueFirst] = value; }
         }
 
-        public bool ShowFieldDiv    /* to deprecate */
-        {
-            get { return this[BoolStyles.ShowFieldDiv] ?? Parent.ShowFieldDiv; }
-            set { this[BoolStyles.ShowFieldDiv] = value; }
-        }
-
         public override string ToString()
         {
             return ControlID; 
@@ -179,11 +172,11 @@ namespace Signum.Web
         public RuntimeInfo RuntimeInfo()
         {
             if (this.UntypedValue == null)
-                return new RuntimeInfo() { RuntimeType = null };
+                return new RuntimeInfo() { EntityType = null };
 
             Type type = this.UntypedValue.GetType();
             if (type.IsLite())
-                return new RuntimeInfo((Lite)this.UntypedValue);
+                return new RuntimeInfo((Lite<IIdentifiable>)this.UntypedValue);
 
             if (type.IsEmbeddedEntity())
                 return new RuntimeInfo((EmbeddedEntity)this.UntypedValue);
@@ -209,7 +202,7 @@ namespace Signum.Web
         }
 
         public TypeContext(T value, string controlID)
-            : base(null, controlID, PropertyRoute.Root(typeof(T)))
+            : base(null, controlID, PropertyRoute.Root(value.GetType()))
         {
             Value = value;
         }

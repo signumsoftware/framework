@@ -6,6 +6,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
@@ -44,7 +45,7 @@ namespace Signum.Engine.Linq
             }
             if (this.candidates.Contains(exp) && exp.NodeType != ExpressionType.Constant)
             {
-                if (exp.Type.IsAssignableFrom(typeof(IQueryable<>)))
+                if (exp.Type.IsInstantiationOf(typeof(IQueryable<>)))
                     return ExpressionEvaluator.PartialEval(exp);
 
                 return miConstant.GetInvoker(exp.Type)();

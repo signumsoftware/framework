@@ -51,7 +51,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override List<QueryToken> SubTokensInternal()
         {
-            return SubTokensBase(entityType, null);
+            return SubTokensBase(entityType, GetImplementations());
         }
 
         public override string Format
@@ -64,14 +64,20 @@ namespace Signum.Entities.DynamicQuery
             get { return null; }
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
-            return null;
+            return Implementations.By(entityType);
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
-            return Parent.IsAllowed();
+            var parent = Parent.IsAllowed();
+            var routes = GetPropertyRoute().IsAllowed();
+
+            if (parent.HasText() && routes.HasText())
+                Resources.And.Combine(parent, routes);
+
+            return parent ?? routes;
         }
 
         public override PropertyRoute GetPropertyRoute()

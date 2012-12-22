@@ -48,10 +48,10 @@ namespace Signum.Entities.DynamicQuery
 
         protected override List<QueryToken> SubTokensInternal()
         {
-            return SubTokensBase(typeof(string), Implementations());
+            return SubTokensBase(typeof(string), GetImplementations());
         }
 
-        public override Implementations Implementations()
+        public override Implementations? GetImplementations()
         {
             return null;
         }
@@ -66,7 +66,7 @@ namespace Signum.Entities.DynamicQuery
             get { return null; }
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             PropertyRoute route = GetPropertyRoute();
 
