@@ -23,7 +23,9 @@
         </Grid>
         <ScrollViewer x:Name="ScrollViewer"
                       VerticalScrollBarVisibility="{Binding VerticalScrollBarVisibility, ElementName=me}"
-                      HorizontalScrollBarVisibility="{Binding HorizontalScrollBarVisibility, ElementName=me}" Grid.Row="1" >
+                      HorizontalScrollBarVisibility="{Binding HorizontalScrollBarVisibility, ElementName=me}" 
+                      Focusable="False"
+                      Grid.Row="1" >
             <m:EntityRepeaterItemsControl x:Name="itemsControl"
 			ItemsSource="{Binding Entities, ElementName=me, Mode=Default}" 
 			ItemTemplate="{Binding EntityTemplate, ElementName=me, Mode=Default}" 

@@ -71,7 +71,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType();
+                Type type = SelectType(Navigator.IsFindable);
                 if (type == null)
                     return null;
 

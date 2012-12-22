@@ -748,12 +748,12 @@ namespace Signum.Windows
             OnCreate();
         }
 
-        public Type SelectType()
+        public Type SelectType(Func<Type, bool> filterType)
         {
             if (Implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
 
-            return Navigator.SelectType(Window.GetWindow(this), Implementations.Types);
+            return Navigator.SelectType(Window.GetWindow(this), Implementations.Types, filterType);
         }
 
 
@@ -762,7 +762,8 @@ namespace Signum.Windows
             if (!Create)
                 return;
 
-            IdentifiableEntity result = Creating == null ? (IdentifiableEntity)Constructor.Construct(SelectType(), Window.GetWindow(this)) : Creating();
+            IdentifiableEntity result = Creating != null ? Creating() :
+                (IdentifiableEntity)Constructor.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), Window.GetWindow(this));
 
             if (result == null)
                 return;

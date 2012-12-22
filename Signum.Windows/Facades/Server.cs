@@ -251,7 +251,8 @@ namespace Signum.Windows
               
                 if(liteType.IsAssignableFrom(objType))
                 {
-                    return ((IdentifiableEntity)obj).ToLite();
+                    IdentifiableEntity ident = (IdentifiableEntity)obj;
+                    return ident.ToLite(ident.IsNew);
                 }
             }
 

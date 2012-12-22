@@ -41,14 +41,6 @@ namespace Signum.Windows
             set { SetValue(AutoCompleteProperty, value); }
         }
 
-        public static readonly DependencyProperty HideAutoCompleteOnLostFocusProperty =
-            DependencyProperty.Register("HideAutoCompleteOnLostFocus", typeof(bool), typeof(EntityLine), new UIPropertyMetadata(true));
-        public bool HideAutoCompleteOnLostFocus
-        {
-            get { return (bool)GetValue(HideAutoCompleteOnLostFocusProperty); }
-            set { SetValue(HideAutoCompleteOnLostFocusProperty, value); }
-        }
-
         int autoCompleteElements = 5;
         public int AutoCompleteElements
         {
@@ -112,7 +104,7 @@ namespace Signum.Windows
             }
             else
             {
-                if (e.Reason != CloseReason.LostFocus || HideAutoCompleteOnLostFocus)
+                if (e.Reason != CloseReason.LostFocus)
                     autoCompleteTextBox.Visibility = Visibility.Hidden;
             }
         }
