@@ -16,7 +16,6 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Controls;
-using System.Windows;
 
 namespace Signum.Windows.Chart
 {
@@ -25,7 +24,6 @@ namespace Signum.Windows.Chart
         public static readonly DependencyProperty UserChartProperty =
             DependencyProperty.RegisterAttached("UserChart", typeof(UserChartDN), typeof(ChartClient), new UIPropertyMetadata(null));
         public static UserChartDN GetUserChart(DependencyObject obj)
-        public static void Start()
         {
             return (UserChartDN)obj.GetValue(UserChartProperty);
         }
@@ -34,6 +32,8 @@ namespace Signum.Windows.Chart
             obj.SetValue(UserChartProperty, value);
         }
 
+
+        public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -59,17 +59,19 @@ namespace Signum.Windows.Chart
                     .OpenSubKey("Main", true)
                     .CreateSubKey("FeatureControl")
                     .CreateSubKey("FEATURE_BROWSER_EMULATION");
-                
-                Navigator.AddSetting(new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart(), IsCreable = a => a });
+
+                main.SetValue(processName, 9999, RegistryValueKind.DWord);
+
                 Constructor.Register<UserChartDN>(win =>
                 {
-                    MessageBox.Show(win, 
+                    MessageBox.Show(win,
                         Signum.Windows.Extensions.Properties.Resources._0CanOnlyBeCreatedFromTheChartWindow.Formato(typeof(UserChartDN).NicePluralName()),
                         Signum.Windows.Extensions.Properties.Resources.Create,
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return null;
                 }); 
-                SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
+
+                SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
 
                 ChartUtils.RemoveNotNullValidators();
             }

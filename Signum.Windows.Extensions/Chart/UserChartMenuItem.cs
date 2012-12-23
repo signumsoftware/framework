@@ -133,10 +133,10 @@ namespace Signum.Windows.Chart
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
 
-            var cuc = ChartClient.GetUserChart(ChartWindow);
+            var autoSet = ChartClient.GetUserChart(ChartWindow);
 
-            if (cuc != null)
-                SetCurrent(cuc );
+            if (autoSet != null)
+                SetCurrent(autoSet);
         }
 
         static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
@@ -215,5 +215,6 @@ namespace Signum.Windows.Chart
                 Initialize();
             }
         }
+
     }
 }

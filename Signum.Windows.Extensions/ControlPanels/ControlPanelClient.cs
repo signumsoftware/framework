@@ -23,12 +23,12 @@ namespace Signum.Windows.ControlPanels
             {
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<ControlPanelDN>(EntityType.Admin) { View = e => new ControlPanelEdit() },
+                    new EntitySettings<ControlPanelDN>() { View = e => new ControlPanelEdit() },
 
-                    new EntitySettings<CountSearchControlPartDN>(EntityType.Content) { View = e => new CountSearchControlPartEdit() },
-                    new EntitySettings<LinkListPartDN>(EntityType.Content) { View = e => new LinkListPartEdit() },
-                    new EntitySettings<UserQueryPartDN>(EntityType.Content) { View = e => new UserQueryPartEdit() },                
-                    new EntitySettings<UserChartPartDN>(EntityType.Content) { View = e => new UserChartPartEdit() }
+                    new EntitySettings<CountSearchControlPartDN>() { View = e => new CountSearchControlPartEdit() },
+                    new EntitySettings<LinkListPartDN>() { View = e => new LinkListPartEdit() },
+                    new EntitySettings<UserQueryPartDN>() { View = e => new UserQueryPartEdit() },                
+                    new EntitySettings<UserChartPartDN>() { View = e => new UserChartPartEdit() }
                 });
 
                 PartViews.Add(typeof(CountSearchControlPartDN), new PartView { ViewControl = () => new CountSearchControlPartView() });
@@ -41,7 +41,7 @@ namespace Signum.Windows.ControlPanels
     public class PartView
     {
         public Expression<Func<FrameworkElement>> ViewControl;
-        public Action<IPanelPartContent, Control> OnTitleClick;
+        public Action<IPartDN, Control> OnTitleClick;
     }
 
     public class ControlPanelViewDataTemplateSelector : DataTemplateSelector

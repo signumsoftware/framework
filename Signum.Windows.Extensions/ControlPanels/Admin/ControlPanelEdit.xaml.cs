@@ -13,8 +13,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
-using Signum.Entities.Exceptions;
 using Signum.Entities.ControlPanel;
+using Signum.Utilities;
 
 namespace Signum.Windows.ControlPanels.Admin
 {
@@ -37,20 +37,20 @@ namespace Signum.Windows.ControlPanels.Admin
         {
             var win = Window.GetWindow(this);
 
-            var imp = (ImplementedByAttribute)PropertyRoute.Construct<ControlPanelDN>(cp => cp.Parts.First().Content).GetImplementations();
+            var imp = (Implementations)PropertyRoute.Construct<ControlPanelDN>(cp => cp.Parts.First().Content).GetImplementations();
 
-            var type = Navigator.SelectType(win, imp.ImplementedTypes);
+            var type = Navigator.SelectType(win, imp.Types, t => Navigator.IsCreable(t, isSearchEntity: false));
 
             if (type == null)
                 return null;
 
-            var lastColumn = Panel.NumberOfColumns - 1;
+            var lastColumn = 0.To(Panel.NumberOfColumns).WithMin(c => Panel.Parts.Count(p => p.Column == c));
 
             return new PanelPart
             {
                 Column = lastColumn,
-                Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row) ?? 0) + 1,
-                Content = (IPanelPartContent)Constructor.Construct(type, win),
+                Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row) ?? 0),
+                Content = (IPartDN)Constructor.Construct(type, win),
                 Title = null,
             };
         }

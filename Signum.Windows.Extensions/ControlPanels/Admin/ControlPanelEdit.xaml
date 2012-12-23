@@ -6,12 +6,21 @@
     xmlns:swcp="clr-namespace:Signum.Windows.ControlPanels"
     m:Common.TypeContext="d:ControlPanelDN"
     MinWidth="600">
-    <StackPanel>
-        <m:EntityLine m:Common.Route="Related"/>
-        <m:ValueLine m:Common.Route="HomePagePriority"/>
-        <m:ValueLine m:Common.Route="DisplayName"/>
-        <m:ValueLine m:Common.Route="NumberOfColumns"/>
-        <m:EntityRepeater m:Common.Route="Parts" Creating="EntityRepeater_Creating" ViewOnCreate="False">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <m:EntityLine m:Common.Route="Related" Grid.Column="0" Grid.Row="0"/>
+        <m:ValueLine m:Common.Route="DisplayName" Grid.Column="0" Grid.Row="1"/>
+        <m:ValueLine m:Common.Route="HomePagePriority" Grid.Column="1" Grid.Row="0"/>
+        <m:ValueLine m:Common.Route="NumberOfColumns" Grid.Column="1" Grid.Row="1"/>
+        <m:EntityRepeater m:Common.Route="Parts" Creating="EntityRepeater_Creating" ViewOnCreate="False" Grid.Row="2" Grid.ColumnSpan="2">
             <m:EntityRepeater.Resources>
                 <Style TargetType="{x:Type m:EntityRepeaterContentControl}" BasedOn="{StaticResource {x:Type m:EntityRepeaterContentControl}}">
                     <Setter Property="swcp:StackColumnPanel.Column" Value="{Binding Column}"/>
@@ -44,5 +53,5 @@
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
-    </StackPanel>
+    </Grid>
 </UserControl>

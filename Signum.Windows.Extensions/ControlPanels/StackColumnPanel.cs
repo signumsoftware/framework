@@ -53,7 +53,8 @@ namespace Signum.Windows.ControlPanels
         protected override Size ArrangeOverride(Size finalSize)
         {
             var groups = this.InternalChildren.Cast<UIElement>()
-               .GroupBy(a => GetColumn(a)).OrderBy(a => a.Key).ToList();
+               .GroupBy(a => GetColumn(a))
+               .OrderBy(a => a.Key).ToList();
 
             var colWidh = finalSize.Width / groups.Count;
 
@@ -64,7 +65,9 @@ namespace Signum.Windows.ControlPanels
 
                 foreach (var item in gr.OrderBy(a=>GetRow(a)))
                 {
-                    item.Arrange(new Rect(new Point(xPos, yPos), new Size(colWidh, item.DesiredSize.Height)));
+                    item.Arrange(new Rect(
+                        new Point(xPos, yPos), 
+                        new Size(colWidh, item.DesiredSize.Height)));
 
                     yPos += item.DesiredSize.Height;
                 }

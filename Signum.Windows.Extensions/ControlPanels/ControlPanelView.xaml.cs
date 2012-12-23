@@ -37,7 +37,7 @@ namespace Signum.Windows.ControlPanels
 
         void ControlPanelView_Loaded(object sender, RoutedEventArgs e)
         {
-            cbCombox.ItemsSource = Server.RetrieveAllLite<ControlPanelDN>(null);
+            cbCombox.ItemsSource = Server.RetrieveAllLite<ControlPanelDN>();
 
             var home = Server.Return((IControlPanelServer cps) => cps.GetHomePageControlPanel());
 

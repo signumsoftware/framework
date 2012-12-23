@@ -6,6 +6,8 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
+using System.ComponentModel;
+using System.Collections.Specialized;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -43,8 +45,9 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref numberOfColumns, value, () => NumberOfColumns); }
         }
 
-        [ValidateChildProperty, NotNullable]
+        [ValidateChildProperty, NotifyCollectionChanged, NotifyChildProperty, NotNullable]
         MList<PanelPart> parts = new MList<PanelPart>();
+        [NoRepeatValidator]
         public MList<PanelPart> Parts
         {
             get { return parts; }
@@ -64,13 +67,20 @@ namespace Signum.Entities.ControlPanel
             {
                 PanelPart part = (PanelPart)sender;
 
-                int index = Parts.IndexOf(part);
-
                 if (pi.Is(() => part.Column))
                 {
                     if (part.Column >= NumberOfColumns)
                         return Resources.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.Formato(part.Title, part.Column, NumberOfColumns);
+                }
 
+                if (pi.Is(() => part.Row))
+                {
+                    if (part.Row > 0 && !parts.Any(p => p.Row == part.Row - 1 && p.Column == p.Column))
+                        return "There's nothing in Column {0} Row {1}. Move this part up to Row {2}".Formato(part.Column, part.Row, part.Row - 1);
+                }
+
+                if (pi.Is(() => part.Row) || pi.Is(() => part.Column))
+                {
                     if (parts.Any(p => p != part && p.Row == part.Row && p.Column == part.Column))
                         return Resources.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.Formato(part.Title, part.Column, part.Row);
                 }
@@ -79,18 +89,38 @@ namespace Signum.Entities.ControlPanel
             return base.ChildPropertyValidation(sender, pi);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        //protected override string PropertyValidation(PropertyInfo pi)
+        //{
+        //    if (pi.Is(() => Parts) && Parts.Any())
+        //    {
+        //        var rows = Parts.Select(p => p.Row).Distinct().ToList();
+        //        int maxRow = rows.Max();
+        //        var numbers = 0.To(maxRow);
+        //        if (maxRow != rows.Count)
+        //            return Resources.ControlPanelDN_Rows0DontHaveAnyParts.Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
+        //    }
+
+        //    return base.PropertyValidation(pi);
+        //}
+
+        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            if (pi.Is(() => Parts) && Parts.Any())
+            if(sender == Parts)
+                foreach (var pp in Parts)
+                    pp.NotifyRowColumn();
+
+            base.ChildCollectionChanged(sender, args);
+        }
+
+        protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (sender is PanelPart && e.PropertyName == "Row" || e.PropertyName == "Column")
             {
-                var rows = Parts.Select(p => p.Row).Distinct().ToList();
-                int maxRow = rows.Max();
-                var numbers = 0.To(maxRow + 1);
-                if (maxRow != rows.Count)
-                    return Resources.ControlPanelDN_Rows0DontHaveAnyParts.Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
+                foreach (var pp in Parts)
+                    pp.NotifyRowColumn();
             }
 
-            return base.PropertyValidation(pi);
+            base.ChildPropertyChanged(sender, e);
         }
 
         static readonly Expression<Func<ControlPanelDN, string>> ToStringExpression = e => e.displayName;
@@ -103,11 +133,11 @@ namespace Signum.Entities.ControlPanel
         {
             return new ControlPanelDN
             {
-                DisplayName = "Clon {0}".Formato(this.DisplayName),
-                HomePage = this.HomePage,
-                NumberOfColumns = this.NumberOfColumns,
-                Parts = this.Parts.Select(p => p.Clone()).ToMList(),
-                Related = this.Related,
+                DisplayName = "Clone {0}".Formato(this.DisplayName),
+                HomePagePriority = HomePagePriority,
+                NumberOfColumns = NumberOfColumns,
+                Parts = Parts.Select(p => p.Clone()).ToMList(),
+                Related = Related,
             };
         }
     }

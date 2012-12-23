@@ -6,13 +6,17 @@
     m:Common.TypeContext="d:CountSearchControlPartDN"
     MinWidth="300">
     <StackPanel>
-        <m:EntityRepeater m:Common.Route="UserQueries">
+        <m:EntityRepeater m:Common.Route="UserQueries" Grid.IsSharedSizeScope="True">
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <m:ValueLine m:Common.Route="Label" />
-                        <m:EntityLine m:Common.Route="UserQuery" />
-                    </StackPanel>
+                    <Grid m:Common.LabelVisible="False">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="Left" Width="*"/>
+                            <ColumnDefinition SharedSizeGroup="Right" Width="2*" />
+                        </Grid.ColumnDefinitions>
+                        <m:ValueLine m:Common.Route="Label" Grid.Column="0" />
+                        <m:EntityLine m:Common.Route="UserQuery" Grid.Column="1" />
+                    </Grid>
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>

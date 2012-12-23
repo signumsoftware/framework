@@ -262,7 +262,7 @@
     <value>Part {0} is in column {1} of row {2} which already has other parts</value>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
-    <value>There are not any parts in rows {{{0}}}</value>
+    <value>There are not any parts in rows {0}</value>
   </data>
   <data name="CountSearchControlPartDN" xml:space="preserve">
     <value>Counter list</value>

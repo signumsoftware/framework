@@ -23,6 +23,7 @@ namespace Signum.Entities.ControlPanel
         }
 
         int row;
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
         public int Row
         {
             get { return row; }
@@ -30,6 +31,7 @@ namespace Signum.Entities.ControlPanel
         }
 
         int column;
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
         public int Column
         {
             get { return column; }
@@ -64,11 +66,17 @@ namespace Signum.Entities.ControlPanel
         {
             return new PanelPart
             {
-                Column = this.Column,
-                Row=this.Row,
+                Column = Column,
+                Row = Row,
                 Content = content.Clone(),
-                Title = this.Title
+                Title = Title
             };
+        }
+
+        internal void NotifyRowColumn()
+        {
+            Notify(() => Row);
+            Notify(() => Column);
         }
     }
 
