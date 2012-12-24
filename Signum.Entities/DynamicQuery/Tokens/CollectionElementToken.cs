@@ -52,16 +52,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Implementations? GetImplementations()
         {
-            ExtensionToken et = Parent as ExtensionToken;
-
-            if (et != null && et.IsProjection)
-                return et.GetElementImplementations();
-
-            var pr = GetPropertyRoute();
-            if (pr != null)
-                return pr.TryGetImplementations();
-
-            return null;
+            return Parent.GetElementImplementations();
         }
 
         public override string Format

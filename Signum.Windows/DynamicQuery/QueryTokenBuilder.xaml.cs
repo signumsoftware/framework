@@ -132,10 +132,6 @@ namespace Signum.Windows
             Token = tokens.LastOrDefault();
         }
 
-        void cbi_Loaded(object sender, RoutedEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
 
         public QueryTokenBuilder()
         {

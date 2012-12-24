@@ -7,11 +7,14 @@
         <StackPanel.Resources>
             <Style TargetType="ComboBox" x:Key="{x:Type ComboBox}">
                 <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="{Binding SelectedItem.TypeColor, RelativeSource={RelativeSource Self}}"/>
+                <Setter Property="ToolTip" Value="{Binding SelectedItem.NiceTypeName, RelativeSource={RelativeSource Self}}"/>
                 <Setter Property="Margin" Value="1,0,0,1"/>
             </Style>
             <Style TargetType="ComboBoxItem" x:Key="{x:Type ComboBoxItem}">
                 <Setter Property="AutomationProperties.ItemStatus" Value="{Binding Key}"/>
-                <EventSetter Event="Loaded" Handler="cbi_Loaded"/>
+                <Setter Property="Foreground" Value="{Binding TypeColor}"/>
+                <Setter Property="ToolTip" Value="{Binding NiceTypeName}"/>
             </Style>
         </StackPanel.Resources>
     </StackPanel>
