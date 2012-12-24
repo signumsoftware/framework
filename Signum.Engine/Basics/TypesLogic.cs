@@ -36,7 +36,7 @@ namespace Signum.Engine.Basics
             get { return Schema.Current.TypeToName; }
         }
 
-        public static Dictionary<Type, EntityType> EntityTypes { get; private set; }
+        public static Dictionary<Type, EntityKind> EntityKinds { get; private set; }
 
         public static Type ToType(this TypeDN type)
         {
@@ -52,14 +52,14 @@ namespace Signum.Engine.Basics
         {
             Schema current = Schema.Current; 
 
-            var attributes = current.Tables.Keys.Select(t=>KVP.Create(t,t.SingleAttributeInherit<EntityTypeAttribute>())).ToList();
+            var attributes = current.Tables.Keys.Select(t=>KVP.Create(t,t.SingleAttributeInherit<EntityKindAttribute>())).ToList();
 
             var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".Formato(a.Key.Name), "\r\n");
 
             if (errors.HasText())
                 throw new InvalidOperationException(errors);
 
-            EntityTypes = attributes.Select(kvp => KVP.Create(kvp.Key, kvp.Value.EntityType)).ToDictionary();
+            EntityKinds = attributes.Select(kvp => KVP.Create(kvp.Key, kvp.Value.EntityType)).ToDictionary();
 
             List<TypeDN> types = Database.RetrieveAll<TypeDN>();
 
@@ -154,14 +154,14 @@ namespace Signum.Engine.Basics
             return Schema.Current.TypeToName.TryGetC(type);
         }
 
-        public static EntityType GetEntityType(Type type)
+        public static EntityKind GetEntityKind(Type type)
         {
-            return EntityTypes.GetOrThrow(type, "EntityType not found for {0}");
+            return EntityKinds.GetOrThrow(type, "EntityKind not found for {0}");
         }
 
-        public static EntityType? TryGetEntityType(Type type)
+        public static EntityKind? TryGetEntityKind(Type type)
         {
-            return EntityTypes.TryGetS(type);
+            return EntityKinds.TryGetS(type);
         }
     }
 }

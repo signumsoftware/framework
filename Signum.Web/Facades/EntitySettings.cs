@@ -66,9 +66,9 @@ namespace Signum.Web
         
         public EntitySettings()
         {
-            switch (TypeLogic.GetEntityType(typeof(T)))
+            switch (TypeLogic.GetEntityKind(typeof(T)))
             {
-                case EntityType.SystemString:
+                case EntityKind.SystemString:
                     IsCreable = EntityWhen.Never;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
@@ -76,7 +76,7 @@ namespace Signum.Web
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
 
-                case EntityType.System:
+                case EntityKind.System:
                     IsCreable = EntityWhen.Never;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
@@ -84,7 +84,7 @@ namespace Signum.Web
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
 
-                case EntityType.String:
+                case EntityKind.String:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
@@ -92,28 +92,28 @@ namespace Signum.Web
                     MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
 
-                case EntityType.Shared:
+                case EntityKind.Shared:
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
 
-                case EntityType.Main:
+                case EntityKind.Main:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
 
-                case EntityType.Part:
+                case EntityKind.Part:
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
 
-                case EntityType.SharedPart:
+                case EntityKind.SharedPart:
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
