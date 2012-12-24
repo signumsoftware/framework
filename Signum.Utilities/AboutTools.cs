@@ -42,6 +42,7 @@ namespace Signum.Utilities
                             {
                                 case 0: return "Windows Vista / 2008 Server";
                                 case 1: return "Windows 7";
+                                case 2: return "Windows 8";
                             }
                             break;
                     }
