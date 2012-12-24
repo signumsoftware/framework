@@ -63,11 +63,19 @@ namespace Signum.Windows
             set { SetValue(ItemsPanelProperty, value); }
         }
 
-        private static ItemsPanelTemplate GetDefaultItemsPanelTemplate()
+        static ItemsPanelTemplate GetDefaultItemsPanelTemplate()
         {
             ItemsPanelTemplate template = new ItemsPanelTemplate(new FrameworkElementFactory(typeof(StackPanel)));
             template.Seal();
             return template;
+        }
+
+        public static readonly DependencyProperty ItemContainerStyleProperty =
+           DependencyProperty.Register("ItemContainerStyle", typeof(Style), typeof(EntityRepeater), new PropertyMetadata(null));
+        public Style ItemContainerStyle
+        {
+            get { return (Style)GetValue(ItemContainerStyleProperty); }
+            set { SetValue(ItemContainerStyleProperty, value); }
         }
 
         public static readonly DependencyProperty IconProperty =
@@ -85,6 +93,7 @@ namespace Signum.Windows
             this.AddHandler(EntityRepeaterContentControl.MoveUpClickEvent, new RoutedEventHandler(btMoveUp_Click));
             this.AddHandler(EntityRepeaterContentControl.MoveDownClickEvent, new RoutedEventHandler(btMoveDown_Click));
         }
+
 
         protected override void btCreate_Click(object sender, RoutedEventArgs e)
         {
