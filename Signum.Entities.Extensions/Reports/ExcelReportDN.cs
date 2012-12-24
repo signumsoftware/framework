@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Reports
 {
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class ExcelReportDN : IdentifiableEntity
     {
         QueryDN query;

@@ -11,7 +11,7 @@ using System.Collections.Specialized;
 
 namespace Signum.Entities.ControlPanel
 {
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class ControlPanelDN : Entity
     {
         public ControlPanelDN()

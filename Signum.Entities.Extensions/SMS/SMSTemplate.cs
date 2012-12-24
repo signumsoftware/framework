@@ -25,7 +25,7 @@ namespace Signum.Entities.SMS
         Enable
     }
 
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class SMSTemplateDN : Entity
     {
         [SqlDbType(Size = 100)]

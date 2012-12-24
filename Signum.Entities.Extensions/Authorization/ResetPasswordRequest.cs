@@ -6,7 +6,7 @@ using Signum.Entities;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityType(EntityType.System)]
+    [Serializable, EntityKind(EntityKind.System)]
     public class ResetPasswordRequestDN : Entity
     {
         string code;

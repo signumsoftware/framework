@@ -64,7 +64,7 @@ namespace Signum.Engine.Authorization
             var graph = Schema.Current.ToDirectedGraph();
             graph.RemoveAll(graph.FeedbackEdgeSet().Edges);
             var compilationOrder = graph.CompilationOrder().ToList();
-            var entityTypes = graph.ToDictionary(t => t.Type, t => TypeLogic.GetEntityType(t.Type));
+            var entityTypes = graph.ToDictionary(t => t.Type, t => TypeLogic.GetEntityKind(t.Type));
 
             return role =>
             {
