@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.ControlPanel;
+using System.Diagnostics;
+using Signum.Utilities;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -25,6 +27,16 @@ namespace Signum.Windows.ControlPanels
         public LinkListPartView()
         {
             InitializeComponent();
+        }
+
+        private void Hyperlink_Click_1(object sender, RoutedEventArgs e)
+        {
+            string url = ((Hyperlink)sender).NavigateUri.ToString();
+            if (System.Environment.OSVersion.NiceWindowsVersion() == "Windows 8")
+                Process.Start(new ProcessStartInfo("explorer.exe", url)); // Problems with chrome
+            else
+                Process.Start(new ProcessStartInfo(url));
+            e.Handled = true;
         }
     }
 }

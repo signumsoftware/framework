@@ -3,14 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
              xmlns:swcp="clr-namespace:Signum.Windows.ControlPanels"
              xmlns:secp="clr-namespace:Signum.Entities.ControlPanel;assembly=Signum.Entities.Extensions"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <DockPanel LastChildFill="True">
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <TextBlock Text="{Binding DisplayName}" Cursor="Hand"/>
-            <ComboBox x:Name="cbCombox" SelectionChanged="cbCombox_SelectionChanged" />
+            <m:EntityCombo x:Name="cpCombo" EntityChanged="cpCombo_EntityChanged"/>
+            <Button x:Name="reload" Click="reload_Click" Style="{StaticResource RoundButton}">
+                <Image Source="pack://application:,,,/Signum.Windows;component/Images/reload.png" Width="16" Height="16" /> 
+            </Button>
         </StackPanel>
         <ItemsControl ItemsSource="{Binding Parts}">
             <ItemsControl.ItemsPanel>
@@ -22,14 +25,13 @@
                 <Style TargetType="{x:Type ContentPresenter}">
                     <Setter Property="swcp:StackColumnPanel.Column" Value="{Binding Column}"/>
                     <Setter Property="swcp:StackColumnPanel.Row" Value="{Binding Row}"/>
-                    <Setter Property="Margin" Value="0, 10, 0, 0"/>
                 </Style>
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type secp:PanelPart}">
-                    <GroupBox>
+                    <GroupBox Style="{StaticResource EntityGroupBox}" Margin="8" Loaded="GroupBox_Loaded">                      
                         <GroupBox.Header>
-                            <TextBlock Text="{Binding}" Cursor="Hand"/>
+                            <TextBlock Text="{Binding}" x:Name="tb"/>
                         </GroupBox.Header>
                         <ContentControl Content="{Binding Content}">
                             <ContentControl.ContentTemplateSelector>

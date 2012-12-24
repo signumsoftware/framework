@@ -34,31 +34,16 @@ namespace Signum.Windows.Chart
     /// </summary>
     public partial class ChartRequestWindow : Window
     {
-        public static readonly DependencyProperty FilterOptionsProperty =
-         DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(ChartRequestWindow), new UIPropertyMetadata(null));
-        public FreezableCollection<FilterOption> FilterOptions
-        {
-            get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
-            set { SetValue(FilterOptionsProperty, value); }
-        }
-
-        public static readonly DependencyProperty OrderOptionsProperty =
-         DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(ChartRequestWindow), new UIPropertyMetadata(null));
-        public ObservableCollection<OrderOption> OrderOptions
-        {
-            get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
-            set { SetValue(OrderOptionsProperty, value); }
-        }
-
-        public ResultTable resultTable;
-        public QueryDescription Description;
-        public QuerySettings Settings { get; private set; }
         public Type EntityType;
-
 
         public ChartRequest Request
         {
             get { return (ChartRequest)DataContext; }
+            set
+            {
+                DataContext = value;
+                chartRenderer.UpdateFiltersOrdersUserInterface();
+            }
         }
 
         public ChartRequestWindow()
@@ -69,7 +54,7 @@ namespace Signum.Windows.Chart
 
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(ChartBuilder_DataContextChanged);
             this.Loaded += new RoutedEventHandler(ChartWindow_Loaded);
-            webBrowser.HideScriptErrors(true);
+            chartRenderer.GenerateChart += GenerateChart;
 
             userChartMenuItem.ChartWindow = this;
         }
@@ -87,65 +72,28 @@ namespace Signum.Windows.Chart
 
         void ChartWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            filterBuilder.Filters = FilterOptions = new FreezableCollection<FilterOption>();
-            OrderOptions = new ObservableCollection<OrderOption>();
+            filterBuilder.Filters = chartRenderer.FilterOptions = new FreezableCollection<FilterOption>();
 
-            UpdateFiltersOrdersUserInterface();
+            chartRenderer.UpdateFiltersOrdersUserInterface();
 
             ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
             Request.ChartRequestChanged += Request_ChartRequestChanged;
 
-            chartBuilder.Description = Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
-            Settings = Navigator.GetQuerySettings(Request.QueryName);
-            var entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
+            chartBuilder.Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+
+            var entityColumn = chartBuilder.Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             EntityType = Lite.Extract(entityColumn.Type);
 
             qtbFilters.Token = null;
             qtbFilters.SubTokensEvent += new Func<QueryToken, List<QueryToken>>(qtbFilters_SubTokensEvent);
 
             SetTitle();
-
-            webBrowser.ObjectForScripting = new ScriptInterface { window = this };
-            webBrowser.NavigateToString(FullHtml.Value);
-        }
-
-
-        static string baseResourcePath = "Signum.Windows.Extensions.Chart.Html.";
-
-        static ResetLazy<string> FullHtml = new ResetLazy<string>(() =>
-        {
-            string baseHtml = typeof(ChartRequestWindow).Assembly.ReadResourceStream(baseResourcePath + "ChartContainer.htm");
-
-            return Regex.Replace(baseHtml, @"\<(?<tag>style|script) src=""(?<fileName>.*?)"" \/\>", m =>
-                (m.Groups["tag"].Value == "style" ? "<style type=\"text/css\">\r\n" : "<script>\r\n" )+ 
-                 typeof(ChartRequestWindow).Assembly.ReadResourceStream(baseResourcePath + m.Groups["fileName"].Value) +
-                 (m.Groups["tag"].Value == "style" ? "\r\n</style>" : "\r\n</script>"));
-        }); 
-
-        internal void UpdateFiltersOrdersUserInterface()
-        {
-            FilterOptions.Clear();
-            if (Request.Filters != null)
-                FilterOptions.AddRange(Request.Filters.Select(f => new FilterOption
-                {
-                    Token = f.Token,
-                    Operation = f.Operation,
-                    Value = f.Value
-                }));
-
-            OrderOptions.Clear();
-            if (Request.Orders != null)
-                OrderOptions.AddRange(Request.Orders.Select(o => new OrderOption
-                {
-                    Token = o.Token,
-                    OrderType = o.OrderType,
-                }));
         }
 
         void Request_ChartRequestChanged()
         {
             UpdateMultiplyMessage();
-            ReDrawChart(); 
+            chartRenderer.ReDrawChart(); 
         }
 
         void Filters_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -178,10 +126,10 @@ namespace Signum.Windows.Chart
         List<QueryToken> qtbFilters_SubTokensEvent(QueryToken token)
         {
             var cr = (ChartRequest)DataContext;
-            if (cr == null || Description == null)
+            if (cr == null || chartRenderer.Description == null)
                 return new List<QueryToken>();
 
-            return ChartUtils.SubTokensChart(token, Description.Columns, cr.GroupResults);
+            return ChartUtils.SubTokensChart(token, chartRenderer.Description.Columns, cr.GroupResults);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
@@ -189,20 +137,18 @@ namespace Signum.Windows.Chart
             filterBuilder.AddFilter(qtbFilters.Token);
         }
 
-        private void Border_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            GenerateChart();
-        }
+      
 
         private void execute_Click(object sender, RoutedEventArgs e)
         {
             GenerateChart();
         }
 
+
         public void GenerateChart()
         {
-            Request.Filters = filterBuilder.Filters.Select(f => f.ToFilter()).ToList();
-            Request.Orders = OrderOptions.Select(o => o.ToOrder()).ToList();
+            Request.Filters = chartRenderer.FilterOptions.Select(f => f.ToFilter()).ToList();
+            Request.Orders = chartRenderer.OrderOptions.Select(o => o.ToOrder()).ToList();
 
             var request = Request;
 
@@ -211,26 +157,13 @@ namespace Signum.Windows.Chart
 
             execute.IsEnabled = false;
             Async.Do(
-                () => resultTable = Server.Return((IChartServer cs) => cs.ExecuteChart(request)),
+                () => chartRenderer.ResultTable = Server.Return((IChartServer cs) => cs.ExecuteChart(request)),
                 () =>
                 {
                     request.NeedNewQuery = false;
-                    ReDrawChart();
+                    chartRenderer.ReDrawChart();
                 },
                 () => execute.IsEnabled = true);
-        }
-
-        private void ReDrawChart()
-        {
-            if (!Request.NeedNewQuery)
-            {
-                if (resultTable != null)
-                    SetResults();
-            }
-            else
-            {    
-                ClearResults();
-            }
         }
 
         private bool HasErrors()
@@ -248,147 +181,6 @@ namespace Signum.Windows.Chart
         }
 
 
-        internal void SetResults(string script = null)
-        {
-            if (resultTable == null)
-                return;
-
-            if(script == null)
-                script = Request.ChartScript.Script; 
-
-            FillGridView();
-
-            if (Request.GroupResults)
-            {
-                //so the values don't get affected till next SetResults
-                var filters = Request.Filters.Select(f => new FilterOption { Path = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
-                var keyColunns = Request.Columns
-                    .Zip(resultTable.Columns, (t, c) => new { t.Token, Column = c })
-                    .Where(a => !(a.Token is AggregateToken)).ToArray();
-
-                lastRequest = new LastRequest
-                {
-                    KeyColumns = Request.Columns.Iterate()
-                    .Where(a => a.Value.ScriptColumn.IsGroupKey)
-                    .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token })
-                    .ToList(),
-                    Filters = Request.Filters.Where(a => !(a.Token is AggregateToken)).Select(f => new FilterOption
-                    {
-                        Token = f.Token,
-                        Value = f.Value,
-                        Operation = f.Operation
-                    }).ToList(),
-                    GroupResults = Request.GroupResults,
-                    GetFilter = rr => keyColunns.Select(t => GetTokenFilters(t.Token, rr[t.Column])).ToList()
-                };
-            }
-            else lastRequest = new LastRequest { GroupResults = false };
-
-            lvResult.ItemsSource = resultTable.Rows;
-            if (resultTable.Rows.Length > 0)
-            {
-                lvResult.SelectedIndex = 0;
-                lvResult.ScrollIntoView(resultTable.Rows.FirstEx());
-            }
-
-            lvResult.Background = Brushes.White;
-
-            var jsonData = ChartUtils.DataJson(Request, resultTable);
-
-            var json = new JavaScriptSerializer().Serialize(jsonData);
-
-            
-            try
-            {
-                webBrowser.InvokeScript("reDraw", script, json);
-            }
-            catch (Exception e)
-            {
-                errorLine.Text = e.Message;
-                errorLine.Visibility = System.Windows.Visibility.Visible;
-            }
-
-            errorLine.Text = null;
-            errorLine.Visibility = System.Windows.Visibility.Collapsed;
-        }
-
-        static FilterOption GetTokenFilters(QueryToken queryToken, object p)
-        {
-            return new FilterOption(queryToken.FullKey(), p);
-        }
-
-        static GenericInvoker<Func<QueryToken, object, IEnumerable<FilterOption>>> miGetIntervalFilters = new GenericInvoker<Func<QueryToken, object, IEnumerable<FilterOption>>>(
-            (qt, obj) => GetIntervalFilters<int>(qt, (NullableInterval<int>)obj));
-        static IEnumerable<FilterOption> GetIntervalFilters<T>(QueryToken queryToken, NullableInterval<T> interval)
-            where T: struct, IComparable<T>, IEquatable<T>
-        {
-            if (interval.Min.HasValue)
-                yield return new FilterOption { Path = queryToken.FullKey(), Value = interval.Min.Value, Operation = FilterOperation.GreaterThanOrEqual };
-
-            if (interval.Max.HasValue)
-                yield return new FilterOption { Path = queryToken.FullKey(), Value = interval.Max.Value, Operation = FilterOperation.LessThan };
-        }
-
-        void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
-        {
-            SortGridViewColumnHeader header = sender as SortGridViewColumnHeader;
-
-            if (header == null)
-                return;
-
-            string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);
-            if (canOrder.HasText())
-            {
-                MessageBox.Show(this, canOrder);
-                return;
-            }
-
-            header.ChangeOrders(OrderOptions);         
-
-            GenerateChart();
-        }
-
-        public void ClearResults()
-        {
-            resultTable = null;
-            gvResults.Columns.Clear();
-            lvResult.ItemsSource = null;
-            lvResult.Background = Brushes.WhiteSmoke;
-
-            lastRequest = null;
-
-            var keys = Request.Columns.Select(a => a.Token).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
-            OrderOptions.RemoveAll(a => !(a.Token is AggregateToken) && !keys.Contains(a.Token.FullKey()));
-        }
-
-        private void FillGridView()
-        {
-            gvResults.Columns.Clear();
-            foreach (var rc in resultTable.Columns)
-            {
-                gvResults.Columns.Add(new GridViewColumn
-                {
-                    Header = new SortGridViewColumnHeader
-                    {
-                        Content = rc.Column.DisplayName,
-                        RequestColumn = rc.Column,
-                    },
-                    CellTemplate = CreateDataTemplate(rc),
-                });
-            }
-
-            SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
-        }
-
-        DataTemplate CreateDataTemplate(ResultColumn c)
-        {
-            Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
-            DataTemplate dt = Settings.GetFormatter(c.Column)(b);
-            return dt;
-        }
-
-       
-
         ChartScript chartScriptControl;
 
         private void edit_Click(object sender, RoutedEventArgs e)
@@ -403,105 +195,9 @@ namespace Signum.Windows.Chart
             }); 
         }
 
-        [ComVisible(true)]
-        public class ScriptInterface
+        internal void SetResults(string script)
         {
-            internal ChartRequestWindow window;
-
-            public void OpenSubgroup(string dataClicks)
-            {
-                window.OpenSubgroup(dataClicks);
-            }
-        }
-
-        class LastRequest
-        {
-            public List<FilterOption> Filters;
-
-            public bool GroupResults;
-
-            public List<KeyColumn> KeyColumns; 
-
-            public Func<ResultRow, List<FilterOption>> GetFilter; 
-        }
-
-        class KeyColumn
-        {
-            public int Position;
-            public QueryToken Token;
-        }
-
-        LastRequest lastRequest;
-
-        internal void OpenSubgroup(string dataClicks)
-        {
-            var dic = dataClicks.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries).ToDictionary(a => a.Split('=')[0], a => a.Split('=')[1]);
-
-            if (!lastRequest.GroupResults)
-            {
-                Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type);
-
-                if (Navigator.IsNavigable(lite.EntityType, isSearchEntity: true))
-                    Navigator.NavigateUntyped(lite, new NavigateOptions());
-            }
-            else
-            {
-                var subFilters = lastRequest.KeyColumns.Select(t=>new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type)));
-
-                Navigator.Explore(new ExploreOptions(Request.QueryName)
-                {
-                    FilterOptions = lastRequest.Filters.Concat(subFilters).ToList(),
-                    SearchOnLoad = true,
-                }); 
-            }
-        }
-
-        void lvResult_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            ResultRow row = (ResultRow)lvResult.SelectedItem;
-
-            if (row == null)
-                return;
-
-            ShowRow(row);
-
-            e.Handled = true;
-        }
-
-        public void ShowRow(ResultRow row)
-        {
-            if (row.Table.HasEntities)
-            {
-                Lite<IdentifiableEntity> lite = row.Entity;
-
-                if (Navigator.IsNavigable(lite.EntityType, isSearchEntity: true))
-                    Navigator.NavigateUntyped(lite);
-            }
-            else
-            {
-                var subFilters = lastRequest.GetFilter(row);
-
-                Navigator.Explore(new ExploreOptions(Request.QueryName)
-                {
-                    FilterOptions = lastRequest.Filters.Concat(subFilters).ToList(),
-                    SearchOnLoad = true,
-                });
-            }
-        }
-    }
-
-    public static class WebBrowserHacks
-    {
-        public static void HideScriptErrors(this WebBrowser wb, bool hide)
-        {
-            wb.Navigated += (s, args) =>
-            {
-                FieldInfo fiComWebBrowser = typeof(WebBrowser).GetField("_axIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic);
-                if (fiComWebBrowser == null) return;
-                object objComWebBrowser = fiComWebBrowser.GetValue(wb);
-                if (objComWebBrowser == null) return;
-                objComWebBrowser.GetType().InvokeMember("Silent", BindingFlags.SetProperty, null, objComWebBrowser, new object[] { hide });
-            };
+            chartRenderer.SetResults(script);
         }
     }
 }

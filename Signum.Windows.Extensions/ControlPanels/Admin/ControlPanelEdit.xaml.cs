@@ -49,7 +49,7 @@ namespace Signum.Windows.ControlPanels.Admin
             return new PanelPart
             {
                 Column = lastColumn,
-                Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row) ?? 0),
+                Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row + 1) ?? 0),
                 Content = (IPartDN)Constructor.Construct(type, win),
                 Title = null,
             };

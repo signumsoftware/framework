@@ -50,7 +50,6 @@ namespace Signum.Windows.Chart
         ChartRequest ChartRequest
         {
             get { return (ChartRequest)ChartWindow.DataContext; }
-            set { ChartWindow.DataContext = value; }
         }
 
         QueryDescription Description
@@ -161,9 +160,7 @@ namespace Signum.Windows.Chart
         {
             CurrentUserChart = uc;
 
-            this.ChartRequest = CurrentUserChart.ToRequest();
-
-            this.ChartWindow.UpdateFiltersOrdersUserInterface();
+            this.ChartWindow.Request = CurrentUserChart.ToRequest();
 
             this.ChartWindow.GenerateChart();
         }

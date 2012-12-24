@@ -5,14 +5,14 @@
 @model ControlPanelDN
 @if (!Model.Parts.IsNullOrEmpty())
 {
-    int rowNumber = Model.Parts.Max(p => p.Row);
+    int rowNumber = Model.Parts.Max(p => p.Row) + 1;
     int equalColumnWidth = (int)Math.Floor(((decimal)100 / Model.NumberOfColumns) - 1);
     <div id="sfCpContainer">
-        @for (int col = 1; col <= Model.NumberOfColumns; col++)
+        @for (int col = 0; col < Model.NumberOfColumns; col++)
         {
-            bool hasChart = Model.Parts.Any(p => p.Column == col && p.Content.GetType() == typeof(UserChartPartDN) && !((UserChartPartDN)p.Content).OnlyData);
+            bool hasChart = Model.Parts.Any(p => p.Column == col && p.Content.GetType() == typeof(UserChartPartDN) && !((UserChartPartDN)p.Content).ShowData);
             <div class="sf-ftbl-column"@(hasChart ? " style=min-width:" + equalColumnWidth + "%" : "") data-column="@col">
-                @for (int row = 1; row <= rowNumber; row++)
+                @for (int row = 0; row < rowNumber; row++)
                 {
                     PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
                     if (pp != null)

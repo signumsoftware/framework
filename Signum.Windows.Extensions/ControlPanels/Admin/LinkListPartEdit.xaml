@@ -6,13 +6,13 @@
     m:Common.TypeContext="d:LinkListPartDN"
     MinWidth="300">
     <StackPanel>
-        <m:EntityRepeater m:Common.Route="Links" ViewOnCreate="False" Grid.IsSharedSizeScope="True">
+        <m:EntityRepeater m:Common.Route="Links" ViewOnCreate="False" >
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>
-                    <Grid m:Common.LabelVisible="False">
+                    <Grid m:Common.LabelVisible="False" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition SharedSizeGroup="Left" Width="*"/>
-                            <ColumnDefinition SharedSizeGroup="Right" Width="2*" />
+                            <ColumnDefinition Width="*" MinWidth="60"/>
+                            <ColumnDefinition Width="2*" />
                         </Grid.ColumnDefinitions>
                         <m:ValueLine m:Common.Route="Label" Grid.Column="0" />
                         <m:ValueLine m:Common.Route="Link" Grid.Column="1" />

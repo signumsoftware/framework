@@ -140,7 +140,14 @@ namespace Signum.Windows.UserQueries
             Navigator.Manager.SetOrderTokens(countSearchControl.QueryName, orders);
 
             countSearchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
+            countSearchControl.Text = uq.DisplayName + ": {0}";
+            countSearchControl.LinkClick += (object sender, EventArgs e) =>
+            {
+                Navigator.Explore(new ExploreOptions(countSearchControl.QueryName)
+                {
+                    InitializeSearchControl = sc => UserQueryClient.SetUserQuery(sc, uq)
+                });
+            };
         }
-        
     }
 }

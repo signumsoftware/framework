@@ -43,7 +43,7 @@ namespace Signum.Windows.Chart
                 DataContext = new ChartRequest(query)
             };
 
-            ChartClient.SetUserChart(window, uc);
+            ChartClient.SetUserChart(cw, uc);
 
             cw.Show();
         }

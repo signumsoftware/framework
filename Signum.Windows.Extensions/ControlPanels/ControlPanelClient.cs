@@ -30,10 +30,33 @@ namespace Signum.Windows.ControlPanels
                     new EntitySettings<UserQueryPartDN>() { View = e => new UserQueryPartEdit() },                
                     new EntitySettings<UserChartPartDN>() { View = e => new UserChartPartEdit() }
                 });
+                PartViews.Add(typeof(UserQueryPartDN), new PartView
+                {
+                    ViewControl = () => new UserQueryPartView(),
+                    OnTitleClick = part =>
+                    {
+                        Navigator.Navigate(((UserQueryPartDN)part).UserQuery);
+                    }
+                });
 
-                PartViews.Add(typeof(CountSearchControlPartDN), new PartView { ViewControl = () => new CountSearchControlPartView() });
-                PartViews.Add(typeof(UserQueryPartDN), new PartView { ViewControl = () => new UserQueryPartView() });
-                PartViews.Add(typeof(LinkListPartDN), new PartView { ViewControl = () => new LinkListPartView() });
+                PartViews.Add(typeof(UserChartPartDN), new PartView
+                {
+                    ViewControl = () => new UserChartPartView(),
+                    OnTitleClick = part =>
+                    {
+                        Navigator.Navigate(((UserChartPartDN)part).UserChart);
+                    }
+                });
+
+                PartViews.Add(typeof(CountSearchControlPartDN), new PartView
+                {
+                    ViewControl = () => new CountSearchControlPartView()
+                });
+
+                PartViews.Add(typeof(LinkListPartDN), new PartView
+                {
+                    ViewControl = () => new LinkListPartView()
+                });
             }
         }
     }
@@ -41,7 +64,7 @@ namespace Signum.Windows.ControlPanels
     public class PartView
     {
         public Expression<Func<FrameworkElement>> ViewControl;
-        public Action<IPartDN, Control> OnTitleClick;
+        public Action<IPartDN> OnTitleClick;
     }
 
     public class ControlPanelViewDataTemplateSelector : DataTemplateSelector

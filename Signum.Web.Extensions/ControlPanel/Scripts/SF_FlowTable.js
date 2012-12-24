@@ -32,7 +32,7 @@ SF.FlowTable = (function () {
 
         $column.find(".sf-ftbl-part").each(function (index) {
             var $part = $(this);
-            $part.find("." + partRowClass).val(index + 1);
+            $part.find("." + partRowClass).val(index);
             $part.find("." + partColumnClass).val(column);
         });
     };

@@ -130,11 +130,11 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref userChart, value, () => UserChart); }
         }
 
-        bool onlyData = false;
-        public bool OnlyData
+        bool showData = false;
+        public bool ShowData
         {
-            get { return onlyData; }
-            set { Set(ref onlyData, value, () => OnlyData); }
+            get { return showData; }
+            set { Set(ref showData, value, () => ShowData); }
         }
 
         static readonly Expression<Func<UserChartPartDN, string>> ToStringExpression = e => e.userChart.ToString();
@@ -153,7 +153,7 @@ namespace Signum.Entities.ControlPanel
             return new UserChartPartDN
             {
                 UserChart = this.UserChart,
-                OnlyData = this.OnlyData
+                ShowData = this.ShowData
             };
         }
     }

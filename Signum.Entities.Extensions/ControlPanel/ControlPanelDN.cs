@@ -14,6 +14,11 @@ namespace Signum.Entities.ControlPanel
     [Serializable, EntityType(EntityType.Main)]
     public class ControlPanelDN : Entity
     {
+        public ControlPanelDN()
+        {
+            RebindEvents();
+        }
+
         Lite<IdentifiableEntity> related;
         [NotNullValidator]
         public Lite<IdentifiableEntity> Related
@@ -112,12 +117,17 @@ namespace Signum.Entities.ControlPanel
             base.ChildCollectionChanged(sender, args);
         }
 
+
+        [Ignore]
+        bool invalidating = false;
         protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (sender is PanelPart && e.PropertyName == "Row" || e.PropertyName == "Column")
+            if (!invalidating && sender is PanelPart && (e.PropertyName == "Row" || e.PropertyName == "Column"))
             {
+                invalidating = true;
                 foreach (var pp in Parts)
                     pp.NotifyRowColumn();
+                invalidating = false;
             }
 
             base.ChildPropertyChanged(sender, e);

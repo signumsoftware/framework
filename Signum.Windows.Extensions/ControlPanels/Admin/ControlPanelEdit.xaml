@@ -21,13 +21,13 @@
         <m:ValueLine m:Common.Route="HomePagePriority" Grid.Column="1" Grid.Row="0"/>
         <m:ValueLine m:Common.Route="NumberOfColumns" Grid.Column="1" Grid.Row="1"/>
         <m:EntityRepeater m:Common.Route="Parts" Creating="EntityRepeater_Creating" ViewOnCreate="False" Grid.Row="2" Grid.ColumnSpan="2">
-            <m:EntityRepeater.Resources>
+            <m:EntityRepeater.ItemContainerStyle>
                 <Style TargetType="{x:Type m:EntityRepeaterContentControl}" BasedOn="{StaticResource {x:Type m:EntityRepeaterContentControl}}">
                     <Setter Property="swcp:StackColumnPanel.Column" Value="{Binding Column}"/>
                     <Setter Property="swcp:StackColumnPanel.Row" Value="{Binding Row}"/>
-                    <Setter Property="Margin" Value="0, 10, 0, 0"/>
+                    <Setter Property="Margin" Value="0, 8, 8, 0"/>
                 </Style>
-            </m:EntityRepeater.Resources>
+            </m:EntityRepeater.ItemContainerStyle>
             <m:EntityRepeater.ItemsPanel>
                 <ItemsPanelTemplate>
                     <swcp:StackColumnPanel/>

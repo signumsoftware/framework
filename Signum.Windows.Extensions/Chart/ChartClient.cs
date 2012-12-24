@@ -71,8 +71,6 @@ namespace Signum.Windows.Chart
                     return null;
                 }); 
 
-                SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
-
                 ChartUtils.RemoveNotNullValidators();
             }
         }
@@ -85,7 +83,6 @@ namespace Signum.Windows.Chart
 
             var miResult = new MenuItem
             {
-
                 Header = Signum.Windows.Extensions.Properties.Resources.Chart,
                 Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png").ToSmallImage()
             };
@@ -94,7 +91,6 @@ namespace Signum.Windows.Chart
             {
                 ChartRequestWindow window = new ChartRequestWindow()
                 {
-                    FilterOptions = sc.FilterOptions,
                     DataContext = new ChartRequest(sc.QueryName)
                     {
                         Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
