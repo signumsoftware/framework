@@ -157,10 +157,9 @@ namespace Signum.Windows
                 }
                 else
                 {
-                    FormattedText = (Text ?? "{1}: {0}")
-                        .Formato(ItemsCount, QueryUtils.GetNiceName(QueryName));
+                    FormattedText = (Text ?? (QueryUtils.GetNiceName(QueryName) + ": {0}"))
+                        .Formato(ItemsCount);
                     tb.FontWeight = FontWeights.Bold;
-
                 }
             }, 
             () => { });
