@@ -27,7 +27,7 @@ namespace Signum.Web.Cache
     {
         public new ActionResult View()
         {
-            CachePermissions.ViewCache.Authorize();
+            CachePermission.ViewCache.Authorize();
 
             var list = CacheLogic.Statistics();
 
@@ -39,7 +39,7 @@ namespace Signum.Web.Cache
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Enable()
         {
-            CachePermissions.ViewCache.Authorize();
+            CachePermission.ViewCache.Authorize();
 
             CacheLogic.GloballyDisabled = false;
 
@@ -49,7 +49,7 @@ namespace Signum.Web.Cache
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Disable()
         {
-            CachePermissions.ViewCache.Authorize();
+            CachePermission.ViewCache.Authorize();
 
             CacheLogic.GloballyDisabled = true;
 
@@ -59,7 +59,7 @@ namespace Signum.Web.Cache
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Clean()
         {
-            CachePermissions.InvalidateCache.Authorize();
+            CachePermission.InvalidateCache.Authorize();
 
             CacheLogic.InvalidateAll();
             GlobalLazy.ResetAll(); 

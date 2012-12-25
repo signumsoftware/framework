@@ -73,7 +73,7 @@ namespace Signum.Engine.Processes
 
                 ProcessLogic.MaxDegreeOfParallelism = maxDegreeOfParallelism;
 
-                PermissionAuthLogic.RegisterPermissions(ProcessPermissions.ViewProcessControlPanel);
+                PermissionAuthLogic.RegisterPermissions(ProcessPermission.ViewProcessControlPanel);
 
                 MultiEnumLogic<ProcessDN>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 

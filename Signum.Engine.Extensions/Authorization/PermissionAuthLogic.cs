@@ -69,7 +69,7 @@ namespace Signum.Engine.Authorization
                     AuthUtils.MaxBool,
                     AuthUtils.MinBool);
 
-                RegisterPermissions(BasicPermissions.AdminRules);
+                RegisterPermissions(BasicPermission.AdminRules);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", p => p.Key, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>

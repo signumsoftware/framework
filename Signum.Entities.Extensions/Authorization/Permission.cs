@@ -13,7 +13,7 @@ namespace Signum.Entities.Authorization
 
     }
 
-    public enum BasicPermissions
+    public enum BasicPermission
     {
         AdminRules,
     }

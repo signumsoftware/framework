@@ -35,7 +35,7 @@ namespace Signum.Windows.Authorization
 
             Links.RegisterEntityLinks<RoleDN>((r, c) =>
             {
-                bool authorized = BasicPermissions.AdminRules.TryIsAuthorized() ?? true;
+                bool authorized = BasicPermission.AdminRules.TryIsAuthorized() ?? true;
                 return new QuickLink[]
                 {
                     new QuickLinkAction("Type Rules", () => 

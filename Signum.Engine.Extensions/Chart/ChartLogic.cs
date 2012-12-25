@@ -30,7 +30,7 @@ namespace Signum.Engine.Chart
             {
                 QueryLogic.Start(sb);
 
-                PermissionAuthLogic.RegisterTypes(typeof(ChartPermissions));
+                PermissionAuthLogic.RegisterTypes(typeof(ChartPermission));
 
                 ChartColorLogic.Start(sb, dqm);
                 ChartScriptLogic.Start(sb, dqm);

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Signum.Entities.Cache
 {
-    public enum CachePermissions
+    public enum CachePermission
     {
         ViewCache,
         InvalidateCache

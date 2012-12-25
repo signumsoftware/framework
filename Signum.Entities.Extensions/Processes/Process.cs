@@ -241,7 +241,7 @@ namespace Signum.Entities.Processes
         Suspend,
     }
 
-    public enum ProcessPermissions
+    public enum ProcessPermission
     {
         ViewProcessControlPanel
     }

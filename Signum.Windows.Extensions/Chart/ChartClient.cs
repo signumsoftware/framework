@@ -78,7 +78,7 @@ namespace Signum.Windows.Chart
 
         static MenuItem SearchControl_GetCustomMenuItems(SearchControl sc)
         {
-            if (!ChartPermissions.ViewCharting.IsAuthorized())
+            if (!ChartPermission.ViewCharting.IsAuthorized())
                 return null;
 
             var miResult = new MenuItem

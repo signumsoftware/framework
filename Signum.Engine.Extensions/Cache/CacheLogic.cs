@@ -478,7 +478,7 @@ namespace Signum.Engine.Cache
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                PermissionAuthLogic.RegisterTypes(typeof(CachePermissions));
+                PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
             }
         }
 

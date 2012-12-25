@@ -22,7 +22,7 @@ namespace Signum.Windows.Authorization
 
             Links.RegisterEntityLinks<RoleDN>((r, c) =>
             {
-                bool authorized = BasicPermissions.AdminRules.TryIsAuthorized() ?? true;
+                bool authorized = BasicPermission.AdminRules.TryIsAuthorized() ?? true;
                 return new QuickLink[]
                 {
                     new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r.ToLite(), Owner = Window.GetWindow(c) }.Show())
