@@ -277,6 +277,7 @@
       <DependentUpon>OmniboxTemplate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Omnibox\OmniboxClient.cs" />
+    <Compile Include="Omnibox\SpecialOmniboxProvider.cs" />
     <Compile Include="Processes\PackageData.cs" />
     <Compile Include="Processes\PackageOperationMenuItem.cs" />
     <Compile Include="Processes\PackageOperation.xaml.cs">
@@ -294,6 +295,10 @@
     <Compile Include="Processes\ProcessClient.cs" />
     <Compile Include="Processes\ProcessExecution.xaml.cs">
       <DependentUpon>ProcessExecution.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\ProfilerClient.cs" />
+    <Compile Include="Profiler\ProfilerUploader.xaml.cs">
+      <DependentUpon>ProfilerUploader.xaml</DependentUpon>
     </Compile>
     <Compile Include="SMS\SMSMessage.xaml.cs">
       <DependentUpon>SMSMessage.xaml</DependentUpon>
@@ -680,6 +685,10 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Profiler\ProfilerUploader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SMS\SMSMessage.xaml">
       <SubType>Designer</SubType>

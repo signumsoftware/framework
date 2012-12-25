@@ -261,4 +261,7 @@
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
   </data>
+  <data name="AuthorizationCacheSuccessfullyUpdated" xml:space="preserve">
+    <value>Authorization cache successfully updated</value>
+  </data>
 </root>

@@ -89,11 +89,14 @@ namespace Signum.Entities.Omnibox
                         continue;
                     }
 
-                    result = Contains(kvp.Value, niceName(kvp.Value), pattern);
-                    if (result != null)
+                    if (niceName != null)
                     {
-                        yield return result;
-                        continue;
+                        result = Contains(kvp.Value, niceName(kvp.Value), pattern);
+                        if (result != null)
+                        {
+                            yield return result;
+                            continue;
+                        }
                     }
                 }
             }

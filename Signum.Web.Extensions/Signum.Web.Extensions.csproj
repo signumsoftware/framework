@@ -484,6 +484,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Omnibox\SpecialOmniboxProvider.cs" />
     <Compile Include="Processes\Views\PackageOperation.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -578,7 +579,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Profiler\TimeTracker.cs" />
+    <Compile Include="Profiler\ProfilerFilterAttribute.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
     <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.cs">

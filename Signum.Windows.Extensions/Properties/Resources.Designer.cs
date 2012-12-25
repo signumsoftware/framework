@@ -106,6 +106,15 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authorization cache successfully updated.
+        /// </summary>
+        public static string AuthorizationCacheSuccessfullyUpdated {
+            get {
+                return ResourceManager.GetString("AuthorizationCacheSuccessfullyUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chart.
         /// </summary>
         public static string Chart {

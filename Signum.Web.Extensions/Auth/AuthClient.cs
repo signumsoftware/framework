@@ -10,7 +10,6 @@ using System.Reflection;
 using Signum.Web.Operations;
 using Signum.Entities;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
@@ -20,6 +19,9 @@ using Signum.Engine.Maps;
 using System.Web.Routing;
 using System.Web;
 using Signum.Utilities.Reflection;
+using Signum.Web.Omnibox;
+using Signum.Web.Extensions.Properties;
+using Signum.Web.AuthAdmin;
 #endregion
 
 namespace Signum.Web.Auth
@@ -66,7 +68,7 @@ namespace Signum.Web.Auth
 
                 if (passwordExpiration)
                 {
-                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
+                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });
                 }
 
                 Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>
@@ -80,26 +82,26 @@ namespace Signum.Web.Auth
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
 
-                
+
                 var manager = Navigator.Manager;
                 if (types)
                 {
                     manager.IsCreable += manager_IsCreable;
                     manager.IsReadOnly += manager_IsReadOnly;
                     manager.IsViewable += manager_IsViewable;
-                        }
+                }
 
                 if (queries)
                 {
                     manager.IsFindable += QueryAuthLogic.GetQueryAllowed;
-                        }
+                }
 
                 AuthenticationRequiredAttribute.Authenticate = context =>
-                { 
+                {
                     if (UserDN.Current == null)
                     {
                         string returnUrl = context.HttpContext.Request.SuggestedReturnUrl().PathAndQuery;
-                                            
+
                         //send them off to the login page
                         string loginUrl = PublicLoginUrl(returnUrl);
                         if (context.HttpContext.Request.IsAjaxRequest())
@@ -147,6 +149,8 @@ namespace Signum.Web.Auth
                             .validateAndAjax(),
                     },
                 });
+
+
             }
         }
 
