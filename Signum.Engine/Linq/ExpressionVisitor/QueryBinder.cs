@@ -1202,10 +1202,10 @@ namespace Signum.Engine.Linq
             {
                 var lc = new LambdaComparer<FieldInfo, string>(fi=>fi.Name);
 
-                var groups = whens
-                    .SelectMany(w => ((EmbeddedEntityExpression)w.Value).Bindings, (w, b) => new { w, b })
-                    .GroupBy(p => p.b.FieldInfo, p => p.w, lc)
-                    .ToDictionary(g => g.Key, g => g.ToList(), lc);
+                var groups = (from w in whens
+                             from b in ((EmbeddedEntityExpression)w.Value).Bindings
+                             group new When(w.Condition, b.Binding) by b.FieldInfo into g
+                             select KVP.Create(g.Key, g.ToList())).ToDictionary(); 
 
                 var hasValue = whens.All(w => ((EmbeddedEntityExpression)w.Value).HasValue == null) ? null :
                     CombineWhens(whens.Select(w => new When(w.Condition, ((EmbeddedEntityExpression)w.Value).HasValue ?? new SqlConstantExpression(true))).ToList(), typeof(bool));
