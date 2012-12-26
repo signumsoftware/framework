@@ -35,43 +35,46 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructorFromManyOperation.Construct(IEnumerable<Lite<IIdentifiable>> lites, params object[] args)
         {
-            OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
-
-            using (OperationLogic.AllowSave<F>())
-            using (OperationLogic.AllowSave<T>())
+            using (HeavyProfiler.Log("ConstructFromMany", () => OperationDN.UniqueKey(key)))
             {
-                try
+                OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+
+                using (OperationLogic.AllowSave<F>())
+                using (OperationLogic.AllowSave<T>())
                 {
-                    using (Transaction tr = new Transaction())
+                    try
                     {
-                        OperationLogDN log = new OperationLogDN
+                        using (Transaction tr = new Transaction())
                         {
-                            Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
-                            Start = TimeZoneManager.Now,
-                            User = UserHolder.Current.ToLite()
-                        };
+                            OperationLogDN log = new OperationLogDN
+                            {
+                                Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                Start = TimeZoneManager.Now,
+                                User = UserHolder.Current.ToLite()
+                            };
 
-                        OnBeginOperation();
+                            OnBeginOperation();
 
-                        T result = OnConstruct(lites.Cast<Lite<F>>().ToList(), args);
+                            T result = OnConstruct(lites.Cast<Lite<F>>().ToList(), args);
 
-                        OnEndOperation(result);
+                            OnEndOperation(result);
 
-                        if (!result.IsNew)
-                        {
-                            log.Target = result.ToLite();
-                            log.End = TimeZoneManager.Now;
-                            using (ExecutionMode.Global())
-                                log.Save();
+                            if (!result.IsNew)
+                            {
+                                log.Target = result.ToLite();
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
+                            }
+
+                            return tr.Commit(result);
                         }
-
-                        return tr.Commit(result);
                     }
-                }
-                catch (Exception e)
-                {
-                    OperationLogic.OnErrorOperation(this, null, args, e);
-                    throw;
+                    catch (Exception e)
+                    {
+                        OperationLogic.OnErrorOperation(this, null, args, e);
+                        throw;
+                    }
                 }
             }
         }
