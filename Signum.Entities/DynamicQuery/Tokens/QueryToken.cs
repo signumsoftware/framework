@@ -251,7 +251,7 @@ namespace Signum.Entities.DynamicQuery
                 if (IsCollecction(Type))
                     return "#CE6700";
 
-                switch (QueryUtils.GetFilterType(Type))
+                switch (QueryUtils.TryGetFilterType(Type))
                 {
                     case FilterType.Integer:
                     case FilterType.Decimal:
