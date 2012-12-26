@@ -464,6 +464,18 @@ namespace Signum.Test.LinqProvider
 
             results.ToList();
         }
+
+        [TestMethod]
+        public void SelectMListId()
+        {
+            var list = Database.Query<ArtistDN>().SelectMany(a => a.Friends).Select(a => a.Id).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListIdCovariance()
+        {
+            var list = Database.Query<ArtistDN>().SelectMany(a => a.FriendsCovariant()).Select(a => a.Id).ToList();
+        }
     }
 
     public static class AuthorExtensions

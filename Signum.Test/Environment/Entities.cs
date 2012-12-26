@@ -109,6 +109,13 @@ namespace Signum.Test
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
+        static Expression<Func<ArtistDN, IEnumerable<Lite<IdentifiableEntity>>>> FriendsCovariantExpression =
+            a => a.Friends; 
+        public IEnumerable<Lite<IdentifiableEntity>> FriendsCovariant()
+        {
+            return FriendsCovariantExpression.Evaluate(this);
+        }
+
         //[NotNullable] Do not add Nullable for testing purposes
         MList<Lite<ArtistDN>> friends = new MList<Lite<ArtistDN>>();
         public MList<Lite<ArtistDN>> Friends
