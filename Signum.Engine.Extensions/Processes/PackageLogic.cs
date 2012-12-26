@@ -224,10 +224,7 @@ namespace Signum.Engine.Processes
                         break;
                     case OperationType.ConstructorFrom:
                         {
-                            var result = OperationLogic.ServiceExecuteLite(line.Entity, operationKey);
-                            if (result.IsNew)
-                                result.Save();
-
+                            var result = OperationLogic.ServiceConstructFromLite(line.Entity, operationKey);
                             line.Result = result.ToLite();
                         }
                         break;
