@@ -87,5 +87,10 @@ namespace Signum.Entities.DynamicQuery
         {
             return new CountToken(Parent.Clone());
         }
+
+        public override string TypeColor
+        {
+            get { return "#0000FF"; }
+        }
     }
 }

@@ -322,7 +322,7 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [Count].
+        ///   Looks up a localized string similar to Count.
         /// </summary>
         public static string Count {
             get {
@@ -853,7 +853,7 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to year.
+        ///   Looks up a localized string similar to Year.
         /// </summary>
         public static string Year {
             get {

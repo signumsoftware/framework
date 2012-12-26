@@ -15,6 +15,7 @@
                 <Setter Property="AutomationProperties.ItemStatus" Value="{Binding Key}"/>
                 <Setter Property="Foreground" Value="{Binding TypeColor}"/>
                 <Setter Property="ToolTip" Value="{Binding NiceTypeName}"/>
+                <Setter Property="Content" Value="{Binding SubordinatedToString}"/>
             </Style>
         </StackPanel.Resources>
     </StackPanel>

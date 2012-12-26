@@ -238,7 +238,7 @@ namespace Signum.Web
             {
                 var option = new HtmlTag("option")
                             .Attr("value", qt.Key)
-                            .SetInnerText(qt.ToString());
+                            .SetInnerText(qt.SubordinatedToString);
 
                 if (selected != null && qt.Key == selected.Key)
                     option.Attr("selected", "selected");

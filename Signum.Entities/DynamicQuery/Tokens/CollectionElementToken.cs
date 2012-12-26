@@ -43,8 +43,6 @@ namespace Signum.Entities.DynamicQuery
             get { return CollectionElementType.ToString(); }
         }
 
-
-
         protected override List<QueryToken> SubTokensInternal()
         {
             return SubTokensBase(Type, GetImplementations());
@@ -170,6 +168,11 @@ namespace Signum.Entities.DynamicQuery
                 return null;
 
             return Resources.TheNumberOf0IsBeingMultipliedBy1.Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
+        }
+
+        public override string TypeColor
+        {
+            get { return "#0000FF"; }
         }
     }
 

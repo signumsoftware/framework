@@ -187,7 +187,7 @@
     <value>less than or equal</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>[Count]</value>
+    <value>Count</value>
   </data>
   <data name="Day" xml:space="preserve">
     <value>Day</value>
@@ -310,7 +310,7 @@
     <value>uppercase</value>
   </data>
   <data name="Year" xml:space="preserve">
-    <value>year</value>
+    <value>Year</value>
   </data>
   <data name="_0IsNotAllowed" xml:space="preserve">
     <value>{0} is not allowed</value>

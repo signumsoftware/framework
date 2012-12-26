@@ -8,7 +8,6 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.DynamicQuery
 {
-
     [Serializable]
     public class ColumnToken : QueryToken
     {
@@ -70,7 +69,6 @@ namespace Signum.Entities.DynamicQuery
 
                 if (Column.Format == "d")
                     return DateTimeProperties(this, DateTimePrecision.Days);
-
             }
 
             return SubTokensBase(Column.Type, Column.Implementations);
@@ -106,6 +104,17 @@ namespace Signum.Entities.DynamicQuery
         public override QueryToken Clone()
         {
             return new ColumnToken(Column);
+        }
+
+        public override string TypeColor
+        {
+            get
+            {
+                if (Column.IsEntity)
+                    return "#0000FF";
+
+                return base.TypeColor;
+            }
         }
     }
 }

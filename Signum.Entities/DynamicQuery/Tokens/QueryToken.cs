@@ -16,6 +16,19 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class QueryToken : IEquatable<QueryToken>
     {
+        public bool Subordinated { get; set; }
+
+        public string SubordinatedToString
+        {
+            get
+            {
+                if (Subordinated)
+                    return "- " + ToString();
+
+                return ToString();
+            }
+        }
+
         public abstract override string ToString();
         public abstract string NiceName();
         public abstract string Format { get; }
@@ -231,12 +244,12 @@ namespace Signum.Entities.DynamicQuery
             return this.FullKey().GetHashCode();
         }
 
-        public string TypeColor
+        public virtual string TypeColor
         {
             get
             {
                 if (IsCollecction(Type))
-                    return "#9900BF";
+                    return "#CE6700";
 
                 switch (QueryUtils.GetFilterType(Type))
                 {
@@ -245,10 +258,10 @@ namespace Signum.Entities.DynamicQuery
                     case FilterType.String:
                     case FilterType.Guid: 
                     case FilterType.Boolean: return "#000000";
-                    case FilterType.DateTime: return "#915500";
-                    case FilterType.Enum: return "#006919";
-                    case FilterType.Lite: return "#002F9E";
-                    case FilterType.Embedded: return "#516DB0";
+                    case FilterType.DateTime: return "#8000FF";
+                    case FilterType.Enum: return "#B00061";
+                    case FilterType.Lite: return "#2B91AF";
+                    case FilterType.Embedded: return "#156F8A";
                     default: return "#7D7D7D";
                 }
             }
