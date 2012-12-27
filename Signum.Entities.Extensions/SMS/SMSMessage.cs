@@ -128,11 +128,12 @@ namespace Signum.Entities.SMS
 
     public enum SMSMessageOperation
     {
-        CreateSMS,
         Send,
         UpdateStatus,
         CreateUpdateStatusPackage,
-        CreateSMSMessageFromTemplate
+        CreateSMSFromSMSTemplate,
+        CreateSMSWithTemplateFromEntity,
+        CreateSMSFromEntity,
     }
 
     public enum SMSMessageProcess
