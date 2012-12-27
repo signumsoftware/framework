@@ -248,7 +248,7 @@ namespace Signum.Test
                 Execute = (album, _) => { },
             }.Register();
 
-            new ConstructFrom<BandDN>(AlbumOperation.CreateFromBand)
+            new ConstructFrom<BandDN>(AlbumOperation.CreateAlbumFromBand)
             {
                 ToState = AlbumState.Saved,
                 AllowsNew = false,
