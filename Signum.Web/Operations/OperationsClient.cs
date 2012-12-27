@@ -197,31 +197,53 @@ namespace Signum.Web.Operations
                 }
             }
 
-            List<ToolBarButton> buttons = operations
-                .Where(oi => oi.OperationInfo.OperationType != OperationType.ConstructorFrom ||
-                            (oi.OperationInfo.OperationType == OperationType.ConstructorFrom && oi.OperationSettings != null && !oi.OperationSettings.GroupInMenu))
-                .Select(octx => CreateToolBarButton(octx))
-                .ToList();
+            List<ToolBarButton> buttons = new List<ToolBarButton>();
+            Dictionary<EntityOperationGroup, ToolBarMenu> groups = new Dictionary<EntityOperationGroup,ToolBarMenu>();
 
-            var constructFroms = operations.Where(oi => oi.OperationInfo.OperationType == OperationType.ConstructorFrom &&
-                            (oi.OperationSettings == null || (oi.OperationSettings != null && oi.OperationSettings.GroupInMenu)));
-            if (constructFroms.Any())
+            foreach (var eoc in operations)
             {
-                string createText = Resources.Create;
-                buttons.Add(new ToolBarMenu
+                //if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom &&
+                //   (eoc.OperationSettings == null || !eoc.OperationSettings.AvoidMoveToSearchControl))
+                //{
+                //    if(EntityOperationToolBarButton.MoveToSearchControls(eoc))
+                //        continue; 
+                //}
+
+                EntityOperationGroup group = GetDefaultGroup(eoc);
+
+                if(group != null)
                 {
-                    Id = "tmConstructors",
-                    AltText = createText,
-                    Text = createText,
-                    DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
-                    Items = constructFroms.Select(octx => CreateToolBarButton(octx)).ToList()
-                });
+                    var cm = groups.GetOrCreate(group, () => new ToolBarMenu
+                    {
+                        Id = group == EntityOperationGroup.Create ? "tmConstructors" : "",
+                        AltText = group.Description(),
+                        Text = group.Description(),
+                        DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
+                    });
+
+                   cm.Items.Add(CreateToolBarButton(eoc, group));
+                }
+                else
+                {
+                    buttons.Add(CreateToolBarButton(eoc, null));
+                }
             }
 
-            return buttons.ToArray();
+            return buttons.OrderBy(a=>a is ToolBarMenu).ToArray();
         }
 
-        protected internal virtual ToolBarButton CreateToolBarButton(EntityOperationContext ctx)
+        private EntityOperationGroup GetDefaultGroup(EntityOperationContext eoc)
+        {
+            if (eoc.OperationSettings != null && eoc.OperationSettings.Group != null)
+                return eoc.OperationSettings.Group == EntityOperationGroup.None ? null : eoc.OperationSettings.Group;
+
+            if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom)
+                return EntityOperationGroup.Create;
+
+            return null;
+        }
+
+        protected internal virtual ToolBarButton CreateToolBarButton(EntityOperationContext ctx, EntityOperationGroup group)
         {
             return new ToolBarButton
             {
@@ -234,7 +256,7 @@ namespace Signum.Web.Operations
                 AltText = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
 
-                Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
+                Text = ctx.OperationSettings.TryCC(o => o.Text) ??  (group == null ? ctx.OperationInfo.Key.NiceToString() : group.SimplifyName(ctx.OperationInfo.Key.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).ToJS(),
             };
         }

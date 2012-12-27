@@ -384,4 +384,10 @@
   <data name="Unknown" xml:space="preserve">
     <value>unknown</value>
   </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create...</value>
+  </data>
+  <data name="CreateFromRegex" xml:space="preserve">
+    <value>^Create (?&lt;t&gt;.*) from .*$</value>
+  </data>
 </root>
