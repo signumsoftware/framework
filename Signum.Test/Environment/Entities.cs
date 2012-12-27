@@ -413,7 +413,7 @@ namespace Signum.Test
     {
         Save,
         Modify,
-        CreateFromBand,
+        CreateAlbumFromBand,
         Delete,
         Clone,
         CreateGreatestHitsAlbum,

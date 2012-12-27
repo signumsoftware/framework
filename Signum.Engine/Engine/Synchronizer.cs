@@ -217,7 +217,7 @@ namespace Signum.Engine
                 var old = distances.WithMin(kvp=>kvp.Value.Values.Min());
 
                 Selection selection = !Interactive ? new Selection(old.Key, old.Value.WithMin(a => a.Value).Key) :
-                                        SelectInteractive(old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), old.Key, replacementsKey);
+                                        SelectInteractive(old.Key, old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey);
 
                 oldOnly.Remove(selection.OldValue);
                 distances.Remove(selection.OldValue);
@@ -248,10 +248,19 @@ namespace Signum.Engine
 
         const int MaxElements = 70;
 
-        private static Selection SelectInteractive(List<string> newValues, string oldValue, string replacementsKey)
+        public static Func<string, List<string>, Selection?> AutoRepacement; 
+
+        private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey)
         {
-            if (oldValue.Replace("s.", ".") == newValues[0])
-                return new Selection(oldValue, newValues[0]);
+            if (AutoRepacement != null)
+            {
+                Selection? selection = AutoRepacement(oldValue, newValues);
+                if (selection != null)
+                {
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "AutoReplacement: {0} -> {1}", selection.Value.OldValue, selection.Value.NewValue);
+                    return selection.Value;
+                }
+            }
 
             int startingIndex = 0;
 

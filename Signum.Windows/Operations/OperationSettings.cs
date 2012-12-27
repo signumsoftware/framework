@@ -6,6 +6,8 @@ using Signum.Entities;
 using System.Windows;
 using System.Windows.Media;
 using Signum.Entities.Basics;
+using System.Text.RegularExpressions;
+using System.Windows.Controls;
 
 namespace Signum.Windows.Operations
 {
@@ -23,6 +25,22 @@ namespace Signum.Windows.Operations
 
     }
 
+    public class EntityOperationGroup
+    {
+        public static readonly EntityOperationGroup None = new EntityOperationGroup();
+
+        public static EntityOperationGroup Create = new EntityOperationGroup
+        {
+            Description = () => Signum.Entities.Properties.Resources.Create,
+            SimplifyName = cs => Regex.Replace(cs, Signum.Entities.Properties.Resources.CreateFromRegex, m => m.Groups["t"].Value, RegexOptions.IgnoreCase),
+            Background = Brushes.Green,
+        }; 
+
+        public Func<string> Description;
+        public Func<string, string> SimplifyName;
+        public Brush Background;
+    }
+
     public class EntityOperationSettings : OperationSettings
     {
         public Func<EntityOperationContext, IdentifiableEntity> Click { get; set; }
@@ -33,6 +51,8 @@ namespace Signum.Windows.Operations
 
         public bool AvoidMoveToSearchControl { get; set; }
 
+        public EntityOperationGroup Group { get; set; }
+
         public EntityOperationSettings(Enum key)
             : base(key)
         {
@@ -42,7 +62,7 @@ namespace Signum.Windows.Operations
     public class EntityOperationContext
     {
         public FrameworkElement EntityControl { get; set; }
-        public ToolBarButton SenderButton { get; set; }
+        public Control SenderButton { get; set; }
         public OperationInfo OperationInfo { get; set; }
         public ViewMode ViewButtons { get; set; }
         public bool ShowOperations { get; set; }
