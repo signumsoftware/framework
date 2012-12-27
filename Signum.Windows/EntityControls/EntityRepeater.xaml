@@ -3,42 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
     x:Class="Signum.Windows.EntityRepeater"
-	x:Name="me"  MinWidth="200" >
-    <m:EntityListBase.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Resources.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="RepeaterItemStyle" TargetType="{x:Type ContentControl}">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type ContentControl}">
-                            <m:EntityRepeaterLineBorder BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1" m:Common.TypeContext="{m:ContinueRoute /}">
-                                <Grid Loaded="Grid_Loaded" >
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition  Width="*"/>
-                                        <ColumnDefinition  Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <ContentPresenter 
-						                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
-						                HorizontalAlignment="Stretch"  />
-                                    <Button x:Name="btRemove" Click="btRemove_Click" 
-                                        Style="{StaticResource RoundButton}" 
-                                        Content="{StaticResource Remove}" 
-                                        ToolTip="{m:Loc Remove}"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Top"
-                                        Loaded="btRemove_Loaded"
-                                        Grid.Column="1"/>
-                                </Grid>
-                            </m:EntityRepeaterLineBorder>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-        </ResourceDictionary>
-    </m:EntityListBase.Resources>
-
+	x:Name="me"  MinWidth="200">
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
@@ -58,11 +23,14 @@
         </Grid>
         <ScrollViewer x:Name="ScrollViewer"
                       VerticalScrollBarVisibility="{Binding VerticalScrollBarVisibility, ElementName=me}"
-                      HorizontalScrollBarVisibility="{Binding HorizontalScrollBarVisibility, ElementName=me}" Grid.Row="1" >
-            <m:RepeaterItemsControl  x:Name="itemsControl"
+                      HorizontalScrollBarVisibility="{Binding HorizontalScrollBarVisibility, ElementName=me}" 
+                      Focusable="False"
+                      Grid.Row="1" >
+            <m:EntityRepeaterItemsControl x:Name="itemsControl"
 			ItemsSource="{Binding Entities, ElementName=me, Mode=Default}" 
 			ItemTemplate="{Binding EntityTemplate, ElementName=me, Mode=Default}" 
-			ItemContainerStyle="{DynamicResource RepeaterItemStyle}"
+            ItemsPanel="{Binding ItemsPanel, ElementName=me, Mode=Default}"
+            ItemContainerStyle="{Binding ItemContainerStyle, ElementName=me, Mode=Default}"
             HorizontalContentAlignment="Stretch"
 			HorizontalAlignment="Stretch" 
             VerticalAlignment="Stretch" />

@@ -39,8 +39,11 @@ namespace Signum.Entities
         Lite<T> Clone(); 
     }
 
+    [Serializable]
+    abstract class LiteImp  : Modifiable{ }
+
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
-    class LiteImp<T> : Modifiable, Lite<T>
+    class LiteImp<T> : LiteImp, Lite<T>
         where T : IdentifiableEntity
     {
         T entityOrNull;
@@ -235,6 +238,8 @@ namespace Signum.Entities
 
     public static class Lite
     {
+        public static Type BaseImplementationType = typeof(LiteImp);
+
         static GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>> giNewLite =
             new GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>>((id, str) => new LiteImp<IdentifiableEntity>(id, str));
 

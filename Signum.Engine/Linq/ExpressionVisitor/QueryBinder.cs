@@ -877,7 +877,7 @@ namespace Signum.Engine.Linq
         {
             Expression source = m.Method.IsExtensionMethod() ? m.Arguments[0]: m.Object;
 
-            if (source == null || m.Method.Name == "InSql")
+            if (source == null || m.Method.Name == "InSql" || m.Method.Name == "DisableQueryFilter")
                 return m;
 
             if (source.NodeType == ExpressionType.Conditional)
@@ -1094,7 +1094,7 @@ namespace Signum.Engine.Linq
                     if (pi != null)
                     {
                         if (pi.Name == "Id")
-                            return liteRef.Id;
+                            return liteRef.Id.UnNullify();
                         if (pi.Name == "EntityOrNull" || pi.Name == "Entity")
                             return liteRef.Reference;
                         if (pi.Name == "ToStr")
@@ -1126,7 +1126,7 @@ namespace Signum.Engine.Linq
                     ImplementedByAllExpression iba = (ImplementedByAllExpression)source;
                     FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(iba.Type, (PropertyInfo)m.Member);
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
-                        return iba.Id;
+                        return iba.Id.UnNullify();
 
                     throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".Formato(m.Member));
                 }

@@ -23,12 +23,12 @@ namespace Signum.Windows
     /// </summary>
     public partial class EntityRepeater : EntityListBase
     {
-        public static readonly DependencyProperty VerticalScrollBarVisiblityProperty =
-           DependencyProperty.Register("VerticalScrollBarVisiblity", typeof(ScrollBarVisibility), typeof(EntityRepeater), new UIPropertyMetadata(ScrollBarVisibility.Disabled));
-        public ScrollBarVisibility VerticalScrollBarVisiblity
+        public static readonly DependencyProperty VerticalScrollBarVisibilityProperty =
+           DependencyProperty.Register("VerticalScrollBarVisibility", typeof(ScrollBarVisibility), typeof(EntityRepeater), new UIPropertyMetadata(ScrollBarVisibility.Disabled));
+        public ScrollBarVisibility VerticalScrollBarVisibility
         {
-            get { return (ScrollBarVisibility)GetValue(VerticalScrollBarVisiblityProperty); }
-            set { SetValue(VerticalScrollBarVisiblityProperty, value); }
+            get { return (ScrollBarVisibility)GetValue(VerticalScrollBarVisibilityProperty); }
+            set { SetValue(VerticalScrollBarVisibilityProperty, value); }
         }
 
         public static readonly DependencyProperty HorizontalScrollBarVisibilityProperty =
@@ -37,6 +37,45 @@ namespace Signum.Windows
         {
             get { return (ScrollBarVisibility)GetValue(HorizontalScrollBarVisibilityProperty); }
             set { SetValue(HorizontalScrollBarVisibilityProperty, value); }
+        }
+
+        internal static readonly DependencyProperty RemoveVisibilityProperty =
+            DependencyProperty.Register("RemoveVisibility", typeof(Visibility), typeof(EntityRepeater), new UIPropertyMetadata(Visibility.Visible));
+        internal Visibility RemoveVisibility
+        {
+            get { return (Visibility)GetValue(RemoveVisibilityProperty); }
+            set { SetValue(RemoveVisibilityProperty, value); }
+        }
+
+        internal static readonly DependencyProperty MoveVisibilityProperty =
+            DependencyProperty.Register("MoveVisibility", typeof(Visibility), typeof(EntityRepeater), new UIPropertyMetadata(Visibility.Collapsed));
+        internal Visibility MoveVisibility
+        {
+            get { return (Visibility)GetValue(MoveVisibilityProperty); }
+            set { SetValue(MoveVisibilityProperty, value); }
+        }
+
+        public static readonly DependencyProperty ItemsPanelProperty =
+            DependencyProperty.Register("ItemsPanel", typeof(ItemsPanelTemplate), typeof(EntityRepeater), new FrameworkPropertyMetadata(GetDefaultItemsPanelTemplate()));
+        public ItemsPanelTemplate ItemsPanel
+        {
+            get { return (ItemsPanelTemplate)GetValue(ItemsPanelProperty); }
+            set { SetValue(ItemsPanelProperty, value); }
+        }
+
+        static ItemsPanelTemplate GetDefaultItemsPanelTemplate()
+        {
+            ItemsPanelTemplate template = new ItemsPanelTemplate(new FrameworkElementFactory(typeof(StackPanel)));
+            template.Seal();
+            return template;
+        }
+
+        public static readonly DependencyProperty ItemContainerStyleProperty =
+           DependencyProperty.Register("ItemContainerStyle", typeof(Style), typeof(EntityRepeater), new PropertyMetadata(null));
+        public Style ItemContainerStyle
+        {
+            get { return (Style)GetValue(ItemContainerStyleProperty); }
+            set { SetValue(ItemContainerStyleProperty, value); }
         }
 
         public static readonly DependencyProperty IconProperty =
@@ -50,11 +89,11 @@ namespace Signum.Windows
         public EntityRepeater()
         {
             this.InitializeComponent();
+            this.AddHandler(EntityRepeaterContentControl.RemoveClickEvent, new RoutedEventHandler(btRemove_Click));
+            this.AddHandler(EntityRepeaterContentControl.MoveUpClickEvent, new RoutedEventHandler(btMoveUp_Click));
+            this.AddHandler(EntityRepeaterContentControl.MoveDownClickEvent, new RoutedEventHandler(btMoveDown_Click));
         }
 
-        private void Grid_Loaded(object sender, RoutedEventArgs e)
-        {
-        }
 
         protected override void btCreate_Click(object sender, RoutedEventArgs e)
         {
@@ -94,57 +133,160 @@ namespace Signum.Windows
 
         protected override void btRemove_Click(object sender, RoutedEventArgs e)
         {
-            object value = ((Grid)(((Button)sender).Parent)).DataContext;
+            object entity = ((EntityRepeaterContentControl)e.OriginalSource).DataContext;
 
-            if (value != null)
+            if (entity != null)
             {
-                if (OnRemoving(value))
+                if (OnRemoving(entity))
                 {
                     IList list = EnsureEntities();
-                    list.Remove(value);
+                    list.Remove(entity);
                     SetEntityUserInteraction(null);
                 }
             }
+
+            e.Handled = true;
+        }
+
+        protected void btMoveUp_Click(object sender, RoutedEventArgs e)
+        {
+            object entity = ((EntityRepeaterContentControl)e.OriginalSource).DataContext;
+
+            if (entity != null)
+            {
+                int index = Entities.IndexOf(entity);
+                if (index > 0)
+                {
+                    Entities.RemoveAt(index);
+                    Entities.Insert(index - 1, entity);
+                    SetEntityUserInteraction(entity);
+                }
+            }
+
+            e.Handled = true;
+        }
+
+        protected void btMoveDown_Click(object sender, RoutedEventArgs e)
+        {
+            object entity = ((EntityRepeaterContentControl)e.OriginalSource).DataContext;
+
+            if (entity != null)
+            {
+                int index = Entities.IndexOf(entity);
+                if (index < Entities.Count - 1)
+                {
+                    Entities.RemoveAt(index);
+                    Entities.Insert(index + 1, entity);
+                    SetEntityUserInteraction(entity);
+                }
+            }
+
+            e.Handled = true;
         }
 
         protected override void UpdateVisibility()
         {
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
-
-            var remove = this.CanRemove().ToVisibility();
-            var buttons = this.itemsControl.Children<Button>().Where(a => a.Name == "btRemove").ToList();
-            foreach (var bt in buttons)
-                bt.Visibility = remove;
+           
+            RemoveVisibility = this.CanRemove().ToVisibility();
+            MoveVisibility = this.Move.ToVisibility();
         }
 
         protected override bool CanRemove()
         {
             return Remove && !Common.GetIsReadOnly(this);
         }
-
-        private void btRemove_Loaded(object sender, RoutedEventArgs e)
-        {
-            ((Button)sender).Visibility = this.CanRemove().ToVisibility();
-        }
     }
 
-    [StyleTypedPropertyAttribute(Property = "ItemContainerStyle", StyleTargetType = typeof(ContentControl))]
-    public class RepeaterItemsControl : ItemsControl
+
+    [StyleTypedPropertyAttribute(Property = "ItemContainerStyle", StyleTargetType = typeof(EntityRepeaterContentControl))]
+    public class EntityRepeaterItemsControl : ItemsControl
     {
         protected override DependencyObject GetContainerForItemOverride()
         {
-            return new ContentControl();
+            return new EntityRepeaterContentControl();
         }
 
         protected override bool IsItemItsOwnContainerOverride(object item)
         {
-            return item is ContentControl;
+            return item is EntityRepeaterContentControl;
         }
     }
 
-    public class EntityRepeaterLineBorder: Border
+    [TemplatePart(Name = "PART_RemoveButton", Type = typeof(Button))]
+    public class EntityRepeaterContentControl: ContentControl
     {
+        public static readonly RoutedEvent RemoveClickEvent = EventManager.RegisterRoutedEvent(
+          "RemoveClick", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(EntityRepeaterContentControl));
+        public event RoutedEventHandler RemoveClick
+        {
+            add { AddHandler(RemoveClickEvent, value); }
+            remove { RemoveHandler(RemoveClickEvent, value); }
+        }
+
+        public static readonly RoutedEvent MoveUpClickEvent = EventManager.RegisterRoutedEvent(
+          "MoveUpClick", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(EntityRepeaterContentControl));
+        public event RoutedEventHandler MoveUpClick
+        {
+            add { AddHandler(MoveUpClickEvent, value); }
+            remove { RemoveHandler(MoveUpClickEvent, value); }
+        }
+
+        public static readonly RoutedEvent MoveDownClickEvent = EventManager.RegisterRoutedEvent(
+          "MoveDownClick", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(EntityRepeaterContentControl));
+        public event RoutedEventHandler MoveDownClick
+        {
+            add { AddHandler(MoveDownClickEvent, value); }
+            remove { RemoveHandler(MoveDownClickEvent, value); }
+        }
+
+        static EntityRepeaterContentControl()
+        {
+            FrameworkElement.DefaultStyleKeyProperty.OverrideMetadata(typeof(EntityRepeaterContentControl), new FrameworkPropertyMetadata(typeof(EntityRepeaterContentControl)));
+        }
+
+        Button btRemove;
+        Button btMoveUp;
+        Button btMoveDown;
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+
+            if (btRemove != null)
+                btRemove.Click -= new RoutedEventHandler(btRemove_Click);
+            if (btMoveUp != null)
+                btMoveUp.Click -= new RoutedEventHandler(btMoveUp_Click);
+            if (btMoveDown != null)
+                btMoveDown.Click -= new RoutedEventHandler(btMoveDown_Click);
+
+            btRemove = (Button)base.GetTemplateChild("PART_RemoveButton");
+            btMoveUp = (Button)base.GetTemplateChild("PART_MoveUp");
+            btMoveDown = (Button)base.GetTemplateChild("PART_MoveDown");
+
+            if (btRemove != null)
+                btRemove.Click += new RoutedEventHandler(btRemove_Click);
+            if (btMoveUp != null)
+                btMoveUp.Click += new RoutedEventHandler(btMoveUp_Click);
+            if (btMoveDown != null)
+                btMoveDown.Click += new RoutedEventHandler(btMoveDown_Click);
+        }
+
+        private void btRemove_Click(object sender, RoutedEventArgs e)
+        {
+            this.RaiseEvent(new RoutedEventArgs(RemoveClickEvent)); 
+        }
+
+        void btMoveUp_Click(object sender, RoutedEventArgs e)
+        {
+            this.RaiseEvent(new RoutedEventArgs(MoveUpClickEvent));
+        }
+
+        void btMoveDown_Click(object sender, RoutedEventArgs e)
+        {
+            this.RaiseEvent(new RoutedEventArgs(MoveDownClickEvent)); 
+        }
+
         protected override AutomationPeer OnCreateAutomationPeer()
         {
             return new EntityRepeaterLineBorderAutomationPeer(this);
@@ -153,7 +295,7 @@ namespace Signum.Windows
 
     class EntityRepeaterLineBorderAutomationPeer : FrameworkElementAutomationPeer
     {
-        public EntityRepeaterLineBorderAutomationPeer(EntityRepeaterLineBorder owner)
+        public EntityRepeaterLineBorderAutomationPeer(EntityRepeaterContentControl owner)
             : base(owner)
         {
         }

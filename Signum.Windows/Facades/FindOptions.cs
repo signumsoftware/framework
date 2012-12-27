@@ -86,6 +86,8 @@ namespace Signum.Windows
         public string WindowTitle { get; set; }
 
         internal abstract SearchMode GetSearchMode();
+
+        public Action<SearchControl> InitializeSearchControl;
     }
 
     public class FindManyOptions : FindOptionsBase

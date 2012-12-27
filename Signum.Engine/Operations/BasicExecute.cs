@@ -60,71 +60,74 @@ namespace Signum.Engine.Operations
 
         void IExecuteOperation.Execute(IIdentifiable entity, params object[] parameters)
         {
-            OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
-
-            string error = OnCanExecute((T)entity);
-            if (error != null)
-                throw new ApplicationException(error);
-
-            OperationLogDN log = new OperationLogDN
+            using (HeavyProfiler.Log("Execute", () => OperationDN.UniqueKey(key)))
             {
-                Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
-                Start = TimeZoneManager.Now,
-                User = UserHolder.Current.ToLite()
-            };
+                OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
 
-            using (OperationLogic.AllowSave(entity.GetType()))
-            {
-                try
+                string error = OnCanExecute((T)entity);
+                if (error != null)
+                    throw new ApplicationException(error);
+
+                OperationLogDN log = new OperationLogDN
                 {
-                    using (Transaction tr = new Transaction())
-                    {
-                        OnBeginOperation((T)entity);
+                    Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                    Start = TimeZoneManager.Now,
+                    User = UserHolder.Current.ToLite()
+                };
 
-                        Execute((T)entity, parameters);
-
-                        OnEndOperation((T)entity);
-
-                        entity.Save(); //Nothing happens if already saved
-
-                        log.Target = entity.ToLite(); //in case AllowsNew == true
-                        log.End = TimeZoneManager.Now;
-                        using (ExecutionMode.Global())
-                            log.Save();
-
-                        tr.Commit();
-                    }
-                }
-                catch (Exception ex)
+                using (OperationLogic.AllowSave(entity.GetType()))
                 {
-                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, parameters, ex);
-
-                    if (!entity.IsNew)
+                    try
                     {
-                        if (Transaction.InTestTransaction)
-                            throw;
-
-                        var exLog = ex.LogException();
-
-                        using (Transaction tr2 = Transaction.ForceNew())
+                        using (Transaction tr = new Transaction())
                         {
-                            OperationLogDN log2 = new OperationLogDN
-                            {
-                                Operation = log.Operation,
-                                Start = log.Start,
-                                User = log.User,
-                                Target = entity.ToLite(),
-                                Exception = exLog.ToLite(),
-                                End = TimeZoneManager.Now
-                            };
+                            OnBeginOperation((T)entity);
 
+                            Execute((T)entity, parameters);
+
+                            OnEndOperation((T)entity);
+
+                            entity.Save(); //Nothing happens if already saved
+
+                            log.Target = entity.ToLite(); //in case AllowsNew == true
+                            log.End = TimeZoneManager.Now;
                             using (ExecutionMode.Global())
-                                log2.Save();
+                                log.Save();
 
-                            tr2.Commit();
+                            tr.Commit();
                         }
                     }
-                    throw;
+                    catch (Exception ex)
+                    {
+                        OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, parameters, ex);
+
+                        if (!entity.IsNew)
+                        {
+                            if (Transaction.InTestTransaction)
+                                throw;
+
+                            var exLog = ex.LogException();
+
+                            using (Transaction tr2 = Transaction.ForceNew())
+                            {
+                                OperationLogDN log2 = new OperationLogDN
+                                {
+                                    Operation = log.Operation,
+                                    Start = log.Start,
+                                    User = log.User,
+                                    Target = entity.ToLite(),
+                                    Exception = exLog.ToLite(),
+                                    End = TimeZoneManager.Now
+                                };
+
+                                using (ExecutionMode.Global())
+                                    log2.Save();
+
+                                tr2.Commit();
+                            }
+                        }
+                        throw;
+                    }
                 }
             }
         }

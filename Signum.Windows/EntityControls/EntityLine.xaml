@@ -59,6 +59,7 @@
                     x:Name="autoCompleteTextBox"
                     AutoCompleting="autoCompleteTextBox_AutoCompleting" 
                     Closed="autoCompleteTextBox_Closed"
+                    Margin="-2,1,-2,-2"
                     Visibility="Hidden"/>
             </Grid>
             <!--HorizontalContentAlignment="Center"

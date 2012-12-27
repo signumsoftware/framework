@@ -85,7 +85,6 @@ namespace Signum.Windows
                     {
                         Type = type,
                         Create = false,
-                        HideAutoCompleteOnLostFocus = false,
                         Implementations = implementations
                     };
 
@@ -108,7 +107,6 @@ namespace Signum.Windows
                     Create = false,
                     AutoComplete = false,
                     Find = false,
-                    HideAutoCompleteOnLostFocus = false,
                     Implementations = null
                 };
 

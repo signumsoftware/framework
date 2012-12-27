@@ -52,46 +52,45 @@ namespace Signum.Windows
 
         public EntitySettings()
         {
+            EntityKind entityKind = Server.GetEntityKind(typeof(T));
 
-            EntityType entityType = Server.GetEntityType(typeof(T));
-
-            switch (entityType)
+            switch (entityKind)
             {
-                case EntityType.SystemString:
+                case EntityKind.SystemString:
                     IsCreable = EntityWhen.Never;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
                     IsReadOnly = true;
                     break;
-                case EntityType.System:
+                case EntityKind.System:
                     IsCreable = EntityWhen.Never;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     IsReadOnly = true;
                     break;
 
-                case EntityType.String:
+                case EntityKind.String:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
                     break;
-                case EntityType.Shared:
+                case EntityKind.Shared:
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
-                case EntityType.Main:
+                case EntityKind.Main:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
 
-                case EntityType.Part:
+                case EntityKind.Part:
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
-                case EntityType.SharedPart:
+                case EntityKind.SharedPart:
                     IsCreable = EntityWhen.IsLine;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;

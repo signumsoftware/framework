@@ -10,7 +10,7 @@
     FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-    Type entitiesType = LiteUtils.Extract(entityColumn.Type);
+    Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations.Value;
     findOptions.ElementsPerPage = findOptions.ElementsPerPage ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage) ?? FindOptions.DefaultElementsPerPage;
     

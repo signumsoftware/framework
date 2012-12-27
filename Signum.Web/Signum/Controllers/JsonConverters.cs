@@ -14,7 +14,7 @@ namespace Signum.Web
     {
         public override IEnumerable<Type> SupportedTypes
         {
-            get { return new[] { typeof(Lite<IdentifiableEntity>) }; }
+            get { return new[] { typeof(LiteImp) }; }
         }
 
         public override object Deserialize(IDictionary<string, object> dictionary, Type type, JavaScriptSerializer serializer)

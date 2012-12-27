@@ -21,18 +21,18 @@ namespace Signum.Entities
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    public sealed class EntityTypeAttribute : Attribute
+    public sealed class EntityKindAttribute : Attribute
     {
-        public EntityType EntityType { get; private set; }
+        public EntityKind EntityType { get; private set; }
 
-        public EntityTypeAttribute(EntityType entityType)
+        public EntityKindAttribute(EntityKind entityType)
         {
             this.EntityType = entityType;
         }
     }
 
     
-    public enum EntityType
+    public enum EntityKind
     {
         SystemString,
         System,
