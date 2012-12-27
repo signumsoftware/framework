@@ -282,6 +282,9 @@ namespace Signum.Utilities
 
         public static string RemoveChars(this string str, params char[] chars)
         {
+            if (!str.HasText())
+                return str;
+
             StringBuilder sb = new StringBuilder(str.Length);
             for (int i = 0; i < str.Length; i++)
             {
