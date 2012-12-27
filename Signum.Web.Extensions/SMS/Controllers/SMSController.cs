@@ -87,7 +87,7 @@ namespace Signum.Web.SMS
             var ie = this.ExtractLite<IdentifiableEntity>(null);
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
 
-            var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSMessageFromTemplate, template.Retrieve());
+            var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSMessageFromEntity, template.Retrieve());
             return Navigator.NormalPage(this, message);
         }
 
