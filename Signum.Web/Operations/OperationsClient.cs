@@ -213,12 +213,20 @@ namespace Signum.Web.Operations
 
                 if(group != null)
                 {
-                    var cm = groups.GetOrCreate(group, () => new ToolBarMenu
+                    var cm = groups.GetOrCreate(group, () =>
                     {
-                        Id = group == EntityOperationGroup.Create ? "tmConstructors" : "",
-                        AltText = group.Description(),
-                        Text = group.Description(),
-                        DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
+                        var tbm = new ToolBarMenu
+                        {
+                            Id = group == EntityOperationGroup.Create ? "tmConstructors" : "",
+                            AltText = group.Description(),
+                            Text = group.Description(),
+                            DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
+                            Items = new List<ToolBarButton>(),
+                        };
+
+                        buttons.Add(tbm);
+
+                        return tbm;
                     });
 
                    cm.Items.Add(CreateToolBarButton(eoc, group));
