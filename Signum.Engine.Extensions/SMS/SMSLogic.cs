@@ -203,7 +203,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperation.CreateSMSMessageFromEntity)
+            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
             {
                 Construct = (provider, args) =>
                 {
