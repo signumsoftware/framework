@@ -126,30 +126,33 @@ namespace Signum.Web.Selenium
         public const string PageLoadLongTimeout = "40000";
 
         //public const int DefaultAjaxTimeout = 10000;
-        public const int DefaultAjaxTimeout = 15000;
+        public const int DefaultAjaxTimeout = 10000;
+        public const int DefaultAjaxAttempts = 3;
 
         public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition)
         {
-            WaitAjaxFinished(selenium, condition, DefaultAjaxTimeout);
+            WaitAjaxFinished(selenium, condition, DefaultAjaxTimeout, DefaultAjaxAttempts);
         }
 
-        public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition, int? timeout = null)
+        public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition, int? timeout = null, int? attempts = null)
         {
-            var func = condition.Compile();
-
-            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
-
+            var func = condition.Compile();           
             if (func())
                 return;
 
-            do
+            for (int i = 0; i < attempts; i++)
             {
-                Thread.Sleep(500);
+                DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
 
-                if (func())
-                    return;
+                do
+                {
+                    Thread.Sleep(500);
 
-            } while (DateTime.Now < limit);
+                    if (func())
+                        return;
+
+                } while (DateTime.Now < limit);
+            }
 
             throw new TimeoutException("The expression took more than {0} ms:\r\n{1}".Formato(timeout ?? DefaultAjaxTimeout, condition.NiceToString()));
         }
@@ -182,7 +185,7 @@ namespace Signum.Web.Selenium
             selenium.Click("jq=#{0}btnOk".Formato(prefix));
             if (submit)
                 selenium.WaitForPageToLoad(DefaultPageLoadTimeout);
-            else 
+            else
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
 
