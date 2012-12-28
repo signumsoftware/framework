@@ -82,7 +82,7 @@ namespace Signum.Windows.Processes
                               OperationSettings = os.TryCC(a=>a.ContextualFromMany),
                               CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a=>a.t))),
                           }
-                          where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFromMany :
+                          where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
                               os.ContextualFromMany == null ? (oi.Lite == true && os.Click == null && oi.OperationType != OperationType.ConstructorFrom) :
                               (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(coc))
                           select coc).ToList();

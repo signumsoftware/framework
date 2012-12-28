@@ -98,7 +98,7 @@ namespace Signum.Web.Processes
                                 OperationSettings = os.TryCC(s => s.ContextualFromMany),
                                 CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
                             }
-                            where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFromMany :
+                            where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
                             os.ContextualFromMany == null ? (oi.Lite == true && os.OnClick == null && oi.OperationType != OperationType.ConstructorFrom) :
                             (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(context))
                             select context).ToList();
