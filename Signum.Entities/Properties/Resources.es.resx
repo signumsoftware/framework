@@ -450,4 +450,7 @@
   <data name="ComparisonType" xml:space="preserve">
     <value>Tipo comparación</value>
   </data>
+  <data name="CreateFromRegex" xml:space="preserve">
+    <value>^Crear (?&lt;t&gt;.*) desde .*$</value>
+  </data>
 </root>

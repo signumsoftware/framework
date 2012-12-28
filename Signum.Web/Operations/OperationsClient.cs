@@ -220,7 +220,7 @@ namespace Signum.Web.Operations
                             Id = group == EntityOperationGroup.Create ? "tmConstructors" : "",
                             AltText = group.Description(),
                             Text = group.Description(),
-                            DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
+                            DivCssClass = " ".CombineIfNotEmpty(ToolBarButton.DefaultEntityDivCssClass, group.CssClass),
                             Items = new List<ToolBarButton>(),
                         };
 

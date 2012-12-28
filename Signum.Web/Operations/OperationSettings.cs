@@ -39,17 +39,6 @@ namespace Signum.Web.Operations
         public Func<ConstructorOperationContext, bool> IsVisible { get; set; }
     }
 
-    public abstract class EntityOperationSettingsBase : OperationSettings
-    {
-        public ContextualOperationSettings ContextualFromMany { get; set; }
-        public ContextualOperationSettings Contextual { get; set; }
-
-        public EntityOperationSettingsBase(Enum key)
-            : base(key)
-        {
-        }
-    }
-
     public class EntityOperationGroup
     {
         public static readonly EntityOperationGroup None = new EntityOperationGroup();
@@ -57,17 +46,20 @@ namespace Signum.Web.Operations
         public static EntityOperationGroup Create = new EntityOperationGroup
         {
             Description = () => Signum.Entities.Properties.Resources.Create,
-            SimplifyName = cs => Regex.Replace(cs, Signum.Entities.Properties.Resources.CreateFromRegex, m => m.Groups["t"].Value, RegexOptions.IgnoreCase),
-            CssClass = _ => "sf-operation"
+            SimplifyName = cs => Regex.Replace(cs, Signum.Entities.Properties.Resources.CreateFromRegex, m => m.Groups["t"].Value.FirstUpper(), RegexOptions.IgnoreCase),
+            CssClass = "sf-operation"
         };
 
         public Func<string> Description;
         public Func<string, string> SimplifyName;
-        public Func<Enum, string> CssClass { get; set; }
+        public string CssClass { get; set; }
     }
 
-    public class EntityOperationSettings : EntityOperationSettingsBase
+    public class EntityOperationSettings : OperationSettings
     {
+        public ContextualOperationSettings ContextualFromMany { get; set; }
+        public ContextualOperationSettings Contextual { get; set; }
+
         public EntityOperationSettings(Enum operationKey)
             : base(operationKey)
         {
@@ -79,8 +71,6 @@ namespace Signum.Web.Operations
         }
 
         public static Func<Enum, string> CssClass { get; set; }
-
-        bool groupInMenu = true;
 
         public EntityOperationGroup Group { get; set; }
 
