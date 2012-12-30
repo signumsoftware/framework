@@ -119,13 +119,15 @@ namespace Signum.Engine.Disconnected
                         }
                     }
 
+                    string newDatabaseName = newDatabase.DatabaseName();
+
                     foreach (var tuple in downloadTables)
                     {
                         token.ThrowIfCancellationRequested();
                         int ms = 0;
                         using (token.MeasureTime(l => ms = l))
                         {
-                            tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabase, machine);
+                            tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabaseName, machine);
                         }
 
                         int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
@@ -338,36 +340,41 @@ namespace Signum.Engine.Disconnected
 
     public interface ICustomExporter
     {
-        void Export(Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase, DisconnectedMachineDN machine);
+        void Export(Table table, IDisconnectedStrategy strategy, string newDatabaseName, DisconnectedMachineDN machine);
     }
 
     public class BasicExporter<T> : ICustomExporter where T : IdentifiableEntity
     {
-        public virtual void Export(Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase, DisconnectedMachineDN machine)
+        public virtual void Export(Table table, IDisconnectedStrategy strategy, string newDatabaseName, DisconnectedMachineDN machine)
         {
-            this.CopyTable(table, strategy, newDatabase);
+            this.CopyTable(table, strategy, newDatabaseName);
         }
 
-        protected virtual void CopyTable(Table table, IDisconnectedStrategy strategy, Connector newDatabase)
+        protected virtual void CopyTable(Table table, IDisconnectedStrategy strategy, string newDatabaseName)
         {
             var filter = strategy.Download == Download.Subset ? GetWhere((DisconnectedStrategy<T>)strategy) : null;
 
-            CopyTableBasic(table, newDatabase, filter);
+            CopyTableBasic(table, newDatabaseName, filter);
 
             foreach (var rt in table.RelationalTables())
-                CopyTableBasic(rt, newDatabase, filter == null ? null : (SqlPreCommandSimple)filter.Clone());
+                CopyTableBasic(rt, newDatabaseName, filter == null ? null : (SqlPreCommandSimple)filter.Clone());
         }
 
-        protected virtual int CopyTableBasic(ITable table, Connector newDatabase, SqlPreCommandSimple filter)
+        protected virtual int CopyTableBasic(ITable table, string newDatabaseName, SqlPreCommandSimple filter)
         {
-            string fullOuterName = "{0}.dbo.{1}".Formato(newDatabase.DatabaseName().SqlScape(), table.Name.SqlScape());
+            NamePrefix newPrefix = new NamePrefix
+            {
+                SchemaName = table.Prefix.SchemaName,
+                DatabaseName = newDatabaseName,
+                ServerName = null
+            };
 
             string command =
 @"INSERT INTO {0} ({2})
 SELECT {3}
 FROM {1} as [table]".Formato(
-                fullOuterName,
-                table.Name.SqlScape(),
+                newPrefix.PrefixName(table.Name),
+                table.PrefixedName(),
                 table.Columns.Keys.ToString(a => a.SqlScape(), ", "),
                 table.Columns.Keys.ToString(a => "[table]." + a.SqlScape(), ", "));
 
@@ -381,15 +388,15 @@ FROM {1} as [table]".Formato(
                 {
                     RelationalTable rt = (RelationalTable)table;
                     command +=
-                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".Formato(rt.BackReference.ReferenceTable.Name.SqlScape(), rt.BackReference.Name.SqlScape()) +
+                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".Formato(rt.BackReference.ReferenceTable.PrefixedName(), rt.BackReference.Name.SqlScape()) +
                         "\r\nWHERE [masterTable].Id in ({0})".Formato(filter.Sql);
                 }
             }
 
             string fullCommand =
-                "SET IDENTITY_INSERT {0} ON\r\n".Formato(fullOuterName) +
+                "SET IDENTITY_INSERT {0} ON\r\n".Formato(newPrefix.PrefixName(table.PrefixedName())) +
                 command +
-                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(fullOuterName);
+                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(newPrefix.PrefixName(table.PrefixedName()));
 
             return Executor.ExecuteNonQuery(fullCommand, filter.TryCC(a => a.Parameters));
         }
@@ -404,18 +411,23 @@ FROM {1} as [table]".Formato(
 
     public class DeleteAndCopyExporter<T> : BasicExporter<T> where T : IdentifiableEntity
     {
-        public override void Export(Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase, DisconnectedMachineDN machine)
+        public override void Export(Table table, IDisconnectedStrategy strategy, string newDatabaseName, DisconnectedMachineDN machine)
         {
-            this.DeleteTable(table, newDatabase);
+            this.DeleteTable(table, newDatabaseName);
 
-            this.CopyTable(table, strategy, newDatabase);
+            this.CopyTable(table, strategy, newDatabaseName);
         }
 
-        private void DeleteTable(Table table, SqlConnector newDatabase)
+        private void DeleteTable(Table table, string newDatabaseName)
         {
-            string fullOuterName = "{0}.dbo.{1}".Formato(newDatabase.DatabaseName().SqlScape(), table.Name.SqlScape());
+            NamePrefix newPrefix = new NamePrefix
+            {
+                SchemaName = table.Prefix.SchemaName,
+                DatabaseName = newDatabaseName,
+                ServerName = null
+            };
 
-            DisconnectedTools.DeleteTable(fullOuterName); 
+            DisconnectedTools.DeleteTable(newPrefix.PrefixName(table.Name)); 
         } 
     }
 }
