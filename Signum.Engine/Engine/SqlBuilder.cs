@@ -22,22 +22,19 @@ namespace Signum.Engine
         public readonly static string PrimaryKeyName = "Id";
 
         #region Create Tables
-        public static SqlPreCommand CreateTable(string table, List<string> campos)
-        {
-            return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(table.SqlScape(), campos.ToString(",\r\n").Indent(2)));
-        }
-
         public static SqlPreCommand CreateTableSql(ITable t)
         {
-            return CreateTable(t.Name, t.Columns.Values.Select(c => SqlBuilder.CreateField(c)).ToList());
+            return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(
+                t.PrefixedName(), 
+                t.Columns.Values.Select(c => SqlBuilder.CreateField(c)).ToString(",\r\n").Indent(2)));
         }
 
-        internal static SqlPreCommand DropTable(string table)
+        public static SqlPreCommand DropTable(NamePrefix prefix, string table)
         {
-            return new SqlPreCommandSimple("DROP TABLE {0}".Formato(table.SqlScape()));
+            return new SqlPreCommandSimple("DROP TABLE {0}".Formato(prefix.PrefixName(table)));
         }
 
-        internal static SqlPreCommand DropView(string view)
+        public static SqlPreCommand DropView(NamePrefix prefix, string view)
         {
             return new SqlPreCommandSimple("DROP VIEW {0}".Formato(view.SqlScape()));
         }
@@ -50,12 +47,12 @@ namespace Signum.Engine
             }.Combine(Spacing.Simple);
         }
 
-        internal static SqlPreCommand AlterTableDropColumn(string table, string columnName)
+        public static SqlPreCommand AlterTableDropColumn(string table, string columnName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".Formato(table.SqlScape(), columnName.SqlScape()));
         }
 
-        internal static SqlPreCommand AlterTableAddColumn(string table, IColumn column)
+        public static SqlPreCommand AlterTableAddColumn(string table, IColumn column)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table, CreateField(column), !column.Nullable ? "-- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : null));
         }
@@ -80,24 +77,14 @@ namespace Signum.Engine
             return false;
         }
 
-        internal static SqlPreCommand AlterTableAlterColumn(string table, IColumn column)
+        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".Formato(table.SqlScape(), CreateField(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".Formato(table.PrefixedName(), CreateField(column)));
         }
 
         public static string CreateField(IColumn c)
         {
             return CreateField(c.Name, c.SqlDbType, c.UdtTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.Identity);
-        }
-
-        public static string CreatePrimaryKeyField(bool identity)
-        {
-            return CreateField(PrimaryKeyName, PrimaryKeyType, null, null, null, false, true, identity);
-        }
-
-        public static string CreateReferenceField(string name, bool nullable)
-        {
-            return CreateField(name, PrimaryKeyType, null, null, null, nullable, false, false);
         }
 
         public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity)
@@ -130,7 +117,7 @@ namespace Signum.Engine
         public static SqlPreCommand AlterTableForeignKeys(ITable t)
         {
             return t.Columns.Values.Select(c =>
-                c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
+                c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable)).Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand CreateAllIndices(ITable t)
@@ -147,7 +134,7 @@ namespace Signum.Engine
             return new[] { uniqueIndices, freeIndexes }.Combine(Spacing.Simple);
         }
 
-        internal static SqlPreCommand DropIndex(string table, DiffIndex index)
+        public static SqlPreCommand DropIndex(string table, DiffIndex index)
         {
             if (index.ViewName == null)
                 return DropIndex(table, index.IndexName);
@@ -235,13 +222,13 @@ namespace Signum.Engine
                         .Formato(table.SqlScape(), constraintName.SqlScape(), definition, column.SqlScape()));
         }
 
-        public static SqlPreCommand AlterTableAddConstraintForeignKey(string table, string fieldName, string foreignTable)
+        public static SqlPreCommand AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4})".Formato(
-                table.SqlScape(),
-                ForeignKeyName(table, fieldName),
+                table.PrefixedName(),
+                ForeignKeyName(table.Name, fieldName),
                 fieldName.SqlScape(),
-                foreignTable.SqlScape(),
+                foreignTable.PrefixedName(),
                 PrimaryKeyName.SqlScape()));
         }
 
@@ -250,42 +237,41 @@ namespace Signum.Engine
             return "FK_{0}_{1}".Formato(table, fieldName).SqlScape();
         }
 
-        internal static SqlPreCommand RenameTable(string oldName, string newName)
+        public static SqlPreCommand RenameTable(string oldName, string newName)
         {
             return new SqlPreCommandSimple("EXEC SP_RENAME '{0}' , '{1}'".Formato(oldName, newName));
         }
 
-        internal static SqlPreCommand RenameColumn(string tableName, string oldName, string newName)
+        public static SqlPreCommand RenameColumn(string tableName, string oldName, string newName)
         {
             return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'COLUMN' ".Formato(tableName, oldName, newName));
         }
 
-        internal static SqlPreCommand RenameIndex(string tableName, string oldName, string newName)
+        public static SqlPreCommand RenameIndex(string tableName, string oldName, string newName)
         {
             return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'INDEX' ".Formato(tableName, oldName, newName));
         }
         #endregion
 
-        internal static SqlPreCommandSimple SetIdentityInsert(string table, bool value)
+        public static SqlPreCommandSimple SetIdentityInsert(string table, bool value)
         {
             return new SqlPreCommandSimple("SET IDENTITY_INSERT {0} {1}".Formato(
-                table.SqlScape(), value ? "ON" : "OFF"));
+                table, value ? "ON" : "OFF"));
         }
 
-        internal static SqlPreCommandSimple SetSnapshotIsolation(string schemaName, bool value)
+        public static SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)
         {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1}".Formato(schemaName, value ? "ON" : "OFF"));
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1}".Formato(databaseName, value ? "ON" : "OFF"));
         }
 
-        internal static SqlPreCommandSimple MakeSnapshotIsolationDefault(string schemaName, bool value)
+        public static SqlPreCommandSimple MakeSnapshotIsolationDefault(string databaseName, bool value)
         {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1}".Formato(schemaName, value ? "ON" : "OFF"));
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1}".Formato(databaseName, value ? "ON" : "OFF"));
         }
 
-        internal static SqlPreCommandSimple SelectRowCount()
+        public static SqlPreCommandSimple SelectRowCount()
         {
             return new SqlPreCommandSimple("select @@rowcount;");
         }
-
     }
 }

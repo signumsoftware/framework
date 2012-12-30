@@ -9,10 +9,12 @@ namespace Signum.Engine
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class SqlViewNameAttribute : Attribute
     {
-        public string Name { get; private set;}
+        public string Schema { get; private set; }
+        public string Name { get; private set; }
 
-        public SqlViewNameAttribute(string name)
+        public SqlViewNameAttribute(string schema, string name)
         {
+            this.Schema = schema;
             this.Name = name;
         }
     }
@@ -22,9 +24,9 @@ namespace Signum.Engine
     {
         public bool PrimaryKey { get; set; }
 
-        public string Name { get; private set;}
+        public string Name { get; private set; }
 
     }
 
-    public interface IView: IRootEntity { }
+    public interface IView : IRootEntity { }
 }

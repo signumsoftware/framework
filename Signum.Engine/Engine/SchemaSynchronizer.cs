@@ -14,13 +14,11 @@ namespace Signum.Engine
 {
     public static class SchemaSynchronizer
     {
-        public static Func<Dictionary<string, DiffTable>> GetDatabaseDescription = DefaultGetDatabaseDescription;
-
-        public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements)
+        public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements, string serverName, string databaseName)
         {
-            Dictionary<string, DiffTable> database = GetDatabaseDescription();
+            Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(serverName, databaseName);
 
-            Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.Name);
+            Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.PrefixedName());
 
             Dictionary<ITable, Dictionary<string, UniqueIndex>> modelIndices = model.Values.ToDictionary(t => t, t => t.GeneratUniqueIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".Formato(t.Name)));
 
@@ -28,7 +26,7 @@ namespace Signum.Engine
             SqlPreCommand dropIndices =
                 Synchronizer.SynchronizeScript(model, database,
                  null,
-                   (tn, dif) => dif.Indices.Values.Select(ix => SqlBuilder.DropIndex(tn, ix)).Combine(Spacing.Simple),
+                (tn, dif) => dif.Indices.Values.Select(ix => SqlBuilder.DropIndex(tn, ix)).Combine(Spacing.Simple),
                 (tn, tab, dif) =>
                 {
                     Dictionary<string, UniqueIndex> modelIxs = modelIndices[tab];
@@ -67,7 +65,7 @@ namespace Signum.Engine
                 model,
                 database,
                 (tn, tab) => SqlBuilder.CreateTableSql(tab),
-                (tn, dif) => SqlBuilder.DropTable(tn),
+                (tn, dif) => SqlBuilder.DropTable(dif.Prefix, dif.Name),
                 (tn, tab, dif) =>
                     SqlPreCommand.Combine(Spacing.Simple,
                     dif.Name != tab.Name ? SqlBuilder.RenameTable(dif.Name, tab.Name) : null,
@@ -99,10 +97,10 @@ namespace Signum.Engine
                      tab.Columns,
                      dif.Colums,
                      (cn, colModel) => colModel.ReferenceTable != null ?
-                         SqlBuilder.AlterTableAddConstraintForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name) : null,
+                         SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable) : null,
                      null,
                      (cn, colModel, coldb) => colModel.ReferenceTable != null && (coldb.ForeingKey == null || !coldb.ForeingKey.EqualForeignKey(tn, colModel)) ?
-                         SqlBuilder.AlterTableAddConstraintForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name) : null,
+                         SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable) : null,
                      Spacing.Simple),
                  Spacing.Double);
 
@@ -169,7 +167,7 @@ namespace Signum.Engine
             Renamed,
         }
 
-        public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription()
+        public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription(string serverName, string databaseName)
         {
             var udttypes = Schema.Current.Settings.UdtSqlName.Values.ToHashSet(StringComparer.InvariantCultureIgnoreCase);
 
@@ -179,7 +177,12 @@ namespace Signum.Engine
                             select new DiffTable
                             {
                                 Name = t.name,
-                                Schema = s.name,
+                                Prefix = new NamePrefix
+                                {
+                                    ServerName = serverName,
+                                    DatabaseName = databaseName,
+                                    SchemaName = s.name,
+                                },
                                 Colums = (from c in t.Columns()
                                           join type in Database.View<SysTypes>() on c.user_type_id equals type.user_type_id
                                           join ctr in Database.View<SysObjects>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
@@ -293,7 +296,7 @@ namespace Signum.Engine
     public class DiffTable
     {
         public string Name;
-        public string Schema;
+        public NamePrefix Prefix;
         public Dictionary<string, DiffColumn> Colums;
 
         public List<DiffIndex> SimpleIndices

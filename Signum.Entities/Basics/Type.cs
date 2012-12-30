@@ -19,19 +19,19 @@ namespace Signum.Entities.Basics
         }
 
         [NotNullable, UniqueIndex]
-        string tableName;
-        public string TableName
-        {
-            get { return tableName; }
-            set { Set(ref tableName, value, () => TableName); }
-        }
-
-        [NotNullable, UniqueIndex]
         string cleanName;
         public string CleanName
         {
             get { return cleanName; }
             set { Set(ref cleanName, value, () => CleanName); }
+        }
+
+        [NotNullable, UniqueIndex]
+        string tableName;
+        public string TableName
+        {
+            get { return tableName; }
+            set { Set(ref tableName, value, () => TableName); }
         }
 
         static Expression<Func<TypeDN, string>> ToStringExpression = e => e.CleanName;

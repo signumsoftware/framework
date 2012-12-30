@@ -36,18 +36,43 @@ namespace Signum.Engine
             where T : IdentifiableEntity
         {
             Table table = Schema.Current.Table<T>();
-            return ExistTable(table.Name);
+            return ExistTable(table.Prefix, table.Name);
         }
 
         public static bool ExistTable(Type type)
         {
             Table table = Schema.Current.Table(type);
-            return ExistTable(table.Name);
+            return ExistTable(table.Prefix, table.Name);
         }
 
-        public static bool ExistTable(string tableName)
+
+        public static bool ExistTable(SchemaName schema, string tableName)
         {
-            return Database.View<SysTables>().Any(a => a.name == tableName);
+            if (schema == null)
+                return Database.View<SysTables>().Any(a => a.name == tableName);
+
+
+            if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database.Server.Name))
+                return false;
+
+            if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database.Name))
+                return false;
+
+            using (Administrator.OverrideViewPrefix(prefix.ServerName, prefix.DatabaseName))
+            {
+                return (from t in Database.View<SysTables>()
+                        join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
+                        select t).Any();
+            }
+        }
+
+        static readonly ThreadVariable<DatabaseName> viewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
+        private static IDisposable OverrideViewPrefix(DatabaseName database)
+        {
+            var old = viewDatabase.Value;
+            viewDatabase.Value = database;
+
+
         }
 
         public static List<T> TryRetrieveAll<T>(Replacements replacements)
@@ -62,7 +87,7 @@ namespace Signum.Engine
 
             using (Synchronizer.RenameTable(table, replacements))
             {
-                if (ExistTable(table.Name))
+                if (ExistTable(table.Prefix, table.Name))
                 {
                     return Database.RetrieveAll(type);
                 }
@@ -133,12 +158,12 @@ namespace Signum.Engine
         public static IDisposable DisableIdentity(Table table)
         {
             table.Identity = false;
-            SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
+            SqlBuilder.SetIdentityInsert(table.PrefixedName(), true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
                 table.Identity = true;
-                SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
+                SqlBuilder.SetIdentityInsert(table.PrefixedName(), false).ExecuteNonQuery();
             });
         }
 
@@ -174,14 +199,20 @@ namespace Signum.Engine
             }
         }
 
-        public static void SetSnapshotIsolation(bool value)
+        public static void SetSnapshotIsolation(bool value, string databaseName = null)
         {
-            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(Connector.Current.DatabaseName(), value));
+            if (databaseName == null)
+                databaseName = Connector.Current.DatabaseName();
+
+            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(databaseName, value));
         }
 
-        public static void MakeSnapshotIsolationDefault(bool value)
+        public static void MakeSnapshotIsolationDefault(bool value, string databaseName = null)
         {
-            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(Connector.Current.DatabaseName(), value));
+            if (databaseName == null)
+                databaseName = Connector.Current.DatabaseName();
+
+            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(databaseName, value));
         }
 
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
