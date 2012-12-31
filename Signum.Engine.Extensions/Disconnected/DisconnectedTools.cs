@@ -125,7 +125,7 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
 
                 ((SqlConnection)Transaction.CurrentConnection).InfoMessage += (object sender, SqlInfoMessageEventArgs e) => { message = e.Message; };
 
-                Executor.ExecuteNonQuery("DBCC CHECKIDENT ({0}, NORESEED)".Formato(table.Name));
+                Executor.ExecuteNonQuery("DBCC CHECKIDENT ('{0}', NORESEED)".Formato(table.Name));
 
                 if (message == null)
                     throw new InvalidOperationException("DBCC CHECKIDENT didn't write a message");
@@ -164,7 +164,7 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
         {
             var pb = Connector.Current.ParameterBuilder;
 
-            Executor.ExecuteNonQuery("DBCC CHECKIDENT ({0}, RESEED, @seed)".Formato(table.Name), new List<DbParameter>
+            Executor.ExecuteNonQuery("DBCC CHECKIDENT ('{0}', RESEED, @seed)".Formato(table.Name), new List<DbParameter>
             {
                 pb.CreateParameter("@seed", IsEmpty(table) ? nextId :  nextId  -1, typeof(int))
             });

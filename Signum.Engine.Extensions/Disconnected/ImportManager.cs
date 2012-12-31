@@ -133,6 +133,7 @@ namespace Signum.Engine.Disconnected
 
                         using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { SynchronizeSchema = l })))
                         using (Connector.Override(newDatabase))
+                        using (SchemaName.AvoidDatabaseName())
                         {
                             var script = Administrator.TotalSynchronizeScript(interactive: false);
 
@@ -436,6 +437,7 @@ table.Name.OnDatabase(newDatabaseName));
         {
             int? maxOther;
             using (Connector.Override(newDatabase))
+            using (SchemaName.AvoidDatabaseName())
                 maxOther = DisconnectedTools.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
 
             if (maxOther == null)

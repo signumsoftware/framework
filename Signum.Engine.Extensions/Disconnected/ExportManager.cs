@@ -37,7 +37,7 @@ namespace Signum.Engine.Disconnected
         {
             public Type Type;
             public Table Table;
-            public IDisconnectedStrategy Strategy; 
+            public IDisconnectedStrategy Strategy;
         }
 
         public void Initialize()
@@ -75,124 +75,128 @@ namespace Signum.Engine.Disconnected
 
             var token = cancelationSource.Token;
 
-            var task = Task.Factory.StartNew(()=>
+            var task = Task.Factory.StartNew(() =>
             {
                 using (AuthLogic.UserSession(user))
                 {
                     OnStartExporting(machine);
                     DisconnectedMachineDN.Current = machine.ToLite();
 
-                try
-                {
-                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Lock = l })))
+                    try
                     {
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Lock = l })))
+                        {
+                            foreach (var tuple in downloadTables)
+                            {
+                                token.ThrowIfCancellationRequested();
+
+                                if (tuple.Strategy.Upload == Upload.Subset)
+                                    miUnsafeLock.MakeGenericMethod(tuple.Type).Invoke(this, new object[] { machine.ToLite(), tuple.Strategy, export });
+                            }
+                        }
+
+                        string connectionString;
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateDatabase = l })))
+                            connectionString = CreateDatabase(machine);
+
+                        var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current);
+
+
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateSchema = l })))
+                        using (Connector.Override(newDatabase))
+                        using (SchemaName.AvoidDatabaseName())
+                        {
+                            Administrator.TotalGeneration();
+                        }
+
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DisableForeignKeys = l })))
+                        using (Connector.Override(newDatabase))
+                        using (SchemaName.AvoidDatabaseName())
+                        {
+                            foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
+                            {
+                                token.ThrowIfCancellationRequested();
+
+                                DisableForeignKeys(tuple.Table);
+                            }
+                        }
+
+                        DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
+
                         foreach (var tuple in downloadTables)
                         {
                             token.ThrowIfCancellationRequested();
-
-                            if (tuple.Strategy.Upload == Upload.Subset)
-                                miUnsafeLock.MakeGenericMethod(tuple.Type).Invoke(this, new object[] { machine.ToLite(), tuple.Strategy, export });
-                        }
-                    }
-
-                    string connectionString;
-                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateDatabase = l })))
-                        connectionString = CreateDatabase(machine);
-
-                    var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current);
-
-
-                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateSchema = l })))
-                    using (Connector.Override(newDatabase))
-                    {
-                        Administrator.TotalGeneration();
-                    }
-
-                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DisableForeignKeys = l })))
-                    using (Connector.Override(newDatabase))
-                    {
-                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
-                        {
-                            token.ThrowIfCancellationRequested();
-
-                            DisableForeignKeys(tuple.Table);
-                        }
-                    }
-
-                    DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
-
-                    foreach (var tuple in downloadTables)
-                    {
-                        token.ThrowIfCancellationRequested();
-                        int ms = 0;
-                        using (token.MeasureTime(l => ms = l))
-                        {
-                            tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabaseName, machine);
-                        }
-
-                        int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
-                        
-                        ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e =>
-                            new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
+                            int ms = 0;
+                            using (token.MeasureTime(l => ms = l))
                             {
-                                Element =
+                                tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabaseName, machine);
+                            }
+
+                            int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
+
+                            ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e =>
+                                new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
                                 {
-                                    CopyTable = ms,
-                                    MaxIdInRange = maxId,
-                                }
-                            });
-                    }
-
-                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { EnableForeignKeys = l })))
-                        foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
-                        {
-                            token.ThrowIfCancellationRequested();
-
-                            EnableForeignKeys(tuple.Table);
+                                    Element =
+                                    {
+                                        CopyTable = ms,
+                                        MaxIdInRange = maxId,
+                                    }
+                                });
                         }
 
-                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { ReseedIds = l })))
-                    using (Connector.Override(newDatabase))
-                    {
-                        foreach (var table in Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { EnableForeignKeys = l })))
+                            foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
+                            {
+                                token.ThrowIfCancellationRequested();
+
+                                EnableForeignKeys(tuple.Table);
+                            }
+
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { ReseedIds = l })))
+                        using (Connector.Override(newDatabase))
+                        using (SchemaName.AvoidDatabaseName())
                         {
-                            token.ThrowIfCancellationRequested();
+                            foreach (var table in Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None))
+                            {
+                                token.ThrowIfCancellationRequested();
 
-                            Reseed(machine, table);
+                                Reseed(machine, table);
+                            }
                         }
-                    }
 
-                    CopyExport(export, newDatabase);
+                        CopyExport(export, newDatabase);
 
-                    machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
-                    using(SqlConnector.Override(newDatabase))
                         machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+                        using (SqlConnector.Override(newDatabase))
+                        using (SchemaName.AvoidDatabaseName())
+                            machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
 
-                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
-                        BackupDatabase(machine, export, newDatabase);
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
+                            BackupDatabase(machine, export, newDatabase);
 
-                    using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DropDatabase = l })))
-                        DropDatabase(newDatabase);
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DropDatabase = l })))
+                            DropDatabase(newDatabase);
 
-                    token.ThrowIfCancellationRequested();
+                        token.ThrowIfCancellationRequested();
 
-                    export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
-                }
-                catch (Exception e)
-                {
-                    var ex = e.LogException();
+                        export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
+                    }
+                    catch (Exception e)
+                    {
+                        var ex = e.LogException();
 
-                    export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Exception = ex.ToLite(), State = DisconnectedExportState.Error });
+                        export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Exception = ex.ToLite(), State = DisconnectedExportState.Error });
 
                         OnExportingError(machine, export, e);
-                }
-                finally
-                {
-                    runningExports.Remove(export);
+                    }
+                    finally
+                    {
+                        runningExports.Remove(export);
                         DisconnectedMachineDN.Current = null;
 
                         OnEndExporting();
-                }
+                    }
                 }
             });
 
@@ -202,13 +206,12 @@ namespace Signum.Engine.Disconnected
             return export;
         }
 
-       
-
         private void CopyExport(Lite<DisconnectedExportDN> export, SqlConnector newDatabase)
         {
             var clone = export.Retrieve().Clone();
 
             using (Connector.Override(newDatabase))
+            using (SchemaName.AvoidDatabaseName())
             {
                 clone.Save();
             }
@@ -217,12 +220,12 @@ namespace Signum.Engine.Disconnected
 
         protected virtual void OnStartExporting(DisconnectedMachineDN machine)
         {
-            
+
         }
 
         protected virtual void OnEndExporting()
         {
-            
+
         }
 
         protected virtual void OnExportingError(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Exception exception)
@@ -301,7 +304,7 @@ namespace Signum.Engine.Disconnected
             foreach (var rt in table.RelationalTables())
                 DisconnectedTools.EnableForeignKeys(rt);
         }
-       
+
         protected virtual void DisableForeignKeys(Table table)
         {
             DisconnectedTools.DisableForeignKeys(table);
@@ -390,7 +393,7 @@ FROM {1} as [table]".Formato(
 
             string fullCommand =
                 "SET IDENTITY_INSERT {0} ON\r\n".Formato(newTableName) +
-                command +
+                command + "\r\n" +
                 "SET IDENTITY_INSERT {0} OFF\r\n".Formato(newTableName);
 
             return Executor.ExecuteNonQuery(fullCommand, filter.TryCC(a => a.Parameters));
@@ -415,7 +418,7 @@ FROM {1} as [table]".Formato(
 
         private void DeleteTable(Table table, DatabaseName newDatabaseName)
         {
-            DisconnectedTools.DeleteTable(table.Name.OnDatabase(newDatabaseName)); 
-        } 
+            DisconnectedTools.DeleteTable(table.Name.OnDatabase(newDatabaseName));
+        }
     }
 }
