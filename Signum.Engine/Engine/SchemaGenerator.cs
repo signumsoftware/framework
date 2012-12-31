@@ -14,7 +14,7 @@ namespace Signum.Engine
         {
             return Schema.Current.GetDatabaseTables()
                 .Select(a => a.Name.Schema)
-                .Where(s => !s.IsDefault())
+                .Where(s => s.Name != "dbo")
                 .Distinct()
                 .Select(SqlBuilder.CreateSchema)
                 .Combine(Spacing.Simple);

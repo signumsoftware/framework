@@ -128,7 +128,7 @@ namespace Signum.Engine.Basics
                          select new TypeDN
                          {
                              FullClassName = type.FullName,
-                             TableName = tab.Name.ToString(),
+                             TableName = tab.Name.Name,
                              CleanName = Reflector.CleanTypeName(type)
                          }).ToList();
             return lista;

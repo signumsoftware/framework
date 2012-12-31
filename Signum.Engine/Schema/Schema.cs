@@ -819,7 +819,29 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; private set; }
 
-        public DatabaseName Database { get; private set; }
+        readonly DatabaseName database;
+
+        static bool AvoidDatabaseNameGlobally;
+
+        static ThreadVariable<bool> avoidDatabaseName = new ThreadVariable<bool>("avoidDatabaseName");
+
+        public static IDisposable AvoidDatabaseName()
+        {
+            var old = avoidDatabaseName.Value;
+            avoidDatabaseName.Value = true;
+            return new Disposable(() => avoidDatabaseName.Value = old);
+        }
+
+        public DatabaseName Database
+        {
+            get
+            {
+                if (database == null || AvoidDatabaseNameGlobally || avoidDatabaseName.Value)
+                    return null;
+
+                return database;
+            }
+        }
 
         public static readonly SchemaName Default = new SchemaName(null, "dbo");
 
@@ -834,7 +856,7 @@ namespace Signum.Engine.Maps
                 throw new ArgumentNullException("name");
 
             this.Name = name;
-            this.Database = database;
+            this.database = database;
         }
 
         public override string ToString()
