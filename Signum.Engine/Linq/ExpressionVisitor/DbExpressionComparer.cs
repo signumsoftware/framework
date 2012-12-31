@@ -135,7 +135,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareTable(TableExpression a, TableExpression b)
         {
-            return a.Name == b.Name;
+            return a.PrefixedName == b.PrefixedName;
         }
 
         protected virtual bool CompareColumn(ColumnExpression a, ColumnExpression b)

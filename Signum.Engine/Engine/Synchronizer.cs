@@ -144,13 +144,21 @@ namespace Signum.Engine
 
         public static IDisposable RenameTable(Table table, Replacements replacements)
         {
-            string tempName = replacements.TryGetC(Replacements.KeyTablesInverse).TryGetC(table.Name) ?? table.Name;
-            if (tempName == null)
+            string fullName = replacements.TryGetC(Replacements.KeyTablesInverse).TryGetC(table.Name);
+            if (fullName == null)
                 return null;
 
             string realName = table.Name;
-            table.Name = tempName;
-            return new Disposable(() => table.Name = realName);
+            SchemaName realSchema = table.SchemaName;
+
+            table.Name = fullName.TryAfterLast('.') ?? fullName;
+            table.SchemaName = SchemaName.Parse(fullName.TryBeforeLast('.'));
+
+            return new Disposable(() =>
+            {
+                table.Name = realName;
+                table.SchemaName = realSchema;
+            });
         }
     }
 

@@ -544,7 +544,7 @@ namespace Signum.Engine.Maps
             return tables.Values.ToString(t => t.Type.TypeName(), "\r\n\r\n");
         }
 
-        internal IEnumerable<ITable> GetDatabaseTables()
+        public IEnumerable<ITable> GetDatabaseTables()
         {
             foreach (var table in Schema.Current.Tables.Values)
             {
@@ -553,6 +553,11 @@ namespace Signum.Engine.Maps
                 foreach (var subTable in table.RelationalTables().Cast<ITable>())
                     yield return subTable;
             }
+        }
+
+        public List<DatabaseName> DatabaseNames()
+        {
+            return GetDatabaseTables().Select(a => a.Name.Schema.TryCC(s => s.Database)).Distinct().ToList();
         }
 
         public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()
@@ -699,5 +704,221 @@ namespace Signum.Engine.Maps
         public bool IsRoot { get; set; }
         public bool WasNew { get; set; }
         public bool WasModified { get; set; }
+    }
+
+
+    public static class TableExtensions
+    {
+        internal static string UnScapeSql(this string name)
+        {
+            return name.Trim('[', ']');
+        }
+    }
+
+    public class ServerName : IEquatable<ServerName>
+    {
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Linked Servers: http://msdn.microsoft.com/en-us/library/ms188279.aspx
+        /// Not fully supported jet
+        /// </summary>
+        /// <param name="name"></param>
+        public ServerName(string name)
+        {
+            if (string.IsNullOrEmpty(this.Name))
+                throw new ArgumentNullException("name");
+
+            this.Name = name;
+        }
+
+        public override string ToString()
+        {
+            return Name.SqlScape() + ".";
+        }
+
+        public bool Equals(ServerName other)
+        {
+            return other.Name == Name;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var db = obj as ServerName;
+            return db != null && Equals(db);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
+
+        internal static ServerName Parse(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return null;
+
+            return new ServerName(name.UnScapeSql());
+        }
+    }
+
+    public class DatabaseName : IEquatable<DatabaseName>
+    {
+        public string Name { get; private set; }
+
+        public ServerName Server { get; private set; }
+
+        public DatabaseName(ServerName server, string name)
+        {
+            if (string.IsNullOrEmpty(this.Name))
+                throw new ArgumentNullException("name");
+
+            this.Name = name;
+            this.Server = server;
+        }
+
+        public override string ToString()
+        {
+            var result = Name.SqlScape() + ".";
+
+            if (Server == null)
+                return result;
+
+            return Server.ToString() + result;
+        }
+
+        public bool Equals(DatabaseName other)
+        {
+            return other.Name == Name &&
+                object.Equals(Server, other.Server);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var db = obj as DatabaseName;
+            return db != null && Equals(db);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() ^ (Server == null ? 0 : Server.GetHashCode());
+        }
+
+        internal static DatabaseName Parse(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return null;
+
+            return new DatabaseName(ServerName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
+        }
+    }
+
+    public class SchemaName : IEquatable<SchemaName>
+    {
+        public string Name { get; private set; }
+
+        public DatabaseName Database { get; private set; }
+
+        public SchemaName(DatabaseName database, string name)
+        {
+            if (string.IsNullOrEmpty(this.Name))
+                throw new ArgumentNullException("name");
+
+            this.Name = name;
+            this.Database = database;
+        }
+
+        public override string ToString()
+        {
+            var result = Name.SqlScape() + ".";
+
+            if (Database == null)
+                return result;
+
+            return Database.ToString() + result;
+        }
+
+        public bool Equals(SchemaName other)
+        {
+            return other.Name == Name &&
+                object.Equals(Database, other.Database);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var sc = obj as SchemaName;
+            return sc != null && Equals(sc);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() ^ (Database == null ? 0 : Database.GetHashCode());
+        }
+
+        internal static SchemaName Parse(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return null;
+
+            return new SchemaName(DatabaseName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
+        }
+
+    }
+
+    public class ObjectName : IEquatable<ObjectName>
+    {
+        public string Name { get; private set; }
+
+        public SchemaName Schema { get; private set; }
+
+        public ObjectName(SchemaName schema, string name)
+        {
+            if (string.IsNullOrEmpty(this.Name))
+                throw new ArgumentNullException("name");
+
+            this.Name = name;
+            this.Schema = schema;
+        }
+
+        public override string ToString()
+        {
+            if (Schema == null)
+                return Name.SqlScape();
+
+            return Schema.ToString() + Name.SqlScape();
+        }
+
+        public string ToStringDbo()
+        {
+            if (Schema == null)
+                return "dbo." + Name.SqlScape();
+
+            return Schema.ToString() + Name.SqlScape();
+        }
+
+        public bool Equals(ObjectName other)
+        {
+            return other.Name == Name &&
+                object.Equals(Schema, other.Schema);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var sc = obj as ObjectName;
+            return sc != null && Equals(sc);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() ^ (Schema == null ? 0 : Schema.GetHashCode());
+        }
+
+        internal static ObjectName Parse(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException("name");
+
+            return new ObjectName(SchemaName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
+        }
     }
 }

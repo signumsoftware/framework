@@ -24,89 +24,6 @@ using System.Threading;
 
 namespace Signum.Engine.Maps
 {
-    public static class NamePrefixExtensions
-    {
-        public static string PrefixedName(this ITable table)
-        {
-            return table.Prefix.PrefixName(table.Name); 
-        }
-    }
-
-    public class ServerName
-    {
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// Linked Servers: http://msdn.microsoft.com/en-us/library/ms188279.aspx
-        /// Not fully supported jet
-        /// </summary>
-        /// <param name="name"></param>
-        public ServerName(string name)
-        {
-            if (string.IsNullOrEmpty(this.Name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-        }
-
-        public string PrefixName(string threePartIdentifier)
-        {
-            return Name.SqlScape() + "." + threePartIdentifier;
-        }
-    }
-
-    public class DatabaseName
-    {
-        public string Name { get; private set; }
-
-        public ServerName Server {get; private set;}
-
-        public DatabaseName(ServerName server, string name)
-        {
-            if (string.IsNullOrEmpty(this.Name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-            this.Server = server;
-        }
-
-        public string PrefixName(string twoPartIdentifier)
-        {
-            string threePart =  Name.SqlScape() + "." + twoPartIdentifier;
-
-            if(Server == null)
-                return threePart;
-
-            return Server.PrefixName(threePart);
-        }
-    }
-
-    public class SchemaName
-    {
-        public string Name { get; private set; }
-
-        public DatabaseName Database { get; private set; }
-
-        public SchemaName(DatabaseName database, string name)
-        {
-            if (string.IsNullOrEmpty(this.Name))
-                throw new ArgumentNullException("name");
-
-            this.Name = name;
-            this.Database = database;
-        }
-
-        public string PrefixName(string objectIdentifier)
-        {
-            string twoPart = Name.SqlScape() + "." + objectIdentifier.SqlScape();
-
-            if (Database == null)
-                return twoPart;
-
-            return Database.PrefixName(twoPart);
-        }
-    }
-  
     public interface IFieldFinder
     {
         Field GetField(MemberInfo value);
@@ -115,9 +32,7 @@ namespace Signum.Engine.Maps
 
     public interface ITable
     {
-        SchemaName Schema { get; set; }
-
-        string Name { get; }
+        ObjectName Name { get; }
 
         Dictionary<string, IColumn> Columns { get; }
 
@@ -138,10 +53,7 @@ namespace Signum.Engine.Maps
     {
         public Type Type { get; private set; }
 
-        public NamePrefix Prefix { get; set; }
-
-        public string Name { get; set; }
-
+        public ObjectName Name { get; set; }
 
         bool identity = true;
         public bool Identity
@@ -798,8 +710,7 @@ namespace Signum.Engine.Maps
         public Dictionary<string, IColumn> Columns { get; set; }
         public List<UniqueIndex> MultiIndexes { get; set; }
 
-        public NamePrefix Prefix { get; set; }
-        public string Name { get; set; }
+        public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
         public FieldReference BackReference { get; set; }
         public Field Field { get; set; }

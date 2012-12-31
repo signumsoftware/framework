@@ -25,36 +25,36 @@ namespace Signum.Engine
         public static SqlPreCommand CreateTableSql(ITable t)
         {
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(
-                t.PrefixedName(), 
+                t.Name, 
                 t.Columns.Values.Select(c => SqlBuilder.CreateField(c)).ToString(",\r\n").Indent(2)));
         }
 
-        public static SqlPreCommand DropTable(NamePrefix prefix, string table)
+        public static SqlPreCommand DropTable(ObjectName tableName)
         {
-            return new SqlPreCommandSimple("DROP TABLE {0}".Formato(prefix.PrefixName(table)));
+            return new SqlPreCommandSimple("DROP TABLE {0}".Formato(tableName));
         }
 
-        public static SqlPreCommand DropView(NamePrefix prefix, string view)
+        public static SqlPreCommand DropView(ObjectName viewName)
         {
-            return new SqlPreCommandSimple("DROP VIEW {0}".Formato(view.SqlScape()));
+            return new SqlPreCommandSimple("DROP VIEW {0}".Formato(viewName));
         }
 
-        static SqlPreCommand DropViewIndex(string view, string index)
+        static SqlPreCommand DropViewIndex(ObjectName viewName, string index)
         {
             return new[]{
-                 DropIndex(view, index),
-                 DropView(view)
+                 DropIndex(viewName, index),
+                 DropView(viewName)
             }.Combine(Spacing.Simple);
         }
 
-        public static SqlPreCommand AlterTableDropColumn(string table, string columnName)
+        public static SqlPreCommand AlterTableDropColumn(ITable table, string columnName)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".Formato(table.SqlScape(), columnName.SqlScape()));
+            return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".Formato(table.Name, columnName.SqlScape()));
         }
 
-        public static SqlPreCommand AlterTableAddColumn(string table, IColumn column)
+        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table, CreateField(column), !column.Nullable ? "-- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : null));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table.Name, CreateField(column), !column.Nullable ? "-- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : null));
         }
 
         private static bool IsNumber(SqlDbType sqlDbType)
@@ -79,7 +79,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".Formato(table.PrefixedName(), CreateField(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".Formato(table.Name, CreateField(column)));
         }
 
         public static string CreateField(IColumn c)
@@ -134,20 +134,20 @@ namespace Signum.Engine
             return new[] { uniqueIndices, freeIndexes }.Combine(Spacing.Simple);
         }
 
-        public static SqlPreCommand DropIndex(string table, DiffIndex index)
+        public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
         {
             if (index.ViewName == null)
-                return DropIndex(table, index.IndexName);
+                return DropIndex(tableName, index.IndexName);
             else
-                return DropViewIndex(index.ViewName, index.IndexName);
+                return DropViewIndex(new ObjectName(tableName.Schema, index.ViewName), index.IndexName);
         }
 
-        static SqlPreCommand DropIndex(string table, string indexName)
+        static SqlPreCommand DropIndex(ObjectName objectName, string indexName)
         {
-            return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(table.SqlScape(), indexName.SqlScape()));
+            return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(objectName, indexName.SqlScape()));
         }
 
-        public static SqlPreCommand ReCreateFreeIndex(string oldTable, string table, DiffIndex index, Dictionary<string, string> tableReplacements)
+        public static SqlPreCommand ReCreateFreeIndex(ITable table, DiffIndex index, string oldTable, Dictionary<string, string> tableReplacements)
         {
             if (index.IsControlledIndex)
                 throw new InvalidOperationException("The Index is not a free index");
@@ -155,14 +155,14 @@ namespace Signum.Engine
             var onlyColumn = index.Columns.Only();
 
             string indexName = onlyColumn != null && index.IndexName.StartsWith("FIX_") ? "FIX_{0}_{1}".Formato(table, (tableReplacements.TryGetC(onlyColumn) ?? onlyColumn)) :
-                tableReplacements == null ? index.IndexName.Replace(oldTable, table) :
-                index.IndexName.Replace(tableReplacements).Replace(oldTable, table);
+                tableReplacements == null ? index.IndexName.Replace(oldTable, table.Name.Name) :
+                index.IndexName.Replace(tableReplacements).Replace(oldTable, table.Name.Name);
 
             string columns = index.Columns.ToString(c => (tableReplacements.TryGetC(c) ?? c).SqlScape(), ", ");
 
             return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
                  indexName.SqlScape(),
-                 table.SqlScape(),
+                 table.Name,
                  columns));
         }
 
@@ -172,7 +172,7 @@ namespace Signum.Engine
 
             return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
                  indexName.SqlScape(),
-                 table.Name.SqlScape(),
+                 table.Name,
                  column.Name.SqlScape()));
         }
 
@@ -184,19 +184,19 @@ namespace Signum.Engine
             {
                 return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2})".Formato(
                     index.IndexName,
-                    index.Table.Name.SqlScape(),
+                    index.Table.Name,
                     columns));
             }
 
             if (index.ViewName != null)
             {
-                string viewName = index.ViewName;
+                ObjectName viewName = new ObjectName(index.Table.Name.Schema, index.ViewName);
 
-                SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM dbo.{2} WHERE {3}"
-                    .Formato(viewName.SqlScape(), columns, index.Table.Name.SqlScape(), index.Where)) { AddGo = true };
+                SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
+                    .Formato(viewName, columns, index.Table.Name, index.Where)) { AddGo = true };
 
                 SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
-                    .Formato(index.IndexName, viewName.SqlScape(), index.Columns.ToString(c => c.Name.SqlScape(), ", ")));
+                    .Formato(index.IndexName, viewName, index.Columns.ToString(c => c.Name.SqlScape(), ", ")));
 
                 return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
             }
@@ -204,31 +204,31 @@ namespace Signum.Engine
             {
                 return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2}) WHERE {3}".Formato(
                       index.IndexName,
-                      index.Table.Name.SqlScape(),
+                      index.Table.Name,
                       columns, index.Where));
             }
         }
 
-        public static SqlPreCommand AlterTableDropConstraint(string table, string constraintName)
+        public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, string constraintName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".Formato(
-                table.SqlScape(),
+                tableName,
                 constraintName.SqlScape())) { AddGo = true };
         }
 
-        public static SqlPreCommand AlterTableAddDefaultConstraint(string table, string column, string constraintName, string definition)
+        public static SqlPreCommand AlterTableAddDefaultConstraint(ITable table, string column, string constraintName, string definition)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
-                        .Formato(table.SqlScape(), constraintName.SqlScape(), definition, column.SqlScape()));
+                        .Formato(table.Name, constraintName.SqlScape(), definition, column.SqlScape()));
         }
 
         public static SqlPreCommand AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4})".Formato(
-                table.PrefixedName(),
-                ForeignKeyName(table.Name, fieldName),
+                table.Name,
+                ForeignKeyName(table.Name.Name, fieldName),
                 fieldName.SqlScape(),
-                foreignTable.PrefixedName(),
+                foreignTable.Name,
                 PrimaryKeyName.SqlScape()));
         }
 
@@ -237,26 +237,52 @@ namespace Signum.Engine
             return "FK_{0}_{1}".Formato(table, fieldName).SqlScape();
         }
 
-        public static SqlPreCommand RenameTable(string oldName, string newName)
+        public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
         {
-            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}' , '{1}'".Formato(oldName, newName));
+            if (object.Equals(oldTable.Name.Schema, newTable.Name.Schema))
+                return RenameTable(oldTable.Name, newTable.Name.Name);
+
+            if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
+                return SqlPreCommand.Combine(Spacing.Simple,
+                    AlterSchema(oldTable.Name, newTable.Name.Schema),
+                    oldTable.Name == newTable.Name ? null : RenameTable(new ObjectName(newTable.Name.Schema, oldTable.Name.Name), newTable.Name.Name));
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                CreateTableSql(newTable),
+                MoveRows(oldTable.Name, newTable.Name),
+                DropTable(oldTable.Name));
         }
 
-        public static SqlPreCommand RenameColumn(string tableName, string oldName, string newName)
+        public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable)
         {
-            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'COLUMN' ".Formato(tableName, oldName, newName));
+            return new SqlPreCommandSimple("SELECT * INTO {0} FROM {1}".Formato(newTable, oldTable));
         }
 
-        public static SqlPreCommand RenameIndex(string tableName, string oldName, string newName)
+        public static SqlPreCommand RenameTable(ObjectName oldName, string newName)
         {
-            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'INDEX' ".Formato(tableName, oldName, newName));
+            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}' , '{1}'".Formato(oldName, newName.SqlScape()));
+        }
+
+        public static SqlPreCommandSimple AlterSchema(ObjectName oldName, SchemaName schemaName)
+        {
+            return new SqlPreCommandSimple("ALTER SCHEMA {0} TRANSFER {1};".Formato(schemaName.Name.SqlScape(), oldName));
+        }
+
+        public static SqlPreCommand RenameColumn(ITable table, string oldName, string newName)
+        {
+            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'COLUMN' ".Formato(table.Name, oldName, newName));
+        }
+
+        public static SqlPreCommand RenameIndex(ITable table, string oldName, string newName)
+        {
+            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'INDEX' ".Formato(table.Name, oldName, newName));
         }
         #endregion
 
-        public static SqlPreCommandSimple SetIdentityInsert(string table, bool value)
+        public static SqlPreCommandSimple SetIdentityInsert(ObjectName tableName, bool value)
         {
             return new SqlPreCommandSimple("SET IDENTITY_INSERT {0} {1}".Formato(
-                table, value ? "ON" : "OFF"));
+                tableName, value ? "ON" : "OFF"));
         }
 
         public static SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)

@@ -66,7 +66,7 @@ namespace Signum.Engine.Basics
             var dict = EnumerableExtensions.JoinStrict(
                 types, current.Tables.Keys, t => t.FullClassName, t => (EnumEntity.Extract(t) ?? t).FullName,
                 (typeDN, type) => new { typeDN, type },
-                "caching types table from {0}".Formato(current.Table(typeof(TypeDN)).Name)
+                "caching types table from {0}".Formato(current.Table(typeof(TypeDN)).PrefixedName())
                 ).ToDictionary(a => a.type, a => a.typeDN);
 
             current.TypeToId = dict.SelectDictionary(k => k, v => v.Id);

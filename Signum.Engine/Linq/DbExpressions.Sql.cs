@@ -239,7 +239,7 @@ namespace Signum.Engine.Linq
     {
         public readonly ITable Table;
 
-        public string Name { get { return Table.Name; } }
+        public string PrefixedName { get { return Table.PrefixedName(); } }
 
         public override Alias[] KnownAliases
         {
@@ -254,7 +254,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0} as {1}".Formato(Name, Alias);
+            return "{0} as {1}".Formato(PrefixedName, Alias);
         }
 
         internal ColumnExpression GetIdExpression()
@@ -262,7 +262,7 @@ namespace Signum.Engine.Linq
             var expression = ((ITablePrivate)Table).GetPrimaryOrder(Alias);
 
             if (expression == null)
-                throw new InvalidOperationException("Impossible to determine Primary Key for {0}".Formato(Name));
+                throw new InvalidOperationException("Impossible to determine Primary Key for {0}".Formato(PrefixedName));
 
             return expression;
         }

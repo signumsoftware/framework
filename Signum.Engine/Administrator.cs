@@ -35,44 +35,39 @@ namespace Signum.Engine
         public static bool ExistTable<T>()
             where T : IdentifiableEntity
         {
-            Table table = Schema.Current.Table<T>();
-            return ExistTable(table.Prefix, table.Name);
+            return ExistTable(Schema.Current.Table<T>());
         }
 
         public static bool ExistTable(Type type)
         {
-            Table table = Schema.Current.Table(type);
-            return ExistTable(table.Prefix, table.Name);
+            return ExistTable(Schema.Current.Table(type));
         }
 
-
-        public static bool ExistTable(SchemaName schema, string tableName)
+        public static bool ExistTable(Table table)
         {
-            if (schema == null)
-                return Database.View<SysTables>().Any(a => a.name == tableName);
+            SchemaName schemaName = table.SchemaName;
 
-
-            if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database.Server.Name))
+            if (schemaName.Database != null && schemaName.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schemaName.Database.Server.Name))
                 return false;
 
-            if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database.Name))
+            if (schemaName.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schemaName.Database.Name))
                 return false;
 
-            using (Administrator.OverrideViewPrefix(prefix.ServerName, prefix.DatabaseName))
+            using (schemaName.Database == null ? null : Administrator.OverrideViewPrefix(schemaName.Database))
             {
                 return (from t in Database.View<SysTables>()
                         join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
+                        where t.name == table.Name && s.name == schemaName.Name
                         select t).Any();
             }
         }
 
         static readonly ThreadVariable<DatabaseName> viewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
-        private static IDisposable OverrideViewPrefix(DatabaseName database)
+        public static IDisposable OverrideViewPrefix(DatabaseName database)
         {
             var old = viewDatabase.Value;
             viewDatabase.Value = database;
-
-
+            return new Disposable(() => viewDatabase.Value = old);
         }
 
         public static List<T> TryRetrieveAll<T>(Replacements replacements)
@@ -87,10 +82,8 @@ namespace Signum.Engine
 
             using (Synchronizer.RenameTable(table, replacements))
             {
-                if (ExistTable(table.Prefix, table.Name))
-                {
+                if (ExistTable(table))
                     return Database.RetrieveAll(type);
-                }
                 return new List<IdentifiableEntity>();
             }
         }
@@ -158,22 +151,22 @@ namespace Signum.Engine
         public static IDisposable DisableIdentity(Table table)
         {
             table.Identity = false;
-            SqlBuilder.SetIdentityInsert(table.PrefixedName(), true).ExecuteNonQuery();
+            SqlBuilder.SetIdentityInsert(table.SchemaName, table.Name, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
                 table.Identity = true;
-                SqlBuilder.SetIdentityInsert(table.PrefixedName(), false).ExecuteNonQuery();
+                SqlBuilder.SetIdentityInsert(table.SchemaName, table.Name, false).ExecuteNonQuery();
             });
         }
 
-        public static IDisposable DisableIdentity(string tableName)
+        public static IDisposable DisableIdentity(SchemaName schemaName, string tableName)
         {
-            SqlBuilder.SetIdentityInsert(tableName, true).ExecuteNonQuery();
+            SqlBuilder.SetIdentityInsert(schemaName, tableName, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
-                SqlBuilder.SetIdentityInsert(tableName, false).ExecuteNonQuery();
+                SqlBuilder.SetIdentityInsert(schemaName, tableName, false).ExecuteNonQuery();
             });
         }
 

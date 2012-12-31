@@ -765,7 +765,7 @@ namespace Signum.Engine.Linq
 
             Type type = value.GetType();
 
-            if (!type.IsInstantiationOf(typeof(SignumTableQuery<>)) && !type.IsInstantiationOf(typeof(Query<>)))
+            if (!type.IsInstantiationOf(typeof(SignumTable<>)) && !type.IsInstantiationOf(typeof(Query<>)))
                 throw new InvalidOperationException("{0} belongs to another kind of Linq Provider".Formato(type.TypeName()));
 
             return true;

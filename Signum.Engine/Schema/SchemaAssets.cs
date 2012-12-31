@@ -37,6 +37,7 @@ namespace Signum.Engine.Maps
         #region Views
         public class View
         {
+            public SchemaName Schema = SchemaName.Default;
             public string Name;
             public string Definition;
 
@@ -82,14 +83,16 @@ namespace Signum.Engine.Maps
 
         #region Procedures
         public Dictionary<string, Procedure> StoreProcedures = new Dictionary<string, Procedure>();
-        public void IncludeStoreProcedure(string procedureName, string procedureCodeAndArguments)
+        public Procedure IncludeStoreProcedure(string procedureName, string procedureCodeAndArguments)
         {
-            StoreProcedures[procedureName] = new Procedure
+            var name = new Procedure
             {
                 ProcedureName = procedureName,
                 ProcedureCodeAndArguments = procedureCodeAndArguments,
                 ProcedureType = "PROCEDURE"
-            }; 
+            };
+
+            StoreProcedures[procedureName] = name; 
         }
 
         public void IncludeUserDefinedFunction(string functionName, string functionCodeAndArguments)
@@ -126,6 +129,7 @@ namespace Signum.Engine.Maps
 
         public class Procedure
         {
+            public SchemaName Schema = SchemaName.Default;
             public string ProcedureType;
             public string ProcedureName;
             public string ProcedureCodeAndArguments;
@@ -179,6 +183,9 @@ namespace Signum.Engine.Maps
 
         SqlPreCommand SyncDefaultConstraints(Replacements replacements)
         {
+
+
+
             var oldConstraints = (from t in Database.View<SysTables>()
                                   join c in Database.View<SysColumns>() on t.object_id equals c.object_id
                                   join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
@@ -189,7 +196,7 @@ namespace Signum.Engine.Maps
             return Synchronizer.SynchronizeScript(
                 DefaultContraints.SelectDictionary(t => t.Name, dic => dic),
                 oldConstraints,
-                (tn, newDic) => newDic.Select(kvp => SqlBuilder.AlterTableAddDefaultConstraint(tn, kvp.Key.Name, kvp.Value.ConstraintName, kvp.Value.DefaultExpression)).Combine(Spacing.Simple),
+                (tn, newDic) => newDic.Select(kvp => SqlBuilder.AlterTableAddDefaultConstraint(kvp.Value, kvp.Key.Name, kvp.Value.ConstraintName, kvp.Value.DefaultExpression)).Combine(Spacing.Simple),
                 (tn, oldDic) => oldDic.Select(kvp => SqlBuilder.AlterTableDropConstraint(tn, kvp.Value.constraintName)).Combine(Spacing.Simple),
                 (tn, newDic, oldDic) =>
                     Synchronizer.SynchronizeScript(
