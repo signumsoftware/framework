@@ -149,6 +149,82 @@ namespace Signum.Utilities
             return str.Substring(index + 1);
         }
 
+
+        public static string BeforeLast(this string str, char separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(0, index);
+        }
+
+        public static string BeforeLast(this string str, string separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(0, index);
+        }
+
+        public static string AfterLast(this string str, char separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(index + 1);
+        }
+
+        public static string AfterLast(this string str, string separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(index + 1);
+        }
+
+        public static string TryBeforeLast(this string str, char separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(0, index);
+        }
+
+        public static string TryBeforeLast(this string str, string separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(0, index);
+        }
+
+        public static string TryAfterLast(this string str, char separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(index + 1);
+        }
+
+        public static string TryAfterLast(this string str, string separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(index + 1);
+        }
+
+
+
+
         public static string Between(this string str, string firstSeparator, string secondSeparator = null)
         {
             if (secondSeparator == null)
