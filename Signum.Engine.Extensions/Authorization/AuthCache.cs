@@ -76,7 +76,7 @@ namespace Signum.Entities.Authorization
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", false, arg.Id);
 
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.PrefixedName(), f.Name, param.ParameterName), new List<DbParameter> { param });
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name.SqlScape(), param.ParameterName), new List<DbParameter> { param });
         }
 
 

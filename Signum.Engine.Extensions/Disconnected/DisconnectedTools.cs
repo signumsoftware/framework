@@ -78,18 +78,18 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
 
         public static void DisableForeignKeys(ITable table)
         {
-            Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT all".Formato(table.PrefixedName()));
+            Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT all".Formato(table.Name));
         }
 
         public static void EnableForeignKeys(ITable table)
         {
-            Executor.ExecuteNonQuery("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT all".Formato(table.PrefixedName()));
+            Executor.ExecuteNonQuery("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT all".Formato(table.Name));
         }
 
 
-        public static void DeleteTable(string fullTableName)
+        public static void DeleteTable(ObjectName tableName)
         {
-            Executor.ExecuteNonQuery("DELETE FROM {0}".Formato(fullTableName));
+            Executor.ExecuteNonQuery("DELETE FROM {0}".Formato(tableName));
         }
 
         // TSQL Seed madness pseudo-code. 
@@ -108,7 +108,7 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
         {
             var pb = Connector.Current.ParameterBuilder;
 
-            int? max = (int?)Executor.ExecuteScalar("SELECT MAX(Id) FROM {0} WHERE @min <= Id AND Id < @max".Formato(table.PrefixedName()), new List<DbParameter>
+            int? max = (int?)Executor.ExecuteScalar("SELECT MAX(Id) FROM {0} WHERE @min <= Id AND Id < @max".Formato(table.Name), new List<DbParameter>
             {
                 pb.CreateParameter("@min", seedMin, typeof(int)),
                 pb.CreateParameter("@max", seedMax, typeof(int))
@@ -125,7 +125,7 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
 
                 ((SqlConnection)Transaction.CurrentConnection).InfoMessage += (object sender, SqlInfoMessageEventArgs e) => { message = e.Message; };
 
-                Executor.ExecuteNonQuery("DBCC CHECKIDENT ({0}, NORESEED)".Formato(table.PrefixedName()));
+                Executor.ExecuteNonQuery("DBCC CHECKIDENT ({0}, NORESEED)".Formato(table.Name));
 
                 if (message == null)
                     throw new InvalidOperationException("DBCC CHECKIDENT didn't write a message");
@@ -157,14 +157,14 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
             if (info.Identity.HasValue)
                 return info.Identity.Value + 1;
 
-            return Executor.ExecuteNonQuery("SELECT IDENT_CURRENT ('{0}') ".Formato(table.PrefixedName()));
+            return Executor.ExecuteNonQuery("SELECT IDENT_CURRENT ('{0}') ".Formato(table.Name));
         }
 
         public static void SetNextId(ITable table, int nextId)
         {
             var pb = Connector.Current.ParameterBuilder;
 
-            Executor.ExecuteNonQuery("DBCC CHECKIDENT ({0}, RESEED, @seed)".Formato(table.PrefixedName()), new List<DbParameter>
+            Executor.ExecuteNonQuery("DBCC CHECKIDENT ({0}, RESEED, @seed)".Formato(table.Name), new List<DbParameter>
             {
                 pb.CreateParameter("@seed", IsEmpty(table) ? nextId :  nextId  -1, typeof(int))
             });

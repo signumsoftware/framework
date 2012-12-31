@@ -368,7 +368,7 @@ namespace Signum.Engine.Disconnected
             {
                 using (Transaction tr = new Transaction())
                 {
-                    using (Administrator.DisableIdentity(table.SchemaName, table.Name))
+                    using (Administrator.DisableIdentity(table.Name))
                     {
                         SqlPreCommandSimple sql = InsertTableScript(table, newDatabaseName, interval);
 
@@ -397,11 +397,11 @@ SELECT {2}
 FROM {3} as [relationalTable]
 JOIN {4} [table] on [relationalTable].{5} = [table].Id
 WHERE @min <= [table].Id AND [table].Id < @max".Formato(
-rt.PrefixedName(),
+rt.Name,
 columns.ToString(c => c.Name.SqlScape(), ", "),
 columns.ToString(c => "[relationalTable]." + c.Name.SqlScape(), ", "),
-Prefix(newDatabaseName, rt),
-Prefix(newDatabaseName, table),
+rt.Name.OnDatabase(newDatabaseName),
+table.Name.OnDatabase(newDatabaseName),
 rt.BackReference.Name.SqlScape());
 
             var sql = new SqlPreCommandSimple(command, new List<DbParameter>()
@@ -419,10 +419,10 @@ rt.BackReference.Name.SqlScape());
 SELECT {2}
 FROM {3} as [table]
 WHERE @min <= [table].Id AND [table].Id < @max".Formato(
-table.PrefixedName(),
+table.Name,
 table.Columns.Keys.ToString(a => a.SqlScape(), ", "),
 table.Columns.Keys.ToString(a => "[table]." + a.SqlScape(), ", "),
-Prefix(newDatabaseName, table));
+table.Name.OnDatabase(newDatabaseName));
 
             var sql = new SqlPreCommandSimple(command, new List<DbParameter>()
             {
@@ -430,11 +430,6 @@ Prefix(newDatabaseName, table));
                 pb.CreateParameter("@max", interval.Value.Max, typeof(int)),
             });
             return sql;
-        }
-
-        protected virtual string Prefix(DatabaseName newDatabaseName, ITable table)
-        {
-            return new SchemaName(newDatabaseName, table.SchemaName.Name).PrefixName(table.Name);
         }
 
         protected virtual Interval<int>? GetNewIdsInterval(Table table, DisconnectedMachineDN machine, SqlConnector newDatabase)
@@ -497,11 +492,11 @@ Prefix(newDatabaseName, table));
 SELECT {2}
 FROM {3} as [relationalTable]
 INNER JOIN {4} as [table] ON [relationalTable].{5} = [table].id".Formato(
-            rt.PrefixedName(),
+            rt.Name,
             columns.ToString(c => c.Name.SqlScape(), ", "),
             columns.ToString(c => "[relationalTable]." + c.Name.SqlScape(), ", "),
-            Prefix(newDatabaseName, rt),
-            Prefix(newDatabaseName, table),
+            rt.Name.OnDatabase(newDatabaseName),
+            table.Name.OnDatabase(newDatabaseName),
             rt.BackReference.Name.SqlScape()) + GetUpdateWhere(table), new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
             return insert;
         }
@@ -513,8 +508,8 @@ INNER JOIN {4} as [table] ON [relationalTable].{5} = [table].id".Formato(
             var delete = new SqlPreCommandSimple(@"DELETE {0}
 FROM {0}
 INNER JOIN {1} as [table] ON {0}.{2} = [table].id".Formato(
-                rt.PrefixedName(),
-                Prefix(newDatabaseName, table),
+                rt.Name,
+                table.Name.OnDatabase(newDatabaseName),
                 rt.BackReference.Name.SqlScape()) + GetUpdateWhere(table), new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
             return delete;
         }
@@ -528,9 +523,9 @@ INNER JOIN {1} as [table] ON {0}.{2} = [table].id".Formato(
 FROM {0}
 INNER JOIN {1} as [table] ON {0}.id = [table].id
 ".Formato(
- table.PrefixedName(),
- Prefix(newDatabaseName, table),
- table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0}.{1} = [table].{1}".Formato(table.PrefixedName(), c.Name.SqlScape()), ",\r\n")) + GetUpdateWhere(table),
+ table.Name,
+ table.Name.OnDatabase(newDatabaseName),
+ table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0}.{1} = [table].{1}".Formato(table.Name, c.Name.SqlScape()), ",\r\n")) + GetUpdateWhere(table),
  new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id, typeof(int)) });
             return command;
         }

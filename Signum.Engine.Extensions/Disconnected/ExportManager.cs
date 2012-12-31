@@ -362,16 +362,16 @@ namespace Signum.Engine.Disconnected
 
         protected virtual int CopyTableBasic(ITable table, DatabaseName newDatabaseName, SqlPreCommandSimple filter)
         {
-            SchemaName schema = new SchemaName(newDatabaseName, table.SchemaName.Name);
+            ObjectName newTableName = table.Name.OnDatabase(newDatabaseName);
 
             string command =
 @"INSERT INTO {0} ({2})
 SELECT {3}
 FROM {1} as [table]".Formato(
-                schema.PrefixName(table.Name),
-                table.PrefixedName(),
-                table.Columns.Keys.ToString(a => a.SqlScape(), ", "),
-                table.Columns.Keys.ToString(a => "[table]." + a.SqlScape(), ", "));
+                    newTableName,
+                    table.Name,
+                    table.Columns.Keys.ToString(a => a.SqlScape(), ", "),
+                    table.Columns.Keys.ToString(a => "[table]." + a.SqlScape(), ", "));
 
             if (filter != null)
             {
@@ -383,15 +383,15 @@ FROM {1} as [table]".Formato(
                 {
                     RelationalTable rt = (RelationalTable)table;
                     command +=
-                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".Formato(rt.BackReference.ReferenceTable.PrefixedName(), rt.BackReference.Name.SqlScape()) +
+                        "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".Formato(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlScape()) +
                         "\r\nWHERE [masterTable].Id in ({0})".Formato(filter.Sql);
                 }
             }
 
             string fullCommand =
-                "SET IDENTITY_INSERT {0} ON\r\n".Formato(schema.PrefixName(table.Name)) +
+                "SET IDENTITY_INSERT {0} ON\r\n".Formato(newTableName) +
                 command +
-                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(schema.PrefixName(table.Name));
+                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(newTableName);
 
             return Executor.ExecuteNonQuery(fullCommand, filter.TryCC(a => a.Parameters));
         }
@@ -415,9 +415,7 @@ FROM {1} as [table]".Formato(
 
         private void DeleteTable(Table table, DatabaseName newDatabaseName)
         {
-            SchemaName schema = new SchemaName(newDatabaseName, table.SchemaName.Name);
-
-            DisconnectedTools.DeleteTable(schema.PrefixName(table.Name)); 
+            DisconnectedTools.DeleteTable(table.Name.OnDatabase(newDatabaseName)); 
         } 
     }
 }

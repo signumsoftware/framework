@@ -593,7 +593,7 @@ namespace Signum.Engine.Cache
             var dgml = Schema.Current.ToDirectedGraph().ToDGML(t =>
                 new[]
             {
-                new XAttribute("Label", t.PrefixedName()),
+                new XAttribute("Label", t.Name),
                 new XAttribute("Background", GetColor(t.Type, cacheHint).ToHtml())
             }, info => new[]
             {
