@@ -119,7 +119,7 @@ namespace Signum.Engine.Disconnected
                         }
                     }
 
-                    string newDatabaseName = newDatabase.DatabaseName();
+                    DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
 
                     foreach (var tuple in downloadTables)
                     {
@@ -340,17 +340,17 @@ namespace Signum.Engine.Disconnected
 
     public interface ICustomExporter
     {
-        void Export(Table table, IDisconnectedStrategy strategy, string newDatabaseName, DisconnectedMachineDN machine);
+        void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine);
     }
 
     public class BasicExporter<T> : ICustomExporter where T : IdentifiableEntity
     {
-        public virtual void Export(Table table, IDisconnectedStrategy strategy, string newDatabaseName, DisconnectedMachineDN machine)
+        public virtual void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine)
         {
             this.CopyTable(table, strategy, newDatabaseName);
         }
 
-        protected virtual void CopyTable(Table table, IDisconnectedStrategy strategy, string newDatabaseName)
+        protected virtual void CopyTable(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName)
         {
             var filter = strategy.Download == Download.Subset ? GetWhere((DisconnectedStrategy<T>)strategy) : null;
 
@@ -360,20 +360,15 @@ namespace Signum.Engine.Disconnected
                 CopyTableBasic(rt, newDatabaseName, filter == null ? null : (SqlPreCommandSimple)filter.Clone());
         }
 
-        protected virtual int CopyTableBasic(ITable table, string newDatabaseName, SqlPreCommandSimple filter)
+        protected virtual int CopyTableBasic(ITable table, DatabaseName newDatabaseName, SqlPreCommandSimple filter)
         {
-            NamePrefix newPrefix = new NamePrefix
-            {
-                SchemaName = table.Prefix.SchemaName,
-                DatabaseName = newDatabaseName,
-                ServerName = null
-            };
+            SchemaName schema = new SchemaName(newDatabaseName, table.SchemaName.Name);
 
             string command =
 @"INSERT INTO {0} ({2})
 SELECT {3}
 FROM {1} as [table]".Formato(
-                newPrefix.PrefixName(table.Name),
+                schema.PrefixName(table.Name),
                 table.PrefixedName(),
                 table.Columns.Keys.ToString(a => a.SqlScape(), ", "),
                 table.Columns.Keys.ToString(a => "[table]." + a.SqlScape(), ", "));
@@ -394,9 +389,9 @@ FROM {1} as [table]".Formato(
             }
 
             string fullCommand =
-                "SET IDENTITY_INSERT {0} ON\r\n".Formato(newPrefix.PrefixName(table.PrefixedName())) +
+                "SET IDENTITY_INSERT {0} ON\r\n".Formato(schema.PrefixName(table.Name)) +
                 command +
-                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(newPrefix.PrefixName(table.PrefixedName()));
+                "SET IDENTITY_INSERT {0} OFF\r\n".Formato(schema.PrefixName(table.Name));
 
             return Executor.ExecuteNonQuery(fullCommand, filter.TryCC(a => a.Parameters));
         }
@@ -411,23 +406,18 @@ FROM {1} as [table]".Formato(
 
     public class DeleteAndCopyExporter<T> : BasicExporter<T> where T : IdentifiableEntity
     {
-        public override void Export(Table table, IDisconnectedStrategy strategy, string newDatabaseName, DisconnectedMachineDN machine)
+        public override void Export(Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName, DisconnectedMachineDN machine)
         {
             this.DeleteTable(table, newDatabaseName);
 
             this.CopyTable(table, strategy, newDatabaseName);
         }
 
-        private void DeleteTable(Table table, string newDatabaseName)
+        private void DeleteTable(Table table, DatabaseName newDatabaseName)
         {
-            NamePrefix newPrefix = new NamePrefix
-            {
-                SchemaName = table.Prefix.SchemaName,
-                DatabaseName = newDatabaseName,
-                ServerName = null
-            };
+            SchemaName schema = new SchemaName(newDatabaseName, table.SchemaName.Name);
 
-            DisconnectedTools.DeleteTable(newPrefix.PrefixName(table.Name)); 
+            DisconnectedTools.DeleteTable(schema.PrefixName(table.Name)); 
         } 
     }
 }

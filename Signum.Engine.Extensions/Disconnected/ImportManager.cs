@@ -362,13 +362,13 @@ namespace Signum.Engine.Disconnected
             if (interval == null)
                 return 0;
 
-            string newDatabaseName = newDatabase.DatabaseName();
+            DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
 
             using (DisconnectedTools.SaveAndRestoreNextId(table))
             {
                 using (Transaction tr = new Transaction())
                 {
-                    using (Administrator.DisableIdentity(table.PrefixedName()))
+                    using (Administrator.DisableIdentity(table.SchemaName, table.Name))
                     {
                         SqlPreCommandSimple sql = InsertTableScript(table, newDatabaseName, interval);
 
@@ -387,7 +387,7 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        protected virtual SqlPreCommandSimple InsertRelationalTableScript(Table table, string newDatabaseName, Interval<int>? interval, RelationalTable rt)
+        protected virtual SqlPreCommandSimple InsertRelationalTableScript(Table table, DatabaseName newDatabaseName, Interval<int>? interval, RelationalTable rt)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
             var columns = rt.Columns.Values.Where(c => !c.Identity);
@@ -412,7 +412,7 @@ rt.BackReference.Name.SqlScape());
             return sql;
         }
 
-        protected virtual SqlPreCommandSimple InsertTableScript(Table table, string newDatabaseName, Interval<int>? interval)
+        protected virtual SqlPreCommandSimple InsertTableScript(Table table, DatabaseName newDatabaseName, Interval<int>? interval)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
             string command = @"INSERT INTO {0} ({1})
@@ -432,14 +432,9 @@ Prefix(newDatabaseName, table));
             return sql;
         }
 
-        protected virtual string Prefix(string newDatabase, ITable table)
+        protected virtual string Prefix(DatabaseName newDatabaseName, ITable table)
         {
-            return new NamePrefix
-            {
-                SchemaName = table.Prefix.SchemaName,
-                DatabaseName = newDatabase,
-                ServerName = null
-            }.PrefixName(table.Name);
+            return new SchemaName(newDatabaseName, table.SchemaName.Name).PrefixName(table.Name);
         }
 
         protected virtual Interval<int>? GetNewIdsInterval(Table table, DisconnectedMachineDN machine, SqlConnector newDatabase)
@@ -465,12 +460,12 @@ Prefix(newDatabaseName, table));
         {
             int inserts = Insert(machine, table, strategy, newDatabase);
 
-            int update = strategy.Upload == Upload.Subset ? Update(machine, table, strategy, newDatabase.DatabaseName()) : 0;
+            int update = strategy.Upload == Upload.Subset ? Update(machine, table, strategy, new DatabaseName(null, newDatabase.DatabaseName())) : 0;
 
             return new ImportResult { Inserted = inserts, Updated = update };
         }
 
-        protected virtual int Update(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, string newDatabaseName)
+        protected virtual int Update(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName)
         {
             using (Transaction tr = new Transaction())
             {
@@ -493,7 +488,7 @@ Prefix(newDatabaseName, table));
             }
         }
 
-        protected virtual SqlPreCommandSimple InsertUpdatedRelationalTableScript(RelationalTable rt, DisconnectedMachineDN machine, Table table, string newDatabaseName)
+        protected virtual SqlPreCommandSimple InsertUpdatedRelationalTableScript(RelationalTable rt, DisconnectedMachineDN machine, Table table, DatabaseName newDatabaseName)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
             var columns = rt.Columns.Values.Where(c => !c.Identity);
@@ -511,7 +506,7 @@ INNER JOIN {4} as [table] ON [relationalTable].{5} = [table].id".Formato(
             return insert;
         }
 
-        protected virtual SqlPreCommandSimple DeleteUpdatedRelationalTableScript(DisconnectedMachineDN machine, Table table, RelationalTable rt, string newDatabaseName)
+        protected virtual SqlPreCommandSimple DeleteUpdatedRelationalTableScript(DisconnectedMachineDN machine, Table table, RelationalTable rt, DatabaseName newDatabaseName)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
 
@@ -524,7 +519,7 @@ INNER JOIN {1} as [table] ON {0}.{2} = [table].id".Formato(
             return delete;
         }
 
-        protected virtual SqlPreCommandSimple UpdateTableScript(DisconnectedMachineDN machine, Table table, string newDatabaseName)
+        protected virtual SqlPreCommandSimple UpdateTableScript(DisconnectedMachineDN machine, Table table, DatabaseName newDatabaseName)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
 
