@@ -105,7 +105,7 @@ namespace Signum.Engine
                     {
                         using (Transaction tr = new Transaction())
                         {
-                            using (Administrator.DisableIdentity(table.SchemaName, table.Name))
+                            using (Administrator.DisableIdentity(table.Name))
                                 action(item, writer);
                             tr.Commit();
                         }
@@ -115,7 +115,7 @@ namespace Signum.Engine
                     {
                         using (Transaction tr = new Transaction())
                         {
-                            using (Administrator.DisableIdentity(table.SchemaName, table.Name))
+                            using (Administrator.DisableIdentity(table.Name))
                                 action(item, writer);
                             tr.Commit();
                         }
@@ -173,7 +173,7 @@ namespace Signum.Engine
                 {
                     using (Transaction tr = new Transaction())
                     {
-                        using (Administrator.DisableIdentity(table.SchemaName, table.Name))
+                        using (Administrator.DisableIdentity(table.Name))
                             action(item, writer);
                         tr.Commit();
                     }

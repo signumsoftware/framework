@@ -111,7 +111,7 @@
     <Compile Include="Database.cs" />
     <Compile Include="DynamicQuery\DynamicQueryManager.cs" />
     <Compile Include="DynamicQuery\AutoCompleteUtils.cs" />
-    <Compile Include="Engine\SchemaInfoTables.cs" />
+    <Compile Include="Engine\Sys.Tables.cs" />
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="ExecutionContext.cs" />
     <Compile Include="GlobalLazy.cs" />

@@ -16,6 +16,7 @@ namespace Signum.Engine.SchemaInfoTables
     {
         [SqlViewColumn(PrimaryKey=true)]
         public int object_id;
+        public int schema_id;
         public string type;
         public string type_desc;
         public string name;
@@ -104,6 +105,8 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
         [SqlViewColumn(PrimaryKey = true)]
         public int object_id;
+
+        public int schema_id;
 
         static Expression<Func<SysViews, IQueryable<SysIndexes>>> IndicesExpression =
             v => Database.View<SysIndexes>().Where(ix => ix.object_id == v.object_id);

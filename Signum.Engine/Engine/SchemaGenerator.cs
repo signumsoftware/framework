@@ -10,15 +10,25 @@ namespace Signum.Engine
 {
     public static class SchemaGenerator
     {
+        public static SqlPreCommand CreateSchemasScript()
+        {
+            return Schema.Current.GetDatabaseTables()
+                .Select(a => a.Name.Schema)
+                .Where(s => !s.IsDefault())
+                .Distinct()
+                .Select(SqlBuilder.CreateSchema)
+                .Combine(Spacing.Simple);
+        }
+
         public static SqlPreCommand CreateTablesScript()
         {
             List<ITable> tables = Schema.Current.GetDatabaseTables().ToList();
 
-            SqlPreCommand createTables = tables.Select(t => SqlBuilder.CreateTableSql(t)).Combine(Spacing.Double);
+            SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double);
 
-            SqlPreCommand foreignKeys = tables.Select(t => SqlBuilder.AlterTableForeignKeys(t)).Combine(Spacing.Double);
+            SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double);
             
-            SqlPreCommand indices = tables.Select(t => SqlBuilder.CreateAllIndices(t)).NotNull().Combine(Spacing.Double);
+            SqlPreCommand indices = tables.Select(SqlBuilder.CreateAllIndices).NotNull().Combine(Spacing.Double);
 
             return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
         }

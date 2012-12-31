@@ -44,7 +44,7 @@ namespace Signum.Engine.Maps
                 if (version == null)
                     throw new InvalidOperationException("Schema.Version is not set");
 
-                return version; 
+                return version;
             }
             set { this.version = value; }
         }
@@ -272,13 +272,13 @@ namespace Signum.Engine.Maps
                 if (command == null)
                     return null;
 
-                var replacementsComment = replacements.Interactive ? null: replacements.Select(r =>
+                var replacementsComment = replacements.Interactive ? null : replacements.Select(r =>
                     SqlPreCommandConcat.Combine(Spacing.Double, new SqlPreCommandSimple("-- Replacements on {0}".Formato(r.Key)),
-                        r.Value.Select(a => new SqlPreCommandSimple("--   {0} -> {1}".Formato(a.Key, a.Value))).Combine(Spacing.Simple))); 
+                        r.Value.Select(a => new SqlPreCommandSimple("--   {0} -> {1}".Formato(a.Key, a.Value))).Combine(Spacing.Simple)));
 
                 return SqlPreCommand.Combine(Spacing.Double,
                     new SqlPreCommandSimple(Resources.StartOfSyncScriptGeneratedOn0.Formato(DateTime.Now)),
-                   
+
                     new SqlPreCommandSimple("use {0}".Formato(schemaName)),
                     command,
                     new SqlPreCommandSimple(Resources.EndOfSyncScript));
@@ -383,14 +383,16 @@ namespace Signum.Engine.Maps
         internal Schema(SchemaSettings settings)
         {
             this.Settings = settings;
-            this.Assets = new SchemaAssets();   
+            this.Assets = new SchemaAssets();
 
+            Generating += SchemaGenerator.CreateSchemasScript;
             Generating += SchemaGenerator.CreateTablesScript;
             Generating += SchemaGenerator.InsertEnumValuesScript;
             Generating += TypeLogic.Schema_Generating;
             Generating += Assets.Schema_Generating;
 
-            Synchronizing += SchemaSynchronizer.SynchronizeSchemaScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeSchemasScript;
+            Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
 
@@ -478,7 +480,7 @@ namespace Signum.Engine.Maps
             FieldReference refField = field as FieldReference;
             if (refField != null)
                 return Implementations.By(refField.FieldType.CleanType());
-            
+
             FieldImplementedBy ibField = field as FieldImplementedBy;
             if (ibField != null)
                 return Implementations.By(ibField.ImplementationColumns.Keys.ToArray());
@@ -593,14 +595,14 @@ namespace Signum.Engine.Maps
         IEnumerable<int> GetAllIds();
 
         event Action Invalidation;
-        event Action Disabled; 
+        event Action Disabled;
 
         bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
 
         string GetToString(int id);
     }
 
-    public abstract class CacheController<T> : ICacheController 
+    public abstract class CacheController<T> : ICacheController
         where T : IdentifiableEntity
     {
         public abstract bool Enabled { get; }
@@ -726,7 +728,7 @@ namespace Signum.Engine.Maps
         /// <param name="name"></param>
         public ServerName(string name)
         {
-            if (string.IsNullOrEmpty(this.Name))
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
             this.Name = name;
@@ -734,7 +736,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return Name.SqlScape() + ".";
+            return Name.SqlScape();
         }
 
         public bool Equals(ServerName other)
@@ -770,7 +772,7 @@ namespace Signum.Engine.Maps
 
         public DatabaseName(ServerName server, string name)
         {
-            if (string.IsNullOrEmpty(this.Name))
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
             this.Name = name;
@@ -779,12 +781,12 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            var result = Name.SqlScape() + ".";
+            var result = Name.SqlScape();
 
             if (Server == null)
                 return result;
 
-            return Server.ToString() + result;
+            return Server.ToString() + "." + result;
         }
 
         public bool Equals(DatabaseName other)
@@ -819,9 +821,16 @@ namespace Signum.Engine.Maps
 
         public DatabaseName Database { get; private set; }
 
+        public static readonly SchemaName Default = new SchemaName(null, "dbo");
+
+        public bool IsDefault()
+        {
+            return Name == "dbo" && Database == null;
+        }
+
         public SchemaName(DatabaseName database, string name)
         {
-            if (string.IsNullOrEmpty(this.Name))
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
             this.Name = name;
@@ -830,12 +839,12 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            var result = Name.SqlScape() + ".";
+            var result = Name.SqlScape();
 
             if (Database == null)
                 return result;
 
-            return Database.ToString() + result;
+            return Database.ToString() + "." + result;
         }
 
         public bool Equals(SchemaName other)
@@ -873,8 +882,11 @@ namespace Signum.Engine.Maps
 
         public ObjectName(SchemaName schema, string name)
         {
-            if (string.IsNullOrEmpty(this.Name))
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
+
+            if (schema == null)
+                throw new ArgumentNullException("schema");
 
             this.Name = name;
             this.Schema = schema;
@@ -882,18 +894,18 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            if (Schema == null)
+            if (Schema == null || Schema.IsDefault())
                 return Name.SqlScape();
 
-            return Schema.ToString() + Name.SqlScape();
+            return Schema.ToString() + "." + Name.SqlScape();
         }
 
         public string ToStringDbo()
         {
             if (Schema == null)
-                return "dbo." + Name.SqlScape();
+                return Name.SqlScape();
 
-            return Schema.ToString() + Name.SqlScape();
+            return Schema.ToString() + "." + Name.SqlScape();
         }
 
         public bool Equals(ObjectName other)
@@ -919,6 +931,16 @@ namespace Signum.Engine.Maps
                 throw new ArgumentNullException("name");
 
             return new ObjectName(SchemaName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
+        }
+
+        public ObjectName OnDatabase(DatabaseName databaseName)
+        {
+            return new ObjectName(new SchemaName(databaseName, Schema.Name), Name);
+        }
+
+        internal ObjectName OnSchema(SchemaName schemaName)
+        {
+            return new ObjectName(schemaName, Name);
         }
     }
 }

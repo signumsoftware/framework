@@ -154,7 +154,7 @@ namespace Signum.Engine
 
             var onlyColumn = index.Columns.Only();
 
-            string indexName = onlyColumn != null && index.IndexName.StartsWith("FIX_") ? "FIX_{0}_{1}".Formato(table, (tableReplacements.TryGetC(onlyColumn) ?? onlyColumn)) :
+            string indexName = onlyColumn != null && index.IndexName.StartsWith("FIX_") ? "FIX_{0}_{1}".Formato(table.Name.Name, (tableReplacements.TryGetC(onlyColumn) ?? onlyColumn)) :
                 tableReplacements == null ? index.IndexName.Replace(oldTable, table.Name.Name) :
                 index.IndexName.Replace(tableReplacements).Replace(oldTable, table.Name.Name);
 
@@ -168,7 +168,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand CreateFreeIndex(ITable table, IColumn column)
         {
-            string indexName = "FIX_{0}_{1}".Formato(table.Name, column.Name);
+            string indexName = "FIX_{0}_{1}".Formato(table.Name.Name, column.Name);
 
             return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
                  indexName.SqlScape(),
@@ -216,14 +216,17 @@ namespace Signum.Engine
                 constraintName.SqlScape())) { AddGo = true };
         }
 
-        public static SqlPreCommand AlterTableAddDefaultConstraint(ITable table, string column, string constraintName, string definition)
+        public static SqlPreCommand AlterTableAddDefaultConstraint(ObjectName tableName, string column, string constraintName, string definition)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
-                        .Formato(table.Name, constraintName.SqlScape(), definition, column.SqlScape()));
+                        .Formato(tableName, constraintName.SqlScape(), definition, column.SqlScape()));
         }
 
         public static SqlPreCommand AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
         {
+            if(!object.Equals(table.Name.Schema.Database, foreignTable.Name.Schema.Database))
+                return null;
+
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4})".Formato(
                 table.Name,
                 ForeignKeyName(table.Name.Name, fieldName),
@@ -249,13 +252,25 @@ namespace Signum.Engine
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 CreateTableSql(newTable),
-                MoveRows(oldTable.Name, newTable.Name),
+                MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
                 DropTable(oldTable.Name));
         }
 
-        public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable)
+        public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames)
         {
-            return new SqlPreCommandSimple("SELECT * INTO {0} FROM {1}".Formato(newTable, oldTable));
+            SqlPreCommandSimple command = new SqlPreCommandSimple(
+@"INSERT INTO {0} ({2})
+SELECT {3}
+FROM {1} as [table]".Formato(
+                   newTable,
+                   oldTable,
+                   columnNames.ToString(a => a.SqlScape(), ", "),
+                   columnNames.ToString(a => "[table]." + a.SqlScape(), ", ")));
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON".Formato(newTable)),
+                command,
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF".Formato(newTable)));
         }
 
         public static SqlPreCommand RenameTable(ObjectName oldName, string newName)
@@ -298,6 +313,16 @@ namespace Signum.Engine
         public static SqlPreCommandSimple SelectRowCount()
         {
             return new SqlPreCommandSimple("select @@rowcount;");
+        }
+
+        public static SqlPreCommand CreateSchema(SchemaName schemaName)
+        {
+            return new SqlPreCommandSimple("CREATE SCHEMA {0}".Formato(schemaName));
+        }
+
+        public static SqlPreCommand DropSchema(SchemaName schemaName)
+        {
+            return new SqlPreCommandSimple("DROP SCHEMA {0}".Formato(schemaName));
         }
     }
 }

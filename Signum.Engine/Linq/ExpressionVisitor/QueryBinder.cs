@@ -1441,11 +1441,11 @@ namespace Signum.Engine.Linq
             if (pr.Projector is EntityExpression)
             {
                 EntityExpression ee = (EntityExpression)pr.Projector;
-                Expression id = ee.Table.GetIdExpression(Alias.Raw(ee.Table.Name));
+                Expression id = ee.Table.GetIdExpression(Alias.Table(ee.Table.Name));
 
                 commands.AddRange(ee.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
                 {
-                    Expression backId = f.RelationalTable.BackColumnExpression(Alias.Raw(f.RelationalTable.Name));
+                    Expression backId = f.RelationalTable.BackColumnExpression(Alias.Table(f.RelationalTable.Name));
                     return new DeleteExpression(f.RelationalTable, pr.Select,
                         SmartEqualizer.EqualNullable(backId, ee.ExternalId));
                 }));
@@ -1456,7 +1456,7 @@ namespace Signum.Engine.Linq
             {
                 MListElementExpression mlee = (MListElementExpression)pr.Projector;
 
-                Expression id = mlee.Table.RowIdExpression(Alias.Raw(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(Alias.Table(mlee.Table.Name));
 
                 commands.Add(new DeleteExpression(mlee.Table, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
             }
@@ -1489,7 +1489,7 @@ namespace Signum.Engine.Linq
                 (ITable)((EntityExpression)entity).Table : 
                 (ITable)((MListElementExpression)entity).Table;
 
-            Alias alias = Alias.Raw(table.Name);
+            Alias alias = Alias.Table(table.Name);
 
             Expression toUpdate = table is Table ? 
                 ((Table)table).GetProjectorExpression(alias, this) : 
@@ -1513,7 +1513,7 @@ namespace Signum.Engine.Linq
             {
                 EntityExpression ee = (EntityExpression)entity;
 
-                Expression id = ee.Table.GetIdExpression(Alias.Raw(ee.Table.Name));
+                Expression id = ee.Table.GetIdExpression(Alias.Table(ee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
                 table = ee.Table;
@@ -1522,7 +1522,7 @@ namespace Signum.Engine.Linq
             {
                 MListElementExpression mlee = (MListElementExpression)entity;
 
-                Expression id = mlee.Table.RowIdExpression(Alias.Raw(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(Alias.Table(mlee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
                 table = mlee.Table;
@@ -2000,9 +2000,9 @@ namespace Signum.Engine.Linq
             return Alias.NextSelectAlias();
         }
 
-        internal Alias NextTableAlias(string tableName)
+        internal Alias NextTableAlias(ObjectName tableName)
         {
-            return Alias.NextTableAlias(tableName);
+            return Alias.NextTableAlias(tableName.Name);
         }
         
         #endregion

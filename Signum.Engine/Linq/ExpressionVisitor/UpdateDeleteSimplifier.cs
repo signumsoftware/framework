@@ -74,7 +74,7 @@ namespace Signum.Engine.Linq
 
                 if (table.Alias == result.Alias)
                 {
-                    return new ColumnExpression(result.Type, Alias.Raw(table.PrefixedName), result.Name);
+                    return new ColumnExpression(result.Type, Alias.Table(table.Name), result.Name);
                 }
 
                 return result;

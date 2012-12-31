@@ -45,25 +45,25 @@ namespace Signum.Engine
 
         public static bool ExistTable(Table table)
         {
-            SchemaName schemaName = table.SchemaName;
+            SchemaName schema = table.Name.Schema;
 
-            if (schemaName.Database != null && schemaName.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schemaName.Database.Server.Name))
+            if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database.Server.Name))
                 return false;
 
-            if (schemaName.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schemaName.Database.Name))
+            if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database.Name))
                 return false;
 
-            using (schemaName.Database == null ? null : Administrator.OverrideViewPrefix(schemaName.Database))
+            using (schema.Database == null ? null : Administrator.OverrideDatabaseInViews(schema.Database))
             {
                 return (from t in Database.View<SysTables>()
                         join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
-                        where t.name == table.Name && s.name == schemaName.Name
+                        where t.name == table.Name.Name && s.name == schema.Name
                         select t).Any();
             }
         }
 
-        static readonly ThreadVariable<DatabaseName> viewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
-        public static IDisposable OverrideViewPrefix(DatabaseName database)
+        internal static readonly ThreadVariable<DatabaseName> viewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
+        public static IDisposable OverrideDatabaseInViews(DatabaseName database)
         {
             var old = viewDatabase.Value;
             viewDatabase.Value = database;
@@ -151,22 +151,22 @@ namespace Signum.Engine
         public static IDisposable DisableIdentity(Table table)
         {
             table.Identity = false;
-            SqlBuilder.SetIdentityInsert(table.SchemaName, table.Name, true).ExecuteNonQuery();
+            SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
                 table.Identity = true;
-                SqlBuilder.SetIdentityInsert(table.SchemaName, table.Name, false).ExecuteNonQuery();
+                SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
             });
         }
 
-        public static IDisposable DisableIdentity(SchemaName schemaName, string tableName)
+        public static IDisposable DisableIdentity(ObjectName tableName)
         {
-            SqlBuilder.SetIdentityInsert(schemaName, tableName, true).ExecuteNonQuery();
+            SqlBuilder.SetIdentityInsert(tableName, true).ExecuteNonQuery();
 
             return new Disposable(() =>
             {
-                SqlBuilder.SetIdentityInsert(schemaName, tableName, false).ExecuteNonQuery();
+                SqlBuilder.SetIdentityInsert(tableName, false).ExecuteNonQuery();
             });
         }
 

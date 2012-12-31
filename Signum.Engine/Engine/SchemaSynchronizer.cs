@@ -14,7 +14,30 @@ namespace Signum.Engine
 {
     public static class SchemaSynchronizer
     {
-        public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements)
+        public static SqlPreCommand SynchronizeSchemasScript(Replacements replacements)
+        {
+            HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).ToHashSet();
+            HashSet<SchemaName> database = new HashSet<SchemaName>();
+            foreach (var db in model.Select(a => a.Database).Distinct())
+	        {
+                using (Administrator.OverrideDatabaseInViews(db))
+                {
+                    database.AddRange(
+                     from s in Database.View<SysSchemas>()
+                     select new SchemaName(db, s.name));
+                }
+	        }
+
+            return Synchronizer.SynchronizeScript(
+                model.ToDictionary(a => a),
+                database.ToDictionary(a => a),
+                (_, newSN) => SqlBuilder.CreateSchema(newSN),
+                null,
+                null, Spacing.Simple);
+        }
+
+
+        public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
             Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.Name.ToString());
 
@@ -99,7 +122,7 @@ namespace Signum.Engine
                      (cn, colModel) => colModel.ReferenceTable != null ?
                          SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable) : null,
                      null,
-                     (cn, colModel, coldb) => colModel.ReferenceTable != null && (coldb.ForeingKey == null || !coldb.ForeingKey.EqualForeignKey(tn, colModel)) ?
+                     (cn, colModel, coldb) => colModel.ReferenceTable != null && (coldb.ForeingKey == null || !coldb.ForeingKey.EqualForeignKey(tab.Name.Name, colModel)) ?
                          SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable) : null,
                      Spacing.Simple),
                  Spacing.Double);
@@ -175,15 +198,15 @@ namespace Signum.Engine
 
             foreach (var db in databases)
             {
-                using (Administrator.OverrideViewPrefix(db))
+                using (Administrator.OverrideDatabaseInViews(db))
                 {
-                    var tables =  
+                    var tables =
                         (from s in Database.View<SysSchemas>()
                          from t in s.Tables()
                          where !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")
                          select new DiffTable
                          {
-                             Name = new ObjectName(new SchemaName(db, s.name),  t.name),
+                             Name = new ObjectName(new SchemaName(db, s.name), t.name),
                              Colums = (from c in t.Columns()
                                        join type in Database.View<SysTypes>() on c.user_type_id equals type.user_type_id
                                        join ctr in Database.View<SysObjects>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
@@ -200,11 +223,16 @@ namespace Signum.Engine
                                            DefaultConstraintName = ctr.name,
                                            PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                                            ForeingKey = (from fk in t.ForeignKeys()
-                                                       where fk.ForeignKeyColumns().Any(fkc => fkc.parent_column_id == c.column_id)
-                                                       join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
-                                                       select fk.name == null ? null : new DiffForeignKey { Name = fk.name, TargetTable = rt.name }).FirstOrDefault(),
+                                                         where fk.ForeignKeyColumns().Any(fkc => fkc.parent_column_id == c.column_id)
+                                                         join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
+                                                         join rs in Database.View<SysSchemas>() on rt.schema_id equals rs.schema_id
+                                                         select fk.name == null ? null : new DiffForeignKey
+                                                         {
+                                                             Name = fk.name,
+                                                             TargetTable = new ObjectName(new SchemaName(db, rs.name), rt.name),
+                                                         }).FirstOrDefault(),
                                        }).ToDictionary(a => a.Name, "columns"),
-                         
+
                              SimpleIndices = (from i in t.Indices()
                                               where !i.is_primary_key //&& !(i.is_unique && i.name.StartsWith("IX_"))
                                               select new DiffIndex
@@ -212,10 +240,10 @@ namespace Signum.Engine
                                                   IsUnique = i.is_unique,
                                                   IndexName = i.name,
                                                   Columns = (from ic in i.IndexColumns()
-                                                          join c in t.Columns() on ic.column_id equals c.column_id
-                                                          select c.name).ToList()
+                                                             join c in t.Columns() on ic.column_id equals c.column_id
+                                                             select c.name).ToList()
                                               }).ToList(),
-                         
+
                              ViewIndices = (from v in Database.View<SysViews>()
                                             where v.name.StartsWith("VIX_" + t.name + "_")
                                             from i in v.Indices()
@@ -225,11 +253,11 @@ namespace Signum.Engine
                                                 ViewName = v.name,
                                                 IndexName = i.name,
                                                 Columns = (from ic in i.IndexColumns()
-                                                            join c in v.Columns() on ic.column_id equals c.column_id
-                                                            select c.name).ToList()
-                         
+                                                           join c in v.Columns() on ic.column_id equals c.column_id
+                                                           select c.name).ToList()
+
                                             }).ToList(),
-                         
+
                          }).ToList();
 
                     allTables.AddRange(tables);
@@ -278,7 +306,7 @@ namespace Signum.Engine
                                        from col in t.Columns.Values
                                        where col.ReferenceTable == table
                                        select new SqlPreCommandSimple("REVIEW THIS! UPDATE {0} SET {1} = {2} WHERE {1} = {3} -- {4} re-indexed".Formato(
-                                           t.PrefixedName(), col.Name, s.Id, c.Id, c.toStr)))
+                                           t.Name, col.Name, s.Id, c.Id, c.toStr)))
                                            .Combine(Spacing.Simple);
 
                         return updates;
@@ -318,8 +346,6 @@ namespace Signum.Engine
         }
 
         public Dictionary<string, DiffIndex> Indices = new Dictionary<string, DiffIndex>();
-
-     
     }
 
     public class DiffIndex

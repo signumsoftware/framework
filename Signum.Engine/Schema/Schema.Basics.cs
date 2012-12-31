@@ -84,7 +84,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return Name;
+            return Name.ToString();
         }
 
         public void GenerateColumns()
@@ -191,6 +191,22 @@ namespace Signum.Engine.Maps
         public IEnumerable<RelationalTable> RelationalTables()
         {
             return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
+        }
+
+        public void ToDatabase(DatabaseName databaseName)
+        {
+            this.Name = this.Name.OnDatabase(databaseName);
+
+            foreach (var item in RelationalTables())
+                item.ToDatabase(databaseName);
+        }
+
+        public void ToSchema(SchemaName schemaName)
+        {
+            this.Name = this.Name.OnSchema(schemaName);
+
+            foreach (var item in RelationalTables())
+                item.ToSchema(schemaName);
         }
     }
 
@@ -762,6 +778,16 @@ namespace Signum.Engine.Maps
                 return this.Field;
 
             return null;
+        }
+
+        public void ToDatabase(DatabaseName databaseName)
+        {
+            this.Name = this.Name.OnDatabase(databaseName);
+        }
+
+        public void ToSchema(SchemaName schemaName)
+        {
+            this.Name = this.Name.OnSchema(schemaName);
         }
     }
 

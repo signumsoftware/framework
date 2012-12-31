@@ -37,26 +37,33 @@ namespace Signum.Engine.Maps
         #region Views
         public class View
         {
-            public SchemaName Schema = SchemaName.Default;
-            public string Name;
+            public ObjectName Name;
             public string Definition;
 
             public SqlPreCommandSimple CreateView()
             {
-                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(Name.SqlScape()) + Definition) { AddGo = true };
+                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(Name) + Definition) { AddGo = true };
             }
 
             public SqlPreCommandSimple AlterView()
             {
-                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(Name.SqlScape()) + Definition) { AddGo = true };
+                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(Name) + Definition) { AddGo = true };
             } 
         }
 
-
-        public Dictionary<string, View> Views = new Dictionary<string, View>();
-        public void IncludeView(string viewName, string viewDefinition)
+        public View IncludeView(string viewName, string viewDefinition)
         {
-            Views[viewName] = new View { Name = viewName, Definition = viewDefinition };
+            return IncludeView(new ObjectName(SchemaName.Default, viewName), viewDefinition);
+        }
+
+        public Dictionary<ObjectName, View> Views = new Dictionary<ObjectName, View>();
+        public View IncludeView(ObjectName viewName, string viewDefinition)
+        {
+            return Views[viewName] = new View
+            {
+                Name = viewName,
+                Definition = viewDefinition
+            };
         }
 
         SqlPreCommand GenerateViews()
@@ -66,9 +73,16 @@ namespace Signum.Engine.Maps
 
         SqlPreCommand SyncViews(Replacements replacements)
         {
-            var oldView = (from v in Database.View<SysViews>()
-                           join m in Database.View<SysSqlModules>() on v.object_id equals m.object_id
-                           select KVP.Create(v.name, m.definition)).ToDictionary();
+            var oldView = Schema.Current.DatabaseNames().SelectMany(db =>
+            {
+                using (Administrator.OverrideDatabaseInViews(db))
+                {
+                    return (from v in Database.View<SysViews>()
+                            join s in Database.View<SysSchemas>() on v.schema_id equals s.schema_id
+                            join m in Database.View<SysSqlModules>() on v.object_id equals m.object_id
+                            select KVP.Create(new ObjectName(new SchemaName(db, s.name), v.name), m.definition));
+                }
+            }).ToDictionary();
 
             return Synchronizer.SynchronizeScript(
                 Views,
@@ -82,22 +96,30 @@ namespace Signum.Engine.Maps
         #endregion
 
         #region Procedures
-        public Dictionary<string, Procedure> StoreProcedures = new Dictionary<string, Procedure>();
+        public Dictionary<ObjectName, Procedure> StoreProcedures = new Dictionary<ObjectName, Procedure>();
         public Procedure IncludeStoreProcedure(string procedureName, string procedureCodeAndArguments)
         {
-            var name = new Procedure
+            return IncludeStoreProcedure(new ObjectName(SchemaName.Default, procedureName), procedureCodeAndArguments);
+        }
+
+        public Procedure IncludeStoreProcedure(ObjectName procedureName, string procedureCodeAndArguments)
+        {
+            return StoreProcedures[procedureName] =  new Procedure
             {
                 ProcedureName = procedureName,
                 ProcedureCodeAndArguments = procedureCodeAndArguments,
                 ProcedureType = "PROCEDURE"
             };
-
-            StoreProcedures[procedureName] = name; 
         }
 
-        public void IncludeUserDefinedFunction(string functionName, string functionCodeAndArguments)
+        public Procedure IncludeUserDefinedFunction(string functionName, string functionCodeAndArguments)
         {
-            StoreProcedures[functionName] = new Procedure
+            return IncludeUserDefinedFunction(new ObjectName(SchemaName.Default, functionName), functionCodeAndArguments);
+        }
+
+        public Procedure IncludeUserDefinedFunction(ObjectName functionName, string functionCodeAndArguments)
+        {
+            return StoreProcedures[functionName] = new Procedure
             {
                 ProcedureName = functionName,
                 ProcedureCodeAndArguments = functionCodeAndArguments,
@@ -112,10 +134,17 @@ namespace Signum.Engine.Maps
 
         SqlPreCommand SyncProcedures(Replacements replacements)
         {
-            var oldProcedures = (from p in Database.View<SysObjects>()
-                                 where p.type == "P" || p.type == "IF"
-                                 join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
-                                 select new { p.name, p.type, m.definition }).ToDictionary(a => a.name);
+            var oldProcedures = Schema.Current.DatabaseNames().SelectMany(db =>
+            {
+                using (Administrator.OverrideDatabaseInViews(db))
+                {
+                    return (from p in Database.View<SysObjects>()
+                            join s in Database.View<SysViews>() on p.schema_id equals s.schema_id
+                            where p.type == "P" || p.type == "IF"
+                            join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
+                            select KVP.Create(new ObjectName(new SchemaName(db, s.name), p.name), m.definition));
+                }
+            }).ToDictionary();
 
             return Synchronizer.SynchronizeScript(
                 StoreProcedures,
@@ -123,25 +152,24 @@ namespace Signum.Engine.Maps
                 (name, newProc) => newProc.CreateSql(),
                 null,
                 (name, newProc, oldProc) =>
-                    Clean(newProc.CreateSql().Sql) == Clean(oldProc.definition) ? null : newProc.AlterSql(),
+                    Clean(newProc.CreateSql().Sql) == Clean(oldProc) ? null : newProc.AlterSql(),
                 Spacing.Double);
         }
 
         public class Procedure
         {
-            public SchemaName Schema = SchemaName.Default;
             public string ProcedureType;
-            public string ProcedureName;
+            public ObjectName ProcedureName;
             public string ProcedureCodeAndArguments;
 
             public SqlPreCommandSimple CreateSql()
             {
-                return new SqlPreCommandSimple("CREATE {0} {1} ".Formato(ProcedureType, ProcedureName.SqlScape()) + ProcedureCodeAndArguments) { AddGo = true };
+                return new SqlPreCommandSimple("CREATE {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { AddGo = true };
             }
 
             public SqlPreCommandSimple AlterSql()
             {
-                return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName.SqlScape()) + ProcedureCodeAndArguments) { AddGo = true };
+                return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { AddGo = true };
             }
         }
         #endregion
@@ -153,10 +181,10 @@ namespace Signum.Engine.Maps
             public string DefaultExpression;
         }
 
-        public Dictionary<ITable, Dictionary<IColumn, DefaultConstaint>> DefaultContraints = new Dictionary<ITable, Dictionary<IColumn, DefaultConstaint>>();
+        public Dictionary<ObjectName, Dictionary<IColumn, DefaultConstaint>> DefaultContraints = new Dictionary<ObjectName, Dictionary<IColumn, DefaultConstaint>>();
         public void IncludeDefaultConstraint(ITable table, IColumn column, string constraintName, string defaultExpression)
         {
-            DefaultContraints.GetOrCreate(table)[column] = new DefaultConstaint
+            DefaultContraints.GetOrCreate(table.Name)[column] = new DefaultConstaint
             {
                 ConstraintName = constraintName,
                 DefaultExpression = defaultExpression
@@ -177,26 +205,35 @@ namespace Signum.Engine.Maps
             return (from t in DefaultContraints
                     from c in t.Value
                     select new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
-                         .Formato(t.Key.Name.SqlScape(), c.Value.ConstraintName.SqlScape(), c.Value.DefaultExpression, c.Key.Name.SqlScape())))
+                         .Formato(t.Key.Name, c.Value.ConstraintName.SqlScape(), c.Value.DefaultExpression, c.Key.Name.SqlScape())))
                         .Combine(Spacing.Double);
         }
 
         SqlPreCommand SyncDefaultConstraints(Replacements replacements)
         {
-
-
-
-            var oldConstraints = (from t in Database.View<SysTables>()
-                                  join c in Database.View<SysColumns>() on t.object_id equals c.object_id
-                                  join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
-                                  select new { table = t.name, column = c.name, constraint = ctr.name, definition = ctr.definition })
-                                 .AgGroupToDictionary(a => a.table,
+             var oldConstraints = Schema.Current.DatabaseNames().SelectMany(db =>
+            {
+                using (Administrator.OverrideDatabaseInViews(db))
+                {
+                    return (from t in Database.View<SysTables>()
+                            join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
+                            join c in Database.View<SysColumns>() on t.object_id equals c.object_id
+                            join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
+                            select new
+                            {
+                                table = new ObjectName(new SchemaName(db, s.name), t.name),
+                                column = c.name,
+                                constraint = ctr.name,
+                                definition = ctr.definition
+                            });
+                }
+            }).AgGroupToDictionary(a => a.table,
                                     gr => gr.ToDictionary(a => a.column, a => new { constraintName = a.constraint, a.definition }));
 
             return Synchronizer.SynchronizeScript(
-                DefaultContraints.SelectDictionary(t => t.Name, dic => dic),
+                DefaultContraints,
                 oldConstraints,
-                (tn, newDic) => newDic.Select(kvp => SqlBuilder.AlterTableAddDefaultConstraint(kvp.Value, kvp.Key.Name, kvp.Value.ConstraintName, kvp.Value.DefaultExpression)).Combine(Spacing.Simple),
+                (tn, newDic) => newDic.Select(kvp => SqlBuilder.AlterTableAddDefaultConstraint(tn, kvp.Key.Name, kvp.Value.ConstraintName, kvp.Value.DefaultExpression)).Combine(Spacing.Simple),
                 (tn, oldDic) => oldDic.Select(kvp => SqlBuilder.AlterTableDropConstraint(tn, kvp.Value.constraintName)).Combine(Spacing.Simple),
                 (tn, newDic, oldDic) =>
                     Synchronizer.SynchronizeScript(
