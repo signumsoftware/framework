@@ -36,42 +36,46 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructOperation.Construct(params object[] args)
         {
-            OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
-
-            using (OperationLogic.AllowSave<T>())
+            using (HeavyProfiler.Log("Construct", () => OperationDN.UniqueKey(key)))
             {
-                try
+                OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+
+
+                using (OperationLogic.AllowSave<T>())
                 {
-                    using (Transaction tr = new Transaction())
+                    try
                     {
-                        OperationLogDN log = new OperationLogDN
+                        using (Transaction tr = new Transaction())
                         {
-                            Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
-                            Start = TimeZoneManager.Now,
-                            User = UserHolder.Current.ToLite()
-                        };
+                            OperationLogDN log = new OperationLogDN
+                            {
+                                Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                Start = TimeZoneManager.Now,
+                                User = UserHolder.Current.ToLite()
+                            };
 
-                        OnBeginOperation();
+                            OnBeginOperation();
 
-                        T entity = Construct(args);
+                            T entity = Construct(args);
 
-                        OnEndOperation(entity);
+                            OnEndOperation(entity);
 
-                        if (!entity.IsNew)
-                        {
-                            log.Target = entity.ToLite();
-                            log.End = TimeZoneManager.Now;
-                            using (ExecutionMode.Global())
-                                log.Save();
+                            if (!entity.IsNew)
+                            {
+                                log.Target = entity.ToLite();
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
+                            }
+
+                            return tr.Commit(entity);
                         }
-
-                        return tr.Commit(entity);
                     }
-                }
-                catch (Exception ex)
-                {
-                    OperationLogic.OnErrorOperation(this, null, args, ex);
-                    throw;
+                    catch (Exception ex)
+                    {
+                        OperationLogic.OnErrorOperation(this, null, args, ex);
+                        throw;
+                    }
                 }
             }
         }

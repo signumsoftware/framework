@@ -11,8 +11,9 @@
 		<ItemsControl x:Name="itemsControl">
 			<ItemsControl.ItemTemplate>
 				<DataTemplate>
-					<Microsoft_Windows_Themes:ButtonChrome x:Name="Chrome" SnapsToDevicePixels="True"  BorderBrush="#FF707070" IsEnabled="False" Margin="1">
-					<TextBlock Text="{Binding}" Margin="2,1"/>
+					<Microsoft_Windows_Themes:ButtonChrome x:Name="Chrome" SnapsToDevicePixels="True"  BorderBrush="#FF707070" IsEnabled="False" Margin="1"
+                                                           ToolTip="{Binding NiceTypeName}">
+                        <TextBlock Text="{Binding}" Margin="2,1" Foreground="{Binding TypeColor}"/>
 					</Microsoft_Windows_Themes:ButtonChrome>
 				</DataTemplate>
 			</ItemsControl.ItemTemplate>

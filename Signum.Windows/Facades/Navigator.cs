@@ -205,9 +205,9 @@ namespace Signum.Windows
             return Manager.FindDataTemplate(element, entityType);
         }
 
-        public static Type SelectType(Window parent, IEnumerable<Type> implementations)
+        public static Type SelectType(Window parent, IEnumerable<Type> implementations, Func<Type, bool> filterType)
         {
-            return Manager.SelectTypes(parent, implementations);
+            return Manager.SelectTypes(parent, implementations, filterType);
         }
 
         public static bool IsFindable(object queryName)
@@ -590,6 +590,9 @@ namespace Signum.Windows
                 Title = options.WindowTitle ?? SearchTitle(options.QueryName)
             };
 
+            if (options.InitializeSearchControl != null)
+                options.InitializeSearchControl(sw.SearchControl);
+
             if (TaskSearchWindow != null)
                 TaskSearchWindow(sw, options.QueryName);
 
@@ -826,7 +829,7 @@ namespace Signum.Windows
                 throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
         }
 
-        public virtual Type SelectTypes(Window parent, IEnumerable<Type> implementations)
+        public virtual Type SelectTypes(Window parent, IEnumerable<Type> implementations, Func<Type, bool> filterType)
         {
             if (implementations == null || implementations.Count() == 0)
                 throw new ArgumentException("implementations");
@@ -836,7 +839,7 @@ namespace Signum.Windows
                 return only;
 
             Type sel;
-            if (SelectorWindow.ShowDialog(implementations, out sel,
+            if (SelectorWindow.ShowDialog(implementations.Where(filterType), out sel,
                 elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
                 elementText: t => t.NiceName(),
                 title: Properties.Resources.TypeSelector,
@@ -874,10 +877,9 @@ namespace Signum.Windows
         {
             if (entityType.IsLite())
             {
-                return null;
-                //DataTemplate template = (DataTemplate)element.FindResource(typeof(Lite));
-                //if (template != null)
-                //    return template;
+                DataTemplate template = (DataTemplate)element.FindResource(Lite.BaseImplementationType);
+                if (template != null)
+                    return template;
             }
 
             if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())

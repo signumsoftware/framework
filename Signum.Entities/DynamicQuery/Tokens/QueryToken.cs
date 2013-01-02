@@ -16,6 +16,19 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class QueryToken : IEquatable<QueryToken>
     {
+        public bool Subordinated { get; set; }
+
+        public string SubordinatedToString
+        {
+            get
+            {
+                if (Subordinated)
+                    return "- " + ToString();
+
+                return ToString();
+            }
+        }
+
         public abstract override string ToString();
         public abstract string NiceName();
         public abstract string Format { get; }
@@ -120,7 +133,7 @@ namespace Signum.Entities.DynamicQuery
                 return EntityProperties(type).OrderBy(a => a.ToString()).ToList();
             }
 
-            if(type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null)
+            if(IsCollecction(type))
             {
                 return CollectionProperties(this);
             }
@@ -230,8 +243,97 @@ namespace Signum.Entities.DynamicQuery
         {
             return this.FullKey().GetHashCode();
         }
-    }
 
+        public virtual string TypeColor
+        {
+            get
+            {
+                if (IsCollecction(Type))
+                    return "#CE6700";
+
+                switch (QueryUtils.TryGetFilterType(Type))
+                {
+                    case FilterType.Integer:
+                    case FilterType.Decimal:
+                    case FilterType.String:
+                    case FilterType.Guid: 
+                    case FilterType.Boolean: return "#000000";
+                    case FilterType.DateTime: return "#8000FF";
+                    case FilterType.Enum: return "#B00061";
+                    case FilterType.Lite: return "#2B91AF";
+                    case FilterType.Embedded: return "#156F8A";
+                    default: return "#7D7D7D";
+                }
+            }
+        }
+
+        public string NiceTypeName
+        {
+            get
+            {
+                Type type = Type.CleanType();
+
+                if (IsCollecction(type))
+                {
+                    return Resources.ListOf0.Formato(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
+                }
+
+                return GetNiceTypeName(Type, GetImplementations());
+            }
+        }
+
+        protected internal virtual Implementations? GetElementImplementations()
+        {
+            var pr = GetPropertyRoute();
+            if (pr != null)
+                return pr.Add("Item").TryGetImplementations();
+
+            return null;
+        }
+
+        public bool IsCollecction(Type type)
+        {
+            return type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
+        }
+
+        static string GetNiceTypeName(Type type, Implementations? implementations)
+        {
+            switch (QueryUtils.TryGetFilterType(type))
+            {
+                case FilterType.Integer: return Resources.Number;
+                case FilterType.Decimal: return Resources.DecimalNumber;
+                case FilterType.String: return Resources.Text;
+                case FilterType.DateTime:  return Resources.DateTime;
+                case FilterType.Boolean: return Resources.Check;
+                case FilterType.Guid: return Resources.GlobalUniqueIdentifier;
+                case FilterType.Enum: return type.UnNullify().NiceName();
+                case FilterType.Lite:
+                {
+                    var cleanType = type.CleanType();
+                    var imp = implementations.Value;
+
+                    if (imp.IsByAll)
+                        return Combine(cleanType, Resources.AnyEntity);
+                            
+
+                    if (imp.Types.Only() == type.CleanType())
+                        return cleanType.NiceName();
+
+                    return Combine(cleanType, imp.Types.CommaOr(t => t.NiceName()));
+                }
+                case FilterType.Embedded: return Resources.Embedded0.Formato(type.NiceName());
+                default: return type.TypeName();
+            }
+        }
+
+        private static string Combine(Type cleanType, string implementations)
+        {
+            if(cleanType == typeof(IIdentifiable) || cleanType == typeof(IdentifiableEntity))
+                return implementations;
+
+            return "{0} ({1})".Formato(cleanType.NiceName(), implementations);
+        }
+    }
 
     public class BuildExpressionContext
     {

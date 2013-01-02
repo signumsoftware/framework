@@ -450,9 +450,9 @@ namespace Signum.Engine.Maps
 
         #region Names
 
-        public virtual string GenerateTableName(Type type)
+        public virtual ObjectName GenerateTableName(Type type)
         {
-            return CleanType(type).Name;
+            return new ObjectName(SchemaName.Default, CleanType(type).Name);
         }
 
         public virtual string GenerateCleanTypeName(Type type)
@@ -473,9 +473,9 @@ namespace Signum.Engine.Maps
             return type;
         }
 
-        public virtual string GenerateTableNameCollection(Type type, NameSequence name)
+        public virtual ObjectName GenerateTableNameCollection(Type type, NameSequence name)
         {
-            return CleanType(type).Name + name.ToString();
+            return new ObjectName(SchemaName.Default, CleanType(type).Name + name.ToString());
         }
 
         public virtual string GenerateFieldName(Type type, KindOfField kindOfField)
@@ -598,13 +598,15 @@ namespace Signum.Engine.Maps
             return table;
         }
 
-        public override string GenerateTableName(Type type)
+        public override ObjectName GenerateTableName(Type type)
         {
+            DatabaseName db = Administrator.viewDatabase.Value;
+
             SqlViewNameAttribute vn = type.SingleAttribute<SqlViewNameAttribute>();
             if (vn != null)
-                return vn.Name;
+                return new ObjectName(new SchemaName(db, vn.Schema ?? "dbo"), vn.Name);
 
-            return CleanType(type).Name;
+            return new ObjectName(new SchemaName(db, "dbo"), CleanType(type).Name);
         }
 
         public override string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)

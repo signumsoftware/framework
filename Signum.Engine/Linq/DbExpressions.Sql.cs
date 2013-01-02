@@ -81,6 +81,11 @@ namespace Signum.Engine.Linq
 
         static readonly Variable<AliasGenerator> current = Statics.ThreadVariable<AliasGenerator>("aliasGenerator");
 
+        public static Alias Table(ObjectName name)
+        {
+            return new Alias(name.ToString());
+        }
+
         public static Alias Raw(string name)
         {
             return new Alias(name);
@@ -239,7 +244,7 @@ namespace Signum.Engine.Linq
     {
         public readonly ITable Table;
 
-        public string Name { get { return Table.Name; } }
+        public ObjectName Name { get { return Table.Name; } }
 
         public override Alias[] KnownAliases
         {
@@ -979,9 +984,11 @@ namespace Signum.Engine.Linq
             if (projector == null)
                 throw new ArgumentNullException("projector");
 
-            Type shouldImplement = uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) : projector.Type;
-            if (!shouldImplement.IsAssignableFrom(resultType))
-                throw new InvalidOperationException("ProjectionType is {0} but should implement {1}".Formato(resultType.TypeName(), shouldImplement.TypeName()));  
+            var elementType = uniqueFunction == null ? resultType.ElementType() : resultType;
+            if (!elementType.IsAssignableFrom(projector.Type))
+                throw new InvalidOperationException("Projector ({0}) does not fit in the projection ({1})".Formato(
+                    projector.Type.TypeName(),
+                    elementType.TypeName()));
 
             this.Select = source;
             this.Projector = projector;

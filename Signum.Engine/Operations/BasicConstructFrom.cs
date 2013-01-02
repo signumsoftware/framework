@@ -59,47 +59,50 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructorFromOperation.Construct(IIdentifiable entity, params object[] args)
         {
-            OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
-
-            string error = OnCanConstruct(entity);
-            if (error != null)
-                throw new ApplicationException(error);
-
-            using (OperationLogic.AllowSave(entity.GetType()))
-            using (OperationLogic.AllowSave<T>())
+            using (HeavyProfiler.Log("ConstructFrom", () => OperationDN.UniqueKey(key)))
             {
-                try
+                OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+
+                string error = OnCanConstruct(entity);
+                if (error != null)
+                    throw new ApplicationException(error);
+
+                using (OperationLogic.AllowSave(entity.GetType()))
+                using (OperationLogic.AllowSave<T>())
                 {
-                    using (Transaction tr = new Transaction())
+                    try
                     {
-                        OperationLogDN log = new OperationLogDN
+                        using (Transaction tr = new Transaction())
                         {
-                            Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
-                            Start = TimeZoneManager.Now,
-                            User =  UserHolder.Current.ToLite()
-                        };
+                            OperationLogDN log = new OperationLogDN
+                            {
+                                Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                Start = TimeZoneManager.Now,
+                                User = UserHolder.Current.ToLite()
+                            };
 
-                        OnBeginOperation((IdentifiableEntity)entity);
+                            OnBeginOperation((IdentifiableEntity)entity);
 
-                        T result = Construct((F)entity, args);
+                            T result = Construct((F)entity, args);
 
-                        OnEndOperation(result);
+                            OnEndOperation(result);
 
-                        if (!result.IsNew)
-                        {
-                            log.Target = result.ToLite();
-                            log.End = TimeZoneManager.Now;
-                            using (ExecutionMode.Global())
-                                log.Save();
+                            if (!result.IsNew)
+                            {
+                                log.Target = result.ToLite();
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
+                            }
+
+                            return tr.Commit(result);
                         }
-
-                        return tr.Commit(result);
                     }
-                }
-                catch (Exception e)
-                {
-                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, e);
-                    throw;
+                    catch (Exception e)
+                    {
+                        OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, e);
+                        throw;
+                    }
                 }
             }
         }

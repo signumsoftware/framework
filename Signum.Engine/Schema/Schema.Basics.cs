@@ -32,7 +32,8 @@ namespace Signum.Engine.Maps
 
     public interface ITable
     {
-        string Name { get; }
+        ObjectName Name { get; }
+
         Dictionary<string, IColumn> Columns { get; }
 
         List<UniqueIndex> MultiIndexes { get; set; }
@@ -52,7 +53,8 @@ namespace Signum.Engine.Maps
     {
         public Type Type { get; private set; }
 
-        public string Name { get; set; }
+        public ObjectName Name { get; set; }
+
         bool identity = true;
         public bool Identity
         {
@@ -82,7 +84,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return Name;
+            return Name.ToString();
         }
 
         public void GenerateColumns()
@@ -189,6 +191,22 @@ namespace Signum.Engine.Maps
         public IEnumerable<RelationalTable> RelationalTables()
         {
             return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
+        }
+
+        public void ToDatabase(DatabaseName databaseName)
+        {
+            this.Name = this.Name.OnDatabase(databaseName);
+
+            foreach (var item in RelationalTables())
+                item.ToDatabase(databaseName);
+        }
+
+        public void ToSchema(SchemaName schemaName)
+        {
+            this.Name = this.Name.OnSchema(schemaName);
+
+            foreach (var item in RelationalTables())
+                item.ToSchema(schemaName);
         }
     }
 
@@ -708,7 +726,7 @@ namespace Signum.Engine.Maps
         public Dictionary<string, IColumn> Columns { get; set; }
         public List<UniqueIndex> MultiIndexes { get; set; }
 
-        public string Name { get; set; }
+        public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
         public FieldReference BackReference { get; set; }
         public Field Field { get; set; }
@@ -760,6 +778,16 @@ namespace Signum.Engine.Maps
                 return this.Field;
 
             return null;
+        }
+
+        public void ToDatabase(DatabaseName databaseName)
+        {
+            this.Name = this.Name.OnDatabase(databaseName);
+        }
+
+        public void ToSchema(SchemaName schemaName)
+        {
+            this.Name = this.Name.OnSchema(schemaName);
         }
     }
 

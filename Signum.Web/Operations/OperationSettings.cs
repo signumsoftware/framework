@@ -9,6 +9,7 @@ using System.Web;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 #endregion
 
 namespace Signum.Web.Operations
@@ -38,19 +39,27 @@ namespace Signum.Web.Operations
         public Func<ConstructorOperationContext, bool> IsVisible { get; set; }
     }
 
-    public abstract class EntityOperationSettingsBase : OperationSettings
+    public class EntityOperationGroup
+    {
+        public static readonly EntityOperationGroup None = new EntityOperationGroup();
+
+        public static EntityOperationGroup Create = new EntityOperationGroup
+        {
+            Description = () => Signum.Entities.Properties.Resources.Create,
+            SimplifyName = cs => Regex.Replace(cs, Signum.Entities.Properties.Resources.CreateFromRegex, m => m.Groups["t"].Value.FirstUpper(), RegexOptions.IgnoreCase),
+            CssClass = "sf-operation"
+        };
+
+        public Func<string> Description;
+        public Func<string, string> SimplifyName;
+        public string CssClass { get; set; }
+    }
+
+    public class EntityOperationSettings : OperationSettings
     {
         public ContextualOperationSettings ContextualFromMany { get; set; }
         public ContextualOperationSettings Contextual { get; set; }
 
-        public EntityOperationSettingsBase(Enum key)
-            : base(key)
-        {
-        }
-    }
-
-    public class EntityOperationSettings : EntityOperationSettingsBase
-    {
         public EntityOperationSettings(Enum operationKey)
             : base(operationKey)
         {
@@ -63,15 +72,7 @@ namespace Signum.Web.Operations
 
         public static Func<Enum, string> CssClass { get; set; }
 
-        bool groupInMenu = true;
-        /// <summary>
-        /// Set to false if this operation is not to be grouped in a Constructors menu
-        /// </summary>
-        public bool GroupInMenu 
-        {
-            get { return groupInMenu; }
-            set { groupInMenu = value; }
-        }
+        public EntityOperationGroup Group { get; set; }
 
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
         public Func<EntityOperationContext, JsInstruction> OnClick { get; set; }

@@ -97,7 +97,7 @@ namespace Signum.Entities.DynamicQuery
             return isProjection ? null : implementations;
         }
 
-        public Implementations? GetElementImplementations()
+        protected internal override Implementations? GetElementImplementations()
         {
             return isProjection ? implementations : null; 
         }

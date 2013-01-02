@@ -689,6 +689,8 @@ SF.registerModule("FindNavigator", function () {
 
                 var self = this;
                 var $selectedOption = $selectedCombo.children("option:selected");
+                $selectedCombo.attr("title", $selectedOption.attr("title"));
+                $selectedCombo.attr("style", $selectedOption.attr("style"));
                 if ($selectedOption.val() == "") {
                     var $prevSelect = $selectedCombo.prev("select");
                     if ($prevSelect.length == 0) {

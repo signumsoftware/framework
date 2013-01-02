@@ -98,7 +98,6 @@ namespace Signum.Windows.Operations
             new OperationColor(a => a.OperationType == OperationType.Execute && a.Lite == false) { Color = Colors.Blue}, 
             new OperationColor(a => a.OperationType == OperationType.Execute && a.Lite == true) { Color = Colors.Yellow}, 
             new OperationColor(e => e.OperationType == OperationType.Delete ) { Color = Colors.Red }, 
-            new OperationColor(e => e.OperationType == OperationType.ConstructorFrom ) { Color = Colors.Green }, 
         };
 
         public T GetSettings<T>(Enum key)
@@ -159,9 +158,50 @@ namespace Signum.Windows.Operations
                 }
             }
 
-            return operations.Select(EntityOperationToolBarButton.CreateButton).ToList();
+            List<FrameworkElement> buttons = new List<FrameworkElement>();
+            Dictionary<EntityOperationGroup, ContextMenu> groups = new Dictionary<EntityOperationGroup,ContextMenu>();
+
+            foreach (var eoc in operations)
+            {
+                if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom &&
+                   (eoc.OperationSettings == null || !eoc.OperationSettings.AvoidMoveToSearchControl))
+                {
+                    if(EntityOperationToolBarButton.MoveToSearchControls(eoc))
+                        continue; 
+                }
+
+                EntityOperationGroup group = GetDefaultGroup(eoc);
+
+                if(group != null)
+                {
+                    var cm = groups.GetOrCreate(group, () =>
+                    {
+                        var tbb = EntityOperationToolBarButton.CreateGroupContainer(group);
+                        buttons.Add(tbb);
+                        return tbb.ContextMenu;
+                    });
+
+                   cm.Items.Add(EntityOperationToolBarButton.NewMenuItem(eoc, group));
+                }
+                else
+                {
+                    buttons.Add(EntityOperationToolBarButton.NewToolbarButton(eoc));
+                }
+            }
+
+            return buttons.OrderByDescending(a=>a.ContextMenu == null).ToList();
         }
 
+        private EntityOperationGroup GetDefaultGroup(EntityOperationContext eoc)
+        {
+            if (eoc.OperationSettings != null && eoc.OperationSettings.Group != null)
+                return eoc.OperationSettings.Group == EntityOperationGroup.None ? null : eoc.OperationSettings.Group;
+
+            if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom)
+                return EntityOperationGroup.Create;
+
+            return null;
+        }
 
         protected internal virtual Brush GetBackground(OperationInfo oi, OperationSettings os)
         {

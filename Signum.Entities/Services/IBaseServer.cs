@@ -47,7 +47,7 @@ namespace Signum.Services
         Dictionary<Type, TypeDN> ServerTypes();
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, EntityType> EntityTypes();
+        Dictionary<Type, EntityKind> EntityKinds();
 
         [OperationContract, NetDataContract]
         DateTime ServerNow();

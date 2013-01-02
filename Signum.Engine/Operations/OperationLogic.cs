@@ -139,7 +139,7 @@ namespace Signum.Engine.Operations
         static void OperationLogic_Initializing()
         {
             var errors = (from t in Schema.Current.Tables.Keys
-                          let et = TypeLogic.TryGetEntityType(t)
+                          let et = TypeLogic.TryGetEntityKind(t)
                           let sp = IsSaveProtected(t)
                           select et == null ? "{0} has no EntityTypeAttribute set".Formato(t.FullName) :
                           sp != RequiresSaveProtected(et.Value) ? "{0} is {1} but is {2}save protected".Formato(t.FullName, et, sp ? "" : "NOT ") :
@@ -149,21 +149,21 @@ namespace Signum.Engine.Operations
                 throw new InvalidOperationException("EntitySetting - SaveProtected inconsistencies: \r\n" + errors);
         }
 
-        private static bool RequiresSaveProtected(EntityType entityType)
+        private static bool RequiresSaveProtected(EntityKind entityType)
         {
             switch (entityType)
             {
-                case EntityType.SystemString:
-                case EntityType.System:
+                case EntityKind.SystemString:
+                case EntityKind.System:
                     return false;
 
-                case EntityType.String:
-                case EntityType.Shared:
-                case EntityType.Main:
+                case EntityKind.String:
+                case EntityKind.Shared:
+                case EntityKind.Main:
                     return true;
 
-                case EntityType.Part:
-                case EntityType.SharedPart:                
+                case EntityKind.Part:
+                case EntityKind.SharedPart:                
                     return false;
 
                 default:

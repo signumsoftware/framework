@@ -238,6 +238,8 @@ namespace Signum.Entities
 
     public static class Lite
     {
+        public static Type BaseImplementationType = typeof(LiteImp);
+
         static GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>> giNewLite =
             new GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>>((id, str) => new LiteImp<IdentifiableEntity>(id, str));
 

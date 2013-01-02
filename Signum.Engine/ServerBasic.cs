@@ -118,10 +118,10 @@ namespace Signum.Services
         }
 
 
-        public Dictionary<Type, EntityType> EntityTypes()
+        public Dictionary<Type, EntityKind> EntityKinds()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                 () => TypeLogic.EntityTypes);
+                 () => TypeLogic.EntityKinds);
         }
 
         public virtual DateTime ServerNow()

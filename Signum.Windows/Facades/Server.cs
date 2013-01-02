@@ -31,7 +31,7 @@ namespace Signum.Windows
             {
                 ServerTypes = current.ServerTypes();
                 NameToType = ServerTypes.ToDictionary(a => a.Value.CleanName, a => a.Key);
-                EntityTypes = current.EntityTypes();
+                EntityKinds = current.EntityKinds();
             };
         }
 
@@ -251,7 +251,8 @@ namespace Signum.Windows
               
                 if(liteType.IsAssignableFrom(objType))
                 {
-                    return ((IdentifiableEntity)obj).ToLite();
+                    IdentifiableEntity ident = (IdentifiableEntity)obj;
+                    return ident.ToLite(ident.IsNew);
                 }
             }
 
@@ -283,7 +284,7 @@ namespace Signum.Windows
         }
 
         public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
-        public static Dictionary<Type, EntityType> EntityTypes { get; private set; }
+        public static Dictionary<Type, EntityKind> EntityKinds { get; private set; }
         public static Dictionary<string, Type> NameToType { get; private set; }
 
         public static Type TryGetType(string cleanName)
@@ -308,9 +309,9 @@ namespace Signum.Windows
            return lite;
         }
 
-        internal static EntityType GetEntityType(Type type)
+        internal static EntityKind GetEntityKind(Type type)
         {
-            return EntityTypes.GetOrThrow(type, "Type {0} not found in the Server");
+            return EntityKinds.GetOrThrow(type, "Type {0} not found in the Server");
         }
     }
 

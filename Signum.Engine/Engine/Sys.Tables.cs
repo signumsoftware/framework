@@ -11,17 +11,35 @@ namespace Signum.Engine.SchemaInfoTables
 
    
 
-    [SqlViewName("sys.objects")]
+    [SqlViewName("sys", "objects")]
     public class SysObjects : IView
     {
         [SqlViewColumn(PrimaryKey=true)]
         public int object_id;
+        public int schema_id;
         public string type;
         public string type_desc;
         public string name;
     }
 
-    [SqlViewName("sys.schemas")]
+
+    [SqlViewName("sys", "servers")]
+    public class SysServers : IView
+    {
+        [SqlViewColumn(PrimaryKey = true)]
+        public int server_id;
+        public string name;
+    }
+
+    [SqlViewName("sys", "servers")]
+    public class SysDatabases : IView
+    {
+        [SqlViewColumn(PrimaryKey = true)]
+        public int server_id;
+        public string name;
+    }
+
+    [SqlViewName("sys", "schemas")]
     public class SysSchemas : IView
     {
         [SqlViewColumn(PrimaryKey = true)]
@@ -37,7 +55,7 @@ namespace Signum.Engine.SchemaInfoTables
     }
 
 
-    [SqlViewName("sys.tables")]
+    [SqlViewName("sys", "tables")]
     public class SysTables : IView
     {
         public string name;
@@ -81,12 +99,14 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [SqlViewName("sys.views")]
+    [SqlViewName("sys", "views")]
     public class SysViews : IView
     {
         public string name;
         [SqlViewColumn(PrimaryKey = true)]
         public int object_id;
+
+        public int schema_id;
 
         static Expression<Func<SysViews, IQueryable<SysIndexes>>> IndicesExpression =
             v => Database.View<SysIndexes>().Where(ix => ix.object_id == v.object_id);
@@ -103,7 +123,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [SqlViewName("sys.columns")]
+    [SqlViewName("sys", "columns")]
     public class SysColumns : IView
     {
         public string name;
@@ -118,7 +138,7 @@ namespace Signum.Engine.SchemaInfoTables
         public bool is_identity; 
     }
 
-    [SqlViewName("sys.default_constraints")]
+    [SqlViewName("sys", "default_constraints")]
     public class SysDefaultConstraints : IView
     {
         public string name;
@@ -129,7 +149,7 @@ namespace Signum.Engine.SchemaInfoTables
         public bool is_system_named;
     }
 
-    [SqlViewName("sys.types")]
+    [SqlViewName("sys", "types")]
     public class SysTypes : IView
     {
         [SqlViewColumn(PrimaryKey = true)]
@@ -138,7 +158,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
-    [SqlViewName("sys.foreign_keys")]
+    [SqlViewName("sys", "foreign_keys")]
     public class SysForeignKeys : IView
     {
         [SqlViewColumn(PrimaryKey = true)]
@@ -155,7 +175,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [SqlViewName("sys.foreign_key_columns")]
+    [SqlViewName("sys", "foreign_key_columns")]
     public class SysForeignKeyColumns : IView
     {
         public int constraint_object_id;
@@ -166,7 +186,7 @@ namespace Signum.Engine.SchemaInfoTables
         public int referenced_column_id;
     }
 
-    [SqlViewName("sys.indexes")]
+    [SqlViewName("sys", "indexes")]
     public class SysIndexes : IView
     {
         public int index_id;
@@ -184,7 +204,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [SqlViewName("sys.index_columns")]
+    [SqlViewName("sys", "index_columns")]
     public class SysIndexColumn : IView
     {
         public int object_id;
@@ -192,14 +212,14 @@ namespace Signum.Engine.SchemaInfoTables
         public int column_id;
     }
 
-    [SqlViewName("sys.extended_properties")]
+    [SqlViewName("sys", "extended_properties")]
     public class SysExtendedProperties : IView
     {
         public int major_id;
         public string name;
     }
 
-    [SqlViewName("sys.sql_modules")]
+    [SqlViewName("sys", "sql_modules")]
     public class SysSqlModules : IView
     {
         [SqlViewColumn(PrimaryKey = true)]
@@ -207,7 +227,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string definition; 
     }
 
-    [SqlViewName("sys.procedures")]
+    [SqlViewName("sys", "procedures")]
     public class SysProcedures : IView
     {
         [SqlViewColumn(PrimaryKey = true)]

@@ -357,7 +357,7 @@ namespace Signum.Windows
         }
 
 
-        public Type SelectType()
+        public Type SelectType(Func<Type, bool> filterType)
         {
             if (CleanType.IsEmbeddedEntity())
                 return CleanType;
@@ -365,7 +365,7 @@ namespace Signum.Windows
             if (Implementations.Value.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
 
-            return Navigator.SelectType(Window.GetWindow(this), Implementations.Value.Types);
+            return Navigator.SelectType(Window.GetWindow(this), Implementations.Value.Types, filterType);
         }
 
         protected object OnCreate()
@@ -376,7 +376,7 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = SelectType();
+                Type type = SelectType(Navigator.IsFindable);
                 if (type == null)
                     return null;
 
@@ -406,7 +406,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType();
+                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
                 if (type == null)
                     return null;
 
