@@ -78,12 +78,12 @@ namespace Signum.Engine.Alerts
             SystemAlertTypes.Add(alertType); 
         }
 
-        public static AlertDN CreateAlert(this IIdentifiable entity, string text, Enum alertType = null, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null)
+        public static AlertDN CreateAlert(this IIdentifiable entity, string text, Enum alertType, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null)
         {
             return CreateAlert(entity.ToLite(), text, alertType, alertDate, user, title);
         }
 
-        public static AlertDN CreateAlert<T>(this Lite<T> entity, string text, Enum alertType = null, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
+        public static AlertDN CreateAlert<T>(this Lite<T> entity, string text, Enum alertType, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
         {
             if (started == false)
                 return null;
@@ -95,16 +95,16 @@ namespace Signum.Engine.Alerts
                 Text = text,
                 Title = title,
                 Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
-                AlertType = alertType == null ? null : AlertTypeEnumLogic.ToEntity(alertType)
+                AlertType = AlertTypeEnumLogic.ToEntity(alertType)
             }.Execute(AlertOperation.SaveNew);
         }
 
-        public static AlertDN CreateAlertForceNew(this IIdentifiable entity, string text, Enum alertType = null, DateTime? alertDate = null, Lite<UserDN> user = null)
+        public static AlertDN CreateAlertForceNew(this IIdentifiable entity, string text, Enum alertType, DateTime? alertDate = null, Lite<UserDN> user = null)
         {
             return CreateAlertForceNew(entity.ToLite(), text, alertType, alertDate, user);
         }
 
-        public static AlertDN CreateAlertForceNew<T>(this Lite<T> entity, string text, Enum alertType = null, DateTime? alertDate = null, Lite<UserDN> user = null) where T : class, IIdentifiable
+        public static AlertDN CreateAlertForceNew<T>(this Lite<T> entity, string text, Enum alertType, DateTime? alertDate = null, Lite<UserDN> user = null) where T : class, IIdentifiable
         {
             if (started == false)
                 return null;

@@ -9,7 +9,6 @@ using System.Reflection;
 using Signum.Web.Operations;
 using Signum.Entities;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
@@ -21,6 +20,9 @@ using System.Web.Mvc.Html;
 using System.Collections;
 using System.Web.Script.Serialization;
 using System.Drawing;
+using Signum.Web.Omnibox;
+using Signum.Entities.Profiler;
+using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Profiler
 {
@@ -33,6 +35,22 @@ namespace Signum.Web.Profiler
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(ProfilerClient));
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProfilerHeavy",
+                    () => ProfilerPermission.ViewHeavyProfiler.IsAuthorized(),
+                    uh => uh.Action((ProfilerController pc) => pc.Heavy())));
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProfilerTimeTable",
+                    () => ProfilerPermission.ViewTimeTracker.IsAuthorized(),
+                    uh => uh.Action((ProfilerController pc) => pc.TimeTable())));
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProfilerTimes",
+                    () => ProfilerPermission.ViewTimeTracker.IsAuthorized(),
+                    uh => uh.Action((ProfilerController pc) => pc.Times())));
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("OverrideSessionTimeout",
+                    () => ProfilerPermission.OverrideSessionTimeout.IsAuthorized(),
+                    uh => uh.Action((ProfilerController pc) => pc.OverrideSessionTimeout(60))));
             }
         }
 

@@ -115,6 +115,7 @@
     <Compile Include="Chart\IChartServer.cs" />
     <Compile Include="Chart\UserChart.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
+    <Compile Include="ControlPanel\IUserQueryServer.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />
     <Compile Include="Disconnected\DisconnectedExportRanges.cs" />
     <Compile Include="Disconnected\DisconnectedImportDN.cs" />
@@ -132,6 +133,7 @@
     <Compile Include="Mailing\SMTPConfiguration.cs" />
     <Compile Include="Chart\UserChartOmniboxResultGenerator.cs" />
     <Compile Include="Notes\Note.cs" />
+    <Compile Include="Omnibox\SpecialOmniboxResultGenerator.cs" />
     <Compile Include="Processes\IProcessServer.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />
@@ -177,8 +179,12 @@
     <EmbeddedResource Include="Properties\Resources.es.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.fr.resx" />
-    <EmbeddedResource Include="Properties\Resources.it.resx" />
+    <EmbeddedResource Include="Properties\Resources.fr.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.it.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -187,7 +193,9 @@
     <EmbeddedResource Include="Properties\Resources.pt.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.de.resx" />
+    <EmbeddedResource Include="Properties\Resources.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="Authorization\Authorization.cd" />

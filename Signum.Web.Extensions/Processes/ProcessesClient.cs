@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +9,6 @@ using System.Reflection;
 using Signum.Web.Operations;
 using Signum.Entities;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
@@ -20,7 +18,8 @@ using Signum.Engine.Maps;
 using System.Web.Routing;
 using Signum.Entities.Processes;
 using Signum.Engine.Operations;
-#endregion
+using Signum.Web.Omnibox;
+using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Processes
 {
@@ -64,6 +63,10 @@ namespace Signum.Web.Processes
 
                     ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
                 }
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessControlPanel", 
+                    () => ProcessPermission.ViewProcessControlPanel.IsAuthorized(),
+                    uh => uh.Action((ProcessController pc) => pc.View())));
             }
         }
 
@@ -95,7 +98,7 @@ namespace Signum.Web.Processes
                                 OperationSettings = os.TryCC(s => s.ContextualFromMany),
                                 CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
                             }
-                            where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFromMany :
+                            where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
                             os.ContextualFromMany == null ? (oi.Lite == true && os.OnClick == null && oi.OperationType != OperationType.ConstructorFrom) :
                             (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(context))
                             select context).ToList();

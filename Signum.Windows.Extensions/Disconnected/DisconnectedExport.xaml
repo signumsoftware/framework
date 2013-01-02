@@ -15,7 +15,7 @@
             <m:ValueLine m:Common.Route="CreateDatabase" />
             <m:ValueLine m:Common.Route="CreateSchema" />
             <m:ValueLine m:Common.Route="DisableForeignKeys" />
-            <m:EntityRepeater m:Common.Route="Copies" ViewOnCreate="False" Grid.Column="0" Height="150" VerticalScrollBarVisiblity="Visible" >
+            <m:EntityRepeater m:Common.Route="Copies" ViewOnCreate="False" Grid.Column="0" Height="150" VerticalScrollBarVisibility="Visible" >
                 <m:EntityRepeater.EntityTemplate>
                     <DataTemplate DataType="d:DownloadStatisticsTableDN">
                         <Grid m:Common.LabelVisible="False" HorizontalAlignment="Stretch">

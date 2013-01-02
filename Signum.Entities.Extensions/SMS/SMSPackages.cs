@@ -8,13 +8,13 @@ using Signum.Utilities;
 
 namespace Signum.Entities.SMS
 {
-    [Serializable, EntityType(EntityType.System)]
+    [Serializable, EntityKind(EntityKind.System)]
     public class SMSSendPackageDN : SMSPackageDN
     {
 
     }
 
-    [Serializable, EntityType(EntityType.System)]
+    [Serializable, EntityKind(EntityKind.System)]
     public class SMSUpdatePackageDN : SMSPackageDN
     {
 

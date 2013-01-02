@@ -42,9 +42,9 @@ namespace Signum.Web.SMS
 
                 OperationsClient.AddSettings(new List<OperationSettings> 
                 {
-                    new EntityOperationSettings(SMSMessageOperation.CreateSMSMessageFromTemplate)
+                    new EntityOperationSettings(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                     {
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMSMessageFromTemplate", "SMS"))
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMSMessageFromEntity", "SMS"))
                         .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
                     },
 

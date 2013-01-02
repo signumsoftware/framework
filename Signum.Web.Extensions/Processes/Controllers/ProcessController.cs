@@ -61,7 +61,7 @@ namespace Signum.Web.Processes
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Start()
         {
-            ProcessPermissions.ViewProcessControlPanel.Authorize();
+            ProcessPermission.ViewProcessControlPanel.Authorize();
 
             ProcessLogic.StartBackgroundProcess();
 
@@ -73,7 +73,7 @@ namespace Signum.Web.Processes
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Stop()
         {
-            ProcessPermissions.ViewProcessControlPanel.Authorize();
+            ProcessPermission.ViewProcessControlPanel.Authorize();
 
             ProcessLogic.Stop();
 

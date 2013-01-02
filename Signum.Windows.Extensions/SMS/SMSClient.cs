@@ -30,7 +30,7 @@ namespace Signum.Windows.SMS
                     new EntitySettings<SMSUpdatePackageDN> { View = e => new SMSUpdatePackage()},
                 });
 
-                OperationClient.AddSetting(new EntityOperationSettings(SMSMessageOperation.CreateSMSMessageFromTemplate)
+                OperationClient.AddSetting(new EntityOperationSettings(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                 {
                     Click = FindAssociatedTemplates
                 });
@@ -50,7 +50,7 @@ namespace Signum.Windows.SMS
             });
 
             if (template != null)
-                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSMessageFromTemplate,
+                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity,
                     ((Lite<SMSTemplateDN>)template).Retrieve()));
 
             return null;

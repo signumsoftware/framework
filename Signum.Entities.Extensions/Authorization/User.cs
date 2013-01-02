@@ -16,7 +16,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class UserDN : Entity, IEmailOwnerDN, IUserDN
     {
         public static Func<string, string> ValidatePassword = p =>

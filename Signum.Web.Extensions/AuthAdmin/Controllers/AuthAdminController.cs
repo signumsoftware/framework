@@ -25,7 +25,7 @@ namespace Signum.Web.AuthAdmin
         protected override void OnAuthorization(AuthorizationContext filterContext)
         {
             if (UserDN.Current != null)
-                BasicPermissions.AdminRules.Authorize();
+                BasicPermission.AdminRules.Authorize();
         }
 
         public ViewResult Permissions(Lite<RoleDN> role)

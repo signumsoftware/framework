@@ -34,8 +34,7 @@ namespace Signum.Entities.Omnibox
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
-(?<dot>\.)|
-(?<semicolon>;)|
+(?<symbol>[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+])|
 (?<comparer>(==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=))", 
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace);
 
@@ -84,8 +83,7 @@ namespace Signum.Entities.Omnibox
                         return result;
 
                     AddTokens(tokens, m, "ident", OmniboxTokenType.Identifier);
-                    AddTokens(tokens, m, "dot", OmniboxTokenType.Dot);
-                    AddTokens(tokens, m, "semicolon", OmniboxTokenType.Semicolon);
+                    AddTokens(tokens, m, "symbol", OmniboxTokenType.Symbol);
                     AddTokens(tokens, m, "comparer", OmniboxTokenType.Comparer);
                     AddTokens(tokens, m, "number", OmniboxTokenType.Number);
                     AddTokens(tokens, m, "string", OmniboxTokenType.String);
@@ -94,7 +92,7 @@ namespace Signum.Entities.Omnibox
 
                 tokens.Sort(a => a.Index);
 
-                var tokenPattern = new string(tokens.Select(t => Char(t.Type)).ToArray());
+                var tokenPattern = new string(tokens.Select(t => t.Char()).ToArray());
 
                 foreach (var generator in Generators)
                 {
@@ -115,21 +113,6 @@ namespace Signum.Entities.Omnibox
             if (group.Success)
             {
                 tokens.Add(new OmniboxToken(type, group.Index, group.Value));
-            }
-        }
-
-        static char Char(OmniboxTokenType omniboxTokenType)
-        {
-            switch (omniboxTokenType)
-            {
-                case OmniboxTokenType.Identifier: return 'I';
-                case OmniboxTokenType.Dot: return '.';
-                case OmniboxTokenType.Semicolon: return ';';
-                case OmniboxTokenType.Comparer: return '=';
-                case OmniboxTokenType.Number: return 'N';
-                case OmniboxTokenType.String: return 'S';
-                case OmniboxTokenType.Entity: return 'E';
-                default: return '?';
             }
         }
     }
@@ -165,6 +148,7 @@ namespace Signum.Entities.Omnibox
     public interface IOmniboxResultGenerator
     {
         IEnumerable<OmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern);
+
         List<HelpOmniboxResult> GetHelp();
     }
 
@@ -213,13 +197,26 @@ namespace Signum.Entities.Omnibox
 
             return null;
         }
+
+        internal char Char()
+        {
+            switch (Type)
+            {
+                case OmniboxTokenType.Identifier: return 'I';
+                case OmniboxTokenType.Symbol: return Value.Single();
+                case OmniboxTokenType.Comparer: return '=';
+                case OmniboxTokenType.Number: return 'N';
+                case OmniboxTokenType.String: return 'S';
+                case OmniboxTokenType.Entity: return 'E';
+                default: return '?';
+            }
+        }
     }
 
     public enum OmniboxTokenType
     {
         Identifier,
-        Dot,
-        Semicolon,
+        Symbol,
         Comparer,
         Number,
         String,

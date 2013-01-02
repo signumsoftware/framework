@@ -66,7 +66,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -171,6 +173,9 @@
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
     <Compile Include="Chart\ChartOmniboxProvider.cs" />
+    <Compile Include="Chart\ChartRenderer.xaml.cs">
+      <DependentUpon>ChartRenderer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\ChartScript.xaml.cs">
       <DependentUpon>ChartScript.xaml</DependentUpon>
     </Compile>
@@ -188,7 +193,39 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
+    <Compile Include="ControlPanels\UserChartPartView.xaml.cs">
+      <DependentUpon>UserChartPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\LinkListPartView.xaml.cs">
+      <DependentUpon>LinkListPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\CountSearchControlPartView.xaml.cs">
+      <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\UserQueryPartView.xaml.cs">
+      <DependentUpon>UserQueryPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml.cs">
+      <DependentUpon>CountSearchControlPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\LinkListPartEdit.xaml.cs">
+      <DependentUpon>LinkListPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\UserChartPartEdit.xaml.cs">
+      <DependentUpon>UserChartPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\UserQueryPartEdit.xaml.cs">
+      <DependentUpon>UserQueryPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\ControlPanelClient.cs" />
+    <Compile Include="ControlPanels\ControlPanelView.xaml.cs">
+      <DependentUpon>ControlPanelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\StackColumnPanel.cs" />
     <Compile Include="Converters.cs" />
+    <Compile Include="ControlPanels\Admin\ControlPanelEdit.xaml.cs">
+      <DependentUpon>ControlPanelEdit.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Disconnected\UploadProgress.xaml.cs">
       <DependentUpon>UploadProgress.xaml</DependentUpon>
     </Compile>
@@ -240,6 +277,7 @@
       <DependentUpon>OmniboxTemplate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Omnibox\OmniboxClient.cs" />
+    <Compile Include="Omnibox\SpecialOmniboxProvider.cs" />
     <Compile Include="Processes\PackageData.cs" />
     <Compile Include="Processes\PackageOperationMenuItem.cs" />
     <Compile Include="Processes\PackageOperation.xaml.cs">
@@ -257,6 +295,10 @@
     <Compile Include="Processes\ProcessClient.cs" />
     <Compile Include="Processes\ProcessExecution.xaml.cs">
       <DependentUpon>ProcessExecution.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\ProfilerClient.cs" />
+    <Compile Include="Profiler\ProfilerUploader.xaml.cs">
+      <DependentUpon>ProfilerUploader.xaml</DependentUpon>
     </Compile>
     <Compile Include="SMS\SMSMessage.xaml.cs">
       <DependentUpon>SMSMessage.xaml</DependentUpon>
@@ -484,6 +526,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Chart\ChartRenderer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Chart\ChartScript.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -509,6 +555,46 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\Admin\ControlPanelEdit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\UserChartPartView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\LinkListPartView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\CountSearchControlPartView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\UserQueryPartView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\Admin\LinkListPartEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\Admin\UserChartPartEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\Admin\UserQueryPartEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\ControlPanelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Disconnected\UploadProgress.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -599,6 +685,10 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Profiler\ProfilerUploader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SMS\SMSMessage.xaml">
       <SubType>Designer</SubType>

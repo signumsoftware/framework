@@ -84,22 +84,18 @@ namespace Signum.Engine.ControlPanel
             }.Register();
         }
 
-        public static Lite<ControlPanelDN> GetHomePageControlPanel()
+        public static ControlPanelDN GetHomePageControlPanel()
         {
-            UserDN currentUser = UserDN.Current;
-            if (currentUser == null)
+            var cps = Database.Query<ControlPanelDN>()
+                .Where(a=>a.HomePagePriority.HasValue)
+                .OrderByDescending(a => a.HomePagePriority)
+                .Select(a => a.ToLite())
+                .FirstOrDefault();
+
+            if (cps == null)
                 return null;
 
-            var panel = Database.Query<ControlPanelDN>().Where(cp => cp.Related.RefersTo(currentUser) && cp.HomePage).Select(a => a.ToLite()).FirstOrDefault();
-            if (panel != null)
-                return panel;
-
-            var panels = Database.Query<ControlPanelDN>().Where(cp => cp.Related.Entity is RoleDN && cp.HomePage)
-                .Select(cp => new { ControlPanel = cp.ToLite(), Role = ((RoleDN)cp.Related.Entity).ToLite() }).ToList();
-
-            var hs = AuthLogic.RolesGraph().IndirectlyRelatedTo(RoleDN.Current.ToLite(), true);
-
-            return panels.Where(p => hs.Contains(p.Role)).OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel);
+            return cps.Retrieve(); //I assume this simplifies the cross applys.
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)

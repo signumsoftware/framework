@@ -273,7 +273,7 @@ WriteLiteral("\">\r\n            <div class=\"sf-chart-container\" style=\"displ
 
             
             #line 44 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                                                       Write(ucPart.OnlyData ? "none" : "block");
+                                                       Write(ucPart.ShowData ? "none" : "block");
 
             
             #line default
@@ -314,7 +314,7 @@ WriteLiteral("\">\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
             
             #line 51 "..\..\ControlPanel\Views\UserChartPart.cshtml"
     
-        if (ucPart.OnlyData)
+        if (ucPart.ShowData)
         {
             ViewData[ViewDataKeys.Results] = resultTable;
             ViewData[ViewDataKeys.Navigate] = false;

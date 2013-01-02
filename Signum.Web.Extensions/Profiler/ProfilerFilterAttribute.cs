@@ -9,7 +9,7 @@ using Signum.Engine.Profiler;
 
 namespace Signum.Web.Profiler
 {
-    public class ProfilerFilter : ActionFilterAttribute
+    public class ProfilerFilterAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {

@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class NewsletterDN : Entity, IProcessDataDN
     {
         [NotNullable, SqlDbType(Size = 100)]
@@ -91,7 +91,7 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    [Serializable, EntityType(EntityType.System)]
+    [Serializable, EntityKind(EntityKind.System)]
     public class NewsletterDeliveryDN : Entity
     {
         bool sent;

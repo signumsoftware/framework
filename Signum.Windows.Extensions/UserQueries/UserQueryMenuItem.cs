@@ -183,9 +183,9 @@ namespace Signum.Windows.UserQueries
                 }.Handle(MenuItem.ClickEvent, remove_Clicked));
             };
 
-          
-
             initialize();
+
+            var autoSet = UserQueryClient.GetUserQuery(sc);
 
             if (autoSet != null)
             {
@@ -202,15 +202,6 @@ namespace Signum.Windows.UserQueries
             }
 
             return miResult;
-        }
-
-        [ThreadStatic]
-        static UserQueryDN autoSet;
-        internal static IDisposable AutoSet(UserQueryDN uq)
-        {
-            var old = autoSet;
-            autoSet = uq;
-            return new Disposable(() => autoSet = old);
         }
     }
 }

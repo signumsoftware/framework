@@ -30,6 +30,9 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         string PasswordNearExpired();
+
+        [OperationContract, NetDataContract]
+        byte[] DownloadAuthRules();
     }
 
     [ServiceContract]
@@ -46,9 +49,6 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         bool IsAllowedForInUserInterface(Lite<IIdentifiable> lite, TypeAllowedBasic allowed);
-
-        [OperationContract, NetDataContract]
-        byte[] DownloadAuthRules();
     }
 
     [ServiceContract]

@@ -16,13 +16,13 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable, EntityType(EntityType.SystemString)]
+    [Serializable, EntityKind(EntityKind.SystemString)]
     public class ProcessDN : MultiEnumDN
     {
        
     }
 
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class ProcessExecutionDN : IdentifiableEntity
     {
         internal ProcessExecutionDN() { }
@@ -200,7 +200,7 @@ namespace Signum.Entities.Processes
     {
     }
 
-    [Serializable, EntityType(EntityType.System)]
+    [Serializable, EntityKind(EntityKind.System)]
     public class UserProcessSessionDN : Entity, ISessionDataDN
     {
         Lite<UserDN> user;
@@ -241,7 +241,7 @@ namespace Signum.Entities.Processes
         Suspend,
     }
 
-    public enum ProcessPermissions
+    public enum ProcessPermission
     {
         ViewProcessControlPanel
     }

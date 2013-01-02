@@ -18,6 +18,4 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         void RemoveUserQuery(Lite<UserQueryDN> lite);
     }
-
-   
 }

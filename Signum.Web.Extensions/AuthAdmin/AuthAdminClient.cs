@@ -19,6 +19,7 @@ using System.Web.Routing;
 using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Web.Basic;
+using Signum.Web.Omnibox;
 
 namespace Signum.Web.AuthAdmin
 {
@@ -72,13 +73,17 @@ namespace Signum.Web.AuthAdmin
                         Mapping.New<bool>(), "Resource_Key", false);
 
                 QuickLinkWidgetHelper.RegisterEntityLinks<RoleDN>((RoleDN entity, string partialViewName, string prefix) =>
-                     entity.IsNew || !BasicPermissions.AdminRules.IsAuthorized() ? null :
+                     entity.IsNew || !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
                          types ? new QuickLinkAction(Resources._0Rules.Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(entity.ToLite()))): null,
                          permissions ? new QuickLinkAction(Resources._0Rules.Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(entity.ToLite()))): null,
                          facadeMethods ? new QuickLinkAction(Resources._0Rules.Formato(typeof(FacadeMethodDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.FacadeMethods(entity.ToLite()))): null
                      });
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",
+                    () => BasicPermission.AdminRules.IsAuthorized(),
+                    uh => uh.Action((AuthAdminController aac) => aac.Export())));
             }
         }
 

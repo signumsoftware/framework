@@ -126,7 +126,9 @@ namespace Signum.Web.Selenium
         public const string PageLoadLongTimeout = "40000";
 
         //public const int DefaultAjaxTimeout = 10000;
-        public const int DefaultAjaxTimeout = 15000;
+        public static int DefaultAjaxTimeout = 30000;
+        public static int DefaultAjaxWait = 200;
+
 
         public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition)
         {
@@ -136,20 +138,19 @@ namespace Signum.Web.Selenium
         public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition, int? timeout = null)
         {
             var func = condition.Compile();
-
-            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
-
             if (func())
                 return;
 
+            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
             do
             {
-                Thread.Sleep(500);
+                Thread.Sleep(DefaultAjaxWait);
 
                 if (func())
                     return;
 
             } while (DateTime.Now < limit);
+
 
             throw new TimeoutException("The expression took more than {0} ms:\r\n{1}".Formato(timeout ?? DefaultAjaxTimeout, condition.NiceToString()));
         }
@@ -182,7 +183,7 @@ namespace Signum.Web.Selenium
             selenium.Click("jq=#{0}btnOk".Formato(prefix));
             if (submit)
                 selenium.WaitForPageToLoad(DefaultPageLoadTimeout);
-            else 
+            else
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
 

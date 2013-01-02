@@ -30,10 +30,12 @@ using Signum.Engine.Profiler;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
 using Signum.Engine.Operations;
+using Signum.Entities.ControlPanel;
+using Signum.Engine.ControlPanel;
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer,
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IControlPanelServer,
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer,
         ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
@@ -373,5 +375,11 @@ namespace Signum.Services
                 ProfilerLogic.ProfilerEntries(entries));
         }
         #endregion
+
+        public ControlPanelDN GetHomePageControlPanel()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ControlPanelLogic.GetHomePageControlPanel());
+        }
     }
 }

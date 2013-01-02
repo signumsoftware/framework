@@ -22,16 +22,16 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref title, value, () => Title); }
         }
 
-        int row = 1;
-        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        int row;
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
         public int Row
         {
             get { return row; }
             set { Set(ref row, value, () => Row); }
         }
 
-        int column = 1;
-        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        int column;
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
         public int Column
         {
             get { return column; }
@@ -55,8 +55,8 @@ namespace Signum.Entities.ControlPanel
         {
             if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
             {
-                if (content != null && (content.GetType() == typeof(CountSearchControlPartDN) || content.GetType() == typeof(LinkListPartDN)))
-                    return Resources.ControlPanelDN_PartTitleMustBeSpecifiedForListParts;
+                if (content != null && content.RequiresTitle)
+                    return  Resources.ControlPanelDN_TitleMustBeSpecifiedFor0.Formato(content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);
@@ -66,20 +66,27 @@ namespace Signum.Entities.ControlPanel
         {
             return new PanelPart
             {
-                Column = this.Column,
-                Row=this.Row,
+                Column = Column,
+                Row = Row,
                 Content = content.Clone(),
-                Title = this.Title
+                Title = Title
             };
+        }
+
+        internal void NotifyRowColumn()
+        {
+            Notify(() => Row);
+            Notify(() => Column);
         }
     }
 
     public interface IPartDN : IIdentifiable
     {
+        bool RequiresTitle { get; }
         IPartDN Clone();
     }
 
-    [Serializable, EntityType(EntityType.Part)]
+    [Serializable, EntityKind(EntityKind.Part)]
     public class UserQueryPartDN : Entity, IPartDN
     {
         [NotNullable]
@@ -97,6 +104,11 @@ namespace Signum.Entities.ControlPanel
             return userQuery == null ? null : ToStringExpression.Evaluate(this);
         }
 
+        public bool RequiresTitle
+        {
+            get { return false; }
+        }
+
         public IPartDN Clone()
         {
             return new UserQueryPartDN
@@ -106,7 +118,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [Serializable, EntityType(EntityType.Part)]
+    [Serializable, EntityKind(EntityKind.Part)]
     public class UserChartPartDN : Entity, IPartDN
     {
         [NotNullable]
@@ -118,11 +130,11 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref userChart, value, () => UserChart); }
         }
 
-        bool onlyData = false;
-        public bool OnlyData
+        bool showData = false;
+        public bool ShowData
         {
-            get { return onlyData; }
-            set { Set(ref onlyData, value, () => OnlyData); }
+            get { return showData; }
+            set { Set(ref showData, value, () => ShowData); }
         }
 
         static readonly Expression<Func<UserChartPartDN, string>> ToStringExpression = e => e.userChart.ToString();
@@ -130,17 +142,23 @@ namespace Signum.Entities.ControlPanel
         {
             return userChart == null ? null : ToStringExpression.Evaluate(this);
         }
+
+        public bool RequiresTitle
+        {
+            get { return false; }
+        }
+
         public IPartDN Clone()
         {
             return new UserChartPartDN
             {
                 UserChart = this.UserChart,
-                OnlyData = this.OnlyData
+                ShowData = this.ShowData
             };
         }
     }
 
-    [Serializable, EntityType(EntityType.Part)]
+    [Serializable, EntityKind(EntityKind.Part)]
     public class CountSearchControlPartDN : Entity, IPartDN
     {
         [NotNullable]
@@ -154,6 +172,11 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return "{0} {1}".Formato(userQueries.Count, typeof(UserQueryDN).NicePluralName());
+        }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
         }
 
         public IPartDN Clone()
@@ -200,7 +223,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [Serializable, EntityType(EntityType.Part)]
+    [Serializable, EntityKind(EntityKind.Part)]
     public class LinkListPartDN : Entity, IPartDN
     {
         [NotNullable]
@@ -215,6 +238,12 @@ namespace Signum.Entities.ControlPanel
         {
             return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
         }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
+        }
+
         public IPartDN Clone()
         {
             return new LinkListPartDN

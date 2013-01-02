@@ -61,6 +61,24 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} can only be created from the chart window.
+        /// </summary>
+        public static string _0CanOnlyBeCreatedFromTheChartWindow {
+            get {
+                return ResourceManager.GetString("_0CanOnlyBeCreatedFromTheChartWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} can only be created from the search window.
+        /// </summary>
+        public static string _0CanOnlyBeCreatedFromTheSearchWindow {
+            get {
+                return ResourceManager.GetString("_0CanOnlyBeCreatedFromTheSearchWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alert.
         /// </summary>
         public static string Alert {
@@ -84,6 +102,15 @@ namespace Signum.Windows.Extensions.Properties {
         public static string AreYouSureToRemove0 {
             get {
                 return ResourceManager.GetString("AreYouSureToRemove0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Authorization cache successfully updated.
+        /// </summary>
+        public static string AuthorizationCacheSuccessfullyUpdated {
+            get {
+                return ResourceManager.GetString("AuthorizationCacheSuccessfullyUpdated", resourceCulture);
             }
         }
         

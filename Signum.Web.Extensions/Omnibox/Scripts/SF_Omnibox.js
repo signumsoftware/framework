@@ -5,7 +5,7 @@ SF.Omnibox = (function () {
     var lastXhr; //To avoid previous requests results to be shown
     $omnibox.autocomplete({
         delay: 0,
-        minLength: 2,
+        minLength: 1,
         source: function (request, response) {
             if (lastXhr)
                 lastXhr.abort();

@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityType(EntityType.Shared)]
+    [Serializable, EntityKind(EntityKind.Shared)]
     public class RoleDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

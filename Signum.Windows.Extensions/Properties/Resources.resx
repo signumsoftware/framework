@@ -237,6 +237,12 @@
   <data name="Chart" xml:space="preserve">
     <value>Chart</value>
   </data>
+  <data name="_0CanOnlyBeCreatedFromTheChartWindow" xml:space="preserve">
+    <value>{0} can only be created from the chart window</value>
+  </data>
+  <data name="_0CanOnlyBeCreatedFromTheSearchWindow" xml:space="preserve">
+    <value>{0} can only be created from the search window</value>
+  </data>
   <data name="Alert" xml:space="preserve">
     <value>Alert</value>
   </data>
@@ -254,5 +260,8 @@
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
+  </data>
+  <data name="AuthorizationCacheSuccessfullyUpdated" xml:space="preserve">
+    <value>Authorization cache successfully updated</value>
   </data>
 </root>

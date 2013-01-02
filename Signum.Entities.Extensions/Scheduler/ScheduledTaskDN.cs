@@ -10,7 +10,7 @@ using Signum.Entities.Processes;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class ScheduledTaskDN : IdentifiableEntity
     {
         [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN), typeof(ScheduleRuleMinutelyDN), typeof(ScheduleRuleHourlyDN))]

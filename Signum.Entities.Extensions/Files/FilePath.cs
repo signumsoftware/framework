@@ -12,7 +12,7 @@ using System.Web;
 
 namespace Signum.Entities.Files
 {
-    [Serializable, EntityType(EntityType.SharedPart)]
+    [Serializable, EntityKind(EntityKind.SharedPart)]
     public class FilePathDN : ImmutableEntity, IFile
     {
         public FilePathDN() { }

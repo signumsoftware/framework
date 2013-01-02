@@ -14,7 +14,7 @@ using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.UserQueries
 {
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class UserQueryDN : Entity
     {
         public UserQueryDN() { }

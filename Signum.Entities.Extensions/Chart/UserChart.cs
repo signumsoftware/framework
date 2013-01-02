@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable, EntityType(EntityType.Main)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class UserChartDN : IdentifiableEntity, IChartBase
     {
         public UserChartDN() { }

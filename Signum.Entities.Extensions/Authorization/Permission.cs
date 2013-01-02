@@ -7,13 +7,13 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityType(EntityType.SystemString)]
+    [Serializable, EntityKind(EntityKind.SystemString)]
     public class PermissionDN : MultiEnumDN
     {
 
     }
 
-    public enum BasicPermissions
+    public enum BasicPermission
     {
         AdminRules,
     }
