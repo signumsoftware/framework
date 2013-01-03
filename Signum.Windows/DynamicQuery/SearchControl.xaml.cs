@@ -763,7 +763,7 @@ namespace Signum.Windows
                 return;
 
             IdentifiableEntity result = Creating != null ? Creating() :
-                (IdentifiableEntity)Constructor.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), Window.GetWindow(this));
+                (IdentifiableEntity)Constructor.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), this);
 
             if (result == null)
                 return;
