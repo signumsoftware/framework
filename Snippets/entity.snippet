@@ -25,11 +25,16 @@
 				</Literal>
 			</Declarations>
 			<Code Language="csharp">
-				<![CDATA[[Serializable]
-	public class $entityName$DN: Entity
+				<![CDATA[[Serializable, EntityKind(EntityKind.Master)]
+    public class $entityName$DN: Entity
     {
        $end$
        
+    }
+    
+    public enum $entityName$Operation
+    {
+        Save
     }]]>
 			</Code>
 		</Snippet>
