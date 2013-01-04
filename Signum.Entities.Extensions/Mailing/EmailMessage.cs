@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Authorization;
-using Signum.Entities.Operations;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Mailing;
-using Signum.Entities.Exceptions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class EmailMessageDN : Entity
     {
         [ImplementedBy(typeof(UserDN))]
@@ -37,7 +36,6 @@ namespace Signum.Entities.Mailing
             get { return cc; }
             set { Set(ref cc, value, () => Cc); }
         }
-
 
         Lite<EmailTemplateDN> template;
         [NotNullValidator]
@@ -93,8 +91,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref exception, value, () => Exception); }
         }
 
-        EmailState state;
-        public EmailState State
+        EmailMessageState state;
+        public EmailMessageState State
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
@@ -107,18 +105,17 @@ namespace Signum.Entities.Mailing
             set { Set(ref package, value, () => Package); }
         }
 
-        static StateValidator<EmailMessageDN, EmailState> validator = new StateValidator<EmailMessageDN, EmailState>(
+        static StateValidator<EmailMessageDN, EmailMessageState> validator = new StateValidator<EmailMessageDN, EmailMessageState>(
             m => m.State, m => m.Exception, m => m.Sent, m => m.Received, m => m.Package)
             {
-{EmailState.Created,      false,             false,      false,         null },
-{EmailState.Sent,         false,             true,       false,         null },
-{EmailState.Exception,    true,              true,       false,         null },
-{EmailState.Received,     false,             true,       true,          null },
+{EmailMessageState.Created,      false,             false,      false,         null },
+{EmailMessageState.Sent,         false,             true,       false,         null },
+{EmailMessageState.Exception,    true,              true,       false,         null },
+{EmailMessageState.Received,     false,             true,       true,          null },
             };
     }
 
-
-    public enum EmailState
+    public enum EmailMessageState
     {
         Created,
         Sent,
@@ -132,17 +129,17 @@ namespace Signum.Entities.Mailing
         string CultureInfo { get; }
     }
 
-    public enum EmailProcesses
+    public enum EmailMessageProcesses
     {
         SendEmails
     }
 
-    public enum EmailOperations
+    public enum EmailMessageOperation
     {
         ReSendEmails
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class EmailPackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]

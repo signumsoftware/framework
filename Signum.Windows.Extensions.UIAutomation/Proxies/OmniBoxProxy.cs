@@ -33,7 +33,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> SelectEntity<T>(Lite<T> lite) where T : IdentifiableEntity
         {
-            var cleanName = TypeLogic.GetCleanName(lite.RuntimeType) + " " + lite.Id;
+            var cleanName = TypeLogic.GetCleanName(lite.EntityType) + " " + lite.Id;
 
             return new NormalWindowProxy<T>(SelectCapture(cleanName, "E:" + lite.Key())); 
         }

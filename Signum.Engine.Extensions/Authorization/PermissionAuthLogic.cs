@@ -69,10 +69,21 @@ namespace Signum.Engine.Authorization
                     AuthUtils.MaxBool,
                     AuthUtils.MinBool);
 
-                RegisterPermissions(BasicPermissions.AdminRules);
+                RegisterPermissions(BasicPermission.AdminRules);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Permissions", "Permission", roles, MultiEnumLogic<PermissionDN>.ToEntity, bool.Parse);
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
+                {
+                    string replacementKey = typeof(PermissionDN).Name;
+
+                    replacements.AskForReplacements(
+                        x.Element("Permissions").Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
+                        MultiEnumLogic<PermissionDN>.AllUniqueKeys().ToHashSet(),
+                        replacementKey);
+
+                    return cache.ImportXml(x, "Permissions", "Permission", roles,
+                        s => MultiEnumLogic<PermissionDN>.TryToEntity(replacements.Apply(replacementKey, s)), bool.Parse);
+                };
             }
         }
  
@@ -80,6 +91,14 @@ namespace Signum.Engine.Authorization
         {
             if (!IsAuthorized(permissionKey))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
+        }
+
+        public static string IsAuthorizedString(this Enum permissionKey)
+        {
+            if (!IsAuthorized(permissionKey))
+                return "Permission '{0}' is denied".Formato(permissionKey);
+
+            return null;
         }
 
         public static bool IsAuthorized(this Enum permissionKey)

@@ -87,7 +87,7 @@ namespace Signum.Web.SMS
             var ie = this.ExtractLite<IdentifiableEntity>(null);
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
 
-            var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate, template.Retrieve());
+            var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity, template.Retrieve());
             return Navigator.NormalPage(this, message);
         }
 
@@ -124,10 +124,10 @@ namespace Signum.Web.SMS
         {
             Type entitiesType = Navigator.ResolveType(webTypeName);
             var providers = Request["providerKeys"].Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(key => Lite.Parse(entitiesType, key)).ToList();
+                .Select(key => Lite.Parse(key)).ToList();
 
             var process = OperationLogic.ServiceConstructFromMany(providers, entitiesType,
-                SMSProviderOperations.SendSMSMessagesFromTemplate, smsTemplate.Retrieve());
+                SMSProviderOperation.SendSMSMessagesFromTemplate, smsTemplate.Retrieve());
 
             return Redirect(Navigator.NavigateRoute(process));
         }
@@ -160,10 +160,10 @@ namespace Signum.Web.SMS
             };
 
             Type entitiesType = Navigator.ResolveType(model.WebTypeName);
-            var providers = model.ProviderKeys.Split('_').Select(key => Lite.Parse(entitiesType, key)).ToList();
+            var providers = model.ProviderKeys.Split('_').Select(key => Lite.Parse(key)).ToList();
 
-            var process = OperationLogic.ServiceConstructFromMany(providers, entitiesType,
-                SMSProviderOperations.SendSMSMessage, cp);
+            var process = OperationLogic.ServiceConstructFromMany(providers.Cast<Lite<IIdentifiable>>(), entitiesType,
+                SMSProviderOperation.SendSMSMessage, cp);
 
             return JsonAction.Redirect(Navigator.NavigateRoute(process));
         }

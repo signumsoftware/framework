@@ -36,10 +36,10 @@ namespace Signum.Windows.UserQueries
 
             var query = QueryClient.queryNames[uq.Query.Key];
 
-            using (UserQueryMenuItemConsturctor.AutoSet(uq))
+            Navigator.Explore(new ExploreOptions(query)
             {
-                Navigator.Explore(new ExploreOptions(query));
-            }
+                InitializeSearchControl = sc => UserQueryClient.SetUserQuery(sc, uq)
+            });
         }
 
         public override string GetItemStatus(UserQueryOmniboxResult result)

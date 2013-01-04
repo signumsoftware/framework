@@ -6,8 +6,6 @@ using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Processes;
 using Signum.Entities;
-using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using System.Reflection;
 using Signum.Entities.Scheduler;
@@ -15,10 +13,11 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Basics;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Processes
 {
@@ -115,14 +114,14 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite> lites)
+        public static PackageDN CreateLines(this PackageDN package, IEnumerable<Lite<IIdentifiable>> lites)
         {
             package.Save();
 
             lites.Select(lite => new PackageLineDN
             {
                 Package = package.ToLite(),
-                Entity = lite.ToLite<IIdentifiable>()
+                Entity = lite
             }).SaveList();
 
             return package;
@@ -130,49 +129,56 @@ namespace Signum.Engine.Processes
 
         public static void ForEachLine(this IExecutingProcess executingProcess, PackageDN package, Action<PackageLineDN> action)
         {
-            List<PackageLineDN> lines = package.RemainingLines().ToList();
+            var totalCount = package.RemainingLines().Count();
 
-            for (int i = 0; i < lines.Count; i++)
+            while (true)
             {
-                executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                List<PackageLineDN> lines = package.RemainingLines().Take(100).ToList();
+                if (lines.IsEmpty())
+                    return;
 
-                PackageLineDN pl = lines[i];
-
-                try
+                for (int i = 0; i < lines.Count; i++)
                 {
-                    using (Transaction tr = Transaction.ForceNew())
+                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
+
+                    PackageLineDN pl = lines[i];
+
+                    try
                     {
-                        action(pl);
-                        pl.FinishTime = TimeZoneManager.Now;
-                        pl.Save();
-                        tr.Commit();
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            action(pl);
+                            pl.FinishTime = TimeZoneManager.Now;
+                            pl.Save();
+                            tr.Commit();
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    if (Transaction.InTestTransaction)
-                        throw;
-
-                    var exLog = e.LogException();
-
-                    using (Transaction tr = Transaction.ForceNew())
+                    catch (Exception e)
                     {
-                        pl.Exception = exLog.ToLite();
-                        pl.Save();
-                        tr.Commit();
-                    }
-                }
+                        if (Transaction.InTestTransaction)
+                            throw;
 
-                executingProcess.ProgressChanged(i, lines.Count);
+                        var exLog = e.LogException();
+
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            pl.Exception = exLog.ToLite();
+                            pl.Save();
+                            tr.Commit();
+                        }
+                    }
+
+                    executingProcess.ProgressChanged(i, totalCount);
+                }
             }
         }
 
-        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite> entities, Enum operationKey)
+        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, Enum operationKey)
         {
             return CreatePackageOperation(entities, MultiEnumLogic<OperationDN>.ToEntity((Enum)operationKey));
         }
 
-        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite> entities, OperationDN operation)
+        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationDN operation)
         {
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationDN()
             {
@@ -206,7 +212,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package, line =>
             {
-                OperationType operationType = OperationLogic.OperationType(line.Entity.RuntimeType, operationKey);
+                OperationType operationType = OperationLogic.OperationType(line.Entity.EntityType, operationKey);
 
                 switch (operationType)
                 {
@@ -218,11 +224,8 @@ namespace Signum.Engine.Processes
                         break;
                     case OperationType.ConstructorFrom:
                         {
-                            var result = OperationLogic.ServiceExecuteLite(line.Entity, operationKey);
-                            if (result.IsNew)
-                                result.Save();
-
-                            line.Result = result.ToLite<IIdentifiable>();
+                            var result = OperationLogic.ServiceConstructFromLite(line.Entity, operationKey);
+                            line.Result = result.ToLite();
                         }
                         break;
                     default:
@@ -232,6 +235,28 @@ namespace Signum.Engine.Processes
         }
     }
 
+    public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
+    {
+        public Enum OperationKey { get; private set; }
+
+        public PackageDeleteAlgorithm(Enum operationKey)
+        {
+            if (operationKey == null)
+                throw new ArgumentNullException("operatonKey");
+
+            this.OperationKey = operationKey;
+        }
+
+        public virtual void Execute(IExecutingProcess executingProcess)
+        {
+            PackageDN package = (PackageDN)executingProcess.Data;
+
+            executingProcess.ForEachLine(package, line =>
+            {
+                ((Lite<T>)line.Entity).Delete<T>(OperationKey);
+            });
+        }
+    }
    
     public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IIdentifiable
     {
@@ -251,7 +276,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package, line =>
             {
-                line.Entity.ToLite<T>().ExecuteLite<T>(OperationKey);
+                ((Lite<T>)line.Entity).ExecuteLite(OperationKey);
             });
         }
     }
@@ -273,11 +298,11 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package, line =>
             {
-                var result = OperationLogic.ConstructFromLite<T>(line.Entity.ToLite<F>(), OperationKey);
+                var result = line.Entity.ConstructFromLite<T>(OperationKey);
                 if (result.IsNew)
                     result.Save();
 
-                line.Result = result.ToLite<IIdentifiable>();
+                line.Result = result.ToLite();
             });
         }
     }

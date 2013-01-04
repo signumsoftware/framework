@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.SMS;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.SMS
 {
@@ -115,7 +116,7 @@ namespace Signum.Windows.SMS
             }
         }
 
-        private IEnumerable<Lite> EntityCombo_LoadData()
+        private IEnumerable<Lite<IIdentifiable>> EntityCombo_LoadData()
         {
             return Server.Return((ISmsServer s) => s.GetAssociatedTypesForTemplates());
         }

@@ -7,12 +7,11 @@ using Signum.Entities.Processes;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
-using Signum.Entities.Exceptions;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class NewsletterDN : Entity, IProcessDataDN
     {
         [NotNullable, SqlDbType(Size = 100)]
@@ -92,7 +91,7 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class NewsletterDeliveryDN : Entity
     {
         bool sent;
@@ -133,7 +132,7 @@ namespace Signum.Entities.Mailing
     }
 
 
-    public enum NewsletterOperations
+    public enum NewsletterOperation
     {
         Save,
         Send,

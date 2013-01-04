@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Basics;
-using Signum.Entities.Operations;
 using System.Text.RegularExpressions;
 using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, AvoidLocalization]
+    [Serializable, EntityKind(EntityKind.System), AvoidLocalization]
     public class RuleDN<R, A> : IdentifiableEntity
         where R: IdentifiableEntity
     {

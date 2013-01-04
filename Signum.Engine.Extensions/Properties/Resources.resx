@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="TheEntity0IsNew" xml:space="preserve">
-    <value>The entity {0} is new</value>
-  </data>
   <data name="QueryOf0" xml:space="preserve">
     <value>Query of {0}</value>
   </data>
@@ -180,12 +177,6 @@
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>Username {0} is not valid</value>
-  </data>
-  <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
-    <value>Impossible to execute {0} from state {1}</value>
-  </data>
-  <data name="Operation01IsNotAuthorized" xml:space="preserve">
-    <value>Operation {0} ({1}) is not Authorized</value>
   </data>
   <data name="Date" xml:space="preserve">
     <value>date</value>
@@ -297,8 +288,5 @@
   </data>
   <data name="TheProperty0" xml:space="preserve">
     <value>the property {0}</value>
-  </data>
-  <data name="InUserInterface" xml:space="preserve">
-    <value>(in user interface)</value>
   </data>
 </root>

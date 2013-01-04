@@ -6,7 +6,6 @@ using Signum.Utilities;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using System.Reflection;
-using Signum.Web.Operations;
 using Signum.Entities;
 using System.Web.Mvc;
 using Signum.Web.Properties;
@@ -14,7 +13,6 @@ using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
-using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
@@ -35,9 +33,9 @@ namespace Signum.Web.Disconnected
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<DisconnectedMachineDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("DisconnectedMachine") },
-                    new EntitySettings<DisconnectedExportDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("DisconnectedExport") },
-                    new EntitySettings<DisconnectedImportDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("DisconnectedImport") },
+                    new EntitySettings<DisconnectedMachineDN> { PartialViewName = e => ViewPrefix.Formato("DisconnectedMachine") },
+                    new EntitySettings<DisconnectedExportDN> { PartialViewName = e => ViewPrefix.Formato("DisconnectedExport") },
+                    new EntitySettings<DisconnectedImportDN> { PartialViewName = e => ViewPrefix.Formato("DisconnectedImport") },
                 });
             }
         }

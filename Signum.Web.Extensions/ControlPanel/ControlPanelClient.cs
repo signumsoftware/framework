@@ -55,21 +55,21 @@ namespace Signum.Web.ControlPanel
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ControlPanelDN>(EntityType.Main) { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
+                    new EntitySettings<ControlPanelDN> { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
                     new EmbeddedEntitySettings<PanelPart>(),
                     
-                    new EntitySettings<UserChartPartDN>(EntityType.Part),
-                    new EntitySettings<UserQueryPartDN>(EntityType.Part),
+                    new EntitySettings<UserChartPartDN>(),
+                    new EntitySettings<UserQueryPartDN>(),
 
-                    new EntitySettings<CountSearchControlPartDN>(EntityType.Part),
-                    new EmbeddedEntitySettings<CountUserQueryElement>() { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
+                    new EntitySettings<CountSearchControlPartDN>(),
+                    new EmbeddedEntitySettings<CountUserQueryElement> { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
                     
-                    new EntitySettings<LinkListPartDN>(EntityType.Part),
-                    new EmbeddedEntitySettings<LinkElement>() { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
+                    new EntitySettings<LinkListPartDN>(),
+                    new EmbeddedEntitySettings<LinkElement> { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(
-                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite<IdentifiableEntity>() });
+                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite() });
 
                 ButtonBarEntityHelper.RegisterEntityButtons<ControlPanelDN>((ctx, panel) => 
                 {

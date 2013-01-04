@@ -37,31 +37,45 @@ namespace Signum.Engine.Chart
                                                   uq.Columns.Count,
                                                   uq.Icon,
                                               }).ToDynamic();
-                
-                new BasicConstructFrom<ChartScriptDN, ChartScriptDN>(ChartScriptOperations.Clone)
-                {
-                    Construct = (cs, _) => new ChartScriptDN
-                    {
-                        Name = cs.Name,
-                        GroupBy = cs.GroupBy,
-                        Icon = cs.Icon,
-                        Columns = cs.Columns.Select(col => new ChartScriptColumnDN
-                        {
-                            ColumnType = col.ColumnType,
-                            DisplayName = col.DisplayName,
-                            IsGroupKey = col.IsGroupKey,
-                            IsOptional = col.IsOptional,
-                        }).ToMList(),
-                        Script = cs.Script,
-                    }
-                }.Register();
 
-                new BasicDelete<ChartScriptDN>(ChartScriptOperations.Delete)
-                {
-                    CanDelete = c => Database.Query<UserChartDN>().Any(a => a.ChartScript == c) ? "There are {0} in the database using {1}".Formato(typeof(UserChartDN).NicePluralName(), c) : null,
-                    Delete = (c, _) => c.Delete(),
-                }.Register();
+
+                RegisterOperations();
             }
+        }
+
+        private static void RegisterOperations()
+        {
+            new BasicExecute<ChartScriptDN>(ChartScriptOperation.Save)
+            {
+                AllowsNew = true,
+                Lite = false,
+                Execute = (cs, _) => { }
+            }.Register();
+
+            new BasicConstructFrom<ChartScriptDN, ChartScriptDN>(ChartScriptOperation.Clone)
+            {
+                Construct = (cs, _) => new ChartScriptDN
+                {
+                    Name = cs.Name,
+                    GroupBy = cs.GroupBy,
+                    Icon = cs.Icon,
+                    Columns = cs.Columns.Select(col => new ChartScriptColumnDN
+                    {
+                        ColumnType = col.ColumnType,
+                        DisplayName = col.DisplayName,
+                        IsGroupKey = col.IsGroupKey,
+                        IsOptional = col.IsOptional,
+                    }).ToMList(),
+                    Script = cs.Script,
+                }
+            }.Register();
+
+
+            new BasicDelete<ChartScriptDN>(ChartScriptOperation.Delete)
+            {
+                CanDelete = c => Database.Query<UserChartDN>().Any(a => a.ChartScript == c) ? "There are {0} in the database using {1}".Formato(typeof(UserChartDN).NicePluralName(), c) : null,
+                Delete = (c, _) => c.Delete(),
+            }.Register();
         }
 
         public static void ImportExportScripts(string folderName)
@@ -126,59 +140,60 @@ namespace Signum.Engine.Chart
         public static void ImportAllScripts(string folderName)
         {
             var files = Directory.GetFiles(folderName, "*.xml").ToDictionary(Path.GetFileNameWithoutExtension);
-            
-            var charts = Database.Query<ChartScriptDN>().ToDictionary(a => a.Name); 
+
+            var charts = Database.Query<ChartScriptDN>().ToDictionary(a => a.Name);
 
             Options options = new Options();
 
-            Synchronizer.SynchronizeReplacing(new Replacements(), "scripts",
-                files,
-                charts,
-                (name, file) =>
-                {
-                    var cs = new ChartScriptDN(); 
-                    cs.ImportXml(XDocument.Load(file), name, force: false);
-                    cs.Save();
-
-                    Console.WriteLine("{0} entity created.".Formato(name));
-                },
-                (name, script) =>
-                {
-                    if (AskYesNoAll("Remove {0} entity?".Formato(name), ref options.RemoveOld))
+            using (OperationLogic.AllowSave<ChartScriptDN>())
+                Synchronizer.SynchronizeReplacing(new Replacements(), "scripts",
+                    files,
+                    charts,
+                    (name, file) =>
                     {
+                        var cs = new ChartScriptDN();
+                        cs.ImportXml(XDocument.Load(file), name, force: false);
+                        cs.Save();
+
+                        Console.WriteLine("{0} entity created.".Formato(name));
+                    },
+                    (name, script) =>
+                    {
+                        if (AskYesNoAll("Remove {0} entity?".Formato(name), ref options.RemoveOld))
+                        {
+                            try
+                            {
+                                script.Delete();
+                                Console.WriteLine("{0} entity removed.".Formato(name));
+                            }
+                            catch (Exception e)
+                            {
+                                SafeConsole.WriteLineColor(ConsoleColor.Red, "Error removing {0} entity: {1}".Formato(name, e.Message));
+                            }
+                        }
+                    },
+                    (name, file, script) =>
+                    {
+                        var xDoc = XDocument.Load(file);
+                        if (script.Icon != null)
+                            script.Icon.Retrieve();
                         try
                         {
-                            script.Delete();
-                            Console.WriteLine("{0} entity removed.".Formato(name));
+                            script.ImportXml(xDoc, name, false);
                         }
-                        catch (Exception e)
+                        catch (FormatException f)
                         {
-                            SafeConsole.WriteLineColor(ConsoleColor.Red, "Error removing {0} entity: {1}".Formato(name, e.Message));
+                            SafeConsole.WriteLineColor(ConsoleColor.Yellow, f.Message);
+                            if (AskYesNoAll("Force {0}?".Formato(name), ref options.ForceAll))
+                                script.ImportXml(xDoc, name, true);
                         }
-                    }
-                },
-                (name, file, script) =>
-                {
-                    var xDoc = XDocument.Load(file);
-                    if (script.Icon != null)
-                        script.Icon.Retrieve(); 
-                    try
-                    {
-                        script.ImportXml(xDoc, name, false);
-                    }
-                    catch (FormatException f)
-                    {
-                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, f.Message);
-                        if (AskYesNoAll("Force {0}?".Formato(name), ref options.ForceAll))
-                            script.ImportXml(xDoc, name, true);
-                    }
 
-                    if (script.HasChanges() && AskYesNoAll("Override {0} entity?".Formato(name), ref options.OverrideAll))
-                    {
-                        script.Save();
-                        Console.WriteLine("{0} entity overriden.".Formato(name));
-                    }
-                });
+                        if (script.HasChanges() && AskYesNoAll("Override {0} entity?".Formato(name), ref options.OverrideAll))
+                        {
+                            script.Save();
+                            Console.WriteLine("{0} entity overriden.".Formato(name));
+                        }
+                    });
         }
 
 

@@ -70,15 +70,15 @@
     <Compile Include="DemoPackage.cs" />
     <Compile Include="DemoPackageLogic.cs" />
     <Compile Include="EntityGroupsTest.cs" />
+    <Compile Include="Environment\MusicExtensionsLoader.cs" />
     <Compile Include="IServerSample.cs" />
-    <Compile Include="MusicGraph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Starter.cs" />
+    <Compile Include="Environment\Starter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">

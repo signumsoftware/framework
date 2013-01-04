@@ -345,12 +345,6 @@
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
-  <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
-    <value>Please confirm you'd like to delete the entity from the system</value>
-  </data>
-  <data name="Create" xml:space="preserve">
-    <value>Create</value>
-  </data>
   <data name="ExcelAdminister" xml:space="preserve">
     <value>Administer</value>
   </data>
@@ -365,9 +359,6 @@
   </data>
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
     <value>We received a request to create an account. You can create it following the link below:</value>
-  </data>
-  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
-    <value>Please confirm you'd like to execute the operation {0} to the entity {1} ({2}-{3})</value>
   </data>
   <data name="Appendices" xml:space="preserve">
     <value>Appendices</value>
@@ -386,9 +377,6 @@
   </data>
   <data name="PasswordsAreDifferent" xml:space="preserve">
     <value>Passwords are different</value>
-  </data>
-  <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
-    <value>Operations</value>
   </data>
   <data name="UserQueries_CreateNew" xml:space="preserve">
     <value>Create</value>
@@ -470,12 +458,6 @@
   </data>
   <data name="ChartScript_Edit" xml:space="preserve">
     <value>Edit Script</value>
-  </data>
-  <data name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" xml:space="preserve">
-    <value>Please confirm you'd like to delete the selected entities from the system</value>
-  </data>
-  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities" xml:space="preserve">
-    <value>Please confirm you'd like to execute the operation {0} to the selected entities</value>
   </data>
   <data name="OperationsAscx_DBOnly" xml:space="preserve">
     <value>DB Only</value>

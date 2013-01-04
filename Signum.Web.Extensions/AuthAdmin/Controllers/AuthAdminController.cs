@@ -16,6 +16,7 @@ using Signum.Entities;
 using Signum.Web.Controllers;
 using System.IO;
 using System.Xml;
+using Signum.Entities.Basics;
 
 namespace Signum.Web.AuthAdmin
 {
@@ -24,7 +25,7 @@ namespace Signum.Web.AuthAdmin
         protected override void OnAuthorization(AuthorizationContext filterContext)
         {
             if (UserDN.Current != null)
-                BasicPermissions.AdminRules.Authorize();
+                BasicPermission.AdminRules.Authorize();
         }
 
         public ViewResult Permissions(Lite<RoleDN> role)

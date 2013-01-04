@@ -164,13 +164,13 @@ namespace Signum.Windows.UIAutomation
         {
         }
 
-        public Lite LiteValue
+        public Lite<IIdentifiable> LiteValue
         {
             get
             {
                 return
                     string.IsNullOrEmpty(Element.Current.HelpText) ? null :
-                    Lite.Parse(Route == null ? typeof(IdentifiableEntity) : Lite.Extract(Route.Type), Element.Current.HelpText.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
+                    Lite.Parse(Element.Current.HelpText.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
             }
             set
             {
@@ -181,7 +181,7 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        public void FindLite(Lite value)
+        public void FindLite(Lite<IIdentifiable> value)
         {
             if (Element.TryChildById("btFind") == null)
                 throw new InvalidOperationException("The {0} {1} has no find button to complete the search for {2}".Formato(GetType().Name, this, value.KeyLong())); 
@@ -192,7 +192,7 @@ namespace Signum.Windows.UIAutomation
             {
                 using (var selector = new SelectorWindowProxy(win))
                 {
-                    win = selector.CheckCapture(value.RuntimeType);
+                    win = selector.CheckCapture(value.EntityType);
                 }
             }
 
@@ -204,7 +204,7 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-        protected virtual bool FastSelect(Lite value)
+        protected virtual bool FastSelect(Lite<IIdentifiable> value)
         {
             return false;
         }
@@ -304,7 +304,7 @@ namespace Signum.Windows.UIAutomation
             list.SelectByName(toString, ()=>this.ToString());
         }
 
-        protected override bool FastSelect(Lite value)
+        protected override bool FastSelect(Lite<IIdentifiable> value)
         {
             if (!value.ToString().HasText())
                 return false;
@@ -339,7 +339,7 @@ namespace Signum.Windows.UIAutomation
         {
         }
 
-        public void SelectLite(Lite lite)
+        public void SelectLite(Lite<IIdentifiable> lite)
         {
             ComboBox.ComboSelectItem(a => a.Current.ItemStatus == lite.Key());
         }
@@ -353,7 +353,7 @@ namespace Signum.Windows.UIAutomation
             list.SelectByName(toString, ()=>this.ToString());
         }
 
-        protected override bool FastSelect(Lite lite)
+        protected override bool FastSelect(Lite<IIdentifiable> lite)
         {
             ComboBox.Pattern<ExpandCollapsePattern>().Expand();
 

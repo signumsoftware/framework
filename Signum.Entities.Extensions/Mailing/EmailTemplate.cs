@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class EmailTemplateDN : IdentifiableEntity
     {
         [NotNullable, UniqueIndex]
@@ -33,5 +33,10 @@ namespace Signum.Entities.Mailing
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum EmailTemplateOperation
+    { 
+        Save
     }
 }

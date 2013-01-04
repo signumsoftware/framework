@@ -42,9 +42,9 @@ namespace Signum.Windows.Disconnected
             {
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<DisconnectedMachineDN>(EntityType.Main) { View = dm => new DisconnectedMachine() },
-                    new EntitySettings<DisconnectedExportDN>(EntityType.System) { View = dm => new DisconnectedExport() },
-                    new EntitySettings<DisconnectedImportDN>(EntityType.System) { View = dm => new DisconnectedImport() },
+                    new EntitySettings<DisconnectedMachineDN> { View = dm => new DisconnectedMachine() },
+                    new EntitySettings<DisconnectedExportDN> { View = dm => new DisconnectedExport() },
+                    new EntitySettings<DisconnectedImportDN> { View = dm => new DisconnectedImport() },
                 });
 
                 Server.Connecting += UpdateCache;

@@ -16,12 +16,4 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         void PushProfilerEntries(List<HeavyProfilerEntry> entries);
     }
-
-    //public ResultTable ExecuteChart(ChartRequest request)
-    //{
-    //    return Return(MethodInfo.GetCurrentMethod(),
-    //    () => ChartLogic.ExecuteChart(request));
-    //}
-
-  
 }

@@ -12,8 +12,6 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
-using Signum.Entities.Operations;
-using Signum.Engine.Operations;
 using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Entities.Chart;
@@ -31,11 +29,14 @@ using System.Xml;
 using Signum.Engine.Profiler;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
+using Signum.Engine.Operations;
+using Signum.Entities.ControlPanel;
+using Signum.Engine.ControlPanel;
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, 
-        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, 
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IControlPanelServer,
+        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer,
         ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
@@ -60,6 +61,7 @@ namespace Signum.Services
                     el.ActionName = mi.Name;
                     el.QueryString = description;
                     el.Version = Schema.Current.Version.ToString();
+                    el.Data = e.Data.Dump();
                 });
                 throw new FaultException(e.Message);
             }
@@ -118,73 +120,8 @@ namespace Signum.Services
 
         #endregion
 
-        #region IOperationServer Members
-        public List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
-                () => OperationLogic.ServiceGetEntityOperationInfos(entity));
-        }
-
-        public List<OperationInfo> GetOperationInfos(Type entityType)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.ServiceGetOperationInfos(entityType));
-        }
-        public bool GetSaveProtected(Type entityType)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () =>  OperationLogic.IsSaveProtected(entityType));
-        }
-
-        public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceExecute(entity, operationKey, args));
-        }
-
-        public IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
-        }
-
-        public IdentifiableEntity Delete(Lite lite, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceDelete(lite, operationKey, args));
-        }
-
-        public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceConstruct(type, operationKey, args));
-        }
-
-        public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
-        }
-
-        public IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
-        }
-
-        public IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
-        }
-
-        public Dictionary<Enum, string> GetContextualCanExecute(Lite[] lite, List<Enum> cleanKeys)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), null,
-                () => OperationLogic.GetContextualCanExecute(lite, cleanKeys));
-        }
-
-        public ProcessExecutionDN CreatePackageOperation(List<Lite> lites, Enum operationKey)
+        #region IProcessServer
+        public ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => PackageLogic.CreatePackageOperation(lites, operationKey));
@@ -240,10 +177,10 @@ namespace Signum.Services
               () => TypeAuthLogic.AuthorizedTypes());
         }
 
-        public bool IsAllowedForInUserInterface(Lite lite, TypeAllowedBasic allowed)
+        public bool IsAllowedForInUserInterface(Lite<IIdentifiable> lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface : true ));
+                () => TypeAuthLogic.IsAllowedFor(lite, allowed, inUserInterface: true));
         }
 
         public byte[] DownloadAuthRules()
@@ -421,12 +358,12 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType()));
-        }    
-    
-        public List<Lite> GetAssociatedTypesForTemplates()
+        }
+
+        public List<Lite<TypeDN>> GetAssociatedTypesForTemplates()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList());
+                () => SMSLogic.RegisteredDataObjectProviders());
         }
 
         #endregion
@@ -435,8 +372,14 @@ namespace Signum.Services
         public void PushProfilerEntries(List<HeavyProfilerEntry> entries)
         {
             Execute(MethodInfo.GetCurrentMethod(), () =>
-                ProfilerLogic.ProfilerEntries(entries)); 
+                ProfilerLogic.ProfilerEntries(entries));
         }
         #endregion
+
+        public ControlPanelDN GetHomePageControlPanel()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ControlPanelLogic.GetHomePageControlPanel());
+        }
     }
 }

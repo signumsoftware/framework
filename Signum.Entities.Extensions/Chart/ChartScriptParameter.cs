@@ -294,6 +294,16 @@ namespace Signum.Entities.Chart
                 ValueDefinition = element.Attribute("ValueDefinition").Value,
             };
         }
+
+        internal ChartScriptParameterDN Clone()
+        {
+            return new ChartScriptParameterDN
+            {
+                Name = Name,
+                Type = Type,
+                ValueDefinition = ValueDefinition,
+            };
+        }
     }
 
 

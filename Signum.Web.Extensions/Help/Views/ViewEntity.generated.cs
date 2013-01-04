@@ -40,14 +40,14 @@ namespace Signum.Web.Extensions.Help.Views
     #line hidden
     using Signum.Entities;
     
-    #line 6 "..\..\Help\Views\ViewEntity.cshtml"
-    using Signum.Entities.DynamicQuery;
+    #line 7 "..\..\Help\Views\ViewEntity.cshtml"
+    using Signum.Entities.Basics;
     
     #line default
     #line hidden
     
-    #line 7 "..\..\Help\Views\ViewEntity.cshtml"
-    using Signum.Entities.Operations;
+    #line 6 "..\..\Help\Views\ViewEntity.cshtml"
+    using Signum.Entities.DynamicQuery;
     
     #line default
     #line hidden

@@ -565,7 +565,7 @@
     <value>La parte {0} está en la columna {1} de la fila {2} que ya contiene otras partes</value>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
-    <value>No hay ninguna parte en las filas {{{0}}}</value>
+    <value>No hay ninguna parte en las filas {0}</value>
   </data>
   <data name="ExceptionDN_Form" xml:space="preserve">
     <value>Formulario</value>

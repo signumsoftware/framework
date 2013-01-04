@@ -9,16 +9,30 @@ using System.Reflection;
 using Signum.Entities.Reports;
 using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
+using System.Windows;
+using Signum.Utilities;
+using Signum.Windows.Properties;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Controls;
-using System.Windows;
 
 namespace Signum.Windows.Chart
 {
     public static class ChartClient
     {
+        public static readonly DependencyProperty UserChartProperty =
+            DependencyProperty.RegisterAttached("UserChart", typeof(UserChartDN), typeof(ChartClient), new UIPropertyMetadata(null));
+        public static UserChartDN GetUserChart(DependencyObject obj)
+        {
+            return (UserChartDN)obj.GetValue(UserChartProperty);
+        }
+        public static void SetUserChart(DependencyObject obj, UserChartDN value)
+        {
+            obj.SetValue(UserChartProperty, value);
+        }
+
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -27,8 +41,8 @@ namespace Signum.Windows.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<UserChartDN>(EntityType.Main) { View = e => new UserChart() },
-                    new EntitySettings<ChartScriptDN>(EntityType.Main) { View = e => new ChartScript() },
+                    new EntitySettings<UserChartDN> { View = e => new UserChart() },
+                    new EntitySettings<ChartScriptDN> { View = e => new ChartScript() },
                     new EmbeddedEntitySettings<ChartScriptParameterDN> { View = (e,p) => new ChartScriptParameter(p) }
                 });
 
@@ -48,6 +62,15 @@ namespace Signum.Windows.Chart
 
                 main.SetValue(processName, 9999, RegistryValueKind.DWord);
 
+                Constructor.Register<UserChartDN>(win =>
+                {
+                    MessageBox.Show(win,
+                        Signum.Windows.Extensions.Properties.Resources._0CanOnlyBeCreatedFromTheChartWindow.Formato(typeof(UserChartDN).NicePluralName()),
+                        Signum.Windows.Extensions.Properties.Resources.Create,
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return null;
+                }); 
+
                 ChartUtils.RemoveNotNullValidators();
             }
         }
@@ -55,12 +78,11 @@ namespace Signum.Windows.Chart
 
         static MenuItem SearchControl_GetCustomMenuItems(SearchControl sc)
         {
-            if (!ChartPermissions.ViewCharting.IsAuthorized())
+            if (!ChartPermission.ViewCharting.IsAuthorized())
                 return null;
 
             var miResult = new MenuItem
             {
-
                 Header = Signum.Windows.Extensions.Properties.Resources.Chart,
                 Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png").ToSmallImage()
             };
@@ -69,7 +91,6 @@ namespace Signum.Windows.Chart
             {
                 ChartRequestWindow window = new ChartRequestWindow()
                 {
-                    FilterOptions = sc.FilterOptions,
                     DataContext = new ChartRequest(sc.QueryName)
                     {
                         Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),

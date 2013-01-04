@@ -16,6 +16,7 @@ using Signum.Entities.Processes;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.SMS
 {
@@ -77,12 +78,12 @@ namespace Signum.Engine.SMS
         {
             phoneNumberProviders[typeof(T)] = exp;
 
-            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperations.SendSMSMessage)
+            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperation.SendSMSMessage)
             {
                 Construct = (providers, args) =>
                 {
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
-                        .Select(pr => new { Exp = exp.Evaluate(pr), Referred = pr.ToLite<IdentifiableEntity>() }).AsEnumerable().NotNull().Distinct().ToList();
+                        .Select(pr => new { Exp = exp.Evaluate(pr), Referred = pr.ToLite() }).AsEnumerable().NotNull().Distinct().ToList();
 
                     CreateMessageParams createParams = args.GetArg<CreateMessageParams>();
 
@@ -159,7 +160,7 @@ namespace Signum.Engine.SMS
         {
             dataObjectProviders[typeof(T)] = func;
 
-            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperations.SendSMSMessagesFromTemplate)
+            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperation.SendSMSMessagesFromTemplate)
             {
                 Construct = (providers, args) =>
                 {
@@ -177,7 +178,7 @@ namespace Signum.Engine.SMS
                           {
                               Phone = phoneFunc.Evaluate(p),
                               Data = func.Evaluate(p),
-                              Referred = p.ToLite<IdentifiableEntity>()
+                              Referred = p.ToLite()
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
                     SMSSendPackageDN package = new SMSSendPackageDN { NumLines = numbers.Count, }.Save();
@@ -202,7 +203,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate)
+            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
             {
                 Construct = (provider, args) =>
                 {
@@ -222,7 +223,7 @@ namespace Signum.Engine.SMS
                         From = template.From,
                         DestinationNumber = GetPhoneNumber(provider),
                         State = SMSMessageState.Created,
-                        Referred = provider.ToLite<IdentifiableEntity>()
+                        Referred = provider.ToLite()
                     };
                 }
             }.Register();
@@ -296,7 +297,7 @@ namespace Signum.Engine.SMS
                     case MessageLengthExceeded.Allowed:
                         break;
                     case MessageLengthExceeded.TextPruning:
-                        return result.RemoveRight(Math.Abs(remainingLength));
+                        return result.RemoveEnd(Math.Abs(remainingLength));
                 }
             }
 
@@ -334,7 +335,7 @@ namespace Signum.Engine.SMS
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
 
-                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperations.CreateUpdateStatusPackage)
+                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperation.CreateUpdateStatusPackage)
                 {
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
@@ -405,6 +406,7 @@ namespace Signum.Engine.SMS
         {
             if (SMSSendAndGetTicketAction == null)
                 throw new InvalidOperationException("SMSSendAction was not established");
+            
             SendSMS(message, SMSSendAndGetTicketAction);
         }
 
@@ -447,6 +449,7 @@ namespace Signum.Engine.SMS
         {
             if (SMSUpdateStatusAction == null)
                 throw new InvalidOperationException("SMSUpdateStatusAction was not established");
+
             UpdateMessageStatus(message, SMSUpdateStatusAction);
         }
 
@@ -455,7 +458,6 @@ namespace Signum.Engine.SMS
         {
             message.State = updateAction(message);
         }
-
     }
 
     public class SMSMessageGraph : Graph<SMSMessageDN, SMSMessageState>
@@ -467,7 +469,7 @@ namespace Signum.Engine.SMS
         {
             GetState = m => m.State;
 
-            new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.CreateSMS)
+            new ConstructFrom<SMSTemplateDN>(SMSMessageOperation.CreateSMSFromSMSTemplate)
             {
                 CanConstruct = t => !t.Active ? Resources.TheTemplateMustBeActiveToConstructSMSMessages : null,
                 ToState = SMSMessageState.Created,
@@ -479,7 +481,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new Execute(SMSMessageOperations.Send)
+            new Execute(SMSMessageOperation.Send)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -495,7 +497,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicExecute<SMSMessageDN>(SMSMessageOperations.UpdateStatus)
+            new BasicExecute<SMSMessageDN>(SMSMessageOperation.UpdateStatus)
             {
                 CanExecute = m => m.State != SMSMessageState.Created ? null : Resources.StatusCanNotBeUpdatedForNonSentMessages,
                 Execute = (t, args) => 

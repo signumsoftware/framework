@@ -126,7 +126,9 @@ namespace Signum.Web.Selenium
         public const string PageLoadLongTimeout = "40000";
 
         //public const int DefaultAjaxTimeout = 10000;
-        public const int DefaultAjaxTimeout = 15000;
+        public static int DefaultAjaxTimeout = 30000;
+        public static int DefaultAjaxWait = 200;
+
 
         public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition)
         {
@@ -136,20 +138,19 @@ namespace Signum.Web.Selenium
         public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition, int? timeout = null)
         {
             var func = condition.Compile();
-
-            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
-
             if (func())
                 return;
 
+            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
             do
             {
-                Thread.Sleep(500);
+                Thread.Sleep(DefaultAjaxWait);
 
                 if (func())
                     return;
 
             } while (DateTime.Now < limit);
+
 
             throw new TimeoutException("The expression took more than {0} ms:\r\n{1}".Formato(timeout ?? DefaultAjaxTimeout, condition.NiceToString()));
         }
@@ -161,21 +162,29 @@ namespace Signum.Web.Selenium
 
         public static void PopupCancel(this ISelenium selenium, string prefix)
         {
-            selenium.Click("jq=span.ui-dialog-title[id$='{0}Temp'] + a".Formato(prefix));
+            selenium.Click("jq=.ui-dialog-titlebar-close:visible");
             Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupCancelDiscardChanges(this ISelenium selenium, string prefix)
         {
-            selenium.Click("jq=span.ui-dialog-title[id$='{0}Temp'] + a".Formato(prefix));
+            selenium.Click("jq=.ui-dialog-titlebar-close:visible");
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupOk(this ISelenium selenium, string prefix)
         {
+            PopupOk(selenium, prefix, false);
+        }
+
+        public static void PopupOk(this ISelenium selenium, string prefix, bool submit)
+        {
             selenium.Click("jq=#{0}btnOk".Formato(prefix));
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
+            if (submit)
+                selenium.WaitForPageToLoad(DefaultPageLoadTimeout);
+            else
+                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
 
         public static void PopupSave(this ISelenium selenium, string prefix)
@@ -186,6 +195,11 @@ namespace Signum.Web.Selenium
         public static void MainEntityHasId(this ISelenium selenium)
         {
             Assert.IsTrue(selenium.IsElementPresent("jq=#divNormalControl[data-isnew=false]"));
+        }
+
+        public static bool PopupEntityHasUnsavedChanges(this ISelenium selenium, string prefix)
+        {
+            return selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".Formato(prefix));
         }
 
         public static string RuntimeInfoSelector(string prefix)
@@ -231,6 +245,16 @@ namespace Signum.Web.Selenium
         public static bool EntityButtonEnabled(this ISelenium selenium, string idButton)
         {
             return selenium.IsElementPresent("{0}:not(.sf-disabled)".Formato(EntityButtonLocator(idButton)));
+        }
+
+        public static bool EntityOperationDisabled(this ISelenium selenium, Enum operationKey)
+        {
+            return selenium.EntityButtonDisabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
+        public static bool EntityButtonDisabled(this ISelenium selenium, string idButton)
+        {
+            return selenium.IsElementPresent("{0}.sf-disabled".Formato(EntityButtonLocator(idButton)));
         }
 
         public static void EntityOperationClick(this ISelenium selenium, Enum operationKey)

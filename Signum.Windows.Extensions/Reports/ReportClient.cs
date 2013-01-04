@@ -25,7 +25,7 @@ namespace Signum.Windows.Reports
 
                     QueryClient.Start();
 
-                    Navigator.AddSetting(new EntitySettings<ExcelReportDN>(EntityType.Main) { View = e => new ExcelReport() });
+                    Navigator.AddSetting(new EntitySettings<ExcelReportDN> { View = e => new ExcelReport() });
                 }
                 else
                 {

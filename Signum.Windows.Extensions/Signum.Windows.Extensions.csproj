@@ -66,7 +66,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -90,6 +92,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alerts\Alert.xaml.cs">
+      <DependentUpon>Alert.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Alerts\AlertClient.cs" />
+    <Compile Include="Alerts\AlertsWidget.xaml.cs">
+      <DependentUpon>AlertsWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Alerts\AlertType.xaml.cs">
+      <DependentUpon>AlertType.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Authorization\AuthClient.cs" />
     <Compile Include="Authorization\NewPassword.xaml.cs">
       <DependentUpon>NewPassword.xaml</DependentUpon>
@@ -161,6 +173,9 @@
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
     <Compile Include="Chart\ChartOmniboxProvider.cs" />
+    <Compile Include="Chart\ChartRenderer.xaml.cs">
+      <DependentUpon>ChartRenderer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\ChartScript.xaml.cs">
       <DependentUpon>ChartScript.xaml</DependentUpon>
     </Compile>
@@ -178,8 +193,39 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
+    <Compile Include="ControlPanels\UserChartPartView.xaml.cs">
+      <DependentUpon>UserChartPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\LinkListPartView.xaml.cs">
+      <DependentUpon>LinkListPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\CountSearchControlPartView.xaml.cs">
+      <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\UserQueryPartView.xaml.cs">
+      <DependentUpon>UserQueryPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml.cs">
+      <DependentUpon>CountSearchControlPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\LinkListPartEdit.xaml.cs">
+      <DependentUpon>LinkListPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\UserChartPartEdit.xaml.cs">
+      <DependentUpon>UserChartPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\UserQueryPartEdit.xaml.cs">
+      <DependentUpon>UserQueryPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\ControlPanelClient.cs" />
+    <Compile Include="ControlPanels\ControlPanelView.xaml.cs">
+      <DependentUpon>ControlPanelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\StackColumnPanel.cs" />
     <Compile Include="Converters.cs" />
-    <Compile Include="Deployment\DeploymentClient.cs" />
+    <Compile Include="ControlPanels\Admin\ControlPanelEdit.xaml.cs">
+      <DependentUpon>ControlPanelEdit.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Disconnected\UploadProgress.xaml.cs">
       <DependentUpon>UploadProgress.xaml</DependentUpon>
     </Compile>
@@ -208,13 +254,6 @@
     </Compile>
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
-    <Compile Include="Deployment\DeploymentLog.xaml.cs">
-      <DependentUpon>DeploymentLog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Exception\Exception.xaml.cs">
-      <DependentUpon>Exception.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Exception\ExceptionClient.cs" />
     <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
       <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
     </Compile>
@@ -222,6 +261,13 @@
       <DependentUpon>SMTPConfiguration.xaml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\SMTPConfigurationClient.cs" />
+    <Compile Include="Notes\Note.xaml.cs">
+      <DependentUpon>Note.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Notes\NoteClient.cs" />
+    <Compile Include="Notes\NotesWidget.xaml.cs">
+      <DependentUpon>NotesWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Omnibox\DynamicQueryOmniboxProvider.cs" />
     <Compile Include="Omnibox\EntityOmniboxProvider.cs" />
     <Compile Include="Omnibox\OmniboxAutocomplete.xaml.cs">
@@ -231,13 +277,7 @@
       <DependentUpon>OmniboxTemplate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Omnibox\OmniboxClient.cs" />
-    <Compile Include="Operations\ConstructFromManyMenuItem.cs" />
-    <Compile Include="Operations\EntityOperationMenuItem.cs" />
-    <Compile Include="Operations\OperationServer.cs" />
-    <Compile Include="Operations\OperationSettings.cs" />
-    <Compile Include="Operations\OperationLog.xaml.cs">
-      <DependentUpon>OperationLog.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Omnibox\SpecialOmniboxProvider.cs" />
     <Compile Include="Processes\PackageData.cs" />
     <Compile Include="Processes\PackageOperationMenuItem.cs" />
     <Compile Include="Processes\PackageOperation.xaml.cs">
@@ -255,6 +295,10 @@
     <Compile Include="Processes\ProcessClient.cs" />
     <Compile Include="Processes\ProcessExecution.xaml.cs">
       <DependentUpon>ProcessExecution.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\ProfilerClient.cs" />
+    <Compile Include="Profiler\ProfilerUploader.xaml.cs">
+      <DependentUpon>ProfilerUploader.xaml</DependentUpon>
     </Compile>
     <Compile Include="SMS\SMSMessage.xaml.cs">
       <DependentUpon>SMSMessage.xaml</DependentUpon>
@@ -283,7 +327,6 @@
     </Compile>
     <Compile Include="Reports\PlainExcelMenuItem.cs" />
     <Compile Include="Reports\ReportMenuItem.cs" />
-    <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Panels\TreeMapPanel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -349,6 +392,18 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Alerts\Alert.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Alerts\AlertsWidget.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Alerts\AlertType.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Authorization\AuthResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -471,6 +526,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Chart\ChartRenderer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Chart\ChartScript.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -496,6 +555,46 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\Admin\ControlPanelEdit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\UserChartPartView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\LinkListPartView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\CountSearchControlPartView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\UserQueryPartView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\Admin\LinkListPartEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\Admin\UserChartPartEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\Admin\UserQueryPartEdit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\ControlPanelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Disconnected\UploadProgress.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -535,14 +634,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Deployment\DeploymentLog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Exception\Exception.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Mailing\ClientCertificationFile.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -551,17 +642,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Notes\Note.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Notes\NotesWidget.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Omnibox\OmniboxAutocomplete.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Omnibox\OmniboxTemplate.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Operations\OperationLog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -592,6 +685,10 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Profiler\ProfilerUploader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SMS\SMSMessage.xaml">
       <SubType>Designer</SubType>
@@ -847,6 +944,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\execute.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exception\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\alert.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\note2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\pin.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

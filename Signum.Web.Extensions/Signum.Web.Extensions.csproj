@@ -53,6 +53,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.Web.PageInspector.Loader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
@@ -89,6 +90,30 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alert\AlertClient.cs" />
+    <Compile Include="Alert\AlertWidgetHelper.cs" />
+    <Compile Include="Alert\Controllers\AlertController.cs" />
+    <Compile Include="Alert\Views\Alert.generated.cs">
+      <DependentUpon>Alert.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Alert\Views\AlertType.generated.cs">
+      <DependentUpon>AlertType.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Alert\Views\Web.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Web.config</DependentUpon>
+    </Compile>
+    <Compile Include="Alert\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Note\Controllers\NoteController.cs" />
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
     <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
     <Compile Include="AuthAdmin\Views\FacadeMethods.generated.cs">
@@ -400,17 +425,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Deployment\DeploymentClient.cs" />
-    <Compile Include="Deployment\Views\DeploymentLog.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DeploymentLog.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Deployment\Views\_ViewStart.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Disconnected\DisconnectedClient.cs" />
     <Compile Include="Disconnected\Views\DisconnectedExport.generated.cs">
       <AutoGen>True</AutoGen>
@@ -426,17 +440,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>DisconnectedMachine.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Exception\ExceptionClient.cs" />
-    <Compile Include="Exception\Views\ExceptionLog.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ExceptionLog.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Exception\Views\_ViewStart.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Help\Views\EntityProperty.generated.cs">
       <AutoGen>True</AutoGen>
@@ -463,6 +466,24 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Search.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Note\NoteClient.cs" />
+    <Compile Include="Note\NoteWidgetHelper.cs" />
+    <Compile Include="Note\Views\Note1.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Note.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Note\Views\Web.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Web.config</DependentUpon>
+    </Compile>
+    <Compile Include="Note\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Omnibox\SpecialOmniboxProvider.cs" />
     <Compile Include="Processes\Views\PackageOperation.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -557,7 +578,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Profiler\TimeTracker.cs" />
+    <Compile Include="Profiler\ProfilerFilterAttribute.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
     <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.cs">
@@ -596,13 +617,6 @@
     <Compile Include="Help\HelpModels.cs" />
     <Compile Include="HttpModules\WhitespaceModule.cs" />
     <Compile Include="Mailing\EmailClient.cs" />
-    <Compile Include="Operations\JsOperations.cs" />
-    <Compile Include="Operations\JsOperationOptions.cs" />
-    <Compile Include="Operations\OperationButtonFactory.cs" />
-    <Compile Include="Operations\OperationContextItem.cs" />
-    <Compile Include="Operations\Controllers\OperationController.cs" />
-    <Compile Include="Operations\OperationsClient.cs" />
-    <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="Processes\ProcessesClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
     <Compile Include="Profiler\ProfilerClient.cs" />
@@ -810,6 +824,22 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Alert\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Alert\Views\Alert.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Alert.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Alert\Views\AlertType.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>AlertType.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Alert\Views\Web.config">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Web.generated.cs</LastGenOutput>
+    </Content>
     <None Include="AuthAdmin\Views\FacadeMethods.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>FacadeMethods.generated.cs</LastGenOutput>
@@ -903,7 +933,6 @@
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Omnibox\Scripts\SF_Omnibox.js" />
-    <Content Include="Operations\Scripts\SF_Operations.js" />
     <Content Include="Processes\Scripts\SF_Process.js" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1000,15 +1029,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserChartPart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Exception\Views\_ViewStart.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Exception\Views\Web.config" />
-    <Content Include="Exception\Views\ExceptionLog.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ExceptionLog.generated.cs</LastGenOutput>
-    </Content>
     <Content Include="Chart\Views\UserChartFilter.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserChartFilter.generated.cs</LastGenOutput>
@@ -1025,15 +1045,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ProcessPanelTable.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Deployment\Views\_ViewStart.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Deployment\Views\DeploymentLog.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>DeploymentLog.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Deployment\Views\Web.config" />
     <Content Include="Chart\Views\ChartPalette.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChartPalette.generated.cs</LastGenOutput>
@@ -1080,6 +1091,18 @@
     <Content Include="Chart\Views\ChartResultsTable.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChartResultsTable1.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Note\Views\Web.config">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Web.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Note\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Note\Views\Note.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Note1.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

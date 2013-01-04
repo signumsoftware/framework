@@ -13,7 +13,6 @@ using Signum.Entities;
 using Signum.Web;
 using Signum.Engine;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using Signum.Web.Extensions.Properties;
 using Signum.Entities.Processes;
@@ -62,7 +61,7 @@ namespace Signum.Web.Processes
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Start()
         {
-            ProcessPermissions.ViewProcessControlPanel.Authorize();
+            ProcessPermission.ViewProcessControlPanel.Authorize();
 
             ProcessLogic.StartBackgroundProcess();
 
@@ -74,7 +73,7 @@ namespace Signum.Web.Processes
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Stop()
         {
-            ProcessPermissions.ViewProcessControlPanel.Authorize();
+            ProcessPermission.ViewProcessControlPanel.Authorize();
 
             ProcessLogic.Stop();
 
@@ -86,7 +85,7 @@ namespace Signum.Web.Processes
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ContextualExecute(string operationFullKey, string prefix, string liteKeys)
         {
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Select(l => (Lite)l).ToList();
+            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
 
             ProcessExecutionDN process = PackageLogic.CreatePackageOperation(lites, OperationsClient.GetOperationKeyAssert(operationFullKey));
 

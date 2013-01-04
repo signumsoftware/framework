@@ -261,14 +261,14 @@ namespace Signum.Entities.Omnibox
                     {
                         var patten = OmniboxUtils.CleanCommas(omniboxToken.Value);
 
-                        var result = OmniboxParser.Manager.AutoComplete(queryToken.Type.CleanType(), queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
+                        var result = OmniboxParser.Manager.AutoComplete(queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
 
                         return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();  
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Entity)
                     {
-                        Lite lite;
-                        var error = Lite.TryParseLite(queryToken.Type.CleanType(), omniboxToken.Value, out lite);
+                        Lite<IdentifiableEntity> lite;
+                        var error = Lite.TryParseLite(omniboxToken.Value, out lite);
                         if(string.IsNullOrEmpty(error))
                             return new []{new ValueTuple { Value = lite }}; 
                     }
@@ -321,9 +321,9 @@ namespace Signum.Entities.Omnibox
             return new[] { new ValueTuple { Value = UnknownValue, Match = null } };
         }
 
-        Lite CreateLite(Type type, int id)
+        Lite<IdentifiableEntity> CreateLite(Type type, int id)
         {
-            return Lite.Create(type, id, type, "{0} {1}".Formato(type.NiceName(), id));
+            return Lite.Create(type, id, "{0} {1}".Formato(type.NiceName(), id));
         }
 
         bool? ParseBool(string val)
@@ -424,7 +424,7 @@ namespace Signum.Entities.Omnibox
 
                 case FilterType.String: return "\"" + p.ToString() + "\"";
                 case FilterType.DateTime: return "'" + p.ToString() + "'";
-                case FilterType.Lite: return ((Lite)p).Key();
+                case FilterType.Lite: return ((Lite<IdentifiableEntity>)p).Key();
                 case FilterType.Embedded: throw new InvalidOperationException("Impossible to translate not null Embedded entity to string");
                 case FilterType.Boolean: return p.ToString();
                 case FilterType.Enum: return p.ToString();

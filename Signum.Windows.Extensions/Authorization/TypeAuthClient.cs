@@ -35,7 +35,7 @@ namespace Signum.Windows.Authorization
 
             Links.RegisterEntityLinks<RoleDN>((r, c) =>
             {
-                bool authorized = BasicPermissions.AdminRules.TryIsAuthorized() ?? true;
+                bool authorized = BasicPermission.AdminRules.TryIsAuthorized() ?? true;
                 return new QuickLink[]
                 {
                     new QuickLinkAction("Type Rules", () => 
@@ -64,7 +64,7 @@ namespace Signum.Windows.Authorization
             IdentifiableEntity ident = (IdentifiableEntity)entity;
 
             if (ident == null || ident.IsNew)
-                return typeRules.GetAllowed(type).Max().GetUI() >= TypeAllowedBasic.Read;
+                return typeRules.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
 
             return ident.IsAllowedFor(TypeAllowedBasic.Read);
         }
@@ -74,7 +74,7 @@ namespace Signum.Windows.Authorization
             if(!typeof(IdentifiableEntity).IsAssignableFrom(type))
                 return true;
 
-            return typeRules.GetAllowed(type).Max().GetUI() == TypeAllowedBasic.Create;
+            return typeRules.GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
         }
 
         static bool manager_IsReadOnly(Type type, ModifiableEntity entity)
@@ -85,19 +85,19 @@ namespace Signum.Windows.Authorization
             IdentifiableEntity ident = (IdentifiableEntity)entity;
 
             if (ident == null || ident.IsNew)
-                return typeRules.GetAllowed(type).Max().GetUI() < TypeAllowedBasic.Modify;
+                return typeRules.GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
             else
                 return !ident.IsAllowedFor(TypeAllowedBasic.Modify);
         }
 
-        public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic requested)
+        public static bool IsAllowedFor(this Lite<IIdentifiable> lite, TypeAllowedBasic requested)
         {
-            TypeAllowedAndConditions tac = GetAllowed(lite.RuntimeType);
+            TypeAllowedAndConditions tac = GetAllowed(lite.EntityType);
 
-            if (requested <= tac.Min().GetUI())
+            if (requested <= tac.MinUI())
                 return true;
 
-            if (tac.Max().GetUI() < requested)
+            if (tac.MaxUI() < requested)
                 return false;
 
             return Server.Return((ITypeAuthServer s) => s.IsAllowedForInUserInterface(lite, requested));
@@ -107,10 +107,10 @@ namespace Signum.Windows.Authorization
         {
             TypeAllowedAndConditions tac = GetAllowed(entity.GetType());
 
-            if (requested <= tac.Min().GetUI())
+            if (requested <= tac.MinUI())
                 return true;
 
-            if (tac.Max().GetUI() < requested)
+            if (tac.MaxUI() < requested)
                 return false;
 
             return Server.Return((ITypeAuthServer s) => s.IsAllowedForInUserInterface(entity.ToLite(), requested));
@@ -140,7 +140,7 @@ namespace Signum.Windows.Authorization
 
                 if (type != null && Navigator.Manager.EntitySettings.ContainsKey(type))
                 {
-                    if (typeRules.GetAllowed(type).Max().GetUI() < TypeAllowedBasic.Read)
+                    if (typeRules.GetAllowed(type).MaxUI() < TypeAllowedBasic.Read)
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }

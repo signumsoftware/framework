@@ -123,7 +123,7 @@ else {
                 return;
             }
             var runtimeInfo = new SF.RuntimeInfo(prefix);
-            if (SF.isEmpty(runtimeInfo.runtimeType())) {
+            if (SF.isEmpty(runtimeInfo.entityType())) {
                 $list.html("");
                 return;
             }

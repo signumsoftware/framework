@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="ConnectionString" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Data Source=localhost;Initial Catalog=SignumExtensionsTest;Integrated Security=True</Value>
+      <Value Profile="(Default)">Data Source=localhost;Initial Catalog=Music;Integrated Security=True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

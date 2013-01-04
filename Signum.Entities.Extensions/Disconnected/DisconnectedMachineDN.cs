@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class DisconnectedMachineDN : Entity
     {
         DateTime creationDate = TimeZoneManager.Now;
@@ -71,7 +71,7 @@ namespace Signum.Entities.Disconnected
         Fixed,
     }
 
-    public enum DisconnectedMachineOperations
+    public enum DisconnectedMachineOperation
     {
         Save,
         UnsafeUnlock,

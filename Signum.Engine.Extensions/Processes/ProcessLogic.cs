@@ -9,7 +9,6 @@ using Signum.Entities;
 using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using System.Threading;
 using Signum.Utilities.DataStructures;
 using System.Diagnostics;
@@ -24,7 +23,6 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Signum.Engine.Scheduler;
 using System.Linq.Expressions;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 using System.IO;
 
@@ -75,7 +73,7 @@ namespace Signum.Engine.Processes
 
                 ProcessLogic.MaxDegreeOfParallelism = maxDegreeOfParallelism;
 
-                PermissionAuthLogic.RegisterPermissions(ProcessPermissions.ViewProcessControlPanel);
+                PermissionAuthLogic.RegisterPermissions(ProcessPermission.ViewProcessControlPanel);
 
                 MultiEnumLogic<ProcessDN>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
@@ -190,18 +188,18 @@ namespace Signum.Engine.Processes
 
         static bool running = false;
 
-        public static int InitialDelayMiliseconds;
+        static int initialDelayMiliseconds;
 
         public static void StartBackgroundProcess(int delayMilliseconds)
         {
-            InitialDelayMiliseconds = delayMilliseconds;
+            initialDelayMiliseconds = delayMilliseconds;
 
-            if (InitialDelayMiliseconds == 0)
+            if (initialDelayMiliseconds == 0)
                 StartBackgroundProcess();
 
             Task.Factory.StartNew(() =>
             {
-                Thread.Sleep(InitialDelayMiliseconds);
+                Thread.Sleep(initialDelayMiliseconds);
                 StartBackgroundProcess();
             });
         }
@@ -462,7 +460,7 @@ namespace Signum.Engine.Processes
             return new ProcessLogicState
             {
                 Running = running,
-                InitialDelayMiliseconds = InitialDelayMiliseconds,
+                InitialDelayMiliseconds = initialDelayMiliseconds,
                 MaxDegreeOfParallelism = MaxDegreeOfParallelism,
                 NextPlannedExecution = nextPlannedExecution,
                 Executing = executing.Values.Select(p => new ExecutionState

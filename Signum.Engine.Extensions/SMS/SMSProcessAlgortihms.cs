@@ -37,7 +37,7 @@ namespace Signum.Engine.SMS
 
                 try
                 {
-                    ms.Execute(SMSMessageOperations.Send);
+                    ms.Execute(SMSMessageOperation.Send);
                 }
                 catch (Exception)
                 {
@@ -82,7 +82,7 @@ namespace Signum.Engine.SMS
 
                 try
                 {
-                    ms.Execute(SMSMessageOperations.UpdateStatus);
+                    ms.Execute(SMSMessageOperation.UpdateStatus);
                 }
                 catch (Exception)
                 {

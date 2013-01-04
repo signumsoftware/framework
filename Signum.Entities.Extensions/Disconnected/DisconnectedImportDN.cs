@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Exceptions;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class DisconnectedImportDN : IdentifiableEntity
     {
         DateTime creationDate = TimeZoneManager.Now;

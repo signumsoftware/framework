@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Reports
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class ExcelReportDN : IdentifiableEntity
     {
         QueryDN query;
@@ -40,17 +40,16 @@ namespace Signum.Entities.Reports
             set { Set(ref file, value, () => File); }
         }
 
-        bool deleted;
-        public bool Deleted
-        {
-            get { return deleted; }
-            set { SetToStr(ref deleted, value, () => Deleted); }
-        }
-
         static readonly Expression<Func<ExcelReportDN, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum ExcelReportOperation
+    { 
+        Save,
+        Delete
     }
 }

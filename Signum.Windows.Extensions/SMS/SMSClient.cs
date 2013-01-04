@@ -24,20 +24,20 @@ namespace Signum.Windows.SMS
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMSMessageDN>(EntityType.Main) { View = e => new SMSMessage() },
-                    new EntitySettings<SMSTemplateDN>(EntityType.Main) { View = e => new SMSTemplate() },
-                    new EntitySettings<SMSSendPackageDN>(EntityType.Main) { View = e => new SMSSendPackage()},
-                    new EntitySettings<SMSUpdatePackageDN>(EntityType.Main) { View = e => new SMSUpdatePackage()},
+                    new EntitySettings<SMSMessageDN> { View = e => new SMSMessage() },
+                    new EntitySettings<SMSTemplateDN> { View = e => new SMSTemplate() },
+                    new EntitySettings<SMSSendPackageDN> { View = e => new SMSSendPackage()},
+                    new EntitySettings<SMSUpdatePackageDN> { View = e => new SMSUpdatePackage()},
                 });
 
-                OperationClient.AddSetting(new EntityOperationSettings<IdentifiableEntity>(SMSMessageOperations.CreateSMSMessageFromTemplate)
+                OperationClient.AddSetting(new EntityOperationSettings(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                 {
                     Click = FindAssociatedTemplates
                 });
             }
         }
 
-        public static IdentifiableEntity FindAssociatedTemplates(EntityOperationEventArgs<IdentifiableEntity> e)
+        public static IdentifiableEntity FindAssociatedTemplates(EntityOperationContext e)
         {
             var template = Navigator.Find(new FindOptions(typeof(SMSTemplateDN))
             {
@@ -50,8 +50,8 @@ namespace Signum.Windows.SMS
             });
 
             if (template != null)
-                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate,
-                    template.ToLite<SMSTemplateDN>().Retrieve()));
+                Navigator.Navigate(e.Entity.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity,
+                    ((Lite<SMSTemplateDN>)template).Retrieve()));
 
             return null;
         }

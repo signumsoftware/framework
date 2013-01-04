@@ -38,15 +38,28 @@ namespace Signum.Engine.Authorization
 
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("FacadeMethods", "FacadeMethod", fm => fm.ToString(), b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) =>
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
                     {
+                        string replacementKey = typeof(FacadeMethodDN).Name;
+
                         var methods = FacadeMethodLogic.RetrieveOrGenerateFacadeMethods().ToDictionary(a => a.ToString());
-                        return cache.ImportXml(x, "FacadeMethods", "FacadeMethod", roles, str =>
+
+                        replacements.AskForReplacements(
+                            x.Element("FacadeMethods").Elements("Role").SelectMany(r => r.Elements("FacadeMethod")).Select(fm => fm.Attribute("Resource").Value).ToHashSet(),
+                            methods.Keys.ToHashSet(), 
+                            replacementKey);
+
+                        return cache.ImportXml(x, "FacadeMethods", "FacadeMethod", roles, (str) =>
                         {
-                            var m = methods.GetOrThrow(str);
-                            if (m.IsNew)
-                                m.Save();
-                            return m;
+                            var fm = methods.TryGetC(replacements.Apply(replacementKey, str));
+
+                            if (fm == null)
+                                return null;
+                            
+                            if (fm.IsNew)
+                                fm.Save();
+
+                            return fm;
                         }, bool.Parse);
                     };
             }

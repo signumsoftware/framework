@@ -8,36 +8,13 @@ using Signum.Utilities;
 
 namespace Signum.Entities.SMS
 {
-    public enum SMSProviderOperations
+    public enum SMSProviderOperation
     {
         SendSMSMessage,
         SendSMSMessagesFromTemplate
     }
 
-    public enum SMSMessageState
-    {
-        Created,
-        Sent,
-        Delivered,
-        Failed,
-    }
-
-    public enum SMSMessageOperations
-    {
-        CreateSMS,
-        Send,
-        UpdateStatus,
-        CreateUpdateStatusPackage,
-        CreateSMSMessageFromTemplate
-    }
-
-    public enum SMSMessageProcess
-    {
-        Send,
-        UpdateStatus
-    }
-
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class SMSMessageDN : Entity
     {
         public static string DefaultFrom;
@@ -139,5 +116,29 @@ namespace Signum.Entities.SMS
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum SMSMessageState
+    {
+        Created,
+        Sent,
+        Delivered,
+        Failed,
+    }
+
+    public enum SMSMessageOperation
+    {
+        Send,
+        UpdateStatus,
+        CreateUpdateStatusPackage,
+        CreateSMSFromSMSTemplate,
+        CreateSMSWithTemplateFromEntity,
+        CreateSMSFromEntity,
+    }
+
+    public enum SMSMessageProcess
+    {
+        Send,
+        UpdateStatus
     }
 }

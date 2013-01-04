@@ -73,7 +73,7 @@ namespace Signum.Web.Extensions.ControlPanel.Views.Admin
             #line 6 "..\..\ControlPanel\Views\Admin\PanelParts.cshtml"
  if (!Model.Parts.IsNullOrEmpty())
 {
-    int rowNumber = Model.Parts.Max(p => p.Row);
+    int rowNumber = Model.Parts.Max(p => p.Row) + 1;
 
             
             #line default
@@ -83,32 +83,32 @@ WriteLiteral("    <table id=\"sfCpAdminContainer\">\r\n        <tr>\r\n");
 
             
             #line 11 "..\..\ControlPanel\Views\Admin\PanelParts.cshtml"
-         for (int col = 1; col <= Model.NumberOfColumns; col++)
-        { 
+             for (int col = 0; col < Model.NumberOfColumns; col++)
+            { 
 
             
             #line default
             #line hidden
-WriteLiteral("            <td class=\"sf-ftbl-column\" data-column=\"");
+WriteLiteral("                <td class=\"sf-ftbl-column\" data-column=\"");
 
 
             
             #line 13 "..\..\ControlPanel\Views\Admin\PanelParts.cshtml"
-                                               Write(col);
+                                                   Write(col);
 
             
             #line default
             #line hidden
-WriteLiteral("\">\r\n                <div class=\"sf-ftbl-droppable\"></div>\r\n");
+WriteLiteral("\">\r\n                    <div class=\"sf-ftbl-droppable\"></div>\r\n");
 
 
             
             #line 15 "..\..\ControlPanel\Views\Admin\PanelParts.cshtml"
-                 for (int row = 1; row <= rowNumber; row++)
-                {
-                    PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
-                    if (pp != null)
+                     for (int row = 0; row < rowNumber; row++)
                     {
+                        PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
+                        if (pp != null)
+                        {
 
             
             #line default
@@ -119,8 +119,8 @@ WriteLiteral("                        <div class=\"sf-ftbl-part-container\">\r\n
             
             #line 21 "..\..\ControlPanel\Views\Admin\PanelParts.cshtml"
                                
-                                var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).FirstEx();
-                                Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPartView"), ppTc);    
+                            var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).FirstEx();
+                            Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPartView"), ppTc);    
                             
 
             
@@ -135,18 +135,18 @@ WriteLiteral("                        <div class=\"sf-ftbl-droppable\"></div>\r\
 
             
             #line 27 "..\..\ControlPanel\Views\Admin\PanelParts.cshtml"
+                        }
                     }
-                }
 
             
             #line default
             #line hidden
-WriteLiteral("            </td>\r\n");
+WriteLiteral("                </td>\r\n");
 
 
             
             #line 30 "..\..\ControlPanel\Views\Admin\PanelParts.cshtml"
-        }
+            }
 
             
             #line default

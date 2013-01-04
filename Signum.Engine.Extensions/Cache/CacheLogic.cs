@@ -141,7 +141,7 @@ namespace Signum.Engine.Cache
                 cachedEntities[referingType] = dic;
 
                 var lites = dic.Values.Select(a=>a.ToLite()).ToHashSet();
-                lites.AddRange(entities.OfType<Lite>().Where(l=>l.RuntimeType == typeof(T)).Select(l=>l.ToLite<T>()));
+                lites.AddRange(entities.OfType<Lite<T>>().Where(l => l.EntityType == typeof(T)));
                 sensibleLites[referingType] = lites;
 
                 var semis = semiControllersFor.TryGetC(typeof(T));
@@ -478,7 +478,7 @@ namespace Signum.Engine.Cache
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                PermissionAuthLogic.RegisterTypes(typeof(CachePermissions));
+                PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
             }
         }
 
@@ -595,10 +595,10 @@ namespace Signum.Engine.Cache
             {
                 new XAttribute("Label", t.Name),
                 new XAttribute("Background", GetColor(t.Type, cacheHint).ToHtml())
-            }, lite => lite ? new[]
+            }, info => new[]
             {
-                new XAttribute("StrokeDashArray",  "2 3")
-            } : new XAttribute[0]);
+                info.IsLite ? new XAttribute("StrokeDashArray",  "2 3") : null,
+            }.NotNull().ToArray());
 
             return dgml;
         }

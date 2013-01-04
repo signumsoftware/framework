@@ -46,7 +46,7 @@ namespace Signum.Web.UserQueries
 
             var userQuery = ToUserQuery(request);
 
-            userQuery.Related = UserDN.Current.ToLite<IdentifiableEntity>();
+            userQuery.Related = UserDN.Current.ToLite();
 
             return Navigator.NormalPage(this, userQuery);
         }

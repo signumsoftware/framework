@@ -6,7 +6,6 @@ using System.Xml.Linq;
 using Signum.Entities.Reflection;
 using System.Reflection;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.Reflection;
 using Signum.Entities.DynamicQuery;

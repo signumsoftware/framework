@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Automation;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using Signum.Entities;
 using System.Windows;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -73,13 +73,6 @@ namespace Signum.Windows.UIAutomation
             return Element.CaptureWindow(
             action: () => ButtonBar.OkButton.ButtonInvoke(),
             actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
-        }
-
-        public void Save()
-        {
-            Element.WaitDataContextChangedAfter(
-            action: () => ButtonBar.SaveButton.ButtonInvoke(),
-            actionDescription: () => "Save " + EntityId);
         }
 
         public void Reload()
@@ -195,11 +188,6 @@ namespace Signum.Windows.UIAutomation
         public AutomationElement OkButton
         {
             get { return Element.ChildById("btOk"); }
-        }
-
-        public AutomationElement SaveButton
-        {
-            get { return Element.ChildById("btSave"); }
         }
 
         public AutomationElement ReloadButton

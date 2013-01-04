@@ -54,7 +54,7 @@ namespace Signum.Web.Chart
                     new EmbeddedEntitySettings<ChartColumnDN> { PartialViewName = _ => ViewPrefix.Formato("ChartColumn") },
                     new EmbeddedEntitySettings<ChartScriptColumnDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptColumn") },
                     new EmbeddedEntitySettings<ChartScriptParameterDN>{ PartialViewName = _ => ViewPrefix.Formato("ChartScriptParameter") },
-                    new EntitySettings<ChartScriptDN>(EntityType.Main) { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
+                    new EntitySettings<ChartScriptDN> { PartialViewName = _ => ViewPrefix.Formato("ChartScript") },
                 });
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
@@ -177,11 +177,9 @@ namespace Signum.Web.Chart
             return new[] { ChartQueryButton(ctx.Prefix) };
         }
 
-
-
         public static ToolBarButton ChartQueryButton(string prefix)
         {
-            if (!ChartPermissions.ViewCharting.IsAuthorized())
+            if (!ChartPermission.ViewCharting.IsAuthorized())
                 return null;
 
             string chartNewText = Resources.Chart_Chart;
@@ -196,7 +194,6 @@ namespace Signum.Web.Chart
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 };
         }
-
 
         public static MvcHtmlString ChartTokenBuilder(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, QueryDescription qd, Context context)
         {

@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class UserChartDN : IdentifiableEntity, IChartBase
     {
         public UserChartDN() { }
@@ -29,6 +29,7 @@ namespace Signum.Entities.Chart
         [Ignore]
         internal object queryName;
 
+        [NotNullable]
         QueryDN query;
         [NotNullValidator]
         public QueryDN Query
@@ -54,6 +55,7 @@ namespace Signum.Entities.Chart
             set { Set(ref displayName, value, () => DisplayName); }
         }
 
+        [NotNullable]
         ChartScriptDN chartScript;
         [NotNullValidator]
         public ChartScriptDN ChartScript

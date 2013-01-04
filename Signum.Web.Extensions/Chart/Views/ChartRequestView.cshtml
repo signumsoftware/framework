@@ -24,7 +24,7 @@
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
 
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-    Type entitiesType = Lite.Extract(entityColumn.Type);
+    Type entitiesType = LiteUtils.Extract(entityColumn.Type);
 }
 <div id="@Model.Compose("sfChartControl")" 
     class="sf-search-control sf-chart-control" 
