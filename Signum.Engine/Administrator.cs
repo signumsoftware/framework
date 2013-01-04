@@ -208,6 +208,11 @@ namespace Signum.Engine
             Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(databaseName, value));
         }
 
+ 		public static void SetBrockerEnabled(bool value)
+        {
+            Executor.ExecuteNonQuery(SqlBuilder.SetBrockerEnabled(ConnectionScope.Current.DatabaseName(), value));
+        }
+
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
            where T : IdentifiableEntity
         {

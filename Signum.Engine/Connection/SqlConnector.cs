@@ -200,6 +200,15 @@ namespace Signum.Engine
             try
             {
                 SqlCommand cmd = NewCommand(preCommand, null);
+
+                var change = queryChange.Value;
+
+                if (change != null)
+                {
+                    SqlDependency dep = new SqlDependency(cmd);
+                    dep.OnChange += change;
+                }
+
                 return cmd.ExecuteReader();
             }
             catch (SqlTypeException ex)

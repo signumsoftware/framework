@@ -109,10 +109,12 @@ namespace Signum.Engine
         static ConcurrentDictionary<IResetLazy, Type[]> registeredLazyList = new ConcurrentDictionary<IResetLazy, Type[]>();
         public static ResetLazy<T> Create<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T:class
         {
-            var result = new ResetLazy<T>(() =>
+            ResetLazy<T> result = null; 
+            result = new ResetLazy<T>(() =>
             {
                 using (ExecutionMode.Global())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
+                using (Connector.NotifyQueryChange((sender, args) => result.Reset()))
                 using (Transaction tr = Transaction.InTestTransaction ? null:  Transaction.ForceNew())
                 using (new EntityCache(true))
                 {
@@ -129,6 +131,9 @@ namespace Signum.Engine
 
             return result;
         }
+
+        
+               
 
         public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T:class
         {

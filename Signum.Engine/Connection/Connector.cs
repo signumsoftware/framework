@@ -56,6 +56,16 @@ namespace Signum.Engine
         }
 
 
+
+        static protected readonly Variable<OnChangeEventHandler> queryChange = Statics.ThreadVariable<OnChangeEventHandler>("queryChange");
+        
+        public static IDisposable NotifyQueryChange(OnChangeEventHandler onChange)
+        {
+            queryChange.Value += onChange;
+
+            return new Disposable(() => queryChange.Value -= onChange);
+        }
+
         public Connector(Schema schema, DynamicQueryManager dqm)
         {
             this.Schema = schema;

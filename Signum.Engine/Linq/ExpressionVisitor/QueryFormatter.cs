@@ -565,8 +565,11 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitTable(TableExpression table)
         {
-            sb.Append(table.Name.ToString());
- 
+			if(Connector.Blabla)
+				sb.Append(table.Name.ToStringDbo());
+			else
+            	sb.Append(table.Name.ToString());
+			
             return table;
         }
 
