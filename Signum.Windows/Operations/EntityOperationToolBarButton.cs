@@ -165,6 +165,7 @@ namespace Signum.Windows.Operations
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
                         Server.Return((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.Key, null));
+                        Window.GetWindow(eoc.EntityControl).Close();
                     }
                 }
             }
