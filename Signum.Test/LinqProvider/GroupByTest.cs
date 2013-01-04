@@ -388,5 +388,11 @@ namespace Signum.Test.LinqProvider
         {
             var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Min(b => b.Friends.Max(m => m.Id)));
         }
+
+        [TestMethod]
+        public void GroupbyAggregateImplicitJoin()
+        {
+            var first = Database.Query<AlbumDN>().GroupBy(a => a.Year).Select(gr => gr.Max(a => a.Label.Name)).ToList();
+        }
     }
 }
