@@ -254,6 +254,7 @@ namespace Signum.Engine.Cache
                     using (Transaction tr = inCache.Value ? new Transaction(): Transaction.ForceNew())
                     using (SetInCache())
                     using (HeavyProfiler.Log("CACHE"))
+                    using (Connection.NotifyQueryChange((sender, aggs) => this.Invalidate(false)))
                     {
                         DisabledTypesDuringTransaction().Add(typeof(T)); //do not raise Disabled event
 
@@ -279,35 +280,35 @@ namespace Signum.Engine.Cache
                 var ee = schema.EntityEvents<T>();
 
                 ee.CacheController = this;
-                ee.Saving += Saving;
-                ee.PreUnsafeDelete += PreUnsafeDelete;
-                ee.PreUnsafeUpdate += UnsafeUpdated;
+                //ee.Saving += Saving;
+                //ee.PreUnsafeDelete += PreUnsafeDelete;
+                //ee.PreUnsafeUpdate += UnsafeUpdated;
             }
 
-            void UnsafeUpdated(IQueryable<T> query)
-            {
-                DisableAndInvalidateAllConnected();
-            }
+            //void UnsafeUpdated(IQueryable<T> query)
+            //{
+            //    DisableAndInvalidateAllConnected();
+            //}
 
-            void PreUnsafeDelete(IQueryable<T> query)
-            {
-                DisableAndInvalidate();
-            }
+            //void PreUnsafeDelete(IQueryable<T> query)
+            //{
+            //    DisableAndInvalidate();
+            //}
 
-            void Saving(T ident)
-            {
-                if (ident.Modified.Value)
-                {
-                    if (ident.IsNew)
-                    {
-                        DisableAndInvalidate();
-                    }
-                    else
-                    {
-                        DisableAndInvalidateAllConnected();
-                    }
-                }
-            }
+            //void Saving(T ident)
+            //{
+            //    if (ident.Modified.Value)
+            //    {
+            //        if (ident.IsNew)
+            //        {
+            //            Invalidate(false);
+            //        }
+            //        else
+            //        {
+            //            InvalidateAllConnected();
+            //        }
+            //    }
+            //}
 
 
             void DisableAndInvalidate()
