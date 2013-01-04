@@ -949,8 +949,8 @@ namespace Signum.Windows
                 SimpleFilterBuilder = null;
 
             FilterOptions.Clear();
+            Navigator.Manager.SetFilterTokens(QueryName, filters);
             FilterOptions.AddRange(filters);
-            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
