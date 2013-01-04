@@ -177,14 +177,9 @@ namespace Signum.Windows.Chart
                 View = new UserChart { QueryDescription = Description }
             });
 
+            Initialize();
             if (userChart != null)
-            {
-                userChart.Save();
-
-                Initialize();
-
                 CurrentUserChart = userChart;
-            }
         }
 
         private void Edit_Clicked(object sender, RoutedEventArgs e)
