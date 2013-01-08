@@ -122,6 +122,20 @@ namespace Signum.Engine
 
         public abstract bool SupportsScalarSubquery { get; }
         public abstract bool SupportsScalarSubqueryInAggregates { get; }
+
+
+        public static string ExtractCatalogPostfix(ref string connectionString, string catalogPostfix)
+        {
+            string toFind = "+" + catalogPostfix;
+
+            int index = connectionString.IndexOf(catalogPostfix);
+            if (index == -1)
+                return null;
+
+            connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind 
+
+            return catalogPostfix;
+        }
     }
 
   
