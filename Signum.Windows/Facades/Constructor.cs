@@ -14,81 +14,86 @@ namespace Signum.Windows
 {
     public static class Constructor
     {
-        public static ConstructorManager ConstructorManager;
+        public static ConstructorManager Manager;
 
         public static void Start(ConstructorManager constructorManager)
         {
-            ConstructorManager = constructorManager;
+            Manager = constructorManager;
             constructorManager.Initialize();
         }
 
-        public static object Construct(Type type, Window window)
+        public static object Construct(Type type, FrameworkElement element)
         {
-            return ConstructorManager.Construct(type, window); 
+            return Manager.Construct(type, element); 
         }
 
-        public static T Construct<T>(Window window)
+        public static T Construct<T>(FrameworkElement element)
         {
-            return (T)Construct(typeof(T), window);
+            return (T)Construct(typeof(T), element);
         }
 
-        public static void Register<T>(Func<Window, T> constructor) 
-            where T:class
+        public static T DefaultConstruct<T>(FrameworkElement element)
         {
-            ConstructorManager.Constructors.Add(typeof(T), constructor);
+            return (T)Construct(typeof(T), element);
+        }
+
+        public static void Register<T>(Func<FrameworkElement, T> constructor)
+            where T : class
+        {
+            Manager.Constructors.Add(typeof(T), constructor);
         }
     }
     
     public class ConstructorManager
     {
-        public event Func<Type, Window, object> GeneralConstructor; 
+        public event Func<Type, FrameworkElement, object> GeneralConstructor;
 
-        public Dictionary<Type, Func<Window, object>> Constructors;
+        public Dictionary<Type, Func<FrameworkElement, object>> Constructors;
 
         internal void Initialize()
         {
             if (Constructors == null)
-                Constructors = new Dictionary<Type, Func<Window, object>>();
+                Constructors = new Dictionary<Type, Func<FrameworkElement, object>>();
         }
 
-        public virtual object Construct(Type type, Window window)
+        public virtual object Construct(Type type, FrameworkElement element)
         {
-            Func<Window, object> c = Constructors.TryGetC(type);
+            Func<FrameworkElement, object> c = Constructors.TryGetC(type);
             if (c != null)
             {
-                object result = c(window);
+                object result = c(element);
                 return result;
             }
 
             if (GeneralConstructor != null)
             {
-                object result = GeneralConstructor(type, window);
+                object result = GeneralConstructor(type, element);
                 if (result != null)
                     return result;
             }
 
-            return DefaultContructor(type, window);
+            return DefaultContructor(type, element);
         }
 
-        public static object DefaultContructor(Type type, Window window)
+        protected internal virtual object DefaultContructor(Type type, FrameworkElement element)
         {
             object result = Activator.CreateInstance(type);
 
-            AddFilterProperties(window, result);
+            AddFilterProperties(element, result);
 
             return result;
         }
 
-        public static object AddFilterProperties(Window window, object obj)
+        protected internal virtual object AddFilterProperties(FrameworkElement element, object obj)
         {
             if (obj == null)
                 throw new ArgumentNullException("result");
 
             Type type = obj.GetType();
 
-            if (window is SearchWindow)
+            if (element is SearchControl)
             {
-                var filters = ((SearchWindow)window).FilterOptions.Where(fo => fo.Operation == FilterOperation.EqualTo && fo.Token is ColumnToken);
+                var filters = ((SearchControl)element).FilterOptions.Where(fo => fo.Operation == FilterOperation.EqualTo && fo.Token is ColumnToken);
 
                 var pairs = from pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                             join fo in filters on pi.Name equals fo.Token.Key

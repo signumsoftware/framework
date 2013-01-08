@@ -71,7 +71,7 @@ namespace Signum.Windows
         {
             this.InitializeComponent();
 
-            this.Initialized += NormalWindow_Initialized;
+            this.Loaded += NormalWindow_Loaded;
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(NormalWindow_DataContextChanged);
 
             Common.AddChangeDataContextHandler(this, ChangeDataContext_Handler);
@@ -79,7 +79,7 @@ namespace Signum.Windows
             RefreshEnabled();
         }
 
-        void NormalWindow_Initialized(object sender, EventArgs e)
+        void NormalWindow_Loaded(object sender, EventArgs e)
         {
             ButtonBar.OkVisible = ViewMode == Windows.ViewMode.View;
         }

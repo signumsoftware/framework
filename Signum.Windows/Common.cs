@@ -204,7 +204,7 @@ namespace Signum.Windows
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             FrameworkElement fe = d as FrameworkElement;
-            if (fe == null)
+            if (fe == null || e.NewValue == null && e.OldValue != null)
                 return;
 
             if (DesignerProperties.GetIsInDesignMode(fe))

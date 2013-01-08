@@ -343,7 +343,6 @@ namespace Signum.Engine.Linq
                 aggregate = new AggregateExpression(resultType, nominated, aggregateFunction);
             }
 
-
             Alias alias = NextSelectAlias();
 
             ColumnDeclaration cd = new ColumnDeclaration("a", aggregate);
@@ -358,7 +357,7 @@ namespace Signum.Engine.Linq
             ScalarExpression subquery = new ScalarExpression(resultType, select);
 
             GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
-            if (info != null)
+            if (info != null && newSource == projection.Select)
             {
                 SourceExpression newsSource2 = info.Source;
                 Expression exp2 = aggregateFunction == AggregateFunction.Count ? null : 
