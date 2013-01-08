@@ -43,7 +43,8 @@ namespace Signum.Windows.Operations
                 Links.RegisterGlobalLinks((entity, control) => new[]
                 { 
                     entity.GetType() == typeof(OperationLogDN) ? null : 
-                        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)){ IsShy = true}
+                        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
+                        {OrderOptions ={ new OrderOption("Start") }}){ IsShy = true}
                 });
             }
         }
