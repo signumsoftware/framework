@@ -18,6 +18,7 @@ using Signum.Engine.Authorization;
 using System.Drawing;
 using Signum.Entities.Basics;
 using System.Xml.Linq;
+using System.Data.SqlClient;
 
 namespace Signum.Engine.Cache
 {
@@ -243,7 +244,6 @@ namespace Signum.Engine.Cache
             public Dictionary<int, T> Dictionary { get { return pack.Value.Dictionary; } }
          
             ResetLazy<Pack> pack;
-            
 
             public FullCacheController(Schema schema)
             {
@@ -254,7 +254,7 @@ namespace Signum.Engine.Cache
                     using (Transaction tr = inCache.Value ? new Transaction(): Transaction.ForceNew())
                     using (SetInCache())
                     using (HeavyProfiler.Log("CACHE"))
-                    using (Connection.NotifyQueryChange((sender, aggs) => this.Invalidate(false)))
+                    using (SqlConnection.NotifyQueryChange((sender, aggs) => this.Invalidate(false)))
                     {
                         DisabledTypesDuringTransaction().Add(typeof(T)); //do not raise Disabled event
 
@@ -475,7 +475,10 @@ namespace Signum.Engine.Cache
             }
         }
 
-        public static void Start(SchemaBuilder sb)
+
+        public bool SqlDependency; 
+
+        public static void Start(SchemaBuilder sb, bool sqlDependencyInvalidation)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -640,5 +643,13 @@ namespace Signum.Engine.Cache
         public int Hits;
         public int Loads;
         public int Invalidations; 
+    }
+
+    public enum InvalidationStrategy
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        EngineInvalidation,
     }
 }

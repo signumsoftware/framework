@@ -111,6 +111,7 @@
     <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
+    <Compile Include="Cache\CacheLazy.cs" />
     <Compile Include="Cache\CacheLogic.cs" />
     <Compile Include="Cache\Completer.cs" />
     <Compile Include="Chart\ChartColorLogic.cs" />
