@@ -55,17 +55,6 @@ namespace Signum.Engine
             return new Disposable(() => scopeTimeout.Value = old);
         }
 
-
-
-        static protected readonly Variable<OnChangeEventHandler> queryChange = Statics.ThreadVariable<OnChangeEventHandler>("queryChange");
-        
-        public static IDisposable NotifyQueryChange(OnChangeEventHandler onChange)
-        {
-            queryChange.Value += onChange;
-
-            return new Disposable(() => queryChange.Value -= onChange);
-        }
-
         public Connector(Schema schema, DynamicQueryManager dqm)
         {
             this.Schema = schema;
@@ -107,6 +96,7 @@ namespace Signum.Engine
         protected internal abstract void ExecuteDataReader(SqlPreCommandSimple command, Action<FieldReader> forEach);
         protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
+        protected internal abstract bool ForceTwoPartNameOnQueries { get; }
 
         public abstract string DatabaseName();
 

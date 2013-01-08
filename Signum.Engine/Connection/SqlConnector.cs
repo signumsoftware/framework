@@ -21,6 +21,21 @@ namespace Signum.Engine
 {
     public class SqlConnector : Connector
     {
+        protected readonly Variable<OnChangeEventHandler> queryChange = Statics.ThreadVariable<OnChangeEventHandler>("queryChange");
+
+        public IDisposable NotifyQueryChange(OnChangeEventHandler onChange)
+        {
+            queryChange.Value += onChange;
+
+            return new Disposable(() => queryChange.Value -= onChange);
+        }
+
+        protected internal override bool ForceTwoPartNameOnQueries
+        {
+            get { return queryChange.Value != null; }
+        }
+
+
         int? commandTimeout = null;
         string connectionString;
 
