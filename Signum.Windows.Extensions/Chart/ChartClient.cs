@@ -62,9 +62,9 @@ namespace Signum.Windows.Chart
 
                 main.SetValue(processName, 9999, RegistryValueKind.DWord);
 
-                Constructor.Register<UserChartDN>(win =>
+                Constructor.Register<UserChartDN>(elem =>
                 {
-                    MessageBox.Show(win,
+                    MessageBox.Show(Window.GetWindow(elem),
                         Signum.Windows.Extensions.Properties.Resources._0CanOnlyBeCreatedFromTheChartWindow.Formato(typeof(UserChartDN).NicePluralName()),
                         Signum.Windows.Extensions.Properties.Resources.Create,
                         MessageBoxButton.OK, MessageBoxImage.Information);

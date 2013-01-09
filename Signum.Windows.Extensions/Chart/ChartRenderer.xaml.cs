@@ -67,18 +67,23 @@ namespace Signum.Windows.Chart
 
             OrderOptions = new ObservableCollection<OrderOption>();
 
+
             webBrowser.HideScriptErrors(true);
             this.Loaded += ChartRenderer_Loaded;
+            this.DataContextChanged += ChartRenderer_DataContextChanged;
         }
 
-       
+        void ChartRenderer_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(DataContext is ChartRequest))
+                return;
+
+            Settings = Navigator.GetQuerySettings(Request.QueryName);
+            Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+        }
 
         void ChartRenderer_Loaded(object sender, RoutedEventArgs e)
         {
-            Settings = Navigator.GetQuerySettings(Request.QueryName);
-
-            Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
-
             webBrowser.ObjectForScripting = new ScriptInterface { renderer = this };
             webBrowser.NavigateToString(FullHtml.Value);
             webBrowser.LoadCompleted += webBrowser_LoadCompleted;

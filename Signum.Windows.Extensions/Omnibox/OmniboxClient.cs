@@ -85,7 +85,7 @@ namespace Signum.Windows.Omnibox
     {
         public override bool AllowedType(Type type)
         {
-            return Navigator.IsNavigable(type, isSearchEntity: false);
+            return Navigator.IsNavigable(type, isSearchEntity: true);
         }
 
         public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)

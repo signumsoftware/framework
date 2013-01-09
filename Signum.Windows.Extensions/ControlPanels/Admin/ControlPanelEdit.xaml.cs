@@ -35,11 +35,9 @@ namespace Signum.Windows.ControlPanels.Admin
 
         private object EntityRepeater_Creating()
         {
-            var win = Window.GetWindow(this);
-
             var imp = (Implementations)PropertyRoute.Construct<ControlPanelDN>(cp => cp.Parts.First().Content).GetImplementations();
 
-            var type = Navigator.SelectType(win, imp.Types, t => Navigator.IsCreable(t, isSearchEntity: false));
+            var type = Navigator.SelectType(Window.GetWindow(this), imp.Types, t => Navigator.IsCreable(t, isSearchEntity: false));
 
             if (type == null)
                 return null;
@@ -50,7 +48,7 @@ namespace Signum.Windows.ControlPanels.Admin
             {
                 Column = lastColumn,
                 Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row + 1) ?? 0),
-                Content = (IPartDN)Constructor.Construct(type, win),
+                Content = (IPartDN)Constructor.Construct(type, this),
                 Title = null,
             };
         }

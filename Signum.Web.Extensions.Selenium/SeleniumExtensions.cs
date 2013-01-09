@@ -126,33 +126,31 @@ namespace Signum.Web.Selenium
         public const string PageLoadLongTimeout = "40000";
 
         //public const int DefaultAjaxTimeout = 10000;
-        public const int DefaultAjaxTimeout = 10000;
-        public const int DefaultAjaxAttempts = 3;
+        public static int DefaultAjaxTimeout = 30000;
+        public static int DefaultAjaxWait = 200;
+
 
         public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition)
         {
-            WaitAjaxFinished(selenium, condition, DefaultAjaxTimeout, DefaultAjaxAttempts);
+            WaitAjaxFinished(selenium, condition, DefaultAjaxTimeout);
         }
 
-        public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition, int? timeout = null, int? attempts = null)
+        public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition, int? timeout = null)
         {
-            var func = condition.Compile();           
+            var func = condition.Compile();
             if (func())
                 return;
 
-            for (int i = 0; i < attempts; i++)
+            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
+            do
             {
-                DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
+                Thread.Sleep(DefaultAjaxWait);
 
-                do
-                {
-                    Thread.Sleep(500);
+                if (func())
+                    return;
 
-                    if (func())
-                        return;
+            } while (DateTime.Now < limit);
 
-                } while (DateTime.Now < limit);
-            }
 
             throw new TimeoutException("The expression took more than {0} ms:\r\n{1}".Formato(timeout ?? DefaultAjaxTimeout, condition.NiceToString()));
         }

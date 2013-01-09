@@ -62,9 +62,9 @@ namespace Signum.Windows.UserQueries
                 Navigator.AddSetting(new EntitySettings<UserQueryDN> { View = _ => new UserQuery() });
                 SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
 
-                Constructor.Register<UserQueryDN>(win =>
+                Constructor.Register<UserQueryDN>(elem =>
                 {
-                    MessageBox.Show(win,
+                    MessageBox.Show(Window.GetWindow(elem),
                         Signum.Windows.Extensions.Properties.Resources._0CanOnlyBeCreatedFromTheSearchWindow.Formato(typeof(UserQueryDN).NicePluralName()),
                         Signum.Windows.Extensions.Properties.Resources.Create,
                         MessageBoxButton.OK, MessageBoxImage.Information);
