@@ -588,7 +588,6 @@ namespace Signum.Engine.Maps
     public interface ICacheController
     {
         bool Enabled { get; }
-        bool IsComplete { get; }
         void Load();
 
         IEnumerable<int> GetAllIds();

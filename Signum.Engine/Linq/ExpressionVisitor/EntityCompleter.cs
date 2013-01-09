@@ -55,19 +55,19 @@ namespace Signum.Engine.Linq
             TypeEntityExpression tfie= newTypeId as TypeEntityExpression;
 
             if (tfie != null)
-                return IsCompletlyCached(tfie.TypeValue);
+                return IsCached(tfie.TypeValue);
 
             TypeImplementedByExpression tibe = newTypeId as TypeImplementedByExpression;
 
             if (tibe != null)
-                return tibe.TypeImplementations.All(t => IsCompletlyCached(t.Type));
+                return tibe.TypeImplementations.All(t => IsCached(t.Type));
 
             return false;
         }
 
         protected override Expression VisitEntity(EntityExpression ee)
         {
-            if (previousTypes.Contains(ee.Type) || IsCompletlyCached(ee.Type))
+            if (previousTypes.Contains(ee.Type) || IsCached(ee.Type))
             {
                 ee = new EntityExpression(ee.Type, ee.ExternalId, null, null);
             }
@@ -87,10 +87,10 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        private bool IsCompletlyCached(Type type)
+        private bool IsCached(Type type)
         { 
             var cc = Schema.Current.CacheController(type);
-            return cc != null && cc.Enabled && cc.IsComplete; /*just to force cache before executing the query*/
+            return cc != null && cc.Enabled; /*just to force cache before executing the query*/
         }
 
         protected override Expression VisitMList(MListExpression ml)

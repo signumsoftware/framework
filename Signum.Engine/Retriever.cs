@@ -16,7 +16,6 @@ namespace Signum.Engine
         T Complete<T>(int? id, Action<T> complete) where T : IdentifiableEntity;
         T Request<T>(int? id) where T : IdentifiableEntity;
         T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
-        T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable;
         Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable;
         T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity; 
         IRetriever Parent { get; }
@@ -110,14 +109,6 @@ namespace Signum.Engine
             return entity;
         }
 
-        public T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable
-        {
-            if (id == null)
-                return null;
-
-            return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id); 
-        }
-
         public T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
         {
             if (id == null)
@@ -161,7 +152,7 @@ namespace Signum.Engine
                     var dic = group.Value;
                     ICacheController cc = Schema.Current.CacheController(group.Key);
 
-                    if (cc != null && cc.IsComplete && cc.Enabled)
+                    if (cc != null && cc.Enabled)
                     {
                         cc.Load();
 
@@ -174,27 +165,6 @@ namespace Signum.Engine
                             retrieved.Add(new IdentityTuple(ident), ident);
                             dic.Remove(ident.Id);
                         }
-                    }
-                    else if (cc != null && !cc.IsComplete)
-                    {
-                        List<int> remaining = new List<int>();
-                        while (dic.Count > 0)
-                        {
-                            IdentifiableEntity ident = dic.Values.FirstEx();
-
-                            if (cc.CompleteCache(ident, this))
-                            {
-                                retrieved.Add(new IdentityTuple(ident), ident);
-                                dic.Remove(ident.Id);
-                            }
-                            else
-                            {
-                                remaining.Add(ident.Id);
-                            }
-                        }
-
-                        if (remaining.Count > 0)
-                            Database.RetrieveList(group.Key, remaining);
                     }
                     else
                     {
@@ -255,8 +225,11 @@ namespace Signum.Engine
         {
             ICacheController cc = Schema.Current.CacheController(typeof(T));
 
-            if (cc != null && cc.IsComplete && cc.Enabled)
+            if (cc != null && cc.Enabled)
+            {
+                cc.Load();
                 return ids.ToDictionary(a => a, a => cc.GetToString(a));
+            }
             else
                 return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToDictionary();
         }
@@ -282,11 +255,6 @@ namespace Signum.Engine
             return Parent.Request<T>(id);
         }
 
-        public T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable
-        {
-            return Parent.RequestIBA<T>(id, type);
-        }
-
         public T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
         {
             return Parent.RequestIBA<T>(id, typeId);
@@ -306,7 +274,5 @@ namespace Signum.Engine
         {
             EntityCache.ReleaseRetriever(this);
         }
-
-        
     }
 }

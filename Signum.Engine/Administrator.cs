@@ -210,7 +210,7 @@ namespace Signum.Engine
 
  		public static void SetBrockerEnabled(bool value)
         {
-            Executor.ExecuteNonQuery(SqlBuilder.SetBrockerEnabled(ConnectionScope.Current.DatabaseName(), value));
+            Executor.ExecuteNonQuery(SqlBuilder.SetBrockerEnabled(Connector.Current.DatabaseName(), value));
         }
 
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)
