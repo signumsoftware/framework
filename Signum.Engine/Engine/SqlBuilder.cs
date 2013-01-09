@@ -324,10 +324,5 @@ FROM {1} as [table]".Formato(
         {
             return new SqlPreCommandSimple("DROP SCHEMA {0}".Formato(schemaName));
         }
-
-        internal static SqlPreCommandSimple SetBrockerEnabled(string schemaName, bool value)
-        {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET {1}".Formato(schemaName, value ? "ENABLE_BROKER" : "DISABLE_BROKER"));
-        }
     }
 }

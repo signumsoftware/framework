@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
+using System.Diagnostics;
 
 namespace Signum.Engine
 {
@@ -46,12 +47,7 @@ namespace Signum.Engine
         public override bool SupportsScalarSubquery { get { return true; } }
         public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
 
-        protected internal override bool ForceTwoPartNameOnQueries
-        {
-            get { return CurrentOnQueryChange != null; }
-        }
-
-        SqlConnection EnsureConnection()
+        public SqlConnection EnsureConnection()
         {
             if (Transaction.HasTransaction)
                 return null;
@@ -62,7 +58,7 @@ namespace Signum.Engine
             return result;
         }
 
-        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection)
+        public SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection)
         {
             SqlCommand cmd = new SqlCommand();
 
@@ -206,14 +202,6 @@ namespace Signum.Engine
             {
                 SqlCommand cmd = NewCommand(preCommand, null);
 
-                var change = CurrentOnQueryChange;
-
-                if (change != null)
-                {
-                    SqlDependency dep = new SqlDependency(cmd);
-                    dep.OnChange += (sender, args) => change(sender, args);
-                }
-
                 return cmd.ExecuteReader();
             }
             catch (SqlTypeException ex)
@@ -310,7 +298,7 @@ namespace Signum.Engine
             return ex;
         }
 
-        private Exception HandleSqlException(SqlException ex)
+        public Exception HandleSqlException(SqlException ex)
         {
             switch (ex.Number)
             {
@@ -432,7 +420,7 @@ open cur
     fetch next from cur into @schema, @tbl, @constraint 
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'ALTER TABLE ' + @schema + '.' + @tbl + ' DROP CONSTRAINT ' + @constraint 
+        select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] DROP CONSTRAINT [' + @constraint + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl, @constraint 
     end 
@@ -450,7 +438,7 @@ open cur
     fetch next from cur into @schema, @tbl
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP TABLE ' + @schema + '.' + @tbl + ';'
+        select @sql = 'DROP TABLE [' + @schema + '].[' + @tbl + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl
     end 
@@ -468,7 +456,7 @@ open cur
     fetch next from cur into @schema, @view
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP VIEW ' + @schema + '.' + @view + ';'
+        select @sql = 'DROP VIEW [' + @schema + '].[' + @view + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @view
     end 
@@ -486,7 +474,7 @@ open cur
     fetch next from cur into @schema, @proc, @type
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP '+ @type +' ' + @schema + '.' + @proc + ';'
+        select @sql = 'DROP '+ @type +' [' + @schema + '].[' + @proc + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @proc, @type
     end 

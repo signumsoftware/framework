@@ -331,11 +331,6 @@ namespace Signum.Engine
         {
             get { return false; }
         }
-
-        protected internal override bool ForceTwoPartNameOnQueries
-        {
-            get { return false; }
-        }
     }
 
     public class SqlCeParameterBuilder : ParameterBuilder
