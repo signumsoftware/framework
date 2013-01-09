@@ -17,6 +17,8 @@ namespace Signum.Engine.Cache
 {
     public static class CacheLazy
     {
+        static readonly object none = new object();
+
         static ConcurrentDictionary<IResetLazy, object> registeredLazyList = new ConcurrentDictionary<IResetLazy, object>();
         public static ResetLazy<T> Create<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T : class
         {
@@ -41,7 +43,7 @@ namespace Signum.Engine.Cache
             {
                 using (ExecutionMode.Global())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
-                using (Connector.NotifyQueryChange(invalidate))
+                using (CacheLogic.NotifyCacheChange(invalidate))
                 using (Transaction tr = Transaction.InTestTransaction ? null : Transaction.ForceNew())
                 using (new EntityCache(true))
                 {
@@ -54,7 +56,7 @@ namespace Signum.Engine.Cache
                 }
             }, mode);
 
-            registeredLazyList.GetOrAdd(result, null);
+            registeredLazyList.GetOrAdd(result, none);
 
             return result;
         }

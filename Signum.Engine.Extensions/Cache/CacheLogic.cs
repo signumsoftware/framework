@@ -19,11 +19,42 @@ using System.Drawing;
 using Signum.Entities.Basics;
 using System.Xml.Linq;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Data.SqlTypes;
 
 namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
+        public static void Start(SchemaBuilder sb)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
+
+                sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += OnStart;
+            }
+        }
+
+        static void OnStart()
+        {
+            try
+            {
+                SqlDependency.Start(((SqlConnector)Connector.Current).ConnectionString);
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (ex.Message.Contains("SQL Server Service Broker"))
+                    throw new InvalidOperationException(@"CacheLogic requires SQL Server Service Broker to be activated. Execute: 
+ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()));
+            }
+        }
+
+        public static void Shutdown()
+        {
+            SqlDependency.Stop(((SqlConnector)Connector.Current).ConnectionString);
+        }
+
         interface ICacheLogicController : ICacheController
         {
             int? Count { get; }
@@ -40,44 +71,56 @@ namespace Signum.Engine.Cache
             void OnDisabled();
         }
 
+        static SqlPreCommandSimple GetDependencyQuery(ITable table)
+        {
+            return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(table.Columns.Keys.ToString(c => c.SqlScape(), ", "), table.Name));
+        }      
+
         class CacheController<T> : CacheControllerBase<T>, ICacheLogicController
                 where T : IdentifiableEntity
         {
-            class Pack
+            ResetLazy<List<SqlPreCommandSimple>> depedencyQueries = new ResetLazy<List<SqlPreCommandSimple>>(() =>
             {
-                public Pack(List<T> list)
-                {
-                    this.List = list;
-                    this.Dictionary = list.ToDictionary(a => a.Id);
-                }
+                Table table = Schema.Current.Table(typeof(T));
 
-                public readonly List<T> List;
-                public readonly Dictionary<int, T> Dictionary;
-            }
+                List<SqlPreCommandSimple> result = new List<SqlPreCommandSimple>();
 
-            public List<T> List { get { return pack.Value.List; } }
-            public Dictionary<int, T> Dictionary { get { return pack.Value.Dictionary; } }
+                result.Add(GetDependencyQuery(table));
 
-            ResetLazy<Pack> pack;
+                foreach (var rt in table.RelationalTables())
+	            {
+                     result.Add(GetDependencyQuery(rt));
+	            }
+
+                return result;
+            });
+
+            
+            ResetLazy<Dictionary<int, T>> pack;
 
             public CacheController(Schema schema)
             {
-                pack = new ResetLazy<Pack>(() =>
+                pack = new ResetLazy<Dictionary<int, T>>(() =>
                 {
                     using (new EntityCache(true))
                     using (ExecutionMode.Global())
                     using (Transaction tr = inCache.Value ? new Transaction() : Transaction.ForceNew())
                     using (CacheLogic.SetInCache())
                     using (HeavyProfiler.Log("CACHE"))
-                    using (Connector.NotifyQueryChange((sender, aggs) => this.Invalidate(isClean: false)))
+                    using (CacheLogic.NotifyCacheChange(this.SubCacheChanged))
                     {
                         DisabledTypesDuringTransaction().Add(typeof(T)); //do not raise Disabled event
 
-                        List<T> result = Database.Query<T>().ToList();
+                        var dic = Database.Query<T>().ToDictionary(a => a.Id);
 
                         Interlocked.Increment(ref loads);
 
-                        return tr.Commit(new Pack(result));
+                        foreach (var sql in depedencyQueries.Value)
+                        {
+                            AttachDependency(sql);
+                        }
+
+                        return tr.Commit(dic);
                     }
                 });
 
@@ -87,6 +130,42 @@ namespace Signum.Engine.Cache
                 ee.Saving += Saving;
                 ee.PreUnsafeDelete += PreUnsafeDelete;
                 ee.PreUnsafeUpdate += UnsafeUpdated;
+            }
+
+            void AttachDependency(SqlPreCommandSimple query)
+            {
+                SqlConnector connector = (SqlConnector)Connector.Current;
+
+                using (HeavyProfiler.Log("Attach SqlDependency", query.Sql))
+                using (SqlConnection con = connector.EnsureConnection())
+                using (SqlCommand cmd = connector.NewCommand(query, con))
+                using (HeavyProfiler.Log("SQL", query.Sql))
+                {
+                    try
+                    {
+                        SqlDependency dep = new SqlDependency(cmd);
+                        dep.OnChange += SqlDependencyChanged;
+
+                        int result = cmd.ExecuteNonQuery();
+                    }
+                    catch (SqlTypeException ex)
+                    {
+                        var nex = connector.HandleSqlTypeException(ex, query);
+                        if (nex == ex)
+                            throw;
+                        throw nex;
+                    }
+                    catch (SqlException ex)
+                    {
+                        var nex = connector.HandleSqlException(ex);
+                        if (nex == ex)
+                            throw;
+                        throw nex;
+                    }
+                }
+
+
+                
             }
 
             void UnsafeUpdated(IQueryable<T> query)
@@ -121,7 +200,7 @@ namespace Signum.Engine.Cache
 
             public int? Count
             {
-                get { return pack.IsValueCreated ? pack.Value.List.Count : (int?)null; }
+                get { return pack.IsValueCreated ? pack.Value.Count : (int?)null; }
             }
 
             public int AttachedEvents
@@ -137,6 +216,21 @@ namespace Signum.Engine.Cache
             public int Loads { get { return loads; } }
 
             EventHandler invalidation;
+
+            void SubCacheChanged(object sender, EventArgs args)
+            {
+                Invalidate(isClean: false);
+            }
+
+            void SqlDependencyChanged(object sender, SqlNotificationEventArgs args)
+            {
+                if (args.Info == SqlNotificationInfo.Invalid &&
+                    args.Source == SqlNotificationSource.Statement &&
+                    args.Type == SqlNotificationType.Subscribe && Debugger.IsAttached)
+                    throw new InvalidOperationException("Invalid query for SqlDependency");
+
+                Invalidate(isClean: false);
+            }
 
             public void Invalidate(bool isClean)
             {
@@ -161,7 +255,7 @@ namespace Signum.Engine.Cache
 
             public override void Load()
             {
-                var eh = Connector.CurrentOnQueryChange;
+                var eh = queryChange.Value;
 
                 if (eh != null)
                     lock (syncLock)
@@ -179,13 +273,13 @@ namespace Signum.Engine.Cache
             public override IEnumerable<int> GetAllIds()
             {
                 Interlocked.Increment(ref hits);
-                return pack.Value.Dictionary.Keys;
+                return pack.Value.Keys;
             }
 
             public override string GetToString(int id)
             {
                 Interlocked.Increment(ref hits);
-                return pack.Value.Dictionary[id].ToString();
+                return pack.Value[id].ToString();
             }
 
             readonly Action<T, T, IRetriever> completer = Completer.GetCompleter<T>();
@@ -193,7 +287,7 @@ namespace Signum.Engine.Cache
             public override bool CompleteCache(T entity, IRetriever retriver)
             {
                 Interlocked.Increment(ref hits);
-                var origin = pack.Value.Dictionary.TryGetC(entity.Id);
+                var origin = pack.Value.TryGetC(entity.Id);
                 if (origin == null)
                     throw new EntityNotFoundException(typeof(T), entity.Id);
                 completer(entity, origin, retriver);
@@ -205,6 +299,8 @@ namespace Signum.Engine.Cache
                 if (invalidation != null)
                     invalidation(this, DisabledCacheEventArgs.Instance);
             }
+
+            public object sql { get; set; }
         }
 
         public class DisabledCacheEventArgs : EventArgs
@@ -220,10 +316,12 @@ namespace Signum.Engine.Cache
 
             public static readonly InvalidatedCacheEventArgs Instance = new InvalidatedCacheEventArgs();
         }
+   
+        static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
+        static DirectedGraph<Type> dependencies = new DirectedGraph<Type>();
 
         static readonly ThreadVariable<bool> inCache = Statics.ThreadVariable<bool>("inCache");
-
         static IDisposable SetInCache()
         {
             var oldInCache = inCache.Value;
@@ -231,20 +329,26 @@ namespace Signum.Engine.Cache
             return new Disposable(() => inCache.Value = oldInCache);
         }
 
-        static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
-        static DirectedGraph<Type> invalidations = new DirectedGraph<Type>();
+        static readonly Variable<EventHandler> queryChange = Statics.ThreadVariable<EventHandler>("queryChange");
+        public static IDisposable NotifyCacheChange(EventHandler onChange)
+        {
+            var old = queryChange.Value;
+            queryChange.Value = onChange;
+            return new Disposable(() => queryChange.Value = old);
+        }
+   
 
         public static bool GloballyDisabled { get; set; }
-
         static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
-
         public static IDisposable Disable()
         {
             if (tempDisabled.Value) return null;
             tempDisabled.Value = true;
             return new Disposable(() => tempDisabled.Value = false); 
-        }
+        }     
+        
+     
 
         const string DisabledCachesKey = "disabledCaches";
 
@@ -278,7 +382,7 @@ namespace Signum.Engine.Cache
 
         private static void DisableAllConnectedTypesInTransaction(Type type)
         {
-            var connected = invalidations.IndirectlyRelatedTo(type, true);
+            var connected = dependencies.IndirectlyRelatedTo(type, true);
 
             var hs = DisabledTypesDuringTransaction();
 
@@ -289,14 +393,7 @@ namespace Signum.Engine.Cache
             }
         }
 
-
-        public static void Start(SchemaBuilder sb)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
-            }
-        }
+        
 
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
         public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
@@ -318,14 +415,14 @@ namespace Signum.Engine.Cache
                 .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumEntity<>)))
                 .Select(t => t.Key.Type).ToList();
 
-            invalidations.Add(type); 
+            dependencies.Add(type);
 
             foreach (var rType in relatedTypes)
             {
                 if (!controllers.ContainsKey(rType))
                     giCacheTable.GetInvoker(rType)(sb);
 
-                invalidations.Add(rType, type);
+                dependencies.Add(rType, type);
             }
         }
     
@@ -343,7 +440,7 @@ namespace Signum.Engine.Cache
 
         private static void InvalidateAllConnectedTypes(Type type, bool includeParentNode)
         {
-            var connected = invalidations.IndirectlyRelatedTo(type, includeParentNode);
+            var connected = dependencies.IndirectlyRelatedTo(type, includeParentNode);
 
             foreach (var stype in connected)
             {
@@ -413,6 +510,7 @@ namespace Signum.Engine.Cache
 
             return Color.Green;
         }
+
     }
 
     public class CacheStatistics
