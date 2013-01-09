@@ -21,21 +21,6 @@ namespace Signum.Engine
 {
     public class SqlConnector : Connector
     {
-        protected readonly Variable<OnChangeEventHandler> queryChange = Statics.ThreadVariable<OnChangeEventHandler>("queryChange");
-
-        public IDisposable NotifyQueryChange(OnChangeEventHandler onChange)
-        {
-            queryChange.Value += onChange;
-
-            return new Disposable(() => queryChange.Value -= onChange);
-        }
-
-        protected internal override bool ForceTwoPartNameOnQueries
-        {
-            get { return queryChange.Value != null; }
-        }
-
-
         int? commandTimeout = null;
         string connectionString;
 
@@ -60,6 +45,11 @@ namespace Signum.Engine
 
         public override bool SupportsScalarSubquery { get { return true; } }
         public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
+
+        protected internal override bool ForceTwoPartNameOnQueries
+        {
+            get { return CurrentOnQueryChange != null; }
+        }
 
         SqlConnection EnsureConnection()
         {
@@ -216,12 +206,12 @@ namespace Signum.Engine
             {
                 SqlCommand cmd = NewCommand(preCommand, null);
 
-                var change = queryChange.Value;
+                var change = CurrentOnQueryChange;
 
                 if (change != null)
                 {
                     SqlDependency dep = new SqlDependency(cmd);
-                    dep.OnChange += change;
+                    dep.OnChange += (sender, args) => change(sender, args);
                 }
 
                 return cmd.ExecuteReader();

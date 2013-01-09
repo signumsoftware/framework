@@ -213,7 +213,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal CacheController<T> CacheController<T>() where T : IdentifiableEntity
+        internal CacheControllerBase<T> CacheController<T>() where T : IdentifiableEntity
         {
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
 
@@ -397,7 +397,6 @@ namespace Signum.Engine.Maps
             Synchronizing += Assets.Schema_Synchronizing;
 
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
-            Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.GlobalLazy_Initialize;
         }
 
         public static Schema Current
@@ -594,24 +593,21 @@ namespace Signum.Engine.Maps
 
         IEnumerable<int> GetAllIds();
 
-        event Action Invalidation;
-        event Action Disabled;
-
         bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
 
         string GetToString(int id);
     }
 
-    public abstract class CacheController<T> : ICacheController
+    public class InvalidateEventArgs : EventArgs{}
+    public class InvaludateEventArgs : EventArgs{}
+
+    public abstract class CacheControllerBase<T> : ICacheController
         where T : IdentifiableEntity
     {
         public abstract bool Enabled { get; }
-        public abstract bool IsComplete { get; }
         public abstract void Load();
 
         public abstract IEnumerable<int> GetAllIds();
-        public abstract event Action Invalidation;
-        public abstract event Action Disabled;
 
         bool ICacheController.CompleteCache(IdentifiableEntity entity, IRetriever retriver)
         {
@@ -631,7 +627,7 @@ namespace Signum.Engine.Maps
 
         public event RetrievedEventHandler<T> Retrieved;
 
-        public CacheController<T> CacheController { get; set; }
+        public CacheControllerBase<T> CacheController { get; set; }
 
         public event FilterQueryEventHandler<T> FilterQuery;
 

@@ -113,9 +113,9 @@ namespace Signum.Engine
             return retrieved; 
         }
 
-        static CacheController<T> CanUseCache<T>(bool onlyComplete) where T : IdentifiableEntity
+        static CacheControllerBase<T> CanUseCache<T>(bool onlyComplete) where T : IdentifiableEntity
         {
-            CacheController<T> cc = Schema.Current.CacheController<T>();
+            CacheControllerBase<T> cc = Schema.Current.CacheController<T>();
 
             if (cc == null || !cc.Enabled)
                 return null;
@@ -208,6 +208,8 @@ namespace Signum.Engine
             var cc = CanUseCache<T>(true);
             if (cc != null)
             {
+                cc.Load();
+
                 using (new EntityCache())
                 using (var r = EntityCache.NewRetriever())
                 {
@@ -235,6 +237,7 @@ namespace Signum.Engine
             var cc = CanUseCache<T>(true);
             if (cc != null)
             {
+
                 return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
             }
 
