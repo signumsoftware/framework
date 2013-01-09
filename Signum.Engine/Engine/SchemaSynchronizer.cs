@@ -395,8 +395,6 @@ namespace Signum.Engine
 
             return result;
         }
- 
-       
     }
 
     public class DiffForeignKey

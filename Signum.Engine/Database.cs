@@ -618,7 +618,7 @@ namespace Signum.Engine
         public static IQueryable<T> View<T>()
             where T : IView
         {
-            return new Query<T>(DbQueryProvider.Single);
+            return new SignumTable<T>(DbQueryProvider.Single, new ViewBuilder(Schema.Current).NewView(typeof(T)));
         }
         #endregion
 
