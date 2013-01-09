@@ -71,7 +71,6 @@
     <Compile Include="Environment\MusicLoader.cs" />
     <Compile Include="Environment\MusicLogic.cs" />
     <Compile Include="ExtensionsTest.cs" />
-    <Compile Include="GlobalQueryLazyTest.cs" />
     <Compile Include="LinqProvider\Assert2.cs" />
     <Compile Include="Environment\Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
