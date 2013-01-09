@@ -80,7 +80,7 @@ namespace Signum.Engine.Maps
                     return (from v in Database.View<SysViews>()
                             join s in Database.View<SysSchemas>() on v.schema_id equals s.schema_id
                             join m in Database.View<SysSqlModules>() on v.object_id equals m.object_id
-                            select KVP.Create(new ObjectName(new SchemaName(db, s.name), v.name), m.definition));
+                            select KVP.Create(new ObjectName(new SchemaName(db, s.name), v.name), m.definition)).ToList();
                 }
             }).ToDictionary();
 
@@ -139,10 +139,10 @@ namespace Signum.Engine.Maps
                 using (Administrator.OverrideDatabaseInViews(db))
                 {
                     return (from p in Database.View<SysObjects>()
-                            join s in Database.View<SysViews>() on p.schema_id equals s.schema_id
+                            join s in Database.View<SysSchemas>() on p.schema_id equals s.schema_id
                             where p.type == "P" || p.type == "IF"
                             join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
-                            select KVP.Create(new ObjectName(new SchemaName(db, s.name), p.name), m.definition));
+                            select KVP.Create(new ObjectName(new SchemaName(db, s.name), p.name), m.definition)).ToList();
                 }
             }).ToDictionary();
 
@@ -211,24 +211,24 @@ namespace Signum.Engine.Maps
 
         SqlPreCommand SyncDefaultConstraints(Replacements replacements)
         {
-             var oldConstraints = Schema.Current.DatabaseNames().SelectMany(db =>
-            {
-                using (Administrator.OverrideDatabaseInViews(db))
+            var oldConstraints = Schema.Current.DatabaseNames().SelectMany(db =>
                 {
-                    return (from t in Database.View<SysTables>()
-                            join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
-                            join c in Database.View<SysColumns>() on t.object_id equals c.object_id
-                            join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
-                            select new
-                            {
-                                table = new ObjectName(new SchemaName(db, s.name), t.name),
-                                column = c.name,
-                                constraint = ctr.name,
-                                definition = ctr.definition
-                            });
-                }
-            }).AgGroupToDictionary(a => a.table,
-                                    gr => gr.ToDictionary(a => a.column, a => new { constraintName = a.constraint, a.definition }));
+                    using (Administrator.OverrideDatabaseInViews(db))
+                    {
+                        return (from t in Database.View<SysTables>()
+                                join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
+                                join c in Database.View<SysColumns>() on t.object_id equals c.object_id
+                                join ctr in Database.View<SysDefaultConstraints>() on c.default_object_id equals ctr.object_id
+                                select new
+                                {
+                                    table = new ObjectName(new SchemaName(db, s.name), t.name),
+                                    column = c.name,
+                                    constraint = ctr.name,
+                                    definition = ctr.definition
+                                }).ToList();
+                    }
+                }).AgGroupToDictionary(a => a.table,
+                                        gr => gr.ToDictionary(a => a.column, a => new { constraintName = a.constraint, a.definition }));
 
             return Synchronizer.SynchronizeScript(
                 DefaultContraints,
