@@ -18,12 +18,17 @@ namespace Signum.Engine.Cache
     {
         static ConcurrentDictionary<Type, Delegate> completers = new ConcurrentDictionary<Type, Delegate>();
 
-        public static Action<T, T, IRetriever> GetCompleter<T>()
+        public static Action<T, T, IRetriever> GetCompleter<T>() where T : IdentifiableEntity
         {
             return (Action<T, T, IRetriever>)completers.GetOrAdd(typeof(T), ConstructCompleter);
         }
 
-        private static Delegate ConstructCompleter(Type type)
+        static Delegate GetCompleter(Type type)
+        {
+            return completers.GetOrAdd(type, ConstructCompleter);
+        }
+
+        static Delegate ConstructCompleter(Type type)
         {
             Table table = Schema.Current.Table(type);
 
@@ -48,11 +53,9 @@ namespace Signum.Engine.Cache
         }
 
         static MethodInfo miAfterClone = ReflectionTools.GetMethodInfo((IAfterClone ac) => ac.AfterClone(null));
-        static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<IdentifiableEntity>(0)).GetGenericMethodDefinition();
-        static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<IdentifiableEntity>(0, typeof(IdentifiableEntity))).GetGenericMethodDefinition();
         static MethodInfo miGetType = ReflectionTools.GetMethodInfo((IdentifiableEntity ie) => ie.GetType());
 
-        private static Expression Clone(Expression origin, Field field, ParameterExpression retriever)
+        static Expression Clone(Expression origin, Field field, ParameterExpression retriever)
         {
             if (field is FieldValue || field is FieldEnum)
                 return origin;
@@ -70,7 +73,7 @@ namespace Signum.Engine.Cache
                 
                 if (field is FieldReference)
                 {
-                    Expression call = CallComplete(origin, retriever, field.FieldType);
+                    Expression call = Expression.Call(miCallComplete.MakeGenericMethod(field.FieldType), origin, retriever);
 
                     return Expression.Condition(Expression.Equal(origin, nullref), nullref,  call);
                 }
@@ -81,7 +84,7 @@ namespace Signum.Engine.Cache
 
                     var call = ib.ImplementationColumns.Keys.Aggregate((Expression)nullref, (acum, t) => Expression.Condition(
                         Expression.Equal(Expression.Call(origin, miGetType), Expression.Constant(t)),
-                        Expression.Convert(CallComplete(Expression.Convert(origin, t), retriever, t), field.FieldType), 
+                        Expression.Convert(Expression.Call(miCallComplete.MakeGenericMethod(t), Expression.Convert(origin, t), retriever), field.FieldType), 
                         acum));
 
                     return Expression.Condition(Expression.Equal(origin, nullref), nullref, call);
@@ -132,9 +135,12 @@ namespace Signum.Engine.Cache
         static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified);
         static MemberBinding resetModified = Expression.Bind(piModified, Expression.Constant(null, typeof(bool?)));
 
-        private static Expression CallComplete(Expression origin, ParameterExpression retriever, Type type)
+        static MethodInfo miCallComplete = ReflectionTools.GetMethodInfo(() => CallComplete<IdentifiableEntity>(null, null)).GetGenericMethodDefinition();
+
+
+        static T CallComplete<T>(T original, IRetriever r) where T : IdentifiableEntity
         {
-            return Expression.Call(retriever, miRequest.MakeGenericMethod(type), Expression.Property(origin, "IdOrNull"));
+            return r.Complete<T>(original.Id, e => GetCompleter<T>()(e, original, r));
         }
     }
 }

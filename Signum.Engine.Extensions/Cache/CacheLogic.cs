@@ -33,7 +33,7 @@ namespace Signum.Engine.Cache
             int Invalidations { get; }
             int Loads { get; }
 
-            int RegisteredEvents { get; }
+            int AttachedEvents { get; }
 
             int Hits { get; }
 
@@ -119,17 +119,12 @@ namespace Signum.Engine.Cache
                 get { return !GloballyDisabled && !tempDisabled.Value && !IsDisabledInTransaction(typeof(T)); }
             }
 
-            public override bool IsComplete
-            {
-                get { return true; }
-            }
-
             public int? Count
             {
                 get { return pack.IsValueCreated ? pack.Value.List.Count : (int?)null; }
             }
 
-            public int RegisteredEvents
+            public int AttachedEvents
             {
                 get { return invalidation == null ? 0 : invalidation.GetInvocationList().Length; }
             }
@@ -366,6 +361,7 @@ namespace Signum.Engine.Cache
                     {
                         Type = kvp.Key,
                         Cached = CacheLogic.IsCached(kvp.Key),
+                        AttachedEvents = kvp.Value.AttachedEvents,
                         Count = kvp.Value.Count, 
                         Hits = kvp.Value.Hits,
                         Loads = kvp.Value.Loads,
@@ -426,7 +422,9 @@ namespace Signum.Engine.Cache
         public int? Count;
         public int Hits;
         public int Loads;
-        public int Invalidations; 
+        public int Invalidations;
+
+        public int AttachedEvents;
     }
 
     public enum InvalidationStrategy

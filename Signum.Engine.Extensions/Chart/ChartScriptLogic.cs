@@ -12,14 +12,13 @@ using Signum.Utilities;
 using System.IO;
 using System.Xml.Linq;
 using Signum.Engine.Authorization;
+using Signum.Engine.Cache;
 
 namespace Signum.Engine.Chart
 {
     public static class ChartScriptLogic
     {
-        public static ResetLazy<List<ChartScriptDN>> Scripts = GlobalLazy.Create(() =>
-            Database.Query<ChartScriptDN>().ToList())
-            .InvalidateWith(typeof(ChartScriptDN));
+        public static ResetLazy<List<ChartScriptDN>> Scripts = CacheLazy.Create(() => Database.Query<ChartScriptDN>().ToList());
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {

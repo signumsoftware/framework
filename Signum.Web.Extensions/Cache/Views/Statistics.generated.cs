@@ -131,7 +131,7 @@ WriteLiteral(@""" class=""sf-button"" id=""sfCacheClear"">
                 Type
             </th>
             <th>
-                CacheType
+                AttachedEvents
             </th>
             <th>
                 Count
@@ -174,7 +174,7 @@ WriteLiteral("\r\n                </td>\r\n                <td>");
 
             
             #line 41 "..\..\Cache\Views\Statistics.cshtml"
-               Write(item.CacheType.NiceToString());
+               Write(item.Cached);
 
             
             #line default

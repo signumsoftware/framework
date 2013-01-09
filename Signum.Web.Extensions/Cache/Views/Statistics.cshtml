@@ -16,7 +16,7 @@
                 Type
             </th>
             <th>
-                CacheType
+                AttachedEvents
             </th>
             <th>
                 Count
@@ -38,7 +38,7 @@
             <tr>
                 <td>@item.Type.Name
                 </td>
-                <td>@item.CacheType.NiceToString()
+                <td>@item.Cached
                 </td>
                 <td>@(item.Count.TryToString() ?? "-- not loaded --")
                 </td>
