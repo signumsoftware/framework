@@ -763,7 +763,7 @@ namespace Signum.Windows
                 return;
 
             IdentifiableEntity result = Creating != null ? Creating() :
-                (IdentifiableEntity)Constructor.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), Window.GetWindow(this));
+                (IdentifiableEntity)Constructor.Construct(SelectType(t => Navigator.IsCreable(t, isSearchEntity: true)), this);
 
             if (result == null)
                 return;
@@ -949,8 +949,8 @@ namespace Signum.Windows
                 SimpleFilterBuilder = null;
 
             FilterOptions.Clear();
+            Navigator.Manager.SetFilterTokens(QueryName, filters);
             FilterOptions.AddRange(filters);
-            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);

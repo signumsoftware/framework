@@ -380,7 +380,7 @@ namespace Signum.Windows
                 if (type == null)
                     return null;
 
-                object entity = Constructor.Construct(type, Window.GetWindow(this));
+                object entity = Constructor.Construct(type, this);
 
                 value = Server.Convert(entity, Type);
             }

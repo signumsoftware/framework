@@ -35,8 +35,8 @@
         </Literal>
 			</Declarations>
 			<Code Language="csharp">
-				<![CDATA[[Serializable]
-	public class $entityName$DN: Entity
+				<![CDATA[[Serializable, EntityKind(EntityKind.String)]
+    public class $entityName$DN: Entity
     {
         [NotNullable, SqlDbType( Size = 100), UniqueIndex]
         string $name$;
@@ -55,6 +55,11 @@
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+    
+    public enum $entityName$Operation
+    {
+        Save
     }]]>
 			</Code>
 		</Snippet>

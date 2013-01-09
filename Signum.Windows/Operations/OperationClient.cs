@@ -35,7 +35,7 @@ namespace Signum.Windows.Operations
 
                 NormalWindow.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
 
-                Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
+                Constructor.Manager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
 
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
@@ -236,7 +236,7 @@ namespace Signum.Windows.Operations
 
 
 
-        protected internal virtual object ConstructorManager_GeneralConstructor(Type entityType, Window win)
+        protected internal virtual object ConstructorManager_GeneralConstructor(Type entityType, FrameworkElement element)
         {
             if (!entityType.IsIIdentifiable())
                 return null;
@@ -249,6 +249,8 @@ namespace Signum.Windows.Operations
 
             if (dic.Count == 0)
                 return null;
+
+            var win = Window.GetWindow(element);
 
             Enum selected = null;
             if (dic.Count == 1)
