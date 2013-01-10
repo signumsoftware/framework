@@ -45,25 +45,25 @@ namespace Signum.Engine.Linq
 
         internal R Translate<R>(Expression expression, Func<ITranslateResult, R> continuation) //For debugging purposes
         {
-            using (Alias.NewGenerator())
-            {
-                ITranslateResult result;
+            AliasGenerator aliasGenerator = new AliasGenerator();
 
-                using (HeavyProfiler.Log("LINQ", () => expression.NiceToString()))
-                using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
-                {
-                    Expression cleaned = Clean(expression, true, log);
-                    var binder = new QueryBinder();
-                    log.Switch("Bind");
-                    ProjectionExpression binded = (ProjectionExpression)binder.BindQuery(cleaned);
-                    ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, binder, log);
-                    log.Switch("ChPrjFlatt");
-                    ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
-                    log.Switch("TB");
-                    result = TranslatorBuilder.Build(flat);
-                }
-                return continuation(result);
+            ITranslateResult result;
+
+            using (HeavyProfiler.Log("LINQ", () => expression.NiceToString()))
+            using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
+            {
+                Expression cleaned = Clean(expression, true, log);
+                var binder = new QueryBinder(aliasGenerator);
+                log.Switch("Bind");
+                ProjectionExpression binded = (ProjectionExpression)binder.BindQuery(cleaned);
+                ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, binder,aliasGenerator, log);
+                log.Switch("ChPrjFlatt");
+                ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized, aliasGenerator);
+                log.Switch("TB");
+                result = TranslatorBuilder.Build(flat);
             }
+            return continuation(result);
+
         }
 
         public static Expression Clean(Expression expression, bool filter, HeavyProfiler.Tracer log)
@@ -76,14 +76,14 @@ namespace Signum.Engine.Linq
             return filtered;
         }
 
-        internal static Expression Optimize(Expression binded, QueryBinder binder, HeavyProfiler.Tracer log)
+        internal static Expression Optimize(Expression binded, QueryBinder binder, AliasGenerator aliasGenerator, HeavyProfiler.Tracer log)
         {
             log.Switch("Aggregate");
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             log.Switch("EntityCompleter");
             Expression completed = EntityCompleter.Complete(rewrited, binder);
             log.Switch("AliasReplacer");
-            Expression replaced = AliasProjectionReplacer.Replace(completed);
+            Expression replaced = AliasProjectionReplacer.Replace(completed, aliasGenerator);
             log.Switch("OrderBy");
             Expression orderRewrited = OrderByRewriter.Rewrite(replaced);
             log.Switch("Rebinder");
@@ -103,45 +103,43 @@ namespace Signum.Engine.Linq
 
         internal R Delete<R>(IQueryable query, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
         {
-            using (Alias.NewGenerator())
+            AliasGenerator aliasGenerator = new AliasGenerator();
+
+            CommandResult cr;
+            using (HeavyProfiler.Log("LINQ"))
+            using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
-                CommandResult cr;
-                using (HeavyProfiler.Log("LINQ"))
-                using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
-                {
-                    Expression cleaned = Clean(query.Expression, true, log);
+                Expression cleaned = Clean(query.Expression, true, log);
 
-                    log.Switch("Bind");
-                    var binder = new QueryBinder();
-                    CommandExpression delete = binder.BindDelete(cleaned);
-                    CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, binder, log);
-                    CommandExpression deleteSimplified = UpdateDeleteSimplifier.Simplify(deleteOptimized, removeSelectRowCount);
+                log.Switch("Bind");
+                var binder = new QueryBinder(aliasGenerator);
+                CommandExpression delete = binder.BindDelete(cleaned);
+                CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, binder, aliasGenerator, log);
+                CommandExpression deleteSimplified = UpdateDeleteSimplifier.Simplify(deleteOptimized, removeSelectRowCount, aliasGenerator);
 
-                    cr = TranslatorBuilder.BuildCommandResult(deleteSimplified);
-                }
-                return continuation(cr);
+                cr = TranslatorBuilder.BuildCommandResult(deleteSimplified);
             }
+            return continuation(cr);
         }
 
         internal R Update<R>(IQueryable query, LambdaExpression entitySelector, LambdaExpression updateConstructor, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
         {
-            using (Alias.NewGenerator())
+            AliasGenerator aliasGenerator = new AliasGenerator();
+
+            CommandResult cr;
+            using (HeavyProfiler.Log("LINQ"))
+            using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
-                CommandResult cr;
-                using (HeavyProfiler.Log("LINQ"))
-                using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
-                {
-                    Expression cleaned = Clean(query.Expression, true, log);
-                    var binder = new QueryBinder();
-                    log.Switch("Bind");
-                    CommandExpression update = binder.BindUpdate(cleaned, entitySelector, updateConstructor);
-                    CommandExpression updateOptimized = (CommandExpression)Optimize(update, binder, log);
-                    CommandExpression updateSimplified = UpdateDeleteSimplifier.Simplify(updateOptimized, removeSelectRowCount);
-                    log.Switch("TR");
-                    cr = TranslatorBuilder.BuildCommandResult(updateSimplified);
-                }
-                return continuation(cr);
+                Expression cleaned = Clean(query.Expression, true, log);
+                var binder = new QueryBinder(aliasGenerator);
+                log.Switch("Bind");
+                CommandExpression update = binder.BindUpdate(cleaned, entitySelector, updateConstructor);
+                CommandExpression updateOptimized = (CommandExpression)Optimize(update, binder, aliasGenerator, log);
+                CommandExpression updateSimplified = UpdateDeleteSimplifier.Simplify(updateOptimized, removeSelectRowCount, aliasGenerator);
+                log.Switch("TR");
+                cr = TranslatorBuilder.BuildCommandResult(updateSimplified);
             }
+            return continuation(cr);
         }
     }
 }

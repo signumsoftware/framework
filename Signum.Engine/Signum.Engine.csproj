@@ -114,6 +114,7 @@
     <Compile Include="Engine\Sys.Tables.cs" />
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="ExecutionContext.cs" />
+    <Compile Include="Linq\AliasGenerator.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />

@@ -15,7 +15,7 @@ using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
-    public class LookupToken
+    class LookupToken
     {
         public override string ToString()
         {
