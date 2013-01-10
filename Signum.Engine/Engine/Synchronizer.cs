@@ -241,11 +241,7 @@ namespace Signum.Engine
 
         static float Distance(StringDistance sd, string o, string n)
         {
-            int lcs = sd.LongestCommonSubsequence(o, n);
-
-            int max = Math.Max(o.Length, n.Length);
-
-            return max / (lcs + 4f);
+            return sd.LevenshteinDistance(o, n, replaceWeight: 2);
         }
 
         const int MaxElements = 70;
