@@ -79,23 +79,23 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, bool skipFirtsLine = true) where T : new()
+        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1) where T : new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, culture, skipFirtsLine).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipLines).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, bool skipFirtsLine = true) where T : new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1) where T : new()
         {
 
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, culture, skipFirtsLine).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipLines).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(this Stream stream, Encoding encoding = null, CultureInfo culture = null, bool skipFirtsLine = true)
+        public static IEnumerable<T> ReadStream<T>(this Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1)
             where T : new()
         {
             encoding = encoding ?? DefaultEncoding;
@@ -109,8 +109,8 @@ namespace Signum.Utilities
                 string str = sr.ReadToEnd().Trim();
                 var matches = Regex.Matches(str, regex, RegexOptions.Multiline | RegexOptions.ExplicitCapture).Cast<Match>();
 
-                if (skipFirtsLine)
-                    matches = matches.Skip(1);
+                if (skipLines > 0)
+                    matches = matches.Skip(skipLines);
 
                 foreach (var m in matches)
                 {
