@@ -345,9 +345,9 @@ namespace Signum.Engine
 
         public override ParameterBuilder ParameterBuilder { get; protected set; }
 
-        public override void CleanDatabase()
+        public override void CleanDatabase(DatabaseName databaseName)
         {
-            SqlConnectorScripts.RemoveAllScript().ExecuteLeaves();
+            SqlConnectorScripts.RemoveAllScript(databaseName).ExecuteLeaves();
             SqlConnectorScripts.ShrinkDatabase(DatabaseName());
         }
 
@@ -405,83 +405,89 @@ namespace Signum.Engine
 
     public static class SqlConnectorScripts
     {
-        public static readonly SqlPreCommandSimple RemoveAllConstraintsScript = new SqlPreCommandSimple(
+        public static readonly string RemoveAllConstraintsScript = 
 @"declare @schema nvarchar(128), @tbl nvarchar(128), @constraint nvarchar(128) 
 DECLARE @sql nvarchar(255) 
 
 declare cur cursor fast_forward for 
 select distinct cu.constraint_schema, cu.table_name, cu.constraint_name 
-from information_schema.table_constraints tc 
-join information_schema.referential_constraints rc on rc.unique_constraint_name = tc.constraint_name 
-join information_schema.constraint_column_usage cu on cu.constraint_name = rc.constraint_name 
+from {0}information_schema.table_constraints tc 
+join {0}information_schema.referential_constraints rc on rc.unique_constraint_name = tc.constraint_name 
+join {0}information_schema.constraint_column_usage cu on cu.constraint_name = rc.constraint_name 
 open cur 
     fetch next from cur into @schema, @tbl, @constraint 
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'ALTER TABLE ' + @schema + '.' + @tbl + ' DROP CONSTRAINT ' + @constraint 
+        select @sql = 'ALTER TABLE {0}' + @schema + '.' + @tbl + ' DROP CONSTRAINT ' + @constraint 
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl, @constraint 
     end 
 close cur 
-deallocate cur");
+deallocate cur";
 
-        public static readonly SqlPreCommandSimple RemoveAllTablesScript = new SqlPreCommandSimple(
+        public static readonly string RemoveAllTablesScript = 
 @"declare @schema nvarchar(128), @tbl nvarchar(128)
 DECLARE @sql nvarchar(255)
  
 declare cur cursor fast_forward for 
 select distinct table_schema, table_name
-from information_schema.tables where table_type = 'BASE TABLE'
+from {0}information_schema.tables where table_type = 'BASE TABLE'
 open cur 
     fetch next from cur into @schema, @tbl
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP TABLE ' + @schema + '.' + @tbl + ';'
+        select @sql = 'DROP TABLE {0}' + @schema + '.' + @tbl + ';'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl
     end 
 close cur 
-deallocate cur");
+deallocate cur";
 
-        public static readonly SqlPreCommandSimple RemoveAllViewsScript = new SqlPreCommandSimple(
+        public static readonly string RemoveAllViewsScript = 
 @"declare @schema nvarchar(128), @view nvarchar(128)
 DECLARE @sql nvarchar(255) 
 
 declare cur cursor fast_forward for 
 select distinct table_schema, table_name
-from information_schema.tables where table_type = 'VIEW'
+from {0}information_schema.tables where table_type = 'VIEW'
 open cur 
     fetch next from cur into @schema, @view
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP VIEW ' + @schema + '.' + @view + ';'
+        select @sql = 'DROP VIEW {0}' + @schema + '.' + @view + ';'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @view
     end 
 close cur 
-deallocate cur");
+deallocate cur";
 
-        public static readonly SqlPreCommandSimple RemoveAllProceduresScript = new SqlPreCommandSimple(
+        public static readonly string RemoveAllProceduresScript =
 @"declare @schema nvarchar(128), @proc nvarchar(128), @type nvarchar(128)
 DECLARE @sql nvarchar(255) 
 
 declare cur cursor fast_forward for 
 select routine_schema, routine_name, routine_type
-from information_schema.routines
+from {0}information_schema.routines
 open cur 
     fetch next from cur into @schema, @proc, @type
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP '+ @type +' ' + @schema + '.' + @proc + ';'
+        select @sql = 'DROP '+ @type +' {0}' + @schema + '.' + @proc + ';'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @proc, @type
     end 
 close cur 
-deallocate cur");
+deallocate cur";
 
-        public static SqlPreCommand RemoveAllScript()
+        public static SqlPreCommand RemoveAllScript(DatabaseName databaseName)
         {
-            return SqlPreCommand.Combine(Spacing.Double, RemoveAllProceduresScript, RemoveAllViewsScript, RemoveAllConstraintsScript, RemoveAllTablesScript);
+            var name = databaseName == null ? null : databaseName.ToString() + ".";
+
+            return SqlPreCommand.Combine(Spacing.Double,
+                new SqlPreCommandSimple(RemoveAllProceduresScript.Formato(name)),
+                new SqlPreCommandSimple(RemoveAllViewsScript.Formato(name)),
+                new SqlPreCommandSimple(RemoveAllConstraintsScript.Formato(name)),
+                new SqlPreCommandSimple(RemoveAllTablesScript.Formato(name)));
         }
 
         internal static SqlPreCommand ShrinkDatabase(string schemaName)
