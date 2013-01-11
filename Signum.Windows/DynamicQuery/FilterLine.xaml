@@ -8,7 +8,7 @@
              mc:Ignorable="d">
     <Grid HorizontalAlignment="Left" Margin="0,0,0,4">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition  SharedSizeGroup="GrColEliminar"/>
+            <ColumnDefinition  SharedSizeGroup="GrColRemove"/>
             <ColumnDefinition  SharedSizeGroup="GrColField"/>
             <ColumnDefinition  SharedSizeGroup="GrColOperation"/>
             <ColumnDefinition  SharedSizeGroup="GrColValue"/>
@@ -16,17 +16,17 @@
         <Button Grid.Column="0" x:Name="btRemove" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" HorizontalAlignment="Right"  VerticalAlignment="Center" Visibility="{Binding Frozen, Converter={x:Static m:Converters.NotBoolToVisibility}}" Click="btRemove_Click" Margin="2,0"/>
         <m:QueryTokenRenderer Grid.Column="1" Token="{Binding Token}"   VerticalAlignment="Center"  Margin="0,0,8,0" />
         <ComboBox Grid.Column="2"
-                                        SelectedItem="{Binding Operation}" 
-                                        ItemsSource="{Binding Token, Converter={x:Static m:Converters.TokenOperations}}"
-                                        IsEnabled="{Binding Frozen, Converter={x:Static m:Converters.Not}}"
-                                       VerticalAlignment="Center"
-                                      Margin="0,0,8,0">
+                  SelectedItem="{Binding Operation}" 
+                  ItemsSource="{Binding Token, Converter={x:Static m:Converters.TokenOperations}}"
+                  IsEnabled="{Binding Frozen, Converter={x:Static m:Converters.Not}}"
+                  VerticalAlignment="Center"
+                  Margin="0,0,8,0" SelectionChanged="ComboBoxOperation_SelectionChanged">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"  VerticalAlignment="Center" Margin="0,0,8,0"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Grid Grid.Column="3" Loaded="Grid_Loaded" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,8,0"/>
+        <StackPanel Grid.Column="3" Loaded="StackPanel_Loaded" x:Name="valueContainer"  HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,8,0"/>
     </Grid>
 </UserControl>

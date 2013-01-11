@@ -43,28 +43,10 @@ namespace Signum.Windows
             this.InitializeComponent();
         }
 
-           
         private void filterRemove_Click(object sender, EventArgs e)
         {
             Filters.Remove((FilterOption)((FilterLine)sender).DataContext);
-                }
-
-
-        //private void lvFilters_DragOver(object sender, DragEventArgs e)
-        //{
-        //    e.Effects = e.Data.GetDataPresent(typeof(FilterOption)) ? DragDropEffects.Copy : DragDropEffects.None;
-        //}
-
-        //private void lvFilters_Drop(object sender, DragEventArgs e)
-        //{
-        //    if (e.Data.GetDataPresent(typeof(FilterOption)))
-        //    {
-        //        FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
-
-        //        Filters.Add(filter);
-        //    }
-        //}
-
+        }
 
         public void AddFilter(QueryToken queryToken)
         {
