@@ -157,7 +157,7 @@ namespace Signum.Web.Selenium
 
         public static string PopupSelector(string prefix)
         {
-            return "jq=#{0}Temp".Formato(prefix);
+            return "jq=#{0}Temp:visible".Formato(prefix);
         }
 
         public static void PopupCancel(this ISelenium selenium, string prefix)
