@@ -353,7 +353,7 @@ namespace Signum.Engine.Mailing
 
         internal static Lite<IEmailOwnerDN> GetRecipient(ResultTable table, ResultColumn column)
         {
-            return ((Lite)table.Rows.DistinctSingle(column)).ToLite<IEmailOwnerDN>();
+            return (Lite<IEmailOwnerDN>)(table.Rows.DistinctSingle(column));
         }
     }
 

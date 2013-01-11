@@ -68,7 +68,7 @@ namespace Signum.Engine.Mailing
     {
         public static string DoNotSend = "null@null.com";
 
-        public static Func<string> OverrideEmailAddress = () => null;     
+        public static Func<string> OverrideEmailAddress = () => null;
 
         public static Func<EmailMessageDN, SmtpClient> SmtpClientBuilder;
 
@@ -88,8 +88,8 @@ namespace Signum.Engine.Mailing
                 sb.Include<EmailMasterTemplateDN>();
 
                 dqm[typeof(EmailMasterTemplateDN)] = (from t in Database.Query<EmailMasterTemplateDN>()
-                                                select new
-                                                {
+                                                      select new
+                                                      {
                                                           Entity = t,
                                                           t.Id,
                                                           t.Name,
@@ -155,9 +155,7 @@ namespace Signum.Engine.Mailing
 
         public static void Configure(IEmailLogicConfiguration config)
         {
-            
-            DefaultCulture = config.DefaultCulture;
-            EmailTemplateDN.DefaultCulture = () => DefaultCulture;
+            EmailTemplateDN.DefaultCulture = config.DefaultCulture;
             EmailTemplateParser.GlobalVariables.Add("UrlPrefix", _ => config.UrlPrefix);
             SenderManager = new EmailSenderManager(config.DefaultFrom, config.DefaultDisplayFrom, config.DefaultBCC);
         }
@@ -177,8 +175,8 @@ namespace Signum.Engine.Mailing
                 catch (Exception ex)
                 {
                     return ex.Message;
+                }
             }
-        }
 
             return null;
         }
@@ -211,8 +209,6 @@ namespace Signum.Engine.Mailing
             List<QueryToken> list = new List<QueryToken>();
             return EmailTemplateParser.Parse(text, s => QueryUtils.Parse("Entity." + s, qd), message.Template.Model.ToType());
         }
-
-        public static CultureInfoDN DefaultCulture;
 
         static Dictionary<Type, Func<EmailTemplateDN>> emailModels =
             new Dictionary<Type, Func<EmailTemplateDN>>();
@@ -288,20 +284,20 @@ namespace Signum.Engine.Mailing
                 c.FullClassName);
 
             replacements.AskForReplacements(
-                old.Keys.ToHashSet(), 
+                old.Keys.ToHashSet(),
                 should.Keys.ToHashSet(), systemTemplatesReplacementKey);
 
-            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
+            Dictionary<string, EmailModelDN> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
 
-            return Synchronizer.SynchronizeScript(should, current, 
-                (tn, s) => table.InsertSqlSync(s), 
-                (tn, c) => table.DeleteSqlSync(c), 
+            return Synchronizer.SynchronizeScript(should, current,
+                (tn, s) => table.InsertSqlSync(s),
+                (tn, c) => table.DeleteSqlSync(c),
                 (tn, s, c) =>
                 {
                     c.FullClassName = s.FullClassName;
                     c.FriendlyName = s.FriendlyName;
                     return table.UpdateSqlSync(c);
-                }, 
+                },
                 Spacing.Double);
         }
 
@@ -660,14 +656,14 @@ namespace Signum.Engine.Mailing
                 Columns = columns,
                 ElementsPerPage = QueryRequest.AllElements,
                 Filters = new List<Filter>
-            {
-                    new Filter
                 {
+                    new Filter
+                    {
                         Token = entityToken,
                         Operation = FilterOperation.EqualTo,
-                        Value = Lite.Create(entityToken.Type.CleanType(), entity)
-            }
-        }
+                        Value = Lite.Create(entityToken.Type.CleanType(), entity.Id)
+                    }
+                }
             });
 
             var dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
@@ -680,10 +676,10 @@ namespace Signum.Engine.Mailing
             {
                 recipient = EmailTemplateParser.GetRecipient(table,
                     dicTokenColumn[QueryUtils.Parse("Entity." + template.Recipient.TokenString, qd)]);
-        }
+            }
 
             var email = new EmailMessageDN
-        {
+            {
                 Recipient = recipient,
                 From = template.From,
                 DisplayFrom = template.DisplayFrom,
@@ -695,16 +691,16 @@ namespace Signum.Engine.Mailing
             };
 
             if (template.Model != null && template.Model is IEmailModelWithCC)
-                {
+            {
                 email.Cc = ",".Combine(email.Cc, ((IEmailModelWithCC)template.Model).CCRecipients.ToString(","));
-                }
+            }
 
             var recipientCI = recipient.InDB(io => io.CultureInfo);
-            var cultureInfo = recipientCI ?? DefaultCulture.CultureInfo;
+            var cultureInfo = recipientCI ?? EmailTemplateDN.DefaultCulture.CultureInfo;
 
             var message = template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == cultureInfo) ??
                 template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == cultureInfo.Parent) ??
-                template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == DefaultCulture.CultureInfo);
+                template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == EmailTemplateDN.DefaultCulture.CultureInfo);
 
             Func<string, QueryToken> parseToken = str => QueryUtils.Parse("Entity." + str, qd);
 
@@ -713,13 +709,13 @@ namespace Signum.Engine.Mailing
 
             email.Subject = ((EmailTemplateParser.BlockNode)message.SubjectParsedNode).Print(
                 new EmailTemplateParameters
-        {
-                        Columns = dicTokenColumn,
-                        IsHtml = false,
-                        CultureInfo = cultureInfo,
-                        Entity = entity,
-                        Model = model
-                    },
+                {
+                    Columns = dicTokenColumn,
+                    IsHtml = false,
+                    CultureInfo = cultureInfo,
+                    Entity = entity,
+                    Model = model
+                },
                 table.Rows);
 
             if (message.TextParsedNode == null)
@@ -727,13 +723,13 @@ namespace Signum.Engine.Mailing
 
             var body = ((EmailTemplateParser.BlockNode)message.TextParsedNode).Print(
                 new EmailTemplateParameters
-        {
-                        Columns = dicTokenColumn,
-                        IsHtml = template.IsBodyHtml,
-                        CultureInfo = cultureInfo,
-                        Entity = entity,
-                        Model = model
-                    },
+                {
+                    Columns = dicTokenColumn,
+                    IsHtml = template.IsBodyHtml,
+                    CultureInfo = cultureInfo,
+                    Entity = entity,
+                    Model = model
+                },
                 table.Rows);
 
             if (template.MasterTemplate != null)
@@ -746,28 +742,28 @@ namespace Signum.Engine.Mailing
 
 
         public static void SendMail(this IEmailModel model)
-                    {
+        {
             var email = model.CreateEmailMessage();
             SenderManager.Send(email);
-                        }
+        }
 
         public static void SendMail(this EmailTemplateDN template, IIdentifiable entity)
-                        {
+        {
             var email = template.CreateEmailMessage(entity);
             SenderManager.Send(email);
-                        }
+        }
 
         public static void SendMailAsync(this IEmailModel model)
-                {
+        {
             var email = model.CreateEmailMessage();
             SenderManager.SendAsync(email);
-            }
+        }
 
         public static void SendMailAsync(this IIdentifiable entity, EmailTemplateDN template)
-                {
+        {
             var email = template.CreateEmailMessage(entity);
             SenderManager.SendAsync(email);
-                }
+        }
 
 
         public static void SafeSendMailAsync(this SmtpClient client, MailMessage message, Action<AsyncCompletedEventArgs> onComplete)
@@ -801,7 +797,7 @@ namespace Signum.Engine.Mailing
         }
 
         internal static SmtpClient SafeSmtpClient(string host, int port)
-            {
+        {
             //http://weblogs.asp.net/stanleygu/archive/2010/03/31/tip-14-solve-smtpclient-issues-of-delayed-email-and-high-cpu-usage.aspx
             return new SmtpClient(host, port)
             {
@@ -825,9 +821,9 @@ namespace Signum.Engine.Mailing
 
 
     public class EmailSenderManager
-        {
+    {
         public EmailSenderManager(string defaultFrom, string defaultDisplayFrom, string defaultBcc)
-            {
+        {
             DefaultFrom = defaultFrom;
             DefaultDisplayFrom = defaultDisplayFrom;
             DefaultBcc = defaultBcc;
@@ -866,14 +862,14 @@ namespace Signum.Engine.Mailing
         public virtual void Send(EmailMessageDN email)
         {
             try
-        {
+            {
                 SmtpClient client = CreateSmtpClient(email);
 
                 MailMessage message = CreateMailMessage(email);
 
                 client.Send(message);
 
-                email.State = EmailState.Sent;
+                email.State = EmailMessageState.Sent;
                 email.Sent = TimeZoneManager.Now;
                 email.Received = null;
                 email.Save();
@@ -886,9 +882,9 @@ namespace Signum.Engine.Mailing
                 var exLog = ex.LogException().ToLite();
 
                 using (Transaction tr = Transaction.ForceNew())
-            {
+                {
                     email.Exception = exLog;
-                    email.State = EmailState.SentError;
+                    email.State = EmailMessageState.Exception;
                     email.Save();
                     tr.Commit();
                 }
@@ -911,7 +907,7 @@ namespace Signum.Engine.Mailing
         public virtual void SendAsync(EmailMessageDN email)
         {
             try
-        {
+            {
                 SmtpClient client = CreateSmtpClient(email);
 
                 MailMessage message = CreateMailMessage(email);
@@ -924,31 +920,31 @@ namespace Signum.Engine.Mailing
                 {
                     Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                     if (args.Error != null)
-            {
+                    {
                         var exLog = args.Error.LogException().ToLite();
                         updater = em => new EmailMessageDN
                 {
-                            Exception = exLog,
-                            State = EmailState.SentError
-                        };
-                }
+                    Exception = exLog,
+                    State = EmailMessageState.Exception
+                };
+                    }
                     else
                         updater = em => new EmailMessageDN
                         {
-                            State = EmailState.Sent,
+                            State = EmailMessageState.Sent,
                             Sent = TimeZoneManager.Now
                         };
 
                     for (int i = 0; i < 4; i++) //to allow main thread to save email asynchronously
-                {
+                    {
                         if (email.InDB().UnsafeUpdate(updater) > 0)
                             return;
 
                         if (i != 3)
                             Thread.Sleep(3000);
-        }
+                    }
                 });
-    }
+            }
             catch (Exception ex)
             {
                 if (Transaction.InTestTransaction) //Transaction.InTestTransaction
@@ -957,12 +953,12 @@ namespace Signum.Engine.Mailing
                 var exLog = ex.LogException().ToLite();
 
                 using (Transaction tr = Transaction.ForceNew())
-        {
+                {
                     email.Exception = exLog;
-                    email.State = EmailState.SentError;
+                    email.State = EmailMessageState.Exception;
                     email.Save();
                     tr.Commit();
-        }
+                }
 
                 throw;
             }
@@ -970,5 +966,5 @@ namespace Signum.Engine.Mailing
 
     }
 
-    
+
 }

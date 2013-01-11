@@ -192,7 +192,7 @@ namespace Signum.Entities.Mailing
         }
 
         public static Func<TypeDN, bool> AssociatedTypeIsEmailOwner;
-        public static Func<CultureInfoDN> DefaultCulture;
+        public static CultureInfoDN DefaultCulture;
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
@@ -212,9 +212,9 @@ namespace Signum.Entities.Mailing
             {
                 if (Messages == null || !Messages.Any())
                     return Resources.ThereIsNotAnyMessageForTheTemplate;
-                if (!Messages.Any(m => m.CultureInfo.Is(DefaultCulture())))
+                if (!Messages.Any(m => m.CultureInfo.Is(DefaultCulture)))
                 {
-                    return Resources.OneOfTheMessagesMustBeSetFor0.Formato(DefaultCulture().DisplayName);
+                    return Resources.OneOfTheMessagesMustBeSetFor0.Formato(DefaultCulture.DisplayName);
                 }
                 if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
                 {
@@ -316,20 +316,21 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class TemplateQueryTokenDN : QueryTokenDN
     {
-        public override void ParseData(Func<DynamicQuery.QueryToken, List<DynamicQuery.QueryToken>> subTokens)
+        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
         {
-            throw new InvalidOperationException("ParseData is ambiguous on {0}".Formato(GetType().NiceName()));
+            throw new NotImplementedException("ParseData is ambiguous on {0}".Formato(GetType().NiceName()));
         }
     }
 
     public enum EmailMasterTemplateOperation
     {
         Create,
+        Save
 	}
 
 
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class EmailMasterTemplateDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

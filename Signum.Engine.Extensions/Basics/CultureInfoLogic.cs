@@ -68,8 +68,8 @@ namespace Signum.Engine.Basics
             var should = GetEntities().ToDictionary(ci => ci.Name);
             var old = Administrator.TryRetrieveAll<CultureInfoDN>(replacements).ToDictionary(ci => ci.Name);
 
-            replacements.AskForReplacements(old, should, cultureInfoReplacmentKey);
-            var current = replacements.ApplyReplacements(old, cultureInfoReplacmentKey);
+            replacements.AskForReplacements(old.Keys.ToHashSet(), should.Keys.ToHashSet(), cultureInfoReplacmentKey);
+            var current = replacements.ApplyReplacementsToOld(old, cultureInfoReplacmentKey);
 
             return Synchronizer.SynchronizeScript(should, current,
                 (tn, s) => table.InsertSqlSync(s),

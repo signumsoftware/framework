@@ -16,7 +16,8 @@
         @if (e.Value.IsBodyHtml)
         {
             @Html.Raw(e.Value.Text)
-        } else
+        } 
+        else
         {
           @Html.Raw(HttpUtility.HtmlEncode(e.Value.Text))
         }

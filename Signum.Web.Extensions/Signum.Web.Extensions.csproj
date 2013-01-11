@@ -472,7 +472,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailTemplateMessage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\Newsletter.cs">
     <Compile Include="Help\Views\NamespaceControl.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -18,7 +18,7 @@ namespace Signum.Engine.Mailing
         {
             GetState = t => t.State;
 
-            new Construct(EmailTemplateOperations.Create)
+            new Construct(EmailTemplateOperation.Create)
             {
                 ToState = EmailTemplateState.Created,
                 Construct = _ => new EmailTemplateDN 
@@ -30,7 +30,7 @@ namespace Signum.Engine.Mailing
                 }
             }.Register();
 
-            new Execute(EmailTemplateOperations.Save)
+            new Execute(EmailTemplateOperation.Save)
             {
                 ToState = EmailTemplateState.Modified,
                 AllowsNew = true,
@@ -39,7 +39,7 @@ namespace Signum.Engine.Mailing
                 Execute = (t, _) => t.State = EmailTemplateState.Modified
             }.Register();
 
-            new Execute(EmailTemplateOperations.Enable) 
+            new Execute(EmailTemplateOperation.Enable) 
             {
                 ToState = EmailTemplateState.Modified,
                 FromStates = new[] { EmailTemplateState.Modified },
@@ -47,7 +47,7 @@ namespace Signum.Engine.Mailing
                 Execute = (t, _) => t.Active = true
             }.Register();
 
-            new Execute(EmailTemplateOperations.Disable) 
+            new Execute(EmailTemplateOperation.Disable) 
             {
                 ToState = EmailTemplateState.Modified,
                 FromStates = new[] { EmailTemplateState.Modified },

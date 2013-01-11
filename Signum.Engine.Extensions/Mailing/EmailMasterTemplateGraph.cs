@@ -13,13 +13,13 @@ namespace Signum.Engine.Mailing
         {
             GetState = t => t.State;
 
-            new Construct(EmailMasterTemplateOperations.Create)
+            new Construct(EmailMasterTemplateOperation.Create)
             {
                 ToState = EmailTemplateState.Created,
                 Construct = _ => new EmailMasterTemplateDN { State = EmailTemplateState.Created }
             }.Register();
 
-            new BasicExecute<EmailMasterTemplateDN>(EmailMasterTemplateOperations.Save)
+            new BasicExecute<EmailMasterTemplateDN>(EmailMasterTemplateOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,

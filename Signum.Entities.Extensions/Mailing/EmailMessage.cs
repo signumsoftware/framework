@@ -12,7 +12,7 @@ using System.Globalization;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class EmailMessageDN : Entity
     {
         public EmailMessageDN()

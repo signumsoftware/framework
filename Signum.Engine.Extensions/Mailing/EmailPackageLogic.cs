@@ -67,7 +67,7 @@ namespace Signum.Engine.Mailing
                             {
                                 Package = emailPackage.ToLite(),
                                 Recipient = m.Recipient,
-                                Body = m.Body,
+                                Text = m.Text,
                                 Subject = m.Subject,
                                 Template = m.Template,
                                 State = EmailMessageState.Created
@@ -105,7 +105,7 @@ namespace Signum.Engine.Mailing
 
                 EmailMessageDN ml = emails[i].RetrieveAndForget();
 
-                EmailLogic.SendMail(ml);
+                ml.Execute(EmailMessageOperation.Send);
 
                 executingProcess.ProgressChanged(i, emails.Count);
             }

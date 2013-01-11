@@ -10,41 +10,41 @@ using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Mailing
 {
-    public class EmailGraph : Graph<EmailMessageDN, EmailState>
+    public class EmailGraph : Graph<EmailMessageDN, EmailMessageState>
     {
         public static void Register() 
         {
             GetState = m => m.State;
 
-            new BasicConstruct<EmailMessageDN>(EmailOperations.CreateMail)
+            new BasicConstruct<EmailMessageDN>(EmailMessageOperation.CreateMail)
             {
                 Construct = _ => new EmailMessageDN 
                 {
-                    State = EmailState.Created,
+                    State = EmailMessageState.Created,
                     From = EmailLogic.SenderManager.TryCC(m => m.DefaultFrom),
                     DisplayFrom = EmailLogic.SenderManager.TryCC(m => m.DefaultDisplayFrom),
                 }
             }.Register();
 
-            new BasicConstructFrom<IIdentifiable, EmailMessageDN>(EmailOperations.CreateMailFromTemplate)
+            new BasicConstructFrom<IIdentifiable, EmailMessageDN>(EmailMessageOperation.CreateMailFromTemplate)
             {
                 AllowsNew = false,
                 Construct = (e, args) =>
                 {
-                    var template = args.GetArg<Lite<EmailTemplateDN>>(0);
+                    var template = args.GetArg<Lite<EmailTemplateDN>>();
                     return EmailLogic.CreateEmailMessage(template.Retrieve(), e);
                 }
             }.Register();
 
-            new BasicExecute<EmailMessageDN>(EmailOperations.Send) 
+            new BasicExecute<EmailMessageDN>(EmailMessageOperation.Send) 
             {
-                CanExecute = m => m.State == EmailState.Created ? null : Resources.TheEmailMessageCanNotBeSendFromState0.Formato(m.State.NiceToString()),
+                CanExecute = m => m.State == EmailMessageState.Created ? null : Resources.TheEmailMessageCanNotBeSendFromState0.Formato(m.State.NiceToString()),
                 AllowsNew = true,
                 Lite = false,
                 Execute = (m, _) => EmailLogic.SenderManager.Send(m)
             }.Register();
 
-            new BasicConstructFrom<EmailMessageDN, EmailMessageDN>(EmailOperations.ReSend)
+            new BasicConstructFrom<EmailMessageDN, EmailMessageDN>(EmailMessageOperation.ReSend)
             {
                 AllowsNew = false,
                 Construct = (m, _) => new EmailMessageDN 
@@ -60,7 +60,7 @@ namespace Signum.Engine.Mailing
                     Subject = m.Subject,
                     Template = m.Template,
                     To = m.To,
-                    State = EmailState.Created
+                    State = EmailMessageState.Created
                 }
             }.Register();
         }
