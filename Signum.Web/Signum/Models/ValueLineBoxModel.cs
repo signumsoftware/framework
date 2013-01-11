@@ -53,6 +53,13 @@ namespace Signum.Web
             set { Set(ref boxType, value, () => BoxType); }
         }
 
+        bool isNullable;
+        public bool IsNullable
+        {
+            get { return isNullable; }
+            set { Set(ref isNullable, value, () => IsNullable); }
+        }
+
         int? intValue;
         public int? IntValue
         {
@@ -106,7 +113,7 @@ namespace Signum.Web
                         return error;
                     break;
                 case ValueLineBoxType.DateTime:
-                    if (dateValue == null)
+                    if (dateValue == null && !IsNullable)
                         return error;
                     break;
                 case ValueLineBoxType.String:

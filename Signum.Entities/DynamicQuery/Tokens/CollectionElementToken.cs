@@ -43,8 +43,6 @@ namespace Signum.Entities.DynamicQuery
             get { return CollectionElementType.ToString(); }
         }
 
-
-
         protected override List<QueryToken> SubTokensInternal()
         {
             return SubTokensBase(Type, GetImplementations());
@@ -52,16 +50,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Implementations? GetImplementations()
         {
-            ExtensionToken et = Parent as ExtensionToken;
-
-            if (et != null && et.IsProjection)
-                return et.GetElementImplementations();
-
-            var pr = GetPropertyRoute();
-            if (pr != null)
-                return pr.TryGetImplementations();
-
-            return null;
+            return Parent.GetElementImplementations();
         }
 
         public override string Format
@@ -90,7 +79,7 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             return Parent.IsAllowed();
         }
@@ -179,6 +168,11 @@ namespace Signum.Entities.DynamicQuery
                 return null;
 
             return Resources.TheNumberOf0IsBeingMultipliedBy1.Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
+        }
+
+        public override string TypeColor
+        {
+            get { return "#0000FF"; }
         }
     }
 

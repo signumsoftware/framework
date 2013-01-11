@@ -149,6 +149,17 @@ namespace Signum.Utilities
             return tracer;
         }
 
+        public static T LogValue<T>(string role, Func<T> valueFactory)
+        {
+            if (!enabled)
+                return valueFactory();
+
+            using (HeavyProfiler.LogNoStackTrace(role))
+            {
+                return valueFactory();
+            }
+        }
+
         public static Tracer LogNoStackTrace(string role)
         {
             if (!enabled)
@@ -306,7 +317,7 @@ namespace Signum.Utilities
                 return null;
 
             if (fileName.Length > 70)
-                fileName = "..." + fileName.TryRight(67);
+                fileName = "..." + fileName.TryEnd(67);
 
             return fileName + " ({0})".Formato(frame.GetFileLineNumber());
         }
@@ -427,7 +438,7 @@ namespace Signum.Utilities
                 new XAttribute("Ratio", "{0:p}".Formato(elapsedMs / elapsedParent)),
                 new XAttribute("Role", Role ?? ""),
                 new XAttribute("FullIndex", this.FullIndex()),
-                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryLeft(100)),
+                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryStart(100)),
                 Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(elapsedMs))
                 );
         }
@@ -468,6 +479,11 @@ namespace Signum.Utilities
                 QueryPerformanceCounter(out count);
                 return count;
             }
+        }
+
+        public static long ToMilliseconds(long t1, long t2)
+        {
+            return (t2 - t1) / FrequencyMilliseconds;
         }
     }
 

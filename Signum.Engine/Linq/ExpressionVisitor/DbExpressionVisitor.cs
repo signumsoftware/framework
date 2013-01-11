@@ -107,6 +107,8 @@ namespace Signum.Engine.Linq
                     return this.VisitSqlEnum((SqlEnumExpression)exp);
                 case (ExpressionType)DbExpressionType.SqlFunction:
                     return this.VisitSqlFunction((SqlFunctionExpression)exp);
+                case (ExpressionType)DbExpressionType.SqlTableValuedFunction:
+                    return this.VisitSqlTableValuedFunction((SqlTableValuedFunctionExpression)exp);
                 case (ExpressionType)DbExpressionType.SqlConstant:
                     return this.VisitSqlConstant((SqlConstantExpression)exp);
                 case (ExpressionType)DbExpressionType.Case:
@@ -158,6 +160,8 @@ namespace Signum.Engine.Linq
                     return base.Visit(exp);
             }
         }
+
+  
 
         protected virtual Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
@@ -519,6 +523,14 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
                 return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); 
+            return sqlFunction;
+        }
+
+        protected virtual Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            if (args != sqlFunction.Arguments)
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
             return sqlFunction;
         }
 

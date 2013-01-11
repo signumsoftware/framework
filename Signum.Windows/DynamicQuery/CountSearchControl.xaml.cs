@@ -140,7 +140,6 @@ namespace Signum.Windows
 
         public void Search()
         {
-       
             var request = new QueryCountRequest
             {
                 QueryName = QueryName, 
@@ -158,10 +157,9 @@ namespace Signum.Windows
                 }
                 else
                 {
-                    FormattedText = (Text ?? "{1}: {0}")
-                        .Formato(ItemsCount, QueryUtils.GetNiceName(QueryName));
+                    FormattedText = (Text ?? (QueryUtils.GetNiceName(QueryName) + ": {0}"))
+                        .Formato(ItemsCount);
                     tb.FontWeight = FontWeights.Bold;
-
                 }
             }, 
             () => { });
@@ -188,6 +186,21 @@ namespace Signum.Windows
                 ColumnOptionsMode = ColumnOptionsMode,
                 SearchOnLoad = true,
             });
+        }
+
+        public void Reinitialize(IEnumerable<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders)
+        {
+            ColumnOptions.Clear();
+            ColumnOptions.AddRange(columns);
+            ColumnOptionsMode = columnOptionsMode;
+           
+            FilterOptions.Clear();
+            FilterOptions.AddRange(filters);
+            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
+
+            OrderOptions.Clear();
+            OrderOptions.AddRange(orders);
+            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
         }
     }
 }

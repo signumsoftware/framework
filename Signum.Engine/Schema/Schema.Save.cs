@@ -88,7 +88,7 @@ namespace Signum.Engine.Maps
             }
 
             result.SqlInsertPattern = (post, output) =>
-                "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name.SqlScape(),
+                "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name,
                 trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
                 output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
                 trios.ToString(p => p.ParameterName + post, ", "));
@@ -306,7 +306,7 @@ namespace Signum.Engine.Maps
             result.SqlUpdatePattern = (post, output) =>
             {
                 string update = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
-                    Name.SqlScape(),
+                    Name,
                     trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName + post).Indent(2), ",\r\n"),
                     idParamName + post);
 
@@ -691,7 +691,7 @@ namespace Signum.Engine.Maps
         {
             InsertCache<T> result = new InsertCache<T>();
 
-            result.sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name.SqlScape(), BackReference.Name);
+            result.sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name, BackReference.Name);
             result.DeleteParameter = ident => Connector.Current.ParameterBuilder.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), false, ident.Id);
 
             var trios = new List<Table.Trio>();
@@ -705,7 +705,7 @@ namespace Signum.Engine.Maps
             BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramPostfix);
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramPostfix);
 
-            result.sqlInsert = post=> "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name.SqlScape(),
+            result.sqlInsert = post=> "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name,
                 trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
                 trios.ToString(p => p.ParameterName + post, ", "));
 
@@ -814,7 +814,7 @@ namespace Signum.Engine.Maps
             return Expression.Call(mi, value, forbidden);
         }
 
-        static int? GetIdForLite(Lite lite, Forbidden forbidden)
+        static int? GetIdForLite(Lite<IIdentifiable> lite, Forbidden forbidden)
         {
             if (lite == null)
                 return null;
@@ -830,7 +830,7 @@ namespace Signum.Engine.Maps
             return lite.Id;
         }
 
-        static int? GetIdForLiteCleanEntity(Lite lite, Forbidden forbidden)
+        static int? GetIdForLiteCleanEntity(Lite<IIdentifiable> lite, Forbidden forbidden)
         {
             if (lite == null)
                 return null;
@@ -864,15 +864,15 @@ namespace Signum.Engine.Maps
             return Expression.Call(fr.IsLite ? miGetTypeForLite : miGetTypeForEntity, value, forbidden);
         }
 
-        static Type GetTypeForLite(Lite value, Forbidden forbidden)
+        static Type GetTypeForLite(Lite<IIdentifiable> value, Forbidden forbidden)
         {
             if (value == null)
                 return null;
 
-            Lite l = (Lite)value;
-            return l.UntypedEntityOrNull == null ? l.RuntimeType :
+            Lite<IIdentifiable> l = (Lite<IIdentifiable>)value;
+            return l.UntypedEntityOrNull == null ? l.EntityType :
                  forbidden.Contains(l.UntypedEntityOrNull) ? null :
-                 l.RuntimeType;
+                 l.EntityType;
         }
 
         static Type GetTypeForEntity(IIdentifiable value, Forbidden forbidden)

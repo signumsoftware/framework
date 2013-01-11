@@ -57,7 +57,19 @@ namespace Signum.Entities.DynamicQuery
 
         public override Implementations? GetImplementations()
         {
-            return null;
+            var cleanType = PropertyInfo.PropertyType.CleanType();
+
+            if (!typeof(IIdentifiable).IsAssignableFrom(cleanType))
+                return null;
+
+            var fi = Reflector.TryFindFieldInfo(Parent.Type, PropertyInfo);
+            if (fi != null)
+                return Implementations.FromAttributes(cleanType, fi.GetCustomAttributes(true).Cast<Attribute>().ToArray(), null);
+
+            if (cleanType.IsAbstract)
+                throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(fi.FieldName()));
+
+            return Implementations.By(cleanType);
         }
 
         public override string Format
@@ -77,7 +89,7 @@ namespace Signum.Entities.DynamicQuery
             get { return PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName); }
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         { 
             return Parent.IsAllowed();
         }

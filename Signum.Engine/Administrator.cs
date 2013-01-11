@@ -23,7 +23,8 @@ namespace Signum.Engine
     {
         public static void TotalGeneration()
         {
-            Connector.Current.CleanDatabase();
+            foreach (var db in Schema.Current.DatabaseNames())
+                Connector.Current.CleanDatabase(db);
 
             SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt();
             foreach (SqlPreCommand command in totalScript.Commands)
@@ -35,19 +36,39 @@ namespace Signum.Engine
         public static bool ExistTable<T>()
             where T : IdentifiableEntity
         {
-            Table table = Schema.Current.Table<T>();
-            return ExistTable(table.Name);
+            return ExistTable(Schema.Current.Table<T>());
         }
 
         public static bool ExistTable(Type type)
         {
-            Table table = Schema.Current.Table(type);
-            return ExistTable(table.Name);
+            return ExistTable(Schema.Current.Table(type));
         }
 
-        public static bool ExistTable(string tableName)
+        public static bool ExistTable(Table table)
         {
-            return Database.View<SysTables>().Any(a => a.name == tableName);
+            SchemaName schema = table.Name.Schema;
+
+            if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database.Server.Name))
+                return false;
+
+            if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database.Name))
+                return false;
+
+            using (schema.Database == null ? null : Administrator.OverrideDatabaseInViews(schema.Database))
+            {
+                return (from t in Database.View<SysTables>()
+                        join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
+                        where t.name == table.Name.Name && s.name == schema.Name
+                        select t).Any();
+            }
+        }
+
+        internal static readonly ThreadVariable<DatabaseName> viewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
+        public static IDisposable OverrideDatabaseInViews(DatabaseName database)
+        {
+            var old = viewDatabase.Value;
+            viewDatabase.Value = database;
+            return new Disposable(() => viewDatabase.Value = old);
         }
 
         public static List<T> TryRetrieveAll<T>(Replacements replacements)
@@ -62,10 +83,8 @@ namespace Signum.Engine
 
             using (Synchronizer.RenameTable(table, replacements))
             {
-                if (ExistTable(table.Name))
-                {
+                if (ExistTable(table))
                     return Database.RetrieveAll(type);
-                }
                 return new List<IdentifiableEntity>();
             }
         }
@@ -142,7 +161,7 @@ namespace Signum.Engine
             });
         }
 
-        public static IDisposable DisableIdentity(string tableName)
+        public static IDisposable DisableIdentity(ObjectName tableName)
         {
             SqlBuilder.SetIdentityInsert(tableName, true).ExecuteNonQuery();
 
@@ -174,14 +193,20 @@ namespace Signum.Engine
             }
         }
 
-        public static void SetSnapshotIsolation(bool value)
+        public static void SetSnapshotIsolation(bool value, string databaseName = null)
         {
-            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(Connector.Current.DatabaseName(), value));
+            if (databaseName == null)
+                databaseName = Connector.Current.DatabaseName();
+
+            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(databaseName, value));
         }
 
-        public static void MakeSnapshotIsolationDefault(bool value)
+        public static void MakeSnapshotIsolationDefault(bool value, string databaseName = null)
         {
-            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(Connector.Current.DatabaseName(), value));
+            if (databaseName == null)
+                databaseName = Connector.Current.DatabaseName();
+
+            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(databaseName, value));
         }
 
         public static int RemoveDuplicates<T, S>(Expression<Func<T, S>> key)

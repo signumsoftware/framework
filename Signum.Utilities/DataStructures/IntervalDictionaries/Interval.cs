@@ -314,6 +314,36 @@ namespace Signum.Utilities.DataStructures
 
     public static class IntervalExtensions
     {
+        public static int Length(this Interval<int> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static long Length(this Interval<long> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static double Length(this Interval<double> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static float Length(this Interval<float> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static decimal Length(this Interval<decimal> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
+        public static TimeSpan Length(this Interval<DateTime> interval)
+        {
+            return interval.Max - interval.Min;
+        }
+
         public static int Distance(this Interval<int> interval, int point)
         {
             return point < interval.Min ? interval.Min - point :
@@ -348,6 +378,27 @@ namespace Signum.Utilities.DataStructures
         {
             return point < interval.Min ? interval.Min - point :
                     point > interval.Max ? point - interval.Max : new TimeSpan(0);
+        }
+
+        public static Interval<T>? Intersection<T>(this IEnumerable<Interval<T>> intervals)
+            where T : struct, IComparable<T>, IEquatable<T>
+        {
+            using (var enumerator = intervals.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    return null;
+
+                Interval<T>? result = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                    result = result.Value.Intersection(enumerator.Current);
+                    if (result == null)
+                        return null;
+                }
+
+                return result;
+            }
         }
     }
 }

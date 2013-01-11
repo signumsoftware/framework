@@ -10,6 +10,10 @@ using System.Windows.Data;
 using System.Collections;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
+using Signum.Windows.Operations;
+using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows
 {
@@ -46,42 +50,52 @@ namespace Signum.Windows
         public EntityWhen IsNavigable { get; set; }
         public bool IsReadOnly { get; set; }
 
-        public EntitySettings(EntityType entityType)
+        public EntitySettings()
         {
-            switch (entityType)
+            EntityKind entityKind = Server.GetEntityKind(typeof(T));
+
+            switch (entityKind)
             {
-                case EntityType.SystemString:
+                case EntityKind.SystemString:
                     IsCreable = EntityWhen.Never;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
                     IsReadOnly = true;
                     break;
-                case EntityType.System:
+                case EntityKind.System:
                     IsCreable = EntityWhen.Never;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     IsReadOnly = true;
                     break;
-                case EntityType.String:
+
+                case EntityKind.String:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
                     break;
-                case EntityType.Part:
-                    IsCreable = EntityWhen.IsLine;
-                    IsViewable = true;
-                    IsNavigable = EntityWhen.Always;
-                    break;
-                case EntityType.Shared:
+                case EntityKind.Shared:
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
-                case EntityType.Main:
+                case EntityKind.Main:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     break;
+
+                case EntityKind.Part:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    break;
+                case EntityKind.SharedPart:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    break;
+           
                 default:
                     break;
             }
@@ -132,18 +146,6 @@ namespace Signum.Windows
         }
     }
 
-    public enum EntityType
-    {
-        SystemString,
-        System,
-        String,
-        Part,
-        Shared,
-        Main,
-    }
-
- 
-
     public class EmbeddedEntitySettings<T> : EntitySettings where T : EmbeddedEntity
     {
         public override Type StaticType
@@ -156,6 +158,12 @@ namespace Signum.Windows
         public bool IsCreable { get; set; }
         public bool IsViewable { get; set; }
         public bool IsReadonly { get; set; }
+
+        public EmbeddedEntitySettings()
+        {
+            IsCreable = true;
+            IsViewable = true;
+        }
 
         public override Control CreateView(ModifiableEntity entity, PropertyRoute typeContext)
         {
@@ -189,7 +197,7 @@ namespace Signum.Windows
 
         internal override bool OnIsNavigable(bool isSearchEntity)
         {
-            throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible wirh isSearchEntity");
+            return false;
         }
 
         internal override bool OnIsReadonly()

@@ -350,7 +350,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             string newExpr = Visit(init.NewExpression, init.NodeType);
             if (newExpr.EndsWith("()"))
-                newExpr = newExpr.RemoveRight(2);
+                newExpr = newExpr.RemoveEnd(2);
             return @"{0} {1}".Formato(newExpr, Block(init.Bindings, VisitBinding, collapse));
         }
 
@@ -358,7 +358,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             string newExpr = Visit(init.NewExpression, init.NodeType);
             if (newExpr.EndsWith("()"))
-                newExpr = newExpr.RemoveRight(2);
+                newExpr = newExpr.RemoveEnd(2);
             return @"{0} {1}".Formato(newExpr, Block(init.Initializers, VisitElementInitializer, collapse));
         }
 

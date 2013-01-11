@@ -13,6 +13,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
 using Signum.Engine;
 using System.Web;
+using Signum.Entities.Basics;
 
 namespace Signum.Web
 {
@@ -170,31 +171,18 @@ namespace Signum.Web
             if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (objType.IsLite() && type.IsAssignableFrom(((Lite)obj).RuntimeType))
+            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IIdentifiable>)obj).EntityType))
             {
-                Lite lite = (Lite)obj;
+                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)obj;
                 return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);
             }
 
             if (type.IsLite())
             {
                 Type liteType = Lite.Extract(type);
-
-                if (objType.IsLite())
+                if (liteType.IsAssignableFrom(objType))
                 {
-                    Lite lite = (Lite)obj;
-                    if (liteType.IsAssignableFrom(lite.RuntimeType))
-                    {
-                        if (lite.UntypedEntityOrNull != null)
-                            return Lite.Create(liteType, lite.UntypedEntityOrNull);
-                        else
-                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToString());
-                    }
-                }
-
-                else if (liteType.IsAssignableFrom(objType))
-                {
-                    return Lite.Create(liteType, (IdentifiableEntity)obj);
+                    return ((IdentifiableEntity)obj).ToLite();
                 }
             }
 

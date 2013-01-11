@@ -16,6 +16,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using Signum.Entities.DynamicQuery;
 using System.Collections.ObjectModel;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Linq
 {
@@ -101,7 +102,7 @@ namespace Signum.Engine.Linq
                     case "FirstEx":
                     case "SingleEx":
                     case "SingleOrDefaultEx":
-                        return BindUniqueRow(m.Type, m.Method.Name.RemoveRight(2).ToEnum<UniqueFunction>(),
+                        return BindUniqueRow(m.Type, m.Method.Name.RemoveEnd(2).ToEnum<UniqueFunction>(),
                            m.GetArgument("collection"), m.TryGetArgument("predicate").StripQuotes(), m == root);
                     case "Distinct":
                         return BindDistinct(m.Type, m.GetArgument("source"));
@@ -111,24 +112,13 @@ namespace Signum.Engine.Linq
                         return BindTake(m.Type, m.GetArgument("source"), m.GetArgument("count"));
                 }
             }
-            else if (m.Method.DeclaringType == typeof(LiteUtils) && m.Method.Name == "ToLite")
+            else if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
             {
                 Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
 
-                if (m.Method.GetParameters().FirstEx().ParameterType == typeof(Lite))
-                {
-                    LiteExpression liteRef = (LiteExpression)Visit(m.GetArgument("lite"));
-
-                    Expression entity = EntityCasting(liteRef.Reference, Lite.Extract(m.Type));
-
-                    return MakeLite(m.Type, entity, toStr);
-                }
-                else
-                {
-                    var entity = Visit(m.GetArgument("entity"));
-                    var converted = EntityCasting(entity, Lite.Extract(m.Type));
-                    return MakeLite(m.Type, converted, toStr);
-                }
+                var entity = Visit(m.GetArgument("entity"));
+                var converted = EntityCasting(entity, Lite.Extract(m.Type));
+                return MakeLite(converted, toStr);
             }
             else if (m.Method.DeclaringType.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
             {
@@ -195,8 +185,23 @@ namespace Signum.Engine.Linq
       
         private ProjectionExpression VisitCastProjection(Expression source)
         {
-            var visit = Visit(source);
-            return AsProjection(visit);
+            if (source is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)source))
+            {
+                var oldInTVF = inTableValuedFunction;
+                inTableValuedFunction = true;
+
+                var visit = Visit(source);
+
+                inTableValuedFunction = oldInTVF;
+
+                return GetTableValuedFunctionProjection((MethodCallExpression)visit);
+            }
+            else
+            {
+
+                var visit = Visit(source);
+                return AsProjection(visit);
+            }
         }
 
         private ProjectionExpression AsProjection(Expression expression)
@@ -213,6 +218,11 @@ namespace Signum.Engine.Linq
             {
                 NewExpression nex = (NewExpression)expression;
                 return (ProjectionExpression)nex.Arguments[1];
+            }
+
+            if (expression is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)expression))
+            {
+              
             }
 
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
@@ -232,12 +242,16 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             Alias alias = NextSelectAlias();
+
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases);
+
             return new ProjectionExpression(
                 new SelectExpression(alias, false, false, count, pc.Columns, projection.Select, null, null, null),
                 pc.Projector, null, resultType);
         }
 
+        //Avoid self referencing SQL problems
+        bool inTableValuedFunction = false;
 
         private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate, bool isRoot)
         {
@@ -252,9 +266,13 @@ namespace Signum.Engine.Linq
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, newSource.KnownAliases);
 
+            if (!isRoot && !inTableValuedFunction && pc.Projector is ColumnExpression && (function == UniqueFunction.First || function == UniqueFunction.FirstOrDefault))
+                return new ScalarExpression(pc.Projector.Type,
+                    new SelectExpression(alias, false, false, top, new[] { new ColumnDeclaration("val", pc.Projector) }, newSource, where, null, null));
+
             var newProjector = new ProjectionExpression(
-                    new SelectExpression(alias, false, false, top, pc.Columns, newSource, where, null, null),
-                    pc.Projector, function, resultType);
+                new SelectExpression(alias, false, false, top, pc.Columns, newSource, where, null, null),
+                pc.Projector, function, resultType);
 
             if (isRoot)
                 return newProjector;
@@ -325,7 +343,6 @@ namespace Signum.Engine.Linq
                 aggregate = new AggregateExpression(resultType, nominated, aggregateFunction);
             }
 
-
             Alias alias = NextSelectAlias();
 
             ColumnDeclaration cd = new ColumnDeclaration("a", aggregate);
@@ -340,7 +357,7 @@ namespace Signum.Engine.Linq
             ScalarExpression subquery = new ScalarExpression(resultType, select);
 
             GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
-            if (info != null)
+            if (info != null && newSource == projection.Select)
             {
                 SourceExpression newsSource2 = info.Source;
                 Expression exp2 = aggregateFunction == AggregateFunction.Count ? null : 
@@ -438,7 +455,7 @@ namespace Signum.Engine.Linq
 
                 switch ((DbExpressionType)newItem.NodeType)
                 {
-                    case DbExpressionType.Lite: return SmartEqualizer.EntityIn((LiteExpression)newItem, col == null ? Enumerable.Empty<Lite>() : col.Cast<Lite>().ToList());
+                    case DbExpressionType.Lite: return SmartEqualizer.EntityIn((LiteExpression)newItem, col == null ? Enumerable.Empty<Lite<IIdentifiable>>() : col.Cast<Lite<IIdentifiable>>().ToList());
                     case DbExpressionType.Entity:
                     case DbExpressionType.ImplementedBy:
                     case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>().ToList());
@@ -753,9 +770,15 @@ namespace Signum.Engine.Linq
             return true;
         }
 
+        public bool IsTableValuedFunction(MethodCallExpression mce)
+        {
+            return typeof(IQueryable).IsAssignableFrom(mce.Method.ReturnType) &&
+                mce.Method.SingleAttribute<SqlMethodAttribute>() != null;
+        }
+
         private ProjectionExpression GetTableProjection(IQueryable query)
         { 
-            ITable table = query is ISignumTable ? ((ISignumTable)query).Table : new ViewBuilder(Schema.Current).NewView(query.ElementType);
+            ITable table = ((ISignumTable)query).Table;
 
             Alias tableAlias = NextTableAlias(table.Name);
 
@@ -773,6 +796,34 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null),
             pc.Projector, null, resultType);
+
+            return projection;
+        }
+
+        private ProjectionExpression GetTableValuedFunctionProjection(MethodCallExpression mce)
+        {
+            Type returnType = mce.Method.ReturnType;
+            var type = returnType.GetGenericArguments()[0];
+
+            Table table = new ViewBuilder(Schema.Current).NewView(type);
+
+            Alias tableAlias = NextTableAlias(table.Name);
+
+            Expression exp = table.GetProjectorExpression(tableAlias, this);
+
+            var functionName = mce.Method.SingleAttribute<SqlMethodAttribute>().Name ?? mce.Method.Name;
+
+            var argumens  = mce.Arguments.Select(DbExpressionNominator.FullNominate).ToList();
+
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, tableAlias, argumens);
+
+            Alias selectAlias = NextSelectAlias();
+
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, new[] { tableAlias });
+
+            ProjectionExpression projection = new ProjectionExpression(
+                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null),
+            pc.Projector, null, returnType);
 
             return projection;
         }
@@ -825,7 +876,7 @@ namespace Signum.Engine.Linq
         {
             Expression source = m.Method.IsExtensionMethod() ? m.Arguments[0]: m.Object;
 
-            if (source == null || m.Method.Name == "InSql")
+            if (source == null || m.Method.Name == "InSql" || m.Method.Name == "DisableQueryFilter")
                 return m;
 
             if (source.NodeType == ExpressionType.Conditional)
@@ -1042,7 +1093,7 @@ namespace Signum.Engine.Linq
                     if (pi != null)
                     {
                         if (pi.Name == "Id")
-                            return liteRef.Id;
+                            return liteRef.Id.UnNullify();
                         if (pi.Name == "EntityOrNull" || pi.Name == "Entity")
                             return liteRef.Reference;
                         if (pi.Name == "ToStr")
@@ -1053,7 +1104,7 @@ namespace Signum.Engine.Linq
                         }
                     }
 
-                    if (pi.Name == "RuntimeType")
+                    if (pi.Name == "EntityType")
                         return liteRef.TypeId;
                     
                     throw new InvalidOperationException("The member {0} of Lite is not accessible on queries".Formato(m.Member));
@@ -1074,7 +1125,7 @@ namespace Signum.Engine.Linq
                     ImplementedByAllExpression iba = (ImplementedByAllExpression)source;
                     FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(iba.Type, (PropertyInfo)m.Member);
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
-                        return iba.Id;
+                        return iba.Id.UnNullify();
 
                     throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".Formato(m.Member));
                 }
@@ -1109,7 +1160,7 @@ namespace Signum.Engine.Linq
                 Expression entity = CombineWhens(whens.Select(w => new When(w.Condition,
                     ((LiteExpression)w.Value).Reference)).ToList(), Lite.Extract(returnType));
 
-                return MakeLite(returnType, entity, null);
+                return MakeLite(entity, null);
             }
 
             if (whens.Any(e => e.Value is ImplementedByAllExpression))
@@ -1150,10 +1201,10 @@ namespace Signum.Engine.Linq
             {
                 var lc = new LambdaComparer<FieldInfo, string>(fi=>fi.Name);
 
-                var groups = whens
-                    .SelectMany(w => ((EmbeddedEntityExpression)w.Value).Bindings, (w, b) => new { w, b })
-                    .GroupBy(p => p.b.FieldInfo, p => p.w, lc)
-                    .ToDictionary(g => g.Key, g => g.ToList(), lc);
+                var groups = (from w in whens
+                             from b in ((EmbeddedEntityExpression)w.Value).Bindings
+                             group new When(w.Condition, b.Binding) by b.FieldInfo into g
+                             select KVP.Create(g.Key, g.ToList())).ToDictionary(); 
 
                 var hasValue = whens.All(w => ((EmbeddedEntityExpression)w.Value).HasValue == null) ? null :
                     CombineWhens(whens.Select(w => new When(w.Condition, ((EmbeddedEntityExpression)w.Value).HasValue ?? new SqlConstantExpression(true))).ToList(), typeof(bool));
@@ -1304,7 +1355,7 @@ namespace Signum.Engine.Linq
                 else
                 {
                     return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null);
-                }               
+                }
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
@@ -1319,7 +1370,7 @@ namespace Signum.Engine.Linq
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
 
-                return new ImplementedByExpression(uType, fies.Select(f => new ImplementationColumn(f.Type, f)).ToReadOnly()); 
+                return new ImplementedByExpression(uType, fies.Select(f => new ImplementationColumn(f.Type, f)).ToReadOnly());
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
@@ -1331,7 +1382,16 @@ namespace Signum.Engine.Linq
                 var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id, NullId);
                 return new EntityExpression(uType, conditionalId, null, null);
             }
-            
+
+            else if (operand.NodeType == (ExpressionType)DbExpressionType.Lite)
+            {
+                LiteExpression lite = (LiteExpression)operand;
+
+                Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType));
+
+                return MakeLite(entity, null);
+            }
+
             return null;
         }
 
@@ -1380,11 +1440,11 @@ namespace Signum.Engine.Linq
             if (pr.Projector is EntityExpression)
             {
                 EntityExpression ee = (EntityExpression)pr.Projector;
-                Expression id = ee.Table.GetIdExpression(Alias.Raw(ee.Table.Name));
+                Expression id = ee.Table.GetIdExpression(Alias.Table(ee.Table.Name));
 
                 commands.AddRange(ee.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
                 {
-                    Expression backId = f.RelationalTable.BackColumnExpression(Alias.Raw(f.RelationalTable.Name));
+                    Expression backId = f.RelationalTable.BackColumnExpression(Alias.Table(f.RelationalTable.Name));
                     return new DeleteExpression(f.RelationalTable, pr.Select,
                         SmartEqualizer.EqualNullable(backId, ee.ExternalId));
                 }));
@@ -1395,7 +1455,7 @@ namespace Signum.Engine.Linq
             {
                 MListElementExpression mlee = (MListElementExpression)pr.Projector;
 
-                Expression id = mlee.Table.RowIdExpression(Alias.Raw(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(Alias.Table(mlee.Table.Name));
 
                 commands.Add(new DeleteExpression(mlee.Table, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
             }
@@ -1428,7 +1488,7 @@ namespace Signum.Engine.Linq
                 (ITable)((EntityExpression)entity).Table : 
                 (ITable)((MListElementExpression)entity).Table;
 
-            Alias alias = Alias.Raw(table.Name);
+            Alias alias = Alias.Table(table.Name);
 
             Expression toUpdate = table is Table ? 
                 ((Table)table).GetProjectorExpression(alias, this) : 
@@ -1452,7 +1512,7 @@ namespace Signum.Engine.Linq
             {
                 EntityExpression ee = (EntityExpression)entity;
 
-                Expression id = ee.Table.GetIdExpression(Alias.Raw(ee.Table.Name));
+                Expression id = ee.Table.GetIdExpression(Alias.Table(ee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
                 table = ee.Table;
@@ -1461,7 +1521,7 @@ namespace Signum.Engine.Linq
             {
                 MListElementExpression mlee = (MListElementExpression)entity;
 
-                Expression id = mlee.Table.RowIdExpression(Alias.Raw(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(Alias.Table(mlee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
                 table = mlee.Table;
@@ -1806,11 +1866,11 @@ namespace Signum.Engine.Linq
 
         internal static SqlConstantExpression NullId = new SqlConstantExpression(null, typeof(int?));
 
-        public Expression MakeLite(Type type, Expression entity, Expression customToStr)
+        public Expression MakeLite(Expression entity, Expression customToStr)
         {
             Expression id = GetId(entity);
             Expression typeId = GetEntityType(entity);
-            return new LiteExpression(type, entity, id, customToStr, typeId, customToStr != null);
+            return new LiteExpression(Lite.Generate(entity.Type), entity, id, customToStr, typeId, customToStr != null);
         }
 
         public Expression GetId(Expression expression)
@@ -1939,9 +1999,9 @@ namespace Signum.Engine.Linq
             return Alias.NextSelectAlias();
         }
 
-        internal Alias NextTableAlias(string tableName)
+        internal Alias NextTableAlias(ObjectName tableName)
         {
-            return Alias.NextTableAlias(tableName);
+            return Alias.NextTableAlias(tableName.Name);
         }
         
         #endregion

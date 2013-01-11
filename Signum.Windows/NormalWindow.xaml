@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:m="clr-namespace:Signum.Windows"
 	x:Class="Signum.Windows.NormalWindow"
-	x:Name="Window"
+	x:Name="win"
 	SizeToContent="WidthAndHeight"
 	ResizeMode="CanResizeWithGrip" 
 	WindowStartupLocation="CenterScreen" 
@@ -14,12 +14,12 @@
     m:Common.AutomationHelpTextFromDataContext="True"
     Title="{Binding ToStringProperty}">
     <DockPanel>
-        <m:ButtonBar x:Name="buttonBar" DockPanel.Dock="Top" OkClick="Ok_Click" SaveClick="Save_Click" ReloadClick="Reload_Click" ReloadVisible="true" MainControl="{Binding Path=MainControl, ElementName=Window}"/>
-        <m:WidgetPanel x:Name="widgetPanel" DockPanel.Dock="Left" MainControl="{Binding Path=MainControl, ElementName=Window}" ExpandedCollapsed="widgetPanel_ExpandedCollapsed" />
+        <m:ButtonBar x:Name="buttonBar" DockPanel.Dock="Top" OkClick="Ok_Click" ReloadClick="Reload_Click" ReloadVisible="true"/>
+        <m:WidgetPanel x:Name="widgetPanel" DockPanel.Dock="Left" MainControl="{Binding Path=MainControl, ElementName=win}" ExpandedCollapsed="widgetPanel_ExpandedCollapsed" />
         <m:ErrorSummary DockPanel.Dock="Bottom"/>
         <m:EntityTitle DockPanel.Dock="Top" x:Name="entityTitle"/>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Focusable="False">
-            <ContentControl Content="{Binding Path=MainControl, ElementName=Window}" Focusable="False"
+            <ContentControl Content="{Binding Path=MainControl, ElementName=win}" Focusable="False"
                         VerticalContentAlignment="Stretch" x:Name="contentControl" 
                         HorizontalContentAlignment="Stretch" MinWidth="40" MinHeight="40" Margin="5"/>
         </ScrollViewer>

@@ -187,7 +187,7 @@
     <value>less than or equal</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>[Count]</value>
+    <value>Count</value>
   </data>
   <data name="Day" xml:space="preserve">
     <value>Day</value>
@@ -353,5 +353,41 @@
   </data>
   <data name="DayOfWeek" xml:space="preserve">
     <value>Day of week</value>
+  </data>
+  <data name="AnyEntity" xml:space="preserve">
+    <value>any entity</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>check</value>
+  </data>
+  <data name="DateTime" xml:space="preserve">
+    <value>date and time</value>
+  </data>
+  <data name="DecimalNumber" xml:space="preserve">
+    <value>decimal number</value>
+  </data>
+  <data name="Embedded0" xml:space="preserve">
+    <value>embedded {0}</value>
+  </data>
+  <data name="GlobalUniqueIdentifier" xml:space="preserve">
+    <value>global unique identifier</value>
+  </data>
+  <data name="ListOf0" xml:space="preserve">
+    <value>list of {0}</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>number</value>
+  </data>
+  <data name="Text" xml:space="preserve">
+    <value>text</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>unknown</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create...</value>
+  </data>
+  <data name="CreateFromRegex" xml:space="preserve">
+    <value>^Create (?&lt;t&gt;.*) from .*$</value>
   </data>
 </root>

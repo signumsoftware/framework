@@ -68,7 +68,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             return Parent.IsAllowed();
         }
@@ -86,6 +86,11 @@ namespace Signum.Entities.DynamicQuery
         public override QueryToken Clone()
         {
             return new CountToken(Parent.Clone());
+        }
+
+        public override string TypeColor
+        {
+            get { return "#0000FF"; }
         }
     }
 }

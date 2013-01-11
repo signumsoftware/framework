@@ -36,6 +36,8 @@ namespace Signum.Engine
 
         private static void AttachInvalidations(Schema s, IResetLazy lazy, params Type[] types)
         {
+            types = types.Where(Schema.Current.Tables.ContainsKey).ToArray(); //static initi of Lazies of not-initialized modules
+
             Action reset = () =>
             {
                 if (Transaction.InTestTransaction)
@@ -109,7 +111,7 @@ namespace Signum.Engine
         {
             var result = new ResetLazy<T>(() =>
             {
-                using (Schema.Current.GlobalMode())
+                using (ExecutionMode.Global())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
                 using (Transaction tr = Transaction.InTestTransaction ? null:  Transaction.ForceNew())
                 using (new EntityCache(true))

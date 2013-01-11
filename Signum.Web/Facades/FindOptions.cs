@@ -148,7 +148,9 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            Navigator.SetTokens(QueryName, FilterOptions);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
+
+            Navigator.SetTokens(queryDescription, FilterOptions);
 
             string options = new Sequence<string>
             {
@@ -174,7 +176,9 @@ namespace Signum.Web
 
         public void Fill(JsOptionsBuilder op)
         {
-            Navigator.SetTokens(this.QueryName, this.FilterOptions);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
+
+            Navigator.SetTokens(queryDescription, this.FilterOptions);
 
             op.Add("webQueryName", QueryName.TryCC(qn => Navigator.ResolveWebQueryName(qn).SingleQuote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
@@ -295,7 +299,7 @@ namespace Signum.Web
             {
                 if (v.GetType().IsLite())
                 {
-                    Lite lite = (Lite)v;
+                    Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)v;
                     value = lite.Key();
                 }
                 else
@@ -373,13 +377,13 @@ namespace Signum.Web
             this.ColumnName = columnName;
         }
 
+        public QueryToken Token { get; set; }
         public string ColumnName { get; set; }
         public string DisplayName { get; set; }
 
         public Column ToColumn(QueryDescription qd)
         {
-            var token = QueryUtils.Parse(ColumnName, qd);
-            return new Column(token, DisplayName.DefaultText(token.NiceName()));
+            return new Column(Token, DisplayName.DefaultText(Token.NiceName()));
         }
 
         public override string ToString()

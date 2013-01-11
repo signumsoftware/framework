@@ -15,7 +15,7 @@ using System.Collections.Concurrent;
 namespace Signum.Utilities.Reflection
 {
     public static class ReflectionTools
-    { 
+    {
         public static bool FieldEquals(FieldInfo f1, FieldInfo f2)
         {
             return MemeberEquals(f1, f2);
@@ -126,7 +126,7 @@ namespace Signum.Utilities.Reflection
             return BaseFieldInfo(field);
         }
 
-        public static FieldInfo GetFieldInfo<T,R>(Expression<Func<T, R>> field)
+        public static FieldInfo GetFieldInfo<T, R>(Expression<Func<T, R>> field)
         {
             return BaseFieldInfo(field);
         }
@@ -175,10 +175,10 @@ namespace Signum.Utilities.Reflection
             if (ex == null)
                 throw new ArgumentException("The lambda 'member' should be an expression accessing a member");
 
-            return  ex.Member;
+            return ex.Member;
         }
 
-    
+
         public static MethodInfo GetMethodInfo(Expression<Action> method)
         {
             return BaseMethodInfo(method);
@@ -215,6 +215,18 @@ namespace Signum.Utilities.Reflection
             return ex.Method;
         }
 
+
+        public static ConstructorInfo GetGenericConstructorDefinition(this ConstructorInfo ci)
+        {
+            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+        }
+
+        public static ConstructorInfo MakeGenericConstructor(this ConstructorInfo ci, params Type[] types)
+        {
+            return ci.DeclaringType.MakeGenericType(types).GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+        }
+
+
         public static Type GetReceiverType<T, R>(Expression<Func<T, R>> lambda)
         {
             Expression body = lambda.Body;
@@ -230,7 +242,7 @@ namespace Signum.Utilities.Reflection
                 return null;
 
             ParameterExpression p = Expression.Parameter(typeof(T), "p");
-            var exp = Expression.Lambda(typeof(Func<T,P>), Expression.MakeMemberAccess(p, m), p);
+            var exp = Expression.Lambda(typeof(Func<T, P>), Expression.MakeMemberAccess(p, m), p);
             return (Func<T, P>)exp.Compile();
         }
 
@@ -262,9 +274,9 @@ namespace Signum.Utilities.Reflection
                 return null;
 
             ParameterExpression t = Expression.Parameter(typeof(T), "t");
-            ParameterExpression  p = Expression.Parameter(typeof(P), "p");
-            var exp = Expression.Lambda(typeof(Action<T, P>), 
-                Expression.Assign(Expression.MakeMemberAccess(t, m), p), t,p);
+            ParameterExpression p = Expression.Parameter(typeof(P), "p");
+            var exp = Expression.Lambda(typeof(Action<T, P>),
+                Expression.Assign(Expression.MakeMemberAccess(t, m), p), t, p);
             return (Action<T, P>)exp.Compile();
         }
 
@@ -300,16 +312,16 @@ namespace Signum.Utilities.Reflection
         {
             switch (Type.GetTypeCode(type.UnNullify()))
             {
-                case TypeCode.Single: 
-                case TypeCode.Double: 
-                case TypeCode.Decimal: 
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Decimal:
 
                 case TypeCode.Byte:
 
                 case TypeCode.Int16:
-                case TypeCode.Int32: 
-                case TypeCode.Int64: 
-                case TypeCode.UInt16: 
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64: return true;
             }
@@ -319,7 +331,7 @@ namespace Signum.Utilities.Reflection
 
         public static bool IsPercentage(string formatString, CultureInfo culture)
         {
-            return formatString.HasText() && formatString.StartsWith("p", StringComparison.InvariantCultureIgnoreCase); 
+            return formatString.HasText() && formatString.StartsWith("p", StringComparison.InvariantCultureIgnoreCase);
         }
 
         public static object ParsePercentage(string value, Type targetType, CultureInfo culture)
@@ -327,7 +339,7 @@ namespace Signum.Utilities.Reflection
             value = value.Trim(culture.NumberFormat.PercentSymbol.ToCharArray());
 
             if (string.IsNullOrEmpty(value))
-                return null; 
+                return null;
 
             switch (Type.GetTypeCode(targetType.UnNullify()))
             {
@@ -360,7 +372,7 @@ namespace Signum.Utilities.Reflection
             if (utype.IsEnum)
                 return (T)Enum.Parse(utype, (string)value);
             else if (utype == typeof(Guid))
-                return (T)(object)Guid.Parse(value); 
+                return (T)(object)Guid.Parse(value);
             else
                 return (T)Convert.ChangeType(value, utype);
         }
@@ -377,7 +389,7 @@ namespace Signum.Utilities.Reflection
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
             else if (utype == typeof(Guid))
-                return Guid.Parse(value); 
+                return Guid.Parse(value);
             else
                 return Convert.ChangeType(value, utype);
         }
@@ -394,7 +406,7 @@ namespace Signum.Utilities.Reflection
             if (utype.IsEnum)
                 return (T)Enum.Parse(utype, (string)value);
             else if (utype == typeof(Guid))
-                return (T)(object)Guid.Parse(value); 
+                return (T)(object)Guid.Parse(value);
             else
                 return (T)Convert.ChangeType(value, utype, culture);
         }
@@ -411,7 +423,7 @@ namespace Signum.Utilities.Reflection
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
             else if (utype == typeof(Guid))
-                return Guid.Parse(value); 
+                return Guid.Parse(value);
             else
                 return Convert.ChangeType(value, utype, culture);
         }
@@ -457,9 +469,9 @@ namespace Signum.Utilities.Reflection
                 if (EnumExtensions.TryParse(value, utype, true, out _result))
                 {
                     result = _result;
-                    return true; 
+                    return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(bool))
             {
@@ -469,7 +481,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(char))
             {
@@ -479,7 +491,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(SByte))
             {
@@ -489,7 +501,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(byte))
             {
@@ -499,7 +511,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(Int16))
             {
@@ -509,7 +521,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(UInt16))
             {
@@ -519,7 +531,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(Int32))
             {
@@ -529,7 +541,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(UInt32))
             {
@@ -539,7 +551,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(Int64))
             {
@@ -549,7 +561,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(UInt64))
             {
@@ -559,7 +571,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(float))
             {
@@ -569,7 +581,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(double))
             {
@@ -579,7 +591,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(decimal))
             {
@@ -589,7 +601,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(DateTime))
             {
@@ -599,7 +611,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(Guid))
             {
@@ -609,7 +621,7 @@ namespace Signum.Utilities.Reflection
                     result = _result;
                     return true;
                 }
-                else return false; 
+                else return false;
             }
             else if (utype == typeof(object))
             {
@@ -667,7 +679,7 @@ namespace Signum.Utilities.Reflection
             if (value == null)
                 return null;
 
-            if (value.GetType() == type)
+            if (type.IsAssignableFrom(value.GetType()))
                 return value;
             else
             {
@@ -691,7 +703,4 @@ namespace Signum.Utilities.Reflection
                   (pi.CanWrite && pi.GetSetMethod().IsStatic);
         }
     }
-
-
-    
 }

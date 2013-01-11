@@ -119,10 +119,10 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string message)
+        public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string messageWithFormat)
         {
             if (dictionary.ContainsKey(key))
-                throw new ArgumentException(message.Formato(key));
+                throw new ArgumentException(messageWithFormat.Formato(key));
 
             dictionary.Add(key, value);
         }

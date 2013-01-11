@@ -184,7 +184,7 @@ namespace Signum.Web
                    
                     var conv = ParameterConverters.FirstOrDefault(c => c.CanConvert(value));
                     if (conv != null)
-                        value = conv.Convert(value);
+                        value = conv.Convert(value, parameters[i].ParameterType);
                    
                     rvd.Add(parameters[i].Name, value);
                 }
@@ -195,20 +195,20 @@ namespace Signum.Web
     public interface IParameterConverter
     {
         bool CanConvert(object obj);
-        object Convert(object obj);
+        object Convert(object obj, Type parameterType);
     }
 
     public class LiteConverter : IParameterConverter
     {
         public bool CanConvert(object obj)
         {
-            return obj is Lite;
+            return obj is Lite<IIdentifiable>;
         }
 
-        public object Convert(object obj)
+        public object Convert(object obj, Type parameterType)
         {
-            Lite lite = (Lite)obj;
-            if (Lite.Extract(lite.GetType()) == lite.RuntimeType)
+            Lite<IIdentifiable> lite = (Lite<IIdentifiable>)obj;
+            if (Lite.Extract(parameterType) == lite.EntityType)
                 return lite.Id;
             else
                 return lite.Key();

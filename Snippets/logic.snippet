@@ -24,6 +24,11 @@
           <ToolTip>Name of the main entity</ToolTip>
           <Default>Foo</Default>
         </Literal>
+         <Literal>
+          <ID>entityParam</ID>
+          <ToolTip>Entity parameter</ToolTip>
+          <Default>e</Default>
+        </Literal>
         <Literal>
           <ID>methodName</ID>
           <ToolTip>Name of one extension method</ToolTip>
@@ -34,10 +39,10 @@
 				<![CDATA[public static class $entityName$Logic
     {
         static Expression<Func<$entityName$DN, int>> $methodName$Expression = 
-            entity => $end$; 
-        public static int $methodName$(this $entityName$DN entity)
+            $entityParam$ => $end$; 
+        public static int $methodName$(this $entityName$DN $entityParam$)
         {
-            return $methodName$Expression.Evaluate(entity);
+            return $methodName$Expression.Evaluate($entityParam$);
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -46,15 +51,22 @@
             {
                 sb.Include<$entityName$DN>();
 
-                dqm[typeof($entityName$DN)] = (from a in Database.Query<$entityName$DN>()
+                dqm[typeof($entityName$DN)] = (from $entityParam$ in Database.Query<$entityName$DN>()
                                                select new
                                                {
-                                                   Entity = a,
-                                                   a.Id
+                                                   Entity = $entityParam$,
+                                                   $entityParam$.Id
                                                    //More fields
                                                }).ToDynamic();
 
-                dqm.RegisterExpression(($entityName$DN a) => a.$methodName$());
+                dqm.RegisterExpression(($entityName$DN $entityParam$) => $entityParam$.$methodName$());
+                
+                new BasicExecute<$entityName$DN>($entityName$Operation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = ($entityParam$, _)=>{}
+                }.Register();
             }
         }
     }]]>

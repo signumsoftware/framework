@@ -154,7 +154,7 @@ namespace Signum.Engine
                 }
             }
 
-            protected void OnPreRealCommit()
+            internal void OnPreRealCommit()
             {
                 while (PreRealCommit != null)
                 {
@@ -569,6 +569,11 @@ namespace Signum.Engine
 
             if (commited)
                 coreTransaction.CallPostRealCommit();
+        }
+
+        public static void InvokePreRealCommit(Transaction tr)
+        {
+            ((RealTransaction)tr.coreTransaction).OnPreRealCommit();
         }
     }
 }

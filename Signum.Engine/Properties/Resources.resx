@@ -147,4 +147,16 @@
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Unautorized access to {0} because {1}</value>
   </data>
+  <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
+    <value>Impossible to execute {0} from state {1}</value>
+  </data>
+  <data name="InUserInterface" xml:space="preserve">
+    <value>(in user interface)</value>
+  </data>
+  <data name="Operation01IsNotAuthorized" xml:space="preserve">
+    <value>Operation {0} ({1}) is not Authorized</value>
+  </data>
+  <data name="TheEntity0IsNew" xml:space="preserve">
+    <value>The entity {0} is new</value>
+  </data>
 </root>

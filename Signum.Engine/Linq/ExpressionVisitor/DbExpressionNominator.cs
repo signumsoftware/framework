@@ -144,7 +144,6 @@ namespace Signum.Engine.Linq
         }
 
 
-
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             //We can not assume allways true because neasted projections
@@ -154,6 +153,18 @@ namespace Signum.Engine.Linq
                 sqlFunction = new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); ;
 
             if (args.All(Has) && (obj == null || Has(obj)))
+                return Add(sqlFunction);
+
+            return sqlFunction;
+        }
+
+        protected override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            if (args != sqlFunction.Arguments)
+                sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args); ;
+
+            if (args.All(Has))
                 return Add(sqlFunction);
 
             return sqlFunction;
@@ -482,13 +493,19 @@ namespace Signum.Engine.Linq
             Expression left = b.Left;
             Expression right = b.Right;
 
-            if ((left.Type == typeof(string)) != (right.Type == typeof(string)))
+            if (left.Type == typeof(string) || right.Type == typeof(string))
             {
                 b = Expression.Add(
-                    left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
-                    right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
+                    left.Type == typeof(string) ? NullToStringEmpty(left) : new SqlCastExpression(typeof(string), left),
+                    right.Type == typeof(string) ? NullToStringEmpty(right) : new SqlCastExpression(typeof(string), right),
+                    miSimpleConcat);
             }
             return b;
+        }
+
+        private Expression NullToStringEmpty(Expression left)
+        {
+            return new SqlFunctionExpression(typeof(string), null, SqlFunction.ISNULL.ToString(), new[] { left, new SqlConstantExpression("") });
         }
 
         private Expression ConvertToSqlComparison(BinaryExpression b)
@@ -653,32 +670,11 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
-            //if (proj.IsOneCell)
-            //{
-            //    var column = proj.Select.Columns.SingleEx();
-
-            //    var select = (SelectExpression)base.Visit(proj.Select);
-            //    var scalar = new ScalarExpression(column.Expression.Type, select);
-
-            //    var reference = column.GetReference(proj.Select.Alias);
-
-            //    if (replacements == null)
-            //        replacements = new Dictionary<ColumnExpression, ScalarExpression>(); 
-
-            //    replacements.Add(reference, scalar);
-            //    var result = Visit(proj.Projector);
-            //    replacements.Remove(reference);
-
-            //    return result;
-            //}
-            //else
-            //{
             bool oldInnerProjection = this.innerProjection;
             innerProjection = true;
             var result = base.VisitProjection(proj);
             innerProjection = oldInnerProjection;
             return result;
-            //}
         }
 
         protected override Expression VisitIn(InExpression inExp)
@@ -908,8 +904,8 @@ namespace Signum.Engine.Linq
                 case "string.StartsWith": return TryLike(m.Object, Expression.Add(m.GetArgument("value"), Expression.Constant("%"), c));
                 case "string.EndsWith": return TryLike(m.Object, Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c));
 
-                case "StringExtensions.Left": return TrySqlFunction(null, SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
-                case "StringExtensions.Right": return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
+                case "StringExtensions.Start": return TrySqlFunction(null, SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
+                case "StringExtensions.End": return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
                 case "StringExtensions.Replicate": return TrySqlFunction(null, SqlFunction.REPLICATE, m.Type, m.GetArgument("str"), m.GetArgument("times"));
                 case "StringExtensions.Reverse": return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
                 case "StringExtensions.Like": return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
@@ -956,7 +952,7 @@ namespace Signum.Engine.Linq
                     m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
                     m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
                 case "Math.Truncate": return TrySqlFunction(null, SqlFunction.ROUND, m.Type, m.GetArgument("d"), new SqlConstantExpression(0), new SqlConstantExpression(1));
-                case "ExpressionNominatorExtensions.InSql":
+                case "LinqHints.InSql":
                     using (ForceFullNominate())
                     {
                         return Visit(m.GetArgument("value"));

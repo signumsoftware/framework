@@ -54,7 +54,7 @@ namespace Signum.Windows
             {
                 Implementations implementations = f.Token.GetImplementations().Value;
 
-                Lite lite = f.RealValue as Lite;
+                Lite<IIdentifiable> lite = f.RealValue as Lite<IIdentifiable>;
 
                 if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                     Server.FillToStr(lite);
@@ -85,7 +85,6 @@ namespace Signum.Windows
                     {
                         Type = type,
                         Create = false,
-                        HideAutoCompleteOnLostFocus = false,
                         Implementations = implementations
                     };
 
@@ -108,7 +107,6 @@ namespace Signum.Windows
                     Create = false,
                     AutoComplete = false,
                     Find = false,
-                    HideAutoCompleteOnLostFocus = false,
                     Implementations = null
                 };
 

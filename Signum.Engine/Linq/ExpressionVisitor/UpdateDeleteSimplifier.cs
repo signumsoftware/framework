@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.Linq
 {
@@ -29,8 +30,8 @@ namespace Signum.Engine.Linq
             var select = delete.Source as SelectExpression;
 
             TableExpression table = select.From as TableExpression;
-
-            if (table == null || delete.Table.Name != table.Name)
+            
+            if (table == null || delete.Table != table.Table)
                 return delete;
 
             if (TrivialWhere(delete, select))
@@ -73,7 +74,7 @@ namespace Signum.Engine.Linq
 
                 if (table.Alias == result.Alias)
                 {
-                    return new ColumnExpression(result.Type, Alias.Raw(table.Name), result.Name);
+                    return new ColumnExpression(result.Type, Alias.Table(table.Name), result.Name);
                 }
 
                 return result;

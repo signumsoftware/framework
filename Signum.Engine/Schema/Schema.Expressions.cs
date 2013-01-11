@@ -157,7 +157,7 @@ namespace Signum.Engine.Maps
             var result = new EntityExpression(cleanType, new ColumnExpression(this.ReferenceType(), tableAlias, Name), null, null);
 
             if(this.IsLite)
-                return binder.MakeLite(this.FieldType, result, null);
+                return binder.MakeLite(result, null);
             else 
                 return result; 
         }
@@ -228,7 +228,7 @@ namespace Signum.Engine.Maps
             var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, implementations);
 
             if (this.IsLite)
-                return binder.MakeLite(this.FieldType, result, null);
+                return binder.MakeLite(result, null);
             else
                 return result; 
         }
@@ -243,7 +243,7 @@ namespace Signum.Engine.Maps
                 new TypeImplementedByAllExpression(new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name)));
 
             if (this.IsLite)
-                return binder.MakeLite(this.FieldType, result, null);
+                return binder.MakeLite(result, null);
             else
                 return result;
         }

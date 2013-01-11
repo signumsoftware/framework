@@ -65,11 +65,14 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Environment\MusicLoader.cs" />
+    <Compile Include="Environment\MusicLogic.cs" />
     <Compile Include="ExtensionsTest.cs" />
     <Compile Include="LinqProvider\Assert2.cs" />
-    <Compile Include="Entities.cs" />
+    <Compile Include="Environment\Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
     <Compile Include="LinqProvider\InDBTest.cs" />
     <Compile Include="LinqProvider\RetriverTest.cs" />
@@ -78,6 +81,7 @@
     <Compile Include="LinqProvider\DistinctTest.cs" />
     <Compile Include="LinqProvider\SelectManyTest.cs" />
     <Compile Include="LinqProvider\SingleFirstTest.cs" />
+    <Compile Include="LinqProvider\SelectImplementations.cs" />
     <Compile Include="LinqProvider\UpdateDeleteTest.cs" />
     <Compile Include="LinqProvider\SqlFunctionsTest.cs" />
     <Compile Include="LinqProvider\TakeSkipTest.cs" />
@@ -100,7 +104,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SaveTest.cs" />
-    <Compile Include="Starter.cs" />
+    <Compile Include="Environment\Starter.cs" />
     <Compile Include="StringDistanceTest.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -112,7 +116,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

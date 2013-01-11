@@ -215,9 +215,9 @@ namespace Signum.Engine
         public readonly Type Type;
         public readonly int Id;
 
-        public IdentityTuple(Lite lite)
+        public IdentityTuple(Lite<IdentifiableEntity> lite)
         {
-            this.Type = lite.RuntimeType;
+            this.Type = lite.EntityType;
             this.Id = lite.Id;
         }
 

@@ -12,60 +12,79 @@ using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Diagnostics;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities
 {
-    [Serializable]
-    public class Lite<T> : Lite
+    public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>>
         where T : class, IIdentifiable
     {
+        T Entity { get; }
+        T EntityOrNull { get; }
+    
+        int Id { get; }
+        bool IsNew { get;  }
+        int? IdOrNull { get; }
+        Type EntityType { get; }
+        IdentifiableEntity UntypedEntityOrNull { get; }
+
+        void ClearEntity();      
+        void SetEntity(IdentifiableEntity ei);
+        void SetToString(string toStr);
+        void RefreshId();
+
+        string Key();
+        string KeyLong();
+
+        Lite<T> Clone(); 
+    }
+
+    [Serializable]
+    abstract class LiteImp  : Modifiable{ }
+
+    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
+    class LiteImp<T> : LiteImp, Lite<T>
+        where T : IdentifiableEntity
+    {
         T entityOrNull;
+        int? id;
+        protected string toStr;
 
         // Methods
-        protected Lite()
+        protected LiteImp()
         {
         }
 
-        public Lite(int id)
-            : base(typeof(T), id)
-        {        
-        }
-
-
-        public Lite(int id, string toStr)
-            : base(typeof(T), id)
+        public LiteImp(int id, string toStr)
         {
+            if (typeof(T).IsAbstract)
+                throw new InvalidOperationException(typeof(T).Name + " is abstract"); 
+
+            this.id = id;
             this.toStr = toStr;
         }
 
-        public Lite(Type runtimeType, int id)
-            : base(runtimeType, id)
+        public LiteImp(T entity, string toStr)
         {
-            if (!typeof(T).IsAssignableFrom(runtimeType))
-                throw new InvalidOperationException("Type {0} is not smaller than {1}".Formato(runtimeType, typeof(T)));
-        }
+            if (typeof(T).IsAbstract)
+                throw new InvalidOperationException(typeof(T).Name + " is abstract"); 
 
-        public Lite(Type runtimeType, int id, string toStr)
-            :this(runtimeType, id)
-        {
+            if (entity.GetType() != typeof(T))
+                throw new ArgumentNullException("entity");
+
+            this.entityOrNull = entity;
+            this.id = entity.IdOrNull;
             this.toStr = toStr;
         }
 
-        internal Lite(T entity)
-            : base((IdentifiableEntity)(IIdentifiable)entity)
+        public IdentifiableEntity UntypedEntityOrNull
         {
-        }
-
-        public override IdentifiableEntity UntypedEntityOrNull
-        {
-            get { return (IdentifiableEntity)(object)EntityOrNull; }
-            protected set { EntityOrNull = (T)(object)value; }
+            get { return (IdentifiableEntity)(object)entityOrNull; }
         }
 
         public T EntityOrNull
         {
             get { return entityOrNull; }
-            protected set { entityOrNull = value; }
         }
 
         public bool IsNew
@@ -82,42 +101,10 @@ namespace Signum.Entities
                 return entityOrNull;
             }
         }
-    }
 
-    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
-    public abstract class Lite : Modifiable, IComparable, IComparable<Lite>
-    {
-        Type runtimeType;
-        int? id;
-        protected string toStr;
-
-        protected Lite()
+        public Type EntityType
         {
-        }
-
-        protected Lite(Type runtimeType, int id)
-        {
-            if (runtimeType == null || !typeof(IdentifiableEntity).IsAssignableFrom(runtimeType))
-                throw new InvalidOperationException("Type {0} does not implement {1}".Formato(runtimeType, typeof(IdentifiableEntity)));
-
-            this.runtimeType = runtimeType;
-            this.id = id;
-        }
-
-        protected Lite(IdentifiableEntity entidad)
-        {
-            if (entidad == null)
-                throw new ArgumentNullException("entidad");
-
-            this.runtimeType = entidad.GetType();
-            this.UntypedEntityOrNull = entidad;
-            this.id = entidad.IdOrNull;
-        }
-
-
-        public Type RuntimeType
-        {
-            get { return runtimeType; }
+            get { return typeof(T); }
         }
 
         public int Id
@@ -135,28 +122,17 @@ namespace Signum.Entities
             get { return id; }
         }
 
-        public abstract IdentifiableEntity UntypedEntityOrNull
-        {
-            get;
-            protected set;
-        }
-
         public void SetEntity(IdentifiableEntity ei)
         {
             if (id == null)
                 throw new InvalidOperationException("New entities are not allowed");
 
-            if (id != ei.id || RuntimeType != ei.GetType())
+            if (id != ei.id || EntityType != ei.GetType())
                 throw new InvalidOperationException("Entities do not match");
 
-            this.UntypedEntityOrNull = ei;
+            this.entityOrNull = (T)ei;
             if (ei != null && this.toStr == null)
                 this.toStr = ei.ToString();
-        }
-
-        public void RefreshId()
-        {
-            id = UntypedEntityOrNull.Id;
         }
 
         public void ClearEntity()
@@ -164,9 +140,15 @@ namespace Signum.Entities
             if (id == null)
                 throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
-            this.toStr = this.UntypedEntityOrNull.ToString();
-            this.UntypedEntityOrNull = null;
+            this.toStr = this.UntypedEntityOrNull.TryToString();
+            this.entityOrNull = null;
         }
+
+        public void RefreshId()
+        {
+            id = UntypedEntityOrNull.Id;
+        }
+
 
         protected internal override void PreSaving(ref bool graphModified)
         {
@@ -176,51 +158,12 @@ namespace Signum.Entities
             }
         }
 
-        public override bool SelfModified
-        {
-            get { return false; }
-        }
-
-        protected override void CleanSelfModified()
-        {
-        }
-
         public override string ToString()
         {
             if (this.UntypedEntityOrNull != null)
                 return this.UntypedEntityOrNull.ToString();
 
             return this.toStr;
-        }
-
-    
-        public static Lite Create(Type type, int id)
-        {
-            return (Lite)Activator.CreateInstance(Generate(type), type, id);
-        }
-
-        public static Lite Create(Type type, int id, Type runtimeType)
-        {
-            return (Lite)Activator.CreateInstance(Generate(type), runtimeType, id);
-        }
-
-        public static Lite Create(Type type, int id, Type runtimeType, string toStr)
-        {
-            Lite result = (Lite)Activator.CreateInstance(Generate(type), runtimeType, id, toStr);
-            return result;
-        }
-
-        public static Lite Create(Type type, IIdentifiable entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException("entity");
-
-            BindingFlags bf = BindingFlags.Default | BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic;
-
-            ConstructorInfo ci = Generate(type).GetConstructor(bf, null, new[] { type }, null);
-
-            Lite result = (Lite)ci.Invoke(new[] { entity });
-            return result;
         }
 
         public override bool Equals(object obj)
@@ -234,31 +177,93 @@ namespace Signum.Entities
             if (GetType() != obj.GetType())
                 return false;
 
-            Lite lite = (Lite)obj as Lite;
-
-            if (RuntimeType != lite.RuntimeType)
-                return false;
-
+            Lite<T> lite = (LiteImp<T>)obj;
             if (IdOrNull != null && lite.IdOrNull != null)
                 return Id == lite.Id;
             else
-                return object.ReferenceEquals(this.UntypedEntityOrNull, lite.UntypedEntityOrNull);
+                return object.ReferenceEquals(this.entityOrNull, lite.EntityOrNull);
         }
 
         const int MagicMask = 123456853;
         public override int GetHashCode()
         {
             return this.id == null ?
-                UntypedEntityOrNull.GetHashCode() ^ MagicMask :
-                this.RuntimeType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
+                entityOrNull.GetHashCode() ^ MagicMask :
+                this.EntityType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
+        }
+
+        public string Key()
+        {
+            return "{0};{1}".Formato(Lite.UniqueTypeName(this.EntityType), this.Id);
+        }
+
+        public string KeyLong()
+        {
+            return "{0};{1};{2}".Formato(Lite.UniqueTypeName(this.EntityType), this.Id, this.ToString());
+        }
+
+        public int CompareTo(Lite<IdentifiableEntity> other)
+        {
+            return ToString().CompareTo(other.ToString());
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (obj is Lite<IdentifiableEntity>)
+                return CompareTo((Lite<IdentifiableEntity>)obj);
+
+            throw new InvalidOperationException("obj is not a Lite");
+        }
+
+        public void SetToString(string toStr)
+        {
+            this.toStr = toStr;
+        }
+
+        protected override void CleanSelfModified()
+        {
+        }
+
+        public override bool SelfModified
+        {
+            get { return false; }
+        }
+
+
+        public Lite<T> Clone()
+        {
+            return new LiteImp<T>(Id, toStr); 
+        }
+    }
+
+    public static class Lite
+    {
+        public static Type BaseImplementationType = typeof(LiteImp);
+
+        static GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>> giNewLite =
+            new GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>>((id, str) => new LiteImp<IdentifiableEntity>(id, str));
+
+        static GenericInvoker<Func<IdentifiableEntity, string, Lite<IdentifiableEntity>>> giNewLiteFat =
+            new GenericInvoker<Func<IdentifiableEntity, string, Lite<IdentifiableEntity>>>((entity, str) => new LiteImp<IdentifiableEntity>(entity, str));
+
+        public static Type Generate(Type identificableType)
+        {
+            return typeof(Lite<>).MakeGenericType(identificableType);
+        }
+
+        public static Type Extract(Type liteType)
+        {
+            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
+                return liteType.GetGenericArguments()[0];
+            return null;
         }
 
         static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
 
-        public static Lite Parse(Type staticType, string liteKey)
+        public static Lite<IdentifiableEntity> Parse(string liteKey)
         {
-            Lite result;
-            string error = TryParseLite(staticType, liteKey, out result);
+            Lite<IdentifiableEntity> result;
+            string error = TryParseLite(liteKey, out result);
             if (error == null)
                 return result;
             else
@@ -267,15 +272,15 @@ namespace Signum.Entities
 
         public static Lite<T> Parse<T>(string liteKey) where T : class, IIdentifiable
         {
-            return (Lite<T>)Lite.Parse(typeof(T), liteKey);
+            return (Lite<T>)Lite.Parse(liteKey);
         }
 
-        public static string TryParseLite(Type staticType, string liteKey, out Lite result)
+        public static string TryParseLite(string liteKey, out Lite<IdentifiableEntity> result)
         {
             result = null;
             if (string.IsNullOrEmpty(liteKey))
-                return null; 
-            
+                return null;
+
             Match match = regex.Match(liteKey);
             if (!match.Success)
                 return Resources.InvalidFormat;
@@ -290,14 +295,14 @@ namespace Signum.Entities
 
             string toStr = match.Groups["toStr"].Value; //maybe null
 
-            result = Lite.Create(staticType, id, type, toStr);
+            result = giNewLite.GetInvoker(type)(id, toStr);
             return null;
         }
 
         public static string TryParse<T>(string liteKey, out Lite<T> lite) where T : class, IIdentifiable
         {
-            Lite untypedLite;
-            var result = Lite.TryParseLite(typeof(T), liteKey, out untypedLite);
+            Lite<IdentifiableEntity> untypedLite;
+            var result = Lite.TryParseLite(liteKey, out untypedLite);
             lite = (Lite<T>)untypedLite;
             return result;
         }
@@ -311,50 +316,16 @@ namespace Signum.Entities
             Lite.ResolveType = resolveType;
         }
 
-        public string Key()
+        public static Lite<IdentifiableEntity> Create(Type type, int id)
         {
-            return "{0};{1}".Formato(UniqueTypeName(this.RuntimeType), this.Id);
+            return giNewLite.GetInvoker(type)(id, null);
         }
 
-        public string KeyLong()
+        public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr)
         {
-            return "{0};{1};{2}".Formato(UniqueTypeName(this.RuntimeType), this.Id, this.ToString());
+            return giNewLite.GetInvoker(type)(id, toStr);
         }
 
-        public int CompareTo(Lite other)
-        {
-            return ToString().CompareTo(other.ToString()); 
-        }
-
-        public int CompareTo(object obj)
-        {
-            if (obj is Lite)
-                return CompareTo((Lite)obj);
-
-            throw new InvalidOperationException("obj is not a Lite"); 
-        }
-
-        public void SetToString(string toStr)
-        {
-            this.toStr = toStr;
-        }
-
-        public static Type Generate(Type identificableType)
-        {
-            return typeof(Lite<>).MakeGenericType(identificableType);
-        }
-
-        public static Type Extract(Type liteType)
-        {
-            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
-                return liteType.GetGenericArguments()[0];
-            return null;
-        }
-    }
-
-
-    public static class LiteUtils
-    {
         public static Lite<T> ToLite<T>(this T entity)
           where T : class, IIdentifiable
         {
@@ -364,7 +335,7 @@ namespace Signum.Entities
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-            return new Lite<T>(entity.GetType(), entity.Id, entity.ToString());
+            return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, entity.ToString());
         }
 
         public static Lite<T> ToLite<T>(this T entity, string toStr)
@@ -376,7 +347,25 @@ namespace Signum.Entities
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-            return new Lite<T>(entity.GetType(), entity.Id, toStr);
+            return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, toStr ?? entity.ToString());
+        }
+
+        public static Lite<T> ToLiteFat<T>(this T entity)
+         where T : class, IIdentifiable
+        {
+            if (entity == null)
+                return null;
+
+            return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((IdentifiableEntity)(IIdentifiable)entity, entity.ToString());
+        }
+
+        public static Lite<T> ToLiteFat<T>(this T entity, string toStr)
+          where T : class, IIdentifiable
+        {
+            if (entity == null)
+                return null;
+
+            return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((IdentifiableEntity)(IIdentifiable)entity, toStr ?? entity.ToString());
         }
 
         public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IIdentifiable
@@ -394,48 +383,7 @@ namespace Signum.Entities
             else
                 return entity.ToLite(toStr);
         }
-
-        public static Lite<T> ToLiteFat<T>(this T entity) where T : class, IIdentifiable
-        {
-            if (entity == null)
-                return null;
-
-            return new Lite<T>(entity);
-        }
-
-        public static Lite<T> ToLiteFat<T>(this T entity, string toStr) where T : class, IIdentifiable
-        {
-            if (entity == null)
-                return null;
-
-            return new Lite<T>(entity);
-        }
-
-        public static Lite<T> ToLite<T>(this Lite lite)
-          where T : class, IIdentifiable
-        {
-            if (lite == null)
-                return null;
-
-            if (lite.UntypedEntityOrNull != null)
-                return new Lite<T>((T)(object)lite.UntypedEntityOrNull);
-            else
-                return new Lite<T>(lite.RuntimeType, lite.Id, lite.ToString());
-        }
-
-        public static Lite<T> ToLite<T>(this Lite lite, string toStr)
-            where T : class, IIdentifiable
-        {
-            if (lite == null)
-                return null;
-
-            if (lite.UntypedEntityOrNull != null)
-                return new Lite<T>((T)(object)lite.UntypedEntityOrNull);
-            else
-                return new Lite<T>(lite.RuntimeType, lite.Id, lite.ToString());
-        }
-
-
+       
         [MethodExpander(typeof(RefersToExpander))]
         public static bool RefersTo<T>(this Lite<T> lite, T entity)
             where T : class, IIdentifiable
@@ -446,7 +394,7 @@ namespace Signum.Entities
             if (lite == null || entity == null)
                 return false;
 
-            if (lite.RuntimeType != entity.GetType())
+            if (lite.EntityType != entity.GetType())
                 return false;
 
             if (lite.IdOrNull != null)
@@ -505,7 +453,7 @@ namespace Signum.Entities
             if (lite1 == null || lite2 == null)
                 return false;
 
-            if (lite1.RuntimeType != lite2.RuntimeType)
+            if (lite1.EntityType != lite2.EntityType)
                 return false;
 
             if (lite1.IdOrNull != null && lite2.IdOrNull != null)
@@ -522,12 +470,23 @@ namespace Signum.Entities
 
         public static bool IsLite(this Type t)
         {
-            return typeof(Lite).IsAssignableFrom(t);
+            return typeof(Lite<IIdentifiable>).IsAssignableFrom(t);
         }
 
         public static Type CleanType(this Type t)
         {
             return Lite.Extract(t) ?? t;
+        }
+
+
+        public static Lite<T> Create<T>(int id) where T : IdentifiableEntity
+        {
+            return new LiteImp<T>(id, null);          
+        }
+
+        public static Lite<T> Create<T>(int id, string toStr) where T : IdentifiableEntity
+        {
+            return new LiteImp<T>(id, toStr);
         }
     }
 }

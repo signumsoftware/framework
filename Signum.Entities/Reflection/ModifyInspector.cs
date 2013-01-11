@@ -22,7 +22,7 @@ namespace Signum.Entities.Reflection
                 return getterCache.GetOrCreate(type, () =>
                 {
                     FieldInfo[] aux = Reflector.InstanceFieldsInOrder(type);
-                    return aux.Where(fi => Reflector.IsModifiableOrInterface(fi.FieldType) && !fi.HasAttribute<IgnoreAttribute>())
+                    return aux.Where(fi => Reflector.IsModifiableIdentifiableOrLite(fi.FieldType) && !fi.HasAttribute<IgnoreAttribute>())
                         .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray();
                 });
         }
@@ -41,7 +41,7 @@ namespace Signum.Entities.Reflection
             if (Reflector.IsMList(obj.GetType()))
             {
                 Type t = obj.GetType().ElementType();
-                if (Reflector.IsModifiableOrInterface(t))
+                if (Reflector.IsModifiableIdentifiableOrLite(t))
                 {
                     IEnumerable col = obj as IEnumerable;
                     foreach (Modifiable item in col)

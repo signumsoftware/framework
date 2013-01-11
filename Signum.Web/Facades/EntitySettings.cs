@@ -8,6 +8,10 @@ using System.Web.Mvc;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Engine.Basics;
+using Signum.Engine.Operations;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Web.Operations;
 
 namespace Signum.Web
 {
@@ -60,49 +64,62 @@ namespace Signum.Web
             return PartialViewName((T)entity);
         }
         
-        public EntitySettings(EntityType entityType)
+        public EntitySettings()
         {
-            switch (entityType)
+            switch (TypeLogic.GetEntityKind(typeof(T)))
             {
-                case EntityType.SystemString:
+                case EntityKind.SystemString:
                     IsCreable = EntityWhen.Never;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
                     IsReadonly = true;
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
-                case EntityType.System:
+
+                case EntityKind.System:
                     IsCreable = EntityWhen.Never;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     IsReadonly = true;
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
-                case EntityType.String:
+
+                case EntityKind.String:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearchEntity;
                     MappingMain = new EntityMapping<T>(true).GetValue;
                     MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
-                case EntityType.Part:
-                    IsCreable = EntityWhen.IsLine;
-                    IsViewable = true;
-                    IsNavigable = EntityWhen.Always;
-                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
-                    break;
-                case EntityType.Shared:
+
+                case EntityKind.Shared:
                     IsCreable = EntityWhen.Always;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
-                case EntityType.Main:
+
+                case EntityKind.Main:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
                     break;
+
+                case EntityKind.Part:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
+                    break;
+
+                case EntityKind.SharedPart:
+                    IsCreable = EntityWhen.IsLine;
+                    IsViewable = true;
+                    IsNavigable = EntityWhen.Always;
+                    MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
+                    break;
+             
                 default:
                     break;
             }
@@ -127,17 +144,6 @@ namespace Signum.Web
         {
             return IsReadonly;
         }
-    }
-
-
-    public enum EntityType
-    {
-        SystemString,
-        System,
-        String,
-        Part,
-        Shared,
-        Main,
     }
 
     public class EmbeddedEntitySettings<T> : EntitySettings, IImplementationsFinder where T : EmbeddedEntity

@@ -355,12 +355,12 @@ namespace Signum.Engine.Linq
             return EntityIn(newItem, entityIDs);
         }
 
-        internal static Expression EntityIn(LiteExpression liteReference, IEnumerable<Lite> collection)
+        internal static Expression EntityIn(LiteExpression liteReference, IEnumerable<Lite<IIdentifiable>> collection)
         {
             if (collection.IsEmpty())
                 return False;
 
-            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.RuntimeType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
+            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.EntityType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
             return EntityIn(liteReference.Reference, entityIDs); 
         }
@@ -537,21 +537,13 @@ namespace Signum.Engine.Linq
 
             if (c.Type.IsLite())
             {
-                var lite = (Lite)c.Value;
+                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)c.Value;
 
                 Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 
-                Type liteType = lite.GetType();
+                EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null);
 
-                EntityExpression ere = new EntityExpression(lite.RuntimeType, id, null, null);
-
-                Type staticType = Lite.Extract(liteType);
-                Expression reference = staticType == ere.Type ? (Expression)ere :
-                    new ImplementedByExpression(staticType,
-                        new[] { new ImplementationColumn(ere.Type, ere) }.ToReadOnly());
-
-                return new LiteExpression(liteType,
-                    reference, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.RuntimeType), false);
+                return new LiteExpression(Lite.Generate(lite.EntityType), ere, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.EntityType), false);
             }
 
             return null;

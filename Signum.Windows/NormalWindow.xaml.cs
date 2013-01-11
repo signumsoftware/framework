@@ -20,6 +20,8 @@ namespace Signum.Windows
 {
     public partial class NormalWindow
     {
+        public static event GetButtonBarElementDelegate GetButtonBarElement;
+
         public static readonly DependencyProperty MainControlProperty =
             DependencyProperty.Register("MainControl", typeof(Control), typeof(NormalWindow));
         public Control MainControl
@@ -36,6 +38,30 @@ namespace Signum.Windows
             set { SetValue(AllowErrorsProperty, value); }
         }
 
+        public static readonly DependencyProperty SaveProtectedProperty =
+            DependencyProperty.Register("SaveProtected", typeof(bool), typeof(NormalWindow), new UIPropertyMetadata(false));
+        public bool SaveProtected
+        {
+            get { return (bool)GetValue(SaveProtectedProperty); }
+            set { SetValue(SaveProtectedProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowOperationsProperty =
+            DependencyProperty.Register("ShowOperations", typeof(bool), typeof(NormalWindow), new PropertyMetadata(true));
+        public bool ShowOperations
+        {
+            get { return (bool)GetValue(ShowOperationsProperty); }
+            set { SetValue(ShowOperationsProperty, value); }
+        }
+
+        public static readonly DependencyProperty ViewModeProperty =
+            DependencyProperty.Register("ViewMode", typeof(ViewMode), typeof(NormalWindow), new PropertyMetadata(ViewMode.Navigate));
+        public ViewMode ViewMode
+        {
+            get { return (ViewMode)GetValue(ViewModeProperty); }
+            set { SetValue(ViewModeProperty, value); }
+        }
+
         public ButtonBar ButtonBar
         {
             get { return this.buttonBar; }
@@ -45,13 +71,17 @@ namespace Signum.Windows
         {
             this.InitializeComponent();
 
+            this.Loaded += NormalWindow_Loaded;
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(NormalWindow_DataContextChanged);
 
             Common.AddChangeDataContextHandler(this, ChangeDataContext_Handler);
 
             RefreshEnabled();
+        }
 
-            this.Loaded += new RoutedEventHandler(NormalWindow_Loaded);
+        void NormalWindow_Loaded(object sender, EventArgs e)
+        {
+            ButtonBar.OkVisible = ViewMode == Windows.ViewMode.View;
         }
 
         void ChangeDataContext_Handler(object sender, ChangeDataContextEventArgs e)
@@ -79,38 +109,49 @@ namespace Signum.Windows
             }
         }
 
-        void NormalWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.buttonBar.SaveButton.IsEnabled = !Common.GetIsReadOnly(this);
-        }
-
         void NormalWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             RefreshEnabled();
-        }
 
-        protected override void OnPreviewKeyDown(System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == Key.S && (e.KeyboardDevice.Modifiers & ModifierKeys.Control) != 0 && buttonBar.SaveVisible)
+            ButtonBarEventArgs ctx = new ButtonBarEventArgs
             {
-                Save();
+                MainControl = MainControl,
+                ViewButtons = ViewMode,
+                SaveProtected = SaveProtected,
+                ShowOperations = ShowOperations,
+            };
+
+            List<FrameworkElement> elements = new List<FrameworkElement>();
+            if (GetButtonBarElement != null)
+            {
+                elements.AddRange(GetButtonBarElement.GetInvocationList()
+                    .Cast<GetButtonBarElementDelegate>()
+                    .Select(d => d(e.NewValue, ctx))
+                    .NotNull().SelectMany(d => d).NotNull().ToList());
             }
+
+            if (MainControl is IHaveToolBarElements)
+            {
+                elements.AddRange(((IHaveToolBarElements)ctx.MainControl).GetToolBarElements(this.DataContext, ctx));
+            }
+
+            ButtonBar.SetButtons(elements);
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            if (Navigator.Manager.OnSaveProtected(this.DataContext.GetType()))
+            if (this.DataContext is IdentifiableEntity && SaveProtected)
             {
                 if (!this.HasChanges())
                     DialogResult = true;
                 else
                 {
-                    var answer = MessageBox.Show(
+                    var result = MessageBox.Show(
                         Properties.Resources.ThereAreChangesContinue,
                         Properties.Resources.ThereAreChanges,
                         MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
 
-                    if (answer != MessageBoxResult.OK)
+                    if (result == MessageBoxResult.Cancel)
                         return;
 
                     DialogResult = false;
@@ -129,12 +170,19 @@ namespace Signum.Windows
                     {
                         case AllowErrors.Yes: break;
                         case AllowErrors.No:
-                            MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), Properties.Resources.FixErrors,
-                                MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            MessageBox.Show(this,
+                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)),
+                                Properties.Resources.FixErrors,
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Exclamation);
                             return;
                         case AllowErrors.Ask:
-                            if (MessageBox.Show(this, type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway, Properties.Resources.ContinueWithErrors,
-                                MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.None) == MessageBoxResult.No)
+                            if (MessageBox.Show(this,
+                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway,
+                                Properties.Resources.ContinueWithErrors,
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Exclamation,
+                                MessageBoxResult.None) == MessageBoxResult.No)
                                 return;
                             break;
                     }
@@ -144,33 +192,6 @@ namespace Signum.Windows
             }
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            Save();
-        }
-
-        private void Save()
-        {
-            if (!this.HasChanges())
-            {
-                MessageBox.Show(this, Properties.Resources.NoChanges);
-
-                return;
-            }
-
-            if (!MainControl.AssertErrors())
-                return;
-
-            buttonBar.SaveButton.IsEnabled = false;
-            IdentifiableEntity ei = (IdentifiableEntity)base.DataContext;
-            IdentifiableEntity nueva = null;
-            Async.Do(
-                () => nueva = Server.Save(ei),
-                () => { base.DataContext = null; base.DataContext = nueva; },
-                () => buttonBar.SaveButton.IsEnabled = true);
-        }
-
-
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
@@ -179,10 +200,14 @@ namespace Signum.Windows
 
             if (this.HasChanges())
             {
-                if (buttonBar.SaveVisible)
+                if (buttonBar.ViewMode == ViewMode.Navigate)
                 {
-                    var result = MessageBox.Show(this, Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
-                        MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
+                    var result = MessageBox.Show(
+                      Properties.Resources.ThereAreChangesContinue,
+                      Properties.Resources.ThereAreChanges,
+                      MessageBoxButton.OKCancel,
+                      MessageBoxImage.Question,
+                      MessageBoxResult.OK);
 
                     if (result == MessageBoxResult.Cancel)
                     {
@@ -190,17 +215,23 @@ namespace Signum.Windows
                         return;
                     }
 
-                    if (result == MessageBoxResult.Yes)
-                        DataContext = Server.Save((IdentifiableEntity)DataContext);
                 }
                 else
                 {
-                    var result = MessageBox.Show(this, Properties.Resources.LoseChanges, Properties.Resources.ThereAreChanges, MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
-
-                    if (result == MessageBoxResult.Cancel)
+                    if (DialogResult == null)
                     {
-                        e.Cancel = true;
-                        return;
+                        var result = MessageBox.Show(this,
+                            Properties.Resources.LoseChanges,
+                            Properties.Resources.ThereAreChanges,
+                            MessageBoxButton.OKCancel,
+                            MessageBoxImage.Question,
+                            MessageBoxResult.OK);
+
+                        if (result == MessageBoxResult.Cancel)
+                        {
+                            e.Cancel = true;
+                            return;
+                        }
                     }
                 }
             }
@@ -248,7 +279,23 @@ namespace Signum.Windows
     public enum AllowErrors
     {
         Ask,
-        Yes, 
+        Yes,
         No,
     }
+
+    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, ButtonBarEventArgs context);
+
+    public interface IHaveToolBarElements
+    {
+        List<FrameworkElement> GetToolBarElements(object dataContext, ButtonBarEventArgs ctx);
+    }
+
+    public class ButtonBarEventArgs
+    {
+        public Control MainControl { get; set; }
+        public ViewMode ViewButtons { get; set; }
+        public bool SaveProtected { get; set; }
+        public bool ShowOperations { get; set; }
+    }
+
 }

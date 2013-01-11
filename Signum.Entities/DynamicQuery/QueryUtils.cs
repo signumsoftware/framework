@@ -192,10 +192,32 @@ namespace Signum.Entities.DynamicQuery
             },
         };
 
+        public static Func<bool> MergeEntityColumns = null;
+
         public static List<QueryToken> SubTokens(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
             if (token == null)
-                return columnDescriptions.Select(s => QueryToken.NewColumn(s)).ToList();
+            {
+                if (MergeEntityColumns != null && !MergeEntityColumns())
+                    return columnDescriptions.Select(s => QueryToken.NewColumn(s)).ToList();
+
+                var dictonary = columnDescriptions.Where(a=>!a.IsEntity).Select(s => QueryToken.NewColumn(s)).ToDictionary(t => t.Key);
+
+                var entity = QueryToken.NewColumn(columnDescriptions.SingleEx(a => a.IsEntity));
+
+                dictonary.Add(entity.Key, entity);
+
+                foreach (var item in entity.SubTokens().OrderBy(a => a.ToString()))
+                {
+                    if (!dictonary.ContainsKey(item.Key))
+                    {
+                        item.Subordinated = true;
+                        dictonary.Add(item.Key, item);
+                    }
+                }
+
+                return dictonary.Values.ToList();
+            }
             else
                 return token.SubTokens();
         }

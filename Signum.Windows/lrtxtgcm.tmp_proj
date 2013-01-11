@@ -1,0 +1,374 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{76278145-7CCD-4411-9B8A-078708128571}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Signum.Windows</RootNamespace>
+    <AssemblyName>Signum.Windows</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <ExpressionBlendVersion>3.0.1927.0</ExpressionBlendVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
+    <OutputPath>bin\Partial\</OutputPath>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Basics\Exception.xaml.cs">
+      <DependentUpon>Exception.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TimePicker.xaml.cs">
+      <DependentUpon>TimePicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\TimeSpanConverter.cs" />
+    <Compile Include="DynamicQuery\DynamicQueryBachRequest.cs" />
+    <Compile Include="DynamicQuery\ElementsInPageLabel.xaml.cs">
+      <DependentUpon>ElementsInPageLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\FilterLine.xaml.cs">
+      <DependentUpon>FilterLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\PageSizeSelector.xaml.cs">
+      <DependentUpon>PageSizeSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\PageSelector.xaml.cs">
+      <DependentUpon>PageSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ErrorSummary.xaml.cs">
+      <DependentUpon>ErrorSummary.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EntityControls\EntityLine.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>EntityLine.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Signum.Utilities\Properties\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
+    <Compile Include="Async.cs" />
+    <Compile Include="ButtonBar.xaml.cs">
+      <DependentUpon>ButtonBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Common.cs" />
+    <Compile Include="Controls\AutoCompleteTextBox.xaml.cs">
+      <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DragDropController.cs" />
+    <Compile Include="Controls\WatermarkTextBox.cs" />
+    <Compile Include="Controls\ShyControl.cs" />
+    <Compile Include="Controls\ToolBarButton.cs" />
+    <Compile Include="AutoControl.cs" />
+    <Compile Include="Converters\EnumBooleanConverter.cs" />
+    <Compile Include="Converters\PropertyRouteConverter.cs" />
+    <Compile Include="Converters\TypeDataTemplateSelector.cs" />
+    <Compile Include="DynamicQuery\QueryTokenBuilder.xaml.cs">
+      <DependentUpon>QueryTokenBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\QueryTokenRenderer.xaml.cs">
+      <DependentUpon>QueryTokenRenderer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\SortGridViewColumnHeader.cs" />
+    <Compile Include="Fluent\ControlExtensions.cs" />
+    <Compile Include="Fluent\EntityExtensions.cs" />
+    <Compile Include="Fluent\Fluent.cs" />
+    <Compile Include="Fluent\FrameworkFactoryGenerator.cs" />
+    <Compile Include="Fluent\TreeExtensions.cs" />
+    <Compile Include="Fluent\WhereExtensions.cs" />
+    <Compile Include="MarkupExtensions\NavigatorExtensions.cs" />
+    <Compile Include="Operations\ConstructFromManyMenuItem.cs" />
+    <Compile Include="Operations\EntityOperationMenuItem.cs" />
+    <Compile Include="Operations\EntityOperationToolBarButton.cs" />
+    <Compile Include="Operations\OperationClient.cs" />
+    <Compile Include="Operations\OperationLog.xaml.cs">
+      <DependentUpon>OperationLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Operations\OperationServer.cs" />
+    <Compile Include="Operations\OperationSettings.cs" />
+    <Compile Include="SelectorWindow.xaml.cs">
+      <DependentUpon>SelectorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\CountSearchControl.xaml.cs">
+      <DependentUpon>CountSearchControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\EntityDetail.xaml.cs">
+      <DependentUpon>EntityDetail.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\EntityListBase.cs" />
+    <Compile Include="EntityControls\EntityRepeater.xaml.cs">
+      <DependentUpon>EntityRepeater.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\TextArea.xaml.cs">
+      <DependentUpon>TextArea.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\LineBase.cs" />
+    <Compile Include="EntityTitle.xaml.cs">
+      <DependentUpon>EntityTitle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MarkupExtensions\EqualsExtension.cs" />
+    <Compile Include="Utilities\Monitors.cs" />
+    <Compile Include="Utilities\ThemeManager.cs" />
+    <Compile Include="ValueLineBox.xaml.cs">
+      <DependentUpon>ValueLineBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Facades\Constructor.cs" />
+    <Compile Include="Converters\DateTimeConverter.cs" />
+    <Compile Include="Converters\NullableNumericConverter.cs" />
+    <Compile Include="Converters\DoubleListConverter.cs" />
+    <Compile Include="Facades\MenuManager.cs" />
+    <Compile Include="Facades\ShortcutHelper.cs" />
+    <Compile Include="Facades\ViewOptions.cs" />
+    <Compile Include="Facades\FindOptions.cs" />
+    <Compile Include="Facades\QuerySettings.cs" />
+    <Compile Include="Facades\EntitySettings.cs" />
+    <Compile Include="MarkupExtensions\LazyExtension.cs" />
+    <Compile Include="MarkupExtensions\PackUriExtension.cs" />
+    <Compile Include="Controls\ColorPicker.cs" />
+    <Compile Include="Controls\ColorUtils\ColorSelector.xaml.cs">
+      <DependentUpon>ColorSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorUtils\HsvColor.cs" />
+    <Compile Include="Controls\ColorUtils\RGBTextBox.xaml.cs">
+      <DependentUpon>RGBTextBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorUtils\SpectrumSlider.cs" />
+    <Compile Include="Controls\DateTimePicker.cs" />
+    <Compile Include="Controls\ImageButton.cs" />
+    <Compile Include="Controls\NumericTextBox.cs" />
+    <Compile Include="Controls\PickerBase.cs" />
+    <Compile Include="Converters\Converter.cs" />
+    <Compile Include="Converters\Converters.cs" />
+    <Compile Include="Converters\GradientConverter.cs" />
+    <Compile Include="Converters\NotNullValidationRule.cs" />
+    <Compile Include="Converters\FormatStringConverter.cs" />
+    <Compile Include="DataBorder.cs" />
+    <Compile Include="DynamicQuery\SearchControl.xaml.cs">
+      <DependentUpon>SearchControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\LightEntityLine.xaml.cs">
+      <DependentUpon>LightEntityLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\FilterBuilder.xaml.cs">
+      <DependentUpon>FilterBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\SearchWindow.xaml.cs">
+      <DependentUpon>SearchWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\EntityBase.cs" />
+    <Compile Include="EntityControls\EntityButtons.xaml.cs">
+      <DependentUpon>EntityButtons.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\EntityCombo.xaml.cs">
+      <DependentUpon>EntityCombo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ImageLoader.cs" />
+    <Compile Include="Widgets\LinksWidget.xaml.cs">
+      <DependentUpon>LinksWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Widgets\WidgetPanel.xaml.cs">
+      <DependentUpon>WidgetPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LocExtension.cs" />
+    <Compile Include="MarkupExtensions\DebugConverter.cs" />
+    <Compile Include="MarkupExtensions\EnumValuesExtension.cs" />
+    <Compile Include="MarkupExtensions\ImageExtension.cs" />
+    <Compile Include="Facades\Navigator.cs" />
+    <Compile Include="NormalWindow.xaml.cs">
+      <DependentUpon>NormalWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.es.Designer.cs">
+      <DependentUpon>Resources.es.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Facades\Server.cs" />
+    <Compile Include="EntityControls\ValueLine.xaml.cs">
+      <DependentUpon>ValueLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\EntityList.xaml.cs">
+      <DependentUpon>EntityList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
+      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Name>Signum.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
+      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Name>Signum.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <ReferencePath Include="C:\Program Files (x86)\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.Types.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\mscorlib.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationCore.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationFramework.Aero.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationFramework.Classic.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationFramework.dll" />
+    <ReferencePath Include="D:\Signum\Framework\Signum.Entities\bin\Debug\Signum.Entities.dll" />
+    <ReferencePath Include="D:\Signum\Framework\Signum.Utilities\bin\Debug\Signum.Utilities.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.Configuration.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.Core.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.Data.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.Data.Linq.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.ServiceModel.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.Xaml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.Xml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\System.Xml.Linq.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\UIAutomationProvider.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\WindowsBase.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\Basics\Exception.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\Controls\TimePicker.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\ElementsInPageLabel.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\FilterLine.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\PageSizeSelector.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\PageSelector.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\ErrorSummary.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\ButtonBar.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\Controls\AutoCompleteTextBox.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\Controls\ColorUtils\ColorSelector.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\Controls\ColorUtils\RGBTextBox.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\QueryTokenBuilder.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\QueryTokenRenderer.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\Operations\OperationLog.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\SelectorWindow.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\CountSearchControl.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\EntityDetail.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\EntityRepeater.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\TextArea.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityTitle.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\ValueLineBox.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\SearchControl.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\LightEntityLine.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\FilterBuilder.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\DynamicQuery\SearchWindow.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\EntityButtons.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\EntityCombo.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\Widgets\LinksWidget.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\Widgets\WidgetPanel.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\NormalWindow.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\ValueLine.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\EntityList.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\EntityControls\EntityLine.g.cs" />
+    <Compile Include="D:\Signum\Framework\Signum.Windows\obj\Debug\GeneratedInternalTypeHelper.g.cs" />
+  </ItemGroup>
+</Project>

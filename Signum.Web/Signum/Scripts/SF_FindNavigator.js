@@ -52,9 +52,9 @@ SF.registerModule("FindNavigator", function () {
 
                 var $tblResults = self.element.find(".sf-search-results-container");
                 $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection),th:not(.sf-th-entity):not(.sf-th-selection) span,th:not(.sf-th-entity):not(.sf-th-selection) .sf-header-droppable", function (e) {
-                    if (e.target != this) {
+                    if (e.target != this || $(this).closest(".sf-search-ctxmenu").length > 0) {
                         return;
-                    }
+                    } 
                     self.newSortOrder($(e.target).closest("th"), e.shiftKey);
                     self.search();
                     return false;
@@ -95,20 +95,20 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $tblResults.on("click", ".sf-search-ctxitem.quickfilter", function () {
+                $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter > span", function () {
                     var $elem = $(this).closest("td");
                     $('.sf-search-ctxmenu-overlay').remove();
                     self.quickFilterCell($elem);
                 });
 
-                $tblResults.on("click", ".sf-search-ctxitem.quickfilter-header", function () {
+                $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter-header > span", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
                     self.quickFilterHeader($elem);
                     return false;
                 });
 
-                $tblResults.on("click", ".sf-search-ctxitem.remove-column", function () {
+                $tblResults.on("click", ".sf-search-ctxitem.sf-remove-column > span", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
 
@@ -116,7 +116,7 @@ SF.registerModule("FindNavigator", function () {
                     return false;
                 });
 
-                $tblResults.on("click", ".sf-search-ctxitem.edit-column", function () {
+                $tblResults.on("click", ".sf-search-ctxitem.sf-edit-column > span", function () {
                     var $elem = $(this).closest("th");
                     $('.sf-search-ctxmenu-overlay').remove();
 
@@ -207,11 +207,11 @@ SF.registerModule("FindNavigator", function () {
                 var $menu = this.createCtxMenu($th);
 
                 var $itemContainer = $menu.find(".sf-search-ctxmenu");
-                $itemContainer.append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>");
+                $itemContainer.append("<div class='sf-search-ctxitem sf-quickfilter-header'><span>" + lang.signum.addFilter + "</span></div>");
 
                 if (this.options.allowChangeColumns) {
-                    $itemContainer.append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
-                        .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
+                    $itemContainer.append("<div class='sf-search-ctxitem sf-edit-column'><span>" + lang.signum.editColumnName + "</span></div>")
+                        .append("<div class='sf-search-ctxitem sf-remove-column'><span>" + lang.signum.removeColumn + "</span></div>");
                 }
 
                 $th.append($menu);
@@ -223,7 +223,7 @@ SF.registerModule("FindNavigator", function () {
                 var $menu = this.createCtxMenu($td);
 
                 $menu.find(".sf-search-ctxmenu")
-                    .html("<div class='sf-search-ctxitem quickfilter'>" + lang.signum.addFilter + "</div>");
+                    .html("<div class='sf-search-ctxitem sf-quickfilter'><span>" + lang.signum.addFilter + "</span></div>");
 
                 $td.append($menu);
                 return false;
@@ -368,7 +368,7 @@ SF.registerModule("FindNavigator", function () {
                 else {
                     var info = new SF.RuntimeInfo(SF.compose(SF.compose(this.options.prefix, "value"), index));
                     if (info.find().length > 0) { //If it's a Lite, the value is the Id
-                        value = info.runtimeType() + ";" + info.id();
+                        value = info.entityType() + ";" + info.id();
                         if (value == ";") {
                             value = "";
                         }
@@ -689,6 +689,8 @@ SF.registerModule("FindNavigator", function () {
 
                 var self = this;
                 var $selectedOption = $selectedCombo.children("option:selected");
+                $selectedCombo.attr("title", $selectedOption.attr("title"));
+                $selectedCombo.attr("style", $selectedOption.attr("style"));
                 if ($selectedOption.val() == "") {
                     var $prevSelect = $selectedCombo.prev("select");
                     if ($prevSelect.length == 0) {
@@ -768,14 +770,14 @@ SF.registerModule("FindNavigator", function () {
 
             create: function (viewOptions) {
                 var self = this;
-                var type = this.getRuntimeType(function (type) {
+                var type = this.getEntityType(function (type) {
                     self.typedCreate($.extend({
                         type: type
                     }, viewOptions || {}));
                 });
             },
 
-            getRuntimeType: function (_onTypeFound) {
+            getEntityType: function (_onTypeFound) {
                 var typeStr = $(this.pf(SF.Keys.entityTypeNames)).val();
                 var types = typeStr.split(",");
                 if (types.length == 1) {

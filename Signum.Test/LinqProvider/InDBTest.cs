@@ -117,5 +117,16 @@ namespace Signum.Test.LinqProvider
             list = Database.Query<ArtistDN>().Where(a => female.ToLite().InDB(a2 => a2.Friends).Contains(a.ToLite())).ToList();
             Assert.IsTrue(list.Count > 0);
         }
+
+        [TestMethod]
+        public void SelectManyInDB()
+        {
+            var artistsInBands = (from b in Database.Query<BandDN>()
+                                  from a in b.Members
+                                  select new
+                                  {
+                                      MaxAlbum = a.InDBEntity(ar => ar.IsMale)
+                                  }).ToList();
+        }
     }
 }

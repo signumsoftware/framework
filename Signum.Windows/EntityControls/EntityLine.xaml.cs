@@ -31,7 +31,7 @@ namespace Signum.Windows
     /// </summary>
     public partial class EntityLine : EntityBase
     {
-        public event Func<string, IEnumerable<Lite>> AutoCompleting;
+        public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> AutoCompleting;
 
         public static readonly DependencyProperty AutoCompleteProperty =
             DependencyProperty.Register("AutoComplete", typeof(bool), typeof(EntityLine), new FrameworkPropertyMetadata(true));
@@ -39,14 +39,6 @@ namespace Signum.Windows
         {
             get { return (bool)GetValue(AutoCompleteProperty); }
             set { SetValue(AutoCompleteProperty, value); }
-        }
-
-        public static readonly DependencyProperty HideAutoCompleteOnLostFocusProperty =
-            DependencyProperty.Register("HideAutoCompleteOnLostFocus", typeof(bool), typeof(EntityLine), new UIPropertyMetadata(true));
-        public bool HideAutoCompleteOnLostFocus
-        {
-            get { return (bool)GetValue(HideAutoCompleteOnLostFocusProperty); }
-            set { SetValue(HideAutoCompleteOnLostFocusProperty, value); }
         }
 
         int autoCompleteElements = 5;
@@ -89,7 +81,7 @@ namespace Signum.Windows
             if (AutoCompleting != null)
                 value = AutoCompleting(arg);
             else
-                value = Server.FindLiteLike(CleanType, safeImplementations.Value, arg, AutoCompleteElements);  
+                value = Server.FindLiteLike(safeImplementations.Value, arg, AutoCompleteElements);  
 
             return value;
         }
@@ -112,7 +104,7 @@ namespace Signum.Windows
             }
             else
             {
-                if (e.Reason != CloseReason.LostFocus || HideAutoCompleteOnLostFocus)
+                if (e.Reason != CloseReason.LostFocus)
                     autoCompleteTextBox.Visibility = Visibility.Hidden;
             }
         }

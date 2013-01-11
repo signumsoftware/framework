@@ -67,7 +67,237 @@ namespace Signum.Utilities
                 return new string[0];
         }
 
-        public static string Left(this string str, int numChars)
+        static InvalidOperationException NotFound(string str, char separator)
+        {
+            return new InvalidOperationException("Separator '{0}' not found on {1}".Formato(separator, str));
+        }
+
+        static InvalidOperationException NotFound(string str, string separator)
+        {
+            return new InvalidOperationException("Separator '{0}' not found on {1}".Formato(separator, str));
+        }
+
+        public static string Before(this string str, char separator)
+        {
+            int index = str.IndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(0, index);
+        }
+
+        public static string Before(this string str, string separator)
+        {
+            int index = str.IndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(0, index);
+        }
+
+        public static string After(this string str, char separator)
+        {
+            int index = str.IndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(index + 1);
+        }
+
+        public static string After(this string str, string separator)
+        {
+            int index = str.IndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(index + 1);
+        }
+
+        public static string TryBefore(this string str, char separator)
+        {
+            int index = str.IndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(0, index);
+        }
+
+        public static string TryBefore(this string str, string separator)
+        {
+            int index = str.IndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(0, index);
+        }
+
+        public static string TryAfter(this string str, char separator)
+        {
+            int index = str.IndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(index + 1);
+        }
+
+        public static string TryAfter(this string str, string separator)
+        {
+            int index = str.IndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(index + 1);
+        }
+
+
+        public static string BeforeLast(this string str, char separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(0, index);
+        }
+
+        public static string BeforeLast(this string str, string separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(0, index);
+        }
+
+        public static string AfterLast(this string str, char separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(index + 1);
+        }
+
+        public static string AfterLast(this string str, string separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                throw NotFound(str, separator);
+
+            return str.Substring(index + 1);
+        }
+
+        public static string TryBeforeLast(this string str, char separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(0, index);
+        }
+
+        public static string TryBeforeLast(this string str, string separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(0, index);
+        }
+
+        public static string TryAfterLast(this string str, char separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(index + 1);
+        }
+
+        public static string TryAfterLast(this string str, string separator)
+        {
+            int index = str.LastIndexOf(separator);
+            if (index == -1)
+                return null;
+
+            return str.Substring(index + 1);
+        }
+
+
+
+
+        public static string Between(this string str, string firstSeparator, string secondSeparator = null)
+        {
+            if (secondSeparator == null)
+                secondSeparator = firstSeparator;
+
+            int start = str.IndexOf(firstSeparator);
+            if (start == -1)
+               throw NotFound(str, firstSeparator);
+
+            start = start + 1;
+
+            int end = str.IndexOf(secondSeparator, start);
+            if (start == -1)
+                throw NotFound(str, secondSeparator);
+
+            return str.Substring(start, end - start);
+        }
+
+        public static string Between(this string str, char firstSeparator, char secondSeparator = (char)0)
+        {
+            if (secondSeparator == 0)
+                secondSeparator = firstSeparator;
+
+            int start = str.IndexOf(firstSeparator);
+            if (start == -1)
+                throw NotFound(str, firstSeparator);
+
+            start = start + 1;
+
+            int end = str.IndexOf(secondSeparator, start);
+            if (start == -1)
+                throw NotFound(str, secondSeparator);
+
+            return str.Substring(start, end - start);
+        }
+
+        public static string TryBetween(this string str, string firstSeparator, string secondSeparator = null)
+        {
+            if (secondSeparator == null)
+                secondSeparator = firstSeparator;
+
+            int start = str.IndexOf(firstSeparator);
+            if (start == -1)
+                return null;
+
+            start = start + 1;
+
+            int end = str.IndexOf(secondSeparator, start);
+            if (start == -1)
+                return null;
+
+            return str.Substring(start, end - start);
+        }
+
+        public static string TryBetween(this string str, char firstSeparator, char secondSeparator = (char)0)
+        {
+            if (secondSeparator == 0)
+                secondSeparator = firstSeparator;
+
+            int start = str.IndexOf(firstSeparator);
+            if (start == -1)
+                return null;
+
+            start = start + 1;
+
+            int end = str.IndexOf(secondSeparator, start);
+            if (start == -1)
+                return null;
+
+            return str.Substring(start, end - start);
+        }
+
+        public static string Start(this string str, int numChars)
         {
             if (numChars > str.Length)
                 throw new InvalidOperationException("String '{0}' is too short".Formato(str));
@@ -75,7 +305,7 @@ namespace Signum.Utilities
             return str.Substring(0, numChars);
         }
 
-        public static string TryLeft(this string str, int numChars)
+        public static string TryStart(this string str, int numChars)
         {
             if (numChars > str.Length)
                 return str;
@@ -83,7 +313,7 @@ namespace Signum.Utilities
             return str.Substring(0, numChars);
         }
 
-        public static string Right(this string str, int numChars)
+        public static string End(this string str, int numChars)
         {
             if (numChars > str.Length)
                 throw new InvalidOperationException("String '{0}' is too short".Formato(str));
@@ -91,7 +321,7 @@ namespace Signum.Utilities
             return str.Substring(str.Length - numChars, numChars);
         }
 
-        public static string TryRight(this string str, int numChars)
+        public static string TryEnd(this string str, int numChars)
         {
             if (numChars > str.Length)
                 return str;
@@ -99,7 +329,7 @@ namespace Signum.Utilities
             return str.Substring(str.Length - numChars, numChars);
         }
 
-        public static string RemoveLeft(this string str, int numChars)
+        public static string RemoveStart(this string str, int numChars)
         {
             if (numChars > str.Length)
                 throw new InvalidOperationException("String '{0}' is too short".Formato(str));
@@ -107,7 +337,7 @@ namespace Signum.Utilities
             return str.Substring(numChars);
         }
 
-        public static string TryRemoveLeft(this string str, int numChars)
+        public static string TryRemoveStart(this string str, int numChars)
         {
             if (numChars > str.Length)
                 return "";
@@ -115,7 +345,7 @@ namespace Signum.Utilities
             return str.Substring(numChars);
         }
 
-        public static string RemoveRight(this string str, int numChars)
+        public static string RemoveEnd(this string str, int numChars)
         {
             if (numChars > str.Length)
                 throw new InvalidOperationException("String '{0}' is too short".Formato(str));
@@ -123,7 +353,7 @@ namespace Signum.Utilities
             return str.Substring(0, str.Length - numChars);
         }
 
-        public static string TryRemoveRight(this string str, int numChars)
+        public static string TryRemoveEnd(this string str, int numChars)
         {
             if (numChars > str.Length)
                 return "";
@@ -164,7 +394,7 @@ namespace Signum.Utilities
         public static string Etc(this string str, int max, string etcString)
         {
             if (str.HasText() && (str.Length > max))
-                return str.Left(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
+                return str.Start(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
             return str;
         }
 
@@ -183,7 +413,7 @@ namespace Signum.Utilities
                 max = pos + etcString.Length;
 
             if (str.HasText() && (str.Length > max))
-                return str.Left(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
+                return str.Start(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
             return str;
         }
 
@@ -199,6 +429,9 @@ namespace Signum.Utilities
 
         public static string RemoveChars(this string str, params char[] chars)
         {
+            if (!str.HasText())
+                return str;
+
             StringBuilder sb = new StringBuilder(str.Length);
             for (int i = 0; i < str.Length; i++)
             {
@@ -392,6 +625,18 @@ namespace Signum.Utilities
             for (int i = 0; i < len; i++)
                 arr[i] = str[len - 1 - i];
             return new string(arr);
+        }
+
+        public static bool Wildcards(this string fileName, IEnumerable<string> wildcards)
+        {
+            return wildcards.Any(wc => fileName.Wildcards(wc));
+        }
+
+        static Dictionary<string, string> wildcardsPatterns = new Dictionary<string, string>();
+        public static bool Wildcards(this string fileName, string wildcard)
+        {
+            var pattern = wildcardsPatterns.GetOrCreate(wildcard, wildcard.Replace(".", "[.]").Replace("*", ".*").Replace("?", "."));
+            return Regex.IsMatch(fileName, pattern);
         }
 
         // like has an optional ESCAPE not available

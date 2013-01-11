@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Web.Properties;
 using Signum.Web.Controllers;
 using Signum.Entities.Reflection;
+using Signum.Engine.Operations;
 #endregion
 
 namespace Signum.Web
@@ -35,10 +36,10 @@ namespace Signum.Web
 
         public static MvcHtmlString RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
         {
-            Type cleanRuntimeType = (typeContext.UntypedValue as Lite).TryCC(l => l.RuntimeType) ?? typeContext.UntypedValue.GetType();
+            Type cleanEntityType = (typeContext.UntypedValue as Lite<IIdentifiable>).TryCC(l => l.EntityType) ?? typeContext.UntypedValue.GetType();
 
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType)
-                .ThrowIfNullC("There's no EntitySettings registered for type {0}".Formato(cleanRuntimeType));
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanEntityType)
+                .ThrowIfNullC("There's no EntitySettings registered for type {0}".Formato(cleanEntityType));
 
             TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
 
@@ -65,11 +66,15 @@ namespace Signum.Web
                     vdd[ViewDataKeys.PartialViewName] = partialViewName;
                     vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
                     vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
+                    vdd[ViewDataKeys.ShowOperations] = true;
+                    vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
                     return helper.Partial(Navigator.Manager.PopupControlView, vdd);
                 case RenderMode.PopupInDiv:
                     vdd[ViewDataKeys.PartialViewName] = partialViewName;
                     vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
                     vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
+                    vdd[ViewDataKeys.ShowOperations] = true;
+                    vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
                         helper.Partial(Navigator.Manager.PopupControlView, vdd),
                         "",

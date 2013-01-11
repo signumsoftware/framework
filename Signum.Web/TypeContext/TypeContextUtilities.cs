@@ -9,6 +9,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities;
 using Signum.Engine;
 using System.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Web
 {
@@ -39,12 +40,12 @@ namespace Signum.Web
 
             if (typeContext.Type.IsLite())
             {
-                Lite lite = typeContext.UntypedValue as Lite;
+                Lite<IIdentifiable> lite = typeContext.UntypedValue as Lite<IIdentifiable>;
                 Type liteType = Lite.Extract(typeContext.Type);
 
                 body = Expression.Call(miRetrieve.MakeGenericMethod(liteType), pe);
-                if (lite.RuntimeType != liteType)
-                    body = Expression.Convert(body, lite.RuntimeType);
+                if (lite.EntityType != liteType)
+                    body = Expression.Convert(body, lite.EntityType);
             }
             else
             {

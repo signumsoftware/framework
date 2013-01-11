@@ -57,7 +57,7 @@ namespace Signum.Web
                 }){ WriteData = false },
                 new FormatterRule(c => c.Type.UnNullify().IsLite(), c => (h,o) => 
                 {
-                    return h.LightEntityLine((Lite)o, false);
+                    return h.LightEntityLine((Lite<IIdentifiable>)o, false);
                 }),
                 new FormatterRule(c=>c.Type.UnNullify() == typeof(DateTime), c => (h,o) => 
                 {
@@ -92,8 +92,8 @@ namespace Signum.Web
             {
                 new EntityFormatterRule(l => true, (h,l) => 
                 {
-                    if (Navigator.IsNavigable(l.RuntimeType, isSearchEntity: true ))
-                        return h.Href(Navigator.NavigateRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
+                    if (Navigator.IsNavigable(l.EntityType, isSearchEntity: true ))
+                        return h.Href(Navigator.NavigateRoute(l.EntityType, l.Id), h.Encode(Resources.View));
                     else
                         return MvcHtmlString.Empty;
                 }),
@@ -152,10 +152,10 @@ namespace Signum.Web
 
     public class EntityFormatterRule
     {
-        public Func<HtmlHelper, Lite, MvcHtmlString> Formatter { get; set; }
-        public Func<Lite, bool> IsApplyable { get; set; }
+        public Func<HtmlHelper, Lite<IIdentifiable>, MvcHtmlString> Formatter { get; set; }
+        public Func<Lite<IIdentifiable>, bool> IsApplyable { get; set; }
 
-        public EntityFormatterRule(Func<Lite, bool> isApplyable, Func<HtmlHelper, Lite, MvcHtmlString> formatter)
+        public EntityFormatterRule(Func<Lite<IIdentifiable>, bool> isApplyable, Func<HtmlHelper, Lite<IIdentifiable>, MvcHtmlString> formatter)
         {
             Formatter = formatter;
             IsApplyable = isApplyable;
@@ -172,7 +172,7 @@ namespace Signum.Web
             if(!WriteData)
                 return MvcHtmlString.Empty;
 
-            string key = value is Lite ? ((Lite)value).Key() : value.TryToString();
+            string key = value is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)value).Key() : value.TryToString();
 
             return MvcHtmlString.Create("data-value=" + key);
         }

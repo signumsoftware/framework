@@ -88,7 +88,7 @@ SF.registerModule("Globals", function () {
 
     SF.RuntimeInfo = function (_prefix) {
         var prefix = _prefix;
-        var _runtimeType = 0;
+        var _entityType = 0;
         var _id = 1;
         var _isNew = 2;
         var $elem; 			//cache for the element
@@ -116,8 +116,8 @@ SF.registerModule("Globals", function () {
             array[key] = val;
             find().val(toValue(array));
         };
-        var runtimeType = function () {
-            return getSet(_runtimeType);
+        var entityType = function () {
+            return getSet(_entityType);
         };
         var id = function () {
             return getSet(_id);
@@ -125,8 +125,8 @@ SF.registerModule("Globals", function () {
         var isNew = function () {
             return getSet(_isNew);
         };
-        var setEntity = function (runtimeType, id) {
-            getSet(_runtimeType, runtimeType);
+        var setEntity = function (entityType, id) {
+            getSet(_entityType, entityType);
             if (SF.isEmpty(id)) {
                 getSet(_id, '');
                 getSet(_isNew, 'n');
@@ -137,13 +137,13 @@ SF.registerModule("Globals", function () {
             }
         };
         var removeEntity = function () {
-            getSet(_runtimeType, '');
+            getSet(_entityType, '');
             getSet(_id, '');
             getSet(_isNew, 'o');
         };
-        var createValue = function (runtimeType, id, isNew) {
+        var createValue = function (entityType, id, isNew) {
             var array = [];
-            array[_runtimeType] = runtimeType;
+            array[_entityType] = entityType;
             array[_id] = id;
             if (SF.isEmpty(isNew)) {
                 array[_isNew] = SF.isEmpty(id) ? "n" : "o";
@@ -155,7 +155,7 @@ SF.registerModule("Globals", function () {
         };
 
         return {
-            runtimeType: runtimeType,
+            entityType: entityType,
             id: id,
             isNew: isNew,
             setEntity: setEntity,

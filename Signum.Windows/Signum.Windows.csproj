@@ -98,6 +98,10 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Page Include="Basics\Exception.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\TimePicker.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -124,6 +128,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Basics\Exception.xaml.cs">
+      <DependentUpon>Exception.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TimePicker.xaml.cs">
       <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
@@ -146,18 +153,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Basics\Alert.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Basics\Note.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="BlueMenu.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -197,6 +192,10 @@
     <Page Include="DynamicQuery\QueryTokenRenderer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Operations\OperationLog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -296,19 +295,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Widgets\AlertsWidget.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Widgets\LinksWidget.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Widgets\NotesWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
@@ -390,12 +377,6 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Async.cs" />
-    <Compile Include="Basics\Alert.xaml.cs">
-      <DependentUpon>Alert.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Basics\Note.xaml.cs">
-      <DependentUpon>Note.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ButtonBar.xaml.cs">
       <DependentUpon>ButtonBar.xaml</DependentUpon>
     </Compile>
@@ -425,6 +406,15 @@
     <Compile Include="Fluent\TreeExtensions.cs" />
     <Compile Include="Fluent\WhereExtensions.cs" />
     <Compile Include="MarkupExtensions\NavigatorExtensions.cs" />
+    <Compile Include="Operations\ConstructFromManyMenuItem.cs" />
+    <Compile Include="Operations\EntityOperationMenuItem.cs" />
+    <Compile Include="Operations\EntityOperationToolBarButton.cs" />
+    <Compile Include="Operations\OperationClient.cs" />
+    <Compile Include="Operations\OperationLog.xaml.cs">
+      <DependentUpon>OperationLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Operations\OperationServer.cs" />
+    <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="SelectorWindow.xaml.cs">
       <DependentUpon>SelectorWindow.xaml</DependentUpon>
     </Compile>
@@ -502,14 +492,8 @@
       <DependentUpon>EntityCombo.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageLoader.cs" />
-    <Compile Include="Widgets\AlertsWidget.xaml.cs">
-      <DependentUpon>AlertsWidget.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Widgets\LinksWidget.xaml.cs">
       <DependentUpon>LinksWidget.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Widgets\NotesWidget.xaml.cs">
-      <DependentUpon>NotesWidget.xaml</DependentUpon>
     </Compile>
     <Compile Include="Widgets\WidgetPanel.xaml.cs">
       <DependentUpon>WidgetPanel.xaml</DependentUpon>
@@ -555,7 +539,6 @@
     <Resource Include="Images\admin.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\pin.png" />
     <Resource Include="Images\star.png" />
   </ItemGroup>
   <ItemGroup>
@@ -582,9 +565,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\note.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\alert.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\forbidden.png" />

@@ -98,7 +98,7 @@ namespace Signum.Engine
                 {
                     if (cmd.CommandText.EndsWith(selecctInsertedId))
                     {
-                        cmd.CommandText = cmd.CommandText.RemoveRight(selecctInsertedId.Length);
+                        cmd.CommandText = cmd.CommandText.RemoveEnd(selecctInsertedId.Length);
 
                         cmd.ExecuteNonQuery();
 
@@ -113,7 +113,7 @@ namespace Signum.Engine
                     }
                     else if (cmd.CommandText.EndsWith(selectRowCount))
                     {
-                        cmd.CommandText = cmd.CommandText.RemoveRight(selectRowCount.Length);
+                        cmd.CommandText = cmd.CommandText.RemoveEnd(selectRowCount.Length);
 
                         cmd.ExecuteNonQuery();
 
@@ -317,7 +317,7 @@ namespace Signum.Engine
 
         public override ParameterBuilder ParameterBuilder { get; protected set; }
 
-        public override void CleanDatabase()
+        public override void CleanDatabase(DatabaseName database)
         {
             string fileName = new SqlCeConnection(connectionString).DataSource;
             if (File.Exists(fileName))

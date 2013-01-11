@@ -53,8 +53,12 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(options);
 
-            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
-            Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
+
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
+            Navigator.SetTokens(queryDescription, findOptions.OrderOptions);
+            Navigator.SetTokens(queryDescription, findOptions.ColumnOptions);
             Navigator.SetSearchViewableAndCreable(findOptions);
 
             var viewData = new ViewDataDictionary(context);
@@ -175,7 +179,13 @@ namespace Signum.Web
                     sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
 
                     foreach (var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
-                        sb.AddLine(new HtmlTag("span").Class("sf-filter-token ui-widget-content ui-corner-all").SetInnerText(t.ToString()).ToHtml());
+                    {
+                        sb.AddLine(new HtmlTag("span")
+                            .Class("sf-filter-token ui-widget-content ui-corner-all")
+                            .Attr("title", t.NiceTypeName)
+                            .Attr("style", "color:" + t.TypeColor)
+                            .SetInnerText(t.ToString()).ToHtml());
+                    }
                 }
 
                 using (sb.Surround("td"))
@@ -228,10 +238,13 @@ namespace Signum.Web
             {
                 var option = new HtmlTag("option")
                             .Attr("value", qt.Key)
-                            .SetInnerText(qt.ToString());
+                            .SetInnerText(qt.SubordinatedToString);
 
                 if (selected != null && qt.Key == selected.Key)
                     option.Attr("selected", "selected");
+
+                option.Attr("title", qt.NiceTypeName);
+                option.Attr("style", "color:" + qt.TypeColor);
 
                 string canColumn = QueryUtils.CanColumn(qt);
                 if (canColumn.HasText())
@@ -244,9 +257,16 @@ namespace Signum.Web
                 options.AddLine(option.ToHtml());
             }
 
-            HtmlTag dropdown = new HtmlTag("select").IdName(context.Compose("ddlTokens_" + index))
-                  .InnerHtml(options.ToHtml())
-                  .Attr("onchange", "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2})".Formato(Navigator.ResolveWebQueryName(queryName), context.ControlID, index));
+            HtmlTag dropdown = new HtmlTag("select")
+                .IdName(context.Compose("ddlTokens_" + index))
+                .InnerHtml(options.ToHtml())
+                .Attr("onchange", "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2})".Formato(Navigator.ResolveWebQueryName(queryName), context.ControlID, index));
+
+            if(selected != null)
+            {
+                dropdown.Attr("title", selected.NiceTypeName);
+                dropdown.Attr("style", "color:" + selected.TypeColor);
+            }
 
             return dropdown.ToHtml();
         }
@@ -278,7 +298,7 @@ namespace Signum.Web
 
             if (filterOption.Token.Type.IsLite())
             {
-                Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type);
+                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                     Database.FillToString(lite);
 

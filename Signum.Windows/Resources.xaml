@@ -331,7 +331,7 @@
         </Border>
     </DataTemplate>
 
-    <DataTemplate x:Key="{x:Type dn:Lite}"  DataType="{x:Type dn:Lite}">
+    <DataTemplate x:Key="{x:Static dn:Lite.BaseImplementationType}"  DataType="{x:Static dn:Lite.BaseImplementationType}">
         <TextBlock Text="{Binding}" VerticalAlignment="Center" />
     </DataTemplate>
 
@@ -827,6 +827,42 @@
                             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type m:EntityRepeaterContentControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type m:EntityRepeaterContentControl}">
+                    <Border BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1" 
+                                    m:Common.TypeContext="{m:ContinueRoute /}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition  Width="*"/>
+                                <ColumnDefinition  Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter 
+						                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+						                HorizontalAlignment="Stretch"  />
+                            <StackPanel Grid.Column="1" Orientation="Vertical" MinWidth="24">
+                                <Button x:Name="PART_RemoveButton"
+                                        Style="{StaticResource RoundButton}" 
+                                        Content="{StaticResource Remove}" 
+                                        ToolTip="{m:Loc Remove}"
+                                        Visibility="{Binding RemoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}" />
+                                <Button x:Name="PART_MoveUp" Style="{DynamicResource RoundButton}" 
+                                        Content="{DynamicResource Up}" 
+                                        ToolTip="{m:Loc MoveUp}"
+                                        Visibility="{Binding MoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}"/>
+                                <Button x:Name="PART_MoveDown" Style="{DynamicResource RoundButton}"                                      
+                                        Content="{DynamicResource Down}"
+                                        ToolTip="{m:Loc MoveDown}"
+                                        Visibility="{Binding MoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

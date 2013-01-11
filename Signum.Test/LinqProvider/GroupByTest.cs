@@ -84,7 +84,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void GroupEntityByTypeIb()
         {
-            var list = Database.Query<AwardNominationDN>().GroupBy(a => a.Award.RuntimeType).ToList();
+            var list = Database.Query<AwardNominationDN>().GroupBy(a => a.Award.EntityType).ToList();
         }
 
         [TestMethod]
@@ -387,6 +387,12 @@ namespace Signum.Test.LinqProvider
         public void MinGroupByMax()
         {
             var first = Database.Query<ArtistDN>().GroupBy(a => a.Status).Select(gr => gr.Min(b => b.Friends.Max(m => m.Id)));
+        }
+
+        [TestMethod]
+        public void GroupbyAggregateImplicitJoin()
+        {
+            var first = Database.Query<AlbumDN>().GroupBy(a => a.Year).Select(gr => gr.Max(a => a.Label.Name)).ToList();
         }
     }
 }

@@ -132,7 +132,7 @@ namespace Signum.Windows
             Binding b;
 
             var vBinding = GetValueBinding();
-            if (vBinding != null) // is something is binded to ValueProperty, bind the new control to there
+            if (vBinding != null)
             {
                 Validation.SetErrorTemplate(this, null);
                 BindingOperations.ClearBinding(this, ValueProperty);
@@ -177,9 +177,6 @@ namespace Signum.Windows
             };
 
             control.SetBinding(Configurator.readOnlyProperties[this.ValueLineType], rb);  
-            // Binding b = new Binding(binding.Path.Path) { Mode = binding.Mode, UpdateSourceTrigger = binding.UpdateSourceTrigger };
-
-            //System.Diagnostics.PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
    
             return control;
         }

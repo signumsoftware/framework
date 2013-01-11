@@ -21,6 +21,7 @@ using Signum.Utilities.Reflection;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using System.Windows.Automation;
+using System.Diagnostics;
 
 namespace Signum.Windows
 {
@@ -203,7 +204,7 @@ namespace Signum.Windows
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             FrameworkElement fe = d as FrameworkElement;
-            if (fe == null)
+            if (fe == null || e.NewValue == null && e.OldValue != null)
                 return;
 
             if (DesignerProperties.GetIsInDesignMode(fe))
@@ -335,7 +336,7 @@ namespace Signum.Windows
         {
             if (context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                if(context.IsAllowed())
+                if(context.IsAllowed() == null)
                 {
                     VoteVisible(fe);
                 }
@@ -515,18 +516,12 @@ namespace Signum.Windows
         {
             if (GetCollapseIfNull(fe) && fe.NotSet(UIElement.VisibilityProperty))
             {
-                var dp = ValueProperty(fe);
-
-                if (dp == null)
-                    throw new InvalidOperationException("Unknown value property of {0}".Formato(fe.GetType().Name));
-
-                Binding b = new Binding()
+                Binding b = new Binding(route)
                 {
-                    Path = new PropertyPath(dp.Name),
-                    Source = fe,
                     Mode = BindingMode.OneWay,
                     Converter = Converters.NullToVisibility,
                 };
+                
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }
@@ -613,11 +608,11 @@ namespace Signum.Windows
                 return ident.ToLite().Key();
             }
 
-            var lite = newValue as Lite;
+            var lite = newValue as Lite<IIdentifiable>;
             if (lite != null)
             {
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[lite.RuntimeType].CleanName);
+                    return "{0};New".Formato(Server.ServerTypes[lite.EntityType].CleanName);
 
                 return lite.Key();
             }

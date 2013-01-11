@@ -130,51 +130,5 @@ namespace Signum.Windows
                 action(menuItem);
             }
         }
-
-
-        public static void MenuItemFactory(string fileName)
-        {
-            Dictionary<string, string> dic = new Dictionary<string, string>();
-
-            List<object> queryNames = Server.Return((IDynamicQueryServer s) => s.GetQueryNames()); 
-
-            string menuItems = queryNames.ToString(o => GetMenuItem(o, dic), "\r\n");
-            string nameSpaces = dic.ToString(kvp => "xmlns:{0}=\"clr-namespace:{1};assembly={2}\"".Formato(kvp.Value, kvp.Key.Split(';')[0], kvp.Key.Split(';')[1]), "\r\n");
-            
-            File.WriteAllText(fileName, nameSpaces);
-            File.AppendAllText(fileName, menuItems);
-
-            Process.Start(fileName);
-        }
-
-        static string GetMenuItem(object queryName, Dictionary<string,string> dic)
-        {
-            string menuItem = "<MenuItem Tag=\"{{m:FindOptions QueryName={0}}}\"/>";
-            Type type = queryName as Type;
-            if (type != null)
-                return menuItem.Formato("{{x:Type {0}:{1}}}".Formato(GetAlias(type, dic), type.Name));
-
-            Enum enumValue = queryName as Enum;
-            if (enumValue != null)
-                return menuItem.Formato("{{x:Static {0}:{1}.{2}}}".Formato(GetAlias(enumValue.GetType(), dic), enumValue.GetType().Name, enumValue.ToString()));
-
-            return menuItem.Formato(queryName.ToString());
-        }
-
-        static string GetAlias(Type exampleType, Dictionary<string,string> dic)
-        {
-            return dic.GetOrCreate(exampleType.Namespace + ";" + exampleType.Assembly.GetName().Name, () =>
-            {
-                string result = exampleType.Namespace.Split('.').ToString(str => str.Substring(0, 1), "").ToLower();
-
-                if (!dic.Values.Contains(result))
-                    return result;
-
-                for (int i = 0; ; i++)
-                    if (!dic.Values.Contains(result + i))
-                        return result + i;
-            }); 
-        }
-
     }  
 }

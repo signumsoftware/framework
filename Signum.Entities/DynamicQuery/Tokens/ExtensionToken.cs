@@ -16,9 +16,12 @@ namespace Signum.Entities.DynamicQuery
         public ExtensionToken(QueryToken parent, string key, Type type, bool isProjection,
             string unit, string format, 
             Implementations? implementations,
-            bool isAllowed, PropertyRoute propertyRoute)
+            string isAllowed, PropertyRoute propertyRoute)
             : base(parent)
         {
+            if (typeof(IIdentifiable).IsAssignableFrom(type.CleanType()) && implementations == null)
+                throw new ArgumentException("Extension {0} of type {1} has no implementations".Formato(key, type.Name));
+
             this.key= key;
             this.type = type;
             this.isProjection = isProjection;
@@ -94,15 +97,20 @@ namespace Signum.Entities.DynamicQuery
             return isProjection ? null : implementations;
         }
 
-        public Implementations? GetElementImplementations()
+        protected internal override Implementations? GetElementImplementations()
         {
             return isProjection ? implementations : null; 
         }
 
-        bool isAllowed; 
-        public override bool IsAllowed()
+        string isAllowed; 
+        public override string IsAllowed()
         {
-            return isAllowed && Parent.IsAllowed();
+            string parent = Parent.IsAllowed();
+
+            if (isAllowed.HasText() && parent.HasText())
+                return Resources.And.Combine(isAllowed, parent);
+
+            return isAllowed ?? parent;
         }
 
         public override QueryToken Clone()

@@ -129,8 +129,8 @@ namespace Signum.Test.LinqProvider
                                   from a in b.Members
                                   select new
                                   {
-                                      MaxAlbum = Database.Query<NoteDN>()
-                                      .Where(n => n.Target.RefersTo(a.LastAward))
+                                      MaxAlbum = Database.Query<NoteWithDateDN>()
+                                      .Where(n => n.Target.Is(a.LastAward))
                                       .Max(n => (int?)n.Id)
                                   }).ToList();
         }
@@ -142,10 +142,12 @@ namespace Signum.Test.LinqProvider
                                   join mle in Database.MListQuery((BandDN b) => b.Members) on b equals mle.Parent
                                   select new
                                   {
-                                      MaxAlbum = Database.Query<NoteDN>()
-                                      .Where(n => n.Target.RefersTo(mle.Element.LastAward))
+                                      MaxAlbum = Database.Query<NoteWithDateDN>()
+                                      .Where(n => n.Target.Is(mle.Element.LastAward))
                                       .Max(n => (int?)n.Id)
                                   }).ToList();
         }
+
+      
     }
 }

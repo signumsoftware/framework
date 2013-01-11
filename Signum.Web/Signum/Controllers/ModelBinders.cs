@@ -24,7 +24,7 @@ namespace Signum.Web.Controllers
                  if (value == null)
                  {
                      object routeValue = controllerContext.RouteData.Values[bindingContext.ModelName];
-                     if (routeValue is Lite)
+                     if (routeValue is Lite<IdentifiableEntity>)
                          return routeValue;
                      else if(routeValue is int)
                          return Lite.Create(cleanType, (int)routeValue);
@@ -35,7 +35,7 @@ namespace Signum.Web.Controllers
                  if (int.TryParse(value, out id))
                      return Lite.Create(cleanType, id);
 
-                 return Lite.Parse(cleanType, value);
+                 return Lite.Parse(value);
              }
              return base.BindModel(controllerContext, bindingContext);
         }

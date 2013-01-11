@@ -16,6 +16,7 @@ using System.Diagnostics;
 using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Services;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -27,7 +28,7 @@ namespace Signum.Engine.DynamicQuery
         QueryDescription GetDescription(object queryName);
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
-        Lite ExecuteUniqueEntity(UniqueEntityRequest request);
+        Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
         Expression Expression { get; } //Optional
         ResetLazy<ColumnDescriptionFactory[]> StaticColumns { get; } 
     }
@@ -53,7 +54,7 @@ namespace Signum.Engine.DynamicQuery
 
         private void AssertColumns(ColumnDescriptionFactory[] columns)
         {
-            columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found");
+            columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not foundon {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
 
             var errors =  columns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a=>a.Name, ", ");
 
@@ -65,7 +66,7 @@ namespace Signum.Engine.DynamicQuery
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
-        public abstract Lite ExecuteUniqueEntity(UniqueEntityRequest request);
+        public abstract Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
 
         public DynamicQuery()
         {
@@ -100,7 +101,13 @@ namespace Signum.Engine.DynamicQuery
 
         public List<ColumnDescription> GetColumnDescriptions()
         {
-            return StaticColumns.Value.Where(f => f.IsAllowed()).Select(f => f.BuildColumnDescription()).ToList();
+            var entity = StaticColumns.Value.Single(f => f.IsEntity);
+            string allowed = entity.IsAllowed();
+            if (allowed != null)
+                throw new InvalidOperationException(
+                    "Not authorized to see Entity column of {0} because {1}".Formato(QueryUtils.GetQueryUniqueKey(QueryName), allowed));
+
+            return StaticColumns.Value.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
         }
 
         public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
@@ -530,14 +537,14 @@ namespace Signum.Engine.DynamicQuery
         {
             if (elementsPerPage == QueryRequest.AllElements)
             {
-                var array = query.Query.ToArray();
-                return new DEnumerableCount<T>(array, query.Context, array.Length);
+                var allList = query.Query.ToList();
+                return new DEnumerableCount<T>(allList, query.Context, allList.Count);
             }
 
             if (currentPage <= 0)
                 throw new InvalidOperationException("currentPage should be greater than zero");
 
-            int totalElements = query.Query.Count();
+            int? totalElements = null;
 
             var q = query.Query;
             if (currentPage != 1)
@@ -545,25 +552,39 @@ namespace Signum.Engine.DynamicQuery
 
             q = q.Take(elementsPerPage);
 
-            return new DEnumerableCount<T>(q.ToArray(), query.Context, totalElements);
+            var list = q.ToList();
+
+            if (list.Count < elementsPerPage && currentPage == 1)
+                totalElements = list.Count; 
+
+            return new DEnumerableCount<T>(list, query.Context, totalElements ?? query.Query.Count());
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, int? elementsPerPage, int currentPage)
         {
             if (elementsPerPage == QueryRequest.AllElements)
-                return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.Collection.Count());
+            {
+                var allList = collection.Collection.ToList();
+                return new DEnumerableCount<T>(allList, collection.Context, allList.Count);
+            }
 
             if (currentPage <= 0)
                 throw new InvalidOperationException("currentPage should be greater than zero");
 
-            int totalElements = collection.Collection.Count();
+            int? totalElements = null;
+
             var c = collection.Collection;
             if (currentPage != 1)
                 c = c.Skip((currentPage - 1) * elementsPerPage.Value);
 
             c = c.Take(elementsPerPage.Value);
 
-            return new DEnumerableCount<T>(c, collection.Context, totalElements);
+            var list = c.ToList();
+
+            if (list.Count < elementsPerPage && currentPage == 1)
+                totalElements = list.Count; 
+
+            return new DEnumerableCount<T>(c, collection.Context, totalElements ?? collection.Collection.Count());
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, int elementsPerPage, int currentPage)
@@ -622,7 +643,5 @@ namespace Signum.Engine.DynamicQuery
             }
             return array;
         }
-
-
     }
 }

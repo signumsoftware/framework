@@ -33,7 +33,8 @@ namespace Signum.Engine.Linq
         Join,
         Aggregate,
         AggregateSubquery,
-        SqlFunction,
+        SqlFunction,        
+        SqlTableValuedFunction,
         SqlConstant,
         SqlEnum,
         SqlCast,
@@ -80,6 +81,11 @@ namespace Signum.Engine.Linq
 
         static readonly Variable<AliasGenerator> current = Statics.ThreadVariable<AliasGenerator>("aliasGenerator");
 
+        public static Alias Table(ObjectName name)
+        {
+            return new Alias(name.ToString());
+        }
+
         public static Alias Raw(string name)
         {
             return new Alias(name);
@@ -91,7 +97,7 @@ namespace Signum.Engine.Linq
                 tableName.Any(a => a == '_') ? new string(tableName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray()) : null;
 
             if (string.IsNullOrEmpty(abv))
-                abv = tableName.TryLeft(3);
+                abv = tableName.TryStart(3);
             else
                 abv = abv.ToLower();
 
@@ -197,14 +203,48 @@ namespace Signum.Engine.Linq
     }
 
 
-    /// <summary>
-    /// A custom expression node that represents a table reference in a SQL query
-    /// </summary>
+    internal class SqlTableValuedFunctionExpression : SourceWithAliasExpression
+    {
+        public readonly Table Table;
+        public readonly ReadOnlyCollection<Expression> Arguments;
+        public readonly string SqlFunction;
+
+        public override Alias[] KnownAliases
+        {
+            get { return new[] { Alias }; }
+        }
+
+        public SqlTableValuedFunctionExpression(string sqlFunction, Table table, Alias alias, IEnumerable<Expression> arguments)
+            :base(DbExpressionType.SqlTableValuedFunction, alias)
+        {
+            this.SqlFunction = sqlFunction;
+            this.Table = table;
+            this.Arguments = arguments.ToReadOnly(); 
+        }
+
+        public override string ToString()
+        {
+            string result = "{0}({1}) as {2}".Formato(SqlFunction, Arguments.ToString(a => a.NiceToString(), ","), Alias);
+
+            return result;
+        }
+      
+        internal ColumnExpression GetIdExpression()
+        {
+            var expression = ((ITablePrivate)Table).GetPrimaryOrder(Alias);
+
+            if (expression == null)
+                throw new InvalidOperationException("Impossible to determine Primary Key for {0}".Formato(Table.Name));
+
+            return expression;
+        }
+    }
+
     internal class TableExpression : SourceWithAliasExpression
     {
         public readonly ITable Table;
 
-        public string Name { get { return Table.Name; } }
+        public ObjectName Name { get { return Table.Name; } }
 
         public override Alias[] KnownAliases
         {
@@ -233,9 +273,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// A custom expression node that represents a reference to a column in a SQL query
-    /// </summary>
     internal class ColumnExpression : DbExpression, IEquatable<ColumnExpression>
     {
         public readonly Alias Alias;
@@ -275,9 +312,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// A declaration of a column in a SQL SELECT expression
-    /// </summary>
     internal class ColumnDeclaration
     {
         public readonly string Name;
@@ -331,9 +365,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// A pairing of an expression and an order type for use in a SQL Order By clause
-    /// </summary>
     internal class OrderExpression
     {
         public readonly OrderType OrderType;
@@ -365,9 +396,8 @@ namespace Signum.Engine.Linq
         Distinct = 64,
         Top = 128
     }
-    /// <summary>
-    /// A custom expression node used to represent a SQL SELECT expression
-    /// </summary>
+
+
     internal class SelectExpression : SourceWithAliasExpression
     {
         public readonly ReadOnlyCollection<ColumnDeclaration> Columns;
@@ -446,9 +476,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// A kind of SQL join
-    /// </summary>
     internal enum JoinType
     {
         CrossJoin,
@@ -461,9 +488,6 @@ namespace Signum.Engine.Linq
         FullOuterJoin, 
     }
 
-    /// <summary>
-    /// A custom expression node representing a SQL join clause
-    /// </summary>
     internal class JoinExpression : SourceExpression
     {
         public readonly JoinType JoinType;
@@ -549,6 +573,7 @@ namespace Signum.Engine.Linq
 
         COALESCE,
         CONVERT,
+        ISNULL,
     }
 
     internal enum SqlEnums
@@ -959,9 +984,11 @@ namespace Signum.Engine.Linq
             if (projector == null)
                 throw new ArgumentNullException("projector");
 
-            Type shouldImplement = uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) : projector.Type;
-            if (!shouldImplement.IsAssignableFrom(resultType))
-                throw new InvalidOperationException("ProjectionType is {0} but should implement {1}".Formato(resultType.TypeName(), shouldImplement.TypeName()));  
+            var elementType = uniqueFunction == null ? resultType.ElementType() : resultType;
+            if (!elementType.IsAssignableFrom(projector.Type))
+                throw new InvalidOperationException("Projector ({0}) does not fit in the projection ({1})".Formato(
+                    projector.Type.TypeName(),
+                    elementType.TypeName()));
 
             this.Select = source;
             this.Projector = projector;

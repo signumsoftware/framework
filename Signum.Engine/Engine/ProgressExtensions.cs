@@ -82,7 +82,7 @@ namespace Signum.Engine
                 {
                     using (Transaction tr = new Transaction())
                     {
-                        using (Administrator.DisableIdentity(table.Name))
+                        using (Administrator.DisableIdentity(table))
                             action(item, writer);
                         tr.Commit();
                     }

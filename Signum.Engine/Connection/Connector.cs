@@ -116,12 +116,39 @@ namespace Signum.Engine
 
         public abstract ParameterBuilder ParameterBuilder { get; protected set; }
 
-        public abstract void CleanDatabase();
+        public abstract void CleanDatabase(DatabaseName database);
 
         public abstract bool AllowsMultipleQueries { get; }
 
         public abstract bool SupportsScalarSubquery { get; }
         public abstract bool SupportsScalarSubqueryInAggregates { get; }
+
+
+        public static string TryExtractCatalogPostfix(ref string connectionString, string catalogPostfix)
+        {
+            string toFind = "+" + catalogPostfix;
+
+            int index = connectionString.IndexOf(toFind);
+            if (index == -1)
+                return null;
+
+            connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind 
+
+            return catalogPostfix;
+        }
+
+        public static string ExtractCatalogPostfix(ref string connectionString, string catalogPostfix)
+        {
+            string toFind = "+" + catalogPostfix;
+
+            int index = connectionString.IndexOf(toFind);
+            if (index == -1)
+                throw new InvalidOperationException("CatalogPostfix '{0}' not found in the connection string".Formato(toFind));
+
+            connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind 
+
+            return catalogPostfix;
+        }
     }
 
   

@@ -72,10 +72,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ViewButtonsProperty =
-            DependencyProperty.Register("ViewButtons", typeof(ViewButtons?), typeof(EntityBase), new UIPropertyMetadata(null));
-        public ViewButtons? ViewButtons
+            DependencyProperty.Register("ViewButtons", typeof(ViewMode?), typeof(EntityBase), new UIPropertyMetadata(null));
+        public ViewMode? ViewButtons
         {
-            get { return (ViewButtons?)GetValue(ViewButtonsProperty); }
+            get { return (ViewMode?)GetValue(ViewButtonsProperty); }
             set { SetValue(ViewButtonsProperty, value); }
         }
 
@@ -177,8 +177,6 @@ namespace Signum.Windows
                 CleanLite = false;
                 CleanType = type;
             }
-
-            
         }
 
         protected internal Type CleanType { get; private set; }
@@ -275,9 +273,9 @@ namespace Signum.Windows
 
             if (View && this.NotSet(ViewProperty))
             {
-                Type runtimeType = CleanLite ? ((Lite)entity).RuntimeType : entity.GetType();
+                Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
 
-                return Navigator.IsViewable(runtimeType);
+                return Navigator.IsViewable(entityType);
             }
             else
                 return View;
@@ -295,9 +293,9 @@ namespace Signum.Windows
 
             if (Navigate && this.NotSet(NavigateProperty))
             {
-                Type runtimeType = CleanLite ? ((Lite)entity).RuntimeType : entity.GetType();
+                Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
 
-                return Navigator.IsNavigable(runtimeType, isSearchEntity: false);
+                return Navigator.IsNavigable(entityType, isSearchEntity: false);
             }
             else
                 return Navigate;
@@ -359,7 +357,7 @@ namespace Signum.Windows
         }
 
 
-        public Type SelectType()
+        public Type SelectType(Func<Type, bool> filterType)
         {
             if (CleanType.IsEmbeddedEntity())
                 return CleanType;
@@ -367,7 +365,7 @@ namespace Signum.Windows
             if (Implementations.Value.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
 
-            return Navigator.SelectType(Window.GetWindow(this), Implementations.Value.Types);
+            return Navigator.SelectType(Window.GetWindow(this), Implementations.Value.Types, filterType);
         }
 
         protected object OnCreate()
@@ -378,11 +376,11 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = SelectType();
+                Type type = SelectType(Navigator.IsFindable);
                 if (type == null)
                     return null;
 
-                object entity = Constructor.Construct(type, Window.GetWindow(this));
+                object entity = Constructor.Construct(type, this);
 
                 value = Server.Convert(entity, Type);
             }
@@ -408,7 +406,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType();
+                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
                 if (type == null)
                     return null;
 

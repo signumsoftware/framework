@@ -66,7 +66,7 @@ namespace Signum.Entities.DynamicQuery
             get { return null; }
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             PropertyRoute route = GetPropertyRoute();
 

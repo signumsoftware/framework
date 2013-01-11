@@ -20,18 +20,8 @@ namespace Signum.Windows
     /// </summary>
     public partial class ButtonBar : UserControl
     {
-        public static event GetButtonBarElementDelegate GetButtonBarElement;
-
-        public static readonly DependencyProperty MainControlProperty =
-            DependencyProperty.Register("MainControl", typeof(Control), typeof(ButtonBar));
-        public Control MainControl
-        {
-            get { return (Control)GetValue(MainControlProperty); }
-            set { SetValue(MainControlProperty, value); }
-        }
-
         public static readonly DependencyProperty OkVisibleProperty =
-            DependencyProperty.Register("OkVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
+             DependencyProperty.Register("OkVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
         public bool OkVisible
         {
             get { return (bool)GetValue(OkVisibleProperty); }
@@ -39,7 +29,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SaveVisibleProperty =
-            DependencyProperty.Register("SaveVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
+          DependencyProperty.Register("SaveVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
         public bool SaveVisible
         {
             get { return (bool)GetValue(SaveVisibleProperty); }
@@ -53,7 +43,7 @@ namespace Signum.Windows
             get { return (bool)GetValue(ReloadVisibleProperty); }
             set { SetValue(ReloadVisibleProperty, value); }
         }
-
+   
         public event RoutedEventHandler OkClick
         {
             add { btOk.Click += value; }
@@ -77,57 +67,32 @@ namespace Signum.Windows
             get { return btOk; }
         }
 
-        public Button SaveButton
-        {
-            get { return btSave; }
-        }
-
         public Button ReloadButton
         {
             get { return btReload; }
         }
 
-        public ViewButtons ViewButtons { get; set; }
+        public ViewMode ViewMode { get; set; }
 
         public ButtonBar()
         {
             InitializeComponent();
-            this.DataContextChanged += new DependencyPropertyChangedEventHandler(ToolBar_DataContextChanged);
         }
 
-        void ToolBar_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        public void SetButtons(List<FrameworkElement> elements)
         {
-            List<FrameworkElement> elements = new List<FrameworkElement>();
-            if (GetButtonBarElement != null)
-                elements.AddRange(GetButtonBarElement.GetInvocationList()
-                    .Cast<GetButtonBarElementDelegate>()
-                    .Select(d => d(e.NewValue, MainControl, ViewButtons))
-                    .NotNull().SelectMany(d => d).NotNull().ToList());
-
             wrapPanel.Children.RemoveRange(2, wrapPanel.Children.Count - 3);
             for (int i = 0; i < elements.Count; i++)
             {
                 wrapPanel.Children.Insert(i + 2, elements[i]);
             }
         }
-
-        public static void Start()
-        {
-            ButtonBar.GetButtonBarElement += (obj, mainControl, viewButtons) => mainControl is IHaveToolBarElements ?
-                ((IHaveToolBarElements)mainControl).GetToolBarElements(obj, viewButtons) : null;
-        }
     }
 
-    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, Control mainControl, ViewButtons buttons);
 
-    public interface IHaveToolBarElements
+    public enum ViewMode
     {
-        List<FrameworkElement> GetToolBarElements(object dataContext, ViewButtons buttons);
-    }
-
-    public enum ViewButtons
-    {
-        Ok,
-        Save
+        View,
+        Navigate
     }
 }

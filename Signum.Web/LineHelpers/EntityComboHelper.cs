@@ -56,7 +56,7 @@ namespace Signum.Web
                         {
                             int? id = entityCombo.IdOrNull;
 
-                            IEnumerable<Lite> data = entityCombo.Data ?? AutoCompleteUtils.RetrieveAllLite(entityCombo.Type.CleanType(), entityCombo.Implementations.Value);
+                            IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutoCompleteUtils.FindAllLite(entityCombo.Implementations.Value);
 
                             bool complexCombo = entityCombo.Implementations.Value.IsByAll || entityCombo.Implementations.Value.Types.Count() > 1;
 
@@ -144,7 +144,7 @@ namespace Signum.Web
             return builder.ToHtml();
         }
 
-        public static SelectListItem ToSelectListItem(this Lite lite, bool selected)
+        public static SelectListItem ToSelectListItem(this Lite<IIdentifiable> lite, bool selected)
         {
             return new SelectListItem { Text = lite.ToString(), Value = lite.Id.ToString(), Selected = selected };
         }

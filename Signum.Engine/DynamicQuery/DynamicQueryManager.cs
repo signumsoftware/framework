@@ -47,7 +47,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        IDynamicQuery TryGet(object queryName)
+        public IDynamicQuery TryGet(object queryName)
         {
             AssertQueryAllowed(queryName); 
             return queries.TryGetC(queryName);
@@ -55,22 +55,26 @@ namespace Signum.Engine.DynamicQuery
 
         public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return this[request.QueryName].ExecuteQuery(request);
+            using (ExecutionMode.UserInterface())
+                return this[request.QueryName].ExecuteQuery(request);
         }
 
         public int ExecuteQueryCount(QueryCountRequest request)
         {
-            return this[request.QueryName].ExecuteQueryCount(request);
+            using (ExecutionMode.UserInterface())
+                return this[request.QueryName].ExecuteQueryCount(request);
         }
 
-        public Lite ExecuteUniqueEntity(UniqueEntityRequest request)
+        public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return this[request.QueryName].ExecuteUniqueEntity(request);
+            using (ExecutionMode.UserInterface())
+                return this[request.QueryName].ExecuteUniqueEntity(request);
         }
 
         public QueryDescription QueryDescription(object queryName)
         {
-            return this[queryName].GetDescription(queryName);
+            using (ExecutionMode.UserInterface())
+                return this[queryName].GetDescription(queryName);
         }
 
         public event Func<object, bool> AllowQuery;
@@ -111,7 +115,10 @@ namespace Signum.Engine.DynamicQuery
 
         public Dictionary<object, IDynamicQuery> GetQueries(Type entityType)
         {
-            return queries.Where(kvp => kvp.Value.EntityColumn().Implementations.Value.Types.Contains(entityType)).ToDictionary();
+            return (from kvp in queries
+                    let ec = kvp.Value.EntityColumn()
+                    where !ec.Implementations.Value.IsByAll && ec.Implementations.Value.Types.Contains(entityType)
+                    select kvp).ToDictionary();
         }
 
         public Dictionary<object, IDynamicQuery> GetQueries()
@@ -186,8 +193,7 @@ namespace Signum.Engine.DynamicQuery
         {
             if (mi.DeclaringType.Assembly == typeof(Enumerable).Assembly ||
                 mi.DeclaringType.Assembly == typeof(Csv).Assembly ||
-                mi.DeclaringType.Assembly == typeof(Lite).Assembly ||
-                mi.DeclaringType.Assembly == typeof(Database).Assembly)
+                mi.DeclaringType.Assembly == typeof(Lite).Assembly)
                 throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
         }
 
@@ -232,7 +238,7 @@ namespace Signum.Engine.DynamicQuery
             public string Format;
             public string Unit;
             public Implementations? Implementations;
-            public Func<bool> IsAllowed;
+            public Func<string> IsAllowed;
             public PropertyRoute PropertyRoute;
         }
 
@@ -276,7 +282,7 @@ namespace Signum.Engine.DynamicQuery
 
                 CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
 
-                var result = new ExtensionRouteInfo(); 
+                var result = new ExtensionRouteInfo();
 
                 if (cm != null && cm.PropertyRoutes.Any())
                 {
@@ -287,8 +293,12 @@ namespace Signum.Engine.DynamicQuery
                     result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }
+                else
+                {
+                    result.Implementations = AllImplementations;
+                }
 
-                result.IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
+                result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
 
                 return result;
             });

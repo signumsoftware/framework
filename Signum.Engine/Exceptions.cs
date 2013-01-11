@@ -77,7 +77,7 @@ namespace Signum.Engine.Exceptions
                 TableName = m.Groups["table"].Value;
                 Field = m.Groups["field"].Value;
                 TableType = Schema.Current.Tables
-                    .Where(kvp => kvp.Value.Name == TableName)
+                    .Where(kvp => kvp.Value.Name.Name == TableName)
                     .Select(p => p.Key)
                     .SingleOrDefaultEx();
             }
@@ -91,7 +91,7 @@ namespace Signum.Engine.Exceptions
                 {
                     ReferedTableName = m2.Groups["referedTable"].Value.Split('.').Last();
                     ReferedTableType = Schema.Current.Tables
-                                    .Where(kvp => kvp.Value.Name == ReferedTableName)
+                                    .Where(kvp => kvp.Value.Name.Name == ReferedTableName)
                                     .Select(p => p.Key)
                                     .SingleOrDefaultEx();
 

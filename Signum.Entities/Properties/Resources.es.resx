@@ -187,7 +187,7 @@
     <value>menor o igual que</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>[Num]</value>
+    <value>Num</value>
   </data>
   <data name="Day" xml:space="preserve">
     <value>Dia</value>
@@ -449,5 +449,8 @@
   </data>
   <data name="ComparisonType" xml:space="preserve">
     <value>Tipo comparación</value>
+  </data>
+  <data name="CreateFromRegex" xml:space="preserve">
+    <value>^Crear (?&lt;t&gt;.*) desde .*$</value>
   </data>
 </root>

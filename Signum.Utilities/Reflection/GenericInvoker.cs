@@ -42,24 +42,39 @@ namespace Signum.Utilities.Reflection
 
     internal class GenericParametersVisitor : SimpleExpressionVisitor
     {
-        int genericParameters;
+        int? parameters;
 
         public static int GenericParameters(LambdaExpression expression)
         {
             var gpv = new GenericParametersVisitor();
+
             gpv.Visit(expression);
-            return gpv.genericParameters;
+
+            if (gpv.parameters == null)
+                throw new InvalidOperationException("No generic method or constructor found on expression:\r\n{0}".Formato(expression.NiceToString()));
+
+            return gpv.parameters.Value;
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if(!m.Method.IsGenericMethod)
-                throw new InvalidOperationException("Should be an expression calling a generic method");
+                throw new InvalidOperationException("The method '{0}' should be generic".Formato(m.Method.MethodName()));
 
-            genericParameters = m.Method.GetGenericMethodDefinition().GetGenericArguments().Length;
+            parameters = m.Method.GetGenericMethodDefinition().GetGenericArguments().Length;
 
             return m;
-        } 
+        }
+
+        protected override NewExpression VisitNew(NewExpression nex)
+        {
+            if (!nex.Type.IsGenericType)
+                throw new InvalidOperationException("The constructor of {0} should be generic".Formato(nex.Type.TypeName()));
+
+            parameters = nex.Type.GetGenericArguments().Length;
+
+            return nex;
+        }
     }
 
     class GeneratorVisitor : SimpleExpressionVisitor
@@ -73,9 +88,16 @@ namespace Signum.Utilities.Reflection
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            MethodInfo mi= m.Method.GetGenericMethodDefinition().MakeGenericMethod(types); 
+            MethodInfo mi = m.Method.GetGenericMethodDefinition().MakeGenericMethod(types); 
             var result = Expression.Call(m.Object, mi, m.Arguments.Zip(mi.GetParameters(), (e,p)=>Convert(e, p.ParameterType)));
             return result; 
+        }
+
+        protected override NewExpression VisitNew(NewExpression nex)
+        {
+            ConstructorInfo ci = nex.Constructor.GetGenericConstructorDefinition().MakeGenericConstructor(types);
+            var result = Expression.New(ci, nex.Arguments.Zip(ci.GetParameters(), (e, p) => Convert(e, p.ParameterType)));
+            return result;
         }
 
         protected override Expression VisitLambda(LambdaExpression lambda)

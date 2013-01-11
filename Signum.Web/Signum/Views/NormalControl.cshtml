@@ -1,5 +1,6 @@
 ﻿@using System.Configuration
 @using Signum.Web.Properties
+@using Signum.Engine.Operations
 @model TypeContext
 @{
     ModifiableEntity modifiable = Model.UntypedValue as ModifiableEntity;
@@ -21,13 +22,10 @@
     <span class="sf-entity-title">@(ViewBag.Title)</span>
 </div>
 <div class="sf-button-bar">
-    @if (Model != null && !Navigator.Manager.OnSaveProtected(modifiable.GetType()) && !Model.ReadOnly)
-    {
-        <a id="ebSave" class="sf-entity-button sf-save" onclick="new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
-    }
     @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     { 
-        Buttons = ViewButtons.Save,
+        ViewButtons = ViewButtons.Save,
+        ShowOperations = (bool)ViewData[ViewDataKeys.ShowOperations],
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
         Prefix =  Model.ControlID
