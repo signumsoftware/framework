@@ -2,34 +2,91 @@
 <ChartScript GroupBy="Always">
   <Columns>
     <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true" />
-    <Column DisplayName="Sub-bars" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Sub-bars" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
     <Column DisplayName="Width" ColumnType="Positionable">
       <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
     </Column>
+    <Column DisplayName="Width 2" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Width 3" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Width 4" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Width 5" ColumnType="Positionable" IsOptional="true" />
   </Columns>
   <Icon FileName="multibars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAsdJREFUeNrsmD1rFUEUhmeuN1Y2USLR1iakEKxSCAoWEbG3u6VdSCPiHxA7axFSmcI/IKQSDFprJwGFNBYWNlYxZuccz9fM7N6sUe/uxC3uwmTOfNydh/fM7L4bj4huyNfIDfyaA/YCOHmwPdiNOI7B/vPLuECtkXfOjxaoELunDu8pHmvsYjyycoaGNQnjxRW3eGvLFwNcWnt44kREoD9gLY4DNa2P4sMvr8sq2AokARgQSq1QVQZMsFV5wAYULZqB6m2F4z6ZL2Bo4wUB08INqKPmGEZAUy2mPfYXBawOpgBVGVk4Lj4FFVVTJY+KAHp+1fFj5tv3H8UfGXdurrrNyXU/k4J319daDorsLlFSRKUOoML9XAdghbkGiYELqQmB+nhuAKt5DNzO7kcG7HaK0cBk3ycgrp2AcDaD9NHiQceDAEECCQaaoEHndduDCUh2nrSzQgZUW5Bho4qi1FS/zoOsOHQErGgReaqZSqqAyylMCplaoMrFNsa0mlpyH9sKaJCdAH+GIDcXINs3af/EdFr6BMiUracQBVzVilno7THzZvf9qZzimQF3tu57N8Brblh724NfX1xB9Xi+V+6zS9fc+dsvfWfAc1c3/uoHf/KF2fFo+2D/VRk/2A4F2TQkX2iGwmCnHU8Rw3qiSo32bxxPLe7PbtVVOuae8bhZjSpFwPR7zGa2V0dNfk4XmgaCVh+YVapBljzF955d6HSjS8sX3ZOVR62nuBfAuh8UR4MuvYOTY6F2VVERoxAs1jmf9j675cd75T47eeuAy9YooFmnoLXABAOjcW5LbOPFH9QhmtKQrRXHVa1I2xSTNmSXUxxQFEFTiA5qBcEAWS2NRckQ0w5mZHFmM/pPgIcMIalU5TSVYKlEA659f6B6x1N7F79996HTjdZvrJYFHKofTIBD+hfc9tOJb3y4zw3rHPA/Xr8EGAASLnxI0iSooQAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
   
-  var dim0 = d3.nest()
-    .key(function(r){return r.c0.toString(); })
-    .rollup(function(r){return r[0].c0 })
-    .entries(data.rows)
-    .map(function(g){return g.values;});
+   var dim0, series, title;
+  
+   if(data.columns.c1.token == null)
+   {   
+      dim0 = data.rows.map(function(r){return r.c0;});     
+      series = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){
+           var col = data.columns[cn];
+            return {
+              key : cn,
+              color : null,
+              niceName : col.title,
+              points : data.rows.map(function(r){
+                var v = r[cn];
+                return {
+                  rowClick : r,
+                  value: v,
+                  niceToString : v == null ? null: (r.c0.niceToString() + ', ' + col.title + ': ' + v.niceToString()),
+                  dim0 : r.c0,
+                };
+              }) 
+            };        
+        });
+     title = ['c2', 'c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return data.columns[cn].title; })
+        .join(" | ")
+   }
+   else
+   {
+      var errors = ['c3','c4','c5','c6']
+        .filter(function(cn){return data.columns[cn].token != undefined; })
+        .map(function(cn){return "'" + data.columns[cn].displayName + "'"; });
+     
+     if(errors.length > 0)
+      throw errors.join() + " not compatible with '" + data.columns.c1.displayName + "'";  
+    
+     dim0 = d3.nest()
+      .key(function(r){return r.c0.toString(); })
+      .rollup(function(r){return r[0].c0 })
+      .entries(data.rows)
+      .map(function(g){return g.values;});
 
-  var series = d3.nest()
+  
+     series = d3.nest()
       .key(function(r){return r.c1; })
       .rollup(function(list){ 
         var obj = d3.nest()
             .key(function(r){return r.c0.toString(); })
             .rollup(function(r){return r[0] })
             .map(list);
+        
+        var c1 = list[0].c1;
         return {
-          dim1 : list[0].c1,
-          values0 : dim0.map(function(d1){ return obj[d1]; })
+          key : c1.key,
+          color: c1.color,
+          niceName : c1.niceToString(),
+          points : dim0.map(function(dim0){ 
+            var row = obj[dim0];
+            return {
+              rowClick: row, 
+              value: row == null ? null: row.c2,
+              niceToString : row == null ? null: (row.c0.niceToString() + ', ' + row.c1.niceToString() + ': ' + row.c2.niceToString()),
+              dim0: dim0
+          	}; })
         };
       })
       .entries(data.rows)
-      .map(function(g){return g.values;}); 
+      .map(function(g){return g.values;});
+     
+     title = data.columns.c2.title + " by " + data.columns.c1.title
+   }
  
   var xRule = rule({
     _1 : 5,
@@ -57,7 +114,7 @@
   }, height);
   //yRule.debugY(chart);
 
-  var x = scaleFor(data.columns.c2, data.rows.map(function (e) { return e.c2; }), 0, xRule.size('content'));
+  var x = scaleFor(data.columns.c2, $.map(series, function(s){ return s.points.map(function(p){return p.value;})}), 0, xRule.size('content'));
   
   var y = d3.scale.ordinal()
       .domain($.map(dim0, function (v) { return v; }))
@@ -90,7 +147,7 @@
     .append('svg:text').attr('class', 'x-title')
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-  	.text(data.columns.c1.title);
+  	.text(title);
   
   
   chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.start('content')  + (y.rangeBand() / 2)))
@@ -115,25 +172,27 @@
   
   var interMagin = 2;
   
-  var color = d3.scale.category20().domain($.map(series, function (s) { return s.dim1; }));
+  var color = d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
   
   var ySubscale = d3.scale.ordinal()
-    .domain($.map(series, function (s) { return s.dim1; }))
+    .domain($.map(series, function (s) { return s.key; }))
     .rangeBands([interMagin, y.rangeBand()-interMagin]);
   
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-    .enterData(function (s) {   return s.values0; }, 'rect', 'shape')
-    .filter(function (r){return r != undefined;})
-    .attr('stroke', '#fff')
-    .attr('fill', function (r) { return getColor(r.c1, color); })
-    .attr('y', function (r) { return ySubscale(r.c1); })
-    .attr('transform', function (r) { return 'translate(0, ' + y(r.c0) + ')'; })
-    .attr('height', ySubscale.rangeBand())
-    .attr('width', function (r) { return x(r.c2); })
-    .attr('data-click', function (r) { return getClickKeys(r, data.columns); })
-    .append('svg:title')
-    .text(function (r) { return r.c0.niceToString() + ', ' + r.c1.niceToString() + ': ' + r.c2.niceToString(); })
+    .each(function(s){
+      d3.select(this).enterData(s.points, 'rect', 'shape')
+      .filter(function (r){return r.value != undefined;})
+      .attr('stroke', '#fff')
+      .attr('fill', function (r) { return s.color || color(s.key); })
+      .attr('y', function (r) { return ySubscale(s.key); })
+      .attr('transform', function (r) { return 'translate(0, ' + y(r.dim0) + ')'; })
+      .attr('height', ySubscale.rangeBand())
+      .attr('width', function (r) { return x(r.value); })
+      .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
+      .append('svg:title')
+      .text(function (r) { return r.niceToString; });
+	});
       
     //paint color legend
     var legendScale = d3.scale.ordinal()
@@ -149,13 +208,13 @@
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('width', yRule.size('legend'))
       .attr('height', yRule.size('legend'))
-      .attr('fill', function (s) { return getColor(s.dim1, color); });
+      .attr('fill', function (s) { return s.color || color(s.key); });
     
     chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
       .enterData(series, 'text', 'color-text')
         .attr('x', function (e, i) { return legendScale(i); })
         .attr('dominant-baseline', 'middle')
-        .text(function (s) { return s.dim1.niceToString(); });
+        .text(function (s) { return s.niceName; });
   }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

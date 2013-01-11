@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Signum.Entities.Chart
 {
-    public enum ChartPermissions
+    public enum ChartPermission
     {
         ViewCharting
     }

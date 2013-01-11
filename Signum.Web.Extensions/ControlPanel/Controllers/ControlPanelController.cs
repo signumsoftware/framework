@@ -24,15 +24,14 @@ namespace Signum.Web.ControlPanel
 
             var cp = this.ExtractEntity<ControlPanelDN>().ApplyChanges(this.ControllerContext, "", true).Value;
 
-            var firstColumnParts = cp.Parts.Where(p => p.Column == 1).ToList();
-            var higherRowFirstColumn = firstColumnParts.Any() ? firstColumnParts.Max(p => p.Row) : 0;
+            var lastColumn = 0.To(cp.NumberOfColumns).WithMin(c => cp.Parts.Count(p => p.Column == c));
 
             var newPart = new PanelPart
             {
-                Row = higherRowFirstColumn + 1,
-                Column = 1,
+                Column = lastColumn,
+                Row = (cp.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row + 1) ?? 0),
                 Title = "",
-                Content = (IIdentifiable)Activator.CreateInstance(Navigator.ResolveType(partType))
+                Content = (IPartDN)Activator.CreateInstance(Navigator.ResolveType(partType))
             };
 
             cp.Parts.Add(newPart);

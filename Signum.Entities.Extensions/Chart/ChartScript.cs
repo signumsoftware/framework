@@ -15,7 +15,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class ChartScriptDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -50,7 +50,7 @@ namespace Signum.Entities.Chart
             set { Set(ref groupBy, value, () => GroupBy); }
         }
 
-        [NotifyCollectionChanged, ValidateChildProperty]
+        [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
         MList<ChartScriptColumnDN> columns = new MList<ChartScriptColumnDN>();
         public MList<ChartScriptColumnDN> Columns
         {
@@ -277,7 +277,7 @@ namespace Signum.Entities.Chart
                 if (s == null)
                     return false;
 
-                if (c == null)
+                if (c == null || c.Token == null)
                     return s.IsOptional;
 
                 if (!ChartUtils.IsChartColumnType(c.Token, s.ColumnType))
@@ -298,8 +298,9 @@ namespace Signum.Entities.Chart
         }
     }
 
-    public enum ChartScriptOperations
+    public enum ChartScriptOperation
     {
+        Save,
         Clone,
         Delete
     }
@@ -371,6 +372,20 @@ namespace Signum.Entities.Chart
         {
             get { return parameter3; }
             set { Set(ref parameter3, value, () => Parameter3); }
+        }
+
+        internal ChartScriptColumnDN Clone()
+        {
+            return new ChartScriptColumnDN
+            {
+                DisplayName = DisplayName,
+                IsGroupKey = IsGroupKey,
+                ColumnType = ColumnType,
+                IsOptional = IsOptional,
+                Parameter1 = Parameter1.TryCC(p => p.Clone()),
+                Parameter2 = Parameter2.TryCC(p => p.Clone()),
+                Parameter3 = Parameter3.TryCC(p => p.Clone()),
+            };
         }
     }
 

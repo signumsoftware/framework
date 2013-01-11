@@ -13,7 +13,6 @@ using Signum.Entities;
 using Signum.Web;
 using Signum.Engine;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using Signum.Web.Extensions.Properties;
 using System.IO;
@@ -68,7 +67,7 @@ namespace Signum.Web.Files
 
             IFile file;
 
-            if (info.RuntimeType == typeof(FilePathDN))
+            if (info.EntityType == typeof(FilePathDN))
             {
                 string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
                 if (!fileType.HasText())
@@ -78,7 +77,7 @@ namespace Signum.Web.Files
             }
             else
             {
-                file = (IFile)Activator.CreateInstance(info.RuntimeType);
+                file = (IFile)Activator.CreateInstance(info.EntityType);
             }
 
             HttpPostedFileBase hpf = Request.Files[fileName] as HttpPostedFileBase;
@@ -105,7 +104,7 @@ namespace Signum.Web.Files
 
             RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Headers["X-" + TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
             IFile file;
-            if (info.RuntimeType == typeof(FilePathDN))
+            if (info.EntityType == typeof(FilePathDN))
             {
                 string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
                 if (!fileType.HasText())
@@ -115,7 +114,7 @@ namespace Signum.Web.Files
             }
             else
             {
-                file = (IFile)Activator.CreateInstance(info.RuntimeType);
+                file = (IFile)Activator.CreateInstance(info.EntityType);
             }
 
             file.FileName = fileName;
@@ -137,12 +136,12 @@ namespace Signum.Web.Files
             sb.AppendLine("<script type='text/javascript'>");
             sb.AppendLine("var parDoc = window.parent.document;");
 
-            if (/*file.TryCS(f => f.IdOrNull) != null ||*/ !shouldHaveSaved)
+            if (file.BinaryFile == null /* If file has been saved */ || !shouldHaveSaved)
             {
                 RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
 
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(prefix));
-                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.ToStrLink), file.FileName));
+                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, file is EmbeddedEntity ? EntityBaseKeys.ToStr : EntityBaseKeys.ToStrLink), file.FileName));
                 sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo), ri.ToString()));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(TypeContextUtilities.Compose(prefix, "DivNew")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "DivOld")));
@@ -168,7 +167,7 @@ namespace Signum.Web.Files
 
             RuntimeInfo ri = RuntimeInfo.FromFormValue(file);
 
-            if (ri.RuntimeType == typeof(FilePathDN))
+            if (ri.EntityType == typeof(FilePathDN))
             {
                 FilePathDN fp = Database.Retrieve<FilePathDN>(ri.IdOrNull.Value);
 

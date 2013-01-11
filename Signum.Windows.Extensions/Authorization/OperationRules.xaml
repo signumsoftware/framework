@@ -38,14 +38,21 @@
                     <GridViewColumn Header="Allow" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Allowed}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:OperationAllowed.Allow}}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Deny" Width="40">
+                    <GridViewColumn Header="DB Only" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton  IsChecked="{Binding Path=Allowed, Converter={x:Static m:Converters.Not}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:OperationAllowed.DBOnly}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="None" Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:OperationAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

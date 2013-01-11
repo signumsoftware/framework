@@ -6,7 +6,7 @@ using System.ServiceModel;
 
 namespace Signum.Entities.Profiler
 {
-    public enum ProfilerPermissions
+    public enum ProfilerPermission
     {
         ViewTimeTracker,
         ViewHeavyProfiler, 

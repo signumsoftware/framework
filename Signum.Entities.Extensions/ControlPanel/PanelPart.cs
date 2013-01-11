@@ -22,16 +22,16 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref title, value, () => Title); }
         }
 
-        int row = 1;
-        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        int row;
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
         public int Row
         {
             get { return row; }
             set { Set(ref row, value, () => Row); }
         }
 
-        int column = 1;
-        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        int column;
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
         public int Column
         {
             get { return column; }
@@ -39,8 +39,8 @@ namespace Signum.Entities.ControlPanel
         }
 
         [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
-        IIdentifiable content;
-        public IIdentifiable Content
+        IPartDN content;
+        public IPartDN Content
         {
             get { return content; }
             set { Set(ref content, value, () => Content); }
@@ -55,17 +55,41 @@ namespace Signum.Entities.ControlPanel
         {
             if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
             {
-                if (content != null && (content.GetType() == typeof(CountSearchControlPartDN) || content.GetType() == typeof(LinkListPartDN)))
-                    return Resources.ControlPanelDN_PartTitleMustBeSpecifiedForListParts;
+                if (content != null && content.RequiresTitle)
+                    return  Resources.ControlPanelDN_TitleMustBeSpecifiedFor0.Formato(content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);
         }
+
+        public PanelPart Clone()
+        {
+            return new PanelPart
+            {
+                Column = Column,
+                Row = Row,
+                Content = content.Clone(),
+                Title = Title
+            };
+        }
+
+        internal void NotifyRowColumn()
+        {
+            Notify(() => Row);
+            Notify(() => Column);
+        }
     }
 
-    [Serializable]
-    public class UserQueryPartDN : Entity
+    public interface IPartDN : IIdentifiable
     {
+        bool RequiresTitle { get; }
+        IPartDN Clone();
+    }
+
+    [Serializable, EntityKind(EntityKind.Part)]
+    public class UserQueryPartDN : Entity, IPartDN
+    {
+        [NotNullable]
         UserQueryDN userQuery;
         [NotNullValidator]
         public UserQueryDN UserQuery
@@ -79,11 +103,25 @@ namespace Signum.Entities.ControlPanel
         {
             return userQuery == null ? null : ToStringExpression.Evaluate(this);
         }
+
+        public bool RequiresTitle
+        {
+            get { return false; }
+        }
+
+        public IPartDN Clone()
+        {
+            return new UserQueryPartDN
+            {
+                UserQuery = this.UserQuery,
+            };
+        }
     }
 
-    [Serializable]
-    public class UserChartPartDN : Entity
+    [Serializable, EntityKind(EntityKind.Part)]
+    public class UserChartPartDN : Entity, IPartDN
     {
+        [NotNullable]
         UserChartDN userChart;
         [NotNullValidator]
         public UserChartDN UserChart
@@ -92,11 +130,11 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref userChart, value, () => UserChart); }
         }
 
-        bool onlyData = false;
-        public bool OnlyData
+        bool showData = false;
+        public bool ShowData
         {
-            get { return onlyData; }
-            set { Set(ref onlyData, value, () => OnlyData); }
+            get { return showData; }
+            set { Set(ref showData, value, () => ShowData); }
         }
 
         static readonly Expression<Func<UserChartPartDN, string>> ToStringExpression = e => e.userChart.ToString();
@@ -104,11 +142,26 @@ namespace Signum.Entities.ControlPanel
         {
             return userChart == null ? null : ToStringExpression.Evaluate(this);
         }
+
+        public bool RequiresTitle
+        {
+            get { return false; }
+        }
+
+        public IPartDN Clone()
+        {
+            return new UserChartPartDN
+            {
+                UserChart = this.UserChart,
+                ShowData = this.ShowData
+            };
+        }
     }
 
-    [Serializable]
-    public class CountSearchControlPartDN : Entity
+    [Serializable, EntityKind(EntityKind.Part)]
+    public class CountSearchControlPartDN : Entity, IPartDN
     {
+        [NotNullable]
         MList<CountUserQueryElement> userQueries = new MList<CountUserQueryElement>();
         public MList<CountUserQueryElement> UserQueries
         {
@@ -119,6 +172,19 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return "{0} {1}".Formato(userQueries.Count, typeof(UserQueryDN).NicePluralName());
+        }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
+        }
+
+        public IPartDN Clone()
+        {
+            return new CountSearchControlPartDN
+            {
+                UserQueries = this.UserQueries.Select(e=>e.Clone()).ToMList(),
+            };
         }
     }
 
@@ -146,11 +212,21 @@ namespace Signum.Entities.ControlPanel
             get { return href; }
             set { Set(ref href, value, () => Href); }
         }
+        public CountUserQueryElement Clone()
+        {
+            return new CountUserQueryElement
+            {
+                Href = this.Href,
+                Label = this.Label,
+                UserQuery = UserQuery,
+            };
+        }
     }
 
-    [Serializable]
-    public class LinkListPartDN : Entity
+    [Serializable, EntityKind(EntityKind.Part)]
+    public class LinkListPartDN : Entity, IPartDN
     {
+        [NotNullable]
         MList<LinkElement> links = new MList<LinkElement>();
         public MList<LinkElement> Links
         {
@@ -161,6 +237,19 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
+        }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
+        }
+
+        public IPartDN Clone()
+        {
+            return new LinkListPartDN
+            {
+                Links = this.Links.Select(e => e.Clone()).ToMList(),
+            };
         }
     }
 
@@ -182,5 +271,15 @@ namespace Signum.Entities.ControlPanel
             get { return link; }
             set { Set(ref link, value, () => Link); }
         }
+
+        public LinkElement Clone()
+        {
+            return new LinkElement
+            {
+                Label = this.Label,
+                Link = this.Link
+            };
+        }
+
     }
 }

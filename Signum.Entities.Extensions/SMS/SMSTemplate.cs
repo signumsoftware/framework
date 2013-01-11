@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.SMS
 {
@@ -16,7 +17,7 @@ namespace Signum.Entities.SMS
         Modified
     }
 
-    public enum SMSTemplateOperations
+    public enum SMSTemplateOperation
     { 
         Create,
         Save,
@@ -24,7 +25,7 @@ namespace Signum.Entities.SMS
         Enable
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class SMSTemplateDN : Entity
     {
         [SqlDbType(Size = 100)]
@@ -57,6 +58,7 @@ namespace Signum.Entities.SMS
             set { Set(ref associatedType, value, () => AssociatedType); }
         }
 
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
         string message;
         [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)] // Max = SMSCharacters.TripleSMSMaxTextLength)]
         public string Message

@@ -13,16 +13,16 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;
-using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.SystemString)]
     public class ProcessDN : MultiEnumDN
     {
+       
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class ProcessExecutionDN : IdentifiableEntity
     {
         internal ProcessExecutionDN() { }
@@ -136,15 +136,15 @@ namespace Signum.Entities.Processes
         static StateValidator<ProcessExecutionDN, ProcessState> stateValidator = new StateValidator<ProcessExecutionDN, ProcessState>
         (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.ExceptionDate, e => e.Exception)
         {
-       {ProcessState.Created,   false,   false,                  false,             false,                 false,               false,              false,            false,         false}, 
-       {ProcessState.Planned,   true,    null,                   null,              null,                  false,               null,               null,             null,          null}, 
-       {ProcessState.Canceled,  null,    true,                   null,              null,                  false,               null,               null,             null,          null}, 
-       {ProcessState.Queued,    null,    null,                   true,              false,                 false,               false,              false,            false,         false},
-       {ProcessState.Executing, null,    null,                   true,              true,                  false,               false,              true,             false,         false},
-       {ProcessState.Suspending,null,    null,                   true,              true,                  false,               true,               true,             false,         false},
-       {ProcessState.Suspended, null,    null,                   true,              true,                  false,               true,               true,             false,         false},
-       {ProcessState.Finished,  null,    null,                   true,              true,                  true,                false,              false,            false,         false},
-       {ProcessState.Error,     null,    null,                   null,              null,                  null,                null,               null,             true,          true},
+       {ProcessState.Created,   false,          false,                  false,             false,                 false,               false,              false,           false,               false}, 
+       {ProcessState.Planned,   true,           null,                   null,              null,                  false,               null,               null,            null,                null}, 
+       {ProcessState.Canceled,  null,           true,                   null,              null,                  false,               null,               null,            null,                null}, 
+       {ProcessState.Queued,    null,           null,                   true,              false,                 false,               false,              false,           false,               false},
+       {ProcessState.Executing, null,           null,                   true,              true,                  false,               false,              true,            false,               false},
+       {ProcessState.Suspending,null,           null,                   true,              true,                  false,               true,               true,            false,               false},
+       {ProcessState.Suspended, null,           null,                   true,              true,                  false,               true,               true,            false,               false},
+       {ProcessState.Finished,  null,           null,                   true,              true,                  true,                false,              false,           false,               false},
+       {ProcessState.Error,     null,           null,                   null,              null,                  null,                null,               null,            true,                true},
         };
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -200,7 +200,7 @@ namespace Signum.Entities.Processes
     {
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class UserProcessSessionDN : Entity, ISessionDataDN
     {
         Lite<UserDN> user;
@@ -241,7 +241,7 @@ namespace Signum.Entities.Processes
         Suspend,
     }
 
-    public enum ProcessPermissions
+    public enum ProcessPermission
     {
         ViewProcessControlPanel
     }

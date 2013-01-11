@@ -11,9 +11,9 @@ using Signum.Services;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Windows;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using System.Windows.Controls;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Processes
 {
@@ -28,102 +28,88 @@ namespace Signum.Windows.Processes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ProcessDN>(EntityType.SystemString) { View = e => new ProcessUI(), Icon = Image("process.png") });
-                Navigator.AddSetting(new EntitySettings<ProcessExecutionDN>(EntityType.System) { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessDN> { View = e => new ProcessUI(), Icon = Image("process.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessExecutionDN> { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
-                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Cancel){ Icon = Image("stop.png") },
-                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Execute){ Icon = Image("play.png") },
-                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Suspend){ Icon = Image("pause.png") },
+                    new EntityOperationSettings(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
+                    new EntityOperationSettings(ProcessOperation.Cancel){ Icon = Image("stop.png") },
+                    new EntityOperationSettings(ProcessOperation.Execute){ Icon = Image("play.png") },
+                    new EntityOperationSettings(ProcessOperation.Suspend){ Icon = Image("pause.png") },
                 });
 
                 if (packageOperation || package)
-                    Navigator.AddSetting(new EntitySettings<PackageLineDN>(EntityType.System) { View = e => new PackageLine(), Icon = Image("packageLine.png") });
+                    Navigator.AddSetting(new EntitySettings<PackageLineDN> { View = e => new PackageLine(), Icon = Image("packageLine.png") });
 
                 if (package)
-                    Navigator.AddSetting(new EntitySettings<PackageDN>(EntityType.System) { View = e => new Package(), Icon = Image("package.png") });
+                    Navigator.AddSetting(new EntitySettings<PackageDN> { View = e => new Package(), Icon = Image("package.png") });
 
                 if (packageOperation)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageOperationDN>(EntityType.System) { View = e => new PackageOperation(), Icon = Image("package.png") });
-                    OperationClient.AddSetting(new ContextualOperationSettings(PackageOperationOperation.CreatePackageOperation)
-                    {
-                        IsVisible = args=>false,
-                    });
+                    Navigator.AddSetting(new EntitySettings<PackageOperationDN> { View = e => new PackageOperation(), Icon = Image("package.png") });
+
                     SearchControl.GetContextMenuItems += SearchControl_GetContextMenuItems;
                 }
             }
         }
 
-         class PackageData
-        {
-            public Enum OperationKey; 
-
-            public Dictionary<Type, OperationInfo> OperationInfos;
-
-            public EntityOperationSettingsBase Settings;
-
-            public string CanExecute;
-        }
-
-
 
         static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
         {
+            if (!Navigator.IsViewable(typeof(PackageOperationDN)))
+                return Enumerable.Empty<MenuItem>();
+
             if (sc.SelectedItems.IsNullOrEmpty() || sc.SelectedItems.Length == 1)
                 return null;
 
             if (sc.Implementations.IsByAll)
                 return null;
 
+            var types = sc.SelectedItems.Select(a => a.EntityType).Distinct().ToList();
+
             var result = (from t in sc.Implementations.Types
                           from oi in OperationClient.Manager.OperationInfos(t)
-                          where oi.IsEntityOperation && oi.Lite == true
-                          group KVP.Create(t, oi) by oi.Key into g
-                          let os = (EntityOperationSettingsBase)OperationClient.Manager.Settings.TryGetC(g.Key)
-                          where os == null ||
-                                os.ContextualFromMany == null && !os.ClickOverriden ||
-                                os.ContextualFromMany.OnVisible(sc, g.First().Value)
-                          select new PackageData
+                          where oi.IsEntityOperation
+                          group new { t, oi } by oi.Key into g
+                          let oi = g.First().oi
+                          let os = OperationClient.Manager.GetSettings<EntityOperationSettings>(g.Key)
+                          let coc = new ContextualOperationContext
                           {
-                              OperationKey = g.Key,
-                              OperationInfos = g.ToDictionary(),
-                              CanExecute = null,
-                              Settings = os
-                          }).ToList();
+                              Entities = sc.SelectedItems,
+                              SearchControl = sc,
+                              OperationInfo = oi,
+                              OperationSettings = os.TryCC(a=>a.ContextualFromMany),
+                              CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a=>a.t))),
+                          }
+                          where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
+                              os.ContextualFromMany == null ? (oi.Lite == true && os.Click == null && oi.OperationType != OperationType.ConstructorFrom) :
+                              (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(coc))
+                          select coc).ToList();
 
             if (result.IsEmpty())
                 return null;
 
-            var types = sc.SelectedItems.Select(a=>a.RuntimeType).Distinct().ToList();
-
-            foreach (PackageData pomi in result)
-            {
-                if (!types.All(pomi.OperationInfos.ContainsKey))
-                    pomi.CanExecute = "{0} is not defined for {1}".Formato(types.Where(t => !pomi.OperationInfos.ContainsKey(t)).CommaAnd(a => a.NiceName()));
-            }
-
-            var cleanKeys = result.Where(pomi => pomi.CanExecute == null && pomi.OperationInfos.Values.Any(oi => oi.HasStates))
-                .Select(kvp => kvp.OperationKey).ToList();
+            var cleanKeys = result
+                .Where(cod => cod.CanExecute == null && cod.OperationInfo.HasStates == true)
+                .Select(cod => cod.OperationInfo.Key).ToList();
 
             if (cleanKeys.Any())
             {
                 Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetContextualCanExecute(sc.SelectedItems, cleanKeys));
-                foreach (var pomi in result)
+                foreach (var cod in result)
                 {
-                    var ce = canExecutes.TryGetC(pomi.OperationKey);
+                    var ce = canExecutes.TryGetC(cod.OperationInfo.Key);
                     if (ce.HasText())
-                        pomi.CanExecute = ce;
+                        cod.CanExecute = ce;
                 }
             }
 
-            return result.Select(pd=>PackageOperationMenuItemConsturctor.Construct(sc, pd.OperationKey, pd.CanExecute, pd.OperationInfos, pd.Settings));
+            return result.Select(coc=>PackageOperationMenuItemConsturctor.Construct(coc));
         }
 
 
-        static ProcessExecutionDN ProcessOperation_Plan(EntityOperationEventArgs<ProcessExecutionDN> args)
+        static ProcessExecutionDN ProcessOperation_Plan(EntityOperationContext args)
         {
             DateTime plan = TimeZoneManager.Now;
             if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, Window.GetWindow(args.SenderButton)))

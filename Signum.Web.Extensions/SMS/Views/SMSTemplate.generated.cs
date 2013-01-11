@@ -215,7 +215,7 @@ WriteLiteral("    <div id=\"sfTemplateLiterals\">\r\n");
             #line 34 "..\..\SMS\Views\SMSTemplate.cshtml"
        Write(Html.EntityCombo(e, s => s.AssociatedType, ec =>
             {
-                ec.Data = SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList();
+                ec.Data = SMSLogic.RegisteredDataObjectProviders();
                 ec.OnEntityChanged = "SF.SMS.fillLiterals()";
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
                 ec.ComboHtmlProperties["data-url"] = Url.Action<SMSController>(s => s.GetLiteralsForType(ec.ControlID));

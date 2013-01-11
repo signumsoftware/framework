@@ -25,13 +25,13 @@ namespace Signum.Engine.Profiler
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 if (timeTracker)
-                    PermissionAuthLogic.RegisterPermissions(ProfilerPermissions.ViewTimeTracker);
+                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewTimeTracker);
 
                 if (heavyProfiler)
-                    PermissionAuthLogic.RegisterPermissions(ProfilerPermissions.ViewHeavyProfiler); 
+                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler); 
 
                 if(overrideSessionTimeout)
-                    PermissionAuthLogic.RegisterPermissions(ProfilerPermissions.OverrideSessionTimeout); 
+                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout); 
             }
         }
 

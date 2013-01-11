@@ -13,7 +13,6 @@ using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
-using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Engine.Extensions.Properties;
 using System.Net;
@@ -24,7 +23,6 @@ using System.Web;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Linq.Expressions;
-using Signum.Entities.Exceptions;
 using Signum.Engine.Exceptions;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
@@ -146,6 +144,12 @@ namespace Signum.Engine.Mailing
                 EmailTemplateDN.AssociatedTypeIsEmailOwner = t =>
                     typeof(IEmailOwnerDN).IsAssignableFrom(t.ToType());
 
+                new BasicExecute<EmailTemplateDN>(EmailTemplateOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (et, _) => { },
+                }.Register();
             }
         }
 
@@ -283,9 +287,11 @@ namespace Signum.Engine.Mailing
             Dictionary<string, EmailModelDN> old = Administrator.TryRetrieveAll<EmailModelDN>(replacements).ToDictionary(c =>
                 c.FullClassName);
 
-            replacements.AskForReplacements(old, should, systemTemplatesReplacementKey);
+            replacements.AskForReplacements(
+                old.Keys.ToHashSet(), 
+                should.Keys.ToHashSet(), systemTemplatesReplacementKey);
 
-            Dictionary<string, EmailModelDN> current = replacements.ApplyReplacements(old, systemTemplatesReplacementKey);
+            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
 
             return Synchronizer.SynchronizeScript(should, current, 
                 (tn, s) => table.InsertSqlSync(s), 

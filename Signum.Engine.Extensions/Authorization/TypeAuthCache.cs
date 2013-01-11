@@ -418,18 +418,37 @@ namespace Signum.Entities.Authorization
                             select new XElement("Condition",
                                 new XAttribute("Name", c.Condition.Key),
                                 new XAttribute("Allowed", c.Allowed.ToString()))
-                                )
+                         )
                      ))
                  ));
         }
 
 
-        internal SqlPreCommand ImportXml(XElement element, Dictionary<string, Lite<RoleDN>> roles)
+        internal SqlPreCommand ImportXml(XElement element, Dictionary<string, Lite<RoleDN>> roles, Replacements replacements)
         {
             var current = Database.RetrieveAll<RuleTypeDN>().GroupToDictionary(a => a.Role);
             var should = element.Element("Types").Elements("Role").ToDictionary(x => roles[x.Attribute("Name").Value]);
 
             Table table = Schema.Current.Table(typeof(RuleTypeDN));
+
+            replacements.AskForReplacements(
+                element.Element("Types").Elements("Role").SelectMany(x => x.Elements("Type")).Select(x => x.Attribute("Resource").Value).ToHashSet(),
+                TypeLogic.NameToType.Where(a=>!a.Value.IsEnumEntity()).Select(a=>a.Key).ToHashSet(), typeof(TypeDN).Name);
+
+            replacements.AskForReplacements(
+                element.Element("Types").Elements("Role").SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).Select(x => x.Attribute("Name").Value).ToHashSet(),
+                MultiEnumLogic<TypeConditionNameDN>.AllUniqueKeys().ToHashSet(),
+                typeof(TypeConditionNameDN).Name);
+
+            Func<string, TypeDN> getResource = s =>
+            {
+                Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeof(TypeDN).Name, s));
+
+                if (type == null)
+                    return null;
+
+                return TypeLogic.TypeToDN[type];
+            };
 
             return Synchronizer.SynchronizeScript(should, current, 
                 (role, x) =>
@@ -437,13 +456,14 @@ namespace Signum.Entities.Authorization
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, null, max, role);
 
-                    var dic = x.Elements("Type").ToDictionary(
-                        xr => TypeLogic.TypeToDN[TypeLogic.GetType(xr.Attribute("Resource").Value)],
-                        xr => new
-                        {
-                            Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(),
-                            Condition = Conditions(xr)
-                        }, "Type rules for {0}".Formato(role));
+                    var dic = (from xr in x.Elements("Type")
+                               let t = getResource(xr.Attribute("Resource").Value)
+                               where t != null
+                               select KVP.Create(t, new
+                               {
+                                   Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(),
+                                   Condition = Conditions(xr, replacements)
+                               })).ToDictionary("Type rules for {0}".Formato(role));
 
                     SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RuleTypeDN
                     {
@@ -462,13 +482,18 @@ namespace Signum.Entities.Authorization
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, def, max, role);
 
+                    var dic = (from xr in  x.Elements("Type")
+                              let t = getResource(xr.Attribute("Resource").Value)
+                               where t != null
+                               select KVP.Create(t, xr)).ToDictionary("Type rules for {0}".Formato(role));
+
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
-                        x.Elements("Type").ToDictionary(a => TypeLogic.TypeToDN[TypeLogic.GetType(a.Attribute("Resource").Value)], "Type rules for {0}".Formato(role)), 
+                        dic, 
                         list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), 
                         (r, xr) =>
                         {
                             var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
-                            var conditions = Conditions(xr);
+                            var conditions = Conditions(xr, replacements);
 
                             return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions}, Comment(role, r, a));
                         }, 
@@ -477,7 +502,7 @@ namespace Signum.Entities.Authorization
                         {
                             var oldA = pr.Allowed;
                             pr.Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
-                            var conditions = Conditions(xr);
+                            var conditions = Conditions(xr, replacements);
 
                             if (!pr.Conditions.SequenceEqual(conditions))
                                 pr.Conditions = conditions;
@@ -490,13 +515,16 @@ namespace Signum.Entities.Authorization
                 }, Spacing.Double);
         }
 
-        private static MList<RuleTypeConditionDN> Conditions(XElement xr)
+        private static MList<RuleTypeConditionDN> Conditions(XElement xr, Replacements replacements)
         {
-            return xr.Descendants("Condition").Select(xc => new RuleTypeConditionDN
-            {
-                Condition = MultiEnumLogic<TypeConditionNameDN>.ToEntity(xc.Attribute("Name").Value),
-                Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
-            }).ToMList();
+            return (from xc in xr.Elements("Condition")
+                    let cn = MultiEnumLogic<TypeConditionNameDN>.TryToEntity(replacements.Apply(typeof(TypeConditionNameDN).Name, xc.Attribute("Name").Value))
+                    where cn != null
+                    select new RuleTypeConditionDN
+                    {
+                        Condition = cn,
+                        Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
+                    }).ToMList();
         }
 
 

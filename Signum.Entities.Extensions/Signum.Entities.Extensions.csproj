@@ -83,21 +83,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\PasswordValidIntervalDN.cs" />
-    <Compile Include="Authorization\ResetPasswordRequestDN.cs" />
-    <Compile Include="Authorization\SessionLogDN.cs" />
-    <Compile Include="Authorization\UserTicketDN.cs" />
+    <Compile Include="Alerts\Alert.cs" />
+    <Compile Include="Authorization\PasswordValidInterval.cs" />
+    <Compile Include="Authorization\ResetPasswordRequest.cs" />
+    <Compile Include="Authorization\SessionLog.cs" />
+    <Compile Include="Authorization\UserTicket.cs" />
     <Compile Include="Authorization\Services.cs" />
-    <Compile Include="Authorization\PermissionDN.cs" />
+    <Compile Include="Authorization\Permission.cs" />
     <Compile Include="Authorization\Rules.cs" />
-    <Compile Include="Authorization\RoleDN.cs" />
+    <Compile Include="Authorization\Role.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\UserDN.cs" />
     <Compile Include="Basics\CultureInfoDN.cs" />
+    <Compile Include="Authorization\User.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
-    <Compile Include="Basics\TypeConditionDN.cs" />
-    <Compile Include="Basics\EnumDN.cs" />
+    <Compile Include="Basics\TypeConditionName.cs" />
     <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
@@ -116,14 +117,13 @@
     <Compile Include="Chart\IChartServer.cs" />
     <Compile Include="Chart\UserChart.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
+    <Compile Include="ControlPanel\IUserQueryServer.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />
     <Compile Include="Disconnected\DisconnectedExportRanges.cs" />
     <Compile Include="Disconnected\DisconnectedImportDN.cs" />
     <Compile Include="Disconnected\DisconnectedMachineDN.cs" />
     <Compile Include="Disconnected\DisconnectedExportDN.cs" />
     <Compile Include="Disconnected\FileMessage.cs" />
-    <Compile Include="Exceptions\ExceptionDN.cs" />
-    <Compile Include="Deployment\DeploymentLogDN.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
@@ -135,14 +135,14 @@
     <Compile Include="Mailing\Newsletter.cs" />
     <Compile Include="Mailing\SMTPConfiguration.cs" />
     <Compile Include="Chart\UserChartOmniboxResultGenerator.cs" />
+    <Compile Include="Notes\Note.cs" />
+    <Compile Include="Omnibox\SpecialOmniboxResultGenerator.cs" />
+    <Compile Include="Processes\IProcessServer.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\EntityOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\OmniboxParser.cs" />
     <Compile Include="Omnibox\OmniboxUtils.cs" />
-    <Compile Include="Operations\IOperationServer.cs" />
-    <Compile Include="Operations\OperationDN.cs" />
-    <Compile Include="Operations\OperationLogDN.cs" />
     <Compile Include="Processes\Process.cs" />
     <Compile Include="Processes\Package.cs" />
     <Compile Include="Profiler\IProfilerServer.cs" />
@@ -182,8 +182,12 @@
     <EmbeddedResource Include="Properties\Resources.es.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.fr.resx" />
-    <EmbeddedResource Include="Properties\Resources.it.resx" />
+    <EmbeddedResource Include="Properties\Resources.fr.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.it.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -192,7 +196,9 @@
     <EmbeddedResource Include="Properties\Resources.pt.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.de.resx" />
+    <EmbeddedResource Include="Properties\Resources.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="Authorization\Authorization.cd" />
@@ -215,7 +221,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"

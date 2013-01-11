@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="otCharts" storage="d:\signum\extensions\signum.web.extensions.sample.test\otcharts.orderedtest" id="7dcff2bd-ad20-41ad-b7ba-009e468ced05" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
-  <TestLinks>
-    <TestLink id="ab3d9d1d-29b6-de18-e4f5-a4cb882c396a" name="Chart001_Open_Filter_Draw_CreateUC" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  </TestLinks>
-</OrderedTest>

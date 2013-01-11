@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
@@ -15,6 +14,8 @@ using System.Reflection;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using System.IO;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Help
 {

@@ -14,40 +14,13 @@ using System.Collections.Specialized;
 
 namespace Signum.Entities.Mailing
 {
-    //[Serializable]
-    //public class EmailTemplateOldDN : IdentifiableEntity
-    //{
-    //    [NotNullable, UniqueIndex]
-    //    string fullClassName;
-    //    public string FullClassName
-    //    {
-    //        get { return fullClassName; }
-    //        set { Set(ref fullClassName, value, () => FullClassName); }
-    //    }
-
-    //    [NotNullable]
-    //    string friendlyName;
-    //    [StringLengthValidator(Min = 1)]
-    //    public string FriendlyName
-    //    {
-    //        get { return friendlyName; }
-    //        set { Set(ref friendlyName, value, () => FriendlyName); }
-    //    }
-
-    //    static readonly Expression<Func<EmailTemplateOldDN, string>> ToStringExpression = e => e.friendlyName;
-    //    public override string ToString()
-    //    {
-    //        return ToStringExpression.Evaluate(this);
-    //    }
-    //}
-
     public enum EmailTemplateState
     {
         Created,
         Modified
     }
 
-    public enum EmailTemplateOperations
+    public enum EmailTemplateOperation
     {
         Create,
         Save,
@@ -55,7 +28,7 @@ namespace Signum.Entities.Mailing
         Disable
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class EmailTemplateDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -292,7 +265,6 @@ namespace Signum.Entities.Mailing
         }
     }
 
-
     [Serializable]
     public class EmailTemplateMessageDN : EmbeddedEntity
     {
@@ -350,11 +322,12 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum EmailMasterTemplateOperations
+    public enum EmailMasterTemplateOperation
     {
         Create,
-        Save
-    }
+	}
+
+
 
     [Serializable]
     public class EmailMasterTemplateDN : Entity

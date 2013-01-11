@@ -58,9 +58,9 @@ namespace Signum.Web.UserQueries
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserQueryDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
+                    new EntitySettings<UserQueryDN> { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
                     
-                    new EmbeddedEntitySettings<QueryFilterDN>()
+                    new EmbeddedEntitySettings<QueryFilterDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryFilter"), 
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
@@ -69,7 +69,7 @@ namespace Signum.Web.UserQueries
                             .SetProperty(a=>a.TryToken, qtMapping)
                     },
 
-                    new EmbeddedEntitySettings<QueryColumnDN>()
+                    new EmbeddedEntitySettings<QueryColumnDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
@@ -77,7 +77,7 @@ namespace Signum.Web.UserQueries
                             .SetProperty(a=>a.TryToken, qtMapping)
                     },
 
-                    new EmbeddedEntitySettings<QueryOrderDN>()
+                    new EmbeddedEntitySettings<QueryOrderDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)
@@ -117,7 +117,7 @@ namespace Signum.Web.UserQueries
             Lite<UserQueryDN> currentUserQuery = null;
             string url = (ctx.ControllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                currentUserQuery = new Lite<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
+                currentUserQuery = Lite.Create<UserQueryDN>(int.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString()));
 
             foreach (var uq in UserQueryLogic.GetUserQueries(ctx.QueryName))
             {
@@ -146,7 +146,7 @@ namespace Signum.Web.UserQueries
                 });
             }
 
-            if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
+            if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string uqEditText = Resources.UserQueries_Edit;
                 items.Add(new ToolBarButton
@@ -189,6 +189,7 @@ namespace Signum.Web.UserQueries
             findOptions.ColumnOptions.Clear();
             findOptions.ColumnOptions.AddRange(userQuery.Columns.Select(qc => new ColumnOption
             {
+                Token = qc.Token,
                 ColumnName = qc.TokenString,                
                 DisplayName = qc.DisplayName,
             }));

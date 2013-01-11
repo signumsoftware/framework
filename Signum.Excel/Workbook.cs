@@ -26,7 +26,7 @@
         public CodeCompileUnit WriteCode(string fullClassName)
         {
             string className = fullClassName.Split('.').Last();
-            string nameSpace = fullClassName.RemoveRight(className.Length + 1);
+            string nameSpace = fullClassName.RemoveEnd(className.Length + 1);
 
             CodeCompileUnit unit = new CodeCompileUnit();
 

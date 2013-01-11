@@ -115,7 +115,7 @@ Write(Html.EntityLine(tc, ucp => ucp.UserChart, el => el.Create = false));
             #line hidden
             
             #line 12 "..\..\ControlPanel\Views\Admin\UserChartPart.cshtml"
-Write(Html.ValueLine(tc, ucp => ucp.OnlyData));
+Write(Html.ValueLine(tc, ucp => ucp.ShowData));
 
             
             #line default

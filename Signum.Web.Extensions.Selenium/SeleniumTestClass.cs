@@ -10,6 +10,7 @@ using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Selenium
 {
@@ -77,9 +78,9 @@ namespace Signum.Web.Selenium
                 id.HasValue ? id.ToString() : "");
         }
 
-        protected virtual string ViewRoute(Lite lite)
+        protected virtual string ViewRoute(Lite<IIdentifiable> lite)
         {
-            return ViewRoute(lite.RuntimeType, lite.IdOrNull);
+            return ViewRoute(lite.EntityType, lite.IdOrNull);
         }
     }
 }

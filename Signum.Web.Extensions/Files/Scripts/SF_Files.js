@@ -33,6 +33,17 @@ SF.registerModule("Files", function () {
                 $(e.target).toggleClass("sf-file-drop-over", toggle);
             },
 
+            getParentRuntimeInfo: function (parentPrefix) {
+                var $runtimeInfoField = new SF.RuntimeInfo(parentPrefix).find();
+                if ($runtimeInfoField.length > 0) {
+                    return $runtimeInfoField.val();
+                }
+                else { //popup
+                    var $mainControl = $(".sf-main-control[data-prefix=" + parentPrefix + "]");
+                    return $mainControl.data("runtimeinfo");
+                }
+            },
+
             fileDropped: function (e) {
                 var files = e.target.files || e.dataTransfer.files;
                 e.stopPropagation();
@@ -54,7 +65,7 @@ SF.registerModule("Files", function () {
                     var xhr = new XMLHttpRequest();
                     xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
                     xhr.setRequestHeader("X-FileName", fileName);
-                    xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, new SF.RuntimeInfo($divNew.attr("data-parent-prefix")).find().val());
+                    xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, this.getParentRuntimeInfo($divNew.attr("data-parent-prefix")));
                     xhr.setRequestHeader("X-Prefix", this.options.prefix);
                     xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().find().val());
                     xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
@@ -121,7 +132,7 @@ SF.registerModule("Files", function () {
 
                 var $parentPrefix = $("<input />").attr("type", "hidden")
                     .attr("name", "fileParentRuntimeInfo")
-                    .val(new SF.RuntimeInfo($divNew.attr("data-parent-prefix")).find().val())
+                    .val(this.getParentRuntimeInfo($divNew.attr("data-parent-prefix")))
                     .addClass("sf-file-parent-prefix").appendTo($fileForm);
 
                 var $tabId = $("#" + SF.Keys.tabId).clone().appendTo($fileForm);
@@ -165,7 +176,7 @@ SF.registerModule("Files", function () {
                 this.onItemCreated(template, viewOptions);
                 $(".sf-repeater-element > #" + SF.compose(viewOptions.prefix, SF.Keys.runtimeInfo)).remove();
             },
-            
+
             _getRemoving: function (itemPrefix) {
                 return "$('#" + this.options.prefix + "').data('fileRepeater').remove('" + itemPrefix + "');";
             }

@@ -7,7 +7,6 @@ using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities.Authorization;
-using Signum.Entities.Exceptions;
 
 namespace Signum.Entities.Scheduler
 {
@@ -20,13 +19,13 @@ namespace Signum.Entities.Scheduler
     {
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.SystemString)]
     public class CustomTaskDN : MultiEnumDN, ITaskDN
     {
         
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class CustomTaskExecutionDN : IdentifiableEntity
     {
         CustomTaskDN customTask;

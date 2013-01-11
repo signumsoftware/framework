@@ -12,7 +12,7 @@ using System.Web;
 
 namespace Signum.Entities.Files
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.SharedPart)]
     public class FilePathDN : ImmutableEntity, IFile
     {
         public FilePathDN() { }
@@ -36,7 +36,7 @@ namespace Signum.Entities.Files
 
         [NotNullable, SqlDbType(Size = 260)]
         string fileName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 260), FileNameValidator]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
         public string FileName
         {
             get { return fileName; }

@@ -31,7 +31,9 @@ namespace Signum.Web.Chart
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(findOptions.QueryName));
 
-            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
 
             var request = new ChartRequest(findOptions.QueryName)
             {
@@ -154,7 +156,7 @@ namespace Signum.Web.Chart
 
                 foreach (var column in chartRequest.Columns.Iterate())
                 {
-                    if (column.Value.ScriptColumn.IsGroupKey)
+                    if (column.Value.ScriptColumn.IsGroupKey && column.Value.Token != null)
                         filters.AddRange(GetFilter(column.Value, "c" + column.Position));
                 }
 
@@ -178,7 +180,7 @@ namespace Signum.Web.Chart
                 var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
                 Type entitiesType = Lite.Extract(entityColumn.Type);
 
-                Lite lite = Lite.Parse(entitiesType, entity);
+                Lite<IdentifiableEntity> lite = Lite.Parse(entity);
                 return Redirect(Navigator.NavigateRoute(lite));
             }
         }
@@ -188,12 +190,12 @@ namespace Signum.Web.Chart
             if (chartToken == null ||  chartToken.Token is AggregateToken)
                 return null;
 
-
             var token = chartToken.Token;
 
-            bool hasKey = Request.Params.AllKeys.Contains(key);
-            var value = !hasKey ? null : 
-                FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(Request.Params[key]), token.Type);
+            string str = Request.Params.AllKeys.Contains(key)  ? Request.Params[key] : null;
+
+            var value = str == null || str == "null" ? null :
+                FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(str), token.Type);
             
             return new FilterOption
             {
@@ -264,7 +266,7 @@ namespace Signum.Web.Chart
 
             var userChart = request.ToUserChart();
 
-            userChart.Related = UserDN.Current.ToLite<IdentifiableEntity>();
+            userChart.Related = UserDN.Current.ToLite();
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
@@ -291,7 +293,7 @@ namespace Signum.Web.Chart
 
             userChart.Delete();
 
-            return Redirect(Navigator.FindRoute(queryName));
+            return JsonAction.Redirect(Navigator.FindRoute(queryName));
         }
         #endregion
     }

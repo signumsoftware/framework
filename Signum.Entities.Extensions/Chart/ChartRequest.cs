@@ -82,7 +82,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotifyCollectionChanged, ValidateChildProperty]
+        [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
         MList<ChartColumnDN> columns = new MList<ChartColumnDN>();
         public MList<ChartColumnDN> Columns
         {

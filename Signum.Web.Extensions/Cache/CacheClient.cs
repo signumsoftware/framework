@@ -14,11 +14,12 @@ using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
-using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 using System.Web.Mvc.Html;
+using Signum.Web.Omnibox;
+using Signum.Entities.Cache;
 
 namespace Signum.Web.Cache
 {
@@ -31,6 +32,10 @@ namespace Signum.Web.Cache
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(CacheClient));
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ViewCache",
+                    () => CachePermission.ViewCache.IsAuthorized(),
+                    uh => uh.Action((CacheController cc) => cc.View())));
             }
         }
     }

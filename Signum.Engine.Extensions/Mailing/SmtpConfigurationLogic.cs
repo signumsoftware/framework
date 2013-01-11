@@ -12,6 +12,7 @@ using Signum.Utilities;
 using System.Net.Mail;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Mailing
 {
@@ -66,6 +67,13 @@ namespace Signum.Engine.Mailing
                                                           }).ToDynamic();
                 
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += SetCache;
+
+                new BasicExecute<SMTPConfigurationDN>(SMTPConfigurationOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (sc, _) => { },
+                }.Register();
             }
         }
 

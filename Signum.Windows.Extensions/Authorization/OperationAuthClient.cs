@@ -6,12 +6,13 @@ using Signum.Entities.Authorization;
 using Signum.Services;
 using System.Windows.Markup;
 using System.Windows;
+using Signum.Windows.Operations;
 
 namespace Signum.Windows.Authorization
 {
     public static class OperationAuthClient
     {
-        static DefaultDictionary<Enum, bool> authorizedOperations;
+        static DefaultDictionary<Enum, OperationAllowed> authorizedOperations;
 
         public static bool Started { get; private set; }
 
@@ -27,9 +28,11 @@ namespace Signum.Windows.Authorization
             authorizedOperations = Server.Return((IOperationAuthServer s) => s.OperationRules());
         }
 
-        public static bool GetAllowed(Enum operationKey)
+        public static bool GetAllowed(Enum operationKey, bool inUserInterface)
         {
-            return authorizedOperations.GetAllowed(operationKey);
+            var allowed = authorizedOperations.GetAllowed(operationKey);
+
+            return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
     }
 
@@ -37,6 +40,8 @@ namespace Signum.Windows.Authorization
     [MarkupExtensionReturnType(typeof(bool))]
     public class OperationAllowedExtension : MarkupExtension
     {
+        public bool InUserInterface { get; set; }
+
         Enum operationKey;
         public OperationAllowedExtension(object value)
         {
@@ -45,13 +50,15 @@ namespace Signum.Windows.Authorization
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return OperationAuthClient.GetAllowed(operationKey);
+            return OperationAuthClient.GetAllowed(operationKey, InUserInterface);
         }
     }
 
     [MarkupExtensionReturnType(typeof(Visibility))]
     public class OperationVisiblityExtension : MarkupExtension
     {
+        public bool InUserInterface { get; set; }
+
         Enum operationKey;
         public OperationVisiblityExtension(object value)
         {
@@ -60,7 +67,7 @@ namespace Signum.Windows.Authorization
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-             return OperationAuthClient.GetAllowed(operationKey) ? Visibility.Visible : Visibility.Collapsed;
+            return OperationAuthClient.GetAllowed(operationKey, InUserInterface) ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

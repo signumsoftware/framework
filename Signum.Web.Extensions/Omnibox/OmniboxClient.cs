@@ -96,10 +96,10 @@ namespace Signum.Web.Omnibox
         {
             public override bool AllowedType(Type type)
             {
-                return Navigator.IsNavigable(type, true);
+                return Navigator.IsNavigable(type, isSearchEntity: true);
             }
 
-            public override Lite RetrieveLite(Type type, int id)
+            public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
             {
                 if (!Database.Exists(type, id))
                     return null;
@@ -116,12 +116,12 @@ namespace Signum.Web.Omnibox
                 return DynamicQueryManager.Current.QueryDescription(queryName);
             }
 
-            public override List<Lite> AutoComplete(Type cleanType, Implementations implementations, string subString, int count)
+            public override List<Lite<IdentifiableEntity>> AutoComplete(Implementations implementations, string subString, int count)
             {
                 if (string.IsNullOrEmpty(subString))
-                    return new List<Lite>();
+                    return new List<Lite<IdentifiableEntity>>();
 
-                return AutoCompleteUtils.FindLiteLike(cleanType, implementations, subString, 5);
+                return AutoCompleteUtils.FindLiteLike(implementations, subString, 5);
             }
         }
     }

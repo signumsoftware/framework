@@ -13,6 +13,7 @@ using Signum.Utilities;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.UserQueries;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.ControlPanel
 {
@@ -49,25 +50,52 @@ namespace Signum.Engine.ControlPanel
                                                    ToStr = cp.ToString(),
                                                    Links = cp.UserQueries.Count
                                                }).ToDynamic(); 
+
+                RegisterOperations();
             }
         }
 
-        public static Lite<ControlPanelDN> GetHomePageControlPanel()
+        private static void RegisterOperations()
         {
-            UserDN currentUser = UserDN.Current;
-            if (currentUser == null)
+            new BasicExecute<ControlPanelDN>(ControlPanelOperation.Save)
+            {
+                AllowsNew = true,
+                Lite = false,
+                Execute = (cp, _) => { }
+            }.Register();
+
+            new BasicDelete<ControlPanelDN>(ControlPanelOperation.Delete)
+            {
+                Lite = false,
+                Delete = (cp, _) =>
+                {
+                    var parts = cp.Parts.Select(a => a.Content).ToList();
+                    cp.Delete();
+                    Database.DeleteList(parts);
+
+                }
+            }.Register();
+
+            new BasicConstructFrom<ControlPanelDN, ControlPanelDN>(ControlPanelOperation.Clone)
+            {
+                Lite = true,
+                AllowsNew = false,
+                Construct = (cp, _) => cp.Clone()
+            }.Register();
+        }
+
+        public static ControlPanelDN GetHomePageControlPanel()
+        {
+            var cps = Database.Query<ControlPanelDN>()
+                .Where(a=>a.HomePagePriority.HasValue)
+                .OrderByDescending(a => a.HomePagePriority)
+                .Select(a => a.ToLite())
+                .FirstOrDefault();
+
+            if (cps == null)
                 return null;
 
-            var panel = Database.Query<ControlPanelDN>().Where(cp => cp.Related.ToLite<UserDN>().RefersTo(currentUser) && cp.HomePage).Select(a => a.ToLite()).FirstOrDefault();
-            if (panel != null)
-                return panel;
-
-            var panels = Database.Query<ControlPanelDN>().Where(cp => cp.Related.Entity is RoleDN && cp.HomePage)
-                .Select(cp => new { ControlPanel = cp.ToLite(), Role = ((RoleDN)cp.Related.Entity).ToLite() }).ToList();
-
-            var hs = AuthLogic.RolesGraph().IndirectlyRelatedTo(RoleDN.Current.ToLite(), true);
-
-            return panels.Where(p => hs.Contains(p.Role)).OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel);
+            return cps.Retrieve(); //I assume this simplifies the cross applys.
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
@@ -89,7 +117,7 @@ namespace Signum.Engine.ControlPanel
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
 
             TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related));
 
             TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));

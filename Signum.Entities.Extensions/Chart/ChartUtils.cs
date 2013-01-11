@@ -232,9 +232,10 @@ namespace Signum.Entities.Chart
             var cols = request.Columns.Select((c, i) => new
             {
                 name = "c" + i,
+                displayName = request.Columns[i].ScriptColumn.DisplayName,
                 title = c.GetTitle(),
                 token = c.Token == null? null: c.Token.FullKey(),
-                type =  c.Token == null? null: c.Token.GetChartColumnType().ToString(),
+                type =  c.Token == null? null: c.Token.GetChartColumnType().ToString(),               
                 parameter1 = c.Parameter1,
                 parameter2 = c.Parameter2,
                 parameter3 = c.Parameter3,
@@ -247,6 +248,7 @@ namespace Signum.Entities.Chart
                 cols.Insert(0, new
                 {
                     name = "entity",
+                    displayName = "Entity",
                     title = "",
                     token = ChartColumnType.Lite.ToString(),
                     type = "entity",
@@ -263,6 +265,7 @@ namespace Signum.Entities.Chart
                 columns = cols.ToDictionary(a => a.name, a => new
                 {
                     a.title,
+                    a.displayName,
                     a.token,
                     a.isGroupKey,
                     a.type,
@@ -281,16 +284,16 @@ namespace Signum.Entities.Chart
 
             var type = ct.Token.Type.UnNullify();
 
-            if (typeof(Lite).IsAssignableFrom(type))
+            if (type.IsLite())
             {
                 return r =>
                 {
-                    Lite l = (Lite)r[columnIndex];
+                    Lite<IdentifiableEntity> l = (Lite<IdentifiableEntity>)r[columnIndex];
                     return new
                     {
                         key = l.TryCC(li => li.Key()),
                         toStr = l.TryCC(li => li.ToString()),
-                        color = l == null ? "#555" : GetChartColor(l.RuntimeType, l.Id).TryToHtml(),
+                        color = l == null ? "#555" : GetChartColor(l.EntityType, l.Id).TryToHtml(),
                     };
                 };
             }
@@ -343,11 +346,11 @@ namespace Signum.Entities.Chart
             var result = 0.To(heigth).Select(a => new List<ChartScriptDN>()).ToList();
 
             var groups = scripts
-                .OrderBy(a => a.Name)
-                .GroupBy(a => a.ColumnsStructure)
-                .OrderBy(a => a.Key.Length)
-                .ThenByDescending(a => a.Count())
-                .ThenBy(a => a.Key)
+                .OrderBy(s => s.Name)
+                .GroupBy(s => s.ColumnsStructure)
+                .OrderBy(g => g.First().Columns.Count(s=>!s.IsOptional))
+                .ThenByDescending(g => g.Count())
+                .ThenBy(g => g.Key)
                 .ToList();
 
             foreach (var gr in groups)

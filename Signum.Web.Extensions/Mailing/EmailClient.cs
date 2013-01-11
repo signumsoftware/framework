@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Entities;
 using System.Web;
@@ -42,14 +41,14 @@ namespace Signum.Web.Mailing
                 if (smtpConfig)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMTPConfigurationDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
+                    new EntitySettings<SMTPConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
                 });
 
                 if (newsletter)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<NewsletterDN>(EntityType.Main) { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
-                    new EntitySettings<NewsletterDeliveryDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
+                    new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
+                    new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                 });
             }
         }

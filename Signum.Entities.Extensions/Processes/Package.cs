@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Operations;
 using Signum.Utilities;
-using Signum.Entities.Exceptions;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.Part)]
     public class PackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
@@ -21,20 +20,13 @@ namespace Signum.Entities.Processes
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        Lite<UserDN> user;
-        public Lite<UserDN> User
-        {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
-        }
-
         public override string ToString()
         {
-            return "Package {0} {1}".Formato(Name, User);
+            return "Package {0}".Formato(Name);
         }
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class PackageOperationDN : PackageDN
     {
         OperationDN operation;
@@ -46,21 +38,16 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            return "Package {0} {1} {2}".Formato(Operation, Name, User); ;
+            return "Package {0} {1}".Formato(Operation, Name); ;
         }
-    }
-
-    public enum PackageOperationOperation
-    {
-        CreatePackageOperation
     }
 
     public enum PackageOperationProcess
     {
-        ExecutePackageOperation
+        PackageOperation
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class PackageLineDN : IdentifiableEntity
     {
         [NotNullable]

@@ -13,12 +13,12 @@ using Signum.Entities;
 using Signum.Web;
 using Signum.Engine;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using Signum.Web.Extensions.Properties;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
 using Signum.Engine.Authorization;
+using Signum.Web.Operations;
 #endregion
 
 namespace Signum.Web.Processes
@@ -61,9 +61,9 @@ namespace Signum.Web.Processes
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Start()
         {
-            ProcessPermissions.ViewProcessControlPanel.Authorize();
+            ProcessPermission.ViewProcessControlPanel.Authorize();
 
-            ProcessLogic.StartProcesses();
+            ProcessLogic.StartBackgroundProcess();
 
             Thread.Sleep(1000);
 
@@ -73,7 +73,7 @@ namespace Signum.Web.Processes
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Stop()
         {
-            ProcessPermissions.ViewProcessControlPanel.Authorize();
+            ProcessPermission.ViewProcessControlPanel.Authorize();
 
             ProcessLogic.Stop();
 
@@ -85,10 +85,9 @@ namespace Signum.Web.Processes
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ContextualExecute(string operationFullKey, string prefix, string liteKeys)
         {
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Select(l => (Lite)l).ToList();
+            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
 
-            ProcessExecutionDN process = (ProcessExecutionDN)OperationLogic.ServiceConstructFromMany(
-                lites, typeof(ProcessExecutionDN), PackageOperationOperation.CreatePackageOperation, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey));
+            ProcessExecutionDN process = PackageLogic.CreatePackageOperation(lites, OperationsClient.GetOperationKeyAssert(operationFullKey));
 
             return Navigator.PopupOpen(this, new PopupNavigateOptions(new TypeContext<ProcessExecutionDN>(process, prefix)));
         }

@@ -57,7 +57,7 @@ namespace Signum.Engine.Mailing
                 sb.Include<NewsletterDN>();
                 sb.Include<NewsletterDeliveryDN>();
                 ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(NewsletterOperations.Send, new NewsletterProcessAlgortihm());
+                ProcessLogic.Register(NewsletterOperation.Send, new NewsletterProcessAlgortihm());
 
 
                 dqm[typeof(NewsletterDN)] = (from n in Database.Query<NewsletterDN>()
@@ -156,7 +156,7 @@ namespace Signum.Engine.Mailing
         {
             GetState = n => n.State;
 
-            new ConstructFrom<NewsletterDN>(NewsletterOperations.Clone)
+            new ConstructFrom<NewsletterDN>(NewsletterOperation.Clone)
             {
                 ToState = NewsletterState.Created,
                 Construct = (n, _) => new NewsletterDN
@@ -169,7 +169,7 @@ namespace Signum.Engine.Mailing
                 }
             }.Register();
 
-            new Execute(NewsletterOperations.Save)
+            new Execute(NewsletterOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -178,13 +178,13 @@ namespace Signum.Engine.Mailing
                 Execute = (n, _) => n.State = NewsletterState.Saved
             }.Register();
 
-            new Execute(NewsletterOperations.AddRecipients)
+            new Execute(NewsletterOperation.AddRecipients)
             {
                 FromStates = new[] { NewsletterState.Saved },
                 ToState = NewsletterState.Saved,
                 Execute = (n, args) =>
                 {
-                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>(0);
+                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>();
                     var existent = Database.Query<NewsletterDeliveryDN>().Where(d => d.Newsletter.RefersTo(n)).Select(d => d.Recipient).ToList();
                     p.Except(existent).Select(ie => new NewsletterDeliveryDN
                     {
@@ -196,13 +196,13 @@ namespace Signum.Engine.Mailing
                 }
             }.Register();
 
-            new Execute(NewsletterOperations.RemoveRecipients)
+            new Execute(NewsletterOperation.RemoveRecipients)
             {
                 FromStates = new[] { NewsletterState.Saved },
                 ToState = NewsletterState.Saved,
                 Execute = (n, args) =>
                 {
-                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>(0);
+                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>();
                     foreach (var eo in p.GroupsOf(20))
                     {
                         var col = Database.Query<NewsletterDeliveryDN>().Where(d =>
@@ -214,7 +214,7 @@ namespace Signum.Engine.Mailing
                 }
             }.Register();
 
-            new Execute(NewsletterOperations.Send)
+            new Execute(NewsletterOperation.Send)
             {
                 FromStates = new[] { NewsletterState.Saved },
                 ToState = NewsletterState.Sent,
@@ -222,7 +222,7 @@ namespace Signum.Engine.Mailing
                     d.Newsletter.RefersTo(n)) ? null : "There is not any delivery for this newsletter",
                 Execute = (n, _) =>
                 {
-                    var process = ProcessLogic.Create(NewsletterOperations.Send, n);
+                    var process = ProcessLogic.Create(NewsletterOperation.Send, n);
                     process.Execute(ProcessOperation.Execute);
 
                     n.State = NewsletterState.Sent;
@@ -250,17 +250,14 @@ namespace Signum.Engine.Mailing
             var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            var newsletterDeliveryElementToken = QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd);
-            var newsletterToken = QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd);
-            var emailToken = QueryUtils.Parse("Entity.Email", qd);
 
-            var tokens = new List<QueryToken>();
-            tokens.Add(newsletterDeliveryElementToken);
-            tokens.Add(emailToken);
-            tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject));
-            tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.HtmlBody));
+            var columns = new List<QueryToken>();
+            columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd));
+            columns.Add(QueryUtils.Parse("Entity.Email", qd));
+            columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject));
+            columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.HtmlBody));
 
-            tokens = tokens.Distinct().ToList();
+            columns = columns.Distinct().ToList();
 
             var resultTable = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
@@ -269,13 +266,19 @@ namespace Signum.Engine.Mailing
                 { 
                     new Filter
                     { 
-                        Token = newsletterToken,
+                        Token = QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd),
                         Operation = FilterOperation.EqualTo, 
                         Value = newsletter.ToLite(), 
-                    }
+                    },
+                    new Filter
+                    {
+                        Token = QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Sent", qd),
+                        Operation = FilterOperation.EqualTo,
+                        Value = false
+                    },
                 },
                 Orders = new List<Order>(),
-                Columns = tokens.Select(t => new Column(t, t.NiceName())).ToList(),
+                Columns = columns.Select(t => new Column(t, t.NiceName())).ToList(),
                 ElementsPerPage = QueryRequest.AllElements,
             });
 
@@ -286,7 +289,7 @@ namespace Signum.Engine.Mailing
                     Row = r,
                 }).ToList();
 
-            var dic = tokens.Select((t, i) => KVP.Create(t.FullKey(), i)).ToDictionary();
+            var dic = columns.Select((t, i) => KVP.Create(t.FullKey(), i)).ToDictionary();
 
             string overrideEmail = EmailLogic.OverrideEmailAddress();
 

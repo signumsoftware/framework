@@ -16,13 +16,13 @@ namespace Signum.Engine.SMS
         public static void Register()
         {
             GetState = t => t.State;
-            new Construct(SMSTemplateOperations.Create)
+            new Construct(SMSTemplateOperation.Create)
             {
                 ToState = SMSTemplateState.Created,
                 Construct = _ => new SMSTemplateDN { State = SMSTemplateState.Created },
             }.Register();
 
-            new Execute(SMSTemplateOperations.Save)
+            new Execute(SMSTemplateOperation.Save)
             {
                 Lite = false,
                 AllowsNew = true,
@@ -31,7 +31,7 @@ namespace Signum.Engine.SMS
                 Execute = (t, _) => { t.State = SMSTemplateState.Modified; }
             }.Register();
 
-            new Execute(SMSTemplateOperations.Enable)
+            new Execute(SMSTemplateOperation.Enable)
             {
                 FromStates = new[] { SMSTemplateState.Modified },
                 ToState = SMSTemplateState.Modified,
@@ -39,7 +39,7 @@ namespace Signum.Engine.SMS
                 Execute = (t, _) => { t.Active = true; }
             }.Register();
 
-            new Execute(SMSTemplateOperations.Disable)
+            new Execute(SMSTemplateOperation.Disable)
             {
                 CanExecute = c => !c.Active ? "The template is already inactive" : null,
                 FromStates = new[] { SMSTemplateState.Modified },

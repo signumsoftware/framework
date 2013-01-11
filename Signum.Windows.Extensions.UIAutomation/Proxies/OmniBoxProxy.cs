@@ -33,7 +33,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> SelectEntity<T>(Lite<T> lite) where T : IdentifiableEntity
         {
-            var cleanName = TypeLogic.GetCleanName(lite.RuntimeType) + " " + lite.Id;
+            var cleanName = TypeLogic.GetCleanName(lite.EntityType) + " " + lite.Id;
 
             return new NormalWindowProxy<T>(SelectCapture(cleanName, "E:" + lite.Key())); 
         }
@@ -59,7 +59,7 @@ namespace Signum.Windows.UIAutomation
                     var item = lb.TryDescendant(e => e.Current.ItemStatus == itemsStatus);
 
                     if (item == null)
-                        throw new KeyNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(autoCompleteText, itemsStatus));
+                        throw new KeyNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(itemsStatus, autoCompleteText));
 
                     var listItem = item.Normalize(a => a.Current.ControlType == ControlType.ListItem);
 

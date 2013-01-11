@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Windows.Automation;
 using Signum.Utilities;
-using Signum.Entities.Operations;
 using Signum.Entities;
 using System.Windows;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.UIAutomation
 {
-    public class NormalWindowProxy<T>: WindowProxy, ILineContainer<T> where T: ModifiableEntity
+    public class NormalWindowProxy<T> : WindowProxy, ILineContainer<T> where T : ModifiableEntity
     {
-        public WindowProxy ParentWindow { get { return this;} }
+        public WindowProxy ParentWindow { get { return this; } }
         public PropertyRoute PreviousRoute { get; set; }
 
         AutomationElement ILineContainer.Element
@@ -35,7 +35,12 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement LeftExpander
         {
-            get { return Element.ChildById("expander"); }
+            get { return Element.ChildById("widgetPanel").ChildById("expander"); }
+        }
+
+        public AutomationElement LeftExpanderButton
+        {
+            get { return LeftExpander.ChildById("HeaderSite"); }
         }
 
         AutomationElement mainControl;
@@ -58,20 +63,16 @@ namespace Signum.Windows.UIAutomation
         public void Ok()
         {
             ButtonBar.OkButton.ButtonInvoke();
+
+            Element.Wait(() => IsClosed,
+            actionDescription: () => "Waiting to close window after OK {0}".Formato(EntityId));
         }
 
         public AutomationElement OkCapture()
         {
-           return Element.CaptureWindow(
-           action: () =>  ButtonBar.OkButton.ButtonInvoke(),
-           actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
-        }
-
-        public void Save()
-        {
-            Element.WaitDataContextChangedAfter(
-            action: () => ButtonBar.SaveButton.ButtonInvoke(),
-            actionDescription: () => "Save " + EntityId);
+            return Element.CaptureWindow(
+            action: () => ButtonBar.OkButton.ButtonInvoke(),
+            actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
         }
 
         public void Reload()
@@ -93,7 +94,6 @@ namespace Signum.Windows.UIAutomation
                     mb.CancelButton.ButtonInvoke();
             }
         }
-
         public void Execute(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
@@ -122,7 +122,7 @@ namespace Signum.Windows.UIAutomation
                 () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time));
         }
 
-        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T:IdentifiableEntity
+        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T : IdentifiableEntity
         {
             AutomationElement element = ConstructFrom(operationKey, timeOut);
 
@@ -156,16 +156,25 @@ namespace Signum.Windows.UIAutomation
                 }
             }
 
-            OnDisposed(); 
+            OnDisposed();
         }
     }
+
+    public static class NormalWindowExtensions
+    {
+        public static NormalWindowProxy<T> ToNormalWindow<T>(this AutomationElement element) where T : IdentifiableEntity
+        {
+            return new NormalWindowProxy<T>(element);
+        }
+    }
+
 
     public class OperationTimeouts
     {
         public static int ExecuteTimeout = 3 * 1000;
         public static int ConstructFromTimeout = 2 * 1000;
     }
-  
+
 
     public class ButtonBarProxy
     {
@@ -181,11 +190,6 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("btOk"); }
         }
 
-        public AutomationElement SaveButton
-        {
-            get { return Element.ChildById("btSave"); }
-        }
-
         public AutomationElement ReloadButton
         {
             get { return Element.ChildById("btReload"); }
@@ -197,5 +201,5 @@ namespace Signum.Windows.UIAutomation
         }
     }
 
-    
+
 }

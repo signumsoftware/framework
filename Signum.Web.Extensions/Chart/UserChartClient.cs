@@ -50,7 +50,7 @@ namespace Signum.Web.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserChartDN>(EntityType.Main) 
+                    new EntitySettings<UserChartDN> 
                     { 
                         PartialViewName = _ => ChartClient.ViewPrefix.Formato("UserChart"),
                         MappingMain = new EntityMapping<UserChartDN>(true)
@@ -96,7 +96,7 @@ namespace Signum.Web.Chart
             Lite<UserChartDN> currentUserChart = null;
             string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UC"))
-                currentUserChart = new Lite<UserChartDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
+                currentUserChart = Lite.Create<UserChartDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
 
             foreach (var uc in UserChartLogic.GetUserCharts(queryName))
             {
@@ -125,7 +125,7 @@ namespace Signum.Web.Chart
                 });
             }            
             
-            if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface))
+            if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
                 string ucEditText = Resources.UserChart_Edit;
                 items.Add(new ToolBarButton

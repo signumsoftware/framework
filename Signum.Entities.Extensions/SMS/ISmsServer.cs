@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.ServiceModel;
 using Signum.Services;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.SMS
 {
@@ -17,6 +18,6 @@ namespace Signum.Entities.SMS
         List<string> GetLiteralsFromDataObjectProvider(TypeDN type);
 
         [OperationContract, NetDataContract]
-        List<Lite> GetAssociatedTypesForTemplates();
+        List<Lite<TypeDN>> GetAssociatedTypesForTemplates();
     }
 }

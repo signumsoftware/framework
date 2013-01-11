@@ -14,6 +14,7 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Reports;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations;
+using Signum.Utilities;
 
 namespace Signum.Engine.UserQueries
 {
@@ -37,7 +38,7 @@ namespace Signum.Engine.UserQueries
                                                 Filters = uq.Filters.Count,
                                                 Columns = uq.Columns.Count,
                                                 Orders = uq.Orders.Count,
-                                            }).ToDynamic(); 
+                                            }).ToDynamic();
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += UserQueryLogic_Retrieved;
 
@@ -59,7 +60,7 @@ namespace Signum.Engine.UserQueries
         public static UserQueryDN ParseAndSave(this UserQueryDN userQuery)
         {
             if (!userQuery.IsNew || userQuery.queryName == null)
-                throw new InvalidOperationException("userQuery should be new and have queryName"); 
+                throw new InvalidOperationException("userQuery should be new and have queryName");
 
             userQuery.Query = QueryLogic.RetrieveOrGenerateQuery(userQuery.queryName);
 
@@ -74,24 +75,16 @@ namespace Signum.Engine.UserQueries
         static void UserQueryLogic_Retrieved(UserQueryDN userQuery)
         {
             object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
-
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            foreach (var f in userQuery.Filters)
-                f.ParseData(description);
-
-            foreach (var c in userQuery.Columns)
-                c.ParseData(description);
-
-            foreach (var o in userQuery.Orders)
-                o.ParseData(description);
+            userQuery.ParseData(description);
         }
 
         public static List<Lite<UserQueryDN>> GetUserQueries(object queryName)
         {
             return (from er in Database.Query<UserQueryDN>()
                     where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
-                    select er.ToLite()).ToList(); 
+                    select er.ToLite()).ToList();
         }
 
         public static void RemoveUserQuery(Lite<UserQueryDN> lite)
@@ -103,16 +96,16 @@ namespace Signum.Engine.UserQueries
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(UserDN));
 
-            TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey, 
-                uq => uq.Related.RefersTo(UserDN.Current)); 
+            TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey,
+                uq => uq.Related.RefersTo(UserDN.Current));
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(RoleDN));
 
-            TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey, 
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
+            TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey,
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related));
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Signum.Web.Profiler
     {
         public ActionResult Heavy()
         {
-            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+            ProfilerPermission.ViewHeavyProfiler.Authorize();
 
             ViewData[ViewDataKeys.Title] = "Root entries";
 
@@ -34,7 +34,7 @@ namespace Signum.Web.Profiler
 
         public ActionResult Statistics(SqlProfileResumeOrder order)
         {
-            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+            ProfilerPermission.ViewHeavyProfiler.Authorize();
 
             var list = HeavyProfiler.SqlStatistics().ToList().OrderByDescending(GetOrder(order)); ;
 
@@ -63,7 +63,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult HeavyRoute(string indices)
         {
-            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+            ProfilerPermission.ViewHeavyProfiler.Authorize();
 
             var entry = HeavyProfiler.Find(indices);
 
@@ -75,7 +75,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Enable()
         {
-            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+            ProfilerPermission.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Enabled = true;
             return null;
@@ -84,7 +84,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Disable()
         {
-            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+            ProfilerPermission.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Enabled = false;
             return null;
@@ -93,7 +93,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Clean()
         {
-            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+            ProfilerPermission.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Clean();
             return null;
@@ -102,7 +102,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Times()
         {
-            ProfilerPermissions.ViewTimeTracker.Authorize();
+            ProfilerPermission.ViewTimeTracker.Authorize();
 
             return View(ProfilerClient.ViewPrefix.Formato("Times"));
         }
@@ -110,7 +110,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ClearTimes()
         {
-            ProfilerPermissions.ViewTimeTracker.Authorize();
+            ProfilerPermission.ViewTimeTracker.Authorize();
 
             Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
             return RedirectToAction("Times"); 
@@ -119,7 +119,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult TimeTable()
         {
-            ProfilerPermissions.ViewTimeTracker.Authorize();
+            ProfilerPermission.ViewTimeTracker.Authorize();
 
             return View(ProfilerClient.ViewPrefix.Formato("TimeTable"));
         }
@@ -127,7 +127,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ClearTimesTable()
         {
-            ProfilerPermissions.ViewTimeTracker.Authorize();
+            ProfilerPermission.ViewTimeTracker.Authorize();
 
             Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
             return RedirectToAction("Times");
@@ -137,7 +137,7 @@ namespace Signum.Web.Profiler
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult OverrideSessionTimeout(int? sec)
         {
-            ProfilerPermissions.OverrideSessionTimeout.Authorize();
+            ProfilerPermission.OverrideSessionTimeout.Authorize();
 
             ProfilerLogic.SessionTimeout = sec;
 

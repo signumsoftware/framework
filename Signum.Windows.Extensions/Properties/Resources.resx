@@ -150,12 +150,6 @@
   <data name="View" xml:space="preserve">
     <value>View</value>
   </data>
-  <data name="ConstructorSelector" xml:space="preserve">
-    <value>Constructor Selector</value>
-  </data>
-  <data name="PleaseSelectAConstructor" xml:space="preserve">
-    <value>Please Select a Constructor</value>
-  </data>
   <data name="DownloadFile" xml:space="preserve">
     <value>Download File</value>
   </data>
@@ -242,5 +236,32 @@
   </data>
   <data name="Chart" xml:space="preserve">
     <value>Chart</value>
+  </data>
+  <data name="_0CanOnlyBeCreatedFromTheChartWindow" xml:space="preserve">
+    <value>{0} can only be created from the chart window</value>
+  </data>
+  <data name="_0CanOnlyBeCreatedFromTheSearchWindow" xml:space="preserve">
+    <value>{0} can only be created from the search window</value>
+  </data>
+  <data name="Alert" xml:space="preserve">
+    <value>Alert</value>
+  </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>Alerts</value>
+  </data>
+  <data name="NewAlert" xml:space="preserve">
+    <value>New Alert</value>
+  </data>
+  <data name="NewNote" xml:space="preserve">
+    <value>New Note</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note:</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="AuthorizationCacheSuccessfullyUpdated" xml:space="preserve">
+    <value>Authorization cache successfully updated</value>
   </data>
 </root>

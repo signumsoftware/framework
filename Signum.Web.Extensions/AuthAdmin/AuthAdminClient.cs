@@ -13,13 +13,13 @@ using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
-using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Web.Basic;
+using Signum.Web.Omnibox;
 
 namespace Signum.Web.AuthAdmin
 {
@@ -32,16 +32,15 @@ namespace Signum.Web.AuthAdmin
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(AuthAdminClient));
-
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.EntitySettings<UserDN>().PartialViewName = _ => ViewPrefix.Formato("User");
                 else
-                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Main) { PartialViewName = _ => ViewPrefix.Formato("User") });
+                    Navigator.AddSetting(new EntitySettings<UserDN> { PartialViewName = _ => ViewPrefix.Formato("User") });
 
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
-                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix.Formato("Role"); 
+                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix.Formato("Role");
                 else
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Shared) { PartialViewName = _ => ViewPrefix.Formato("Role") });
+                    Navigator.AddSetting(new EntitySettings<RoleDN> { PartialViewName = _ => ViewPrefix.Formato("Role") });
 
                 if (types)
                 {
@@ -61,8 +60,8 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (operations)
-                    Register<OperationRulePack, OperationAllowedRule, OperationDN, bool, OperationDN>("operations", a => a.Resource,
-                        Mapping.New<bool>(), "Resource", true);
+                    Register<OperationRulePack, OperationAllowedRule, OperationDN, OperationAllowed, OperationDN>("operations", a => a.Resource,
+                        Mapping.New<OperationAllowed>(), "Resource", true);
 
                 if (permissions)
                     Register<PermissionRulePack, PermissionAllowedRule, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource,
@@ -74,13 +73,17 @@ namespace Signum.Web.AuthAdmin
                         Mapping.New<bool>(), "Resource_Key", false);
 
                 QuickLinkWidgetHelper.RegisterEntityLinks<RoleDN>((RoleDN entity, string partialViewName, string prefix) =>
-                     entity.IsNew || !BasicPermissions.AdminRules.IsAuthorized() ? null :
+                     entity.IsNew || !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
                          types ? new QuickLinkAction(Resources._0Rules.Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(entity.ToLite()))): null,
                          permissions ? new QuickLinkAction(Resources._0Rules.Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(entity.ToLite()))): null,
                          facadeMethods ? new QuickLinkAction(Resources._0Rules.Formato(typeof(FacadeMethodDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.FacadeMethods(entity.ToLite()))): null
                      });
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",
+                    () => BasicPermission.AdminRules.IsAuthorized(),
+                    uh => uh.Action((AuthAdminController aac) => aac.Export())));
             }
         }
 
@@ -99,10 +102,10 @@ namespace Signum.Web.AuthAdmin
             where R : IdentifiableEntity
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
-                Navigator.AddSetting(new EntitySettings<R>(EntityType.SystemString));
+                Navigator.AddSetting(new EntitySettings<R>());
 
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
-            Navigator.AddSetting(new EmbeddedEntitySettings<T>()
+            Navigator.AddSetting(new EmbeddedEntitySettings<T>
             {
                 PartialViewName = e => viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
@@ -119,13 +122,10 @@ namespace Signum.Web.AuthAdmin
 
         static void RegisterTypes()
         {
-            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(TypeDN)))
-                Navigator.AddSetting(new EntitySettings<TypeDN>(EntityType.SystemString));
-
             Navigator.AddSetting(new EmbeddedEntitySettings<TypeConditionRule>());
 
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
-            Navigator.AddSetting(new EmbeddedEntitySettings<TypeRulePack>()
+            Navigator.AddSetting(new EmbeddedEntitySettings<TypeRulePack>
             {
                 PartialViewName = e => viewPrefix.Formato("types"),
                 MappingDefault = new EntityMapping<TypeRulePack>(false)

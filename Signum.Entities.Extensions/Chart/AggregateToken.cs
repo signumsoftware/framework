@@ -33,7 +33,7 @@ namespace Signum.Entities.Chart
 
         public override string ToString()
         {
-            return "[{0}]".Formato(AggregateFunction.NiceToString());
+            return AggregateFunction.NiceToString();
         }
 
         public override string NiceName()
@@ -117,10 +117,10 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        public override bool IsAllowed()
+        public override string IsAllowed()
         {
             if (AggregateFunction == Chart.AggregateFunction.Count)
-                return true;
+                return null;
 
             return Parent.IsAllowed();
         }
@@ -147,6 +147,11 @@ namespace Signum.Entities.Chart
                 return Parent.Type.IsNullable() ? typeof(int?) : typeof(int);
 
             return null;
+        }
+
+        public override string TypeColor
+        {
+            get { return "#0000FF"; }
         }
     }
 

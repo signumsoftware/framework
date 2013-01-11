@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Signum.Engine.Operations;
-using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Entities;
 using System.Web;
@@ -40,9 +39,9 @@ namespace Signum.Web.Files
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<FileRepositoryDN>(EntityType.Main){ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
-                        new EntitySettings<FilePathDN>(EntityType.Shared),
-                        new EntitySettings<FileTypeDN>(EntityType.SystemString),
+                        new EntitySettings<FileRepositoryDN>{ PartialViewName = e => ViewPrefix.Formato("FileRepository")},
+                        new EntitySettings<FilePathDN>(),
+                        new EntitySettings<FileTypeDN>(),
                     });
 
                     var es = Navigator.EntitySettings<FilePathDN>();
@@ -52,7 +51,7 @@ namespace Signum.Web.Files
                     es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.RuntimeType == null)
+                        if (runtimeInfo.EntityType == null)
                             return null;
                         else
                         {
@@ -87,7 +86,7 @@ namespace Signum.Web.Files
 
                 if (file)
                 {
-                    var es = new EntitySettings<FileDN>(EntityType.Shared);
+                    var es = new EntitySettings<FileDN>();
                     Navigator.AddSetting(es);
 
                     var baseMapping = (Mapping<FileDN>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
@@ -95,7 +94,7 @@ namespace Signum.Web.Files
                     es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.RuntimeType == null)
+                        if (runtimeInfo.EntityType == null)
                             return null;
                         else
                         {
@@ -138,27 +137,29 @@ namespace Signum.Web.Files
                     es.MappingDefault = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.RuntimeType == null)
+                        if (runtimeInfo.EntityType == null)
                             return null;
                         else
                         {
-                            if (runtimeInfo.IsNew)
+                            HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
+
+                            if (hpf != null && hpf.ContentLength != 0)
                             {
-                                var result = new EmbeddedFileDN();
-
-                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
-
-                                if (hpf.ContentLength != 0)
+                                return new EmbeddedFileDN()
                                 {
-                                    result.FileName = Path.GetFileName(hpf.FileName);
-                                    result.BinaryFile = hpf.InputStream.ReadAllBytes();
-                                }
-
-                                return result;
+                                    FileName = Path.GetFileName(hpf.FileName),
+                                    BinaryFile = hpf.InputStream.ReadAllBytes()
+                                };
+                            }
+                            else
+                            {
+                                var sessionFile = (EmbeddedFileDN)GetSessionFile(ctx);
+                                if (sessionFile != null)
+                                    return sessionFile;
+                                else 
+                                    return baseMapping(ctx);
                             }
                         }
-
-                        return baseMapping(ctx);
                     };
                 }
 

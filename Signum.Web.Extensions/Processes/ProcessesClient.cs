@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,18 +9,17 @@ using System.Reflection;
 using Signum.Web.Operations;
 using Signum.Entities;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
-using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 using Signum.Entities.Processes;
 using Signum.Engine.Operations;
-#endregion
+using Signum.Web.Omnibox;
+using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Processes
 {
@@ -35,46 +33,94 @@ namespace Signum.Web.Processes
             {
                 Navigator.RegisterArea(typeof(ProcessesClient));
 
+                Navigator.Manager.DefaultSFUrls.Add(url =>
+                {
+                    return new Dictionary<string, string> 
+                    { 
+                       { "operationContextualFromMany", url.Action("ContextualExecute", "Process") }
+                    };
+                });
+
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ProcessExecutionDN>(EntityType.System){ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
-                    new EntitySettings<ProcessDN>(EntityType.SystemString){ PartialViewName = e => ViewPrefix.Formato("Process")},
+                    new EntitySettings<ProcessExecutionDN>{ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
+                    new EntitySettings<ProcessDN>{ PartialViewName = e => ViewPrefix.Formato("Process")},
                 });
 
                 if (packages || packageOperations)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageLineDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("PackageLine") });
+                    Navigator.AddSetting(new EntitySettings<PackageLineDN> { PartialViewName = e => ViewPrefix.Formato("PackageLine") });
                 }
 
                 if (packages)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("Package") });
+                    Navigator.AddSetting(new EntitySettings<PackageDN> { PartialViewName = e => ViewPrefix.Formato("Package") });
                 }
 
                 if (packageOperations)
                 {
-                    Navigator.AddSetting(new EntitySettings<PackageOperationDN>(EntityType.System) { PartialViewName = e => ViewPrefix.Formato("PackageOperation") });
-                    OperationsClient.AddSetting(new ContextualOperationSettings(PackageOperationOperation.CreatePackageOperation)
-                    {
-                        IsVisible = _ => false,
-                    });
+                    Navigator.AddSetting(new EntitySettings<PackageOperationDN> { PartialViewName = e => ViewPrefix.Formato("PackageOperation") });
 
                     ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
                 }
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessControlPanel", 
+                    () => ProcessPermission.ViewProcessControlPanel.IsAuthorized(),
+                    uh => uh.Action((ProcessController pc) => pc.View())));
             }
         }
 
         public static ContextualItem CreateGroupContextualItem(SelectedItemsMenuContext ctx)
         {
+            if (!Navigator.IsViewable(typeof(PackageOperationDN)))
+                return null;
+
             if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count <= 1)
                 return null;
 
             if (ctx.Implementations.IsByAll)
                 return null;
 
-            List<ContextualItem> operations = GetOperations(ctx);
-            if (operations == null || operations.Count == 0)
+            var types = ctx.Lites.Select(a => a.EntityType).Distinct().ToList();
+
+            var contexts = (from t in types
+                            from oi in OperationsClient.Manager.OperationInfos(t)
+                            where oi.IsEntityOperation
+                            group new { t, oi } by oi.Key into g
+                            let os = OperationsClient.Manager.GetSettings<EntityOperationSettings>(g.Key)
+                            let oi = g.First().oi
+                            let context = new ContextualOperationContext
+                            {
+                                OperationInfo = g.First().oi,
+                                Prefix = ctx.Prefix,
+                                QueryName = ctx.QueryName,
+                                Entities = ctx.Lites,
+                                OperationSettings = os.TryCC(s => s.ContextualFromMany),
+                                CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
+                            }
+                            where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
+                            os.ContextualFromMany == null ? (oi.Lite == true && os.OnClick == null && oi.OperationType != OperationType.ConstructorFrom) :
+                            (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(context))
+                            select context).ToList();
+
+            if (contexts.IsEmpty())
                 return null;
+
+            var cleanKeys = contexts.Where(cod => cod.CanExecute == null && cod.OperationInfo.HasStates == true)
+                .Select(kvp => kvp.OperationInfo.Key).ToList();
+
+            if (cleanKeys.Any())
+            {
+                Dictionary<Enum, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites.ToArray(), cleanKeys);
+                foreach (var cod in contexts)
+                {
+                    var ce = canExecutes.TryGetC(cod.OperationInfo.Key);
+                    if (ce.HasText())
+                        cod.CanExecute = ce;
+                }
+            }
+
+            List<ContextualItem> operations = contexts.Select(op => OperationsClient.Manager.CreateContextual(op)).ToList();
 
             HtmlStringBuilder content = new HtmlStringBuilder();
             using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
@@ -83,13 +129,13 @@ namespace Signum.Web.Processes
 
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Extensions.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
+                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
 
                 foreach (var operation in operations)
                 {
                     content.AddLine(new HtmlTag("li")
                         .Class(ctxItemClass)
-                        .InnerHtml(OperationsContextualItemsHelper.IndividualOperationToString(operation)));
+                        .InnerHtml(OperationsClient.Manager.IndividualOperationToString(operation)));
                 }
             }
 
@@ -100,35 +146,5 @@ namespace Signum.Web.Processes
             };
         }
 
-        private static List<ContextualItem> GetOperations(SelectedItemsMenuContext ctx)
-        {
-            var contexts = (from t in ctx.Implementations.Types
-                            from oi in OperationLogic.ServiceGetOperationInfos(t)
-                            where oi.IsEntityOperation && oi.Lite == true
-                            let os = (EntityOperationSettings)OperationsClient.Manager.Settings.TryGetC(oi.Key)
-                            group Tuple.Create(t, oi, os) by oi.Key into g
-                            let context = new ContextualOperationContext
-                            {
-                                OperationInfo = g.First().Item2,
-                                Prefix = ctx.Prefix,
-                                QueryName = ctx.QueryName,
-                                Entities = ctx.Lites,
-                                OperationSettings = g.First().Item3.TryCC(eos => eos.ContextualFromMany)
-                            }
-                            let entityCtx = new EntityOperationContext()
-                            {
-                                OperationSettings = g.First().Item3,
-                                OperationInfo = g.First().Item2,
-                                Prefix = ctx.Prefix
-                            }
-                            where string.IsNullOrEmpty(context.OperationInfo.CanExecute)
-                                && ((entityCtx.OperationSettings == null && context.OperationSettings == null)
-                                    || (context.OperationSettings != null && (context.OperationSettings.IsVisible == null || (context.OperationSettings.IsVisible != null && context.OperationSettings.IsVisible(context))))
-                                    || (context.OperationSettings == null && entityCtx.OperationSettings.OnClick == null && entityCtx.OperationSettings.IsVisible == null))
-                            select context
-                    );
-
-            return contexts.Select(op => OperationButtonFactory.CreateContextual(op)).ToList();
-        }
     }
 }

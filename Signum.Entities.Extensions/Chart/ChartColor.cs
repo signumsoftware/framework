@@ -9,7 +9,7 @@ using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.System)]
     public class ChartColorDN : IdentifiableEntity
     {
         [ImplementedByAll, UniqueIndex]
@@ -51,6 +51,7 @@ namespace Signum.Entities.Chart
             set { Set(ref type, value, () => Type); }
         }
 
+        [NotNullable]
         MList<ChartColorDN> colors = new MList<ChartColorDN>();
         public MList<ChartColorDN> Colors
         {

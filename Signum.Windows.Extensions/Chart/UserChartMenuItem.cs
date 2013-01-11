@@ -50,7 +50,6 @@ namespace Signum.Windows.Chart
         ChartRequest ChartRequest
         {
             get { return (ChartRequest)ChartWindow.DataContext; }
-            set { ChartWindow.DataContext = value; }
         }
 
         QueryDescription Description
@@ -133,7 +132,9 @@ namespace Signum.Windows.Chart
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
 
-            if (autoSet!= null)
+            var autoSet = ChartClient.GetUserChart(ChartWindow);
+
+            if (autoSet != null)
                 SetCurrent(autoSet);
         }
 
@@ -159,9 +160,7 @@ namespace Signum.Windows.Chart
         {
             CurrentUserChart = uc;
 
-            this.ChartRequest = CurrentUserChart.ToRequest();
-
-            this.ChartWindow.UpdateFiltersOrdersUserInterface();
+            this.ChartWindow.Request = CurrentUserChart.ToRequest();
 
             this.ChartWindow.GenerateChart();
         }
@@ -178,14 +177,9 @@ namespace Signum.Windows.Chart
                 View = new UserChart { QueryDescription = Description }
             });
 
+            Initialize();
             if (userChart != null)
-            {
-                userChart.Save();
-
-                Initialize();
-
                 CurrentUserChart = userChart;
-            }
         }
 
         private void Edit_Clicked(object sender, RoutedEventArgs e)
@@ -214,14 +208,5 @@ namespace Signum.Windows.Chart
             }
         }
 
-
-        [ThreadStatic]
-        static UserChartDN autoSet;
-        internal static IDisposable AutoSet(UserChartDN uc)
-        {
-            var old = autoSet;
-            autoSet = uc;
-            return new Disposable(() => autoSet = old);
-        }
     }
 }

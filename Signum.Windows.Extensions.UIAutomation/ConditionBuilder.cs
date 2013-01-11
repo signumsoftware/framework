@@ -126,7 +126,7 @@ namespace Signum.Windows.UIAutomation
             var dic = properties.GetOrCreate(type, () =>
                   type.GetFields(BindingFlags.Static | BindingFlags.Public)
                   .Where(p => p.Name.EndsWith("Property"))
-                  .ToDictionary(p => p.Name.RemoveRight("Property".Length), p => (AutomationProperty)p.GetValue(null)));
+                  .ToDictionary(p => p.Name.RemoveEnd("Property".Length), p => (AutomationProperty)p.GetValue(null)));
 
             var result = dic.TryGetC(propertyName);
 

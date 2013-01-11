@@ -127,7 +127,7 @@ namespace Signum.Web.Selenium
             string cellSelector = SearchTestExtensions.CellSelector(selenium, rowIndexBase1, columnIndexBase1, prefix);
             selenium.ContextMenu(cellSelector);
             
-            string quickFilterSelector = "{0} .quickfilter".Formato(cellSelector);
+            string quickFilterSelector = "{0} .sf-quickfilter > span".Formato(cellSelector);
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(quickFilterSelector));
             selenium.Click(quickFilterSelector);
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
@@ -142,7 +142,7 @@ namespace Signum.Web.Selenium
         {
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
             selenium.ContextMenu(headerSelector);
-            selenium.Click("{0} .quickfilter-header".Formato(headerSelector));
+            selenium.Click("{0} .sf-quickfilter-header > span".Formato(headerSelector));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
         }
 
@@ -157,7 +157,7 @@ namespace Signum.Web.Selenium
             Assert.IsTrue(selenium.IsElementPresent(lastHeaderSelector));
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
             selenium.ContextMenu(headerSelector);
-            selenium.Click("{0} .remove-column".Formato(headerSelector));
+            selenium.Click("{0} .sf-remove-column > span".Formato(headerSelector));
             selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(lastHeaderSelector));
         }
 
@@ -170,7 +170,7 @@ namespace Signum.Web.Selenium
         {
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
             selenium.ContextMenu(headerSelector);
-            selenium.Click("{0} .edit-column".Formato(headerSelector));
+            selenium.Click("{0} .sf-edit-column > span".Formato(headerSelector));
 
             string popupPrefix = prefix + "newName_";
             string popupSelector = SeleniumExtensions.PopupSelector(popupPrefix);

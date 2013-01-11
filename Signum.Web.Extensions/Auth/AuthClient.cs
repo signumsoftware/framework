@@ -10,17 +10,18 @@ using System.Reflection;
 using Signum.Web.Operations;
 using Signum.Entities;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
-using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 using System.Web;
 using Signum.Utilities.Reflection;
+using Signum.Web.Omnibox;
+using Signum.Web.Extensions.Properties;
+using Signum.Web.AuthAdmin;
 #endregion
 
 namespace Signum.Web.Auth
@@ -57,20 +58,20 @@ namespace Signum.Web.Auth
             {
                 ResetPasswordStarted = resetPassword;
 
-                Navigator.RegisterArea(typeof(AuthClient)); 
+                Navigator.RegisterArea(typeof(AuthClient));
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
-                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Main));
+                    Navigator.AddSetting(new EntitySettings<UserDN>());
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Shared));
+                    Navigator.AddSetting(new EntitySettings<RoleDN>());
 
                 if (passwordExpiration)
                 {
-                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Main) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
+                    Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });
                 }
 
-                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>()
+                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>
                 {
                     PartialViewName = _ => ViewPrefix.Formato("SetPassword"),
                     MappingDefault = new EntityMapping<SetPasswordModel>(false)
@@ -81,26 +82,26 @@ namespace Signum.Web.Auth
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
 
-                
+
                 var manager = Navigator.Manager;
                 if (types)
                 {
                     manager.IsCreable += manager_IsCreable;
                     manager.IsReadOnly += manager_IsReadOnly;
                     manager.IsViewable += manager_IsViewable;
-                        }
+                }
 
                 if (queries)
                 {
                     manager.IsFindable += QueryAuthLogic.GetQueryAllowed;
-                        }
+                }
 
                 AuthenticationRequiredAttribute.Authenticate = context =>
-                { 
+                {
                     if (UserDN.Current == null)
                     {
                         string returnUrl = context.HttpContext.Request.SuggestedReturnUrl().PathAndQuery;
-                                            
+
                         //send them off to the login page
                         string loginUrl = PublicLoginUrl(returnUrl);
                         if (context.HttpContext.Request.IsAjaxRequest())
@@ -148,6 +149,8 @@ namespace Signum.Web.Auth
                             .validateAndAjax(),
                     },
                 });
+
+
             }
         }
 
@@ -159,9 +162,9 @@ namespace Signum.Web.Auth
             var ident = (IdentifiableEntity)entity;
 
             if (ident == null || ident.IsNew)
-                return TypeAuthLogic.GetAllowed(type).Max().GetUI() >= TypeAllowedBasic.Read;
+                return TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
 
-            return ident.IsAllowedFor(TypeAllowedBasic.Read, ExecutionContext.UserInterface);
+            return ident.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true);
         }
 
         static bool manager_IsReadOnly(Type type, ModifiableEntity entity)
@@ -172,9 +175,9 @@ namespace Signum.Web.Auth
             var ident = (IdentifiableEntity)entity;
 
             if (ident == null || ident.IsNew)
-                return TypeAuthLogic.GetAllowed(type).Max().GetUI() < TypeAllowedBasic.Modify;
+                return TypeAuthLogic.GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
 
-            return !ident.IsAllowedFor(TypeAllowedBasic.Modify, ExecutionContext.UserInterface);
+            return !ident.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true);
         }
 
         static bool manager_IsCreable(Type type)
@@ -182,7 +185,7 @@ namespace Signum.Web.Auth
             if(!typeof(IdentifiableEntity).IsAssignableFrom(type))
                 return true;
 
-            return TypeAuthLogic.GetAllowed(type).Max().GetUI() == TypeAllowedBasic.Create;
+            return TypeAuthLogic.GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
         }
 
         public static Uri SuggestedReturnUrl(this HttpRequestBase request)
