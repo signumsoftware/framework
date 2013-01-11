@@ -114,7 +114,7 @@ namespace Signum.Engine.Basics
                 }, Spacing.Double);
         }
 
-        public static Dictionary<string, O> ApplyReplacementsToOldCleaning<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
+        static Dictionary<string, O> ApplyReplacementsToOldCleaning<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
         {
             if (!replacements.ContainsKey(replacementsKey))
                 return oldDictionary;
