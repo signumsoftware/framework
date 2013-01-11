@@ -10,9 +10,4 @@ namespace Signum.Entities.Cache
         ViewCache,
         InvalidateCache
     }
-
-    public interface IAfterClone : IIdentifiable
-    {
-        void AfterClone(IdentifiableEntity original);
-    }
 }

@@ -113,7 +113,7 @@
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Cache\CacheLazy.cs" />
     <Compile Include="Cache\CacheLogic.cs" />
-    <Compile Include="Cache\Completer.cs" />
+    <Compile Include="Cache\CachedTable.cs" />
     <Compile Include="Chart\ChartColorLogic.cs" />
     <Compile Include="Chart\ChartLogic.cs">
       <SubType>Code</SubType>
