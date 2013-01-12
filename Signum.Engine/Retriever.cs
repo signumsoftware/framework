@@ -160,7 +160,7 @@ namespace Signum.Engine
                         {
                             IdentifiableEntity ident = dic.Values.FirstEx();
 
-                            cc.CompleteCache(ident, this);
+                            cc.Complete(ident, this);
 
                             retrieved.Add(new IdentityTuple(ident), ident);
                             dic.Remove(ident.Id);

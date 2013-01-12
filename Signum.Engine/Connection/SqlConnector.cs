@@ -47,7 +47,7 @@ namespace Signum.Engine
         public override bool SupportsScalarSubquery { get { return true; } }
         public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
 
-        public SqlConnection EnsureConnection()
+        SqlConnection EnsureConnection()
         {
             if (Transaction.HasTransaction)
                 return null;
@@ -58,7 +58,7 @@ namespace Signum.Engine
             return result;
         }
 
-        public SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection)
+        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection)
         {
             SqlCommand cmd = new SqlCommand();
 

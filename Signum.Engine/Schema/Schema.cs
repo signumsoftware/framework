@@ -592,7 +592,7 @@ namespace Signum.Engine.Maps
 
         IEnumerable<int> GetAllIds();
 
-        bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
+        void Complete(IdentifiableEntity entity, IRetriever retriver);
 
         string GetToString(int id);
     }
@@ -608,12 +608,12 @@ namespace Signum.Engine.Maps
 
         public abstract IEnumerable<int> GetAllIds();
 
-        bool ICacheController.CompleteCache(IdentifiableEntity entity, IRetriever retriver)
+        void ICacheController.Complete(IdentifiableEntity entity, IRetriever retriver)
         {
-            return CompleteCache((T)entity, retriver);
+            Complete((T)entity, retriver);
         }
 
-        public abstract bool CompleteCache(T entity, IRetriever retriver);
+        public abstract void Complete(T entity, IRetriever retriver);
 
         public abstract string GetToString(int id);
     }
