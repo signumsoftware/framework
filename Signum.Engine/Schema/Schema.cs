@@ -326,7 +326,7 @@ namespace Signum.Engine.Maps
 
             public void InitializeUntil(InitLevel topLevel)
             {
-                for (InitLevel current = initLevel + 1 ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
+                for (InitLevel current = initLevel + 1 ?? InitLevel.Level_0BeforeAnyQuery; current <= topLevel; current++)
                 {
                     InitializeJust(current);
                     initLevel = current;
@@ -396,6 +396,7 @@ namespace Signum.Engine.Maps
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
 
+            Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.Schema_Initializing;
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
         }
 
@@ -542,7 +543,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return tables.Values.ToString(t => t.Type.TypeName(), "\r\n\r\n");
+            return "Schema ( tables: {0} )".Formato(tables.Count);
         }
 
         public IEnumerable<ITable> GetDatabaseTables()
