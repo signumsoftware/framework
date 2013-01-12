@@ -18,7 +18,10 @@ namespace Signum.Engine.Chart
 {
     public static class ChartScriptLogic
     {
-        public static ResetLazy<List<ChartScriptDN>> Scripts = CacheLazy.Create(() => Database.Query<ChartScriptDN>().ToList());
+        public static ResetLazy<List<ChartScriptDN>> Scripts = CacheLazy.Create(() => 
+            Database.Query<ChartScriptDN>().ToList())
+            .InvalidateWith(typeof(ChartScriptDN));
+
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {

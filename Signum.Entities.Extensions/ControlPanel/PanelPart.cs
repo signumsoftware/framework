@@ -98,10 +98,9 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref userQuery, value, () => UserQuery); }
         }
 
-        static readonly Expression<Func<UserQueryPartDN, string>> ToStringExpression = e => e.userQuery.ToString();
         public override string ToString()
         {
-            return userQuery == null ? null : ToStringExpression.Evaluate(this);
+            return userQuery.TryToString();
         }
 
         public bool RequiresTitle
@@ -137,10 +136,9 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref showData, value, () => ShowData); }
         }
 
-        static readonly Expression<Func<UserChartPartDN, string>> ToStringExpression = e => e.userChart.ToString();
         public override string ToString()
         {
-            return userChart == null ? null : ToStringExpression.Evaluate(this);
+            return userChart.TryToString();
         }
 
         public bool RequiresTitle

@@ -21,8 +21,8 @@ namespace Signum.Engine.Chart
         public static readonly ResetLazy<Dictionary<Type, Dictionary<int, Color>>> Colors = CacheLazy.Create(() =>
               Database.Query<ChartColorDN>()
               .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
-              .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))));
-        //.InvalidateWith(typeof(ChartColorDN));
+              .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))))
+              .InvalidateWith(typeof(ChartColorDN));
 
         public static readonly int Limit = 360; 
 

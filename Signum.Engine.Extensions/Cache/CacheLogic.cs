@@ -55,24 +55,6 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             SqlDependency.Stop(((SqlConnector)Connector.Current).ConnectionString);
         }
 
-        
-
-        internal interface ICacheLogicController : ICacheController
-        {
-            int? Count { get; }
-
-            void Invalidate(bool isClean);
-
-            int Invalidations { get; }
-            int Loads { get; }
-
-            int AttachedEvents { get; }
-
-            int Hits { get; }
-
-            void OnDisabled();
-        }
-
         static SqlPreCommandSimple GetDependencyQuery(ITable table)
         {
             return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(table.Columns.Keys.ToString(c => c.SqlScape(), ", "), table.Name));
@@ -81,48 +63,11 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
         class CacheController<T> : CacheControllerBase<T>, ICacheLogicController
                 where T : IdentifiableEntity
         {
-            ResetLazy<List<SqlPreCommandSimple>> depedencyQueries = new ResetLazy<List<SqlPreCommandSimple>>(() =>
-            {
-                Table table = Schema.Current.Table(typeof(T));
-
-                List<SqlPreCommandSimple> result = new List<SqlPreCommandSimple>();
-
-                result.Add(GetDependencyQuery(table));
-
-                foreach (var rt in table.RelationalTables())
-	            {
-                     result.Add(GetDependencyQuery(rt));
-	            }
-
-                return result;
-            });
+            public CachedTable<T> cachedTable;
+            public CachedTableBase CachedTable { get { return cachedTable; } }
 
             public CacheController(Schema schema)
             {
-                pack = new ResetLazy<Dictionary<int, T>>(() =>
-                {
-                    using (new EntityCache(true))
-                    using (ExecutionMode.Global())
-                    using (Transaction tr = inCache.Value ? new Transaction() : Transaction.ForceNew())
-                    using (CacheLogic.SetInCache())
-                    using (HeavyProfiler.Log("CACHE"))
-                    using (CacheLogic.NotifyCacheChange(this.SubCacheChanged))
-                    {
-                        DisabledTypesDuringTransaction().Add(typeof(T)); //do not raise Disabled event
-
-                        var dic = Database.Query<T>().ToDictionary(a => a.Id);
-
-                        Interlocked.Increment(ref loads);
-
-                        foreach (var sql in depedencyQueries.Value)
-                        {
-                            AttachDependency(sql);
-                        }
-
-                        return tr.Commit(dic);
-                    }
-                });
-
                 var ee = schema.EntityEvents<T>();
 
                 ee.CacheController = this;
@@ -131,40 +76,9 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
                 ee.PreUnsafeUpdate += UnsafeUpdated;
             }
 
-            void AttachDependency(SqlPreCommandSimple query)
+            public void BuildCachedTable()
             {
-                SqlConnector connector = (SqlConnector)Connector.Current;
-
-                using (HeavyProfiler.Log("Attach SqlDependency", query.Sql))
-                using (SqlConnection con = connector.EnsureConnection())
-                using (SqlCommand cmd = connector.NewCommand(query, con))
-                using (HeavyProfiler.Log("SQL", query.Sql))
-                {
-                    try
-                    {
-                        SqlDependency dep = new SqlDependency(cmd);
-                        dep.OnChange += SqlDependencyChanged;
-
-                        int result = cmd.ExecuteNonQuery();
-                    }
-                    catch (SqlTypeException ex)
-                    {
-                        var nex = connector.HandleSqlTypeException(ex, query);
-                        if (nex == ex)
-                            throw;
-                        throw nex;
-                    }
-                    catch (SqlException ex)
-                    {
-                        var nex = connector.HandleSqlException(ex);
-                        if (nex == ex)
-                            throw;
-                        throw nex;
-                    }
-                }
-
-
-                
+                cachedTable = new CachedTable<T>(this, new Linq.AliasGenerator(), null, null);
             }
 
             void UnsafeUpdated(IQueryable<T> query)
@@ -197,154 +111,74 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
                 get { return !GloballyDisabled && !tempDisabled.Value && !IsDisabledInTransaction(typeof(T)); }
             }
 
-            public int? Count
+            private void AssertEnabled()
             {
-                get { return pack.IsValueCreated ? pack.Value.Count : (int?)null; }
+                if (!Enabled)
+                    throw new InvalidOperationException("Cache for {0} is not enabled".Formato(Enabled));
             }
 
-            public int AttachedEvents
+            public event EventHandler<CacheEventArgs> Invalidated;
+
+            public void OnChange(object sender, SqlNotificationEventArgs args)
             {
-                get { return invalidation == null ? 0 : invalidation.GetInvocationList().Length; }
-            }
-
-            int invalidations;
-            public int Invalidations { get { return invalidations; } }
-            int hits;
-            public int Hits { get { return hits; } }
-            int loads;
-            public int Loads { get { return loads; } }
-
-            EventHandler invalidation;
-
-            
-
-            void SqlDependencyChanged(object sender, SqlNotificationEventArgs args)
-            {
-                if (args.Info == SqlNotificationInfo.Invalid &&
-                    args.Source == SqlNotificationSource.Statement &&
-                    args.Type == SqlNotificationType.Subscribe && Debugger.IsAttached)
-                    throw new InvalidOperationException("Invalid query for SqlDependency");
-
-                Invalidate(isClean: false);
-            }
-
-            public void Invalidate(bool isClean)
-            {
-                pack.Reset();
-                if (invalidation != null)
-                    invalidation(this, InvalidatedCacheEventArgs.Instance);
-
-                if (isClean)
-                {
-                    invalidations = 0;
-                    hits = 0;
-                    loads = 0;
-                }
-                else
-                {
-                    Interlocked.Increment(ref invalidations);
-                }
-
+                NotifyInvalidateAllConnectedTypes(typeof(T));
             }
 
             static object syncLock = new object();
 
             public override void Load()
             {
-                var eh = queryChange.Value;
+                AssertEnabled();
 
-                if (eh != null)
-                    lock (syncLock)
-                    {
-                        if (invalidation == invalidation - eh)
-                            invalidation += eh;
-                    }
+                cachedTable.LoadAll();
+            }
 
-                if (pack.IsValueCreated)
-                    return;
-
-                pack.Load();
+            public void ForceReset()
+            {
+                cachedTable.ForceReset();
             }
 
             public override IEnumerable<int> GetAllIds()
             {
-                Interlocked.Increment(ref hits);
-                return pack.Value.Keys;
+                return cachedTable.GetAllIds();
             }
 
             public override string GetToString(int id)
             {
-                Interlocked.Increment(ref hits);
-                return pack.Value[id].ToString();
+                return cachedTable.GetToString(id);
             }
 
-            readonly Action<T, T, IRetriever> completer = Completer.GetCompleter<T>();
-
-            public override bool CompleteCache(T entity, IRetriever retriver)
+            public override void Complete(T entity, IRetriever retriver)
             {
-                Interlocked.Increment(ref hits);
-                var origin = pack.Value.TryGetC(entity.Id);
-                if (origin == null)
-                    throw new EntityNotFoundException(typeof(T), entity.Id);
-                completer(entity, origin, retriver);
-                return true;
+                cachedTable.Complete(entity, retriver);
             }
 
-            public void OnDisabled()
+            public void NotifyDisabled()
             {
-                if (invalidation != null)
-                    invalidation(this, DisabledCacheEventArgs.Instance);
+                if (Invalidated != null)
+                    Invalidated(this, CacheEventArgs.Disabled);
             }
 
-            public object sql { get; set; }
+            public void NotifyInvalidated()
+            {
+                if (Invalidated != null)
+                    Invalidated(this, CacheEventArgs.Invalidated);
+            }
         }
 
-        public class DisabledCacheEventArgs : EventArgs
-        {
-            private DisabledCacheEventArgs() { }
-
-            public static readonly DisabledCacheEventArgs Instance = new DisabledCacheEventArgs();
-        }
-
-        public class InvalidatedCacheEventArgs : EventArgs
-        {
-            private InvalidatedCacheEventArgs() { }
-
-            public static readonly InvalidatedCacheEventArgs Instance = new InvalidatedCacheEventArgs();
-        }
-   
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
-        static DirectedGraph<Type> dependencies = new DirectedGraph<Type>();
-
-        static readonly ThreadVariable<bool> inCache = Statics.ThreadVariable<bool>("inCache");
-        static IDisposable SetInCache()
-        {
-            var oldInCache = inCache.Value;
-            inCache.Value = true;
-            return new Disposable(() => inCache.Value = oldInCache);
-        }
-
-
-        static readonly Variable<EventHandler> queryChange = Statics.ThreadVariable<EventHandler>("queryChange");
-        public static IDisposable NotifyCacheChange(EventHandler onChange)
-        {
-            var old = queryChange.Value;
-            queryChange.Value = onChange;
-            return new Disposable(() => queryChange.Value = old);
-        }
-   
+        static DirectedGraph<Type> inverseDependencies = new DirectedGraph<Type>();
 
         public static bool GloballyDisabled { get; set; }
+
         static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
         public static IDisposable Disable()
         {
             if (tempDisabled.Value) return null;
             tempDisabled.Value = true;
             return new Disposable(() => tempDisabled.Value = false); 
-        }     
-        
-     
+        }
 
         const string DisabledCachesKey = "disabledCaches";
 
@@ -373,23 +207,22 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
         {
             DisabledTypesDuringTransaction().Add(type);
 
-            controllers[type].OnDisabled();
+            controllers[type].NotifyDisabled();
         }
 
         private static void DisableAllConnectedTypesInTransaction(Type type)
         {
-            var connected = dependencies.IndirectlyRelatedTo(type, true);
+            var connected = inverseDependencies.IndirectlyRelatedTo(type, true);
 
             var hs = DisabledTypesDuringTransaction();
 
             foreach (var stype in connected)
             {
                 hs.Add(stype);
-                controllers[stype].OnDisabled();
+                controllers[stype].NotifyDisabled();
             }
         }
 
-        
 
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
         public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
@@ -400,7 +233,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             TryCacheSubTables(typeof(T), sb);
         }
 
-        public static void AvoidCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
+        public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
             controllers.AddOrThrow(typeof(T), null, "{0} already registered");
         }
@@ -411,55 +244,40 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
                 .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumEntity<>)))
                 .Select(t => t.Key.Type).ToList();
 
-            dependencies.Add(type);
+            inverseDependencies.Add(type);
 
             foreach (var rType in relatedTypes)
             {
                 if (!controllers.ContainsKey(rType))
                     giCacheTable.GetInvoker(rType)(sb);
 
-                dependencies.Add(rType, type);
+                inverseDependencies.Add(rType, type);
             }
         }
     
-        static CacheController<T> GetController<T>() where T : IdentifiableEntity
+        static ICacheLogicController GetController(Type type)
         {
-            var controller = controllers.GetOrThrow(typeof(T), "{0} is not registered in CacheLogic");
+            var controller = controllers.GetOrThrow(type, "{0} is not registered in CacheLogic");
 
-            var result = controller as CacheController<T>;
+            if (controller == null)
+                throw new InvalidOperationException("{0} is just semi cached");
 
-            if (result == null)
-                throw new InvalidOperationException("{0} is not registered"); 
-
-            return result;
+            return controller;
         }
 
-        private static void InvalidateAllConnectedTypes(Type type, bool includeParentNode)
+        private static void NotifyInvalidateAllConnectedTypes(Type type)
         {
-            var connected = dependencies.IndirectlyRelatedTo(type, includeParentNode);
+            var connected = inverseDependencies.IndirectlyRelatedTo(type, includeParentNode : true);
 
             foreach (var stype in connected)
             {
-                controllers[stype].Invalidate(isClean: false);
+                controllers[stype].NotifyInvalidated();
             }
         }
 
-       
-
-        public static List<CacheStatistics> Statistics()
+        public static List<CachedTableBase> Statistics()
         {
-            return (from kvp in controllers
-                    orderby kvp.Value.Count descending
-                    select new CacheStatistics
-                    {
-                        Type = kvp.Key,
-                        Cached = CacheLogic.IsCached(kvp.Key),
-                        AttachedEvents = kvp.Value.AttachedEvents,
-                        Count = kvp.Value.Count, 
-                        Hits = kvp.Value.Hits,
-                        Loads = kvp.Value.Loads,
-                        Invalidations = kvp.Value.Invalidations,
-                    }).ToList();
+            return controllers.Values.Select(a => a.CachedTable).OrderByDescending(a => a.Count).ToList();
         }
 
         public static bool IsCached(Type type)
@@ -467,11 +285,11 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             return controllers.TryGetC(type) != null;
         }
 
-        public static void InvalidateAll()
+        public static void ForceReset()
         {
             foreach (var item in controllers)
             {
-                item.Value.Invalidate(isClean: true);
+                item.Value.ForceReset();
             }
         }
 
@@ -507,17 +325,36 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             return Color.Green;
         }
 
+
+        internal static void AttachInvalidations(EventHandler<CacheEventArgs> invalidated, Type[] type)
+        {
+            foreach (var t in type)
+            {
+                GetController(t).Invalidated += invalidated;
+            }
+        }
     }
 
-    public class CacheStatistics
+    internal interface ICacheLogicController : ICacheController
     {
-        public Type Type;
-        public bool Cached;
-        public int? Count;
-        public int Hits;
-        public int Loads;
-        public int Invalidations;
+        event EventHandler<CacheEventArgs> Invalidated; 
 
-        public int AttachedEvents;
+        CachedTableBase CachedTable { get; }
+
+        void NotifyDisabled();
+
+        void NotifyInvalidated();
+
+        void OnChange(object sender, SqlNotificationEventArgs args);
+
+        void ForceReset();
+    }
+
+    public class CacheEventArgs : EventArgs
+    {
+        private CacheEventArgs() { }
+
+        public static readonly CacheEventArgs Invalidated = new CacheEventArgs();
+        public static readonly CacheEventArgs Disabled = new CacheEventArgs();
     }
 }

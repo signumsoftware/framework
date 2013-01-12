@@ -50,8 +50,126 @@ namespace Signum.Web.Extensions.Cache.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Cache/Views/Statistics.cshtml")]
-    public class Statistics : System.Web.Mvc.WebViewPage<List<CacheStatistics>>
+    public class Statistics : System.Web.Mvc.WebViewPage<List<CachedTableBase>>
     {
+
+public System.Web.WebPages.HelperResult ShowTree(CachedTableBase table, string prefix)
+{
+return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
+
+
+
+#line 31 "..\..\Cache\Views\Statistics.cshtml"
+ 
+
+#line default
+#line hidden
+
+WriteLiteralTo(@__razor_helper_writer, "            <tr>\r\n                <td>");
+
+
+
+#line 33 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, prefix + table.Table.Name.Name);
+
+#line default
+#line hidden
+
+WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n                <td>");
+
+
+
+#line 35 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, table.Type.TypeName());
+
+#line default
+#line hidden
+
+WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n                <td>");
+
+
+
+#line 37 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, table.Count.TryToString() ?? "-- not loaded --");
+
+#line default
+#line hidden
+
+WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n                <td>");
+
+
+
+#line 39 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, table.Hits.DefaultToNull());
+
+#line default
+#line hidden
+
+WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n                <td>");
+
+
+
+#line 41 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, table.Invalidations.DefaultToNull());
+
+#line default
+#line hidden
+
+WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n                <td>");
+
+
+
+#line 43 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, table.Loads.DefaultToNull());
+
+#line default
+#line hidden
+
+WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n                <td>");
+
+
+
+#line 45 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, table.SumLoadTime.NiceToString());
+
+#line default
+#line hidden
+
+WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n            </tr>\r\n");
+
+
+
+#line 48 "..\..\Cache\Views\Statistics.cshtml"
+            
+    if (table.SubTables != null)
+    {
+        foreach (var st in table.SubTables)
+        {
+            
+#line default
+#line hidden
+
+
+#line 53 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, ShowTree(st, table.Table.Name.Name + " / "));
+
+#line default
+#line hidden
+
+
+#line 53 "..\..\Cache\Views\Statistics.cshtml"
+                                                        
+        }
+    }
+        
+#line default
+#line hidden
+
+});
+
+        }
+
+
         public Statistics()
         {
         }
@@ -91,12 +209,12 @@ WriteLiteral("\" class=\"sf-button\" style=\"");
             
             #line default
             #line hidden
-WriteLiteral(";color:red\" id=\"sfCacheDisable\">\r\n        Disable </a><a href=\"");
+WriteLiteral(";color:red\" id=\"sfCacheDisable\">Disable </a><a href=\"");
 
 
             
-            #line 8 "..\..\Cache\Views\Statistics.cshtml"
-                        Write(Url.Action((CacheController pc) => pc.Enable()));
+            #line 7 "..\..\Cache\Views\Statistics.cshtml"
+                                                                                                                                                                                              Write(Url.Action((CacheController pc) => pc.Enable()));
 
             
             #line default
@@ -105,125 +223,70 @@ WriteLiteral("\" class=\"sf-button\"  style=\"");
 
 
             
-            #line 8 "..\..\Cache\Views\Statistics.cshtml"
-                                                                                                     Write(CacheLogic.GloballyDisabled ? "" : "display:none");
+            #line 7 "..\..\Cache\Views\Statistics.cshtml"
+                                                                                                                                                                                                                                                                           Write(CacheLogic.GloballyDisabled ? "" : "display:none");
 
             
             #line default
             #line hidden
-WriteLiteral("\" id=\"sfCacheEnable\">\r\n            Enable </a><a href=\"");
+WriteLiteral("\" id=\"sfCacheEnable\">Enable </a><a href=\"");
 
 
             
-            #line 9 "..\..\Cache\Views\Statistics.cshtml"
-                           Write(Url.Action((CacheController pc) => pc.Clean()));
+            #line 7 "..\..\Cache\Views\Statistics.cshtml"
+                                                                                                                                                                                                                                                                                                                                                                       Write(Url.Action((CacheController pc) => pc.Clean()));
 
             
             #line default
             #line hidden
-WriteLiteral(@""" class=""sf-button"" id=""sfCacheClear"">
-                Clean </a>
+WriteLiteral(@""" class=""sf-button"" id=""sfCacheClear"">Clean </a>
 </div>
 <table class=""sf-search-results sf-stats-table"">
     <thead>
         <tr>
-            <th>
-                Type
+            <th>Table
             </th>
-            <th>
-                AttachedEvents
+            <th>Type
             </th>
-            <th>
-                Count
+            <th>Count
             </th>
-            <th>
-                Invalidations
+            <th>Hits
             </th>
-            <th>
-                Loads
+            <th>Invalidations
             </th>
-            <th>
-                Hits
+            <th>Loads
+            </th>
+            <th>LoadTime
             </th>
         </tr>
     </thead>
     <tbody>
-");
+
+        ");
+
+
+
+WriteLiteral("\r\n\r\n");
 
 
             
-            #line 36 "..\..\Cache\Views\Statistics.cshtml"
-         foreach (var item in Model)
+            #line 58 "..\..\Cache\Views\Statistics.cshtml"
+         foreach (var table in Model)
         {
+            
+            
+            #line default
+            #line hidden
+            
+            #line 60 "..\..\Cache\Views\Statistics.cshtml"
+       Write(ShowTree(table, null));
 
             
             #line default
             #line hidden
-WriteLiteral("            <tr>\r\n                <td>");
-
-
             
-            #line 39 "..\..\Cache\Views\Statistics.cshtml"
-               Write(item.Type.Name);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </td>\r\n                <td>");
-
-
-            
-            #line 41 "..\..\Cache\Views\Statistics.cshtml"
-               Write(item.Cached);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </td>\r\n                <td>");
-
-
-            
-            #line 43 "..\..\Cache\Views\Statistics.cshtml"
-                Write(item.Count.TryToString() ?? "-- not loaded --");
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </td>\r\n                <td>");
-
-
-            
-            #line 45 "..\..\Cache\Views\Statistics.cshtml"
-               Write(item.Invalidations.DefaultToNull());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </td>\r\n                <td>");
-
-
-            
-            #line 47 "..\..\Cache\Views\Statistics.cshtml"
-               Write(item.Loads.DefaultToNull());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </td>\r\n                <td>");
-
-
-            
-            #line 49 "..\..\Cache\Views\Statistics.cshtml"
-               Write(item.Hits.DefaultToNull());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
-
-
-            
-            #line 52 "..\..\Cache\Views\Statistics.cshtml"
+            #line 60 "..\..\Cache\Views\Statistics.cshtml"
+                                  
         }
 
             
@@ -233,7 +296,7 @@ WriteLiteral("    </tbody>\r\n</table>\r\n");
 
 
             
-            #line 55 "..\..\Cache\Views\Statistics.cshtml"
+            #line 64 "..\..\Cache\Views\Statistics.cshtml"
 Write(Html.ScriptsJs("~/Cache/Scripts/SF_Cache.js"));
 
             

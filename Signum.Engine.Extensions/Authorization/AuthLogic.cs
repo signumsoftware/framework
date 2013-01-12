@@ -49,7 +49,7 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
-        public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = CacheLazy.Create(Cache);//.InvalidateWith(typeof(RoleDN));
+        public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = CacheLazy.Create(Cache).InvalidateWith(typeof(RoleDN));
 
         public static void AssertStarted(SchemaBuilder sb)
         {

@@ -17,17 +17,17 @@ namespace Signum.Engine.Cache
 {
     public static class CacheLazy
     {
-        static readonly object none = new object();
-
-        static ConcurrentDictionary<IResetLazy, object> registeredLazyList = new ConcurrentDictionary<IResetLazy, object>();
+        static ConcurrentDictionary<IResetLazy, Type[]> registeredLazyList = new ConcurrentDictionary<IResetLazy, Type[]>();
         public static ResetLazy<T> Create<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T : class
         {
             ResetLazy<T> result = null;
-            EventHandler invalidate = (sender, args) =>
+            EventHandler<CacheEventArgs> invalidate = (sender, args) =>
             {
-                if (args == CacheLogic.InvalidatedCacheEventArgs.Instance || args is SqlNotificationEventArgs)
+                if (args == CacheEventArgs.Invalidated)
+                {
                     result.Reset();
-                else if (args == CacheLogic.DisabledCacheEventArgs.Instance)
+                }
+                else if (args == CacheEventArgs.Disabled)
                 {
                     if (Transaction.InTestTransaction)
                     {
@@ -39,11 +39,20 @@ namespace Signum.Engine.Cache
                 }
             };
 
+            bool isFirsTime = true;
+
             result = new ResetLazy<T>(() =>
             {
+                if (isFirsTime)
+                {
+                    Type[] types = registeredLazyList[result];
+                    if (types != null)
+                        CacheLogic.AttachInvalidations(invalidate, types);
+                    isFirsTime = false;
+                }
+
                 using (ExecutionMode.Global())
                 using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
-                using (CacheLogic.NotifyCacheChange(invalidate))
                 using (Transaction tr = Transaction.InTestTransaction ? null : Transaction.ForceNew())
                 using (new EntityCache(true))
                 {
@@ -56,9 +65,19 @@ namespace Signum.Engine.Cache
                 }
             }, mode);
 
-            registeredLazyList.GetOrAdd(result, none);
+            registeredLazyList.GetOrAdd(result, (Type[])null);
 
             return result;
+        }
+
+        public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T : class
+        {
+            if (!registeredLazyList.ContainsKey(lazy))
+                throw new InvalidOperationException("The lazy of type '{0}' is not a CacheLazy".Formato(typeof(T).TypeName()));
+
+            registeredLazyList.TryUpdate(lazy, types, null);
+
+            return lazy;
         }
 
         public static void ResetAll()
