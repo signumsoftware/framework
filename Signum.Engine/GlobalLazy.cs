@@ -17,15 +17,47 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Engine
 {
+    public struct InvalidateWith
+    {
+        static readonly Type[] Empty = new Type[0];
+
+        readonly Type[] types;
+        public Type[] Types 
+        {
+            get { return types ?? Empty; } 
+        }
+
+        public InvalidateWith(params Type[] types)
+        {
+            if(types != null)
+                foreach (var type in types)
+                {
+                    if (type.IsAbstract)
+                        throw new InvalidOperationException("Impossible to invalidate using {0} because is abstract".Formato(type));
+
+                    if (!Reflector.IsIdentifiableEntity(type))
+                        throw new InvalidOperationException("Impossible to invalidate using {0} because is not and IdentifiableEntity".Formato(type));
+                }
+
+
+            this.types = types;
+        }
+    
+        internal bool InSchema()
+        {
+            return Types.All(Schema.Current.Tables.ContainsKey);
+        }
+    }
+
     public static class GlobalLazy
     {
         public static GlobalLazyManager Manager = new GlobalLazyManager();
 
-        static ConcurrentDictionary<IResetLazy, Type[]> registeredLazyList = new ConcurrentDictionary<IResetLazy, Type[]>();
-        public static ResetLazy<T> Create<T>(Func<T> func, Type[] invalidateWith, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T : class
+        static ConcurrentDictionary<IResetLazy, InvalidateWith> registeredLazyList = new ConcurrentDictionary<IResetLazy, InvalidateWith>();
+        public static ResetLazy<T> Create<T>(Func<T> func, InvalidateWith invalidateWith) where T : class
         {
             ResetLazy<T> result = null;
-            
+
             result = new ResetLazy<T>(() =>
             {
                 Manager.AssertAttached(invalidateWith);
@@ -42,24 +74,12 @@ namespace Signum.Engine
 
                     return value;
                 }
-            }, mode);
+            });
 
-            AsserAttacheable(invalidateWith);
 
             registeredLazyList.GetOrAdd(result, invalidateWith);
 
             return result;
-        }
-        static void AsserAttacheable(Type[] invalidateWith)
-        {
-            foreach (var type in invalidateWith)
-            {
-                if (type.IsAbstract)
-                    throw new InvalidOperationException("Impossible to invalidate using {0} because is abstract".Formato(type));
-
-                if (!Reflector.IsIdentifiableEntity(type))
-                    throw new InvalidOperationException("Impossible to invalidate using {0} because is not and IdentifiableEntity".Formato(type));
-            }
         }
 
         internal static void Schema_Initializing()
@@ -68,7 +88,7 @@ namespace Signum.Engine
 
             foreach (var kvp in registeredLazyList)
             {
-                if (kvp.Value.All(schema.Tables.ContainsKey))
+                if (kvp.Value.InSchema())
                 {
                     IResetLazy lazy = kvp.Key;
 
@@ -82,8 +102,8 @@ namespace Signum.Engine
             Schema schema = Schema.Current;
 
             return (from kvp in registeredLazyList
-                    where kvp.Value.All(schema.Tables.ContainsKey)
-                    from type in kvp.Value
+                    where kvp.Value.InSchema()
+                    from type in kvp.Value.Types
                     select type).Distinct();
         }
 
@@ -104,7 +124,7 @@ namespace Signum.Engine
 
     public class GlobalLazyManager
     {
-        public virtual void AttachInvalidations(Type[] types, EventHandler invalidate)
+        public virtual void AttachInvalidations(InvalidateWith invalidateWith, EventHandler invalidate)
         {
             Action onInvalidation = () =>
             {
@@ -119,13 +139,13 @@ namespace Signum.Engine
 
             Schema schema = Schema.Current; 
 
-            foreach (var type in types)
+            foreach (var type in invalidateWith.Types)
             {
                 giAttachInvalidations.GetInvoker(type)(schema, onInvalidation);
             }
 
-            var dependants = DirectedGraph<Table>.Generate(types.Select(t => schema.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).Select(t => t.Type).ToHashSet();
-            dependants.ExceptWith(types);
+            var dependants = DirectedGraph<Table>.Generate(invalidateWith.Types.Select(t => schema.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).Select(t => t.Type).ToHashSet();
+            dependants.ExceptWith(invalidateWith.Types);
 
             foreach (var type in dependants)
             {
@@ -161,9 +181,9 @@ namespace Signum.Engine
             ee.PreUnsafeDelete += q => action();
         }
 
-        public virtual void AssertAttached(Type[] invalidateWith)
+        public virtual void AssertAttached(InvalidateWith invalidateWith)
         {
-            foreach (var type in invalidateWith)
+            foreach (var type in invalidateWith.Types)
             {
                 Schema.Current.Table(type);
             }
