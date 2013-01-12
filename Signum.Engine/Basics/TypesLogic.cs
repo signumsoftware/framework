@@ -94,7 +94,8 @@ namespace Signum.Engine.Basics
             Table table = Schema.Current.Table<TypeDN>();
 
             Dictionary<string, TypeDN> should = GenerateSchemaTypes().ToDictionary(s => s.TableName);
-            Dictionary<string, TypeDN> current = replacements.ApplyReplacementsToOld(
+
+            Dictionary<string, TypeDN> current = replacements.ApplyReplacementsToOldCleaning(
                 Administrator.TryRetrieveAll<TypeDN>(replacements).ToDictionary(c => c.TableName), Replacements.KeyTables);
 
             return Synchronizer.SynchronizeScript(
@@ -111,6 +112,18 @@ namespace Signum.Engine.Basics
                     c.CleanName = s.CleanName;
                     return table.UpdateSqlSync(c, originalName);
                 }, Spacing.Double);
+        }
+
+        public static Dictionary<string, O> ApplyReplacementsToOldCleaning<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
+        {
+            if (!replacements.ContainsKey(replacementsKey))
+                return oldDictionary;
+
+            Dictionary<string, string> dic = replacements[replacementsKey];
+
+            var cleanDic = dic.SelectDictionary(n => ObjectName.Parse(n).Name, n => ObjectName.Parse(n).Name);
+
+            return oldDictionary.SelectDictionary(a => cleanDic.TryGetC(a) ?? a, v => v);
         }
 
         internal static SqlPreCommand Schema_Generating()

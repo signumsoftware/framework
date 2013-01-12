@@ -11,7 +11,7 @@ namespace Signum.Entities.DynamicQuery
     public class Column : IEquatable<Column>
     {
         public string DisplayName { get; set; }
-        public QueryToken Token { get; internal set; }
+        public QueryToken Token { get; private set; }
 
         public Column(QueryToken token, string displayName)
         {

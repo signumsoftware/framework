@@ -21,7 +21,7 @@
             <Grid>
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="30"  SharedSizeGroup="GrColEliminar"/>
+                        <ColumnDefinition Width="30"  SharedSizeGroup="GrColRemove"/>
                         <ColumnDefinition  MinWidth="70" Width="Auto" SharedSizeGroup="GrColField"/>
                         <ColumnDefinition  MinWidth="70" Width="Auto" SharedSizeGroup="GrColOperation"/>
                         <ColumnDefinition  MinWidth="200" Width="Auto" SharedSizeGroup="GrColValue"/>

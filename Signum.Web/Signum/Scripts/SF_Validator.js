@@ -298,9 +298,13 @@ SF.registerModule("Validator", function () {
 
             var formChildren = null;
             if (isEmbedded) {
-                formChildren = $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                var myRuntimeInfoKey = SF.compose(this.valOptions.prefix, SF.Keys.runtimeInfo);
+                formChildren = $("form :input:not('#" + myRuntimeInfoKey + "'), #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                if (!SF.isEmpty(this.valOptions.parentDiv) && $("form").find("#" + this.valOptions.parentDiv).length == 0) {
+                    formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input:not('#" + myRuntimeInfoKey + "')"));
+                }
             }
-            if (!SF.isEmpty(this.valOptions.parentDiv)) {
+            else if (!SF.isEmpty(this.valOptions.parentDiv)) {
                 if (formChildren == null) {
                     formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
                 }

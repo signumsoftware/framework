@@ -14,15 +14,14 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Order
     {
+        public QueryToken Token { get; private set; }
+        public OrderType OrderType { get; private set; }
+
         public Order(QueryToken token, OrderType orderType)
         {
             this.Token = token;
             this.OrderType = orderType;
         }
-
-        public QueryToken Token { get; set; }
-
-        public OrderType OrderType { get; set; }
 
         public override string ToString()
         {

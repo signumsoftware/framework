@@ -23,7 +23,8 @@ namespace Signum.Engine
     {
         public static void TotalGeneration()
         {
-            Connector.Current.CleanDatabase();
+            foreach (var db in Schema.Current.DatabaseNames())
+                Connector.Current.CleanDatabase(db);
 
             SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt();
             foreach (SqlPreCommand command in totalScript.Commands)

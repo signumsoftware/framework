@@ -207,8 +207,6 @@ namespace Signum.Windows
 
         public static readonly DependencyProperty ValueProperty =
              DependencyProperty.Register("Value", typeof(object), typeof(FilterOption), new UIPropertyMetadata((d, e) => ((FilterOption)d).ValueChanged(e)));
-
-       
         public object Value
         {
             get { return (object)GetValue(ValueProperty); }
@@ -224,7 +222,6 @@ namespace Signum.Windows
         }
 
         public event DependencyPropertyChangedEventHandler BindingValueChanged;
-
         private void ValueChanged(DependencyPropertyChangedEventArgs args)
         {
             RefreshRealValue();
@@ -235,9 +232,9 @@ namespace Signum.Windows
 
         public void RefreshRealValue()
         {
-            var newRealValue =Token != null ? Server.Convert(Value, Token.Type) : Value;
+            var newRealValue = (Token == null || Operation == FilterOperation.IsIn) ? Value : Server.Convert(Value, Token.Type);
 
-            if(!object.Equals(newRealValue, RealValue))
+            if (!object.Equals(newRealValue, RealValue))
             {
                 RealValue = newRealValue;
             }
@@ -245,12 +242,7 @@ namespace Signum.Windows
 
         public Filter ToFilter()
         {
-            return new Filter
-            {
-                Token = Token,
-                Operation = Operation,
-                Value = RealValue
-            };
+            return new Filter(Token, Operation, RealValue);
         }
 
         protected override Freezable CreateInstanceCore()

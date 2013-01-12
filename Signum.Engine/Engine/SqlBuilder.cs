@@ -193,7 +193,7 @@ namespace Signum.Engine
                 ObjectName viewName = new ObjectName(index.Table.Name.Schema, index.ViewName);
 
                 SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
-                    .Formato(viewName, columns, index.Table.Name, index.Where)) { AddGo = true };
+                    .Formato(viewName, columns, index.Table.Name.ToStringDbo(), index.Where)) { AddGo = true };
 
                 SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
                     .Formato(index.IndexName, viewName, index.Columns.ToString(c => c.Name.SqlScape(), ", ")));

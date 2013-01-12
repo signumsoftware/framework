@@ -277,7 +277,7 @@ namespace Signum.Engine
 
         public override ParameterBuilder ParameterBuilder { get; protected set; }
 
-        public override void CleanDatabase()
+        public override void CleanDatabase(DatabaseName database)
         {
             string fileName = new SqlCeConnection(connectionString).DataSource;
             if (File.Exists(fileName))

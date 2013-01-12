@@ -475,6 +475,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to is in.
+        /// </summary>
+        public static string FilterOperation_IsIn {
+            get {
+                return ResourceManager.GetString("FilterOperation_IsIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to less than.
         /// </summary>
         public static string FilterOperation_LessThan {

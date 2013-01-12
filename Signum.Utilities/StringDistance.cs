@@ -8,7 +8,7 @@ namespace Signum.Utilities
     {
         int[][] num;
 
-        public int LevenshteinDistance(string str1, string str2)
+        public int LevenshteinDistance(string str1, string str2, int deleteWeight = 1, int insertWeight = 1, int replaceWeight = 1)
         {
             if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2))
                 return 0;
@@ -26,17 +26,16 @@ namespace Signum.Utilities
             for (int i = 1; i < M1; i++)
             {
                 char cs = str1[i - 1];
-                int[] numim1 = num[i - 1];
-                int[] numi = num[i];
+
                 for (int j = 1; j < M2; j++)
                 {
                     if (cs == str2[j - 1])
-                        numi[j] = numim1[j - 1];
+                        num[i][j] = num[i - 1][j - 1];
                     else
-                        numi[j] = Math.Min(Math.Min(
-                                        numim1[j] + 1,     //deletion
-                                        numi[j - 1] + 1),  //insertion
-                                        numim1[j - 1] + 1);//substitution
+                        num[i][j] = Math.Min(Math.Min(
+                                        num[i - 1][j] + deleteWeight,     //deletion
+                                        num[i][j - 1] + insertWeight),  //insertion
+                                        num[i - 1][j - 1] + replaceWeight);//replace
                 }
             }
 

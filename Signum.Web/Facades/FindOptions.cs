@@ -276,13 +276,7 @@ namespace Signum.Web
 
         public Filter ToFilter()
         {
-            Filter f = new Filter
-            {
-                Token = Token,
-                Operation = Operation,                
-            };
-
-            f.Value = Common.Convert(Value, f.Token.Type);
+            Filter f = new Filter(Token, Operation, Common.Convert(Value, Token.Type));
 
             return f;
         }

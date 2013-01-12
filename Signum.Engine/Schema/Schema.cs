@@ -884,7 +884,7 @@ namespace Signum.Engine.Maps
         internal static SchemaName Parse(string name)
         {
             if (string.IsNullOrEmpty(name))
-                return null;
+                return SchemaName.Default;
 
             return new SchemaName(DatabaseName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
         }

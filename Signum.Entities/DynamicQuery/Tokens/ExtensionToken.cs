@@ -20,7 +20,7 @@ namespace Signum.Entities.DynamicQuery
             : base(parent)
         {
             if (typeof(IIdentifiable).IsAssignableFrom(type.CleanType()) && implementations == null)
-                throw new ArgumentException("Extension {0} of type {1} has no implementations".Formato(key, type.Name));
+                throw new ArgumentException("Extension {0}({1}) on type {2} has no implementations".Formato(key, type.Name, parent.Type.CleanType()));
 
             this.key= key;
             this.type = type;

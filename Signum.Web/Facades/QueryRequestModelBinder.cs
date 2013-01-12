@@ -86,12 +86,9 @@ namespace Signum.Web
             {
                 string name = m.Groups["token"].Value;
                 var token = QueryUtils.Parse(name, queryDescription);
-                return new Signum.Entities.DynamicQuery.Filter
-                {
-                    Token = token,
-                    Operation = EnumExtensions.ToEnum<FilterOperation>(m.Groups["op"].Value),
-                    Value = FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(m.Groups["value"].Value), token.Type)
-                };
+                return new Signum.Entities.DynamicQuery.Filter(token,
+                    EnumExtensions.ToEnum<FilterOperation>(m.Groups["op"].Value),
+                    FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(m.Groups["value"].Value), token.Type));
             }).ToList();
         }
 

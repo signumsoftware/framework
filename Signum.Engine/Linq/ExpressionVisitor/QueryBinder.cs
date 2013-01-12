@@ -785,7 +785,7 @@ namespace Signum.Engine.Linq
 
         private ProjectionExpression GetTableProjection(IQueryable query)
         { 
-            ITable table = query is ISignumTable ? ((ISignumTable)query).Table : new ViewBuilder(Schema.Current).NewView(query.ElementType);
+            ITable table = ((ISignumTable)query).Table;
 
             Alias tableAlias = NextTableAlias(table.Name);
 
