@@ -26,13 +26,22 @@ namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
+        /// <summary>
+        /// If you have invalidation problems look at exceptions in: select * from sys.transmission_queue 
+        /// If there are exceptions like: 'Could not obtain information about Windows NT group/user'
+        ///    Change login to a SqlServer authentication (i.e.: sa)
+        ///    Change Server Authentication mode and enable SA: http://msdn.microsoft.com/en-us/library/ms188670.aspx
+        ///    Change Database ownership to sa: ALTER AUTHORIZATION ON DATABASE::yourDatabase TO sa
+        /// </summary>
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
 
-                sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += OnStart;
+                GlobalLazy.Manager = new CacheGlobalLazyManager();
+
+                sb.Schema.Initializing[InitLevel.Level_0BeforeAnyQuery] += OnStart;
             }
         }
 
@@ -223,6 +232,14 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             }
         }
 
+        public static void CacheAllGlobalLazyTables(SchemaBuilder sb)
+        {
+            foreach (var type in GlobalLazy.TypesForInvalidation())
+            {
+                if (!controllers.ContainsKey(type))
+                    giCacheTable.GetInvoker(type)(sb);
+            }
+        }
 
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
         public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
@@ -231,6 +248,8 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
 
             TryCacheSubTables(typeof(T), sb);
+
+            cc.BuildCachedTable();
         }
 
         public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
@@ -325,12 +344,45 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             return Color.Green;
         }
 
-
-        internal static void AttachInvalidations(EventHandler<CacheEventArgs> invalidated, Type[] type)
+        public class CacheGlobalLazyManager : GlobalLazyManager
         {
-            foreach (var t in type)
+            public override void AttachInvalidations(Type[] types, EventHandler invalidate)
             {
-                GetController(t).Invalidated += invalidated;
+                EventHandler<CacheEventArgs> onInvalidation = (sender, args) =>
+                {
+                    if (args == CacheEventArgs.Invalidated)
+                    {
+                        invalidate(sender, args);
+                    }
+                    else if (args == CacheEventArgs.Disabled)
+                    {
+                        if (Transaction.InTestTransaction)
+                        {
+                            invalidate(sender, args);
+                            Transaction.Rolledback += () => invalidate(sender, args);
+                        }
+
+                        Transaction.PostRealCommit += dic => invalidate(sender, args);
+                    }
+                };
+
+                foreach (var t in types)
+                {
+                    var ctrlr = controllers.TryGetC(t);
+                    if (ctrlr == null)
+                        throw new InvalidOperationException(@"Impossible to attach invalidations to {0} because is not registered in CacheLogic. 
+Consider calling CacheLogic.CacheAllGlobalLazyTables at the end of your Starter.Start method".Formato(t.Name));
+
+                    ctrlr.Invalidated += onInvalidation;
+                }
+            }
+
+            public override void AssertAttached(Type[] invalidateWith)
+            {
+                foreach (var type in invalidateWith)
+                {
+                    GetController(type).Load();
+                }
             }
         }
     }

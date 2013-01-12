@@ -25,9 +25,11 @@ namespace Signum.Engine.Cache
         protected static Action<Modifiable> resetModifiedAction;
         static CachedTableBase()
         {
-            Expression param = Expression.Parameter(typeof(Modifiable));
+            ParameterExpression param = Expression.Parameter(typeof(Modifiable));
             var piModified = ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified);
-            resetModifiedAction = Expression.Lambda<Action<Modifiable>>(Expression.Assign(Expression.Property(param, piModified), Expression.Constant(null, typeof(bool?)))).Compile();
+            resetModifiedAction = Expression.Lambda<Action<Modifiable>>(
+                Expression.Assign(Expression.Property(param, piModified), Expression.Constant(null, typeof(bool?))),
+                param).Compile();
         }
 
         public abstract ITable Table { get; }
@@ -44,16 +46,23 @@ namespace Signum.Engine.Cache
 
         protected void OnChange(object sender, SqlNotificationEventArgs args)
         {
-            if (args.Info == SqlNotificationInfo.Invalid &&
-                args.Source == SqlNotificationSource.Statement &&
-                args.Type == SqlNotificationType.Subscribe && Debugger.IsAttached)
-                throw new InvalidOperationException("Invalid query for SqlDependency");
+            try
+            {
+                if (args.Info == SqlNotificationInfo.Invalid &&
+                    args.Source == SqlNotificationSource.Statement &&
+                    args.Type == SqlNotificationType.Subscribe)
+                    throw new InvalidOperationException("Invalid query for SqlDependency") { Data = { { "query", query } } };
 
-            Reset();
+                Reset();
 
-            Interlocked.Increment(ref invalidations);
+                Interlocked.Increment(ref invalidations);
 
-            controller.OnChange(this, args);
+                controller.OnChange(this, args);
+            }
+            catch (Exception e)
+            {
+                e.LogException();
+            }
         }
 
         public void ForceReset()
@@ -130,6 +139,7 @@ namespace Signum.Engine.Cache
 
             public CachedTableConstructor(CachedTableBase cachedTable, AliasGenerator aliasGenerator)
             {
+                this.cachedTable = cachedTable;
                 this.table = cachedTable.Table;
                 this.aliasGenerator = aliasGenerator;
                 this.currentAlias = aliasGenerator.NextTableAlias(table.Name.Name);
@@ -137,7 +147,7 @@ namespace Signum.Engine.Cache
                 this.tupleType = TupleReflection.TupleChainType(table.Columns.Values.Select(GetColumnType));
 
                 this.retriever = Expression.Parameter(typeof(IRetriever), "retriever");
-                this.originObject = Expression.Parameter(typeof(object), "origin");
+                this.originObject = Expression.Parameter(typeof(object), "originObject");
                 this.origin = Expression.Parameter(tupleType, "origin");
             }
 
@@ -148,7 +158,7 @@ namespace Signum.Engine.Cache
 
             internal string CreatePartialInnerJoin(IColumn column)
             {
-                return "INNER JOIN {0} {1} ON {1}.{2}=".Formato(table.Name, currentAlias.Name.SqlScape(), column.Name);
+                return "INNER JOIN {0} {1} ON {1}.{2}=".Formato(table.Name.ToStringDbo(), currentAlias.Name.SqlScape(), column.Name);
             }
 
             internal Type GetColumnType(IColumn column)
@@ -210,7 +220,7 @@ namespace Signum.Engine.Cache
                     {
                         IColumn column = (IColumn)field;
 
-                        return GetEntity(isLite, column, field.FieldType);
+                        return GetEntity(isLite, column, field.FieldType.CleanType());
                     }
 
                     if (field is FieldImplementedBy)
@@ -238,7 +248,11 @@ namespace Signum.Engine.Cache
 
                         if (isLite)
                         {
-                            var liteCreate = Expression.Call(miLiteCreate, SchemaGetType(typeId), Expression.Convert(id, typeof(int)), Expression.Constant(null, typeof(string)));
+                            var liteCreate = Expression.Call(miLiteCreate,
+                                SchemaGetType(Expression.Convert(typeId, typeof(int))),
+                                Expression.Convert(id, typeof(int)),
+                                Expression.Constant(null, typeof(string)));
+
                             var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)), liteCreate);
 
                             return Expression.Condition(Expression.NotEqual(id, NullId), liteRequest, nullRef);
@@ -252,22 +266,26 @@ namespace Signum.Engine.Cache
 
                 if (field is FieldEmbedded)
                 {
-                    var nullref = Expression.Constant(null, field.FieldType);
-
                     var fe = (FieldEmbedded)field;
 
                     Expression ctor = Expression.MemberInit(Expression.New(fe.FieldType),
                         fe.EmbeddedFields.Values.Select(f => Expression.Bind(f.FieldInfo, Materialize(f.Field)))
                         .And(resetModified));
 
-                    return Expression.Condition(Expression.Equal(origin, nullref), nullref, ctor);
+                    if (fe.HasValue == null)
+                        return ctor;
+
+                    return Expression.Condition(
+                        Expression.Equal(GetTupleProperty(fe.HasValue), Expression.Constant(true)), 
+                        ctor, 
+                        Expression.Constant(null, field.FieldType));
                 }
 
                 if (field is FieldMList)
                 {
                     var mListField = (FieldMList)field;
 
-                    var idColumn = table.Columns.OfType<FieldPrimaryKey>().First();
+                    var idColumn = table.Columns.Values.OfType<FieldPrimaryKey>().First();
 
                     string lastPartialJoin = CreatePartialInnerJoin(idColumn);
 
@@ -280,7 +298,7 @@ namespace Signum.Engine.Cache
 
                     cachedTable.subTables.Add(ctb);
 
-                    return Expression.Call(Expression.Constant(ctb), miGetMListTable.MakeGenericMethod(elementType), GetTupleProperty(idColumn));
+                    return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetMList"), GetTupleProperty(idColumn), retriever);
                 }
 
                 throw new InvalidOperationException("Unexpected {0}".Formato(field.GetType().Name));
@@ -293,7 +311,7 @@ namespace Signum.Engine.Cache
                 if (isLite)
                 {
                     if (CacheLogic.IsCached(type))
-                        return Expression.Call(retriever, miRequestLite.MakeGenericMethod(type), id);
+                        return Expression.Call(retriever, miRequestLite.MakeGenericMethod(type), Lite.NewExpression(type, id, Expression.Constant(null, typeof(string))));
 
                     string lastPartialJoin = CreatePartialInnerJoin(column);
 
@@ -305,7 +323,7 @@ namespace Signum.Engine.Cache
                     cachedTable.subTables.Add(ctb);
 
                     return Expression.Condition(Expression.Equal(id, NullId), Expression.Constant(null, Lite.Generate(type)),
-                        Expression.Call(Expression.Constant(ctb), miGetLiteTable.MakeGenericMethod(type), id));
+                        Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), id));
                 }
                 else
                 {
@@ -323,7 +341,7 @@ namespace Signum.Engine.Cache
 
                     var entity = Expression.Parameter(type);
                     LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(type),
-                        Expression.Call(Expression.Constant(ctb), miCompleteTable.MakeGenericMethod(type), entity, retriever),
+                        Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("Complete"), entity, retriever),
                         entity);
 
                     return Expression.Call(retriever, miComplete.MakeGenericMethod(type), id, lambda);
@@ -335,11 +353,7 @@ namespace Signum.Engine.Cache
             static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<IdentifiableEntity>(null, null)).GetGenericMethodDefinition();
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<IdentifiableEntity>(null)).GetGenericMethodDefinition();
             static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<IdentifiableEntity>(0, null)).GetGenericMethodDefinition();
-
-            static MethodInfo miCompleteTable = ReflectionTools.GetMethodInfo((CachedTable<IdentifiableEntity> ct) => ct.Complete(null, null)).GetGenericMethodDefinition();
-            static MethodInfo miGetLiteTable = ReflectionTools.GetMethodInfo((CachedLiteTable<IdentifiableEntity> ct) => ct.GetLite(1)).GetGenericMethodDefinition();
-            static MethodInfo miGetMListTable = ReflectionTools.GetMethodInfo((CachedRelationalTable<IdentifiableEntity> ct) => ct.GetMList(1, null)).GetGenericMethodDefinition();
-
+            
             static MemberBinding resetModified = Expression.Bind(ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified), Expression.Constant(null, typeof(bool?)));
 
             static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
@@ -368,15 +382,15 @@ namespace Signum.Engine.Cache
 
         public CachedTable(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins) : base(controller)
         {
-            CachedTableConstructor ctr = new CachedTableConstructor(this, aliasGenerator);
-
             this.table = Schema.Current.Table(typeof(T));
+
+            CachedTableConstructor ctr = new CachedTableConstructor(this, aliasGenerator);
 
             //Query
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".Formato(
                     Table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlScape() + "." + c.Name.SqlScape(), ",\r\n"),
-                    Table.Name,
+                    table.Name.ToStringDbo(),
                     ctr.currentAlias.Name.SqlScape());
 
                 ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias.Name.SqlScape() + ".Id\r\n" + remainingJoins;
@@ -407,12 +421,12 @@ namespace Signum.Engine.Cache
                 }
 
                 var block = Expression.Block(new[] { ctr.origin }, instructions);
-                var lambda = Expression.Lambda<Action<object, IRetriever, T>>(block, me, ctr.originObject, ctr.retriever);
+                var lambda = Expression.Lambda<Action<object, IRetriever, T>>(block, ctr.originObject, ctr.retriever, me);
 
                 completer = lambda.Compile();
 
-                idGetter = ctr.GetGetter<int>(table.Fields.Values.OfType<FieldPrimaryKey>().Single());
-                toStrGetter = ctr.GetGetter<string>((IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name]);
+                idGetter = ctr.GetGetter<int>((IColumn)table.Fields.Values.Select(ef => ef.Field).Single(f => f is FieldPrimaryKey));
+                toStrGetter = ctr.GetGetter<string>((IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name].Field);
             }
 
             rows = new ResetLazy<Dictionary<int, object>>(() =>
@@ -496,9 +510,9 @@ namespace Signum.Engine.Cache
 
             //Query
             {
-                string select = "SELECT\r\n{0},\r\n{1}\r\nFROM {2} {3}\r\n".Formato(
+                string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".Formato(
                     ctr.table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlScape() + "." + c.Name.SqlScape(), ",\r\n"),
-                    table.Name,
+                    table.Name.ToStringDbo(),
                     ctr.currentAlias.Name.SqlScape());
 
                 ctr.remainingJoins = lastPartialJoin + ctr.currentAlias.Name.SqlScape() + "."+table.BackReference.Name.SqlScape() +"\r\n" + remainingJoins;
@@ -617,7 +631,7 @@ namespace Signum.Engine.Cache
                 string select = "SELECT {0} {1} FROM {1} {2}\r\n".Formato(
                     currentAlias.Name.SqlScape() + "." + colId.Name.SqlScape(),
                     currentAlias.Name.SqlScape() + "." + colToStr.Name.SqlScape(),
-                    table.Name,
+                    table.Name.ToStringDbo(),
                     currentAlias.Name.SqlScape());
 
                 select += lastPartialJoin + currentAlias.Name.SqlScape() + ".Id\r\n" + remainingJoins;
