@@ -55,7 +55,9 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             SqlDependency.Stop(((SqlConnector)Connector.Current).ConnectionString);
         }
 
-        interface ICacheLogicController : ICacheController
+        
+
+        internal interface ICacheLogicController : ICacheController
         {
             int? Count { get; }
 
@@ -94,9 +96,6 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
                 return result;
             });
-
-            
-            ResetLazy<Dictionary<int, T>> pack;
 
             public CacheController(Schema schema)
             {
@@ -217,10 +216,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
             EventHandler invalidation;
 
-            void SubCacheChanged(object sender, EventArgs args)
-            {
-                Invalidate(isClean: false);
-            }
+            
 
             void SqlDependencyChanged(object sender, SqlNotificationEventArgs args)
             {
@@ -523,13 +519,5 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
         public int Invalidations;
 
         public int AttachedEvents;
-    }
-
-    public enum InvalidationStrategy
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        EngineInvalidation,
     }
 }
