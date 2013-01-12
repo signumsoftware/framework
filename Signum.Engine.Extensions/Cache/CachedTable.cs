@@ -310,7 +310,7 @@ namespace Signum.Engine.Cache
 
                 if (isLite)
                 {
-                    if (CacheLogic.IsCached(type))
+                    if (CacheLogic.GetCacheType(type) == CacheType.Cached)
                         return Expression.Call(retriever, miRequestLite.MakeGenericMethod(type), Lite.NewExpression(type, id, Expression.Constant(null, typeof(string))));
 
                     string lastPartialJoin = CreatePartialInnerJoin(column);
@@ -327,7 +327,7 @@ namespace Signum.Engine.Cache
                 }
                 else
                 {
-                    if (CacheLogic.IsCached(type))
+                    if (CacheLogic.GetCacheType(type) == CacheType.Cached)
                         return Expression.Call(retriever, miRequest.MakeGenericMethod(type), id);
 
                     string lastPartialJoin = CreatePartialInnerJoin(column);

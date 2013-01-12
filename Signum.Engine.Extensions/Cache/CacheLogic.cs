@@ -299,9 +299,16 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             return controllers.Values.Select(a => a.CachedTable).OrderByDescending(a => a.Count).ToList();
         }
 
-        public static bool IsCached(Type type)
+        public static CacheType GetCacheType(Type type)
         {
-            return controllers.TryGetC(type) != null;
+            ICacheLogicController controller;
+            if (!controllers.TryGetValue(type, out controller))
+                return CacheType.None;
+
+            if (controller == null)
+                return CacheType.Semi;
+
+            return CacheType.Cached;
         }
 
         public static void ForceReset()
@@ -332,8 +339,11 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             if (type.IsEnumEntity())
                 return Color.Red;
 
-            if (CacheLogic.IsCached(type))
-                return Color.Purple;
+            switch (CacheLogic.GetCacheType(type))
+            {
+                case CacheType.Cached: return Color.Purple;
+                case CacheType.Semi: return Color.Pink;
+            }
 
             if (typeof(MultiEnumDN).IsAssignableFrom(type))
                 return Color.Orange;
@@ -346,7 +356,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
         public class CacheGlobalLazyManager : GlobalLazyManager
         {
-            public override void AttachInvalidations(Type[] types, EventHandler invalidate)
+            public override void AttachInvalidations(InvalidateWith invalidateWith, EventHandler invalidate)
             {
                 EventHandler<CacheEventArgs> onInvalidation = (sender, args) =>
                 {
@@ -366,7 +376,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
                     }
                 };
 
-                foreach (var t in types)
+                foreach (var t in invalidateWith.Types)
                 {
                     var ctrlr = controllers.TryGetC(t);
                     if (ctrlr == null)
@@ -377,9 +387,9 @@ Consider calling CacheLogic.CacheAllGlobalLazyTables at the end of your Starter.
                 }
             }
 
-            public override void AssertAttached(Type[] invalidateWith)
+            public override void AssertAttached(InvalidateWith invalidateWith)
             {
-                foreach (var type in invalidateWith)
+                foreach (var type in invalidateWith.Types)
                 {
                     GetController(type).Load();
                 }
@@ -408,5 +418,12 @@ Consider calling CacheLogic.CacheAllGlobalLazyTables at the end of your Starter.
 
         public static readonly CacheEventArgs Invalidated = new CacheEventArgs();
         public static readonly CacheEventArgs Disabled = new CacheEventArgs();
+    }
+
+    public enum CacheType
+    {
+        Cached,
+        Semi,
+        None
     }
 }

@@ -20,7 +20,7 @@ namespace Signum.Engine.Chart
     {
         public static ResetLazy<List<ChartScriptDN>> Scripts = GlobalLazy.Create(() =>
             Database.Query<ChartScriptDN>().ToList(),
-            invalidateWith: new[] { typeof(ChartScriptDN) });
+            new InvalidateWith(typeof(ChartScriptDN)));
 
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)

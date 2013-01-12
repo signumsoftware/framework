@@ -35,7 +35,7 @@ namespace Signum.Engine.Authorization
         static ResetLazy<UserDN> systemUserLazy = GlobalLazy.Create(() => SystemUserName == null ? null :
             Database.Query<UserDN>().Where(u => u.UserName == SystemUserName)
             .SingleEx(() => "SystemUser with name '{0}' not found".Formato(SystemUserName)),
-            invalidateWith: new Type[0]);
+            new InvalidateWith(null));
         public static UserDN SystemUser
         {
             get { return systemUserLazy.Value; }
@@ -45,14 +45,14 @@ namespace Signum.Engine.Authorization
         static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.Create(() => AnonymousUserName == null ? null :
             Database.Query<UserDN>().Where(u => u.UserName == AnonymousUserName)
             .SingleEx(() => "AnonymousUser with name '{0}' not found".Formato(AnonymousUserName)),
-            invalidateWith: new Type[0]);
+            new InvalidateWith(null));
         public static UserDN AnonymousUser
         {
             get { return anonymousUserLazy.Value; }
         }
 
-        public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache, 
-            invalidateWith: new[] { typeof(RoleDN) });
+        public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache,
+            new InvalidateWith(typeof(RoleDN)));
 
         public static void AssertStarted(SchemaBuilder sb)
         {
