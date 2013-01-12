@@ -103,7 +103,7 @@ namespace Signum.Engine.Maps
             //set { typeToName = value; }
         }
 
-        internal Type GetType(int id)
+        public Type GetType(int id)
         {
             return this.idToType[id];
         }

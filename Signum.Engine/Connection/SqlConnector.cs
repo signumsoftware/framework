@@ -149,7 +149,7 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override void ExecuteDataReader(SqlPreCommandSimple preCommand, Action<FieldReader> forEach)
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change,  Action<FieldReader> forEach)
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con))
@@ -157,6 +157,12 @@ namespace Signum.Engine
             {
                 try
                 {
+                    if (change != null)
+                    {
+                        SqlDependency dep = new SqlDependency(cmd);
+                        dep.OnChange += change;
+                    }
+
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         FieldReader fr = new FieldReader(reader);
@@ -356,6 +362,11 @@ namespace Signum.Engine
         public override bool AllowsMultipleQueries
         {
             get { return true; }
+        }
+
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple query, object OnChange, Action<FieldReader> action)
+        {
+            throw new NotImplementedException();
         }
     }
 

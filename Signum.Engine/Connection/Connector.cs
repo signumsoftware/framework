@@ -96,7 +96,6 @@ namespace Signum.Engine
         protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand);
         protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand);
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
-        protected internal abstract void ExecuteDataReader(SqlPreCommandSimple command, Action<FieldReader> forEach);
         protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
 

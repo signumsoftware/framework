@@ -392,7 +392,7 @@ namespace Signum.Engine.Linq
                     Type type = ((TypeEntityExpression)typeId).TypeValue;
 
                     liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                        Expression.Convert(Expression.New(LiteConstructor(type), id.UnNullify(), toStringOrNull), lite.Type),
+                        Expression.Convert(Lite.NewExpression(type, id, toStringOrNull), lite.Type),
                         nothing);
                 }
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
@@ -403,7 +403,7 @@ namespace Signum.Engine.Linq
                             {
                                 var visitId = Visit(NullifyColumn(ti.ExternalId));
                                 return Expression.Condition(Expression.NotEqual(visitId, NullId),
-                                    Expression.Convert(Expression.New(LiteConstructor(ti.Type), visitId.UnNullify(), toStringOrNull), lite.Type), acum);
+                                    Expression.Convert(Lite.NewExpression(ti.Type, visitId, toStringOrNull), lite.Type), acum);
                             });
                 }
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
@@ -427,13 +427,6 @@ namespace Signum.Engine.Linq
             }
 
             static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
-
-            static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructor = new ConcurrentDictionary<Type,ConstructorInfo>();
-
-            static ConstructorInfo LiteConstructor( Type type)
-            {
-                return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(int), typeof(string) }));
-            }
 
             protected override Expression VisitMListElement(MListElementExpression mle)
             {
