@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
 using Signum.Services;
 using Signum.Entities.Authorization;
+using System.Collections;
 
 namespace Signum.Entities.UserQueries
 {
@@ -26,14 +27,22 @@ namespace Signum.Entities.UserQueries
 
         public static string ToString(object value, Type type)
         {
-            string result; 
+            if (value is IList)
+                return ((IList)value).Cast<object>().ToString(o => ToStringElement(o, type), "|");
+
+            return ToStringElement(value, type);
+        }
+
+        static string ToStringElement(object value, Type type)
+        {
+            string result;
             string error = TryToString(value, type, out result);
             if (error == null)
                 return result;
-            throw new InvalidOperationException(error); 
+            throw new InvalidOperationException(error);
         }
 
-        public static string TryToString(object value, Type type, out string result)
+        static string TryToString(object value, Type type, out string result)
         {
             FilterType filterType = QueryUtils.GetFilterType(type);
 
@@ -71,13 +80,36 @@ namespace Signum.Entities.UserQueries
 
         public static string TryParse(string stringValue, Type type, out object result)
         {
+            if (stringValue != null && stringValue.Contains('|'))
+            {
+                IList list = (IList)Activator.CreateInstance(typeof(MList<>).MakeGenericType(type.UnNullify()));
+                result = list;
+                foreach (var item in stringValue.Split('|'))
+                {
+                    object element;
+                    string error = TryParseInternal(item.Trim(), type, out element);
+                    if (error.HasText())
+                        return error;
+
+                    list.Add(element);
+                }
+                return null;
+            }
+            else
+            {
+                return TryParseInternal(stringValue, type, out result);
+            }
+        }
+
+        private static string TryParseInternal(string stringValue, Type type, out object result)
+        {
             FilterType filterType = QueryUtils.GetFilterType(type);
 
-            var list = SpecificFilters.TryGetC(filterType);
+            List<IFilterValueConverter> filters = SpecificFilters.TryGetC(filterType);
 
-            if (list != null)
+            if (filters != null)
             {
-                foreach (var fvc in list)
+                foreach (var fvc in filters)
                 {
                     string error = fvc.TryParse(stringValue, type, out result);
                     if (error != Continue)

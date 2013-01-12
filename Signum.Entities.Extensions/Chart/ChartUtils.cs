@@ -199,14 +199,7 @@ namespace Signum.Entities.Chart
             {
                 GroupResults = uq.GroupResults,
                 ChartScript = uq.ChartScript,
-                
-                Filters = uq.Filters.Select(qf => new Filter
-                {
-                    Token = qf.Token,
-                    Operation = qf.Operation,
-                    Value = qf.Value
-                }).ToList(),
-
+                Filters = uq.Filters.Select(qf => new Filter(qf.Token, qf.Operation, qf.Value)).ToList(),
                 Orders = uq.Orders.Select(o => new Order(o.Token, o.OrderType)).ToList(),
             };
 

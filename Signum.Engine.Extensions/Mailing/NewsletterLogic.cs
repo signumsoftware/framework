@@ -264,18 +264,8 @@ namespace Signum.Engine.Mailing
                 QueryName = queryName,
                 Filters = new List<Filter>
                 { 
-                    new Filter
-                    { 
-                        Token = QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd),
-                        Operation = FilterOperation.EqualTo, 
-                        Value = newsletter.ToLite(), 
-                    },
-                    new Filter
-                    {
-                        Token = QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Sent", qd),
-                        Operation = FilterOperation.EqualTo,
-                        Value = false
-                    },
+                    new Filter(qd, "Entity.NewsletterDeliveries.Element.Newsletter",  FilterOperation.EqualTo, newsletter.ToLite()),
+                    new Filter(qd, "Entity.NewsletterDeliveries.Element.Sent", FilterOperation.EqualTo, false),
                 },
                 Orders = new List<Order>(),
                 Columns = columns.Select(t => new Column(t, t.NiceName())).ToList(),
