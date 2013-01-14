@@ -59,7 +59,7 @@ return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
 
 
 
-#line 31 "..\..\Cache\Views\Statistics.cshtml"
+#line 35 "..\..\Cache\Views\Statistics.cshtml"
  
 
 #line default
@@ -69,7 +69,7 @@ WriteLiteralTo(@__razor_helper_writer, "            <tr>\r\n                <td>
 
 
 
-#line 33 "..\..\Cache\Views\Statistics.cshtml"
+#line 37 "..\..\Cache\Views\Statistics.cshtml"
 WriteTo(@__razor_helper_writer, prefix + table.Table.Name.Name);
 
 #line default
@@ -79,7 +79,7 @@ WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n           
 
 
 
-#line 35 "..\..\Cache\Views\Statistics.cshtml"
+#line 39 "..\..\Cache\Views\Statistics.cshtml"
 WriteTo(@__razor_helper_writer, table.Type.TypeName());
 
 #line default
@@ -89,7 +89,7 @@ WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n           
 
 
 
-#line 37 "..\..\Cache\Views\Statistics.cshtml"
+#line 41 "..\..\Cache\Views\Statistics.cshtml"
 WriteTo(@__razor_helper_writer, table.Count.TryToString() ?? "-- not loaded --");
 
 #line default
@@ -99,7 +99,7 @@ WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n           
 
 
 
-#line 39 "..\..\Cache\Views\Statistics.cshtml"
+#line 43 "..\..\Cache\Views\Statistics.cshtml"
 WriteTo(@__razor_helper_writer, table.Hits.DefaultToNull());
 
 #line default
@@ -109,7 +109,7 @@ WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n           
 
 
 
-#line 41 "..\..\Cache\Views\Statistics.cshtml"
+#line 45 "..\..\Cache\Views\Statistics.cshtml"
 WriteTo(@__razor_helper_writer, table.Invalidations.DefaultToNull());
 
 #line default
@@ -119,7 +119,7 @@ WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n           
 
 
 
-#line 43 "..\..\Cache\Views\Statistics.cshtml"
+#line 47 "..\..\Cache\Views\Statistics.cshtml"
 WriteTo(@__razor_helper_writer, table.Loads.DefaultToNull());
 
 #line default
@@ -129,7 +129,7 @@ WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n           
 
 
 
-#line 45 "..\..\Cache\Views\Statistics.cshtml"
+#line 49 "..\..\Cache\Views\Statistics.cshtml"
 WriteTo(@__razor_helper_writer, table.SumLoadTime.NiceToString());
 
 #line default
@@ -139,7 +139,7 @@ WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n           
 
 
 
-#line 48 "..\..\Cache\Views\Statistics.cshtml"
+#line 52 "..\..\Cache\Views\Statistics.cshtml"
             
     if (table.SubTables != null)
     {
@@ -150,15 +150,15 @@ WriteLiteralTo(@__razor_helper_writer, "\r\n                </td>\r\n           
 #line hidden
 
 
-#line 53 "..\..\Cache\Views\Statistics.cshtml"
-WriteTo(@__razor_helper_writer, ShowTree(st, table.Table.Name.Name + " / "));
+#line 57 "..\..\Cache\Views\Statistics.cshtml"
+WriteTo(@__razor_helper_writer, ShowTree(st, prefix + " -> "));
 
 #line default
 #line hidden
 
 
-#line 53 "..\..\Cache\Views\Statistics.cshtml"
-                                                        
+#line 57 "..\..\Cache\Views\Statistics.cshtml"
+                                          
         }
     }
         
@@ -199,42 +199,42 @@ WriteLiteral("</h2>\r\n<div>\r\n    <a href=\"");
             
             #line default
             #line hidden
-WriteLiteral("\" class=\"sf-button\" style=\"");
+WriteLiteral("\" class=\"sf-button\" \r\n        style=\"");
 
 
             
-            #line 7 "..\..\Cache\Views\Statistics.cshtml"
-                                                                                     Write(!CacheLogic.GloballyDisabled ? "" : "display:none");
-
-            
-            #line default
-            #line hidden
-WriteLiteral(";color:red\" id=\"sfCacheDisable\">Disable </a><a href=\"");
-
-
-            
-            #line 7 "..\..\Cache\Views\Statistics.cshtml"
-                                                                                                                                                                                              Write(Url.Action((CacheController pc) => pc.Enable()));
+            #line 8 "..\..\Cache\Views\Statistics.cshtml"
+           Write(!CacheLogic.GloballyDisabled ? "" : "display:none");
 
             
             #line default
             #line hidden
-WriteLiteral("\" class=\"sf-button\"  style=\"");
+WriteLiteral(";color:red\" id=\"sfCacheDisable\">Disable </a>\r\n    <a href=\"");
 
 
             
-            #line 7 "..\..\Cache\Views\Statistics.cshtml"
-                                                                                                                                                                                                                                                                           Write(CacheLogic.GloballyDisabled ? "" : "display:none");
+            #line 9 "..\..\Cache\Views\Statistics.cshtml"
+        Write(Url.Action((CacheController pc) => pc.Enable()));
 
             
             #line default
             #line hidden
-WriteLiteral("\" id=\"sfCacheEnable\">Enable </a><a href=\"");
+WriteLiteral("\" class=\"sf-button\"  \r\n        style=\"");
 
 
             
-            #line 7 "..\..\Cache\Views\Statistics.cshtml"
-                                                                                                                                                                                                                                                                                                                                                                       Write(Url.Action((CacheController pc) => pc.Clean()));
+            #line 10 "..\..\Cache\Views\Statistics.cshtml"
+           Write(CacheLogic.GloballyDisabled ? "" : "display:none");
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" id=\"sfCacheEnable\">Enable </a>\r\n    <a href=\"");
+
+
+            
+            #line 11 "..\..\Cache\Views\Statistics.cshtml"
+        Write(Url.Action((CacheController pc) => pc.Clean()));
 
             
             #line default
@@ -270,7 +270,7 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 58 "..\..\Cache\Views\Statistics.cshtml"
+            #line 62 "..\..\Cache\Views\Statistics.cshtml"
          foreach (var table in Model)
         {
             
@@ -278,14 +278,14 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 60 "..\..\Cache\Views\Statistics.cshtml"
+            #line 64 "..\..\Cache\Views\Statistics.cshtml"
        Write(ShowTree(table, null));
 
             
             #line default
             #line hidden
             
-            #line 60 "..\..\Cache\Views\Statistics.cshtml"
+            #line 64 "..\..\Cache\Views\Statistics.cshtml"
                                   
         }
 
@@ -296,7 +296,7 @@ WriteLiteral("    </tbody>\r\n</table>\r\n");
 
 
             
-            #line 64 "..\..\Cache\Views\Statistics.cshtml"
+            #line 68 "..\..\Cache\Views\Statistics.cshtml"
 Write(Html.ScriptsJs("~/Cache/Scripts/SF_Cache.js"));
 
             

@@ -4,7 +4,11 @@
 @model List<CachedTableBase>
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div>
-    <a href="@Url.Action((CacheController pc) => pc.Disable())" class="sf-button" style="@(!CacheLogic.GloballyDisabled ? "" : "display:none");color:red" id="sfCacheDisable">Disable </a><a href="@Url.Action((CacheController pc) => pc.Enable())" class="sf-button"  style="@(CacheLogic.GloballyDisabled ? "" : "display:none")" id="sfCacheEnable">Enable </a><a href="@Url.Action((CacheController pc) => pc.Clean())" class="sf-button" id="sfCacheClear">Clean </a>
+    <a href="@Url.Action((CacheController pc) => pc.Disable())" class="sf-button" 
+        style="@(!CacheLogic.GloballyDisabled ? "" : "display:none");color:red" id="sfCacheDisable">Disable </a>
+    <a href="@Url.Action((CacheController pc) => pc.Enable())" class="sf-button"  
+        style="@(CacheLogic.GloballyDisabled ? "" : "display:none")" id="sfCacheEnable">Enable </a>
+    <a href="@Url.Action((CacheController pc) => pc.Clean())" class="sf-button" id="sfCacheClear">Clean </a>
 </div>
 <table class="sf-search-results sf-stats-table">
     <thead>
@@ -50,7 +54,7 @@
     {
         foreach (var st in table.SubTables)
         {
-            @ShowTree(st, table.Table.Name.Name + " / ")
+            @ShowTree(st, prefix + " -> ")
         }
     }
         }

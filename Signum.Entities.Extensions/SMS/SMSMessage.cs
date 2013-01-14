@@ -111,10 +111,9 @@ namespace Signum.Entities.SMS
             set { Set(ref referred, value, () => Referred); }
         }
 
-        static readonly Expression<Func<SMSMessageDN, string>> ToStringExpression = e => "SMS " + e.MessageID;
         public override string ToString()
         {
-            return ToStringExpression.Evaluate(this);
+            return "SMS " + MessageID;
         }
     }
 

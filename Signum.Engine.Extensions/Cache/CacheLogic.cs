@@ -21,6 +21,7 @@ using System.Xml.Linq;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Data.SqlTypes;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Cache
 {
@@ -123,7 +124,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             private void AssertEnabled()
             {
                 if (!Enabled)
-                    throw new InvalidOperationException("Cache for {0} is not enabled".Formato(Enabled));
+                    throw new InvalidOperationException("Cache for {0} is not enabled".Formato(typeof(T).TypeName()));
             }
 
             public event EventHandler<CacheEventArgs> Invalidated;
@@ -137,8 +138,6 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
             public override void Load()
             {
-                AssertEnabled();
-
                 cachedTable.LoadAll();
             }
 
@@ -149,16 +148,22 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
             public override IEnumerable<int> GetAllIds()
             {
+                AssertEnabled();
+
                 return cachedTable.GetAllIds();
             }
 
             public override string GetToString(int id)
             {
+                AssertEnabled();
+
                 return cachedTable.GetToString(id);
             }
 
             public override void Complete(T entity, IRetriever retriver)
             {
+                AssertEnabled();
+
                 cachedTable.Complete(entity, retriver);
             }
 
@@ -255,6 +260,8 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
         public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
             controllers.AddOrThrow(typeof(T), null, "{0} already registered");
+
+            TryCacheSubTables(typeof(T), sb);
         }
 
         private static void TryCacheSubTables(Type type, SchemaBuilder sb)
@@ -296,7 +303,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
         public static List<CachedTableBase> Statistics()
         {
-            return controllers.Values.Select(a => a.CachedTable).OrderByDescending(a => a.Count).ToList();
+            return controllers.Values.NotNull().Select(a => a.CachedTable).OrderByDescending(a => a.Count).ToList();
         }
 
         public static CacheType GetCacheType(Type type)
@@ -313,9 +320,9 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
         public static void ForceReset()
         {
-            foreach (var item in controllers)
+            foreach (var controller in controllers.Values.NotNull())
             {
-                item.Value.ForceReset();
+                controller.ForceReset();
             }
         }
 
