@@ -83,7 +83,7 @@ namespace Signum.Windows.Processes
                               CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a=>a.t))),
                           }
                           where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
-                              os.ContextualFromMany == null ? (oi.Lite == true && os.Click == null && oi.OperationType != OperationType.ConstructorFrom) :
+                              os.ContextualFromMany == null ? (oi.Lite == true && os.Click == null && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom) :
                               (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(coc))
                           select coc).ToList();
 
