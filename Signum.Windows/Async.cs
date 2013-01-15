@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Threading;
 using System.Windows;
+using System.Threading.Tasks;
 
 namespace Signum.Windows
 {
@@ -11,7 +12,7 @@ namespace Signum.Windows
     {
         public static Action<Exception> ExceptionHandler;
 
-        public static IAsyncResult Do(Action otherThread, Action endAction, Action finallyAction)
+        public static IAsyncResult Do(Action backgroundThread, Action endAction, Action finallyAction)
         {
             var disp = Dispatcher.CurrentDispatcher;
 
@@ -19,8 +20,9 @@ namespace Signum.Windows
             {
                 try
                 {
-                    otherThread();
-                    disp.BeginInvoke(DispatcherPriority.Normal, endAction);
+                    backgroundThread();
+                    if (endAction != null)
+                        disp.BeginInvoke(DispatcherPriority.Normal, endAction);
                 }
                 catch (Exception e)
                 {
@@ -28,11 +30,12 @@ namespace Signum.Windows
                 }
                 finally
                 {
-                    disp.BeginInvoke(DispatcherPriority.Normal, finallyAction);
+                    if (finallyAction != null)
+                        disp.BeginInvoke(DispatcherPriority.Normal, finallyAction);
                 }
             };
 
-            return action.BeginInvoke(null, null);
+            return Task.Factory.StartNew(action);
         }
 
         public static void Invoke(this Dispatcher dispatcher, Action action)
