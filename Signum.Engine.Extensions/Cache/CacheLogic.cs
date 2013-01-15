@@ -94,11 +94,17 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             void UnsafeUpdated(IQueryable<T> query)
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
+
+                Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                Transaction.PostRealCommit += Transaction_PostRealCommit;
             }
 
             void PreUnsafeDelete(IQueryable<T> query)
             {
                 DisableTypeInTransaction(typeof(T));
+
+                Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                Transaction.PostRealCommit += Transaction_PostRealCommit;
             }
 
             void Saving(T ident)
@@ -113,7 +119,16 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
                     {
                         DisableAllConnectedTypesInTransaction(typeof(T));
                     }
+
+                    Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                    Transaction.PostRealCommit += Transaction_PostRealCommit;
                 }
+            }
+
+            void Transaction_PostRealCommit(Dictionary<string, object> obj)
+            {
+                cachedTable.ResetAll(forceReset: false);
+                NotifyInvalidateAllConnectedTypes(typeof(T));
             }
 
             public override bool Enabled
@@ -143,7 +158,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
             public void ForceReset()
             {
-                cachedTable.ForceReset();
+                cachedTable.ResetAll(forceReset: true);
             }
 
             public override IEnumerable<int> GetAllIds()
@@ -217,14 +232,14 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             return disabledTypes != null && disabledTypes.Contains(type);
         }
 
-        private static void DisableTypeInTransaction(Type type)
+        static void DisableTypeInTransaction(Type type)
         {
             DisabledTypesDuringTransaction().Add(type);
 
             controllers[type].NotifyDisabled();
         }
 
-        private static void DisableAllConnectedTypesInTransaction(Type type)
+        static void DisableAllConnectedTypesInTransaction(Type type)
         {
             var connected = inverseDependencies.IndirectlyRelatedTo(type, true);
 
@@ -264,7 +279,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             TryCacheSubTables(typeof(T), sb);
         }
 
-        private static void TryCacheSubTables(Type type, SchemaBuilder sb)
+        static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
             List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
                 .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumEntity<>)))
@@ -291,13 +306,15 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             return controller;
         }
 
-        private static void NotifyInvalidateAllConnectedTypes(Type type)
+        static void NotifyInvalidateAllConnectedTypes(Type type)
         {
             var connected = inverseDependencies.IndirectlyRelatedTo(type, includeParentNode : true);
 
             foreach (var stype in connected)
             {
-                controllers[stype].NotifyInvalidated();
+                var controller = controllers[stype];
+                if (controller != null)
+                    controller.NotifyInvalidated();
             }
         }
 
