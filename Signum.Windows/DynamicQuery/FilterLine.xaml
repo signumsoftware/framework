@@ -23,7 +23,7 @@
                   Margin="0,0,8,0" SelectionChanged="ComboBoxOperation_SelectionChanged">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"  VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescription}}"  VerticalAlignment="Center" Margin="0,0,8,0"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
