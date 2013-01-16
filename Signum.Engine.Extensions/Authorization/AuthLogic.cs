@@ -263,7 +263,7 @@ namespace Signum.Engine.Authorization
                 if (user.PasswordHash != passwordHash)
                     throw new IncorrectPasswordException(Resources.IncorrectPassword);
 
-                 return user;
+                return user;
             }
         }
 
