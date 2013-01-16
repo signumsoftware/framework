@@ -454,7 +454,7 @@ namespace Signum.Engine.Cache
             {
                 Dictionary<int, object> result = new Dictionary<int, object>();
                 using (MeasureLoad())
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadUncommitted))
+                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, fr =>
                     {
@@ -573,7 +573,7 @@ namespace Signum.Engine.Cache
                 Dictionary<int, Dictionary<int, object>> result = new Dictionary<int, Dictionary<int, object>>();
 
                 using (MeasureLoad())
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadUncommitted))
+                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, fr =>
                     {
@@ -686,7 +686,7 @@ namespace Signum.Engine.Cache
                 Dictionary<int, string> result = new Dictionary<int, string>();
 
                 using (MeasureLoad())
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadUncommitted))
+                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, fr =>
                     {
