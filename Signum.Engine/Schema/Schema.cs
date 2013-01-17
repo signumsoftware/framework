@@ -103,7 +103,7 @@ namespace Signum.Engine.Maps
             //set { typeToName = value; }
         }
 
-        internal Type GetType(int id)
+        public Type GetType(int id)
         {
             return this.idToType[id];
         }
@@ -213,7 +213,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal CacheController<T> CacheController<T>() where T : IdentifiableEntity
+        internal CacheControllerBase<T> CacheController<T>() where T : IdentifiableEntity
         {
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
 
@@ -326,7 +326,7 @@ namespace Signum.Engine.Maps
 
             public void InitializeUntil(InitLevel topLevel)
             {
-                for (InitLevel current = initLevel + 1 ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
+                for (InitLevel current = initLevel + 1 ?? InitLevel.Level_0BeforeAnyQuery; current <= topLevel; current++)
                 {
                     InitializeJust(current);
                     initLevel = current;
@@ -396,8 +396,8 @@ namespace Signum.Engine.Maps
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
 
+            Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.Schema_Initializing;
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
-            Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.GlobalLazy_Initialize;
         }
 
         public static Schema Current
@@ -543,7 +543,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return tables.Values.ToString(t => t.Type.TypeName(), "\r\n\r\n");
+            return "Schema ( tables: {0} )".Formato(tables.Count);
         }
 
         public IEnumerable<ITable> GetDatabaseTables()
@@ -589,36 +589,32 @@ namespace Signum.Engine.Maps
     public interface ICacheController
     {
         bool Enabled { get; }
-        bool IsComplete { get; }
         void Load();
 
         IEnumerable<int> GetAllIds();
 
-        event Action Invalidation;
-        event Action Disabled;
-
-        bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
+        void Complete(IdentifiableEntity entity, IRetriever retriver);
 
         string GetToString(int id);
     }
 
-    public abstract class CacheController<T> : ICacheController
+    public class InvalidateEventArgs : EventArgs{}
+    public class InvaludateEventArgs : EventArgs{}
+
+    public abstract class CacheControllerBase<T> : ICacheController
         where T : IdentifiableEntity
     {
         public abstract bool Enabled { get; }
-        public abstract bool IsComplete { get; }
         public abstract void Load();
 
         public abstract IEnumerable<int> GetAllIds();
-        public abstract event Action Invalidation;
-        public abstract event Action Disabled;
 
-        bool ICacheController.CompleteCache(IdentifiableEntity entity, IRetriever retriver)
+        void ICacheController.Complete(IdentifiableEntity entity, IRetriever retriver)
         {
-            return CompleteCache((T)entity, retriver);
+            Complete((T)entity, retriver);
         }
 
-        public abstract bool CompleteCache(T entity, IRetriever retriver);
+        public abstract void Complete(T entity, IRetriever retriver);
 
         public abstract string GetToString(int id);
     }
@@ -631,7 +627,7 @@ namespace Signum.Engine.Maps
 
         public event RetrievedEventHandler<T> Retrieved;
 
-        public CacheController<T> CacheController { get; set; }
+        public CacheControllerBase<T> CacheController { get; set; }
 
         public event FilterQueryEventHandler<T> FilterQuery;
 

@@ -29,6 +29,13 @@ namespace Signum.Engine.Linq
         Dictionary<ParameterExpression, Expression> map = new Dictionary<ParameterExpression, Expression>();
         Dictionary<Alias, GroupByInfo> groupByMap = new Dictionary<Alias, GroupByInfo>();
 
+        AliasGenerator aliasGenerator;
+
+        public QueryBinder(AliasGenerator aliasGenerator)
+        {
+            this.aliasGenerator = aliasGenerator;
+        }
+
         public class GroupByInfo
         {
             public Alias GroupAlias;
@@ -637,7 +644,7 @@ namespace Signum.Engine.Linq
 
             SourceExpression subQueryNewSource = subqueryProjection.Select;
             Expression subqueryKey = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, subqueryProjection.Projector, ref subQueryNewSource));// recompute key columns for group expressions relative to subquery (need these for doing the correlation predicate
-            ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumns(subqueryKey, Alias.Raw("basura"), subQueryNewSource.KnownAliases, aggresiveNomination: true, selectTrivialColumns: true); // use same projection trick to get group-by expressions based on subquery
+            ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumns(subqueryKey, aliasGenerator.Raw("basura"), subQueryNewSource.KnownAliases, aggresiveNomination: true, selectTrivialColumns: true); // use same projection trick to get group-by expressions based on subquery
             Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : MapVisitExpand(elementSelector, subqueryProjection.Projector, ref subQueryNewSource); // compute element based on duplicated subquery
 
             Expression subqueryCorrelation = keyPC.Columns.IsEmpty() ? null : 
@@ -1440,11 +1447,11 @@ namespace Signum.Engine.Linq
             if (pr.Projector is EntityExpression)
             {
                 EntityExpression ee = (EntityExpression)pr.Projector;
-                Expression id = ee.Table.GetIdExpression(Alias.Table(ee.Table.Name));
+                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.Name));
 
                 commands.AddRange(ee.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
                 {
-                    Expression backId = f.RelationalTable.BackColumnExpression(Alias.Table(f.RelationalTable.Name));
+                    Expression backId = f.RelationalTable.BackColumnExpression(aliasGenerator.Table(f.RelationalTable.Name));
                     return new DeleteExpression(f.RelationalTable, pr.Select,
                         SmartEqualizer.EqualNullable(backId, ee.ExternalId));
                 }));
@@ -1455,7 +1462,7 @@ namespace Signum.Engine.Linq
             {
                 MListElementExpression mlee = (MListElementExpression)pr.Projector;
 
-                Expression id = mlee.Table.RowIdExpression(Alias.Table(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.Name));
 
                 commands.Add(new DeleteExpression(mlee.Table, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
             }
@@ -1488,7 +1495,7 @@ namespace Signum.Engine.Linq
                 (ITable)((EntityExpression)entity).Table : 
                 (ITable)((MListElementExpression)entity).Table;
 
-            Alias alias = Alias.Table(table.Name);
+            Alias alias = aliasGenerator.Table(table.Name);
 
             Expression toUpdate = table is Table ? 
                 ((Table)table).GetProjectorExpression(alias, this) : 
@@ -1512,7 +1519,7 @@ namespace Signum.Engine.Linq
             {
                 EntityExpression ee = (EntityExpression)entity;
 
-                Expression id = ee.Table.GetIdExpression(Alias.Table(ee.Table.Name));
+                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
                 table = ee.Table;
@@ -1521,7 +1528,7 @@ namespace Signum.Engine.Linq
             {
                 MListElementExpression mlee = (MListElementExpression)entity;
 
-                Expression id = mlee.Table.RowIdExpression(Alias.Table(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
                 table = mlee.Table;
@@ -1825,7 +1832,7 @@ namespace Signum.Engine.Linq
             if (source == projection.Select)
                 return projection;
 
-            Alias newAlias = Alias.NextSelectAlias();
+            Alias newAlias = aliasGenerator.NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, source.KnownAliases); //Do not replace tokens
 
             return new ProjectionExpression(
@@ -1996,12 +2003,12 @@ namespace Signum.Engine.Linq
 
         internal Alias NextSelectAlias()
         {
-            return Alias.NextSelectAlias();
+            return aliasGenerator.NextSelectAlias();
         }
 
         internal Alias NextTableAlias(ObjectName tableName)
         {
-            return Alias.NextTableAlias(tableName.Name);
+            return aliasGenerator.NextTableAlias(tableName.Name);
         }
         
         #endregion

@@ -87,7 +87,7 @@ namespace Signum.Engine
         static GenericInvoker<Func<int, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<int, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>(false);
+            var cc = CanUseCache<T>();
             if (cc != null)
             {
                 using (new EntityCache())
@@ -113,18 +113,17 @@ namespace Signum.Engine
             return retrieved; 
         }
 
-        static CacheController<T> CanUseCache<T>(bool onlyComplete) where T : IdentifiableEntity
+        static CacheControllerBase<T> CanUseCache<T>() where T : IdentifiableEntity
         {
-            CacheController<T> cc = Schema.Current.CacheController<T>();
+            CacheControllerBase<T> cc = Schema.Current.CacheController<T>();
 
             if (cc == null || !cc.Enabled)
                 return null;
 
-            if (onlyComplete && !cc.IsComplete)
-                return null;
-
             if (!EntityCache.HasRetriever && Schema.Current.HasQueryFilter(typeof(T)))
                 return null;
+
+            cc.Load();
 
             return cc;
         }
@@ -146,7 +145,7 @@ namespace Signum.Engine
         public static Lite<T> RetrieveLite<T>(int id)
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>(true);
+            var cc = CanUseCache<T>();
             if (cc != null)
                 return new LiteImp<T>(id, cc.GetToString(id));
 
@@ -176,7 +175,7 @@ namespace Signum.Engine
         public static string GetToStr<T>(int id)
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>(true);
+            var cc = CanUseCache<T>();
             if (cc != null)
                 return cc.GetToString(id).ToString();
 
@@ -205,7 +204,7 @@ namespace Signum.Engine
         public static List<T> RetrieveAll<T>()
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>(true);
+            var cc = CanUseCache<T>();
             if (cc != null)
             {
                 using (new EntityCache())
@@ -232,9 +231,10 @@ namespace Signum.Engine
         public static List<Lite<T>> RetrieveAllLite<T>()
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>(true);
+            var cc = CanUseCache<T>();
             if (cc != null)
             {
+
                 return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
             }
 
@@ -258,7 +258,7 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-            var cc = CanUseCache<T>(false);
+            var cc = CanUseCache<T>();
             if (cc != null)
             {
                 using(new EntityCache())
@@ -317,7 +317,7 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-            var cc = CanUseCache<T>(true);
+            var cc = CanUseCache<T>();
             if (cc != null)
             {
                 return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();

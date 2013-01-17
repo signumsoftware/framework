@@ -212,19 +212,37 @@ namespace Signum.Engine.Maps
                 }
             }
 
-            if (type.IsIdentifiableEntity() && !ExpressionCleaner.HasExpansions(type, EntityExpression.ToStringMethod))
+            if (type.IsIdentifiableEntity())
             {
-                PropertyRoute route = root.Add(fiToStr);
+                FieldInfo fiToString = GetToStringFieldInfo(type);
 
-                Field field = GenerateField(route, contexto, table, preName, forceNull);
+                if (fiToString == fiToStr)
+                {
+                    PropertyRoute route = root.Add(fiToStr);
 
-                if (result.ContainsKey(fiToStr.Name))
-                    throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fiToStr.Name, type.TypeName()));
+                    Field field = GenerateField(route, contexto, table, preName, forceNull);
 
-                result.Add(fiToStr.Name, new EntityField(type, fiToStr) { Field = field });
+                    if (result.ContainsKey(fiToStr.Name))
+                        throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fiToStr.Name, type.TypeName()));
+
+                    result.Add(fiToStr.Name, new EntityField(type, fiToStr) { Field = field });
+                }
             }
 
             return result;
+        }
+
+        public static FieldInfo GetToStringFieldInfo(Type type)
+        {
+            LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(type, EntityExpression.ToStringMethod);
+            if (lambda == null)
+                return fiToStr;
+
+            var mae = lambda.Body as MemberExpression;
+            if (mae == null || mae.Expression != lambda.Parameters.Only())
+                throw new InvalidOperationException("ToStringExpression {0} on {1} should be a trivial accesor to a field".Formato(type.Name, mae.NiceToString()));
+
+            return mae.Member as FieldInfo ?? Reflector.FindFieldInfo(type, (PropertyInfo)mae.Member);
         }
 
         static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((IdentifiableEntity o) => o.toStr);

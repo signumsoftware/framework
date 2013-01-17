@@ -1,80 +1,155 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿
 using Signum.Engine.Maps;
-using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
-using System.Threading;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using Signum.Engine;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine
 {
+    public struct InvalidateWith
+    {
+        static readonly Type[] Empty = new Type[0];
+
+        readonly Type[] types;
+        public Type[] Types 
+        {
+            get { return types ?? Empty; } 
+        }
+
+        public InvalidateWith(params Type[] types)
+        {
+            if(types != null)
+                foreach (var type in types)
+                {
+                    if (type.IsAbstract)
+                        throw new InvalidOperationException("Impossible to invalidate using {0} because is abstract".Formato(type));
+
+                    if (!Reflector.IsIdentifiableEntity(type))
+                        throw new InvalidOperationException("Impossible to invalidate using {0} because is not and IdentifiableEntity".Formato(type));
+                }
+
+
+            this.types = types;
+        }
+    
+        internal bool InSchema()
+        {
+            return Types.All(Schema.Current.Tables.ContainsKey);
+        }
+    }
+
     public static class GlobalLazy
     {
-        static bool initialized; 
+        public static GlobalLazyManager Manager = new GlobalLazyManager();
 
-        internal static void GlobalLazy_Initialize()
+        static ConcurrentDictionary<IResetLazy, InvalidateWith> registeredLazyList = new ConcurrentDictionary<IResetLazy, InvalidateWith>();
+        public static ResetLazy<T> Create<T>(Func<T> func, InvalidateWith invalidateWith) where T : class
         {
-            if (initialized)
-                return;
+            ResetLazy<T> result = null;
 
-            initialized = true;
-
-            var s = Schema.Current;
-            foreach (var kvp in registeredLazyList.ToList())
+            result = new ResetLazy<T>(() =>
             {
-                if (kvp.Value != null)
+                Manager.AssertAttached(invalidateWith);
+
+                using (ExecutionMode.Global())
+                using (HeavyProfiler.Log("ResetLazy", () => typeof(T).TypeName()))
+                using (Transaction tr = Transaction.InTestTransaction ? null : Transaction.ForceNew())
+                using (new EntityCache(true))
                 {
-                    AttachInvalidations(s,kvp.Key, kvp.Value);
+                    var value = func();
+
+                    if (tr != null)
+                        tr.Commit();
+
+                    return value;
+                }
+            });
+
+
+            registeredLazyList.GetOrAdd(result, invalidateWith);
+
+            return result;
+        }
+
+        internal static void Schema_Initializing()
+        {
+            Schema schema = Schema.Current;
+
+            foreach (var kvp in registeredLazyList)
+            {
+                if (kvp.Value.InSchema())
+                {
+                    IResetLazy lazy = kvp.Key;
+
+                    Manager.AttachInvalidations(kvp.Value, (sender, args) => lazy.Reset());
                 }
             }
         }
 
-        private static void AttachInvalidations(Schema s, IResetLazy lazy, params Type[] types)
+        public static IEnumerable<Type> TypesForInvalidation()
         {
-            types = types.Where(Schema.Current.Tables.ContainsKey).ToArray(); //static initi of Lazies of not-initialized modules
+            Schema schema = Schema.Current;
 
-            Action reset = () =>
+            return (from kvp in registeredLazyList
+                    where kvp.Value.InSchema()
+                    from type in kvp.Value.Types
+                    select type).Distinct();
+        }
+
+        public static void ResetAll()
+        {
+            foreach (var lp in registeredLazyList.Keys)
+                lp.Reset();
+        }
+
+        public static void LoadAll()
+        {
+            foreach (var lp in registeredLazyList.Keys)
+                lp.Load();
+        }
+
+        
+    }
+
+    public class GlobalLazyManager
+    {
+        public virtual void AttachInvalidations(InvalidateWith invalidateWith, EventHandler invalidate)
+        {
+            Action onInvalidation = () =>
             {
                 if (Transaction.InTestTransaction)
                 {
-                    lazy.Reset();
-                    Transaction.Rolledback += () => lazy.Reset();
+                    invalidate(this, null);
+                    Transaction.Rolledback += () => invalidate(this, null);
                 }
 
-                Transaction.PostRealCommit += dic => lazy.Reset();
+                Transaction.PostRealCommit += dic => invalidate(this, null);
             };
 
-            List<Type> cached = new List<Type>();
-            foreach (var type in types)
+            Schema schema = Schema.Current; 
+
+            foreach (var type in invalidateWith.Types)
             {
-                var cc = s.CacheController(type);
-                if (cc != null && cc.IsComplete)
-                {
-                    cc.Disabled += reset;
-                    cached.Add(type);
-                }
+                giAttachInvalidations.GetInvoker(type)(schema, onInvalidation);
             }
 
-            var nonCached = types.Except(cached).ToList();
-            if (nonCached.Any())
+            var dependants = DirectedGraph<Table>.Generate(invalidateWith.Types.Select(t => schema.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).Select(t => t.Type).ToHashSet();
+            dependants.ExceptWith(invalidateWith.Types);
+
+            foreach (var type in dependants)
             {
-                foreach (var type in nonCached)
-                {
-                    giAttachInvalidations.GetInvoker(type)(s, reset);
-                }
-
-                var dgIn = DirectedGraph<Table>.Generate(types.Except(cached).Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
-                var dgOut = DirectedGraph<Table>.Generate(cached.Select(t => s.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).ToHashSet();
-
-                foreach (var table in dgIn.Except(dgOut))
-                {
-                    giAttachInvalidationsDependant.GetInvoker(table.Type)(s, reset);
-                }
+                giAttachInvalidationsDependant.GetInvoker(type)(schema, onInvalidation);
             }
         }
 
@@ -106,53 +181,12 @@ namespace Signum.Engine
             ee.PreUnsafeDelete += q => action();
         }
 
-        static ConcurrentDictionary<IResetLazy, Type[]> registeredLazyList = new ConcurrentDictionary<IResetLazy, Type[]>();
-        public static ResetLazy<T> Create<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly) where T:class
+        public virtual void AssertAttached(InvalidateWith invalidateWith)
         {
-            var result = new ResetLazy<T>(() =>
+            foreach (var type in invalidateWith.Types)
             {
-                using (ExecutionMode.Global())
-                using (HeavyProfiler.Log("Lazy", () => typeof(T).TypeName()))
-                using (Transaction tr = Transaction.InTestTransaction ? null:  Transaction.ForceNew())
-                using (new EntityCache(true))
-                {
-                    var value = func();
-
-                    if (tr != null)
-                        tr.Commit();
-
-                    return value;
-                }
-            }, mode);
-
-            registeredLazyList.GetOrAdd(result, (Type[])null);
-
-            return result;
-        }
-
-        public static ResetLazy<T> InvalidateWith<T>(this ResetLazy<T> lazy, params Type[] types) where T:class
-        {
-            if (!registeredLazyList.ContainsKey(lazy))
-                throw new InvalidOperationException("The lazy of type '{0}', declared in '{1}' not a GlobalLazy".Formato(typeof(T).TypeName(), lazy.DeclaredType.TypeName()));
-
-            registeredLazyList.AddOrUpdate(lazy, types, (k, v) => types);
-
-            if (initialized)
-                AttachInvalidations(Schema.Current, lazy, types);
-
-            return lazy;
-        }
-
-        public static void ResetAll()
-        {
-            foreach (var lp in registeredLazyList.Keys)
-                lp.Reset();
-        }
-
-        public static void LoadAll()
-        {
-            foreach (var lp in registeredLazyList.Keys)
-                lp.Load();
+                Schema.Current.Table(type);
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
 using System;
 using System.Data.Common;
+using System.Data.SqlClient;
 
 namespace Signum.Engine
 {
@@ -42,21 +43,6 @@ namespace Signum.Engine
         public static int ExecuteNonQuery(this SqlPreCommandSimple preCommand)
         {
             return Connector.Current.ExecuteNonQuery(preCommand);
-        }
-
-        public static void ExecuteDataReader(string sql, Action<FieldReader> forEach)
-        {
-            Connector.Current.ExecuteDataReader(new SqlPreCommandSimple(sql), forEach);
-        }
-
-        public static void ExecuteDataReader(string sql, List<DbParameter> parameters, Action<FieldReader> forEach)
-        {
-            Connector.Current.ExecuteDataReader(new SqlPreCommandSimple(sql, parameters), forEach);
-        }
-
-        public static void ExecuteDataReader(this SqlPreCommandSimple preCommand, Action<FieldReader> forEach)
-        {
-            Connector.Current.ExecuteDataReader(preCommand, forEach);
         }
 
         public static DbDataReader UnsafeExecuteDataReader(string sql)
