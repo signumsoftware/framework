@@ -13,6 +13,7 @@ using System.IO;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Data.Common;
+using Signum.Engine.Cache;
 
 namespace Signum.Entities.Authorization
 {
@@ -55,7 +56,8 @@ namespace Signum.Entities.Authorization
 
         public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min)
         {
-            runtimeRules = GlobalLazy.Create(this.NewCache).InvalidateWith(typeof(RT), typeof(RoleDN));
+            runtimeRules = GlobalLazy.Create(this.NewCache, 
+                new InvalidateWith(typeof(RT), typeof(RoleDN)));
 
             this.ToKey = toKey;
             this.ToEntity = toEntity;

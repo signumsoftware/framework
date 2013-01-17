@@ -16,6 +16,7 @@ using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using System.Reflection;
 using System.Data.Common;
+using Signum.Engine.Cache;
 
 namespace Signum.Entities.Authorization
 {
@@ -45,7 +46,8 @@ namespace Signum.Entities.Authorization
 
         public TypeAuthCache(SchemaBuilder sb, DefaultBehaviour<TypeAllowedAndConditions> max, DefaultBehaviour<TypeAllowedAndConditions> min)
         {
-            runtimeRules = GlobalLazy.Create(this.NewCache).InvalidateWith(typeof(RuleTypeDN), typeof(RoleDN));
+            runtimeRules = GlobalLazy.Create(this.NewCache,
+              new InvalidateWith(typeof(RuleTypeDN), typeof(RoleDN)));
 
             this.Max = max;
             this.Min = min;
