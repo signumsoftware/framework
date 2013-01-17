@@ -82,6 +82,7 @@ namespace Signum.Engine
             Table table = Schema.Current.Table(type);
 
             using (Synchronizer.RenameTable(table, replacements))
+            using (ExecutionMode.DisableCache())
             {
                 if (ExistTable(table))
                     return Database.RetrieveAll(type);

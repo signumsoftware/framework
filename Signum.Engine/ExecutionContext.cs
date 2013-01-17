@@ -8,7 +8,7 @@ namespace Signum.Engine
 {
     public static class ExecutionMode
     {
-        static ThreadVariable<bool> inGlobalMode = Statics.ThreadVariable<bool>("inGlobalMode");
+        static readonly ThreadVariable<bool> inGlobalMode = Statics.ThreadVariable<bool>("inGlobalMode");
         public static bool InGlobal
         {
             get { return inGlobalMode.Value; }
@@ -21,7 +21,7 @@ namespace Signum.Engine
             return new Disposable(() => inGlobalMode.Value = oldValue);
         }
 
-        static ThreadVariable<bool> inUserInterfaceMode = Statics.ThreadVariable<bool>("inUserInterfaceMode");
+        static readonly ThreadVariable<bool> inUserInterfaceMode = Statics.ThreadVariable<bool>("inUserInterfaceMode");
         public static bool InUserInterface
         {
             get { return inUserInterfaceMode.Value; }
@@ -33,5 +33,20 @@ namespace Signum.Engine
             inUserInterfaceMode.Value = true;
             return new Disposable(() => inUserInterfaceMode.Value = oldValue);
         }
+
+
+        public static bool IsCacheDisabled
+        {
+            get { return cacheTempDisabled.Value; }
+        }
+
+        static readonly ThreadVariable<bool> cacheTempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
+        public static IDisposable DisableCache()
+        {
+            if (cacheTempDisabled.Value) return null;
+            cacheTempDisabled.Value = true;
+            return new Disposable(() => cacheTempDisabled.Value = false);
+        }
+
     }
 }
