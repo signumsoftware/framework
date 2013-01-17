@@ -265,5 +265,33 @@ namespace Signum.Engine
 
             return prov.Update(query, null, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
         }
+
+        public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Blue, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
+
+            int min = Database.Query<T>().Min(a => a.Id);
+            int max = Database.Query<T>().Max(a => a.Id);
+
+            min.To(max + 1, 100).ProgressForeach(id => id.ToString(), null, (i, writer) =>
+            {
+                var list = Database.Query<T>().Where(a => i <= a.Id && a.Id < i + 100).ToList();
+
+                foreach (var item in list)
+                {
+                    if (item.ToString() != item.toStr)
+                        item.InDB().UnsafeUpdate(a => new T { toStr = item.ToString() });
+                }
+            });
+        }
+
+        public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Blue, "UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()));
+
+            int result = Database.Query<T>().UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) });
+
+            Console.WriteLine("{0} {1} updated".Formato(result, typeof(T).TypeName()));
+        }
     }
 }
