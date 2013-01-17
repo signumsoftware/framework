@@ -133,7 +133,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !tempDisabled.Value && !IsDisabledInTransaction(typeof(T)); }
+                get { return !GloballyDisabled && !ExecutionMode.IsCacheDisabled && !IsDisabledInTransaction(typeof(T)); }
             }
 
             private void AssertEnabled()
@@ -200,14 +200,6 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
         static DirectedGraph<Type> inverseDependencies = new DirectedGraph<Type>();
 
         public static bool GloballyDisabled { get; set; }
-
-        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
-        public static IDisposable Disable()
-        {
-            if (tempDisabled.Value) return null;
-            tempDisabled.Value = true;
-            return new Disposable(() => tempDisabled.Value = false); 
-        }
 
         const string DisabledCachesKey = "disabledCaches";
 
