@@ -5,6 +5,8 @@ using System.Text;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Processes;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.SMS
 {
@@ -15,7 +17,7 @@ namespace Signum.Entities.SMS
     }
 
     [Serializable, EntityKind(EntityKind.Main)]
-    public class SMSMessageDN : Entity
+    public class SMSMessageDN : Entity, IProcessLineDN
     {
         public static string DefaultFrom;
 
@@ -115,6 +117,13 @@ namespace Signum.Entities.SMS
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
+        {
+            get { return exception; }
+            set { Set(ref exception, value, () => Exception); }
         }
     }
 
