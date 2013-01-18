@@ -369,7 +369,18 @@ namespace Signum.Windows
             }
 
             Common.VoteVisible(this);
-          
+
+            OnLoaded();
+        }
+
+        bool loaded; 
+        public void OnLoaded()
+        {
+            if (loaded)
+                return;
+
+            loaded = true;
+
             if (FilterColumn.HasText())
             {
                 FilterOptions.Add(new FilterOption
