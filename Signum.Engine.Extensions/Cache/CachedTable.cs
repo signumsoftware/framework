@@ -465,7 +465,7 @@ namespace Signum.Engine.Cache
                 }
 
                 return result;
-            });
+            }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         protected override void Reset()
@@ -589,7 +589,7 @@ namespace Signum.Engine.Cache
                 }
 
                 return result;
-            });
+            }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         protected override void Reset()
@@ -697,7 +697,7 @@ namespace Signum.Engine.Cache
                 }
 
                 return result;
-            });
+            }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         protected override void Reset()
