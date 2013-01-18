@@ -271,6 +271,9 @@ namespace Signum.Engine
         {
             SafeConsole.WriteLineColor(ConsoleColor.Blue, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
 
+            if (!Database.Query<T>().Any())
+                return;
+
             int min = Database.Query<T>().Min(a => a.Id);
             int max = Database.Query<T>().Max(a => a.Id);
 
