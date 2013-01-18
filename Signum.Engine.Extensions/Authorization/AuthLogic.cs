@@ -22,6 +22,7 @@ using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Cache;
+using System.IO;
 
 namespace Signum.Engine.Authorization
 {
@@ -423,35 +424,45 @@ namespace Signum.Engine.Authorization
 
             string answer = Console.ReadLine();
 
-            if (answer.ToLower() == "e")
+            switch (answer.ToLower())
             {
-                var doc = ExportRules();
-                doc.Save(fileName);
-                Console.WriteLine("Sucesfully exported to {0}".Formato(fileName));
-            }
-            else if (answer.ToLower() == "i")
-            {
-                Console.Write("Reading {0}...".Formato(fileName));
-                var doc = XDocument.Load(fileName);
-                Console.WriteLine("Ok");
-                Console.Write("Importing...");
-                SqlPreCommand command = ImportRulesScript(doc);
-                Console.WriteLine("Ok");
-
-                if (command == null)
-                    Console.WriteLine("No changes necessary!");
-                else
-                    command.OpenSqlFileRetry();
-            }
-            else if (answer.ToLower() == "s")
-            {
-                SuggestChanges();
-                if (SafeConsole.Ask("Export now?", "yes", "no") == "yes")
+                case "e":
                 {
                     var doc = ExportRules();
                     doc.Save(fileName);
                     Console.WriteLine("Sucesfully exported to {0}".Formato(fileName));
+
+                    if (SafeConsole.Ask("Publish to Load?"))
+                        File.Copy(fileName, "../../" + Path.GetFileName(fileName), overwrite: true);
+
+                    break;
                 }
+                case "i":
+                {
+                    Console.Write("Reading {0}...".Formato(fileName));
+                    var doc = XDocument.Load(fileName);
+                    Console.WriteLine("Ok");
+                    Console.Write("Importing...");
+                    SqlPreCommand command = ImportRulesScript(doc);
+                    Console.WriteLine("Ok");
+
+                    if (command == null)
+                        Console.WriteLine("No changes necessary!");
+                    else
+                        command.OpenSqlFileRetry();
+
+                    break;
+                }
+                case "s":
+                {
+                    SuggestChanges();
+                    if (SafeConsole.Ask("Export now?"))
+                        goto case "e";
+
+                    break;
+                }
+                default:
+                    break;
             }
         }
 
