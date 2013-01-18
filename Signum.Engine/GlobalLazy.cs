@@ -74,7 +74,7 @@ namespace Signum.Engine
 
                     return value;
                 }
-            });
+            }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
 
             registeredLazyList.GetOrAdd(result, invalidateWith);
