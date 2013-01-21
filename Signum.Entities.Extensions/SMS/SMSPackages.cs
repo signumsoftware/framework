@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.SMS
 {
@@ -32,23 +33,10 @@ namespace Signum.Entities.SMS
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        int numLines;
-        public int NumLines
-        {
-            get { return numLines; }
-            set { SetToStr(ref numLines, value, () => NumLines); }
-        }
-
-        int numErrors;
-        public int NumErrors
-        {
-            get { return numErrors; }
-            set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
+        static Expression<Func<SMSPackageDN, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
-            return "{0} ({1} lines{2})".Formato(Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
+            return ToStringExpression.Evaluate(this);
         }
     }
 }

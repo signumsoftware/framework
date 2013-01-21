@@ -3,8 +3,6 @@
 @using (var sc = Html.TypeContext<SMSUpdatePackageDN>()) 
 {
 	@Html.ValueLine(sc, s => s.Name)
-	@Html.ValueLine(sc, s => s.NumLines)
-	@Html.ValueLine(sc, s => s.NumErrors)
     @Html.SearchControl(new FindOptions(typeof(SMSMessageDN))
     {
         FilterOptions = { new FilterOption("Entity.UpdatePackage", sc.Value) { Frozen = true } },
