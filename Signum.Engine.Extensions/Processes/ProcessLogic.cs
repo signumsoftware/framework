@@ -479,6 +479,51 @@ namespace Signum.Engine.Processes
                 }).ToList()
             };
         }
+
+        public static void ForEachLine<T>(this IExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action) 
+            where T : class, IProcessLineDN
+        {
+            var totalCount = remainingLines.Count();
+
+            while (true)
+            {
+                List<T> lines = remainingLines.Take(100).ToList();
+                if (lines.IsEmpty())
+                    return;
+
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
+
+                    T pl = lines[i];
+
+                    try
+                    {
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            action(pl);
+                            tr.Commit();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (Transaction.InTestTransaction)
+                            throw;
+
+                        var exLog = e.LogException();
+
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            pl.Exception = exLog.ToLite();
+                            pl.Save();
+                            tr.Commit();
+                        }
+                    }
+
+                    executingProcess.ProgressChanged(i, totalCount);
+                }
+            }
+        }
     }       
 
     public interface IProcessAlgorithm

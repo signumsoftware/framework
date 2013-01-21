@@ -173,7 +173,10 @@ namespace Signum.Engine.Cache
             internal Type GetColumnType(IColumn column)
             {
                 if (column is FieldValue)
-                    return ((Field)column).FieldType;
+                {
+                    var type = ((Field)column).FieldType;
+                    return column.Nullable ? type.Nullify() : type.UnNullify();
+                }
 
                 if (column is FieldEmbedded.EmbeddedHasValueColumn)
                     return typeof(bool);
@@ -215,7 +218,10 @@ namespace Signum.Engine.Cache
             public Expression Materialize(Field field)
             {
                 if (field is FieldValue)
-                    return GetTupleProperty((IColumn)field);
+                {
+                    var value = GetTupleProperty((IColumn)field);
+                    return value.Type == field.FieldType ? value : Expression.Convert(value, field.FieldType);
+                }
 
                 if (field is FieldEnum)
                     return Expression.Convert(GetTupleProperty((IColumn)field), field.FieldType);

@@ -127,52 +127,6 @@ namespace Signum.Engine.Processes
             return package;
         }
 
-        public static void ForEachLine(this IExecutingProcess executingProcess, PackageDN package, Action<PackageLineDN> action)
-        {
-            var totalCount = package.RemainingLines().Count();
-
-            while (true)
-            {
-                List<PackageLineDN> lines = package.RemainingLines().Take(100).ToList();
-                if (lines.IsEmpty())
-                    return;
-
-                for (int i = 0; i < lines.Count; i++)
-                {
-                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
-
-                    PackageLineDN pl = lines[i];
-
-                    try
-                    {
-                        using (Transaction tr = Transaction.ForceNew())
-                        {
-                            action(pl);
-                            pl.FinishTime = TimeZoneManager.Now;
-                            pl.Save();
-                            tr.Commit();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        if (Transaction.InTestTransaction)
-                            throw;
-
-                        var exLog = e.LogException();
-
-                        using (Transaction tr = Transaction.ForceNew())
-                        {
-                            pl.Exception = exLog.ToLite();
-                            pl.Save();
-                            tr.Commit();
-                        }
-                    }
-
-                    executingProcess.ProgressChanged(i, totalCount);
-                }
-            }
-        }
-
         public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, Enum operationKey)
         {
             return CreatePackageOperation(entities, MultiEnumLogic<OperationDN>.ToEntity((Enum)operationKey));
@@ -210,7 +164,7 @@ namespace Signum.Engine.Processes
 
             Enum operationKey = MultiEnumLogic<OperationDN>.ToEnum(package.Operation);
 
-            executingProcess.ForEachLine(package, line =>
+            executingProcess.ForEachLine(package.RemainingLines(), line =>
             {
                 OperationType operationType = OperationLogic.OperationType(line.Entity.EntityType, operationKey);
 
@@ -231,6 +185,9 @@ namespace Signum.Engine.Processes
                     default:
                         throw new InvalidOperationException("Unexpected operation type {0}".Formato(operationType));
                 }
+
+                line.FinishTime = TimeZoneManager.Now;
+                line.Save();
             });
         }
     }
@@ -251,9 +208,12 @@ namespace Signum.Engine.Processes
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
-            executingProcess.ForEachLine(package, line =>
+            executingProcess.ForEachLine(package.RemainingLines(), line =>
             {
                 ((Lite<T>)line.Entity).Delete<T>(OperationKey);
+
+                line.FinishTime = TimeZoneManager.Now;
+                line.Save();
             });
         }
     }
@@ -274,9 +234,11 @@ namespace Signum.Engine.Processes
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
-            executingProcess.ForEachLine(package, line =>
+            executingProcess.ForEachLine(package.RemainingLines(), line =>
             {
                 ((Lite<T>)line.Entity).ExecuteLite(OperationKey);
+                line.FinishTime = TimeZoneManager.Now;
+                line.Save();
             });
         }
     }
@@ -296,13 +258,16 @@ namespace Signum.Engine.Processes
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
-            executingProcess.ForEachLine(package, line =>
+            executingProcess.ForEachLine(package.RemainingLines(), line =>
             {
                 var result = line.Entity.ConstructFromLite<T>(OperationKey);
                 if (result.IsNew)
                     result.Save();
 
                 line.Result = result.ToLite();
+
+                line.FinishTime = TimeZoneManager.Now;
+                line.Save();
             });
         }
     }
