@@ -36,7 +36,7 @@ namespace Signum.Engine.Chart
                                                  cc.Color,
                                              }).ToDynamic();
 
-                Colors = GlobalLazy.Create(() =>
+                Colors = sb.GlobalLazy(() =>
                     Database.Query<ChartColorDN>()
                         .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
                         .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
