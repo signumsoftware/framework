@@ -396,7 +396,6 @@ namespace Signum.Engine.Maps
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
 
-            Initializing[InitLevel.Level0SyncEntities] += GlobalLazy.Schema_Initializing;
             Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
         }
 

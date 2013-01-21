@@ -17,6 +17,7 @@ using System.Runtime.Remoting.Contexts;
 using Signum.Engine.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Maps
 {
@@ -585,11 +586,100 @@ namespace Signum.Engine.Maps
             public Action Action;
             public Type[] RegisteredTypes;
         }
+
+        GlobalLazyManager GlobalLazyManager = new GlobalLazyManager();
+
+        public void SwitchGlobalLazyManager(GlobalLazyManager manager)
+        {
+            GlobalLazyManager.AsserNotUsed();
+            GlobalLazyManager = manager;
+        }
+
+        public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith) where T : class
+        {
+            var result = Signum.Engine.GlobalLazy.WithoutInvalidations(func);
+
+            GlobalLazyManager.AttachInvalidations(this, invalidateWith, (sender, args) => result.Reset());
+
+            return result;
+        }
     }
+
+    public class GlobalLazyManager
+    {
+        bool isUsed = false;
+
+        public void AsserNotUsed()
+        {
+            if (isUsed)
+                throw new InvalidOperationException("GlobalLazyManager has already been used");
+        }
+
+        public virtual void AttachInvalidations(SchemaBuilder sb, InvalidateWith invalidateWith, EventHandler invalidate)
+        {
+            isUsed = true;
+
+            Action onInvalidation = () =>
+            {
+                if (Transaction.InTestTransaction)
+                {
+                    invalidate(this, null);
+                    Transaction.Rolledback += () => invalidate(this, null);
+                }
+
+                Transaction.PostRealCommit += dic => invalidate(this, null);
+            };
+
+            Schema schema = sb.Schema;
+
+            foreach (var type in invalidateWith.Types)
+            {
+                giAttachInvalidations.GetInvoker(type)(schema, onInvalidation);
+            }
+
+            var dependants = DirectedGraph<Table>.Generate(invalidateWith.Types.Select(t => schema.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).Select(t => t.Type).ToHashSet();
+            dependants.ExceptWith(invalidateWith.Types);
+
+            foreach (var type in dependants)
+            {
+                giAttachInvalidationsDependant.GetInvoker(type)(schema, onInvalidation);
+            }
+        }
+
+
+        static GenericInvoker<Action<Schema, Action>> giAttachInvalidationsDependant = new GenericInvoker<Action<Schema, Action>>((s, a) => AttachInvalidationsDependant<IdentifiableEntity>(s, a));
+        static void AttachInvalidationsDependant<T>(Schema s, Action action) where T : IdentifiableEntity
+        {
+            var ee = s.EntityEvents<T>();
+
+            ee.Saving += e =>
+            {
+                if (!e.IsNew && e.Modified == true)
+                    action();
+            };
+            ee.PreUnsafeUpdate += q => action();
+        }
+
+        static GenericInvoker<Action<Schema, Action>> giAttachInvalidations = new GenericInvoker<Action<Schema, Action>>((s, a) => AttachInvalidations<IdentifiableEntity>(s, a));
+        static void AttachInvalidations<T>(Schema s, Action action) where T : IdentifiableEntity
+        {
+            var ee = s.EntityEvents<T>();
+
+            ee.Saving += e =>
+            {
+                if (e.Modified == true)
+                    action();
+            };
+            ee.PreUnsafeUpdate += q => action();
+            ee.PreUnsafeDelete += q => action();
+        }
+    }
+
 
     internal class ViewBuilder : SchemaBuilder
     {
-        public ViewBuilder(Schema schema) : base(schema)
+        public ViewBuilder(Schema schema)
+            : base(schema)
         {
         }
 
@@ -643,7 +733,7 @@ namespace Signum.Engine.Maps
 
         protected override bool IsPrimaryKey(PropertyRoute route)
         {
-            if(route.FieldInfo == null) 
+            if (route.FieldInfo == null)
                 return false;
 
             var svca = route.FieldInfo.SingleAttribute<SqlViewColumnAttribute>();
@@ -669,6 +759,7 @@ namespace Signum.Engine.Maps
 
             return result;
         }
-    }
 
+
+    }
 }
