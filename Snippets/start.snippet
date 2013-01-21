@@ -2,9 +2,9 @@
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
 	<CodeSnippet Format="1.0.0">
 		<Header>
-			<Title>Entity</Title>
-			<Shortcut>entity</Shortcut>
-			<Description>New Entity</Description>
+			<Title>Start</Title>
+			<Shortcut>start</Shortcut>
+			<Description>New start method</Description>
 			<Author>Signum Software</Author>
 			<SnippetTypes>
 				<SnippetType>Expansion</SnippetType>
@@ -13,29 +13,20 @@
 		<Snippet>
       <Imports>
         <Import>
+          <Namespace>Signum.Engine</Namespace>
           <Namespace>Signum.Entities</Namespace>
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-			<Declarations>
-				<Literal>
-					<ID>entityName</ID>
-					<ToolTip>Name of the Entity</ToolTip>
-					<Default>Foo</Default>
-				</Literal>
-			</Declarations>
 			<Code Language="csharp">
-				<![CDATA[[Serializable, EntityKind(EntityKind.Main)]
-    public class $entityName$DN: Entity
-    {
-       $end$
-       
-    }
-    
-    public enum $entityName$Operation
-    {
-        Save
-    }]]>
+				<![CDATA[
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                
+            }
+        }]]>
 			</Code>
 		</Snippet>
 	</CodeSnippet>
