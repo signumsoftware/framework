@@ -56,15 +56,15 @@ namespace Signum.Entities.Authorization
 
         public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min)
         {
-            runtimeRules = sb.GlobalLazy(this.NewCache, 
-                new InvalidateWith(typeof(RT), typeof(RoleDN)));
-
             this.ToKey = toKey;
             this.ToEntity = toEntity;
             this.Max = max;
             this.Min = min;
 
             sb.Include<RT>();
+
+            runtimeRules = sb.GlobalLazy(this.NewCache,
+              new InvalidateWith(typeof(RT), typeof(RoleDN)));
 
             sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
 
