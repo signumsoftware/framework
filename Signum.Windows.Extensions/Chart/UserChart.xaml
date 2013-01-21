@@ -24,7 +24,7 @@
                                   ItemsSource="{Binding Token, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"/>
+                                    <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescription}}"/>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>

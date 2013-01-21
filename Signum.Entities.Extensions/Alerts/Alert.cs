@@ -123,6 +123,7 @@ namespace Signum.Entities.Alerts
 
     public enum AlertState
     {
+        [Ignore]
         New,
         Saved,
         Attended

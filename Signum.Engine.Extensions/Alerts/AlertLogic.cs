@@ -240,7 +240,7 @@ namespace Signum.Engine.Alerts
                 (k, c) => table.DeleteSqlSync(c), 
                 (k, s, c) =>
                 {
-                    if (c.Name != s.Name)
+                    if (c.Name != s.Name || c.Key != s.Key)
                     {
                         c.Key = null;
                         c.Name = s.Name;
