@@ -195,6 +195,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
             }
         }
 
+
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
         static DirectedGraph<Type> inverseDependencies = new DirectedGraph<Type>();
@@ -264,14 +265,12 @@ ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()))
         public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
             controllers.AddOrThrow(typeof(T), null, "{0} already registered");
-
-            TryCacheSubTables(typeof(T), sb);
         }
 
         static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
             List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
-                .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumEntity<>)))
+                .Where(kvp => !kvp.Key.Type.IsEnumEntity())
                 .Select(t => t.Key.Type).ToList();
 
             inverseDependencies.Add(type);
