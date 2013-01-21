@@ -40,7 +40,7 @@ namespace Signum.Engine.Cache
             {
                 PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
 
-                GlobalLazy.Manager = new CacheGlobalLazyManager();
+                sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
                 sb.Schema.Initializing[InitLevel.Level_0BeforeAnyQuery] += OnStart;
             }
@@ -195,6 +195,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER\r\nIf you have problems, try: \r\nALTER DAT
             }
         }
 
+
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
         static DirectedGraph<Type> inverseDependencies = new DirectedGraph<Type>();
@@ -244,13 +245,10 @@ ALTER DATABASE {0} SET ENABLE_BROKER\r\nIf you have problems, try: \r\nALTER DAT
             }
         }
 
-        public static void CacheAllGlobalLazyTables(SchemaBuilder sb)
+        static void TryCacheTable(SchemaBuilder sb, Type type)
         {
-            foreach (var type in GlobalLazy.TypesForInvalidation())
-            {
-                if (!controllers.ContainsKey(type))
-                    giCacheTable.GetInvoker(type)(sb);
-            }
+            if (!controllers.ContainsKey(type))
+                giCacheTable.GetInvoker(type)(sb);
         }
 
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
@@ -267,14 +265,12 @@ ALTER DATABASE {0} SET ENABLE_BROKER\r\nIf you have problems, try: \r\nALTER DAT
         public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
             controllers.AddOrThrow(typeof(T), null, "{0} already registered");
-
-            TryCacheSubTables(typeof(T), sb);
         }
 
         static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
             List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
-                .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumEntity<>)))
+                .Where(kvp => !kvp.Key.Type.IsEnumEntity())
                 .Select(t => t.Key.Type).ToList();
 
             inverseDependencies.Add(type);
@@ -372,7 +368,7 @@ ALTER DATABASE {0} SET ENABLE_BROKER\r\nIf you have problems, try: \r\nALTER DAT
 
         public class CacheGlobalLazyManager : GlobalLazyManager
         {
-            public override void AttachInvalidations(InvalidateWith invalidateWith, EventHandler invalidate)
+            public override void AttachInvalidations(SchemaBuilder sb, InvalidateWith invalidateWith, EventHandler invalidate)
             {
                 EventHandler<CacheEventArgs> onInvalidation = (sender, args) =>
                 {
@@ -394,20 +390,9 @@ ALTER DATABASE {0} SET ENABLE_BROKER\r\nIf you have problems, try: \r\nALTER DAT
 
                 foreach (var t in invalidateWith.Types)
                 {
-                    var ctrlr = controllers.TryGetC(t);
-                    if (ctrlr == null)
-                        throw new InvalidOperationException(@"Impossible to attach invalidations to {0} because is not registered in CacheLogic. 
-Consider calling CacheLogic.CacheAllGlobalLazyTables at the end of your Starter.Start method".Formato(t.Name));
+                    CacheLogic.TryCacheTable(sb, t);
 
-                    ctrlr.Invalidated += onInvalidation;
-                }
-            }
-
-            public override void AssertAttached(InvalidateWith invalidateWith)
-            {
-                foreach (var type in invalidateWith.Types)
-                {
-                    GetController(type).Load();
+                    GetController(t).Invalidated += onInvalidation;
                 }
             }
         }

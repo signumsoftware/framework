@@ -46,15 +46,15 @@ namespace Signum.Entities.Authorization
 
         public TypeAuthCache(SchemaBuilder sb, DefaultBehaviour<TypeAllowedAndConditions> max, DefaultBehaviour<TypeAllowedAndConditions> min)
         {
-            runtimeRules = GlobalLazy.Create(this.NewCache,
-              new InvalidateWith(typeof(RuleTypeDN), typeof(RoleDN)));
-
             this.Max = max;
             this.Min = min;
 
             sb.Include<RuleTypeDN>();
 
             sb.AddUniqueIndex<RuleTypeDN>(rt => new { rt.Resource, rt.Role });
+
+            runtimeRules = sb.GlobalLazy(NewCache,
+                new InvalidateWith(typeof(RuleTypeDN), typeof(RoleDN)));
 
             sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
 
