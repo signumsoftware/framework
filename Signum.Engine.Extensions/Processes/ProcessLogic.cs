@@ -412,6 +412,14 @@ namespace Signum.Engine.Processes
                         pe.SuspendDate = TimeZoneManager.Now;
                     }
                 }.Register();
+
+                new ConstructFrom<ProcessExecutionDN>(ProcessOperation.Retry)
+                {
+                    CanConstruct = pe=>pe.State.InState(ProcessOperation.Retry, ProcessState.Error),
+                    ToState = ProcessState.Created,
+                    Construct = (pe, _) =>
+                        pe.Process.Create(pe.ProcessData, pe.SessionData)
+                }.Register();
             }
         }
 
@@ -480,8 +488,8 @@ namespace Signum.Engine.Processes
             };
         }
 
-        public static void ForEachLine<T>(this IExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action) 
-            where T : class, IProcessLineDN
+        public static void ForEachLine<T>(this IExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action)
+            where T : IdentifiableEntity, IProcessLineDN, new()
         {
             var totalCount = remainingLines.Count();
 
@@ -514,8 +522,7 @@ namespace Signum.Engine.Processes
 
                         using (Transaction tr = Transaction.ForceNew())
                         {
-                            pl.Exception = exLog.ToLite();
-                            pl.Save();
+                            pl.InDB().UnsafeUpdate(p => new T { Exception = exLog.ToLite() });
                             tr.Commit();
                         }
                     }
@@ -524,7 +531,7 @@ namespace Signum.Engine.Processes
                 }
             }
         }
-    }       
+    }
 
     public interface IProcessAlgorithm
     {
@@ -583,7 +590,7 @@ namespace Signum.Engine.Processes
 
                 if (UserDN.Current == null)
                     UserDN.Current = AuthLogic.SystemUser;
-                
+
                 Execution.State = ProcessState.Executing;
                 Execution.ExecutionStart = TimeZoneManager.Now;
                 Execution.Progress = 0;
@@ -613,7 +620,7 @@ namespace Signum.Engine.Processes
                 catch (Exception e)
                 {
                     if (Transaction.InTestTransaction)
-                        throw; 
+                        throw;
 
                     Execution.State = ProcessState.Error;
                     Execution.ExceptionDate = TimeZoneManager.Now;

@@ -239,6 +239,7 @@ namespace Signum.Entities.Processes
         Cancel,
         Execute,
         Suspend,
+        Retry,
     }
 
     public enum ProcessPermission
