@@ -188,7 +188,7 @@ namespace Signum.Windows
 
         static ValueLineConfigurator()
         {
-            Binding b = new Binding() { Mode = BindingMode.OneTime, Converter = Converters.EnumDescriptionConverter };
+            Binding b = new Binding() { Mode = BindingMode.OneTime, Converter = Converters.EnumDescription };
             //System.Diagnostics.PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
             comboDataTemplate = new DataTemplate
             {
@@ -331,10 +331,10 @@ namespace Signum.Windows
         public virtual IValueConverter GetConverter(ValueLine vl)
         {
             if (vl.ValueLineType == ValueLineType.Enum && vl.Type.IsNullable())
-                return Converters.NullableEnumConverter;
+                return Converters.NullableEnum;
 
             if (vl.ValueLineType == ValueLineType.Color)
-                return Converters.ColorConverter;
+                return Converters.Color;
 
             if (vl.Type.IsNullable())
                 return Converters.Identity;

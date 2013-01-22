@@ -148,7 +148,7 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override void ExecuteDataReader(SqlPreCommandSimple preCommand, Action<FieldReader> forEach)
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change,  Action<FieldReader> forEach)
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con))
@@ -156,6 +156,12 @@ namespace Signum.Engine
             {
                 try
                 {
+                    if (change != null)
+                    {
+                        SqlDependency dep = new SqlDependency(cmd);
+                        dep.OnChange += change;
+                    }
+
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         FieldReader fr = new FieldReader(reader);
@@ -200,6 +206,7 @@ namespace Signum.Engine
             try
             {
                 SqlCommand cmd = NewCommand(preCommand, null);
+
                 return cmd.ExecuteReader();
             }
             catch (SqlTypeException ex)
@@ -296,7 +303,7 @@ namespace Signum.Engine
             return ex;
         }
 
-        private Exception HandleSqlException(SqlException ex)
+        public Exception HandleSqlException(SqlException ex)
         {
             switch (ex.Number)
             {
@@ -354,6 +361,11 @@ namespace Signum.Engine
         public override bool AllowsMultipleQueries
         {
             get { return true; }
+        }
+
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple query, object OnChange, Action<FieldReader> action)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -418,7 +430,7 @@ open cur
     fetch next from cur into @schema, @tbl, @constraint 
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'ALTER TABLE {0}' + @schema + '.' + @tbl + ' DROP CONSTRAINT ' + @constraint 
+        select @sql = 'ALTER TABLE {0}[' + @schema + '].[' + @tbl + '] DROP CONSTRAINT [' + @constraint + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl, @constraint 
     end 
@@ -436,7 +448,7 @@ open cur
     fetch next from cur into @schema, @tbl
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP TABLE {0}' + @schema + '.' + @tbl + ';'
+        select @sql = 'DROP TABLE {0}[' + @schema + '].[' + @tbl + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl
     end 
@@ -454,7 +466,7 @@ open cur
     fetch next from cur into @schema, @view
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP VIEW {0}' + @schema + '.' + @view + ';'
+        select @sql = 'DROP VIEW {0}[' + @schema + '].[' + @view + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @view
     end 
@@ -472,7 +484,7 @@ open cur
     fetch next from cur into @schema, @proc, @type
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP '+ @type +' {0}' + @schema + '.' + @proc + ';'
+        select @sql = 'DROP '+ @type +' {0}[' + @schema + '].[' + @proc + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @proc, @type
     end 

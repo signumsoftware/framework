@@ -566,7 +566,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitTable(TableExpression table)
         {
             sb.Append(table.Name.ToString());
- 
+
             return table;
         }
 

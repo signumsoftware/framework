@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Diagnostics;
 using Signum.Entities.Basics;
+using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {
@@ -487,6 +488,18 @@ namespace Signum.Entities
         public static Lite<T> Create<T>(int id, string toStr) where T : IdentifiableEntity
         {
             return new LiteImp<T>(id, toStr);
+        }
+
+        static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructor = new ConcurrentDictionary<Type, ConstructorInfo>();
+
+        public static ConstructorInfo LiteConstructor(Type type)
+        {
+            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(int), typeof(string) }));
+        }
+
+        public static NewExpression NewExpression(Type type, Expression id, Expression toString)
+        {
+            return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString);
         }
     }
 }

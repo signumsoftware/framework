@@ -34,10 +34,10 @@ namespace Signum.Windows
         public static readonly IValueConverter Retrieve =
                    ConverterFactory.New((Lite<IIdentifiable> lite) => lite == null ? null : Server.Retrieve(lite));
 
-        public static readonly IValueConverter NullableEnumConverter =
+        public static readonly IValueConverter NullableEnum =
             ConverterFactory.New((object v) => v == null ?  VoidEnum.Instance : v, (object v) => v.Equals(VoidEnum.Instance) ? null : v);
 
-        public static readonly IValueConverter EnumDescriptionConverter =
+        public static readonly IValueConverter EnumDescription =
             ConverterFactory.New((object v) => v is Enum? ((Enum)v).NiceToString(): v);
 
         public static readonly IValueConverter ErrorListToToolTipString =
@@ -116,13 +116,13 @@ namespace Signum.Windows
             });
 
         public static readonly IValueConverter ToStringConverter = ConverterFactory.New(
-            (object d) => d.TryCC(a => a.ToString()));
+            (object d) => d.TryToString());
 
         public static readonly IValueConverter TokenOperations = ConverterFactory.New(
             (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));
 
-        public static readonly IValueConverter ColorConverter = ConverterFactory.New(
-            (ColorDN c) => c == null ? null : (Color?)Color.FromArgb(c.A, c.R, c.G, c.B),
+        public static readonly IValueConverter Color = ConverterFactory.New(
+            (ColorDN c) => c == null ? null : (Color?)System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),
             (Color? c) => c == null ? null : ColorDN.FromARGB(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
 
         public static readonly IMultiValueConverter And = ConverterFactory.New(

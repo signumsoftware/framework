@@ -166,46 +166,6 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override void ExecuteDataReader(SqlPreCommandSimple command, Action<FieldReader> forEach)
-        {
-            using (SqlCeConnection con = EnsureConnection())
-            using (SqlCeCommand cmd = NewCommand(command, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
-            {
-                try
-                {
-                    using (SqlCeDataReader reader = cmd.ExecuteReader())
-                    {
-                        FieldReader fr = new FieldReader(reader);
-                        int row = -1;
-                        //try
-                        //{
-                        while (reader.Read())
-                        {
-                            row++;
-                            forEach(fr);
-                        }
-                        //}
-                        //catch (SqlTypeException ex)
-                        //{
-                        //    FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
-                        //    fieldEx.Command = command;
-                        //    fieldEx.Row = row;
-                        //    throw fieldEx;
-                        //}
-                    }
-                }
-                catch (SqlCeException ex)
-                {
-                    var nex = HandleException(ex);
-                    if (nex == ex)
-                        throw;
-                    throw nex;
-                }
-
-            }
-        }
-
         protected internal override DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand)
         {
             try

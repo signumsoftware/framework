@@ -15,6 +15,7 @@ namespace Signum.Engine.Linq
     internal class ChildProjectionFlattener : DbExpressionVisitor
     {
         SelectExpression currentSource;
+        AliasGenerator aliasGenerator;
         private ChildProjectionFlattener(){}
 
         public bool inMList = false;
@@ -28,9 +29,9 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        static internal ProjectionExpression Flatten(ProjectionExpression proj)
+        static internal ProjectionExpression Flatten(ProjectionExpression proj, AliasGenerator aliasGenerator)
         {
-            var result = (ProjectionExpression)new ChildProjectionFlattener().Visit(proj);
+            var result = (ProjectionExpression)new ChildProjectionFlattener { aliasGenerator = aliasGenerator }.Visit(proj);
             if (result == proj)
                 return result;
 
@@ -81,7 +82,7 @@ namespace Signum.Engine.Linq
 
                     if (!IsKey(currentSource, columns))
                     {
-                        Alias aliasDistinct = Alias.GetUniqueAlias(currentSource.Alias.Name + "D");
+                        Alias aliasDistinct = aliasGenerator.GetUniqueAlias(currentSource.Alias.Name + "D");
                         ColumnGenerator generatorDistinct = new ColumnGenerator();
 
                         List<ColumnDeclaration> columnDistinct = columns.Select(ce => generatorDistinct.MapColumn(ce)).ToList();
@@ -109,7 +110,7 @@ namespace Signum.Engine.Linq
                     List<OrderExpression> innerOrders;
                     SelectExpression @internal = ExtractOrders(proj.Select, out innerOrders);
 
-                    Alias aliasSM = Alias.GetUniqueAlias(@internal.Alias.Name + "SM");
+                    Alias aliasSM = aliasGenerator.GetUniqueAlias(@internal.Alias.Name + "SM");
                     SelectExpression selectMany = new SelectExpression(aliasSM, false, false, null, columnsSMExternal.Concat(columnsSMInternal),
                         new JoinExpression(JoinType.CrossApply,
                             external,
