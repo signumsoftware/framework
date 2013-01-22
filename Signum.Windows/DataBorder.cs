@@ -63,7 +63,7 @@ namespace Signum.Windows
                             FontWeight = FontWeights.Bold
                         };
                     else
-                        Child = es.CreateView((ModifiableEntity)newValue, Common.GetTypeContext(this)); 
+                        Child = es.CreateView((ModifiableEntity)newValue, Common.GetPropertyRoute(this)); 
                 }
             }
             if (Child != null)

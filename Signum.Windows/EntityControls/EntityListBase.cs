@@ -89,9 +89,9 @@ namespace Signum.Windows
                 return Server.Convert(value, Type);
         }
 
-        public override PropertyRoute GetEntityTypeContext()
+        public override PropertyRoute GetEntityPropertyRoute()
         {
-            PropertyRoute tc = base.GetEntityTypeContext();
+            PropertyRoute tc = base.GetEntityPropertyRoute();
             if (tc == null)
                 return null;
 

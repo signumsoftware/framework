@@ -14,38 +14,6 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
-    public class PropertyRouteConverter : TypeConverter
-    {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-        {
-            return sourceType == typeof(string);
-        }
-
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-        {
-            try
-            {
-                if (value == null)
-                    throw new Exception("value is null");
-
-                string val = (string)value;
-
-                if (context == null)
-                    return PropertyRoute.Root(typeof(IdentifiableEntity)); //HACK: Improve Design-Time support
-
-                IXamlTypeResolver resolver = (IXamlTypeResolver)context.GetService(typeof(IXamlTypeResolver));
-                if (resolver == null)
-                    return PropertyRoute.Root(typeof(IdentifiableEntity)); //HACK: Improve Design-Time support
-
-                return PropertyRoute.Root(resolver.Resolve(val));
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Converting to TypeContext: " + e.Message);
-            }
-        } 
-    }
-
     [MarkupExtensionReturnType(typeof(PropertyRoute))]
     public class ContinueRouteExtension : MarkupExtension
     {
@@ -71,7 +39,7 @@ namespace Signum.Windows
             
             var depObj = (DependencyObject)provider.TargetObject;
 
-            PropertyRoute route = Common.GetTypeContext(depObj);
+            PropertyRoute route = Common.GetPropertyRoute(depObj);
 
             if (route == null)
                 throw new FormatException("ContinueRoute is only available with a previous TypeContext");

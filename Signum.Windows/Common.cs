@@ -115,19 +115,32 @@ namespace Signum.Windows
             obj.SetValue(IsReadOnlyProperty, value);
         }
 
-        [TypeConverter(typeof(PropertyRouteConverter))]
-        public static readonly DependencyProperty TypeContextProperty =
-            DependencyProperty.RegisterAttached("TypeContext", typeof(PropertyRoute), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
-        [TypeConverter(typeof(PropertyRouteConverter))]
-        public static PropertyRoute GetTypeContext(DependencyObject obj)
+        public static readonly DependencyProperty PropertyRouteProperty =
+            DependencyProperty.RegisterAttached("PropertyRoute", typeof(PropertyRoute), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
+        public static PropertyRoute GetPropertyRoute(DependencyObject obj)
         {
-            return (PropertyRoute)obj.GetValue(TypeContextProperty);
+            return (PropertyRoute)obj.GetValue(PropertyRouteProperty);
         }
-        [TypeConverter(typeof(PropertyRouteConverter))]
-        public static void SetTypeContext(DependencyObject obj, PropertyRoute value)
+        public static void SetPropertyRoute(DependencyObject obj, PropertyRoute value)
+        {
+            obj.SetValue(PropertyRouteProperty, value);
+        }
+
+
+        //Angabanga style! http://signum.codeplex.com/discussions/407307
+        public static readonly DependencyProperty TypeContextProperty =
+            DependencyProperty.RegisterAttached("TypeContext", typeof(Type), typeof(Common), 
+            new PropertyMetadata((s,args)=>Common.SetPropertyRoute(s, PropertyRoute.Root((Type)args.NewValue))));             
+        public static Type GetTypeContext(DependencyObject obj)
+        {
+            return (Type)obj.GetValue(TypeContextProperty);
+        }
+
+        public static void SetTypeContext(DependencyObject obj, Type value)
         {
             obj.SetValue(TypeContextProperty, value);
         }
+
 
         public static readonly DependencyProperty CollapseIfNullProperty =
                    DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
@@ -242,9 +255,9 @@ namespace Signum.Windows
         static void fe_Initialized(object sender, EventArgs e)
         {
             DataGrid grid = (DataGrid)sender;
-            PropertyRoute parentContext = GetTypeContext(grid).Add("Item");
+            PropertyRoute parentContext = GetPropertyRoute(grid).Add("Item");
 
-            SetTypeContext(grid, parentContext); 
+            SetPropertyRoute(grid, parentContext); 
 
             foreach (DataGridColumn column in grid.Columns)
             {
@@ -253,7 +266,7 @@ namespace Signum.Windows
                     string route = (string)column.GetValue(Common.RouteProperty);
                     PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
 
-                    SetTypeContext(column, context);
+                    SetPropertyRoute(column, context);
 
                     foreach (ColumnCommonRouteTask task in ColumnRouteTask.GetInvocationList())
                         task(column, route, context);
@@ -272,25 +285,18 @@ namespace Signum.Windows
             }
         }
 
-        public enum RouteType
-        {
-            All, 
-            TypeContextOnly, 
-            LabelOnly, 
-        }
-
         private static void InititializeRoute(FrameworkElement fe, string route, DependencyProperty property)
         {
-            PropertyRoute parentContext = GetTypeContext(fe.Parent ?? fe);
+            PropertyRoute parentContext = GetPropertyRoute(fe.Parent ?? fe);
 
             if (parentContext == null)
-                throw new InvalidOperationException("Route attached property can not be set with null TypeContext: '{0}'".Formato(route));
+                throw new InvalidOperationException("Route attached property can not be set with null PropertyRoute: '{0}'".Formato(route));
 
             var context = ContinueRouteExtension.Continue(parentContext, route); 
 
             if (property == Common.RouteProperty)
             {
-                SetTypeContext(fe, context);
+                SetPropertyRoute(fe, context);
 
                 foreach (CommonRouteTask task in RouteTask.GetInvocationList())
                     task(fe, route, context);
@@ -503,7 +509,7 @@ namespace Signum.Windows
             EntityBase eb = fe as EntityBase;
             if (eb != null && eb.NotSet(EntityBase.ImplementationsProperty))
             {
-                PropertyRoute entityContext = eb.GetEntityTypeContext();
+                PropertyRoute entityContext = eb.GetEntityPropertyRoute();
 
                 if (entityContext != null && entityContext.Type.CleanType().IsIIdentifiable())
                 {
@@ -567,7 +573,7 @@ namespace Signum.Windows
             {
                 fe.DataContextChanged += Common_DataContextChanged;
 
-                AutomationProperties.SetHelpText(fe, GetEntityStringAndHascode(fe.DataContext));
+                AutomationProperties.SetHelpText(fe, GetEntityStringAndHashCode(fe.DataContext));
             }
             else
             {
@@ -579,11 +585,11 @@ namespace Signum.Windows
 
         static void Common_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            AutomationProperties.SetHelpText((DependencyObject)sender, GetEntityStringAndHascode(e.NewValue));
+            AutomationProperties.SetHelpText((DependencyObject)sender, GetEntityStringAndHashCode(e.NewValue));
         }
 
 
-        public static string GetEntityStringAndHascode(object newValue)
+        public static string GetEntityStringAndHashCode(object newValue)
         {
             if (newValue == null)
                 return "";

@@ -138,6 +138,7 @@
     <Compile Include="Controls\TimePicker.xaml.cs">
       <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\PropertyRouteConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
     <Compile Include="ProgressWindow.xaml.cs">
       <DependentUpon>ProgressWindow.xaml</DependentUpon>
@@ -397,7 +398,6 @@
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
     <Compile Include="Converters\EnumBooleanConverter.cs" />
-    <Compile Include="Converters\PropertyRouteConverter.cs" />
     <Compile Include="Converters\TypeDataTemplateSelector.cs" />
     <Compile Include="DynamicQuery\QueryTokenBuilder.xaml.cs">
       <DependentUpon>QueryTokenBuilder.xaml</DependentUpon>

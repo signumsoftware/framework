@@ -27,7 +27,7 @@ namespace Signum.Windows
         public AutoControl(Type type)
             : this()
         {
-            Common.SetTypeContext(this, PropertyRoute.Root(type));
+            Common.SetPropertyRoute(this, PropertyRoute.Root(type));
         }
 
         public AutoControl()
@@ -37,7 +37,7 @@ namespace Signum.Windows
 
         void AutoControl_Initialized(object sender, EventArgs e)
         {
-            PropertyRoute typeContext = Common.GetTypeContext(this);
+            PropertyRoute typeContext = Common.GetPropertyRoute(this);
 
             if (typeContext == null || typeContext.Type == null)
             {

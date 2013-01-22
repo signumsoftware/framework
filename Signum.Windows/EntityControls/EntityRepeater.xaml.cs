@@ -312,7 +312,7 @@ namespace Signum.Windows
 
         protected override string GetItemStatusCore()
         {
-            return Common.GetTypeContext(Owner).TryToString();
+            return Common.GetPropertyRoute(Owner).TryToString();
         }
     }
 }

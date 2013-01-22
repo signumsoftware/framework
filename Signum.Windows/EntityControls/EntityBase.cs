@@ -351,7 +351,7 @@ namespace Signum.Windows
             if (EntityChanged != null)
                 EntityChanged(this, isUserInteraction, oldValue, newValue);
 
-            AutomationProperties.SetHelpText(this, Common.GetEntityStringAndHascode(newValue));
+            AutomationProperties.SetHelpText(this, Common.GetEntityStringAndHashCode(newValue));
 
             UpdateVisibility();
         }
@@ -421,9 +421,9 @@ namespace Signum.Windows
             return Server.Convert(value, Type);
         }
 
-        public virtual PropertyRoute GetEntityTypeContext()
+        public virtual PropertyRoute GetEntityPropertyRoute()
         {
-            return Common.GetTypeContext(this);
+            return Common.GetPropertyRoute(this);
         }
 
         protected object OnViewing(object entity, bool creating)
@@ -436,7 +436,7 @@ namespace Signum.Windows
 
             var options = new ViewOptions
             {
-                TypeContext = CleanType.IsEmbeddedEntity() ? GetEntityTypeContext() : null,
+                TypeContext = CleanType.IsEmbeddedEntity() ? GetEntityPropertyRoute() : null,
             };
 
             bool isReadOnly = Common.GetIsReadOnly(this) && !creating;
