@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.SMS;assembly=Signum.Entities.Extensions"
     xmlns:swsms="clr-namespace:Signum.Windows.SMS"            
-    m:Common.TypeContext="d:SMSMessageDN"
+    m:Common.TypeContext="{x:Type d:SMSMessageDN}"
     m:Common.MinLabelWidth="120"
     MinWidth="300" MaxWidth="300">
     <StackPanel>
