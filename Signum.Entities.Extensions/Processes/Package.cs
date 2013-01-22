@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Processes
 {
@@ -47,8 +48,13 @@ namespace Signum.Entities.Processes
         PackageOperation
     }
 
+    public interface IProcessLineDN : IIdentifiable 
+    {
+        Lite<ExceptionDN> Exception { get; set; }
+    }
+
     [Serializable, EntityKind(EntityKind.System)]
-    public class PackageLineDN : IdentifiableEntity
+    public class PackageLineDN : IdentifiableEntity, IProcessLineDN
     {
         [NotNullable]
         Lite<PackageDN> package;

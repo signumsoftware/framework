@@ -17,11 +17,28 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.SMS
 {
     public static class SMSLogic
     {
+        static Expression<Func<SMSSendPackageDN, IQueryable<SMSMessageDN>>> SMSMessagesSendExpression =
+            e => Database.Query<SMSMessageDN>().Where(a => a.SendPackage.RefersTo(e));
+        [ExpressionField("SMSMessagesSendExpression")]
+        public static IQueryable<SMSMessageDN> SMSMessages(this SMSSendPackageDN e)
+        {
+            return SMSMessagesSendExpression.Evaluate(e);
+        }
+
+        static Expression<Func<SMSUpdatePackageDN, IQueryable<SMSMessageDN>>> SMSMessagesUpdateExpression =
+          e => Database.Query<SMSMessageDN>().Where(a => a.UpdatePackage.RefersTo(e));
+        [ExpressionField("SMSMessagesUpdateExpression")]
+        public static IQueryable<SMSMessageDN> SMSMessages(this SMSUpdatePackageDN e)
+        {
+            return SMSMessagesUpdateExpression.Evaluate(e);
+        }
+
         static Func<SMSMessageDN, string> SMSSendAndGetTicketAction;
         static Func<CreateMessageParams, List<string>, List<string>> SMSMultipleSendAction;
         static Func<SMSMessageDN, SMSMessageState> SMSUpdateStatusAction;
@@ -90,10 +107,7 @@ namespace Signum.Engine.SMS
                     if (!createParams.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
 
-                    SMSSendPackageDN package = new SMSSendPackageDN
-                    {
-                        NumLines = numbers.Count,
-                    }.Save();
+                    SMSSendPackageDN package = new SMSSendPackageDN().Save();
 
                     var packLite = package.ToLite();
 
@@ -181,7 +195,7 @@ namespace Signum.Engine.SMS
                               Referred = p.ToLite()
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
-                    SMSSendPackageDN package = new SMSSendPackageDN { NumLines = numbers.Count, }.Save();
+                    SMSSendPackageDN package = new SMSSendPackageDN().Save();
                     var packLite = package.ToLite();
 
                     numbers.Select(n => new SMSMessageDN
@@ -346,8 +360,8 @@ namespace Signum.Engine.SMS
                                                      Entity = e,
                                                      e.Id,
                                                      e.Name,
-                                                     e.NumLines,
-                                                     e.NumErrors,
+                                                     NumLines = e.SMSMessages().Count(),
+                                                     NumErrors = e.SMSMessages().Count(s=>s.Exception != null),
                                                  }).ToDynamic();
 
                 dqm[typeof(SMSUpdatePackageDN)] = (from e in Database.Query<SMSUpdatePackageDN>()
@@ -356,18 +370,15 @@ namespace Signum.Engine.SMS
                                                        Entity = e,
                                                        e.Id,
                                                        e.Name,
-                                                       e.NumLines,
-                                                       e.NumErrors,
+                                                       NumLines = e.SMSMessages().Count(),
+                                                       NumErrors = e.SMSMessages().Count(s => s.Exception != null),
                                                    }).ToDynamic();
             }
         }
 
         private static ProcessExecutionDN UpdateMessages(List<SMSMessageDN> messages)
         {
-            SMSUpdatePackageDN package = new SMSUpdatePackageDN
-            {
-                NumLines = messages.Count,
-            }.Save();
+            SMSUpdatePackageDN package = new SMSUpdatePackageDN().Save();
 
             var packLite = package.ToLite();
 
@@ -500,13 +511,16 @@ namespace Signum.Engine.SMS
             new BasicExecute<SMSMessageDN>(SMSMessageOperation.UpdateStatus)
             {
                 CanExecute = m => m.State != SMSMessageState.Created ? null : Resources.StatusCanNotBeUpdatedForNonSentMessages,
-                Execute = (t, args) => 
+                Execute = (sms, args) => 
                 {
                     var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>();
                     if (func != null)
-                        SMSLogic.UpdateMessageStatus(t, func);
+                        SMSLogic.UpdateMessageStatus(sms, func);
                     else
-                        SMSLogic.UpdateMessageStatus(t);                
+                        SMSLogic.UpdateMessageStatus(sms);
+
+                    if (sms.State == SMSMessageState.Sent)
+                        throw new InvalidOperationException("SMS Message {0} has not updated state".Formato(sms.Id));
                 }
             }.Register();
 

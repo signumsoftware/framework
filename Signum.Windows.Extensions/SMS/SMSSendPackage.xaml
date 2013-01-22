@@ -7,8 +7,6 @@
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" />
-        <m:ValueLine m:Common.Route="NumLines" />
-        <m:ValueLine m:Common.Route="NumErrors" />
         <m:SearchControl QueryName="{x:Type d:SMSMessageDN}" FilterColumn="Entity.SendPackage"/>
     </StackPanel>
 </UserControl>

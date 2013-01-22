@@ -33,28 +33,24 @@ namespace Signum.Engine.Authorization
 
 
         public static string SystemUserName { get; private set; }
-        static ResetLazy<UserDN> systemUserLazy = GlobalLazy.Create(() => SystemUserName == null ? null :
+        static ResetLazy<UserDN> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
             Database.Query<UserDN>().Where(u => u.UserName == SystemUserName)
-            .SingleEx(() => "SystemUser with name '{0}' not found".Formato(SystemUserName)),
-            new InvalidateWith(null));
+            .SingleEx(() => "SystemUser with name '{0}' not found".Formato(SystemUserName)));
         public static UserDN SystemUser
         {
             get { return systemUserLazy.Value; }
         }
 
         public static string AnonymousUserName { get; private set; }
-        static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.Create(() => AnonymousUserName == null ? null :
+        static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.WithoutInvalidations(() => AnonymousUserName == null ? null :
             Database.Query<UserDN>().Where(u => u.UserName == AnonymousUserName)
-            .SingleEx(() => "AnonymousUser with name '{0}' not found".Formato(AnonymousUserName)),
-            new InvalidateWith(null));
+            .SingleEx(() => "AnonymousUser with name '{0}' not found".Formato(AnonymousUserName)));
         public static UserDN AnonymousUser
         {
             get { return anonymousUserLazy.Value; }
         }
 
-        public static readonly ResetLazy<DirectedGraph<Lite<RoleDN>>> roles = GlobalLazy.Create(Cache,
-            new InvalidateWith(typeof(RoleDN)));
-
+        static ResetLazy<DirectedGraph<Lite<RoleDN>>> roles;
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null)));
@@ -69,6 +65,8 @@ namespace Signum.Engine.Authorization
 
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
+
+                roles = sb.GlobalLazy(CacheRoles,  new InvalidateWith(typeof(RoleDN)));
 
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
@@ -148,7 +146,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static DirectedGraph<Lite<RoleDN>> Cache()
+        static DirectedGraph<Lite<RoleDN>> CacheRoles()
         {
             using (AuthLogic.Disable())
             {
