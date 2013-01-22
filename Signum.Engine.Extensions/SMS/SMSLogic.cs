@@ -385,9 +385,10 @@ namespace Signum.Engine.SMS
             if (messages.Any(m => m.State != SMSMessageState.Sent))
                 throw new ApplicationException("SMS messages must be sent prior to update the status");
 
-            messages.Select(m => m.Do(ms => m.UpdatePackage = packLite)).SaveList();
+            messages.ForEach(ms => ms.UpdatePackage = packLite);
+            messages.SaveList();
 
-            var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
+            var process = ProcessLogic.Create(SMSMessageProcess.UpdateStatus, package);
 
             process.Execute(ProcessOperation.Execute);
 

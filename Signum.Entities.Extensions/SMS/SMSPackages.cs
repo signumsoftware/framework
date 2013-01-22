@@ -24,6 +24,11 @@ namespace Signum.Entities.SMS
     [Serializable]
     public abstract class SMSPackageDN : IdentifiableEntity, IProcessDataDN
     {
+        public SMSPackageDN()
+        {
+            this.name = GetType().NiceName() + ": " + TimeZoneManager.Now.ToString();
+        }
+
         [SqlDbType(Size = 200)]
         string name;
         [StringLengthValidator(AllowNulls = true, Max = 200)]
