@@ -48,6 +48,9 @@ namespace Signum.Engine.Cache
 
         static void OnStart()
         {
+            if (GloballyDisabled)
+                return;
+
             try
             {
                 SqlDependency.Start(((SqlConnector)Connector.Current).ConnectionString);
@@ -62,6 +65,9 @@ ALTER DATABASE {0} SET ENABLE_BROKER\r\nIf you have problems, try: \r\nALTER DAT
 
         public static void Shutdown()
         {
+            if (GloballyDisabled)
+                return;
+
             SqlDependency.Stop(((SqlConnector)Connector.Current).ConnectionString);
         }
 
