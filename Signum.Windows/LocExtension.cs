@@ -51,6 +51,8 @@ namespace Signum.Windows
             if (string.IsNullOrEmpty(Key))
                 return "[null]";
             Assembly assembly = GetAssembly(serviceProvider);
+            if (assembly == null)
+                return Key;
 
             ResourceManager manager = new ResourceManager(assembly.GetName().Name + ".Properties.Resources", assembly);
             if (manager == null)
@@ -71,7 +73,7 @@ namespace Signum.Windows
                 if (m != null && m.Success)
                 {
                     string an = m.Groups["an"].Value;
-                    return AppDomain.CurrentDomain.GetAssemblies().SingleEx(a => a.GetName().Name == an);
+                    return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == an);
                 }
             }
 
