@@ -444,7 +444,7 @@ namespace Signum.Engine.Operations
             IOperation result = FindOperation(type, operationKey);
 
             if (!(result is T))
-                throw new InvalidOperationException("Operation {0} is a {1} not a {2} use {3} instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
+                throw new InvalidOperationException("Operation '{0}' is a {1} not a {2} use {3} instead".Formato(OperationDN.UniqueKey(operationKey), result.GetType().TypeName(), typeof(T).TypeName(),
                     result is IExecuteOperation ? "Execute" :
                     result is IDeleteOperation ? "Delete" :
                     result is IConstructOperation ? "Construct" :
@@ -458,7 +458,7 @@ namespace Signum.Engine.Operations
         {
             IOperation result = operations.TryGetValue(type).TryGetC(operationKey);
             if (result == null)
-                throw new InvalidOperationException("Operation {0} not found for type {1}".Formato(operationKey, type));
+                throw new InvalidOperationException("Operation '{0}' not found for type {1}".Formato(OperationDN.UniqueKey(operationKey), type));
             return result;
         }
 

@@ -291,7 +291,7 @@ namespace Signum.Engine
 
         public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
         {
-            SafeConsole.WriteLineColor(ConsoleColor.Gray, "UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()));
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()));
 
             int result = Database.Query<T>().UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) });
 
