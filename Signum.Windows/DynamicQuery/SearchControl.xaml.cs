@@ -945,12 +945,15 @@ namespace Signum.Windows
             ColumnOptionsMode = columnOptionsMode; 
             GenerateListViewColumns();
 
-            if (SimpleFilterBuilder != null)
-                SimpleFilterBuilder = null;
+            if (!filters.SequenceEqual(FilterOptions))
+            {
+                if (SimpleFilterBuilder != null)
+                    SimpleFilterBuilder = null;
 
-            FilterOptions.Clear();
-            Navigator.Manager.SetFilterTokens(QueryName, filters);
-            FilterOptions.AddRange(filters);
+                FilterOptions.Clear();
+                Navigator.Manager.SetFilterTokens(QueryName, filters);
+                FilterOptions.AddRange(filters);
+            }
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
