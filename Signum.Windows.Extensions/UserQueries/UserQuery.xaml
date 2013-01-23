@@ -16,7 +16,8 @@
         <m:EntityLine m:Common.Route="Query"  m:Common.IsReadOnly="true" />
         <m:EntityLine m:Common.Route="Related"  />
         <m:ValueLine m:Common.Route="DisplayName" />
-        <m:EntityRepeater m:Common.Route="Filters" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png">
+        <m:ValueLine m:Common.Route="PreserveFilters"/>
+        <m:EntityRepeater m:Common.Route="Filters" IsEnabled="{Binding PreserveFilters, Converter={x:Static m:Converters.Not}}"  Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png" >
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>
                     <Grid m:Common.LabelVisible="False">

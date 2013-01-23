@@ -176,13 +176,15 @@ namespace Signum.Web.UserQueries
         public static void ApplyUserQuery(this FindOptions findOptions, UserQueryDN userQuery)
         {
             findOptions.FilterOptions.RemoveAll(fo => !fo.Frozen);
-            findOptions.FilterOptions.AddRange(userQuery.Filters.Select(qf => new FilterOption
-            {
-                Token = qf.Token,
-                ColumnName = qf.TokenString,
-                Operation = qf.Operation,
-                Value = qf.Value
-            }));
+
+            if (!userQuery.PreserveFilters)
+                findOptions.FilterOptions.AddRange(userQuery.Filters.Select(qf => new FilterOption
+                {
+                    Token = qf.Token,
+                    ColumnName = qf.TokenString,
+                    Operation = qf.Operation,
+                    Value = qf.Value
+                }));
 
             findOptions.ColumnOptionsMode = userQuery.ColumnsMode;
 

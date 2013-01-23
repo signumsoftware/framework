@@ -85,12 +85,13 @@ namespace Signum.Windows.UserQueries
         {
             QueryDescription description = Navigator.Manager.GetQueryDescription(searchControl.QueryName);
 
-            return searchControl.GetQueryRequest(true).ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName), FindOptions.DefaultElementsPerPage);
+            return searchControl.GetQueryRequest(true).ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName), FindOptions.DefaultElementsPerPage, searchControl.SimpleFilterBuilder != null);
         }
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
         {
-            var filters = searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
+            var filters = uq.PreserveFilters ? searchControl.FilterOptions.ToList() : 
+                searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
             {
                 Path = qf.Token.FullKey(),
                 Operation = qf.Operation,
@@ -116,12 +117,13 @@ namespace Signum.Windows.UserQueries
 
         internal static void ToCountSearchControl(UserQueryDN uq, CountSearchControl countSearchControl)
         {
-            var filters = uq.Filters.Select(qf => new FilterOption
-            {
-                Path = qf.Token.FullKey(),
-                Operation = qf.Operation,
-                Value = qf.Value
-            }).ToList();
+            var filters = uq.PreserveFilters ? countSearchControl.FilterOptions.ToList() :
+                countSearchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
+                {
+                    Path = qf.Token.FullKey(),
+                    Operation = qf.Operation,
+                    Value = qf.Value
+                })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
@@ -135,9 +137,6 @@ namespace Signum.Windows.UserQueries
                 Path = of.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
-
-            Navigator.Manager.SetFilterTokens(countSearchControl.QueryName, filters);
-            Navigator.Manager.SetOrderTokens(countSearchControl.QueryName, orders);
 
             countSearchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
             countSearchControl.Text = uq.DisplayName + ": {0}";
