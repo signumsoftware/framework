@@ -837,7 +837,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type m:EntityRepeaterContentControl}">
                     <Border BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1" 
-                                    m:Common.TypeContext="{m:ContinueRoute /}">
+                                    m:Common.PropertyRoute="{m:ContinueRoute /}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition  Width="*"/>
