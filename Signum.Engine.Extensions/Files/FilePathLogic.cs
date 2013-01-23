@@ -109,7 +109,7 @@ namespace Signum.Engine.Files
         }
         
 
-        const long ERROR_DISK_FULL = 112L; // see winerror.h
+        const long ERROR_DISK_FULL = 112L; 
 
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
@@ -203,9 +203,14 @@ namespace Signum.Engine.Files
             fileTypes.Add(fileTypeKey, algorithm);
         }
 
-        public static byte[] GetByteArray(FilePathDN fp)
+        public static byte[] GetByteArray(this FilePathDN fp)
         {
             return fp.BinaryFile ?? File.ReadAllBytes(fp.FullPhysicalPath);
+        }
+
+        public static byte[] GetByteArray(this Lite<FilePathDN> fp)
+        {
+            return File.ReadAllBytes(fp.InDB(f => f.FullPhysicalPath));
         }
     }
 
