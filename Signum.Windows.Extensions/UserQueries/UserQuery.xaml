@@ -68,7 +68,7 @@
             <m:EntityList m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True"  >
                 <m:EntityList.EntityTemplate>
                     <DataTemplate>
-                        <Grid m:Common.LabelVisible="False" m:Common.TypeContext="{m:ContinueRoute /}">
+                        <Grid m:Common.LabelVisible="False" m:Common.PropertyRoute="{m:ContinueRoute /}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
                                 <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
