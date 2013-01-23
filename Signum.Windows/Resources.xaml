@@ -490,9 +490,9 @@
                             </Setter>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
-                            <Setter Property="Stroke" TargetName="circle" Value="#FF000000"/>
-                            <Setter Property="Stroke" TargetName="arrow" Value="#FF000000"/>
-                            <Setter Property="BorderBrush" TargetName="border" Value="#FF000000"/>
+                            <Setter Property="Stroke" TargetName="circle" Value="{Binding Path=BorderBrush, RelativeSource={RelativeSource AncestorType={x:Type Border}}}"/>
+                            <Setter Property="Stroke" TargetName="arrow" Value="{Binding Path=BorderBrush, RelativeSource={RelativeSource AncestorType={x:Type Border}}}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{Binding Path=BorderBrush, RelativeSource={RelativeSource AncestorType={x:Type Border}}}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
