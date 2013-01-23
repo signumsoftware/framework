@@ -55,7 +55,9 @@ namespace Signum.Web.UserQueries
         {
             return request.ToUserQuery(
                 DynamicQueryManager.Current.QueryDescription(request.QueryName),
-                QueryLogic.RetrieveOrGenerateQuery(request.QueryName), FindOptions.DefaultElementsPerPage);
+                QueryLogic.RetrieveOrGenerateQuery(request.QueryName),
+                FindOptions.DefaultElementsPerPage,
+                preserveFilters: false /*Implement Simple Filter Builder*/);
         }
 
         [HttpPost]

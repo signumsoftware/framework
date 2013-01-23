@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:m2="clr-namespace:Signum.Windows.Files"
     xmlns:dq="clr-namespace:Signum.Entities.UserQueries;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="dq:UserQueryDN" MinWidth="450">
+    m:Common.TypeContext="{x:Type dq:UserQueryDN}" MinWidth="450">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -16,7 +16,8 @@
         <m:EntityLine m:Common.Route="Query"  m:Common.IsReadOnly="true" />
         <m:EntityLine m:Common.Route="Related"  />
         <m:ValueLine m:Common.Route="DisplayName" />
-        <m:EntityRepeater m:Common.Route="Filters" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png">
+        <m:ValueLine m:Common.Route="PreserveFilters"/>
+        <m:EntityRepeater m:Common.Route="Filters" IsEnabled="{Binding PreserveFilters, Converter={x:Static m:Converters.Not}}"  Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png" >
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>
                     <Grid m:Common.LabelVisible="False">
@@ -68,7 +69,7 @@
             <m:EntityList m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True"  >
                 <m:EntityList.EntityTemplate>
                     <DataTemplate>
-                        <Grid m:Common.LabelVisible="False" m:Common.TypeContext="{m:ContinueRoute /}">
+                        <Grid m:Common.LabelVisible="False" m:Common.PropertyRoute="{m:ContinueRoute /}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
                                 <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>

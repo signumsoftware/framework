@@ -9,7 +9,7 @@
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
     SizeToContent="WidthAndHeight"
-    Title="Facade Method Rules" x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="authdn:PermissionRulePack">
+    Title="Facade Method Rules" x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="{x:Type authdn:PermissionRulePack}">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

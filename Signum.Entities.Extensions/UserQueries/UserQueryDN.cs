@@ -49,7 +49,18 @@ namespace Signum.Entities.UserQueries
         {
             get { return displayName; }
             set { SetToStr(ref displayName, value, () => DisplayName); }
-        } 
+        }
+
+        bool preserveFilters;
+        public bool PreserveFilters
+        {
+            get { return preserveFilters; }
+            set
+            {
+                if (Set(ref preserveFilters, value, () => PreserveFilters) && preserveFilters)
+                    filters.Clear();
+            }
+        }
 
         [NotNullable]
         MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
@@ -115,6 +126,9 @@ namespace Signum.Entities.UserQueries
         {
             if (pi.Is(() => ElementsPerPage) && ElementsPerPage <= 0 && ElementsPerPage != -1)
                 return Resources.ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero;
+
+            if (pi.Is(() => Filters) && PreserveFilters && Filters.Any())
+                return "{0} should be empty if {1} is set".Formato(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => PreserveFilters).NiceName());
 
             return base.PropertyValidation(pi);
         }
@@ -396,14 +410,15 @@ namespace Signum.Entities.UserQueries
 
     public static class UserQueryUtils
     {
-        public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query, int defaultElementsPerPage)
+        public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query, int defaultElementsPerPage, bool preserveFilters)
         {
             var tuple = SmartColumns(request.Columns, qd.Columns);
 
             return new UserQueryDN
             {
                 Query = query,
-                Filters = request.Filters.Select(f => new QueryFilterDN
+                PreserveFilters = preserveFilters,
+                Filters = preserveFilters ? new MList<QueryFilterDN>() : request.Filters.Select(f => new QueryFilterDN
                 {
                     Token = f.Token,
                     Operation = f.Operation,

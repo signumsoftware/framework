@@ -34,8 +34,8 @@ namespace Signum.Entities.Omnibox
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
-(?<symbol>[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+])|
-(?<comparer>(==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=))", 
+(?<comparer>(==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=))|
+(?<symbol>[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+])", 
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace);
 
         public static int MaxResults = 20;

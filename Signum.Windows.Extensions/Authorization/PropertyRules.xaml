@@ -10,7 +10,7 @@
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
-    Title="Property Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="authdn:PropertyRulePack">
+    Title="Property Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type authdn:PropertyRulePack}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

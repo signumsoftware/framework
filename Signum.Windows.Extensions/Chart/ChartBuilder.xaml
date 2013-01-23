@@ -74,7 +74,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type sce:ChartColumnDN}">
                     <c:ChartColumn
-                        m:Common.TypeContext="{m:ContinueRoute Columns/}"
+                        m:Common.PropertyRoute="{m:ContinueRoute Columns/}"
                         GroupResults="{Binding DataContext.GroupResults, ElementName=me}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

@@ -8,7 +8,7 @@
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     m:Monitors.AdjustToMonitor="True"
-    m:Common.TypeContext="dn:ChartRequest">
+    m:Common.TypeContext="{x:Type dn:ChartRequest}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -210,55 +210,69 @@ Write(Html.ValueLine(e, f => f.ElementsPerPage));
             #line hidden
             
             #line 43 "..\..\UserQueries\Views\UserQuery.cshtml"
-Write(Html.ValueLine(e, f => f.ColumnsMode));
+Write(Html.ValueLine(e, f => f.PreserveFilters));
 
             
             #line default
             #line hidden
             
             #line 43 "..\..\UserQueries\Views\UserQuery.cshtml"
-                                          
+                                              
     
             
             #line default
             #line hidden
             
             #line 44 "..\..\UserQueries\Views\UserQuery.cshtml"
-Write(Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; }));
-
-            
-            #line default
-            #line hidden
-            
-            #line 44 "..\..\UserQueries\Views\UserQuery.cshtml"
-                                                                                  
-    
-            
-            #line default
-            #line hidden
-            
-            #line 45 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; }));
 
             
             #line default
             #line hidden
             
-            #line 45 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 44 "..\..\UserQueries\Views\UserQuery.cshtml"
                                                                                   
     
             
             #line default
             #line hidden
             
+            #line 45 "..\..\UserQueries\Views\UserQuery.cshtml"
+Write(Html.ValueLine(e, f => f.ColumnsMode));
+
+            
+            #line default
+            #line hidden
+            
+            #line 45 "..\..\UserQueries\Views\UserQuery.cshtml"
+                                          
+    
+            
+            #line default
+            #line hidden
+            
             #line 46 "..\..\UserQueries\Views\UserQuery.cshtml"
-Write(Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; }));
+Write(Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; }));
 
             
             #line default
             #line hidden
             
             #line 46 "..\..\UserQueries\Views\UserQuery.cshtml"
+                                                                                  
+    
+            
+            #line default
+            #line hidden
+            
+            #line 47 "..\..\UserQueries\Views\UserQuery.cshtml"
+Write(Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; }));
+
+            
+            #line default
+            #line hidden
+            
+            #line 47 "..\..\UserQueries\Views\UserQuery.cshtml"
                                                                                  
 } 
 

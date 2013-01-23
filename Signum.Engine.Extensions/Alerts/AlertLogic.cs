@@ -15,11 +15,19 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Alerts;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Alerts
 {
     public static class AlertLogic
     {
+        static Expression<Func<IdentifiableEntity, IQueryable<AlertDN>>> AlertasExpression =
+            e => Database.Query<AlertDN>().Where(a => a.Target.RefersTo(e));
+        public static IQueryable<AlertDN> Alertas(this IdentifiableEntity e)
+        {
+            return AlertasExpression.Evaluate(e);
+        }
+
         public static HashSet<Enum> SystemAlertTypes = new HashSet<Enum>();
         static bool started = false;
 
@@ -41,6 +49,7 @@ namespace Signum.Engine.Alerts
                                 Entity = a,
                                 a.Id,
                                 a.AlertType,
+                                a.AlertDate,
                                 Texto = a.Text.Etc(100),
                                 CreacionDate = a.CreationDate,
                                 a.CreatedBy,

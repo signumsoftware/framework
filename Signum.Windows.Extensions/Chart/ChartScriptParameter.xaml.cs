@@ -29,7 +29,7 @@ namespace Signum.Windows.Chart
 
         public ChartScriptParameter(PropertyRoute p)
         {
-            Common.SetTypeContext(this, p);
+            Common.SetPropertyRoute(this, p);
             InitializeComponent();
         }
     }

@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
     xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="dn:UserChartDN">
+    m:Common.TypeContext="{x:Type dn:UserChartDN}">
     <StackPanel>
         <m:EntityLine m:Common.Route="Query" m:Common.IsReadOnly="True" />
         <m:ValueLine m:Common.Route="DisplayName"/>
@@ -46,7 +46,7 @@
             <m:EntityList m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True"  >
                 <m:EntityList.EntityTemplate>
                     <DataTemplate>
-                        <Grid m:Common.LabelVisible="False" m:Common.TypeContext="{m:ContinueRoute /}">
+                        <Grid m:Common.LabelVisible="False" m:Common.PropertyRoute="{m:ContinueRoute /}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
                                 <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>

@@ -11,7 +11,7 @@
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
     Title="Query Rules" x:Name="me" MinWidth="300" MinHeight="300" 
-        m:Common.TypeContext="authdn:QueryRulePack">
+        m:Common.TypeContext="{x:Type authdn:QueryRulePack}">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
