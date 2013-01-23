@@ -49,6 +49,7 @@ namespace Signum.Engine.Alerts
                                 Entity = a,
                                 a.Id,
                                 a.AlertType,
+                                a.AlertDate,
                                 Texto = a.Text.Etc(100),
                                 CreacionDate = a.CreationDate,
                                 a.CreatedBy,
