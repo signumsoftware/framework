@@ -34,6 +34,13 @@ namespace Signum.Entities.Files
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
+        public FilePathDN(Enum fileType, string fileName, byte[] fileData)
+            : this(fileType)
+        {
+            this.FileName = fileName;
+            this.BinaryFile = fileData;
+        }
+
         [NotNullable, SqlDbType(Size = 260)]
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
