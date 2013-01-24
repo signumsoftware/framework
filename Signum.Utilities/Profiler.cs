@@ -131,20 +131,62 @@ namespace Signum.Utilities
             }
         }
 
-        public static Tracer Log(string role, Func<string> aditionalData)
-        {
-            if (!Enabled)
-                return null;
-
-            return Log(role, aditionalData());
-        }
-
-        public static Tracer Log(string role = null, string aditionalData = null)
+        public static Tracer Log(string role)
         {
             if (!enabled)
                 return null;
 
-            var tracer = CreateNewEntry(role, aditionalData, true);
+            var tracer = CreateNewEntry(role, null, stackTrace: true);
+
+            return tracer;
+        }
+
+        public static Tracer Log(string role, string aditionalData)
+        {
+            if (!enabled)
+                return null;
+
+            var tracer = CreateNewEntry(role, aditionalData, stackTrace: true);
+
+            return tracer;
+        }
+
+        public static Tracer Log(string role, Func<string> aditionalData)
+        {
+            if (!enabled)
+                return null;
+
+            var tracer = CreateNewEntry(role, aditionalData(), stackTrace: true);
+
+            return tracer;
+        }
+
+        public static Tracer LogNoStackTrace(string role)
+        {
+            if (!enabled)
+                return null;
+
+            var tracer = CreateNewEntry(role, null, stackTrace: false);
+
+            return tracer;
+        }
+
+        public static Tracer LogNoStackTrace(string role, string aditionalData)
+        {
+            if (!enabled)
+                return null;
+
+            var tracer = CreateNewEntry(role, aditionalData, stackTrace: false);
+
+            return tracer;
+        }
+
+        public static Tracer LogNoStackTrace(string role, Func<string> aditionalData)
+        {
+            if (!enabled)
+                return null;
+
+            var tracer = CreateNewEntry(role, aditionalData(), stackTrace: false);
 
             return tracer;
         }
@@ -158,16 +200,6 @@ namespace Signum.Utilities
             {
                 return valueFactory();
             }
-        }
-
-        public static Tracer LogNoStackTrace(string role)
-        {
-            if (!enabled)
-                return null;
-
-            var tracer = CreateNewEntry(role, null, false);
-
-            return tracer;
         }
 
         private static Tracer CreateNewEntry(string role, string aditionalData, bool stackTrace)
@@ -239,7 +271,7 @@ namespace Signum.Utilities
             tracer.Switch(role, aditionalData()); 
         }
 
-        public static void Switch(this Tracer tracer, string role = null, string aditionalData = null)
+        public static void Switch(this Tracer tracer, string role, string aditionalData = null)
         {
             if (tracer == null)
                 return;
@@ -267,13 +299,24 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static XDocument FullXDocument()
+        public static XDocument ExportXml()
         {
-            TimeSpan timeSpan = new TimeSpan(Entries.Sum(a => a.Elapsed.Ticks));
-
             return new XDocument(
-                new XElement("Logs", new XAttribute("TotalTime", timeSpan.NiceToString()),
-                    Entries.Select(e => e.FullXml(timeSpan.TotalMilliseconds)))); 
+                new XElement("Logs", Entries.Select(e => e.ExportXml()))
+                );
+        }
+
+        public static void ImportXml(XDocument doc)
+        {
+            var list = doc.Element("Logs").Elements("Log").Select(xLog => HeavyProfilerEntry.ImportXml(xLog, null)).ToList();
+
+            if (list.Any())
+                lock (Entries)
+                {
+                    int delta = Entries.Count - list.Min(e => e.Index);
+                    list.ForEach(e => e.Index += delta);
+                    Entries.AddRange(list);
+                }
         }
 
         public static XDocument SqlStatisticsXDocument()
@@ -429,18 +472,18 @@ namespace Signum.Utilities
             return "{0} {1}".Formato(Elapsed.NiceToString(), Role);
         }
 
-        public XElement FullXml(double elapsedParent)
+        public XElement ExportXml()
         {
-            var elapsedMs = ElapsedMilliseconds; 
-
             return new XElement("Log",
-                new XAttribute("Time", elapsedMs < 10 ? "{0:.00}ms".Formato(elapsedMs): TimeSpan.FromMilliseconds(elapsedMs).NiceToString()),
-                new XAttribute("Ratio", "{0:p}".Formato(elapsedMs / elapsedParent)),
-                new XAttribute("Role", Role ?? ""),
-                new XAttribute("FullIndex", this.FullIndex()),
-                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryStart(100)),
-                Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(elapsedMs))
-                );
+                new XAttribute("Index", this.Index),
+                new XAttribute("Role", this.Role),
+                new XAttribute("BeforeStart", this.BeforeStart),
+                new XAttribute("Start", this.Start),
+                new XAttribute("End", this.End),
+                this.AditionalData == null ? null :
+                new XAttribute("AditionalData", this.AditionalData),
+                Entries == null ? null :
+                Entries.Select(e => e.ExportXml()).ToList());
         }
 
         public void CleanStackTrace()
@@ -449,6 +492,25 @@ namespace Signum.Utilities
             if (this.Entries != null)
                 foreach (var item in this.Entries)
                     item.CleanStackTrace();
+        }
+
+        internal static HeavyProfilerEntry ImportXml(XElement xLog, HeavyProfilerEntry parent)
+        {
+            var result = new HeavyProfilerEntry
+            {
+                Parent = parent,
+                Index = int.Parse(xLog.Attribute("Index").Value),
+                Role = xLog.Attribute("Role").Value,
+                BeforeStart = long.Parse(xLog.Attribute("BeforeStart").Value),
+                Start = long.Parse(xLog.Attribute("Start").Value),
+                End = long.Parse(xLog.Attribute("End").Value),
+                AditionalData = xLog.Attribute("AditionalData").TryCC(ad => ad.Value),
+            };
+
+            if (xLog.Element("Log") != null)
+                result.Entries = xLog.Elements("Log").Select(x => ImportXml(x, result)).ToList();
+         
+            return result;
         }
     }
 
