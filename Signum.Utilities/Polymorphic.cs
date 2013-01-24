@@ -161,7 +161,7 @@ namespace Signum.Utilities
 
             var currentValue = definitions.TryGetC(type);
 
-            if (!minimumType.IsInterface)
+            if (minimumType != null && !minimumType.IsInterface)
                 return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), null);
 
             IEnumerable<Type> interfaces = type.GetInterfaces().Where(IsAllowed);
