@@ -56,6 +56,9 @@ namespace Signum.Utilities
 
         static string EncodeCsv(string p, CultureInfo culture)
         {
+            if (p == null)
+                return p;
+
             string separator = culture.TextInfo.ListSeparator;
 
             if (p.Contains(separator) || p.Contains("\""))
