@@ -140,6 +140,12 @@ namespace Signum.Windows
 
     public static class ColorExtensions
     {
+        public static readonly IValueConverter ToDarkColor = ConverterFactory.New(
+                (Color color) =>new SolidColorBrush(Lerp(color, 0.8f, Colors.Black)));
+
+        public static readonly IValueConverter ToLightColor = ConverterFactory.New(
+                (Color color) =>new SolidColorBrush( Lerp(color, 0.8f, Colors.White)));
+
         public static Color Lerp(Color a, float coef, Color b)
         {
             return Color.FromScRgb(
