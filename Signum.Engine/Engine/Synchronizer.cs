@@ -218,8 +218,7 @@ namespace Signum.Engine
             {
                 var old = distances.WithMin(kvp=>kvp.Value.Values.Min());
 
-                Selection selection = !Interactive ? new Selection(old.Key, old.Value.WithMin(a => a.Value).Key) :
-                                        SelectInteractive(old.Key, old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey);
+                Selection selection = SelectInteractive(old.Key, old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey, Interactive);
 
                 oldOnly.Remove(selection.OldValue);
                 distances.Remove(selection.OldValue);
@@ -248,7 +247,7 @@ namespace Signum.Engine
 
         public static Func<string, List<string>, Selection?> AutoRepacement; 
 
-        private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey)
+        private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
             if (AutoRepacement != null)
             {
@@ -259,6 +258,12 @@ namespace Signum.Engine
                     return selection.Value;
                 }
             }
+
+            if (!interactive)
+                return new Selection(oldValue, newValues.First());
+
+            if (Console.Out == null)
+                throw new InvalidOperationException("Impossible to synchronize without interactive Console");
 
             int startingIndex = 0;
 
