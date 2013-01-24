@@ -54,11 +54,11 @@ namespace Signum.Web.Extensions.Profiler.Views
 
 
 
-WriteLiteral("\r\n<h2>");
+WriteLiteral("<h2>");
 
 
             
-            #line 5 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 4 "..\..\Profiler\Views\HeavyList.cshtml"
 Write(ViewData[ViewDataKeys.Title]);
 
             
@@ -68,7 +68,7 @@ WriteLiteral("</h2>\r\n<div>\r\n    ");
 
 
             
-            #line 7 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 6 "..\..\Profiler\Views\HeavyList.cshtml"
 Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons")));
 
             
@@ -78,17 +78,42 @@ WriteLiteral("\r\n    ");
 
 
             
-            #line 8 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 7 "..\..\Profiler\Views\HeavyList.cshtml"
 Write(Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum)));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n</div>\r\n\r\n");
+WriteLiteral("\r\n    \r\n");
 
 
             
-            #line 11 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 9 "..\..\Profiler\Views\HeavyList.cshtml"
+ using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
+{
+
+            
+            #line default
+            #line hidden
+WriteLiteral("    <input type=\"file\" name=\"xmlFile\" />\r\n");
+
+
+
+WriteLiteral("    <input type=\"submit\" value=\"Upload\" class=\"sf-button\" />\r\n");
+
+
+            
+            #line 13 "..\..\Profiler\Views\HeavyList.cshtml"
+}
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</div>\r\n\r\n\r\n");
+
+
+            
+            #line 17 "..\..\Profiler\Views\HeavyList.cshtml"
  if (Model != null)
 {
 
@@ -107,7 +132,7 @@ WriteLiteral("    <div class=\"sf-profiler-chart\" data-detail-url=\"");
 
 
             
-            #line 15 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 21 "..\..\Profiler\Views\HeavyList.cshtml"
                                                Write(Url.Action("HeavyRoute", "Profiler"));
 
             
@@ -121,7 +146,7 @@ WriteLiteral("    <br />\r\n");
 
 
             
-            #line 18 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 24 "..\..\Profiler\Views\HeavyList.cshtml"
 }
 
             
@@ -131,7 +156,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 20 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 26 "..\..\Profiler\Views\HeavyList.cshtml"
 Write(Html.ScriptCss("~/Profiler/Content/SF_Profiler.css"));
 
             
@@ -141,7 +166,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 21 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 27 "..\..\Profiler\Views\HeavyList.cshtml"
 Write(Html.ScriptsJs("~/scripts/d3.v2.min.js",
                 "~/Profiler/Scripts/SF_Profiler.js"));
 
@@ -153,7 +178,7 @@ WriteLiteral("\r\n\r\n<script language=\"javascript\">\r\n    $(function () {\r\
 
 
             
-            #line 28 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 34 "..\..\Profiler\Views\HeavyList.cshtml"
                  Write(Url.Action((ProfilerController p) => p.Heavy()));
 
             
@@ -165,7 +190,7 @@ WriteLiteral("\",\r\n                success: function (data) {\r\n             
 
 
             
-            #line 35 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 41 "..\..\Profiler\Views\HeavyList.cshtml"
                               Write(Html.Raw(Model.OrderBy(e => e.Start).HeavyDetailsToJson()));
 
             

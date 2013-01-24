@@ -18,6 +18,8 @@ using Signum.Web.Controllers;
 using System.Collections.Generic;
 using Signum.Entities.Profiler;
 using Signum.Engine.Profiler;
+using System.Xml.Linq;
+using System.IO;
 
 namespace Signum.Web.Profiler
 {
@@ -97,6 +99,20 @@ namespace Signum.Web.Profiler
 
             Signum.Utilities.HeavyProfiler.Clean();
             return null;
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult UploadFile()
+        {
+            HttpPostedFileBase hpf = Request.Files[Request.Files.Cast<string>().Single()];
+
+            using (StreamReader sr = new StreamReader(hpf.InputStream))
+            {
+                var doc = XDocument.Load(sr);
+                HeavyProfiler.ImportXml(doc);
+            }
+
+            return RedirectToAction("Heavy");
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
