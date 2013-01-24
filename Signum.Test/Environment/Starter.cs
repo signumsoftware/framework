@@ -55,7 +55,7 @@ namespace Signum.Test
             sb.Schema.Settings.OverrideAttributes((OperationLogDN ol) => ol.User, new ImplementedByAttribute());
             sb.Schema.Settings.OverrideAttributes((ExceptionDN e) => e.User, new ImplementedByAttribute());
 
-            Validator.GetOrCreatePropertyPack((OperationLogDN e) => e.User).Validators.Clear();
+            Validator.PropertyValidator((OperationLogDN e) => e.User).Validators.Clear();
 
             OperationLogic.Start(sb, dqm);
             ExceptionLogic.Start(sb, dqm);

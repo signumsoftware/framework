@@ -206,7 +206,7 @@ namespace Signum.Engine.DynamicQuery
 
         private ExtensionInfo RegisterExpression(ExtensionInfo extension)
         {
-            registeredExtensions.GetOrAdd(extension.SourceType)[extension.Key] = extension;
+            registeredExtensions.GetOrAddDefinition(extension.SourceType)[extension.Key] = extension;
 
             registeredExtensions.ClearCache();
 

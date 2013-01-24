@@ -59,7 +59,7 @@ namespace Signum.Entities.DynamicQuery
                 if (Column.PropertyRoutes != null)
                 {
                     DateTimePrecision? precission =
-                        Column.PropertyRoutes.Select(pr => Validator.GetOrCreatePropertyPack(pr.Parent.Type, pr.PropertyInfo.Name)
+                        Column.PropertyRoutes.Select(pr => Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)
                         .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx())
                         .Select(dtp => dtp.TryCS(d => d.Precision)).Distinct().Only();
 

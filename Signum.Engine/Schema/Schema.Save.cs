@@ -47,6 +47,35 @@ namespace Signum.Engine.Maps
 
     public partial class Table
     {
+        internal void InsertMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
+        {
+            using (HeavyProfiler.LogNoStackTrace("InsertMany"))
+            {
+                var ic = inserter.Value;
+
+                if (!Connector.Current.AllowsMultipleQueries)
+                {
+                    foreach (var item in list)
+                        ic.Insert(item, backEdges);
+                }
+                else
+                {
+                    list.Split_1_2_4_8_16(ls =>
+                    {
+                        switch (ls.Count)
+                        {
+                            case 1: ic.Insert(ls[0], backEdges); break;
+                            case 2: ic.Insert2(ls, backEdges); break;
+                            case 4: ic.Insert4(ls, backEdges); break;
+                            case 8: ic.Insert8(ls, backEdges); break;
+                            case 16: ic.Insert16(ls, backEdges); break;
+                        }
+                    });
+                }
+            }
+        }
+
+
         class InsertCache
         {
             public Func<string, bool, string> SqlInsertPattern;
@@ -71,41 +100,44 @@ namespace Signum.Engine.Maps
 
         InsertCache InitializeInsert()
         {
-            InsertCache result = new InsertCache();
-
-            var trios = new List<Table.Trio>();
-            var assigments = new List<Expression>();
-            var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
-            var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-            var paramPostfix = Expression.Parameter(typeof(string), "postfix");
-
-            var cast = Expression.Parameter(Type, "casted");
-            assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
-
-            foreach (var item in Fields.Values.Where(a=>!Identity || !(a.Field is FieldPrimaryKey)))
+            using (HeavyProfiler.LogNoStackTrace("InitializeInsert"))
             {
-                item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+                InsertCache result = new InsertCache();
+
+                var trios = new List<Table.Trio>();
+                var assigments = new List<Expression>();
+                var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+                var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
+                var paramPostfix = Expression.Parameter(typeof(string), "postfix");
+
+                var cast = Expression.Parameter(Type, "casted");
+                assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
+
+                foreach (var item in Fields.Values.Where(a => !Identity || !(a.Field is FieldPrimaryKey)))
+                {
+                    item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+                }
+
+                result.SqlInsertPattern = (post, output) =>
+                    "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name,
+                    trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                    output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
+                    trios.ToString(p => p.ParameterName + post, ", "));
+
+
+                var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
+                    CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramPostfix);
+
+                result.InsertParameters = expr.Compile();
+
+                result.Insert = GetInsert(result);
+                result.Insert2 = GetInsertMulti(2, result);
+                result.Insert4 = GetInsertMulti(4, result);
+                result.Insert8 = GetInsertMulti(8, result);
+                result.Insert16 = GetInsertMulti(16, result);
+
+                return result;
             }
-
-            result.SqlInsertPattern = (post, output) =>
-                "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name,
-                trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
-                output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
-                trios.ToString(p => p.ParameterName + post, ", "));
-
-
-            var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
-                CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramPostfix);
-
-            result.InsertParameters = expr.Compile();
-
-            result.Insert = GetInsert(result);
-            result.Insert2 = GetInsertMulti(2, result);
-            result.Insert4 = GetInsertMulti(4, result);
-            result.Insert8 = GetInsertMulti(8, result);
-            result.Insert16 = GetInsertMulti(16, result);
-
-            return result;
         }
 
         public IColumn ToStrColumn
@@ -265,6 +297,37 @@ namespace Signum.Engine.Maps
         static FieldInfo fiId = ReflectionTools.GetFieldInfo((IdentifiableEntity i) => i.id);
         static FieldInfo fiTicks = ReflectionTools.GetFieldInfo((Entity i) => i.ticks);
 
+
+
+
+        internal void UpdateMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
+        {
+            using (HeavyProfiler.LogNoStackTrace("InsertMany"))
+            {
+                var uc = updater.Value;
+
+                if (!Connector.Current.AllowsMultipleQueries)
+                {
+                    foreach (var item in list)
+                        uc.Update(item, backEdges);
+                }
+                else
+                {
+                    list.Split_1_2_4_8_16(ls =>
+                    {
+                        switch (ls.Count)
+                        {
+                            case 1: uc.Update(ls[0], backEdges); break;
+                            case 2: uc.Update2(ls, backEdges); break;
+                            case 4: uc.Update4(ls, backEdges); break;
+                            case 8: uc.Update8(ls, backEdges); break;
+                            case 16: uc.Update16(ls, backEdges); break;
+                        }
+                    });
+                }
+            }
+        }
+
         class UpdateCache
         {
             public Func<string, bool, string> SqlUpdatePattern;
@@ -280,64 +343,67 @@ namespace Signum.Engine.Maps
 
         UpdateCache InitializeUpdate()
         {
-            UpdateCache result = new UpdateCache();
-
-            var trios = new List<Trio>();
-            var assigments = new List<Expression>();
-            var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
-            var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-            var paramOldTicks = Expression.Parameter(typeof(long), "oldTicks");
-            var paramPostfix = Expression.Parameter(typeof(string), "postfix");
-
-            var cast = Expression.Parameter(Type);
-            assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
-
-            foreach (var item in Fields.Values.Where(a =>!(a.Field is FieldPrimaryKey)))
+            using (HeavyProfiler.LogNoStackTrace("InitializeUpdate"))
             {
-                item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
-            }
+                UpdateCache result = new UpdateCache();
 
-            var pb = Connector.Current.ParameterBuilder;
+                var trios = new List<Trio>();
+                var assigments = new List<Expression>();
+                var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+                var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
+                var paramOldTicks = Expression.Parameter(typeof(long), "oldTicks");
+                var paramPostfix = Expression.Parameter(typeof(string), "postfix");
 
-            string idParamName = ParameterBuilder.GetParameterName("id");
+                var cast = Expression.Parameter(Type);
+                assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
 
-            string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
+                foreach (var item in Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
+                {
+                    item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+                }
 
-            result.SqlUpdatePattern = (post, output) =>
-            {
-                string update = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
-                    Name,
-                    trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName + post).Indent(2), ",\r\n"),
-                    idParamName + post);
+                var pb = Connector.Current.ParameterBuilder;
+
+                string idParamName = ParameterBuilder.GetParameterName("id");
+
+                string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
+
+                result.SqlUpdatePattern = (post, output) =>
+                {
+                    string update = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
+                        Name,
+                        trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName + post).Indent(2), ",\r\n"),
+                        idParamName + post);
+
+                    if (typeof(Entity).IsAssignableFrom(this.Type))
+                        update += " AND ticks = {0}".Formato(oldTicksParamName + post);
+
+                    if (!output)
+                        return update;
+                    else
+                        return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".Formato(idParamName + post);
+                };
+
+                List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
+
+                parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, fiId)));
 
                 if (typeof(Entity).IsAssignableFrom(this.Type))
-                    update += " AND ticks = {0}".Formato(oldTicksParamName + post); 
+                    parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, null, false, paramOldTicks));
 
-                if (!output)
-                    return update;
-                else
-                    return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".Formato(idParamName + post);
-            };
+                var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>>>(
+                    CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramPostfix);
 
-            List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
+                result.UpdateParameters = expr.Compile();
 
-            parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, fiId)));
+                result.Update = GetUpdate(result);
+                result.Update2 = GetUpdateMultiple(result, 2);
+                result.Update4 = GetUpdateMultiple(result, 4);
+                result.Update8 = GetUpdateMultiple(result, 8);
+                result.Update16 = GetUpdateMultiple(result, 16);
 
-            if (typeof(Entity).IsAssignableFrom(this.Type))
-                parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, null, false, paramOldTicks));
-
-            var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>>>(
-                CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramPostfix);
-
-            result.UpdateParameters = expr.Compile();
-
-            result.Update = GetUpdate(result);
-            result.Update2 = GetUpdateMultiple(result, 2);
-            result.Update4 = GetUpdateMultiple(result, 4);
-            result.Update8 = GetUpdateMultiple(result, 8);
-            result.Update16 = GetUpdateMultiple(result, 16);
-
-            return result;
+                return result;
+            }
         }
 
 
@@ -452,40 +518,43 @@ namespace Signum.Engine.Maps
 
         CollectionsCache InitializeCollections()
         {
-            var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
-            var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-            var paramIsNew = Expression.Parameter(typeof(bool), "isNew");
-
-            var entity = Expression.Parameter(Type);
-
-            var castEntity = Expression.Assign(entity, Expression.Convert(paramIdent, Type));
-
-            var list = (from ef in Fields.Values
-                        where ef.Field is FieldMList
-                        let rt = ((FieldMList)ef.Field).RelationalTable
-                        let cache = giCreateCache.GetInvoker(rt.Field.FieldType)(rt)
-                        select new
-                        {
-                            saveCollection = (Expression)Expression.Call(Expression.Constant(cache),
-                               cache.GetType().GetMethod("RelationalInserts", BindingFlags.NonPublic | BindingFlags.Instance),
-                               Expression.Field(entity, ef.FieldInfo), paramIdent, paramIsNew, paramForbidden),
-
-                            ef.Getter,
-                            cache
-                        }).ToList();
-
-            if (list.IsEmpty())
-                return null;
-            else
+            using (HeavyProfiler.LogNoStackTrace("InitializeCollections"))
             {
-                var miniList = list.Select(a => new { a.Getter, a.cache }).ToList();
-                return new CollectionsCache
-                {
-                    SaveCollections = Expression.Lambda<Action<IdentifiableEntity, Forbidden, bool>>(Expression.Block(new[] { entity },
-                                list.Select(a => a.saveCollection).PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew).Compile(),
+                var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+                var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
+                var paramIsNew = Expression.Parameter(typeof(bool), "isNew");
 
-                    SaveCollectionsSync = ident => miniList.Select(a => a.cache.RelationalInsertsSync((Modifiable)a.Getter(ident), ident)).Combine(Spacing.Double)
-                }; 
+                var entity = Expression.Parameter(Type);
+
+                var castEntity = Expression.Assign(entity, Expression.Convert(paramIdent, Type));
+
+                var list = (from ef in Fields.Values
+                            where ef.Field is FieldMList
+                            let rt = ((FieldMList)ef.Field).RelationalTable
+                            let cache = giCreateCache.GetInvoker(rt.Field.FieldType)(rt)
+                            select new
+                            {
+                                saveCollection = (Expression)Expression.Call(Expression.Constant(cache),
+                                   cache.GetType().GetMethod("RelationalInserts", BindingFlags.NonPublic | BindingFlags.Instance),
+                                   Expression.Field(entity, ef.FieldInfo), paramIdent, paramIsNew, paramForbidden),
+
+                                ef.Getter,
+                                cache
+                            }).ToList();
+
+                if (list.IsEmpty())
+                    return null;
+                else
+                {
+                    var miniList = list.Select(a => new { a.Getter, a.cache }).ToList();
+                    return new CollectionsCache
+                    {
+                        SaveCollections = Expression.Lambda<Action<IdentifiableEntity, Forbidden, bool>>(Expression.Block(new[] { entity },
+                                    list.Select(a => a.saveCollection).PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew).Compile(),
+
+                        SaveCollectionsSync = ident => miniList.Select(a => a.cache.RelationalInsertsSync((Modifiable)a.Getter(ident), ident)).Combine(Spacing.Double)
+                    };
+                }
             }
         }
 
@@ -644,7 +713,7 @@ namespace Signum.Engine.Maps
                     }
                     else
                     {
-                        foreach (var list in collection.Split_1_2_4_8_16())
+                        collection.Split_1_2_4_8_16(list =>
                         {
                             switch (list.Count)
                             {
@@ -655,7 +724,7 @@ namespace Signum.Engine.Maps
                                 case 16: Insert16(list, ident, forbidden); break;
                                 default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count));
                             }
-                        }
+                        });
                     }
                 }
             }
@@ -741,33 +810,48 @@ namespace Signum.Engine.Maps
 
     internal static class SaveUtils
     {
-        public static IEnumerable<List<T>> Split_1_2_4_8_16<T>(this IList<T> list)
+        public static void Split_1_2_4_8_16<T>(this IList<T> original, Action<List<T>> action)
         { 
-            List<T> result = new List<T>(16);
+            List<T> part = new List<T>(16);
             int i = 0;
-            for (; i <= list.Count - 16; i += 16)
-                yield return Fill(result, list, i, 16);
+            for (; i <= original.Count - 16; i += 16)
+            {
+                Fill(part, original, i, 16);
+                action(part);
+            }
 
-            for (; i <= list.Count - 8; i += 8)
-                yield return Fill(result, list, i, 8);
+            for (; i <= original.Count - 8; i += 8)
+            {
+                Fill(part, original, i, 8);
+                action(part);
+            }
 
-            for (; i <= list.Count - 4; i += 4)
-                yield return Fill(result, list, i, 4);
+            for (; i <= original.Count - 4; i += 4)
+            {
+                Fill(part, original, i, 4);
+                action(part);
+            }
 
-            for (; i <= list.Count - 2; i += 2)
-                yield return Fill(result, list, i, 2);
+            for (; i <= original.Count - 2; i += 2)
+            {
+                Fill(part, original, i, 2);
+                action(part);
+            }
 
-            for (; i <= list.Count - 1; i += 1)
-                yield return Fill(result, list, i, 1);
+            for (; i <= original.Count - 1; i += 1)
+            {
+                Fill(part, original, i, 1);
+                action(part);
+            }
         }
 
-        public static List<T> Fill<T>(List<T> holder, IList<T> source, int pos, int count)
+        static List<T> Fill<T>(List<T> part, IList<T> original, int pos, int count)
         {
-            holder.Clear();
+            part.Clear();
             int max = pos + count;
             for (int i = pos; i < max; i++)
-                holder.Add(source[i]);
-            return holder;
+                part.Add(original[i]);
+            return part;
         }
     }
 
