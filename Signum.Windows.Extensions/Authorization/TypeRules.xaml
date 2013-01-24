@@ -9,7 +9,7 @@
     WindowStartupLocation="CenterOwner"    
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
-    Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="authdn:TypeRulePack">
+    Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type authdn:TypeRulePack}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.ControlPanel;assembly=Signum.Entities.Extensions"
     xmlns:swcp="clr-namespace:Signum.Windows.ControlPanels"
-    m:Common.TypeContext="d:ControlPanelDN"
+    m:Common.TypeContext="{x:Type d:ControlPanelDN}"
     MinWidth="600">
     <Grid>
         <Grid.RowDefinitions>

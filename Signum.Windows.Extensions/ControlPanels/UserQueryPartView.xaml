@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:swuq="clr-namespace:Signum.Windows.UserQueries"
     xmlns:d="clr-namespace:Signum.Entities.ControlPanel;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="d:UserQueryPartDN"
+    m:Common.TypeContext="{x:Type d:UserQueryPartDN}"
     MinWidth="300">
     <m:SearchControl x:Name="seachControl" ShowHeader="False" ShowFooter="False" 
                      swuq:UserQueryClient.UserQuery="{Binding UserQuery}"/>

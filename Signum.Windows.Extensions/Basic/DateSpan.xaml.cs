@@ -24,7 +24,7 @@ namespace Signum.Windows.Basics
     {
         public DateSpan(PropertyRoute tc)
         {
-            Common.SetTypeContext(this, tc); 
+            Common.SetPropertyRoute(this, tc); 
             InitializeComponent();
         }
 

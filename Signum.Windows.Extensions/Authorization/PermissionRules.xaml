@@ -9,7 +9,7 @@
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
-    Title="Permission Rules" x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="authdn:PermissionRulePack">
+    Title="Permission Rules" x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="{x:Type authdn:PermissionRulePack}">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

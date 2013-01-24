@@ -40,9 +40,10 @@
     
     @Html.ValueLine(e, f => f.DisplayName)
     @Html.ValueLine(e, f => f.ElementsPerPage)
+    @Html.ValueLine(e, f => f.PreserveFilters)
+    @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
     @Html.ValueLine(e, f => f.ColumnsMode)
     @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; })
-    @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
     @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
 } 
 </div>
