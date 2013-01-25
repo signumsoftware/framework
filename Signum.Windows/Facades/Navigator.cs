@@ -657,7 +657,7 @@ namespace Signum.Windows
             if (!es.OnIsViewable())
                 throw new Exception("{0} is not viewable".Formato(entity));
             
-            Control ctrl = options.View ?? es.CreateView(entity, options.TypeContext);
+            Control ctrl = options.View ?? es.CreateView(entity, options.PropertyRoute);
 
             NormalWindow win = CreateNormalWindow();
                 

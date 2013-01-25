@@ -436,7 +436,7 @@ namespace Signum.Windows
 
             var options = new ViewOptions
             {
-                TypeContext = CleanType.IsEmbeddedEntity() ? GetEntityPropertyRoute() : null,
+                PropertyRoute = CleanType.IsEmbeddedEntity() ? GetEntityPropertyRoute() : null,
             };
 
             bool isReadOnly = Common.GetIsReadOnly(this) && !creating;
