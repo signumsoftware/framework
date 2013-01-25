@@ -112,7 +112,7 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -140,7 +140,7 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -148,7 +148,7 @@ namespace Signum.Engine
             }
         }
 
-        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change,  Action<FieldReader> forEach)
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con))
@@ -192,7 +192,7 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -218,7 +218,7 @@ namespace Signum.Engine
             }
             catch (SqlException ex)
             {
-                var nex = HandleSqlException(ex);
+                var nex = HandleSqlException(ex, preCommand);
                 if (nex == ex)
                     throw;
                 throw nex;
@@ -245,10 +245,10 @@ namespace Signum.Engine
                     if (nex == ex)
                         throw;
                     throw nex;
-                } 
+                }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -278,7 +278,7 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -292,22 +292,24 @@ namespace Signum.Engine
             {
                 var mins = command.Parameters.Where(a => DateTime.MinValue.Equals(a.Value));
 
-                if(mins.Any())
+                if (mins.Any())
                 {
                     return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".Formato(
-                        mins.CommaAnd(a=>a.ParameterName),
-                        mins.Count() == 1 ? "is": "are"), ex);
+                        mins.CommaAnd(a => a.ParameterName),
+                        mins.Count() == 1 ? "is" : "are"), ex);
                 }
             }
 
             return ex;
         }
 
-        public Exception HandleSqlException(SqlException ex)
+        public Exception HandleSqlException(SqlException ex, SqlPreCommand command)
         {
             switch (ex.Number)
             {
-                case -2: return new TimeoutException(ex.Message, ex);
+                case -2: var timeout = new TimeoutException(ex.Message, ex);
+                    timeout.Data["Sql"] = command.PlainSql();
+                    return timeout;
                 case 2601: return new UniqueKeyException(ex);
                 case 547: return new ForeignKeyException(ex);
                 default: return ex;
@@ -383,7 +385,7 @@ namespace Signum.Engine
 
             result.SqlDbType = sqlType;
 
-            if(sqlType == SqlDbType.Udt)
+            if (sqlType == SqlDbType.Udt)
                 result.UdtTypeName = udtTypeName;
 
 
@@ -417,7 +419,7 @@ namespace Signum.Engine
 
     public static class SqlConnectorScripts
     {
-        public static readonly string RemoveAllConstraintsScript = 
+        public static readonly string RemoveAllConstraintsScript =
 @"declare @schema nvarchar(128), @tbl nvarchar(128), @constraint nvarchar(128) 
 DECLARE @sql nvarchar(255) 
 
@@ -437,7 +439,7 @@ open cur
 close cur 
 deallocate cur";
 
-        public static readonly string RemoveAllTablesScript = 
+        public static readonly string RemoveAllTablesScript =
 @"declare @schema nvarchar(128), @tbl nvarchar(128)
 DECLARE @sql nvarchar(255)
  
@@ -455,7 +457,7 @@ open cur
 close cur 
 deallocate cur";
 
-        public static readonly string RemoveAllViewsScript = 
+        public static readonly string RemoveAllViewsScript =
 @"declare @schema nvarchar(128), @view nvarchar(128)
 DECLARE @sql nvarchar(255) 
 
