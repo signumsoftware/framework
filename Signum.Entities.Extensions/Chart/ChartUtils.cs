@@ -64,7 +64,7 @@ namespace Signum.Entities.Chart
 
             if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                var pp = Validator.GetOrCreatePropertyPack(route);
+                var pp = Validator.TryGetPropertyValidator(route);
                 if (pp != null)
                 {
                     DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
@@ -377,7 +377,7 @@ namespace Signum.Entities.Chart
 
         public static void RemoveNotNullValidators()
         {
-            Validator.GetOrCreatePropertyPack((ChartColumnDN c) => c.TokenString)
+            Validator.OverridePropertyValidator((ChartColumnDN c) => c.TokenString)
                 .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
         }
     }

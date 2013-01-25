@@ -1,12 +1,18 @@
 ﻿@using Signum.Utilities.ExpressionTrees
 @using Signum.Web.Profiler
 @model List<HeavyProfilerEntry>
-
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div>
     @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
     @Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum))
+    
+@using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
+{
+    <input type="file" name="xmlFile" />
+    <input type="submit" value="Upload" class="sf-button" />
+}
 </div>
+
 
 @if (Model != null)
 {

@@ -58,7 +58,7 @@ namespace Signum.Entities.Authorization
 
             sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
 
-            Validator.GetOrCreatePropertyPack((RuleTypeDN r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
+            Validator.PropertyValidator((RuleTypeDN r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
         }
 
         string TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)

@@ -23,7 +23,7 @@ namespace Signum.Engine.Help
     {
         public static string GetPropertyHelp(PropertyRoute pr)
         {
-            string validations = Validator.GetOrCreatePropertyPack(pr).Validators.CommaAnd(v => v.HelpMessage);
+            string validations = Validator.TryGetPropertyValidator(pr).Validators.CommaAnd(v => v.HelpMessage);
 
             if (validations.HasText())
                 validations = Resources.Should + validations;

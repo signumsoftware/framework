@@ -86,8 +86,8 @@ namespace Signum.Engine.Mailing
                 NewsletterGraph.Register();
                 sb.AddUniqueIndex<NewsletterDeliveryDN>(nd => new { nd.Newsletter, nd.Recipient });
 
-                Validator.GetOrCreatePropertyPack((NewsletterDN news) => news.HtmlBody).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
-                Validator.GetOrCreatePropertyPack((NewsletterDN news) => news.Subject).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
+                Validator.PropertyValidator((NewsletterDN news) => news.HtmlBody).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
+                Validator.PropertyValidator((NewsletterDN news) => news.Subject).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
             }
         }
 
