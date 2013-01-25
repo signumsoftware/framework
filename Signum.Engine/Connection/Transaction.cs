@@ -530,8 +530,8 @@ namespace Signum.Engine
                 t.GetType().Name,
                 t.Started,
                 t.IsRolledback,
-                t.Connection == null ? "null" : t.Connection.State.ToString(),
-                t.Transaction == null ? "null" : "set"), "\r\n");
+                t.Connection == null ? "null" : (t.Connection.State.ToString() + " Hash " + t.Connection.GetHashCode()),
+                t.Transaction == null ? "null" : (" Hash " + t.Connection.GetHashCode())), "\r\n");
         }
 
         public T Commit<T>(T returnValue)
