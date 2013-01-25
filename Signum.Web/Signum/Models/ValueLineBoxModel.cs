@@ -95,7 +95,8 @@ namespace Signum.Web
             set { Set(ref dateValue, value, () => DateValue); }
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+
+        protected internal override string PropertyValidation(PropertyInfo pi)
         {
             string error = Resources.ValueMustBeSpecifiedFor0.Formato(fieldName);
             switch (boxType)

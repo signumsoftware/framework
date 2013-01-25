@@ -538,7 +538,7 @@ namespace Signum.Windows
             if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
-                   Validator.GetOrCreatePropertyPack(context).Validators.OfType<NotNullableAttribute>().Any())
+                   Validator.TryGetPropertyValidator(context).Validators.OfType<NotNullableAttribute>().Any())
                 {
                     vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).ToObservableCollection();
                 }

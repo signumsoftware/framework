@@ -256,7 +256,7 @@ namespace Signum.Web
                 }
                 catch (FormatException)
                 {
-                    return ctx.None(ctx.PropertyPack != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyPack.PropertyInfo.NiceName()) : Resources.InvalidFormat);
+                    return ctx.None(ctx.PropertyValidator != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : Resources.InvalidFormat);
                 }
             };
         }
@@ -278,7 +278,7 @@ namespace Signum.Web
                 }
                 catch (FormatException)
                 {
-                    return ctx.None(ctx.PropertyPack != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyPack.PropertyInfo.NiceName()) : Resources.InvalidFormat);
+                    return ctx.None(ctx.PropertyValidator != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : Resources.InvalidFormat);
                 }
             };
         }
@@ -385,23 +385,23 @@ namespace Signum.Web
     {
         abstract class PropertyMapping
         {
-            public readonly PropertyPack PropertyPack;
+            public readonly IPropertyValidator PropertyValidator;
 
-            protected PropertyMapping(PropertyPack pp)
+            protected PropertyMapping(IPropertyValidator pv)
             {
-                this.PropertyPack = pp;
+                this.PropertyValidator = pv;
             }
 
-            public static PropertyMapping Create(PropertyPack pp)
+            public static PropertyMapping Create(IPropertyValidator pv)
             {
-                return (PropertyMapping)Activator.CreateInstance(typeof(PropertyMapping<>).MakeGenericType(typeof(T), pp.PropertyInfo.PropertyType), pp);
+                return (PropertyMapping)Activator.CreateInstance(typeof(PropertyMapping<>).MakeGenericType(typeof(T), pv.PropertyInfo.PropertyType), pv);
             }
 
             public abstract void SetProperty(MappingContext<T> parent);
 
             public override string ToString()
             {
-                return PropertyPack.PropertyInfo.PropertyName();
+                return PropertyValidator.PropertyInfo.PropertyName();
             }
         }
 
@@ -412,7 +412,8 @@ namespace Signum.Web
 
             public Mapping<P> Mapping { get; set; }
 
-            public PropertyMapping(PropertyPack pp)  : base( pp)
+            public PropertyMapping(IPropertyValidator pp)
+                : base(pp)
             {
                 GetValue = ReflectionTools.CreateGetter<T, P>(pp.PropertyInfo);
                 SetValue = ReflectionTools.CreateSetter<T, P>(pp.PropertyInfo);
@@ -434,7 +435,7 @@ namespace Signum.Web
                 {
                     string error = e is FormatException ? Resources._0HasAnInvalidFormat : Resources.NotPossibleToaAssign0;
 
-                    ctx.Error.Add(error.Formato(PropertyPack.PropertyInfo.NiceName()));
+                    ctx.Error.Add(error.Formato(PropertyValidator.PropertyInfo.NiceName()));
                 }
 
                 if (!ctx.Empty())
@@ -443,10 +444,10 @@ namespace Signum.Web
 
             public SubContext<P> CreateSubContext(MappingContext<T> parent)
             {
-                string newControlId = TypeContextUtilities.Compose(parent.ControlID, PropertyPack.PropertyInfo.Name);
-                PropertyRoute route = parent.PropertyRoute.Add(this.PropertyPack.PropertyInfo);
+                string newControlId = TypeContextUtilities.Compose(parent.ControlID, PropertyValidator.PropertyInfo.Name);
+                PropertyRoute route = parent.PropertyRoute.Add(this.PropertyValidator.PropertyInfo);
 
-                SubContext<P> ctx = new SubContext<P>(newControlId, PropertyPack, route, parent);
+                SubContext<P> ctx = new SubContext<P>(newControlId, PropertyValidator, route, parent);
                 if (parent.Value != null)
                     ctx.Value = GetValue(parent.Value);
                 return ctx;
@@ -459,7 +460,7 @@ namespace Signum.Web
         {
             if (fillProperties)
             {
-                Properties = Validator.GetPropertyPacks(typeof(T))
+                Properties = Validator.GetPropertyValidators(typeof(T))
                     .Where(kvp => !kvp.Value.PropertyInfo.IsReadOnly())
                     .ToDictionary(kvp => kvp.Key, kvp => PropertyMapping.Create(kvp.Value));
             }
@@ -497,7 +498,7 @@ namespace Signum.Web
             ModifiableEntity entity = ctx.Value;
             foreach (MappingContext childCtx in ctx.Children())
             {
-                string error = entity.PropertyCheck(childCtx.PropertyPack);
+                string error = childCtx.PropertyValidator.PropertyCheck(entity);
                 if (error.HasText())
                     childCtx.Error.Add(error);
             }
@@ -546,7 +547,7 @@ namespace Signum.Web
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
             PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
-                () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
+                () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name)));
 
             propertyMapping.Mapping = Mapping.New<P>();
 
@@ -574,7 +575,7 @@ namespace Signum.Web
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
             PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
-                () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
+                () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name)));
 
             propertyMapping.Mapping = mapping;
             

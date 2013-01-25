@@ -33,61 +33,70 @@ namespace Signum.Engine
 
         static void Save(Func<DirectedGraph<Modifiable>> createGraph)
         {
-            DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph);
+            using (var log = HeavyProfiler.LogNoStackTrace("PreSaving"))
+            {
+                DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph);
 
-            Schema schema = Schema.Current;
-            modifiables = GraphExplorer.ModifyGraph(modifiables, (Modifiable m, ref bool graphModified) =>
+                Schema schema = Schema.Current;
+                modifiables = GraphExplorer.ModifyGraph(modifiables, (Modifiable m, ref bool graphModified) =>
+                    {
+                        IdentifiableEntity ident = m as IdentifiableEntity;
+
+                        if (ident != null)
+                            schema.OnPreSaving(ident, ref graphModified);
+                    }, createGraph);
+
+                log.Switch("Integrity");
+
+                string error = GraphExplorer.Integrity(modifiables);
+                if (error.HasText())
+                    throw new ApplicationException(error);
+
+                log.Switch("Graph");
+
+                GraphExplorer.PropagateModifications(modifiables.Inverse());
+
+                //colapsa modifiables (collections and embeddeds) keeping indentifiables only
+                DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
+
+                foreach (var node in identifiables)
+                    schema.OnSaving(node);
+
+                //Remove all the edges that doesn't mean a dependency
+                identifiables.RemoveAll(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
+
+                //Remove all the nodes that are not modified
+                List<IdentifiableEntity> notModified = identifiables.Where(node => node.Modified == false).ToList();
+
+                notModified.ForEach(node => identifiables.RemoveFullNode(node, None));
+
+                //takes apart the 'forbidden' connections from the good ones
+                DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
+
+                if (backEdges.IsEmpty())
+                    backEdges = null;
+                else
+                    identifiables.RemoveAll(backEdges.Edges);
+
+                IEnumerable<HashSet<IdentifiableEntity>> groups = identifiables.CompilationOrderGroups();
+
+                log.Switch("SaveGroups");
+
+                foreach (var group in groups)
                 {
-                    IdentifiableEntity ident = m as IdentifiableEntity;
+                    SaveGroup(schema, group, backEdges);
+                }
 
-                    if (ident != null)
-                        schema.OnPreSaving(ident, ref graphModified);
-                }, createGraph);
+                if (backEdges != null)
+                {
+                    var postSavings = backEdges.Edges.Select(e => e.From).ToHashSet();
 
-            string error = GraphExplorer.Integrity(modifiables);
-            if (error.HasText())
-                throw new ApplicationException(error);
+                    SaveGroup(schema, postSavings, null);
+                }
 
-            GraphExplorer.PropagateModifications(modifiables.Inverse());
-
-            //colapsa modifiables (collections and embeddeds) keeping indentifiables only
-            DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
-
-            foreach (var node in identifiables)
-                schema.OnSaving(node);
-
-            //Remove all the edges that doesn't mean a dependency
-            identifiables.RemoveAll(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
-
-            //Remove all the nodes that are not modified
-            List<IdentifiableEntity> notModified = identifiables.Where(node => node.Modified == false).ToList();
-
-            notModified.ForEach(node => identifiables.RemoveFullNode(node, None));
-
-            //takes apart the 'forbidden' connections from the good ones
-            DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
-
-            if (backEdges.IsEmpty())
-                backEdges = null;
-            else
-                identifiables.RemoveAll(backEdges.Edges);
-
-            IEnumerable<HashSet<IdentifiableEntity>> groups = identifiables.CompilationOrderGroups();
-
-            foreach (var group in groups)
-            {
-                SaveGroup(schema, group, backEdges);
+                EntityCache.Add(identifiables);
+                EntityCache.Add(notModified);
             }
-
-            if (backEdges != null)
-            {
-                var postSavings = backEdges.Edges.Select(e => e.From).ToHashSet();
-
-                SaveGroup(schema, postSavings, null);
-            }
-
-            EntityCache.Add(identifiables);
-            EntityCache.Add(notModified);
         }
 
         private static void SaveGroup(Schema schema, HashSet<IdentifiableEntity> group, DirectedGraph<IdentifiableEntity> backEdges)

@@ -222,7 +222,15 @@ namespace Signum.Entities
         public event PropertyChangedEventHandler PropertyChanged;
 
         [field: NonSerialized, Ignore]
-        public event PropertyValidationEventHandler ExternalPropertyValidation;
+        public event Func<ModifiableEntity, PropertyInfo, string> ExternalPropertyValidation;
+
+        internal string OnExternalPropertyValidation(PropertyInfo pi)
+        {
+            if (ExternalPropertyValidation == null)
+                return null;
+
+            return ExternalPropertyValidation(this, pi);
+        }
 
         protected void Notify<T>(Expression<Func<T>> property)
         {
@@ -274,11 +282,35 @@ namespace Signum.Entities
 
         public string IntegrityCheck()
         {
-            var packs = Validator.GetPropertyPacks(GetType());
+            using (var log = HeavyProfiler.LogNoStackTrace("IntegrityCheck"))
+            {
+                var validators = Validator.GetPropertyValidators(GetType());
 
-            var result = packs.Select(k => PropertyCheck(k.Value)).NotNull().ToString("\r\n");
+                StringBuilder sb = null;
 
-            return result;
+                foreach (IPropertyValidator pv in validators.Values)
+                {
+                    log.Switch("PropertyCheck", pv.PropertyInfo.Name);
+                    string error = pv.PropertyCheck(this);
+
+                    if (error != null)
+                    {
+                        if (sb == null)
+                        {
+                            sb = new StringBuilder();
+                            sb.Append(error);
+                        }
+
+                        sb.Append("\r\n");
+                        sb.Append(error);
+                    }
+                }
+
+                if (sb == null)
+                    return null;
+
+                return sb.ToString(0, sb.Length - 2);
+            }
         }
 
         //override for per-property checks
@@ -290,76 +322,33 @@ namespace Signum.Entities
                 if (columnName == null)
                     return ((IDataErrorInfo)this).Error;
                 else
-                {
-                    PropertyPack pp = Validator.GetOrCreatePropertyPack(GetType(), columnName);
-                    if (pp == null)
-                        return null; //Hidden properties
-
-                    return PropertyCheck(pp);
-                }
+                    return PropertyCheck(columnName);
             }
         }
 
-        public string PropertyCheck<T>(Expression<Func<T, object>> property) where T : ModifiableEntity
+        public string PropertyCheck(Expression<Func<object>> property)
         {
-            return PropertyCheck(Validator.GetOrCreatePropertyPack(property));
+            return PropertyCheck(ReflectionTools.GetPropertyInfo(property).Name);
         }
 
         public string PropertyCheck(string propertyName) 
         {
-            return PropertyCheck(Validator.GetOrCreatePropertyPack(GetType(), propertyName));
+            IPropertyValidator pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
+
+            if (pp == null)
+                return null; //Hidden properties
+
+            return pp.PropertyCheck(this);
         }
 
-        public string PropertyCheck(PropertyPack pp)
+        protected internal virtual string PropertyValidation(PropertyInfo pi)
         {
-            if (pp.IsAplicable != null && !pp.IsAplicable(this))
-                return null;
-
-            if (pp.Validators.Count > 0)
-            {
-                object propertyValue = pp.GetValue(this);
-
-                //ValidatorAttributes
-                foreach (var validator in pp.Validators)
-                {
-                    string result = validator.Error(this, pp.PropertyInfo, propertyValue);
-                    if (result != null)
-                        return result;
-                }
-            }
-
-            //Internal Validation
-            if (pp.IsAplicablePropertyValidation == null || pp.IsAplicablePropertyValidation(this))
-            {
-                string result = PropertyValidation(pp.PropertyInfo);
-                if (result != null)
-                    return result;
-            }
-
-            //External Validation
-            if (ExternalPropertyValidation != null && (pp.IsAplicableExternalPropertyValidation == null || pp.IsAplicableExternalPropertyValidation(this)))
-            {
-                string result = ExternalPropertyValidation(this, pp.PropertyInfo);
-                if (result != null)
-                    return result;
-            }
-
-            //Static validation
-            if (pp.StaticPropertyValidation != null)
-            {
-                foreach (PropertyValidationEventHandler item in pp.StaticPropertyValidation.GetInvocationList())
-                {
-                    string result = item(this, pp.PropertyInfo);
-                    if (result != null)
-                        return result;
-                }
-            }
             return null;
         }
 
-        protected virtual string PropertyValidation(PropertyInfo pi)
+        protected static void Validate<T>(Expression<Func<T, object>> property, Func<T, PropertyInfo, string> validate) where T : ModifiableEntity
         {
-            return null;
+            Validator.PropertyValidator(property).StaticPropertyValidation += validate;
         }
 
         public string FullIntegrityCheck()

@@ -256,7 +256,7 @@ namespace Signum.Engine.Operations
 
             operation.AssertIsValid();
 
-            operations.GetOrAdd(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
+            operations.GetOrAddDefinition(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
 
             if (IsExecuteNoLite(operation))
             {
@@ -276,7 +276,7 @@ namespace Signum.Engine.Operations
 
             operation.AssertIsValid();
 
-            operations.GetOrAdd(operation.Type)[operation.Key] = operation;
+            operations.GetOrAddDefinition(operation.Type)[operation.Key] = operation;
         }
 
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)

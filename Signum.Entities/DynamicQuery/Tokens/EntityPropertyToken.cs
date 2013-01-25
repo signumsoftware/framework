@@ -73,7 +73,7 @@ namespace Signum.Entities.DynamicQuery
 
                 if (route != null)
                 {
-                    var att = Validator.GetOrCreatePropertyPack(route.Parent.Type, route.PropertyInfo.Name).TryCC(pp =>
+                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name).TryCC(pp =>
                         pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx());
                     if (att != null)
                     {

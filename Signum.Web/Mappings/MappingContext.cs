@@ -29,7 +29,7 @@ namespace Signum.Web
         internal MappingContext LastChild { get; private set; }
         internal abstract MappingContext Next { get; set; }
         
-        internal readonly PropertyPack PropertyPack;
+        internal readonly IPropertyValidator PropertyValidator;
         internal readonly PropertyRoute PropertyRoute; 
 
         public void AddChild(MappingContext context)
@@ -94,10 +94,10 @@ namespace Signum.Web
 
         public abstract IDictionary<string, List<string>> Errors { get; }
 
-        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
+        public MappingContext(string controlID, IPropertyValidator propertyValidator, PropertyRoute route)
         {
             this.ControlID = controlID ?? "";
-            this.PropertyPack = propertyPack;
+            this.PropertyValidator = propertyValidator;
             this.PropertyRoute = route; 
         }
 
@@ -249,7 +249,7 @@ namespace Signum.Web
             get { return Value; }
         }
 
-        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
+        public MappingContext(string controlID, IPropertyValidator propertyPack, PropertyRoute route)
             : base(controlID, propertyPack, route)
         {
         }
@@ -413,8 +413,8 @@ namespace Signum.Web
         ContextualDictionary<List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
-        public SubContext(string controlID, PropertyPack propertyPack, PropertyRoute route, MappingContext parent) :
-            base(controlID, propertyPack, route)
+        public SubContext(string controlID, IPropertyValidator propertyValidator, PropertyRoute route, MappingContext parent) :
+            base(controlID, propertyValidator, route)
         {
             this.parent = parent;
             this.root = parent.Root;

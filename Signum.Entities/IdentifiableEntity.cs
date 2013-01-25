@@ -93,7 +93,8 @@ namespace Signum.Entities
 
         public virtual string IdentifiableIntegrityCheck()
         {
-            return GraphExplorer.IdentifiableIntegrityCheck(GraphExplorer.FromRootIdentifiable(this));
+            using (HeavyProfiler.LogNoStackTrace("IdentifiableIntegrityCheck", () => GetType().Name))
+                return GraphExplorer.IdentifiableIntegrityCheck(GraphExplorer.FromRootIdentifiable(this));
         }
 
         public override int GetHashCode()
