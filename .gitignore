@@ -27,17 +27,3 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
-*.Publish.xml
-[Ll]og/
-#Seguros
-temp/
-
-Selenium/
-Seguros.MVC.Publish.xml
-
-#Ucalenda file upload directories
-AssociationPhotos/
-EventPhotos/
-ExamAttachments/
-UserPhotos/
-UserProfiles/
