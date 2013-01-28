@@ -178,6 +178,10 @@ namespace Signum.Entities
     {
     }
 
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class FieldWithoutPropertyAttribute : Attribute
+    {
+    }
 
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class NotNullableAttribute : Attribute
