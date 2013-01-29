@@ -118,5 +118,10 @@ namespace Signum.Test
                 Assert.Fail("{0} exceeded".Formato(exceeded));
 
         }
+
+        public static new bool Equals(object obj, object obj2)
+        {
+            throw new NotSupportedException("Use Assert.AreEquals instead");
+        }
     }
 }

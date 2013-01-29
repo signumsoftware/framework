@@ -25,13 +25,6 @@ namespace Signum.Engine.Maps
 {
     public class Schema : IImplementationsFinder
     {
-        bool silentMode = false;
-        public bool SilentMode
-        {
-            get { return silentMode; }
-            set { this.silentMode = value; }
-        }
-
         public CultureInfo ForceCultureInfo { get; set; }
 
         public TimeZoneMode TimeZoneMode { get; set; }
