@@ -220,21 +220,38 @@ namespace Signum.Entities.Reflection
 
         public static PropertyInfo TryFindPropertyInfo(FieldInfo fi)
         {
-            return (fi.DeclaringType.GetProperty(CleanFieldName(fi.Name), BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public));
-        }
+            const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        public static string CleanFieldName(string name)
-        {
-            if (name.Length > 2)
+            var propertyName = PropertyName(fi.Name);
+
+            var result = fi.DeclaringType.GetProperty(propertyName, flags);
+
+            if (result != null)
+                return result;
+
+            foreach (Type i in fi.DeclaringType.GetInterfaces())
             {
-                if (name.StartsWith("_"))
-                    name = name.Substring(1);
-                else if (name.StartsWith("m") && char.IsUpper(name[1]))
-                    name = Char.ToLower(name[1]) + name.Substring(2);
+                result = fi.DeclaringType.GetProperty(i.FullName + "." + propertyName, flags);
+
+                if (result != null)
+                    return result;
             }
 
-            return name.FirstUpper();
+            return null;
         }
+        
+        public static Func<string, string> PropertyName = (string fieldName) =>
+        {
+            //if (name.Length > 2)
+            //{
+            //    if (name.StartsWith("_"))
+            //        name = name.Substring(1);
+            //    else if (name.StartsWith("m") && char.IsUpper(name[1]))
+            //        name = Char.ToLower(name[1]) + name.Substring(2);
+            //}
+
+            return fieldName.FirstUpper();
+        };
 
         public static bool QueryableProperty(Type type, PropertyInfo pi)
         {

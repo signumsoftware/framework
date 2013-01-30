@@ -201,8 +201,8 @@ namespace Signum.Engine.Maps
 
                 if (!Settings.Attributes(route).Any(a=>a is IgnoreAttribute))
                 {
-                    if (!SilentMode() && Reflector.TryFindPropertyInfo(fi) == null)
-                        Debug.WriteLine("WARNING!!: Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
+                    if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
+                        throw new InvalidOperationException("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
 
                     Field field = GenerateField(route, contexto, table, preName, forceNull);
 
@@ -247,11 +247,6 @@ namespace Signum.Engine.Maps
         }
 
         static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((IdentifiableEntity o) => o.toStr);
-
-        protected virtual bool SilentMode()
-        {
-            return schema.SilentMode; 
-        }
 
         protected virtual Field GenerateField(PropertyRoute route, Contexts context, Table table, NameSequence preName, bool forceNull)
         {
@@ -514,7 +509,7 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateFieldName(PropertyRoute route, KindOfField tipoCampo)
         {
-            string name = Reflector.CleanFieldName(route.FieldInfo.Name);
+            string name = Reflector.PropertyName(route.FieldInfo.Name);
 
             switch (tipoCampo)
             {
@@ -686,11 +681,6 @@ namespace Signum.Engine.Maps
         public override Table Include(Type type)
         {
             return Schema.Table(type);
-        }
-
-        protected override bool SilentMode()
-        {
-            return true;
         }
 
         public Table NewView(Type type)
