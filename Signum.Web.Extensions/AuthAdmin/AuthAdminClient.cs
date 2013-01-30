@@ -48,7 +48,7 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (properties)
-                    Register<PropertyRulePack, PropertyAllowedRule, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
+                    Register<PropertyRulePack, PropertyAllowedRule, PropertyRouteDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
                         Mapping.New<PropertyAllowed>(), "Resource_Path", true);
 
                 if (queries)

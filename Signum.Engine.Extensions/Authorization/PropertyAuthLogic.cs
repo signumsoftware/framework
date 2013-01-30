@@ -17,7 +17,7 @@ namespace Signum.Engine.Authorization
 {
     public static class PropertyAuthLogic
     {
-        static AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed> cache;
+        static AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyRouteDN, PropertyRoute, PropertyAllowed> cache;
 
         public static IManualAuth<PropertyRoute, PropertyAllowed> Manual { get { return cache; } }
 
@@ -28,11 +28,11 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
-                PropertyLogic.Start(sb);
+                PropertyRouteLogic.Start(sb);
 
-                cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed>(sb,
-                    PropertyLogic.GetPropertyRoute,
-                    PropertyLogic.GetEntity,
+                cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyRouteDN, PropertyRoute, PropertyAllowed>(sb,
+                    PropertyRouteLogic.GetPropertyRoute,
+                    PropertyRouteLogic.GetEntity,
                     AuthUtils.MaxProperty,
                     AuthUtils.MinProperty);
 
@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
                         if (route == null)
                             return null;
 
-                        var property = PropertyLogic.GetEntity(route);
+                        var property = PropertyRouteLogic.GetEntity(route);
                         if (property.IsNew)
                             property.Save();
                             
@@ -109,7 +109,7 @@ namespace Signum.Engine.Authorization
         public static PropertyRulePack GetPropertyRules(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
             var result = new PropertyRulePack {Role = roleLite, Type = typeDN }; 
-            cache.GetRules(result, PropertyLogic.RetrieveOrGenerateProperties(typeDN));
+            cache.GetRules(result, PropertyRouteLogic.RetrieveOrGenerateProperties(typeDN));
             return result;
         }
 

@@ -329,11 +329,11 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(PropertyDN).NiceName(), Role);
+            return Resources._0RulesFor1.Formato(typeof(PropertyRouteDN).NiceName(), Role);
         }
     }
     [Serializable]
-    public class PropertyAllowedRule : AllowedRule<PropertyDN, PropertyAllowed>{}
+    public class PropertyAllowedRule : AllowedRule<PropertyRouteDN, PropertyAllowed>{}
 
 
     [Serializable]

@@ -59,7 +59,7 @@ namespace Signum.Entities.Authorization
     public class RuleOperationDN : RuleDN<OperationDN, OperationAllowed> { }
 
     [Serializable]
-    public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
+    public class RulePropertyDN : RuleDN<PropertyRouteDN, PropertyAllowed> { }
    
     [Serializable]
     public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> 

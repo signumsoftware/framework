@@ -9,9 +9,9 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [EntityKind(EntityKind.SystemString)]
-    public class PropertyDN : IdentifiableEntity
+    public class PropertyRouteDN : IdentifiableEntity
     {
-        public PropertyDN() { }
+        public PropertyRouteDN() { }
 
         [field: Ignore]
         PropertyRoute route;
@@ -38,7 +38,7 @@ namespace Signum.Entities.Basics
             set { Set(ref type, value, () => Type); }
         }
 
-        static readonly Expression<Func<PropertyDN, string>> ToStringExpression = e => e.path;
+        static readonly Expression<Func<PropertyRouteDN, string>> ToStringExpression = e => e.path;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

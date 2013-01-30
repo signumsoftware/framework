@@ -12,15 +12,15 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Basics
 {
-    public static class PropertyLogic
+    public static class PropertyRouteLogic
     {
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<PropertyDN>();
+                sb.Include<PropertyRouteDN>();
 
-                sb.AddUniqueIndex<PropertyDN>(p => new { p.Path, p.Type }); 
+                sb.AddUniqueIndex<PropertyRouteDN>(p => new { p.Path, p.Type }); 
 
                 sb.Schema.Synchronizing += SyncronizeProperties;
             }
@@ -29,11 +29,11 @@ namespace Signum.Engine.Basics
         const string FieldsForKey = "Properties For:{0}";
         static SqlPreCommand SyncronizeProperties(Replacements replacements)
         {
-            var current = Administrator.TryRetrieveAll<PropertyDN>(replacements).AgGroupToDictionary(a => a.Type.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyDN in the database with path"));
+            var current = Administrator.TryRetrieveAll<PropertyRouteDN>(replacements).AgGroupToDictionary(a => a.Type.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyDN in the database with path"));
 
             var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyDN in the database with path"));
 
-            Table table = Schema.Current.Table<PropertyDN>();
+            Table table = Schema.Current.Table<PropertyRouteDN>();
 
             return Synchronizer.SynchronizeScript(should, current,
                 null,
@@ -52,18 +52,18 @@ namespace Signum.Engine.Basics
                 Spacing.Double);
         }
 
-        public static List<PropertyDN> RetrieveOrGenerateProperties(TypeDN typeDN)
+        public static List<PropertyRouteDN> RetrieveOrGenerateProperties(TypeDN typeDN)
         {
-            var retrieve = Database.Query<PropertyDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Path);
+            var retrieve = Database.Query<PropertyRouteDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Path);
             var generate = GenerateProperties(TypeLogic.DnToType[typeDN], typeDN).ToDictionary(a => a.Path);
 
             return generate.Select(kvp => retrieve.TryGetC(kvp.Key).TryDoC(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
         }
 
-        public static List<PropertyDN> GenerateProperties(Type type, TypeDN typeDN)
+        public static List<PropertyRouteDN> GenerateProperties(Type type, TypeDN typeDN)
         {
             return PropertyRoute.GenerateRoutes(type).Select(pr =>
-                new PropertyDN
+                new PropertyRouteDN
                 {
                     Route = pr,
                     Type = typeDN,
@@ -71,17 +71,17 @@ namespace Signum.Engine.Basics
                 }).ToList();
         }
 
-        public static PropertyRoute GetPropertyRoute(PropertyDN route)
+        public static PropertyRoute GetPropertyRoute(PropertyRouteDN route)
         {
             return PropertyRoute.Parse(TypeLogic.DnToType[route.Type], route.Path);
         }
 
-        public static PropertyDN GetEntity(PropertyRoute route)
+        public static PropertyRouteDN GetEntity(PropertyRoute route)
         {
             TypeDN type = TypeLogic.TypeToDN[route.RootType];
             string path = route.PropertyString();
-            return Database.Query<PropertyDN>().SingleOrDefaultEx(f => f.Type == type && f.Path == path).TryDoC(pi => pi.Route = route) ??
-                 new PropertyDN
+            return Database.Query<PropertyRouteDN>().SingleOrDefaultEx(f => f.Type == type && f.Path == path).TryDoC(pi => pi.Route = route) ??
+                 new PropertyRouteDN
                  {
                      Route = route,
                      Type = type,
