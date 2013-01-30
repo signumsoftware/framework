@@ -128,8 +128,8 @@
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
-    <Compile Include="Localization\CodeLocalization.cs" />
-    <Compile Include="Localization\DataLocalization.cs" />
+    <Compile Include="Localization\LocalizedType.cs" />
+    <Compile Include="Localization\LocalizedInstance.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />

@@ -12,26 +12,24 @@ using System.Text;
 
 namespace Signum.Engine.Extensions.Localization
 {
-    public static class DataLocalizationLogic
+    public static class LocalizedInstanceLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<DataLocalizationDN>();
+                sb.Include<LocalizedInstanceDN>();
 
-                dqm[typeof(DataLocalizationDN)] = (from e in Database.Query<DataLocalizationDN>()
+                dqm[typeof(LocalizedInstanceDN)] = (from e in Database.Query<LocalizedInstanceDN>()
                                                    select new
                                                    {
                                                        Entity = e,
                                                        e.Id,
                                                        e.Culture,
                                                        e.Instance,
-                                                       e.PropertyRoute,
-                                                       LocalizedText = e.LocalizedText.Etc(50),
                                                    }).ToDynamic();
 
-                new BasicExecute<DataLocalizationDN>(CodeLocalizationOperation.Save)
+                new BasicExecute<LocalizedInstanceDN>(LocalizedInstanceOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

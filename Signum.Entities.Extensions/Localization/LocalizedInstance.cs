@@ -9,12 +9,12 @@ using System.Text;
 namespace Signum.Entities.Extensions.Localization
 {
     [Serializable, EntityKind(EntityKind.Main)]
-    public class DataLocalizationDN : Entity
+    public class LocalizedInstanceDN : Entity
     {
         [NotNullable]
-        CultureInfoDN culture;
+        Lite<CultureInfoDN> culture;
         [NotNullValidator]
-        public CultureInfoDN Culture
+        public Lite<CultureInfoDN> Culture
         {
             get { return culture; }
             set { Set(ref culture, value, () => Culture); }
@@ -29,6 +29,24 @@ namespace Signum.Entities.Extensions.Localization
             set { Set(ref instance, value, () => Instance); }
         }
 
+        [NotNullable]
+        MList<LocalizedInstancePropertyDN> properties = new MList<LocalizedInstancePropertyDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<LocalizedInstancePropertyDN> Properties
+        {
+            get { return properties; }
+            set { Set(ref properties, value, () => Properties); }
+        }
+
+        public override string ToString()
+        {
+            return "{0} - ({1} {2})".Formato(culture, instance.TryCC(e => e.EntityType.Name));
+        }
+    }
+
+    [Serializable]
+    public class LocalizedInstancePropertyDN : Entity
+    {
         [NotNullable]
         Lite<PropertyRouteDN> propertyRoute;
         [NotNullValidator]
@@ -46,14 +64,9 @@ namespace Signum.Entities.Extensions.Localization
             get { return localizedText; }
             set { Set(ref localizedText, value, () => LocalizedText); }
         }
-
-        public override string ToString()
-        {
-            return "{0} - ({1} {2}).{3}".Formato(culture, instance.TryCC(e => e.EntityType.Name), instance.TryCS(e => e.IdOrNull), propertyRoute);
-        }
     }
 
-    public enum DataLocalizationOperation
+    public enum LocalizedInstanceOperation
     {
         Save,
         Delete,

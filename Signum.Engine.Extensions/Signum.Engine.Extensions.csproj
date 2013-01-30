@@ -107,8 +107,8 @@
     <Compile Include="Authorization\FacadeMethodAuthLogic.cs" />
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
-    <Compile Include="Localization\CodeLocalizationLogic.cs" />
-    <Compile Include="Localization\DataLocalizationLogic.cs" />
+    <Compile Include="Localization\LocalizedTypeLogic.cs" />
+    <Compile Include="Localization\LocalizedInstanceLogic.cs" />
     <Compile Include="Localization\CultureInfoLogic.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />
