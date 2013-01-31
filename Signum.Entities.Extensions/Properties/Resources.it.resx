@@ -145,7 +145,7 @@
     <value>La parte {0} è nella colonna {1} della riga {2} che ha già altre parti</value>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
-    <value>Non ci sono parti nelle righe {0}</value>
+    <value>Non ci sono parti nelle righe {{{0}}}</value>
   </data>
   <data name="CountSearchControlPartDN" xml:space="preserve">
     <value>Elenco dei contatori</value>

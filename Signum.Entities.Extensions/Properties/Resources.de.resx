@@ -292,7 +292,7 @@
     <value>Im Zusammenhang mit</value>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
-    <value>Es gibt keine Teile in den Zeilen {0}</value>
+    <value>Es gibt keine Teile in den Zeilen {{{0}}}</value>
   </data>
   <data name="CountSearchControlPartDN_UserQueries" xml:space="preserve">
     <value>Benutzerabfragen</value>

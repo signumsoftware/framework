@@ -162,17 +162,8 @@
   <data name="CertFileType_SignedFile" xml:space="preserve">
     <value>Archivo firmado</value>
   </data>
-  <data name="EnumDN_Key" xml:space="preserve">
-    <value>Clave</value>
-  </data>
-  <data name="EnumDN_Name" xml:space="preserve">
-    <value>Nombre</value>
-  </data>
   <data name="ExcelReportDN" xml:space="preserve">
     <value>Informe excel</value>
-  </data>
-  <data name="ExcelReportDN_Deleted" xml:space="preserve">
-    <value>Eliminado</value>
   </data>
   <data name="ExcelReportDN_DisplayName" xml:space="preserve">
     <value>Nombre del informe</value>
@@ -192,29 +183,8 @@
   <data name="HolidayDN_Name" xml:space="preserve">
     <value>Nombre</value>
   </data>
-  <data name="ExceptionDN_UrlReferer" xml:space="preserve">
-    <value>Url Referer</value>
-  </data>
-  <data name="ExceptionDN_ThreadId" xml:space="preserve">
-    <value>Thread Id</value>
-  </data>
-  <data name="ExceptionDN_StackTraceHash" xml:space="preserve">
-    <value>Stack Trace Hash</value>
-  </data>
-  <data name="ExceptionDN_StackTrace" xml:space="preserve">
-    <value>Stack Trace</value>
-  </data>
-  <data name="ExceptionDN_Session" xml:space="preserve">
-    <value>Session</value>
-  </data>
-  <data name="ExceptionDN_RequestUrl" xml:space="preserve">
-    <value>Request Url</value>
-  </data>
   <data name="PackageDN" xml:space="preserve">
     <value>Paquete</value>
-  </data>
-  <data name="PackageDN_Operation" xml:space="preserve">
-    <value>Operación</value>
   </data>
   <data name="PackageLineDN" xml:space="preserve">
     <value>Línea paquete</value>
@@ -227,9 +197,6 @@
   </data>
   <data name="PackageLineDN_Package" xml:space="preserve">
     <value>Paquete</value>
-  </data>
-  <data name="PackageLineDN_Target" xml:space="preserve">
-    <value>Destino</value>
   </data>
   <data name="ProcessDN" xml:space="preserve">
     <value>Proceso</value>
@@ -465,9 +432,6 @@
   <data name="FilePathDN_FileLengthString" xml:space="preserve">
     <value>Tamaño</value>
   </data>
-  <data name="ExceptionDN_QueryString" xml:space="preserve">
-    <value>Query String</value>
-  </data>
   <data name="UserQueryDN" xml:space="preserve">
     <value>Consulta de Usuario</value>
   </data>
@@ -488,9 +452,6 @@
   </data>
   <data name="QueryDN" xml:space="preserve">
     <value>Query</value>
-  </data>
-  <data name="QueryDN_DisplayName" xml:space="preserve">
-    <value>Nombre</value>
   </data>
   <data name="QueryDN_Key" xml:space="preserve">
     <value>Clave</value>
@@ -565,43 +526,7 @@
     <value>La parte {0} está en la columna {1} de la fila {2} que ya contiene otras partes</value>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
-    <value>No hay ninguna parte en las filas {0}</value>
-  </data>
-  <data name="ExceptionDN_Form" xml:space="preserve">
-    <value>Formulario</value>
-  </data>
-  <data name="ExceptionDN_ExceptionType" xml:space="preserve">
-    <value>Exception Type</value>
-  </data>
-  <data name="ExceptionDN_ExceptionMessageHash" xml:space="preserve">
-    <value>Hash mensaje excepción</value>
-  </data>
-  <data name="ExceptionDN_ExceptionMessage" xml:space="preserve">
-    <value>Mensaje excepción</value>
-  </data>
-  <data name="ExceptionDN_Environment" xml:space="preserve">
-    <value>Entorno</value>
-  </data>
-  <data name="ChartBase_ChartResultType" xml:space="preserve">
-    <value>Tipo resultado del gráfico</value>
-  </data>
-  <data name="ChartBase_ChartType" xml:space="preserve">
-    <value>Tipo de gráfico</value>
-  </data>
-  <data name="ChartRequest_Chart" xml:space="preserve">
-    <value>Gráfico</value>
-  </data>
-  <data name="ChartBase_Value2" xml:space="preserve">
-    <value>Valor2</value>
-  </data>
-  <data name="ChartBase_GroupResults" xml:space="preserve">
-    <value>Agrupar resultados</value>
-  </data>
-  <data name="ChartBase_Value1" xml:space="preserve">
-    <value>Valor1</value>
-  </data>
-  <data name="ChartBase_Dimension2" xml:space="preserve">
-    <value>Dimensión2</value>
+    <value>No hay ninguna parte en las filas {{{0}}}</value>
   </data>
   <data name="ChartRequest_Filters" xml:space="preserve">
     <value>Filtros</value>
@@ -609,89 +534,8 @@
   <data name="ChartRequest_QueryName" xml:space="preserve">
     <value>Nombre consulta</value>
   </data>
-  <data name="ChartResultType_Bubbles" xml:space="preserve">
-    <value>Burbujas</value>
-  </data>
-  <data name="ChartResultType_Points" xml:space="preserve">
-    <value>Puntos</value>
-  </data>
-  <data name="ChartResultType_TypeTypeValue" xml:space="preserve">
-    <value>Tipo Tipo Valor</value>
-  </data>
-  <data name="ChartResultType_TypeValue" xml:space="preserve">
-    <value>Tipo Valor</value>
-  </data>
-  <data name="ChartTokenDN" xml:space="preserve">
-    <value>Token de gráfico</value>
-  </data>
-  <data name="ExceptionDN_CreationDate" xml:space="preserve">
-    <value>Fecha de creación</value>
-  </data>
-  <data name="ChartTokenDN_DisplayName" xml:space="preserve">
-    <value>Nombre</value>
-  </data>
-  <data name="ExceptionDN_ControllerName" xml:space="preserve">
-    <value>Controller Name</value>
-  </data>
-  <data name="ExceptionDN_ActionName" xml:space="preserve">
-    <value>Action Name</value>
-  </data>
   <data name="LinkListPartDN_Links" xml:space="preserve">
     <value>Enlaces</value>
-  </data>
-  <data name="ExceptionDN" xml:space="preserve">
-    <value>Excepción</value>
-  </data>
-  <data name="ControlPanelDN_PartTitleMustBeSpecifiedForListParts" xml:space="preserve">
-    <value>Título de la parte debe especificarse para partes lista</value>
-  </data>
-  <data name="ChartType_Bars" xml:space="preserve">
-    <value>Barras</value>
-  </data>
-  <data name="ChartType_Bubbles" xml:space="preserve">
-    <value>Burbujas</value>
-  </data>
-  <data name="ChartType_Columns" xml:space="preserve">
-    <value>Columnas</value>
-  </data>
-  <data name="ChartType_Doughnout" xml:space="preserve">
-    <value>Donut</value>
-  </data>
-  <data name="ChartType_Lines" xml:space="preserve">
-    <value>Líneas</value>
-  </data>
-  <data name="ChartType_MultiBars" xml:space="preserve">
-    <value>Múltiples barras</value>
-  </data>
-  <data name="ChartType_MultiColumns" xml:space="preserve">
-    <value>Múltiples columnas</value>
-  </data>
-  <data name="ChartType_MultiLines" xml:space="preserve">
-    <value>Múltiples líneas</value>
-  </data>
-  <data name="ChartType_Pie" xml:space="preserve">
-    <value>Tarta</value>
-  </data>
-  <data name="ChartType_Points" xml:space="preserve">
-    <value>Puntos</value>
-  </data>
-  <data name="ChartType_StackedAreas" xml:space="preserve">
-    <value>Áreas apiladas</value>
-  </data>
-  <data name="ChartType_StackedBars" xml:space="preserve">
-    <value>Barras apiladas</value>
-  </data>
-  <data name="ChartType_StackedColumns" xml:space="preserve">
-    <value>Columnas apiladas</value>
-  </data>
-  <data name="ChartType_TotalAreas" xml:space="preserve">
-    <value>Áreas totales</value>
-  </data>
-  <data name="ChartType_TotalBars" xml:space="preserve">
-    <value>Barras totales</value>
-  </data>
-  <data name="ChartType_TotalColumns" xml:space="preserve">
-    <value>Columnas totales</value>
   </data>
   <data name="LinkElement_Link" xml:space="preserve">
     <value>Enlace</value>
@@ -707,9 +551,6 @@
   </data>
   <data name="ControlPanelDN_DisplayName" xml:space="preserve">
     <value>Nombre</value>
-  </data>
-  <data name="ControlPanelDN_HomePage" xml:space="preserve">
-    <value>Página de inicio</value>
   </data>
   <data name="ControlPanelDN_NumberOfColumns" xml:space="preserve">
     <value>Número de columnas</value>
@@ -737,24 +578,6 @@
   </data>
   <data name="EmailPackageDN_Name" xml:space="preserve">
     <value>Nombre</value>
-  </data>
-  <data name="DeploymentLogDN_Description" xml:space="preserve">
-    <value>Descripción</value>
-  </data>
-  <data name="DeploymentLogDN_CreationDate" xml:space="preserve">
-    <value>Fecha de creación</value>
-  </data>
-  <data name="DeploymentLogDN" xml:space="preserve">
-    <value>Registro despliegue</value>
-  </data>
-  <data name="EmailState_Received" xml:space="preserve">
-    <value>Recibido</value>
-  </data>
-  <data name="EmailState_Sent" xml:space="preserve">
-    <value>Enviado</value>
-  </data>
-  <data name="EmailState_SentError" xml:space="preserve">
-    <value>Error de envío</value>
   </data>
   <data name="EmailTemplateDN" xml:space="preserve">
     <value>Plantillas de email</value>
@@ -822,20 +645,11 @@
   <data name="ColorsFor0" xml:space="preserve">
     <value>Colores para {0}</value>
   </data>
-  <data name="OperationDN" xml:space="preserve">
-    <value>Operación</value>
-  </data>
   <data name="NewsletterDeliveryDN_Recipient" xml:space="preserve">
     <value>Destinatario</value>
   </data>
   <data name="ChartRequest_Orders" xml:space="preserve">
     <value>Órdenes</value>
-  </data>
-  <data name="PackageDN_NumErrors" xml:space="preserve">
-    <value>Núm. Errores</value>
-  </data>
-  <data name="PackageDN_NumLines" xml:space="preserve">
-    <value>Núm. Lineas</value>
   </data>
   <data name="PackageLineDN_Result" xml:space="preserve">
     <value>Resultado</value>
@@ -909,9 +723,6 @@
   <data name="QueryOrderDN_OrderType" xml:space="preserve">
     <value>Tipo de orden</value>
   </data>
-  <data name="QueryTokenDN_Token" xml:space="preserve">
-    <value>Token</value>
-  </data>
   <data name="ResetPasswordRequestDN" xml:space="preserve">
     <value>Solicitud nueva contraseña</value>
   </data>
@@ -981,17 +792,8 @@
   <data name="CountUserQueryElement" xml:space="preserve">
     <value>Contador</value>
   </data>
-  <data name="ProcessExecutionDN_User" xml:space="preserve">
-    <value>Usuario</value>
-  </data>
-  <data name="DeploymentLogDN_Version" xml:space="preserve">
-    <value>Versión</value>
-  </data>
   <data name="_0RulesFor1" xml:space="preserve">
     <value>reglas de {0} para {1}</value>
-  </data>
-  <data name="EmailState_Created" xml:space="preserve">
-    <value>Creado</value>
   </data>
   <data name="EmailTemplateDN_FriendlyName" xml:space="preserve">
     <value>Nombre descriptivo</value>
@@ -1011,23 +813,11 @@
   <data name="RoleQueries_ReferedBy" xml:space="preserve">
     <value>Referido por</value>
   </data>
-  <data name="DeploymentLogDN_DatabaseName" xml:space="preserve">
-    <value>Database Name</value>
-  </data>
-  <data name="DeploymentLogDN_DataSourceName" xml:space="preserve">
-    <value>Data Source Name</value>
-  </data>
-  <data name="DeploymentLogDN_MachineName" xml:space="preserve">
-    <value>Machine Name</value>
-  </data>
   <data name="EmailTemplateDN_FullClassName" xml:space="preserve">
     <value>Full Class Name</value>
   </data>
   <data name="ProcessOperation_Cancel" xml:space="preserve">
     <value>Cancelar</value>
-  </data>
-  <data name="ProcessOperation_Create" xml:space="preserve">
-    <value>Crear</value>
   </data>
   <data name="ProcessOperation_Execute" xml:space="preserve">
     <value>Ejecutar</value>
@@ -1040,9 +830,6 @@
   </data>
   <data name="ProcessOperation_Suspend" xml:space="preserve">
     <value>Suspender</value>
-  </data>
-  <data name="ChartBase_Dimension1" xml:space="preserve">
-    <value>Dimensión1</value>
   </data>
   <data name="UserOperation_Create" xml:space="preserve">
     <value>Crear</value>
@@ -1131,15 +918,6 @@
   <data name="SMSMessageDN_Template" xml:space="preserve">
     <value>Plantilla</value>
   </data>
-  <data name="ChartBase" xml:space="preserve">
-    <value>Gráfico Base</value>
-  </data>
-  <data name="SMSMessageOperations_Send" xml:space="preserve">
-    <value>Enviar</value>
-  </data>
-  <data name="SMSMessageOperations_UpdateStatus" xml:space="preserve">
-    <value>Actualizar estado</value>
-  </data>
   <data name="SMSMessageState_Created" xml:space="preserve">
     <value>Creado</value>
   </data>
@@ -1166,15 +944,6 @@
   </data>
   <data name="SMSTemplateDN_State" xml:space="preserve">
     <value>Estado</value>
-  </data>
-  <data name="SMSTemplateOperations_Create" xml:space="preserve">
-    <value>Crear</value>
-  </data>
-  <data name="SMSTemplateOperations_Disable" xml:space="preserve">
-    <value>Deshabilitar</value>
-  </data>
-  <data name="SMSTemplateOperations_Enable" xml:space="preserve">
-    <value>Activar</value>
   </data>
   <data name="_0IsNotMultiple1" xml:space="preserve">
     <value>{0} no es múltiple de {1}</value>
@@ -1266,12 +1035,6 @@
   <data name="NewsletterDN_Name" xml:space="preserve">
     <value>Nombre</value>
   </data>
-  <data name="NewsletterDN_NumErrors" xml:space="preserve">
-    <value>Num errores</value>
-  </data>
-  <data name="NewsletterDN_NumLines" xml:space="preserve">
-    <value>Núm líneas</value>
-  </data>
   <data name="NewsletterDN_SMTPConfig" xml:space="preserve">
     <value>SMTPConfig</value>
   </data>
@@ -1280,12 +1043,6 @@
   </data>
   <data name="NewsletterDN_Subject" xml:space="preserve">
     <value>Asunto</value>
-  </data>
-  <data name="NewsletterOperations_Save" xml:space="preserve">
-    <value>Guardar</value>
-  </data>
-  <data name="NewsletterOperations_Send" xml:space="preserve">
-    <value>Enviar</value>
   </data>
   <data name="NewsletterState_Saved" xml:space="preserve">
     <value>Guardado</value>
@@ -1317,12 +1074,6 @@
   <data name="SMSMessageDN_UpdatePackage" xml:space="preserve">
     <value>Paquete de actualización</value>
   </data>
-  <data name="SMSMessageOperations_CreateSMSMessageFromTemplate" xml:space="preserve">
-    <value>Crear SMS desde plantilla</value>
-  </data>
-  <data name="SMSMessageOperations_CreateUpdateStatusPackage" xml:space="preserve">
-    <value>Crear paquete de actualización de estado</value>
-  </data>
   <data name="SMSMessageState_Delivered" xml:space="preserve">
     <value>Entregado</value>
   </data>
@@ -1331,18 +1082,6 @@
   </data>
   <data name="SMSPackageDN_Name" xml:space="preserve">
     <value>Nombre</value>
-  </data>
-  <data name="SMSPackageDN_NumErrors" xml:space="preserve">
-    <value>Num errores</value>
-  </data>
-  <data name="SMSPackageDN_NumLines" xml:space="preserve">
-    <value>Num lineas</value>
-  </data>
-  <data name="SMSProviderOperations_SendSMSMessage" xml:space="preserve">
-    <value>Enviar SMS</value>
-  </data>
-  <data name="SMSProviderOperations_SendSMSMessagesFromTemplate" xml:space="preserve">
-    <value>Enviar SMS desde plantilla</value>
   </data>
   <data name="SMSSendPackageDN" xml:space="preserve">
     <value>Paquete de envios SMS</value>
@@ -1356,9 +1095,6 @@
   <data name="SMSTemplateDN_RemoveNoSMSCharacters" xml:space="preserve">
     <value>Quitar No SMSCharacters</value>
   </data>
-  <data name="SMSTemplateOperations_Save" xml:space="preserve">
-    <value>Guardar</value>
-  </data>
   <data name="SMSUpdatePackageDN" xml:space="preserve">
     <value>Paquete de actualización de SMS</value>
   </data>
@@ -1368,12 +1104,6 @@
   <data name="UserQueryPartDN_UserQuery" xml:space="preserve">
     <value>Consulta de usuario</value>
   </data>
-  <data name="SMSMessageOperations_CreateSMS" xml:space="preserve">
-    <value>Crear SMS</value>
-  </data>
-  <data name="UserChartDN_Chart" xml:space="preserve">
-    <value>Gráfico</value>
-  </data>
   <data name="EmailMessageDN_Bcc" xml:space="preserve">
     <value>CCO</value>
   </data>
@@ -1382,21 +1112,6 @@
   </data>
   <data name="WebImage" xml:space="preserve">
     <value>Imagen</value>
-  </data>
-  <data name="ExceptionDN_User" xml:space="preserve">
-    <value>Usuario</value>
-  </data>
-  <data name="ExceptionDN_UserAgent" xml:space="preserve">
-    <value>User Agent</value>
-  </data>
-  <data name="ExceptionDN_UserHostAddress" xml:space="preserve">
-    <value>User Host Address</value>
-  </data>
-  <data name="ExceptionDN_UserHostName" xml:space="preserve">
-    <value>User Host Name</value>
-  </data>
-  <data name="ExceptionDN_Version" xml:space="preserve">
-    <value>Versión</value>
   </data>
   <data name="ExpressionCanNotBeAnAggregate" xml:space="preserve">
     <value>La expresión no puede ser un agregado</value>
@@ -1410,50 +1125,29 @@
   <data name="NewsletterDN_Query" xml:space="preserve">
     <value>Consulta</value>
   </data>
-  <data name="NewsletterOperations_AddRecipients" xml:space="preserve">
-    <value>Agregar destinatarios</value>
-  </data>
-  <data name="NewsletterOperations_CreateFromThis" xml:space="preserve">
-    <value>Crear a partir de este</value>
-  </data>
-  <data name="NewsletterOperations_RemoveRecipients" xml:space="preserve">
-    <value>Quitar destinatarios</value>
-  </data>
   <data name="NewsletterState_Created" xml:space="preserve">
     <value>Creado</value>
   </data>
   <data name="TypeConditionNameDN" xml:space="preserve">
     <value>Nombre condición de tipo</value>
   </data>
-  <data name="OperationLogDN" xml:space="preserve">
-    <value>Registro de operación</value>
+  <data name="AlertOperation_SaveNew" xml:space="preserve">
+    <value>Guardar nuevo</value>
   </data>
-  <data name="OperationLogDN_Duration" xml:space="preserve">
-    <value>Duración</value>
+  <data name="AlertOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
   </data>
-  <data name="OperationLogDN_End" xml:space="preserve">
-    <value>Final</value>
+  <data name="AlertDN_Title" xml:space="preserve">
+    <value>Título</value>
   </data>
-  <data name="OperationLogDN_Exception" xml:space="preserve">
-    <value>Excepción</value>
-  </data>
-  <data name="OperationLogDN_Operation" xml:space="preserve">
-    <value>Operación</value>
-  </data>
-  <data name="OperationLogDN_Start" xml:space="preserve">
-    <value>Inicio</value>
-  </data>
-  <data name="OperationLogDN_Target" xml:space="preserve">
-    <value>Destino</value>
-  </data>
-  <data name="OperationLogDN_User" xml:space="preserve">
-    <value>Usuario</value>
+  <data name="AlertDN_Text" xml:space="preserve">
+    <value>Texto</value>
   </data>
   <data name="TypeAllowedBasic_Read" xml:space="preserve">
     <value>Lectura</value>
   </data>
-  <data name="PackageDN_User" xml:space="preserve">
-    <value>Usuario</value>
+  <data name="AlertDN_Target" xml:space="preserve">
+    <value>Destino</value>
   </data>
   <data name="TypeAllowedBasic_None" xml:space="preserve">
     <value>Ninguno</value>
@@ -1467,17 +1161,17 @@
   <data name="TypeAllowedBasic" xml:space="preserve">
     <value>Permiso tipo básico</value>
   </data>
-  <data name="TypeAllowed_Read" xml:space="preserve">
-    <value>Lectura</value>
+  <data name="AlertDN_State" xml:space="preserve">
+    <value>Estado</value>
   </data>
-  <data name="RoleOperations_Delete" xml:space="preserve">
-    <value>Eliminar</value>
+  <data name="AlertDN_NotAttended" xml:space="preserve">
+    <value>No atendida</value>
   </data>
-  <data name="TypeAllowed_None" xml:space="preserve">
-    <value>Ninguno</value>
+  <data name="AlertDN_Future" xml:space="preserve">
+    <value>Futura</value>
   </data>
-  <data name="TypeAllowed_Modify" xml:space="preserve">
-    <value>Modificar</value>
+  <data name="AlertDN_CreationDate" xml:space="preserve">
+    <value>Fecha de creación</value>
   </data>
   <data name="RuleTypeConditionDN_Allowed" xml:space="preserve">
     <value>Permitido</value>
@@ -1530,8 +1224,8 @@
   <data name="SMSTemplateDN_EditableMessage" xml:space="preserve">
     <value>Mensaje editable</value>
   </data>
-  <data name="TypeAllowed_Create" xml:space="preserve">
-    <value>Crear</value>
+  <data name="AlertDN_CreatedBy" xml:space="preserve">
+    <value>Creado por</value>
   </data>
   <data name="UserChartDN_Orders" xml:space="preserve">
     <value>Órdenes</value>
@@ -1545,26 +1239,485 @@
   <data name="WebDownload" xml:space="preserve">
     <value>Descargar</value>
   </data>
-  <data name="TypeAllowed_DBCreateUIModify" xml:space="preserve">
-    <value>DBCreate UIModify</value>
+  <data name="AlertDN_AttendedDate" xml:space="preserve">
+    <value>Fecha revisión</value>
   </data>
-  <data name="TypeAllowed_DBCreateUINone" xml:space="preserve">
-    <value>DBCreate UINone</value>
+  <data name="AlertDN_AttendedBy" xml:space="preserve">
+    <value>Atendida por</value>
   </data>
-  <data name="TypeAllowed_DBCreateUIRead" xml:space="preserve">
-    <value>DBCreate UIRead</value>
+  <data name="AlertDN_Attended" xml:space="preserve">
+    <value>Atendida</value>
   </data>
-  <data name="TypeAllowed_DBModifyUINone" xml:space="preserve">
-    <value>DBModify UINone</value>
+  <data name="AlertDN_AlertType" xml:space="preserve">
+    <value>Tipo de alerta</value>
   </data>
-  <data name="TypeAllowed_DBModifyUIRead" xml:space="preserve">
-    <value>DBModify UIRead</value>
+  <data name="AlertDN_AlertDate" xml:space="preserve">
+    <value>Fecha alerta</value>
   </data>
-  <data name="TypeAllowed_DBReadUINone" xml:space="preserve">
-    <value>DBRead UINone</value>
+  <data name="AlertDN" xml:space="preserve">
+    <value>Alerta</value>
+  </data>
+  <data name="AlertOperation_Attend" xml:space="preserve">
+    <value>Atender</value>
+  </data>
+  <data name="AlertOperation_Unattend" xml:space="preserve">
+    <value>Desatender</value>
+  </data>
+  <data name="AlertState_Attended" xml:space="preserve">
+    <value>Atentida</value>
+  </data>
+  <data name="AlertState_New" xml:space="preserve">
+    <value>Nuevo</value>
+  </data>
+  <data name="AlertState_Saved" xml:space="preserve">
+    <value>Guardado</value>
+  </data>
+  <data name="AlertTypeDN" xml:space="preserve">
+    <value>Tipo de alerta</value>
+  </data>
+  <data name="AlertTypeDN_Key" xml:space="preserve">
+    <value>Clave</value>
+  </data>
+  <data name="AlertTypeDN_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="AlertTypeOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="CalendarOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Chart" xml:space="preserve">
+    <value>Gráfico</value>
+  </data>
+  <data name="ChartColumnDN" xml:space="preserve">
+    <value>Columna de gráfico</value>
+  </data>
+  <data name="ChartColumnDN_DisplayName" xml:space="preserve">
+    <value>Nombre para Mostrar</value>
+  </data>
+  <data name="ChartColumnDN_Index" xml:space="preserve">
+    <value>Índice</value>
+  </data>
+  <data name="ChartColumnDN_Parameter1" xml:space="preserve">
+    <value>Parámetro1</value>
+  </data>
+  <data name="ChartColumnDN_Parameter2" xml:space="preserve">
+    <value>Parámetro2</value>
+  </data>
+  <data name="ChartColumnDN_Parameter3" xml:space="preserve">
+    <value>Parámetro3</value>
+  </data>
+  <data name="ChartColumnDN_ScriptColumn" xml:space="preserve">
+    <value>Columna de script</value>
+  </data>
+  <data name="ChartColumnType_Date" xml:space="preserve">
+    <value>Fecha</value>
+  </data>
+  <data name="ChartColumnType_DateTime" xml:space="preserve">
+    <value>Fecha hora</value>
+  </data>
+  <data name="ChartColumnType_Enum" xml:space="preserve">
+    <value>Enum</value>
+  </data>
+  <data name="ChartColumnType_Groupable" xml:space="preserve">
+    <value>Agrupable</value>
+  </data>
+  <data name="ChartColumnType_Integer" xml:space="preserve">
+    <value>Entero</value>
+  </data>
+  <data name="ChartColumnType_Lite" xml:space="preserve">
+    <value>Lite</value>
+  </data>
+  <data name="ChartColumnType_Magnitude" xml:space="preserve">
+    <value>Magnitud</value>
+  </data>
+  <data name="ChartColumnType_Positionable" xml:space="preserve">
+    <value>Posicionable</value>
+  </data>
+  <data name="ChartColumnType_Real" xml:space="preserve">
+    <value>Real</value>
+  </data>
+  <data name="ChartColumnType_String" xml:space="preserve">
+    <value>Cadena</value>
+  </data>
+  <data name="ChartParameterType_Enum" xml:space="preserve">
+    <value>Enum</value>
+  </data>
+  <data name="ChartParameterType_Number" xml:space="preserve">
+    <value>Número</value>
+  </data>
+  <data name="ChartParameterType_String" xml:space="preserve">
+    <value>Cadena</value>
+  </data>
+  <data name="ChartRequest_ChartScript" xml:space="preserve">
+    <value>Script de Gráfico</value>
+  </data>
+  <data name="ChartRequest_Columns" xml:space="preserve">
+    <value>Columnas</value>
+  </data>
+  <data name="ChartRequest_GroupResults" xml:space="preserve">
+    <value>Resultados de grupo</value>
+  </data>
+  <data name="ChartScriptColumnDN" xml:space="preserve">
+    <value>Columna de Script de Gráfico</value>
+  </data>
+  <data name="ChartScriptColumnDN_ColumnType" xml:space="preserve">
+    <value>Tipo de columna</value>
+  </data>
+  <data name="ChartScriptColumnDN_DisplayName" xml:space="preserve">
+    <value>Nombre para Mostrar</value>
+  </data>
+  <data name="ChartScriptColumnDN_Index" xml:space="preserve">
+    <value>Índice</value>
+  </data>
+  <data name="ChartScriptColumnDN_IsGroupKey" xml:space="preserve">
+    <value>Es clave de grupo</value>
+  </data>
+  <data name="ChartScriptColumnDN_IsOptional" xml:space="preserve">
+    <value>Es opcional</value>
+  </data>
+  <data name="ChartScriptColumnDN_Parameter1" xml:space="preserve">
+    <value>Parámetro1</value>
+  </data>
+  <data name="ChartScriptColumnDN_Parameter2" xml:space="preserve">
+    <value>Parámetro2</value>
+  </data>
+  <data name="ChartScriptColumnDN_Parameter3" xml:space="preserve">
+    <value>Parámetro3</value>
+  </data>
+  <data name="ChartScriptDN" xml:space="preserve">
+    <value>Script de gráfico</value>
+  </data>
+  <data name="ChartScriptDN_Columns" xml:space="preserve">
+    <value>Columnas</value>
+  </data>
+  <data name="ChartScriptDN_ColumnsStructure" xml:space="preserve">
+    <value>Estructura de columnas</value>
+  </data>
+  <data name="ChartScriptDN_GroupBy" xml:space="preserve">
+    <value>Agrupar por</value>
+  </data>
+  <data name="ChartScriptDN_Icon" xml:space="preserve">
+    <value>Icono</value>
+  </data>
+  <data name="ChartScriptDN_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="ChartScriptDN_Script" xml:space="preserve">
+    <value>Script</value>
+  </data>
+  <data name="ChartScriptOperation_Clone" xml:space="preserve">
+    <value>Clonar</value>
+  </data>
+  <data name="ChartScriptOperation_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="ChartScriptOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="ChartScriptParameterDN" xml:space="preserve">
+    <value>Parámetro de script de gráfico</value>
+  </data>
+  <data name="ChartScriptParameterDN_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="ChartScriptParameterDN_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="ChartScriptParameterDN_ValueDefinition" xml:space="preserve">
+    <value>Definición de valor</value>
+  </data>
+  <data name="ControlPanelDN_HomePagePriority" xml:space="preserve">
+    <value>Prioridad de la página de inicio</value>
+  </data>
+  <data name="ControlPanelDN_TitleMustBeSpecifiedFor0" xml:space="preserve">
+    <value>Se debe especificar el título para {0}</value>
+  </data>
+  <data name="ControlPanelOperation_Clone" xml:space="preserve">
+    <value>Clonar</value>
+  </data>
+  <data name="ControlPanelOperation_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="ControlPanelOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="CountSearchControlPartDN_RequiresTitle" xml:space="preserve">
+    <value>Requiere título</value>
+  </data>
+  <data name="CountUserQueryElement_Href" xml:space="preserve">
+    <value>Href</value>
+  </data>
+  <data name="DisconnectedExportDN" xml:space="preserve">
+    <value>Exportación desconectada</value>
+  </data>
+  <data name="DisconnectedExportDN_BackupDatabase" xml:space="preserve">
+    <value>Copia de seguridad de base de datos</value>
+  </data>
+  <data name="DisconnectedExportDN_Copies" xml:space="preserve">
+    <value>Copias</value>
+  </data>
+  <data name="DisconnectedExportDN_CreateDatabase" xml:space="preserve">
+    <value>Crear base de datos</value>
+  </data>
+  <data name="DisconnectedExportDN_CreateSchema" xml:space="preserve">
+    <value>Crear esquema</value>
+  </data>
+  <data name="DisconnectedExportDN_CreationDate" xml:space="preserve">
+    <value>Fecha de creación</value>
+  </data>
+  <data name="DisconnectedExportDN_DisableForeignKeys" xml:space="preserve">
+    <value>Desactivar Foreign Keys</value>
+  </data>
+  <data name="DisconnectedExportDN_DropDatabase" xml:space="preserve">
+    <value>Eliminar Base de Datos</value>
+  </data>
+  <data name="DisconnectedExportDN_EnableForeignKeys" xml:space="preserve">
+    <value>Activar Foreign Keys</value>
+  </data>
+  <data name="DisconnectedExportDN_Exception" xml:space="preserve">
+    <value>Excepción</value>
+  </data>
+  <data name="DisconnectedExportDN_Lock" xml:space="preserve">
+    <value>Bloqueado</value>
+  </data>
+  <data name="DisconnectedExportDN_Machine" xml:space="preserve">
+    <value>Máquina</value>
+  </data>
+  <data name="DisconnectedExportDN_ReseedIds" xml:space="preserve">
+    <value>Reinicio Ids</value>
+  </data>
+  <data name="DisconnectedExportDN_State" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="DisconnectedExportDN_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="DisconnectedExportState_Completed" xml:space="preserve">
+    <value>Completado</value>
+  </data>
+  <data name="DisconnectedExportState_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="DisconnectedExportState_InProgress" xml:space="preserve">
+    <value>En progreso</value>
+  </data>
+  <data name="DisconnectedExportTableDN" xml:space="preserve">
+    <value>Tabla de exportación desconectada</value>
+  </data>
+  <data name="DisconnectedExportTableDN_CopyTable" xml:space="preserve">
+    <value>Copiar tabla</value>
+  </data>
+  <data name="DisconnectedExportTableDN_Errors" xml:space="preserve">
+    <value>Errores</value>
+  </data>
+  <data name="DisconnectedExportTableDN_MaxIdInRange" xml:space="preserve">
+    <value>Máximo Id en rango</value>
+  </data>
+  <data name="DisconnectedExportTableDN_Order" xml:space="preserve">
+    <value>Orden</value>
+  </data>
+  <data name="DisconnectedExportTableDN_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="DisconnectedImportDN" xml:space="preserve">
+    <value>Importación desconectada</value>
+  </data>
+  <data name="DisconnectedImportDN_Copies" xml:space="preserve">
+    <value>Copias</value>
+  </data>
+  <data name="DisconnectedImportDN_CreationDate" xml:space="preserve">
+    <value>Fecha de creación</value>
+  </data>
+  <data name="DisconnectedImportDN_DisableForeignKeys" xml:space="preserve">
+    <value>Desactivar Foreign Keys</value>
+  </data>
+  <data name="DisconnectedImportDN_DropDatabase" xml:space="preserve">
+    <value>Eliminar Base de Datos</value>
+  </data>
+  <data name="DisconnectedImportDN_EnableForeignKeys" xml:space="preserve">
+    <value>Activar Foreign Keys</value>
+  </data>
+  <data name="DisconnectedImportDN_Exception" xml:space="preserve">
+    <value>Excepción</value>
+  </data>
+  <data name="DisconnectedImportDN_Machine" xml:space="preserve">
+    <value>Máquina</value>
+  </data>
+  <data name="DisconnectedImportDN_RestoreDatabase" xml:space="preserve">
+    <value>Restaurar base de datos</value>
+  </data>
+  <data name="DisconnectedImportDN_State" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="DisconnectedImportDN_SynchronizeSchema" xml:space="preserve">
+    <value>Sincronizar el esquema</value>
+  </data>
+  <data name="DisconnectedImportDN_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="DisconnectedImportDN_Unlock" xml:space="preserve">
+    <value>Desbloquear</value>
+  </data>
+  <data name="DisconnectedImportState_Completed" xml:space="preserve">
+    <value>Completado</value>
+  </data>
+  <data name="DisconnectedImportState_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="DisconnectedImportState_InProgress" xml:space="preserve">
+    <value>En progreso</value>
+  </data>
+  <data name="DisconnectedImportTableDN" xml:space="preserve">
+    <value>Tabla de importación desconectada</value>
+  </data>
+  <data name="DisconnectedImportTableDN_CopyTable" xml:space="preserve">
+    <value>Copiar tabla</value>
+  </data>
+  <data name="DisconnectedImportTableDN_DisableForeignKeys" xml:space="preserve">
+    <value>Desactivar las claves externas</value>
+  </data>
+  <data name="DisconnectedImportTableDN_InsertedOrUpdated" xml:space="preserve">
+    <value>Insertar o actualizar</value>
+  </data>
+  <data name="DisconnectedImportTableDN_InsertedRows" xml:space="preserve">
+    <value>Filas insertadas</value>
+  </data>
+  <data name="DisconnectedImportTableDN_Order" xml:space="preserve">
+    <value>Orden</value>
+  </data>
+  <data name="DisconnectedImportTableDN_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="DisconnectedImportTableDN_UpdatedRows" xml:space="preserve">
+    <value>Filas actualizadas</value>
+  </data>
+  <data name="DisconnectedMachineDN" xml:space="preserve">
+    <value>Máquina desconectada</value>
+  </data>
+  <data name="DisconnectedMachineDN_CreationDate" xml:space="preserve">
+    <value>Fecha de creación</value>
+  </data>
+  <data name="DisconnectedMachineDN_MachineName" xml:space="preserve">
+    <value>Nombre de la máquina</value>
+  </data>
+  <data name="DisconnectedMachineDN_SeedMax" xml:space="preserve">
+    <value>Semilla Máxima</value>
+  </data>
+  <data name="DisconnectedMachineDN_SeedMin" xml:space="preserve">
+    <value>Semilla Mínima</value>
+  </data>
+  <data name="DisconnectedMachineDN_State" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="DisconnectedMachineOperation_FixImport" xml:space="preserve">
+    <value>Arreglar Importación</value>
+  </data>
+  <data name="DisconnectedMachineOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="DisconnectedMachineOperation_UnsafeUnlock" xml:space="preserve">
+    <value>Desbloqueo Inseguro</value>
+  </data>
+  <data name="DisconnectedMachineState_Connected" xml:space="preserve">
+    <value>Conectado</value>
+  </data>
+  <data name="DisconnectedMachineState_Disconnected" xml:space="preserve">
+    <value>Desconectado</value>
+  </data>
+  <data name="DisconnectedMachineState_Faulted" xml:space="preserve">
+    <value>Con errores</value>
+  </data>
+  <data name="DisconnectedMachineState_Fixed" xml:space="preserve">
+    <value>Fijo</value>
+  </data>
+  <data name="EmailMessageOperation_ReSendEmails" xml:space="preserve">
+    <value>Re enviar correos electrónicos</value>
+  </data>
+  <data name="EmailMessageState_Created" xml:space="preserve">
+    <value>Creado</value>
+  </data>
+  <data name="EmailMessageState_Exception" xml:space="preserve">
+    <value>Excepción</value>
+  </data>
+  <data name="EmailMessageState_Received" xml:space="preserve">
+    <value>Recibido</value>
+  </data>
+  <data name="EmailMessageState_Sent" xml:space="preserve">
+    <value>Enviado</value>
+  </data>
+  <data name="EmailTemplateOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="ExcelReportOperation_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="ExcelReportOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="FileRepositoryOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="GroupByChart_Always" xml:space="preserve">
+    <value>Siempre</value>
+  </data>
+  <data name="GroupByChart_Never" xml:space="preserve">
+    <value>Nunca</value>
+  </data>
+  <data name="GroupByChart_Optional" xml:space="preserve">
+    <value>Opcional</value>
+  </data>
+  <data name="LinkListPartDN_RequiresTitle" xml:space="preserve">
+    <value>Requiere título</value>
+  </data>
+  <data name="NewsletterOperation_AddRecipients" xml:space="preserve">
+    <value>Agregar destinatarios</value>
+  </data>
+  <data name="NewsletterOperation_Clone" xml:space="preserve">
+    <value>Clonar</value>
+  </data>
+  <data name="NewsletterOperation_RemoveRecipients" xml:space="preserve">
+    <value>Quitar destinatarios</value>
+  </data>
+  <data name="NewsletterOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="NewsletterOperation_Send" xml:space="preserve">
+    <value>Enviar</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="NoteDN" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="NoteDN_CreatedBy" xml:space="preserve">
+    <value>Creado por</value>
+  </data>
+  <data name="NoteDN_CreationDate" xml:space="preserve">
+    <value>Fecha de creación</value>
+  </data>
+  <data name="NoteDN_Target" xml:space="preserve">
+    <value>Destino</value>
+  </data>
+  <data name="NoteDN_Text" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="NoteDN_Title" xml:space="preserve">
+    <value>Título</value>
+  </data>
+  <data name="NoteOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>[No encontrada]</value>
   </data>
   <data name="Omnibox_DatabaseAccess" xml:space="preserve">
-    <value>Buscar entre 'comillas' hace consultas en base de datos</value>
+    <value>Buscar entre 'apóstrofe' hará consultas a la base de datos</value>
+  </data>
+  <data name="Omnibox_Disambiguate" xml:space="preserve">
+    <value>Con Mayús+entrar eliminará la ambigüedad de la consulta</value>
   </data>
   <data name="Omnibox_Field" xml:space="preserve">
     <value>Campo</value>
@@ -1573,7 +1726,7 @@
     <value>Ayuda</value>
   </data>
   <data name="Omnibox_MatchingOptions" xml:space="preserve">
-    <value>Puedes buscar por (ini)cio, mi(ta)d o (L)etras(M)ayusculas</value>
+    <value>Puede buscar resultados por el (co)mienzo, el me(di)o o por (L)etras(M)ayúsculas</value>
   </data>
   <data name="Omnibox_Query" xml:space="preserve">
     <value>Consulta</value>
@@ -1582,15 +1735,132 @@
     <value>Tipo</value>
   </data>
   <data name="Omnibox_UserChart" xml:space="preserve">
-    <value>GraficoUsuario</value>
+    <value>UserChart</value>
   </data>
   <data name="Omnibox_UserQuery" xml:space="preserve">
-    <value>ConsultaUsuario</value>
+    <value>UserQuery</value>
   </data>
   <data name="Omnibox_Value" xml:space="preserve">
     <value>Valor</value>
   </data>
-  <data name="Omnibox_Disambiguate" xml:space="preserve">
-    <value>Con Shift+Enter desambiguas tu consulta</value>
+  <data name="PackageLineDN_Entity" xml:space="preserve">
+    <value>Entidad</value>
+  </data>
+  <data name="PackageOperationDN" xml:space="preserve">
+    <value>Operación de paquete</value>
+  </data>
+  <data name="PackageOperationDN_Operation" xml:space="preserve">
+    <value>Operación</value>
+  </data>
+  <data name="PasswordExpiresIntervalOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="ProcessExecutionDN_SessionData" xml:space="preserve">
+    <value>Datos de sesión</value>
+  </data>
+  <data name="ProcessOperation_Retry" xml:space="preserve">
+    <value>Reintentar</value>
+  </data>
+  <data name="QueryDN_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="RoleOperation_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="RoleOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="ScheduledTaskOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="SMSMessageDN_Exception" xml:space="preserve">
+    <value>Excepción</value>
+  </data>
+  <data name="SMSMessageDN_Referred" xml:space="preserve">
+    <value>Relacionado</value>
+  </data>
+  <data name="SMSMessageOperation_CreateSMSFromEntity" xml:space="preserve">
+    <value>Crear SMS desde entidad</value>
+  </data>
+  <data name="SMSMessageOperation_CreateSMSFromSMSTemplate" xml:space="preserve">
+    <value>Crear SMS desde plantilla SMS</value>
+  </data>
+  <data name="SMSMessageOperation_CreateSMSWithTemplateFromEntity" xml:space="preserve">
+    <value>Crear SMS con plantilla desde entidad</value>
+  </data>
+  <data name="SMSMessageOperation_CreateUpdateStatusPackage" xml:space="preserve">
+    <value>Crear paquete de actualización de estado</value>
+  </data>
+  <data name="SMSMessageOperation_Send" xml:space="preserve">
+    <value>Enviar</value>
+  </data>
+  <data name="SMSMessageOperation_UpdateStatus" xml:space="preserve">
+    <value>Actualización de estado</value>
+  </data>
+  <data name="SMSProviderOperation_SendSMSMessage" xml:space="preserve">
+    <value>Enviar mensaje SMS</value>
+  </data>
+  <data name="SMSProviderOperation_SendSMSMessagesFromTemplate" xml:space="preserve">
+    <value>Enviar mensajes SMS de plantilla</value>
+  </data>
+  <data name="SMSTemplateOperation_Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="SMSTemplateOperation_Disable" xml:space="preserve">
+    <value>Deshabilitar</value>
+  </data>
+  <data name="SMSTemplateOperation_Enable" xml:space="preserve">
+    <value>Habilitar</value>
+  </data>
+  <data name="SMSTemplateOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="SMTPConfigurationOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="UserChartDN_ChartScript" xml:space="preserve">
+    <value>Script de gráfico</value>
+  </data>
+  <data name="UserChartDN_Columns" xml:space="preserve">
+    <value>Columnas</value>
+  </data>
+  <data name="UserChartDN_GroupResults" xml:space="preserve">
+    <value>Agrupar Resultados</value>
+  </data>
+  <data name="UserChartOperation_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="UserChartOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="UserChartPartDN_RequiresTitle" xml:space="preserve">
+    <value>Requiere título</value>
+  </data>
+  <data name="UserChartPartDN_ShowData" xml:space="preserve">
+    <value>Mostrar datos</value>
+  </data>
+  <data name="UserProcessSessionDN" xml:space="preserve">
+    <value>Sesión de proceso de usuario</value>
+  </data>
+  <data name="UserProcessSessionDN_User" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
+  <data name="UserQueryDN_PreserveFilters" xml:space="preserve">
+    <value>Preservar Filtros</value>
+  </data>
+  <data name="UserQueryOperation_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="UserQueryOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="UserQueryPartDN_RequiresTitle" xml:space="preserve">
+    <value>Requiere título</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>sí</value>
+  </data>
+  <data name="QueryTokenDN_TryToken" xml:space="preserve">
+    <value>Intentar Recuperar Token</value>
   </data>
 </root>

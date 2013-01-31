@@ -292,7 +292,7 @@
     <value>Relacionados</value>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
-    <value>Não há nada nas linhas {0}</value>
+    <value>Não há nada nas linhas {{{0}}}</value>
   </data>
   <data name="CountSearchControlPartDN_UserQueries" xml:space="preserve">
     <value>Questões de utilizador</value>

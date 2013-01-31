@@ -772,7 +772,7 @@
     <value>Liées</value>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
-    <value>Il n'y a pas toutes les parties en rangées {0}</value>
+    <value>Il n'y a pas toutes les parties en rangées {{{0}}}</value>
   </data>
   <data name="CountSearchControlPartDN_UserQueries" xml:space="preserve">
     <value>Requêtes utilisateur</value>
