@@ -6,11 +6,37 @@ using Signum.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Test.Properties;
 using System.Linq.Expressions;
+using System.IO;
 
 namespace Signum.Test
 {
     public static class Assert2
     {
+        static string solutionDirectory;
+        public static string SolutionDirectory
+        {
+            get
+            {
+                if (solutionDirectory == null)
+                {
+                    string directory = Directory.GetCurrentDirectory();
+
+                    while (Path.GetFileName(directory) != "TestResults")
+                    {
+                        if (Path.GetFileName(directory) == null)
+                            throw new InvalidOperationException("TestResults not found");
+
+                        directory = Path.GetDirectoryName(directory);
+                    }
+
+                    solutionDirectory = Path.GetDirectoryName(directory);
+                }
+
+                return solutionDirectory;
+            }
+            set { solutionDirectory = value; }
+        }
+
         public static void Throws<T>(Action action)
             where T : Exception
         {
@@ -91,6 +117,11 @@ namespace Signum.Test
             if (exceeded.HasText())
                 Assert.Fail("{0} exceeded".Formato(exceeded));
 
+        }
+
+        public static new bool Equals(object obj, object obj2)
+        {
+            throw new NotSupportedException("Use Assert.AreEquals instead");
         }
     }
 }

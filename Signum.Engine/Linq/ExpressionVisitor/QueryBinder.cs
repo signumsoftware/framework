@@ -1394,6 +1394,9 @@ namespace Signum.Engine.Linq
             {
                 LiteExpression lite = (LiteExpression)operand;
 
+                if (!uType.IsLite())
+                    throw new InvalidCastException("Impossible to convert an expression of type {0} to {1}".Formato(lite.Type.TypeName(), uType.TypeName())); 
+
                 Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType));
 
                 return MakeLite(entity, null);
