@@ -64,7 +64,7 @@ namespace Signum.Windows
 
         public static void Start()
         {
-            WidgetPanel.GetWidgets += (obj, mainControl) => new LinksWidget() { Control = mainControl } ;
+            WidgetPanel.GetWidgets += (obj, mainControl) => new LinksWidget() { Control = mainControl };
         }
     }
 
@@ -115,9 +115,19 @@ namespace Signum.Windows
     {
         protected QuickLink() { }
 
-        public string Label { get; set; }
+        string label;
+        public string Label 
+        {
+            get {return label;}
 
-        public bool IsVisible { get; set;}
+            set
+            {
+                label = value;
+                RaisePropertyChanged("Label");
+            } 
+        }
+
+        public bool IsVisible { get; set; }
 
         public bool IsShy { get; set; }
 
@@ -130,11 +140,21 @@ namespace Signum.Windows
 
         void Never() { PropertyChanged(null, null); }
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+
     }
 
     public class QuickLinkAction : QuickLink
     {
-        Action action; 
+        Action action;
         public QuickLinkAction(string label, Action action)
         {
             this.Label = label;
@@ -150,41 +170,53 @@ namespace Signum.Windows
 
     public class QuickLinkExplore : QuickLink
     {
-        public ExploreOptions Options {get; set;} 
+        public ExploreOptions Options { get; set; }
+        public bool ShowResultCount { get; set; }
 
-        public QuickLinkExplore(object queryName, string columnName, object value, bool hideColumn):
+        public QuickLinkExplore(object queryName, string columnName, object value, bool hideColumn, bool showCount = false) :
             this(new ExploreOptions(queryName)
-            { 
+            {
                 ShowFilters = false,
                 SearchOnLoad = true,
-                ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove: ColumnOptionsMode.Add,
-                ColumnOptions = hideColumn ? new List<ColumnOption>{new ColumnOption(columnName)}: new List<ColumnOption>(),
+                ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove : ColumnOptionsMode.Add,
+                ColumnOptions = hideColumn ? new List<ColumnOption> { new ColumnOption(columnName) } : new List<ColumnOption>(),
+
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption(columnName, value),
                 }
-            })
-        {  
+            }, showCount)
+        {
         }
 
-        public QuickLinkExplore(ExploreOptions options)
+        public QuickLinkExplore(ExploreOptions options, bool showCount = false)
         {
             Options = options;
             Label = QueryUtils.GetNiceName(Options.QueryName);
             Icon = Navigator.Manager.GetFindIcon(Options.QueryName, false);
             IsVisible = Navigator.IsFindable(Options.QueryName);
+            ShowResultCount = showCount;
+
+            if (ShowResultCount)
+                Navigator.QueryCountBatch(new CountOptions(Options.QueryName)
+                {
+                    FilterOptions = options.FilterOptions,
+                }, count =>
+                {
+                    Label = "{0}({1})".Formato(QueryUtils.GetNiceName(Options.QueryName), count);
+                }, () => { });
         }
 
         public override void Execute()
         {
- 	       Navigator.Explore(Options); 
+            Navigator.Explore(Options);
         }
     }
 
     public class QuickLinkNavigate<T> : QuickLink
-        where T:IdentifiableEntity
+        where T : IdentifiableEntity
     {
-        public NavigateOptions NavigateOptions {get; set;}
+        public NavigateOptions NavigateOptions { get; set; }
 
         public FindUniqueOptions FindUniqueOptions { get; set; }
 
@@ -198,15 +230,15 @@ namespace Signum.Windows
         {
         }
 
-        public QuickLinkNavigate(object queryName, string columnName, object value, UniqueType unique): 
+        public QuickLinkNavigate(object queryName, string columnName, object value, UniqueType unique) :
             this(new FindUniqueOptions(queryName)
-            {
+             {
                  UniqueType = unique,
                  FilterOptions = new List<FilterOption>()
                  {
                      new FilterOption(columnName, value)
                  }
-            })
+             })
         {
         }
 
