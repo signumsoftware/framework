@@ -1119,7 +1119,7 @@
   <data name="NewsletterDeliveryDN_Exception" xml:space="preserve">
     <value>Excepción</value>
   </data>
-  <data name="NewsletterDN_DiplayFrom" xml:space="preserve">
+  <data name="NewsletterDN_DisplayFrom" xml:space="preserve">
     <value>Visualizarlo desde</value>
   </data>
   <data name="NewsletterDN_Query" xml:space="preserve">
