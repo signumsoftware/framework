@@ -117,46 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="_0HasBeenRenamedIn1" xml:space="preserve">
-    <value>     ¿Se ha renombrado '{0}' en {1}??</value>
-  </data>
-  <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
-    <value>Error de concurrencia en la base de datos, Tabla = {0}, Id = {1}</value>
-  </data>
-  <data name="EndOfSyncScript" xml:space="preserve">
-    <value>--- FIN DEL SCRIPT DE SINCRONIZACION</value>
-  </data>
-  <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
-    <value>No se han encontrado {0} con Id {1}</value>
-  </data>
-  <data name="NNone" xml:space="preserve">
-    <value>- n: Ninguno</value>
-  </data>
-  <data name="NoWayOfMappingType0Found" xml:space="preserve">
-    <value>No se ha encontrado manera de mapear el tipo {0}</value>
-  </data>
-  <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
-    <value>--- INICIO DEL SCRIPT DE SINCRONIZACION GENERADO EL {0}</value>
-  </data>
-  <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
-    <value>Hay '{0}' que refieren a esta entidad</value>
-  </data>
-  <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
-    <value>Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'</value>
-  </data>
-  <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
-    <value>Acceso denegado a {0} porque {1}</value>
-  </data>
-  <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
-    <value>Imposible ejecutar {0} desde el estado {1}</value>
-  </data>
-  <data name="InUserInterface" xml:space="preserve">
-    <value>(en interfaz de usuario)</value>
-  </data>
-  <data name="Operation01IsNotAuthorized" xml:space="preserve">
-    <value>La operación {0} ({1}) no está autorizada</value>
-  </data>
-  <data name="TheEntity0IsNew" xml:space="preserve">
-    <value>La entidad {0} es nueva</value>
-  </data>
 </root>

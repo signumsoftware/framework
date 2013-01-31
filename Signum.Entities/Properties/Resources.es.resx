@@ -187,7 +187,7 @@
     <value>menor o igual que</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>Num</value>
+    <value>[Num]</value>
   </data>
   <data name="Day" xml:space="preserve">
     <value>Dia</value>
@@ -279,8 +279,8 @@
   <data name="MoreThanOneColumnNamed0" xml:space="preserve">
     <value>Más de una columna llamada {0}</value>
   </data>
-  <data name="MoreThanOneTokenWithKey0FoundOn1" xml:space="preserve">
-    <value>Más de un token con clave {0} en {1}</value>
+  <data name="ExceptionDN_ExceptionType" xml:space="preserve">
+    <value>Tipo de excepción</value>
   </data>
   <data name="New" xml:space="preserve">
     <value>Nuevo</value>
@@ -312,8 +312,8 @@
   <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
     <value>El número de elementos en {{0}} ha de ser {0} {1}</value>
   </data>
-  <data name="Token0NotCompatibleWith1" xml:space="preserve">
-    <value>Token {0} no compatible con {1}</value>
+  <data name="ExceptionDN_ExceptionMessageHash" xml:space="preserve">
+    <value>Hash del mensaje de excepción</value>
   </data>
   <data name="TypeNotFound" xml:space="preserve">
     <value>Tipo no encontrado</value>
@@ -339,20 +339,20 @@
   <data name="_0IsNotSet" xml:space="preserve">
     <value>{0} no establecido</value>
   </data>
-  <data name="AlertDN" xml:space="preserve">
-    <value>Alerta</value>
+  <data name="ExceptionDN_ExceptionMessage" xml:space="preserve">
+    <value>Mensaje de excepción</value>
   </data>
-  <data name="AlertDN_AlertDate" xml:space="preserve">
-    <value>Fecha de alerta</value>
+  <data name="ExceptionDN_Environment" xml:space="preserve">
+    <value>Entorno</value>
   </data>
-  <data name="AlertDN_CheckDate" xml:space="preserve">
-    <value>Fecha verificación</value>
+  <data name="ExceptionDN_Data" xml:space="preserve">
+    <value>Datos</value>
   </data>
-  <data name="AlertDN_Entity" xml:space="preserve">
-    <value>Entidad</value>
+  <data name="ExceptionDN_CreationDate" xml:space="preserve">
+    <value>Fecha de creación</value>
   </data>
-  <data name="AlertDN_Text" xml:space="preserve">
-    <value>Texto</value>
+  <data name="ExceptionDN_ControllerName" xml:space="preserve">
+    <value>Nombre del controlador</value>
   </data>
   <data name="ColorDN" xml:space="preserve">
     <value>Color</value>
@@ -372,14 +372,14 @@
   <data name="LockableEntity_Locked" xml:space="preserve">
     <value>Bloqueado</value>
   </data>
-  <data name="NoteDN" xml:space="preserve">
-    <value>Nota</value>
+  <data name="ExceptionDN_ActionName" xml:space="preserve">
+    <value>Nombre de la acción</value>
   </data>
-  <data name="NoteDN_Target" xml:space="preserve">
-    <value>Destino</value>
+  <data name="ExceptionDN" xml:space="preserve">
+    <value>Excepción</value>
   </data>
-  <data name="NoteDN_Text" xml:space="preserve">
-    <value>Texto</value>
+  <data name="Embedded0" xml:space="preserve">
+    <value>{0} embebido</value>
   </data>
   <data name="TypeDN" xml:space="preserve">
     <value>Tipo</value>
@@ -390,8 +390,8 @@
   <data name="TypeDN_CleanName" xml:space="preserve">
     <value>Clean Name</value>
   </data>
-  <data name="TypeDN_FriendlyName" xml:space="preserve">
-    <value>Friendly Name</value>
+  <data name="DecimalNumber" xml:space="preserve">
+    <value>número decimal</value>
   </data>
   <data name="TypeDN_FullClassName" xml:space="preserve">
     <value>Full Class Name</value>
@@ -405,23 +405,23 @@
   <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
     <value>Se intentó modificar la entidad bloqueada {0}</value>
   </data>
-  <data name="AlertDN_Attended" xml:space="preserve">
-    <value>Asistió a</value>
+  <data name="DayOfYear" xml:space="preserve">
+    <value>Día del año</value>
   </data>
-  <data name="AlertDN_Future" xml:space="preserve">
-    <value>Futuro</value>
+  <data name="DayOfWeek" xml:space="preserve">
+    <value>Día de la semana</value>
   </data>
-  <data name="AlertDN_NotAttended" xml:space="preserve">
-    <value>No asistió</value>
+  <data name="DateTime" xml:space="preserve">
+    <value>fecha y hora</value>
   </data>
-  <data name="AlertQueries_Attended" xml:space="preserve">
-    <value>Asistió a</value>
+  <data name="Create" xml:space="preserve">
+    <value>Crear...</value>
   </data>
-  <data name="AlertQueries_Future" xml:space="preserve">
-    <value>Futuro</value>
+  <data name="Check" xml:space="preserve">
+    <value>verificación</value>
   </data>
-  <data name="AlertQueries_NotAttended" xml:space="preserve">
-    <value>No asistió</value>
+  <data name="AnyEntity" xml:space="preserve">
+    <value>cualquier entidad</value>
   </data>
   <data name="FilterOperation_NotLike" xml:space="preserve">
     <value>no como</value>
@@ -450,7 +450,94 @@
   <data name="ComparisonType" xml:space="preserve">
     <value>Tipo comparación</value>
   </data>
-  <data name="CreateFromRegex" xml:space="preserve">
-    <value>^Crear (?&lt;t&gt;.*) desde .*$</value>
+  <data name="ExceptionDN_Form" xml:space="preserve">
+    <value>Formulario</value>
+  </data>
+  <data name="ExceptionDN_QueryString" xml:space="preserve">
+    <value>Cadena de consulta</value>
+  </data>
+  <data name="ExceptionDN_RequestUrl" xml:space="preserve">
+    <value>Url solicitada</value>
+  </data>
+  <data name="ExceptionDN_Session" xml:space="preserve">
+    <value>Sesión</value>
+  </data>
+  <data name="ExceptionDN_StackTrace" xml:space="preserve">
+    <value>Seguimiento de la pila</value>
+  </data>
+  <data name="ExceptionDN_StackTraceHash" xml:space="preserve">
+    <value>Stack Trace Hash</value>
+  </data>
+  <data name="ExceptionDN_ThreadId" xml:space="preserve">
+    <value>Identificador de subproceso</value>
+  </data>
+  <data name="ExceptionDN_UrlReferer" xml:space="preserve">
+    <value>Url Referer</value>
+  </data>
+  <data name="ExceptionDN_User" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
+  <data name="ExceptionDN_UserAgent" xml:space="preserve">
+    <value>Agente de usuario</value>
+  </data>
+  <data name="ExceptionDN_UserHostAddress" xml:space="preserve">
+    <value>Dirección de Host de usuario</value>
+  </data>
+  <data name="ExceptionDN_UserHostName" xml:space="preserve">
+    <value>Nombre de Host del usuario</value>
+  </data>
+  <data name="ExceptionDN_Version" xml:space="preserve">
+    <value>Versión</value>
+  </data>
+  <data name="FilterOperation_IsIn" xml:space="preserve">
+    <value>está en</value>
+  </data>
+  <data name="GlobalUniqueIdentifier" xml:space="preserve">
+    <value>Identificador único global</value>
+  </data>
+  <data name="ListOf0" xml:space="preserve">
+    <value>lista de {0}</value>
+  </data>
+  <data name="MultiEnumDN_Key" xml:space="preserve">
+    <value>Clave</value>
+  </data>
+  <data name="MultiEnumDN_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>número</value>
+  </data>
+  <data name="OperationDN" xml:space="preserve">
+    <value>Operación</value>
+  </data>
+  <data name="OperationLogDN" xml:space="preserve">
+    <value>Registro de la operación</value>
+  </data>
+  <data name="OperationLogDN_Duration" xml:space="preserve">
+    <value>Duración</value>
+  </data>
+  <data name="OperationLogDN_End" xml:space="preserve">
+    <value>Final</value>
+  </data>
+  <data name="OperationLogDN_Exception" xml:space="preserve">
+    <value>Excepción</value>
+  </data>
+  <data name="OperationLogDN_Operation" xml:space="preserve">
+    <value>Operación</value>
+  </data>
+  <data name="OperationLogDN_Start" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="OperationLogDN_Target" xml:space="preserve">
+    <value>Destino</value>
+  </data>
+  <data name="OperationLogDN_User" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
+  <data name="Text" xml:space="preserve">
+    <value>texto</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>desconocido</value>
   </data>
 </root>
