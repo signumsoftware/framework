@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities.Properties;
 using System.Globalization;
 using System.Reflection;
+using System.Collections.Concurrent;
 
 namespace Signum.Utilities
 {
@@ -104,35 +105,69 @@ namespace Signum.Utilities
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
-            List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Untyped | MemberOptions.Setters);
+            Regex regex = GetRegex(culture);
 
-            string regex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)".Replace('\'', '"').Replace(';', culture.TextInfo.ListSeparator.SingleEx());
             using (StreamReader sr = new StreamReader(stream, encoding))
             {
                 string str = sr.ReadToEnd().Trim();
-                var matches = Regex.Matches(str, regex, RegexOptions.Multiline | RegexOptions.ExplicitCapture).Cast<Match>();
+                var matches = regex.Matches(str).Cast<Match>();
 
                 if (skipLines > 0)
                     matches = matches.Skip(skipLines);
 
                 foreach (var m in matches)
                 {
-                    var vals = m.Groups["val"].Captures;
-
-                    if (vals.Count < members.Count)
-                        throw new FormatException("Not enought fields on line: " + m.Value);
-
-                    T t = new T();
-                    for (int i = 0; i < members.Count; i++)
-                    {
-                        object value = ConvertTo(DecodeCsv(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
-
-                        members[i].UntypedSetter(t, value);
-                    }
+                    T t = ReadObject<T>(culture, m);
 
                     yield return t;
                 }
             }
+        }
+
+        public static T ReadLine<T>(string csvLine, CultureInfo culture = null)
+            where T : new()
+        {
+            culture = culture ?? CultureInfo.CurrentCulture;
+
+            Regex regex = GetRegex(culture);
+
+            Match m = regex.Match(csvLine);
+
+            return ReadObject<T>(culture, m);
+        }
+
+        static T ReadObject<T>(CultureInfo culture, Match m) where T : new()
+        {
+            var members = MemberEntryCache<T>.Members;
+
+            var vals = m.Groups["val"].Captures;
+
+            if (vals.Count < members.Count)
+                throw new FormatException("Not enought fields on line: " + m.Value);
+
+            T t = new T();
+            for (int i = 0; i < members.Count; i++)
+            {
+                object value = ConvertTo(DecodeCsv(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
+
+                members[i].UntypedSetter(t, value);
+            }
+            return t;
+        }
+
+        static ConcurrentDictionary<char, Regex> regexCache = new ConcurrentDictionary<char, Regex>();
+        const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)";
+        static Regex GetRegex(CultureInfo culture)
+        {
+            char separator = culture.TextInfo.ListSeparator.SingleEx();
+
+            return regexCache.GetOrAdd(separator, s =>
+                new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture));
+        }
+
+        static class MemberEntryCache<T> where T : new()
+        {
+            public static List<MemberEntry<T>> Members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Untyped | MemberOptions.Setters);
         }
 
         static string DecodeCsv(string s)
