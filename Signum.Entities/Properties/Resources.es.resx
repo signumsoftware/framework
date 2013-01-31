@@ -540,4 +540,7 @@
   <data name="Unknown" xml:space="preserve">
     <value>desconocido</value>
   </data>
+  <data name="CreateFromRegex" xml:space="preserve">
+    <value>^ Crear (. *) de. *$</value>
+  </data>
 </root>
