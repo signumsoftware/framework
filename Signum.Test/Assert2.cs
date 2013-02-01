@@ -12,31 +12,6 @@ namespace Signum.Test
 {
     public static class Assert2
     {
-        static string solutionDirectory;
-        public static string SolutionDirectory
-        {
-            get
-            {
-                if (solutionDirectory == null)
-                {
-                    string directory = Directory.GetCurrentDirectory();
-
-                    while (Path.GetFileName(directory) != "TestResults")
-                    {
-                        if (Path.GetFileName(directory) == null)
-                            throw new InvalidOperationException("TestResults not found");
-
-                        directory = Path.GetDirectoryName(directory);
-                    }
-
-                    solutionDirectory = Path.GetDirectoryName(directory);
-                }
-
-                return solutionDirectory;
-            }
-            set { solutionDirectory = value; }
-        }
-
         public static void Throws<T>(Action action)
             where T : Exception
         {
