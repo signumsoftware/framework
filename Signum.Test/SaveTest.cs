@@ -8,7 +8,7 @@ using Signum.Engine;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Engine.Operations;
-using Signum.Test.Enviroment;
+using Signum.Test.Environment;
 
 namespace Signum.Test
 {

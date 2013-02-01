@@ -17,7 +17,7 @@ using Microsoft.SqlServer.Types;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 
-namespace Signum.Test.Enviroment
+namespace Signum.Test.Environment
 {
     public static class Starter
     {

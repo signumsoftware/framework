@@ -7,7 +7,7 @@ using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Test.Enviroment;
+using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {

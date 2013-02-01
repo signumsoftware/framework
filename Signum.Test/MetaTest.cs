@@ -12,7 +12,7 @@ using System.Reflection;
 using Signum.Engine.Linq;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Test.Enviroment;
+using Signum.Test.Environment;
 
 namespace Signum.Test
 {

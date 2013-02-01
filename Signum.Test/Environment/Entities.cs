@@ -10,7 +10,7 @@ using Microsoft.SqlServer.Server;
 using Signum.Engine;
 using Signum.Engine.Maps;
 
-namespace Signum.Test.Enviroment
+namespace Signum.Test.Environment
 {
     [Serializable, EntityKind(EntityKind.Shared)]
     public class NoteWithDateDN : Entity
