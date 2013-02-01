@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
 using Microsoft.SqlServer.Types;
+using Signum.Test.Enviroment;
 
 namespace Signum.Test.LinqProvider
 {

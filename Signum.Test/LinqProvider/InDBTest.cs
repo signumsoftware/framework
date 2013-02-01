@@ -10,6 +10,7 @@ using System.IO;
 using Signum.Utilities;
 using Signum.Engine.Exceptions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Test.Enviroment;
 
 namespace Signum.Test.LinqProvider
 {

@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
+using Signum.Test.Enviroment;
 
 namespace Signum.Test.LinqProvider
 {

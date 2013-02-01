@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace Signum.Test
+namespace Signum.Test.Enviroment
 {
     public static class MusicLogic
     {
