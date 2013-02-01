@@ -63,7 +63,8 @@ namespace Signum.Engine
 
                     return value;
                 }
-            }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
+            }, mode: LazyThreadSafetyMode.ExecutionAndPublication, 
+            declaringType: func.Method.DeclaringType);
 
             registeredLazyList.Add(result);
 
