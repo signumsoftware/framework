@@ -84,27 +84,37 @@ Write(Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(S
             
             #line default
             #line hidden
-WriteLiteral("\r\n    \r\n");
+WriteLiteral("\r\n    ");
 
 
             
-            #line 9 "..\..\Profiler\Views\HeavyList.cshtml"
- using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
-{
+            #line 8 "..\..\Profiler\Views\HeavyList.cshtml"
+Write(Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(null)));
 
             
             #line default
             #line hidden
-WriteLiteral("    <input type=\"file\" name=\"xmlFile\" />\r\n");
+WriteLiteral("\r\n");
+
+
+            
+            #line 9 "..\..\Profiler\Views\HeavyList.cshtml"
+     using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
+    {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <input type=\"file\" name=\"xmlFile\" />\r\n");
 
 
 
-WriteLiteral("    <input type=\"submit\" value=\"Upload\" class=\"sf-button\" />\r\n");
+WriteLiteral("        <input type=\"submit\" value=\"Upload\" class=\"sf-button\" />\r\n");
 
 
             
             #line 13 "..\..\Profiler\Views\HeavyList.cshtml"
-}
+    }
 
             
             #line default
@@ -191,7 +201,7 @@ WriteLiteral("\",\r\n                success: function (data) {\r\n             
 
             
             #line 41 "..\..\Profiler\Views\HeavyList.cshtml"
-                              Write(Html.Raw(Model.OrderBy(e => e.Start).HeavyDetailsToJson()));
+                              Write(Html.Raw(Model.HeavyDetailsToJson()));
 
             
             #line default
