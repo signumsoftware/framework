@@ -30,20 +30,14 @@ namespace Signum.Utilities
     [AttributeUsage(AttributeTargets.Class)]
     public class GenderAttribute : Attribute
     {
-        public Gender Gender { get; private set; }
+        public char Gender { get; private set; }
 
-        public GenderAttribute(Gender gender)
+        public GenderAttribute(char gender)
         {
             this.Gender = gender;
         }
     }
 
-    [AttributeUsage(AttributeTargets.Assembly)]
-    public class LocalizeDescriptionsAttribute : Attribute
-    {
-
-    }
-    
     [AttributeUsage(AttributeTargets.All, Inherited = true)]
     public class ForceLocalization : Attribute
     {
@@ -60,7 +54,7 @@ namespace Signum.Utilities
         {
             var fi = EnumFieldCache.Get(a.GetType()).TryGetC(a);
             if (fi != null)
-                return DescriptionManager.GetDescription(fi) ?? a.ToString().NiceName();
+                return GetDescription(fi) ?? a.ToString().NiceName();
 
             return a.ToString().NiceName();
         }
@@ -72,13 +66,13 @@ namespace Signum.Utilities
         {
             type = CleanType(type);
 
-            return DescriptionManager.GetDescription(type) ??
+            return GetDescription(type) ??
                 CleanTypeName(type).SpacePascal();
         }
 
         public static string NiceName(this PropertyInfo pi)
         {
-            return DescriptionManager.GetDescription(pi) ??
+            return GetDescription(pi) ??
                 (pi.IsDefaultName() ? pi.PropertyType.NiceName() : pi.Name.NiceName());
         }
 

@@ -21,13 +21,13 @@ namespace Signum.Utilities
             {"es", new SpanishGenderDetector()},
         };
 
-        public static Gender GetGender(string name)
+        public static char? GetGender(string name)
         {
             IGenderDetector detector = GenderDetectors.TryGetC(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
             if (detector != null)
                 return detector.GetGender(name);
 
-            return Gender.Neuter;
+            return null;
         }
 
         public static string Pluralize(string singularName)
@@ -130,43 +130,43 @@ namespace Signum.Utilities
 
     public interface IGenderDetector
     {
-        Gender GetGender(string name);
+        char GetGender(string name);
     }
 
     public class SpanishGenderDetector : IGenderDetector
     {
         //http://roble.pntic.mec.es/acid0002/index_archivos/Gramatica/genero_sustantivos.htm
-        Dictionary<string, Gender> terminationIsFemenine = new Dictionary<string, Gender>()
+        Dictionary<string, char> terminationIsFemenine = new Dictionary<string, char>()
         {
-            {"umbre", Gender.Femenine },
+            {"umbre", 'f' },
            
-            {"ión", Gender.Femenine },
-            {"dad", Gender.Femenine },
-            {"tad", Gender.Femenine },
+            {"ión", 'f' },
+            {"dad", 'f' },
+            {"tad", 'f' },
             
-            {"ie", Gender.Femenine },
-            {"is", Gender.Femenine }, 
+            {"ie", 'f' },
+            {"is", 'f' }, 
 
-            {"pa", Gender.Masculine},
+            {"pa", 'f'},
             //{"ta", Gender.Masculine}, Cuenta, Nota, Alerta... son femeninos
-            {"ma", Gender.Masculine},
+            {"ma", 'f'},
 
-            {"a", Gender.Femenine},
-            {"n", Gender.Masculine},
-            {"o", Gender.Masculine},
-            {"r", Gender.Masculine},
-            {"s", Gender.Masculine},
-            {"e", Gender.Masculine},
-            {"l", Gender.Masculine},
+            {"a", 'f'},
+            {"n", 'm'},
+            {"o", 'm'},
+            {"r", 'm'},
+            {"s", 'm'},
+            {"e", 'm'},
+            {"l", 'm'},
 
-            {"", Gender.Masculine},
+            {"", 'm'},
         };
 
 
-        public Gender GetGender(string name)
+        public char? GetGender(string name)
         {
             if (string.IsNullOrEmpty(name))
-                return Gender.Neuter;
+                return null;
 
             int index = name.IndexOf(' ');
 
@@ -179,14 +179,7 @@ namespace Signum.Utilities
                     return kvp.Value;
             }
 
-            return Gender.Masculine;
+            return null;
         }
-    }
-
-    public enum Gender
-    {
-        Neuter,    //_n 
-        Masculine, //_m
-        Femenine,  //_f
     }
 }
