@@ -27,7 +27,7 @@ namespace Signum.Engine
             where T : class, IIdentifiable
         {
             using (new EntityCache())
-            using (HeavyProfiler.Log("DB"))
+            using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".Formato(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
                 Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
@@ -39,8 +39,10 @@ namespace Signum.Engine
         public static void SaveParams(params IIdentifiable[] entities)
         {
             using (new EntityCache())
+            using (HeavyProfiler.Log("DBSave", "SaveParams"))
             using (Transaction tr = new Transaction())
             {
+
                 Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
 
                 tr.Commit();
@@ -54,7 +56,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("entity");
 
             using (new EntityCache())
-            using (HeavyProfiler.Log("DB"))
+            using (HeavyProfiler.Log("DBSave", () => "Save<{0}>".Formato(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
                 Saver.Save((IdentifiableEntity)(IIdentifiable)entity);
@@ -70,7 +72,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-           if (lite.EntityOrNull == null)
+            if (lite.EntityOrNull == null)
                 lite.SetEntity(Retrieve(lite.EntityType, lite.Id));
 
             return lite.EntityOrNull;
@@ -87,30 +89,33 @@ namespace Signum.Engine
         static GenericInvoker<Func<int, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<int, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
-            if (cc != null)
+            using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
             {
-                using (new EntityCache())
-                using (var r = EntityCache.NewRetriever())
+                var cc = CanUseCache<T>();
+                if (cc != null)
                 {
-                    return r.Request<T>(id);
+                    using (new EntityCache())
+                    using (var r = EntityCache.NewRetriever())
+                    {
+                        return r.Request<T>(id);
+                    }
                 }
+
+                if (EntityCache.Created)
+                {
+                    T cached = EntityCache.Get<T>(id);
+
+                    if (cached != null)
+                        return cached;
+                }
+
+                var retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
+
+                if (retrieved == null)
+                    throw new EntityNotFoundException(typeof(T), id);
+
+                return retrieved;
             }
-
-            if (EntityCache.Created)
-            {
-                T cached = EntityCache.Get<T>(id);
-
-                if (cached != null)
-                    return cached;
-            }
-
-            var retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
-
-            if (retrieved == null)
-                throw new EntityNotFoundException(typeof(T), id);
-
-            return retrieved; 
         }
 
         static CacheControllerBase<T> CanUseCache<T>() where T : IdentifiableEntity
@@ -145,15 +150,18 @@ namespace Signum.Engine
         public static Lite<T> RetrieveLite<T>(int id)
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
-            if (cc != null)
-                return new LiteImp<T>(id, cc.GetToString(id));
+            using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".Formato(typeof(T).TypeName())))
+            {
+                var cc = CanUseCache<T>();
+                if (cc != null)
+                    return new LiteImp<T>(id, cc.GetToString(id));
 
-            var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
-            if (result == null)
-                throw new EntityNotFoundException(typeof(T), id);
+                var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
+                if (result == null)
+                    throw new EntityNotFoundException(typeof(T), id);
 
-            return result;
+                return result;
+            }
         }
 
         public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IIdentifiable
@@ -175,11 +183,14 @@ namespace Signum.Engine
         public static string GetToStr<T>(int id)
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
-            if (cc != null)
-                return cc.GetToString(id).ToString();
+            using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".Formato(typeof(T).TypeName())))
+            {
+                var cc = CanUseCache<T>();
+                if (cc != null)
+                    return cc.GetToString(id).ToString();
 
-            return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
+                return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
+            }
         }
 
         #endregion
@@ -204,17 +215,20 @@ namespace Signum.Engine
         public static List<T> RetrieveAll<T>()
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
-            if (cc != null)
+            using (HeavyProfiler.Log("DBRetrieve", () => "All {0}".Formato(typeof(T).TypeName())))
             {
-                using (new EntityCache())
-                using (var r = EntityCache.NewRetriever())
+                var cc = CanUseCache<T>();
+                if (cc != null)
                 {
-                    return cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                    using (new EntityCache())
+                    using (var r = EntityCache.NewRetriever())
+                    {
+                        return cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                    }
                 }
-            }
 
-            return Database.Query<T>().ToList();
+                return Database.Query<T>().ToList();
+            }
         }
 
         static readonly GenericInvoker<Func<IList>> giRetrieveAll = new GenericInvoker<Func<IList>>(() => RetrieveAll<TypeDN>());
@@ -231,14 +245,17 @@ namespace Signum.Engine
         public static List<Lite<T>> RetrieveAllLite<T>()
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
-            if (cc != null)
+            using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".Formato(typeof(T).TypeName())))
             {
+                var cc = CanUseCache<T>();
+                if (cc != null)
+                {
 
-                return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                    return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                }
+
+                return Database.Query<T>().Select(e => e.ToLite()).ToList();
             }
-
-            return Database.Query<T>().Select(e => e.ToLite()).ToList();
         }
 
         public static List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
@@ -255,49 +272,52 @@ namespace Signum.Engine
         public static List<T> RetrieveList<T>(List<int> ids)
             where T : IdentifiableEntity
         {
-            if (ids == null)
-                throw new ArgumentNullException("ids");
-
-            var cc = CanUseCache<T>();
-            if (cc != null)
+            using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".Formato(typeof(T).TypeName())))
             {
-                using(new EntityCache())
-                using (var rr = EntityCache.NewRetriever())
+                if (ids == null)
+                    throw new ArgumentNullException("ids");
+
+                var cc = CanUseCache<T>();
+                if (cc != null)
                 {
-                    return ids.Select(id => rr.Request<T>(id)).ToList();
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        return ids.Select(id => rr.Request<T>(id)).ToList();
+                    }
                 }
-            }
 
-            Dictionary<int, T> result = null;
-           
-            if (EntityCache.Created)
-            {
-                result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a=>a.Id);
-                if (result.Count > 0)
-                    ids.RemoveAll(result.ContainsKey);
-            }
+                Dictionary<int, T> result = null;
 
-            if (ids.Count > 0)
-            {
-                var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToDictionary(a=>a.Id);
+                if (EntityCache.Created)
+                {
+                    result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a => a.Id);
+                    if (result.Count > 0)
+                        ids.RemoveAll(result.ContainsKey);
+                }
 
-                var missing = ids.Except(retrieved.Keys);
+                if (ids.Count > 0)
+                {
+                    var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToDictionary(a => a.Id);
 
-                if (missing.Any())
-                    throw new EntityNotFoundException(typeof(T), missing.ToArray());
+                    var missing = ids.Except(retrieved.Keys);
 
-                if (result == null)
-                    result = retrieved;
+                    if (missing.Any())
+                        throw new EntityNotFoundException(typeof(T), missing.ToArray());
+
+                    if (result == null)
+                        result = retrieved;
+                    else
+                        result.AddRange(retrieved);
+                }
                 else
-                    result.AddRange(retrieved);
-            }
-            else
-            {
-                if (result == null)
-                    result = new Dictionary<int,T>();
-            }
+                {
+                    if (result == null)
+                        result = new Dictionary<int, T>();
+                }
 
-            return ids.Select(id => result[id]).ToList(); //Preserve order
+                return ids.Select(id => result[id]).ToList(); //Preserve order
+            }
         }
 
         public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)
@@ -314,23 +334,26 @@ namespace Signum.Engine
         public static List<Lite<T>> RetrieveListLite<T>(List<int> ids)
             where T : IdentifiableEntity
         {
-            if (ids == null)
-                throw new ArgumentNullException("ids");
-
-            var cc = CanUseCache<T>();
-            if (cc != null)
+            using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".Formato(typeof(T).TypeName())))
             {
-                return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                if (ids == null)
+                    throw new ArgumentNullException("ids");
+
+                var cc = CanUseCache<T>();
+                if (cc != null)
+                {
+                    return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                }
+
+                var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToDictionary(a => a.Id);
+
+                var missing = ids.Except(retrieved.Keys);
+
+                if (missing.Any())
+                    throw new EntityNotFoundException(typeof(T), missing.ToArray());
+
+                return ids.Select(id => retrieved[id]).ToList(); //Preserve order
             }
-
-            var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToDictionary(a => a.Id);
-
-            var missing = ids.Except(retrieved.Keys);
-
-            if (missing.Any())
-                throw new EntityNotFoundException(typeof(T), missing.ToArray());
-
-            return ids.Select(id => retrieved[id]).ToList(); //Preserve order
         }
 
         public static List<Lite<IdentifiableEntity>> RetrieveListLite(Type type, List<int> ids)
@@ -353,8 +376,8 @@ namespace Signum.Engine
             if (lites == null)
                 throw new ArgumentNullException("lites");
 
-            if (lites.IsEmpty()) return new List<IdentifiableEntity>();
-
+            if (lites.IsEmpty())
+                return new List<IdentifiableEntity>();
 
             using (Transaction tr = new Transaction())
             {
@@ -403,7 +426,7 @@ namespace Signum.Engine
         public static void Delete<T>(int id)
             where T : IdentifiableEntity
         {
-            using (HeavyProfiler.Log("DB"))
+            using (HeavyProfiler.Log("DBDelete", () => typeof(T).TypeName()))
             {
                 int result = Database.Query<T>().Where(a => a.Id == id).UnsafeDelete();
                 if (result != 1)
@@ -475,7 +498,7 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-            using (HeavyProfiler.Log("DB"))
+            using (HeavyProfiler.Log("DBDelete", () => "List<{0}>".Formato(typeof(T).TypeName())))
             {
                 int result = Database.Query<T>().Where(a => ids.Contains(a.Id)).UnsafeDelete();
                 if (result != ids.Count())
@@ -599,7 +622,7 @@ namespace Signum.Engine
                 var genericArguments = mi.GetGenericArguments();
 
                 var staticType = genericArguments[0];
-            
+
                 var entityType = isLite ? ((Lite<IdentifiableEntity>)value).EntityType : value.GetType();
 
                 Expression query = !isLite ?
@@ -625,33 +648,38 @@ namespace Signum.Engine
         public static int UnsafeDelete<T>(this IQueryable<T> query)
               where T : IdentifiableEntity
         {
-            if (query == null)
-                throw new ArgumentNullException("query");
-
-            using (Transaction tr = new Transaction())
+            using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(T).TypeName()))
             {
-                Schema.Current.OnPreUnsafeDelete<T>(query);
+                if (query == null)
+                    throw new ArgumentNullException("query");
 
-                int rows = DbQueryProvider.Single.Delete(query, cm=>cm.ExecuteScalar());
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeDelete<T>(query);
 
-                return tr.Commit(rows);
+                    int rows = DbQueryProvider.Single.Delete(query, cm => cm.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
             }
         }
 
         public static int UnsafeDelete<E, V>(this IQueryable<MListElement<E, V>> query)
             where E : IdentifiableEntity
         {
-            if (query == null)
-                throw new ArgumentNullException("query");
-
-
-            using (Transaction tr = new Transaction())
+            using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).NiceName()))
             {
-                Schema.Current.OnPreUnsafeUpdate<E>(query.Select(mle => mle.Parent));
+                if (query == null)
+                    throw new ArgumentNullException("query");
 
-                int rows = DbQueryProvider.Single.Delete(query, cm => cm.ExecuteScalar());
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeUpdate<E>(query.Select(mle => mle.Parent));
 
-                return tr.Commit(rows);
+                    int rows = DbQueryProvider.Single.Delete(query, cm => cm.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
             }
         }
 
@@ -659,16 +687,19 @@ namespace Signum.Engine
         public static int UnsafeUpdate<E>(this IQueryable<E> query, Expression<Func<E, E>> updateConstructor)
             where E : IdentifiableEntity
         {
-            if (query == null)
-                throw new ArgumentNullException("query");
-
-            using (Transaction tr = new Transaction())
+            using (HeavyProfiler.Log("DBUnsafeUpdate", () => typeof(E).TypeName()))
             {
-                Schema.Current.OnPreUnsafeUpdate<E>(query);
+                if (query == null)
+                    throw new ArgumentNullException("query");
 
-                int rows = DbQueryProvider.Single.Update(query, null, updateConstructor, cm => cm.ExecuteScalar());
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeUpdate<E>(query);
 
-                return tr.Commit(rows);
+                    int rows = DbQueryProvider.Single.Update(query, null, updateConstructor, cm => cm.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
             }
         }
 
@@ -676,16 +707,19 @@ namespace Signum.Engine
         public static int UnsafeUpdatePart<T, E>(this IQueryable<T> query, Expression<Func<T, E>> entitySelector, Expression<Func<T, E>> updateConstructor)
             where E : IdentifiableEntity
         {
-            if (query == null)
-                throw new ArgumentNullException("query");
-
-            using (Transaction tr = new Transaction())
+            using (HeavyProfiler.Log("DBUnsafeUpdate", () => typeof(E).TypeName()))
             {
-                Schema.Current.OnPreUnsafeUpdate<E>(query.Select(entitySelector));
+                if (query == null)
+                    throw new ArgumentNullException("query");
 
-                int rows = DbQueryProvider.Single.Update(query, entitySelector, updateConstructor, cm => cm.ExecuteScalar());
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeUpdate<E>(query.Select(entitySelector));
 
-                return tr.Commit(rows);
+                    int rows = DbQueryProvider.Single.Update(query, entitySelector, updateConstructor, cm => cm.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
             }
         }
 
@@ -693,16 +727,19 @@ namespace Signum.Engine
         public static int UnsafeUpdate<E, V>(this IQueryable<MListElement<E, V>> query, Expression<Func<MListElement<E, V>, MListElement<E, V>>> updateConstructor)
            where E : IdentifiableEntity
         {
-            if (query == null)
-                throw new ArgumentNullException("query");
-
-            using (Transaction tr = new Transaction())
+            using (HeavyProfiler.Log("DBUnsafeUpdate", () => typeof(MListElement<E, V>).TypeName()))
             {
-                Schema.Current.OnPreUnsafeUpdate<E>(query.Select(q => q.Parent));
+                if (query == null)
+                    throw new ArgumentNullException("query");
 
-                int rows = DbQueryProvider.Single.Update(query, null, updateConstructor, cm => cm.ExecuteScalar());
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeUpdate<E>(query.Select(q => q.Parent));
 
-                return tr.Commit(rows);
+                    int rows = DbQueryProvider.Single.Update(query, null, updateConstructor, cm => cm.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
             }
         }
     }
@@ -716,7 +753,7 @@ namespace Signum.Engine
 
     interface ISignumTable
     {
-        ITable Table { get; set; } 
+        ITable Table { get; set; }
     }
 
     internal class SignumTable<E> : Query<E>, ISignumTable
