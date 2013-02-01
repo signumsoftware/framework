@@ -60,7 +60,7 @@ namespace Signum.Engine.Cache
                 if (ex.Message.Contains("SQL Server Service Broker"))
                     throw new InvalidOperationException(@"CacheLogic requires SQL Server Service Broker to be activated. Execute: 
 ALTER DATABASE {0} SET ENABLE_BROKER
-If you have problems, try: 
+If you have problems, try first: 
 ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
             }
         }
