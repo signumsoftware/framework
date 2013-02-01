@@ -311,19 +311,26 @@ namespace Signum.Utilities
             var list = doc.Element("Logs").Elements("Log").Select(xLog => HeavyProfilerEntry.ImportXml(xLog, null)).ToList();
 
             if (list.Any())
+            {
                 lock (Entries)
                 {
-                    long timeDelta = Entries.Min(a => a.BeforeStart) - list.Min(a => a.BeforeStart); 
                     int indexDelta = Entries.Count - list.Min(e => e.Index);
                     foreach (var e in list)
-                    {
                         e.Index += indexDelta;
-                        e.BeforeStart += timeDelta;
-                        e.Start += timeDelta;
-                        e.End += timeDelta;
+
+                    if (Entries.Any())
+                    {
+                        long timeDelta = Entries.Any() ? (Entries.Min(a => a.BeforeStart) - list.Min(a => a.BeforeStart)) : 0;
+
+                        foreach (var e in list)
+                            e.ReBaseTime(timeDelta);
+
+                     
                     }
+
                     Entries.AddRange(list);
                 }
+            }
         }
 
         public static XDocument SqlStatisticsXDocument()
@@ -527,6 +534,17 @@ namespace Signum.Utilities
             return new XDocument(
                  new XElement("Logs", ExportXml())
                  );
+        }
+
+        internal void ReBaseTime(long timeDelta)
+        {
+            BeforeStart += timeDelta;
+            Start += timeDelta;
+            End += timeDelta;
+
+            if (Entries != null)
+                foreach (var e in Entries)
+                    e.ReBaseTime(timeDelta);
         }
     }
 
