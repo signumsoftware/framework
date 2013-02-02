@@ -67,10 +67,10 @@ namespace Signum.Entities.Mailing
         [NotNullable, SqlDbType(Size = 50)]
         string displayFrom = DefaultDisplayFrom;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
-        public string DiplayFrom
+        public string DisplayFrom
         {
             get { return displayFrom; }
-            set { Set(ref displayFrom, value, () => DiplayFrom); }
+            set { Set(ref displayFrom, value, () => DisplayFrom); }
         }
 
         static readonly Expression<Func<NewsletterDN, string>> ToStringExpression = e => e.name;

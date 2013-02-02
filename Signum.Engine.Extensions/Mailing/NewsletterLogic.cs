@@ -298,7 +298,7 @@ namespace Signum.Engine.Mailing
                         {
                             var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
                             var message = new MailMessage();
-                            message.From = new MailAddress(newsletter.From, newsletter.DiplayFrom);
+                            message.From = new MailAddress(newsletter.From, newsletter.DisplayFrom);
                             message.To.Add(overrideEmail ?? s.Email);
                             message.IsBodyHtml = true;
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>

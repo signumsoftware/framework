@@ -133,7 +133,7 @@
     <value>El correo electrónico debe tener un valor</value>
   </data>
   <data name="ErrorSavingFile" xml:space="preserve">
-    <value>Error guardando el archivo</value>
+    <value>Error guardadndo el archivo</value>
   </data>
   <data name="HelpDocumentation" xml:space="preserve">
     <value>Documentación de ayuda</value>
@@ -182,9 +182,6 @@
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Debes repetir la nueva contraseña</value>
-  </data>
-  <data name="EmailNotExistsDatabase" xml:space="preserve">
-    <value>El email proporcionado no pertenece a ningún usuario registrado</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Restablecer contraseña</value>
@@ -264,9 +261,6 @@
   <data name="OperationsAscx_Allow" xml:space="preserve">
     <value>Permitir</value>
   </data>
-  <data name="OperationsAscx_Deny" xml:space="preserve">
-    <value>Denegar</value>
-  </data>
   <data name="OperationsAscx_Operation" xml:space="preserve">
     <value>Operación</value>
   </data>
@@ -314,9 +308,6 @@
   </data>
   <data name="ViewsChecker" xml:space="preserve">
     <value>Comprobador de Vistas</value>
-  </data>
-  <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
-    <value>No hay ningún usuario registrado con esa dirección de email</value>
   </data>
   <data name="EmailSent" xml:space="preserve">
     <value>Email enviado</value>
@@ -366,11 +357,8 @@
   <data name="Delete" xml:space="preserve">
     <value>Eliminar</value>
   </data>
-  <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
-    <value>Confirme que desea eliminar la entidad del sistema</value>
-  </data>
-  <data name="Create" xml:space="preserve">
-    <value>Crear</value>
+  <data name="Unknown" xml:space="preserve">
+    <value>Desconocido</value>
   </data>
   <data name="ExcelAdminister" xml:space="preserve">
     <value>Administrar</value>
@@ -387,14 +375,14 @@
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
     <value>Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:</value>
   </data>
-  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
-    <value>Confirme que desea ejecutar la operación {0} a la entidad {1} ({2}-{3})</value>
+  <data name="OperationsAscx_None" xml:space="preserve">
+    <value>Ninguno</value>
   </data>
   <data name="PasswordsAreDifferent" xml:space="preserve">
     <value>Las contraseñas son diferentes</value>
   </data>
-  <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
-    <value>Operaciones</value>
+  <data name="OperationsAscx_DBOnly" xml:space="preserve">
+    <value>DB sólo</value>
   </data>
   <data name="UserQueries_CreateNew" xml:space="preserve">
     <value>Crear</value>
@@ -434,6 +422,9 @@
   </data>
   <data name="AuthAdmin_RemoveCondition" xml:space="preserve">
     <value>Quitar condición</value>
+  </data>
+  <data name="ChartScript_Edit" xml:space="preserve">
+    <value>Editar Script</value>
   </data>
   <data name="Chart_Dimension" xml:space="preserve">
     <value>Dimensión</value>

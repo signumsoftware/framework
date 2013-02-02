@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="TheEntity0IsNew" xml:space="preserve">
-    <value>La entidad {0} es nueva</value>
+  <data name="NotAllowedToSaveThis0WhileOffline" xml:space="preserve">
+    <value>No se puede guardar este {0} en modo desconectado</value>
   </data>
   <data name="QueryOf0" xml:space="preserve">
     <value>Consulta de {0}</value>
@@ -196,11 +196,11 @@
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>El nombre de usuario {0} no es válido</value>
   </data>
-  <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
-    <value>Imposible ejecutar {0} desde el estado {1}</value>
+  <data name="NotAllowedToSave0WhileOffline" xml:space="preserve">
+    <value>No se puede guardar {0} en modo descaonectado</value>
   </data>
-  <data name="Operation01IsNotAuthorized" xml:space="preserve">
-    <value>La operación {0} ({1}) no está autorizada</value>
+  <data name="NotAllowedToModifyExisting0WhileOffline" xml:space="preserve">
+    <value>No se pueden modificar los/las {0} existentes en modo desconectado</value>
   </data>
   <data name="ConstructsANew0_m" xml:space="preserve">
     <value>Construye un nuevo {0}</value>
@@ -322,7 +322,13 @@
   <data name="YourUsernameIs0" xml:space="preserve">
     <value>Su nombre de usuario es: {0}</value>
   </data>
+  <data name="The0WithId12IsLockedBy3" xml:space="preserve">
+    <value>El {0} con Id {1} ({2}) está bloqueado por {3}</value>
+  </data>
   <data name="TheProperty0" xml:space="preserve">
     <value>la propiedad {0}</value>
+  </data>
+  <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
+    <value>No hay ningún usuario registrado con esa dirección de correo electrónico</value>
   </data>
 </root>
