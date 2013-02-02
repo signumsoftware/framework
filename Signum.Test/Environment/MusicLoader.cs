@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Signum.Test
+namespace Signum.Test.Environment
 {
     public static class MusicLoader
     {

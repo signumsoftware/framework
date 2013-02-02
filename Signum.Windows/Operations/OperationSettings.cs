@@ -32,7 +32,7 @@ namespace Signum.Windows.Operations
         public static EntityOperationGroup Create = new EntityOperationGroup
         {
             Description = () => Signum.Entities.Properties.Resources.Create,
-            SimplifyName = cs => Regex.Replace(cs, Signum.Entities.Properties.Resources.CreateFromRegex, m => m.Groups["t"].Value, RegexOptions.IgnoreCase),
+            SimplifyName = cs => Regex.Replace(cs, Signum.Entities.Properties.Resources.CreateFromRegex, m => m.Groups[1].Value, RegexOptions.IgnoreCase),
             Background = Brushes.Green,
         }; 
 

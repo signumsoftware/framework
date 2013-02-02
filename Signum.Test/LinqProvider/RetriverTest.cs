@@ -14,6 +14,7 @@ using System.Data.SqlTypes;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
+using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {

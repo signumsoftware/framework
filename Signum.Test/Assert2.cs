@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Test.Properties;
 using System.Linq.Expressions;
+using System.IO;
 
 namespace Signum.Test
 {
@@ -91,6 +92,11 @@ namespace Signum.Test
             if (exceeded.HasText())
                 Assert.Fail("{0} exceeded".Formato(exceeded));
 
+        }
+
+        public static new bool Equals(object obj, object obj2)
+        {
+            throw new NotSupportedException("Use Assert.AreEquals instead");
         }
     }
 }

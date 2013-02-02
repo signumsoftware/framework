@@ -388,7 +388,7 @@
     <value>Create...</value>
   </data>
   <data name="CreateFromRegex" xml:space="preserve">
-    <value>^Create (?&lt;t&gt;.*) from .*$</value>
+    <value>^Create (.*) from .*$</value>
   </data>
   <data name="FilterOperation_IsIn" xml:space="preserve">
     <value>is in</value>

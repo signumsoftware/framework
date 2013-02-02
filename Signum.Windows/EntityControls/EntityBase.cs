@@ -189,7 +189,7 @@ namespace Signum.Windows
             try
             {
                 isUserInteraction = true;
-                Entity = entity;
+                Entity = Server.Convert(entity, Type);
             }
             finally
             {
@@ -382,7 +382,7 @@ namespace Signum.Windows
 
                 object entity = Constructor.Construct(type, this);
 
-                value = Server.Convert(entity, Type);
+                value = entity;
             }
             else
                 value = Creating();
@@ -418,7 +418,7 @@ namespace Signum.Windows
             if (value == null)
                 return null;
 
-            return Server.Convert(value, Type);
+            return value;
         }
 
         public virtual PropertyRoute GetEntityPropertyRoute()

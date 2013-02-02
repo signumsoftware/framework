@@ -190,7 +190,7 @@
     <value>Plus petit que ou égal</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>Count</value>
+    <value>[Count]</value>
   </data>
   <data name="Day" xml:space="preserve">
     <value>Jour</value>
