@@ -160,7 +160,7 @@ namespace Signum.Entities.UserQueries
     {
         [NotNullable]
         protected string tokenString;
-        [StringLengthValidator(AllowNulls = false, Min = 1), AvoidLocalization]
+        [StringLengthValidator(AllowNulls = false, Min = 1), DescriptionOptions(DescriptionOptions.None)]
         public string TokenString
         {
             get { return tokenString; }
@@ -169,7 +169,7 @@ namespace Signum.Entities.UserQueries
 
         [Ignore]
         protected QueryToken token;
-        [HiddenProperty]
+        [HiddenProperty, DescriptionOptions(DescriptionOptions.None)]
         public QueryToken Token
         {
             get
@@ -181,6 +181,7 @@ namespace Signum.Entities.UserQueries
             set { if (Set(ref token, value, () => Token)) TokenChanged(); }
         }
 
+        [HiddenProperty, DescriptionOptions(DescriptionOptions.None)]
         public QueryToken TryToken
         {
             get { return token; }
@@ -189,7 +190,7 @@ namespace Signum.Entities.UserQueries
 
         [Ignore]
         protected Exception parseException;
-        [HiddenProperty]
+        [HiddenProperty, DescriptionOptions(DescriptionOptions.None)]
         public Exception ParseException
         {
             get { return parseException; }

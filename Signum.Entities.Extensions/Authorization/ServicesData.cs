@@ -38,7 +38,7 @@ namespace Signum.Entities.Authorization
 
 
     //Only for client-side communication
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public abstract class BaseRulePack<T> : ModelEntity
     {
         Lite<RoleDN> role;
@@ -92,7 +92,7 @@ namespace Signum.Entities.Authorization
         Min,
     }
 
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public abstract class AllowedRule<R, A> : ModelEntity
         where R : IdentifiableEntity
     {
@@ -181,7 +181,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
         public TypeAllowedAndConditions(TypeAllowed fallback, ReadOnlyCollection<TypeConditionRule> conditions)
@@ -286,7 +286,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
     {
         public TypeConditionRule(Enum conditionName, TypeAllowed allowed)

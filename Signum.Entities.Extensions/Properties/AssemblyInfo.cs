@@ -38,4 +38,4 @@ using Signum.Utilities;
 
 [assembly:InternalsVisibleTo("Signum.Engine.Extensions")]
 
-[assembly: LocalizeDescriptions]
+[assembly: DefaultAssemblyCulture("en")]

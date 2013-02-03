@@ -15,13 +15,13 @@ namespace Signum.Entities.Files
     }
 
 
-    [Serializable, ForceLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.Description| DescriptionOptions.Members)]
     public class WebImage
     {
         public string FullWebPath;
     }
 
-    [Serializable, ForceLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
     public class WebDownload
     {
         public string FullWebPath;

@@ -76,9 +76,7 @@ namespace Signum.Engine.Help
             {
                 string valueType = ValueType(pr);
 
-                Gender gender = NaturalLanguageTools.GetGender(valueType);
-
-                return Resources.ResourceManager.GetGenderAwareResource("_0IsA1", gender).Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
+                return Resources._0IsA1.ForGenderAndNumber(NaturalLanguageTools.GetGender(valueType)).Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
             }
         }
 
@@ -86,11 +84,11 @@ namespace Signum.Engine.Help
         {
             if (pr.PropertyInfo.IsDefaultName())
                 return
-                    propertyType.GetGenderAwareResource(() => Resources.The0).Formato(typeName) + " " +
-                    pr.Parent.Type.GetGenderAwareResource(() => Resources.OfThe0).Formato(pr.Parent.Type.NiceName());
+                    Resources.The0.ForGenderAndNumber(propertyType.GetGender()).Formato(typeName) + " " +
+                    Resources.OfThe0.ForGenderAndNumber(pr.Parent.Type.GetGender()).Formato(pr.Parent.Type.NiceName());
             else
                 return
-                    propertyType.GetGenderAwareResource(() => Resources._0IsA1).Formato(pr.PropertyInfo.NiceName(), typeName);
+                    Resources._0IsA1.Formato(propertyType.GetGender()).Formato(pr.PropertyInfo.NiceName(), typeName);
         }
 
         static string ValueType(PropertyRoute pr)
@@ -177,19 +175,19 @@ namespace Signum.Engine.Help
         {
             switch (operationInfo.OperationType)
             {
-                case OperationType.Execute: return type.GetGenderAwareResource(()=>Resources.Call0Over1OfThe2).Formato(
+                case OperationType.Execute: return Resources.Call0Over1OfThe2.ForGenderAndNumber(type.GetGender()).Formato(
                     operationInfo.Key.NiceToString(),
                     operationInfo.Lite.Value ? Resources.TheDatabaseVersion : Resources.YourVersion, 
                     type.NiceName());
                 case OperationType.Delete: return Resources.RemovesThe0FromTheDatabase.Formato(type.NiceName());
                 case OperationType.Constructor: return
-                    type.GetGenderAwareResource(() => Resources.ConstructsANew0).Formato(type.NiceName());
+                    Resources.ConstructsANew0.ForGenderAndNumber(type.GetGender()).Formato(type.NiceName());
                 case OperationType.ConstructorFrom: return
-                    operationInfo.ReturnType.GetGenderAwareResource(() => Resources.ConstructsANew0).Formato(operationInfo.ReturnType.NiceName()) + " " +
-                    type.GetGenderAwareResource(()=>Resources.From0OfThe1).Formato(operationInfo.Lite.Value ? Resources.TheDatabaseVersion  : Resources.YourVersion, type.NiceName());
+                    Resources.ConstructsANew0.ForGenderAndNumber(operationInfo.ReturnType.GetGender()).Formato(operationInfo.ReturnType.NiceName()) + " " +
+                    Resources.From0OfThe1.ForGenderAndNumber(type.GetGender()).Formato(operationInfo.Lite.Value ? Resources.TheDatabaseVersion : Resources.YourVersion, type.NiceName());
                 case OperationType.ConstructorFromMany: return
-                    operationInfo.ReturnType.GetGenderAwareResource(()=>Resources.ConstructsANew0).Formato(operationInfo.ReturnType.NiceName()) + " " +
-                    type.GetGenderAwareResource(()=>Resources.FromMany0).Formato(type.NicePluralName());
+                    Resources.ConstructsANew0.ForGenderAndNumber(operationInfo.ReturnType.GetGender()).Formato(operationInfo.ReturnType.NiceName()) + " " +
+                    Resources.FromMany0.ForGenderAndNumber(type.GetGender()).Formato(type.NicePluralName());
             }
 
             return "";

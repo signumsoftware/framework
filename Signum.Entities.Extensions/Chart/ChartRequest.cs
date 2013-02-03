@@ -112,7 +112,7 @@ namespace Signum.Entities.Chart
 
         [NonSerialized]
         bool needNewQuery;
-        [AvoidLocalization]
+        [DescriptionOptions(DescriptionOptions.None)]
         public bool NeedNewQuery
         {
             get { return needNewQuery; }
