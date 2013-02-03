@@ -79,15 +79,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure of deleting the report {0}.
-        /// </summary>
-        public static string AreYouSureOfDeletingReport0 {
-            get {
-                return ResourceManager.GetString("AreYouSureOfDeletingReport0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Add condition.
         /// </summary>
         public static string AuthAdmin_AddCondition {
@@ -286,15 +277,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete.
-        /// </summary>
-        public static string Delete {
-            get {
-                return ResourceManager.GetString("Delete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Download.
         /// </summary>
         public static string Download {
@@ -439,15 +421,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go back to login page.
-        /// </summary>
-        public static string GoBackToLoginPage {
-            get {
-                return ResourceManager.GetString("GoBackToLoginPage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Help documentation.
         /// </summary>
         public static string HelpDocumentation {
@@ -507,15 +480,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string LoginEnter {
             get {
                 return ResourceManager.GetString("LoginEnter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Message.
-        /// </summary>
-        public static string Message {
-            get {
-                return ResourceManager.GetString("Message", resourceCulture);
             }
         }
         
@@ -826,33 +790,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Source.
-        /// </summary>
-        public static string Source {
-            get {
-                return ResourceManager.GetString("Source", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to StackTrace.
-        /// </summary>
-        public static string StackTrace {
-            get {
-                return ResourceManager.GetString("StackTrace", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Target site.
-        /// </summary>
-        public static string TargetSite {
-            get {
-                return ResourceManager.GetString("TargetSite", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The confirmation code that you have just sent is invalid.
         /// </summary>
         public static string TheConfirmationCodeThatYouHaveJustSentIsInvalid {
@@ -1051,29 +988,11 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to View name.
-        /// </summary>
-        public static string ViewName {
-            get {
-                return ResourceManager.GetString("ViewName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to View palette.
         /// </summary>
         public static string ViewPalette {
             get {
                 return ResourceManager.GetString("ViewPalette", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Views Checker.
-        /// </summary>
-        public static string ViewsChecker {
-            get {
-                return ResourceManager.GetString("ViewsChecker", resourceCulture);
             }
         }
         

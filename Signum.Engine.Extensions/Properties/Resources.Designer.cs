@@ -269,15 +269,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Not allowed to modify existing {0} while offline.
-        /// </summary>
-        internal static string NotAllowedToModifyExisting0WhileOffline {
-            get {
-                return ResourceManager.GetString("NotAllowedToModifyExisting0WhileOffline", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Not allowed to save {0} while offline.
         /// </summary>
         internal static string NotAllowedToSave0WhileOffline {
@@ -292,15 +283,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string NotAllowedToSaveThis0WhileOffline {
             get {
                 return ResourceManager.GetString("NotAllowedToSaveThis0WhileOffline", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Not authorized to {0} {1}.
-        /// </summary>
-        internal static string NotAuthorizedTo01 {
-            get {
-                return ResourceManager.GetString("NotAuthorizedTo01", resourceCulture);
             }
         }
         
@@ -458,15 +440,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter.
-        /// </summary>
-        internal static string ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter {
-            get {
-                return ResourceManager.GetString("ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to the property {0}.
         /// </summary>
         internal static string TheProperty0 {
@@ -544,24 +517,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string YouCanResetYourPasswordByFollowingTheLinkBelow {
             get {
                 return ResourceManager.GetString("YouCanResetYourPasswordByFollowingTheLinkBelow", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You recently requested a new password.
-        /// </summary>
-        internal static string YouRecentlyRequestedANewPassword {
-            get {
-                return ResourceManager.GetString("YouRecentlyRequestedANewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your username is: {0}.
-        /// </summary>
-        internal static string YourUsernameIs0 {
-            get {
-                return ResourceManager.GetString("YourUsernameIs0", resourceCulture);
             }
         }
         

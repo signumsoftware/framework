@@ -117,151 +117,172 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Close" xml:space="preserve">
-    <value>Close</value>
-  </data>
   <data name="Reports" xml:space="preserve">
     <value>Reports</value>
+    <comment>ExcelMessage</comment>
   </data>
   <data name="Excel2007Spreadsheet" xml:space="preserve">
     <value>Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx</value>
+    <comment>ExcelMessage</comment>
   </data>
   <data name="ExcelReport" xml:space="preserve">
     <value>Excel Report</value>
-  </data>
-  <data name="Field" xml:space="preserve">
-    <value>Field</value>
+    <comment>ExcelMessage</comment>
   </data>
   <data name="FindLocationFoExcelReport" xml:space="preserve">
     <value>Find location for Excel Report</value>
-  </data>
-  <data name="Name" xml:space="preserve">
-    <value>Name</value>
+    <comment>ExcelMessage</comment>
   </data>
   <data name="Open" xml:space="preserve">
     <value>Open</value>
-  </data>
-  <data name="Reload" xml:space="preserve">
-    <value>Reload</value>
+    <comment>FileMessage</comment>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="View" xml:space="preserve">
     <value>View</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="DownloadFile" xml:space="preserve">
     <value>Download File</value>
+    <comment>FileMessage</comment>
   </data>
   <data name="SelectFile" xml:space="preserve">
     <value>Select File</value>
+    <comment>FilesMessage</comment>
   </data>
   <data name="ViewFile" xml:space="preserve">
     <value>View file</value>
+    <comment>FilesMessage</comment>
   </data>
   <data name="ViewingHasNotDefaultImplementationFor0" xml:space="preserve">
     <value>Viewing has no default implementation for {0}</value>
+    <comment>FilesMessage</comment>
   </data>
   <data name="SavingHasNotDefaultImplementationFor0" xml:space="preserve">
     <value>Saving has no default implementation for {0}</value>
+    <comment>FilesMessage</comment>
   </data>
   <data name="OpeningHasNotDefaultImplementationFor0" xml:space="preserve">
     <value>Opening has no default implementation for {0}</value>
-  </data>
-  <data name="SelectSomeRowsFirst" xml:space="preserve">
-    <value>Select some rows first</value>
+    <comment>FileMessage</comment>
   </data>
   <data name="FileTypes" xml:space="preserve">
     <value>FileTypes</value>
+    <comment>FileMessage</comment>
   </data>
   <data name="MyQueries" xml:space="preserve">
     <value>My Queries</value>
+    <comment>UserQueryMessage</comment>
   </data>
   <data name="RemoveUserQuery" xml:space="preserve">
     <value>Remove User Query?</value>
+    <comment>UserQueryMessage</comment>
   </data>
   <data name="AreYouSureToRemove0" xml:space="preserve">
     <value>Are you sure to remove '{0}'?</value>
+    <comment>UserQueryMessage</comment>
   </data>
   <data name="MyCharts" xml:space="preserve">
     <value>My Charts</value>
-  </data>
-  <data name="Create" xml:space="preserve">
-    <value>Create</value>
+    <comment>ChartMessage</comment>
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
+    <comment>UserQueryMessage</comment>
   </data>
   <data name="Remove" xml:space="preserve">
     <value>Remove</value>
+    <comment>FilesMessage</comment>
   </data>
   <data name="RemainingCharacters" xml:space="preserve">
     <value>Remaining characters</value>
-  </data>
-  <data name="SendData" xml:space="preserve">
-    <value>Send Data</value>
+    <comment>SmsMessage</comment>
   </data>
   <data name="Login_New" xml:space="preserve">
     <value>New:</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Login_Password" xml:space="preserve">
     <value>Password:</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Login_Repeat" xml:space="preserve">
     <value>Repeat:</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Login_UserName" xml:space="preserve">
     <value>Username:</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Insert" xml:space="preserve">
     <value>Insert</value>
+    <comment>SmsMessage</comment>
   </data>
   <data name="RemoveNonValidCharacters" xml:space="preserve">
     <value>Remove non valid characters</value>
+    <comment>SmsMessage</comment>
   </data>
   <data name="Message" xml:space="preserve">
     <value>Message</value>
+    <comment>SmsMessage</comment>
   </data>
   <data name="Login_UserName_Watermark" xml:space="preserve">
     <value>user</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="PasswordsDoNotMatch" xml:space="preserve">
     <value>Passwords do not match</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="PasswordChanged" xml:space="preserve">
     <value>Password changed</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>Unknown</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Chart" xml:space="preserve">
     <value>Chart</value>
+    <comment>ChartMessage</comment>
   </data>
   <data name="_0CanOnlyBeCreatedFromTheChartWindow" xml:space="preserve">
     <value>{0} can only be created from the chart window</value>
+    <comment>ChartMessage</comment>
   </data>
   <data name="_0CanOnlyBeCreatedFromTheSearchWindow" xml:space="preserve">
     <value>{0} can only be created from the search window</value>
+    <comment>ChartMessage</comment>
   </data>
   <data name="Alert" xml:space="preserve">
     <value>Alert</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="Alerts" xml:space="preserve">
     <value>Alerts</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="NewAlert" xml:space="preserve">
     <value>New Alert</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="NewNote" xml:space="preserve">
     <value>New Note</value>
+    <comment>NoteMessage</comment>
   </data>
   <data name="Note" xml:space="preserve">
     <value>Note:</value>
+    <comment>NoteMessage</comment>
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
+    <comment>NoteMessage</comment>
   </data>
   <data name="AuthorizationCacheSuccessfullyUpdated" xml:space="preserve">
     <value>Authorization cache successfully updated</value>
+    <comment>AuthMessage</comment>
   </data>
 </root>

@@ -119,174 +119,211 @@
   </resheader>
   <data name="QueryOf0" xml:space="preserve">
     <value>Query of {0}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="TheDatabaseVersion" xml:space="preserve">
     <value>the database version</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="YourVersion" xml:space="preserve">
     <value>your version</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
     <value>Removes the {0} from the database</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="NotAuthorizedToSave0" xml:space="preserve">
     <value>Not authorized to Save '{0}'</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
     <value>Not authorized to Retrieve '{0}'</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>Access to Facade Method '{0}' is not allowed</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
     <value>Not authorized to {0} the {1} with Id {2}</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
     <value>{0} cycles have been found in the graph of Roles due to the relationships:
 </value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Character" xml:space="preserve">
     <value>character</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="DateTime" xml:space="preserve">
     <value>date and time</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="Integer" xml:space="preserve">
     <value>integer</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="Value" xml:space="preserve">
     <value>value</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="String" xml:space="preserve">
     <value>string</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="Check" xml:space="preserve">
     <value>check</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="Should" xml:space="preserve">
     <value>. Should  </value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="Amount" xml:space="preserve">
     <value>amount</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="ExpressedIn" xml:space="preserve">
     <value>expressed in </value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="IncorrectPassword" xml:space="preserve">
     <value>Incorrect password</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>Username {0} is not valid</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Date" xml:space="preserve">
     <value>date</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="ValueLike0" xml:space="preserve">
     <value>value like {0}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="OrNull" xml:space="preserve">
     <value>or null</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
     <value>{0} is a collection of elements {1}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="ConstructsANew0" xml:space="preserve">
     <value>Constructs a new {0}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="From0OfThe1" xml:space="preserve">
     <value>from {0} of the {1} </value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="The0" xml:space="preserve">
     <value>The {0}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="_0IsA1" xml:space="preserve">
     <value>{0} is a {1}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="FromMany0" xml:space="preserve">
     <value>from many {0}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="OfThe0" xml:space="preserve">
     <value>of the {0}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="Call0Over1OfThe2" xml:space="preserve">
     <value>Call {0} over {1} of the {2}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="HelpNotLoaded" xml:space="preserve">
     <value>Help not loaded</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
     <value>ProcessExecution {0} is not running anymore</value>
+    <comment>ProcessMessage</comment>
   </data>
   <data name="ResetPasswordCode" xml:space="preserve">
     <value>Reset password code</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
     <value>Excel template must have .xlsx extension, and the current one has {0}</value>
+    <comment>ExcelMessage</comment>
   </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
     <value>There are no results to write</value>
+    <comment>ExcelMessage</comment>
   </data>
   <data name="Data" xml:space="preserve">
     <value>Data</value>
+    <comment>ExcelMessage</comment>
   </data>
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
     <value>The Excel Template has a column {0} not present in the Find Window</value>
+    <comment>ExcelMessage</comment>
   </data>
   <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
     <value>You can reset your password by following the link below:</value>
-  </data>
-  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
-    <value>You recently requested a new password</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="Any" xml:space="preserve">
     <value>any</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="_0IsA1AndShows2" xml:space="preserve">
     <value>{0} is a {1} and shows {2}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="_0IsACalculated1" xml:space="preserve">
     <value>{0} is a calculated {1}</value>
+    <comment>HelpMessage</comment>
   </data>
   <data name="ExpiredPassword" xml:space="preserve">
     <value>Expired password</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="PasswordNearExpired" xml:space="preserve">
     <value>Your password is near to expired</value>
-  </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="TheTemplateMustBeActiveToConstructSMSMessages" xml:space="preserve">
     <value>The template must be Active to construct SMS messages</value>
-  </data>
-  <data name="NotAuthorizedTo01" xml:space="preserve">
-    <value>Not authorized to {0} {1}</value>
-  </data>
-  <data name="YourUsernameIs0" xml:space="preserve">
-    <value>Your username is: {0}</value>
+    <comment>SmsMessage</comment>
   </data>
   <data name="StatusCanNotBeUpdatedForNonSentMessages" xml:space="preserve">
     <value>Status can not be updated for non sent messages</value>
+    <comment>SmsMessage</comment>
   </data>
   <data name="TheTextForTheSMSMessageExceedsTheLengthLimit" xml:space="preserve">
     <value>The text for the SMS message exceeds the length limit</value>
+    <comment>SmsMessage</comment>
   </data>
   <data name="NotAllowedToSave0WhileOffline" xml:space="preserve">
     <value>Not allowed to save {0} while offline</value>
-  </data>
-  <data name="NotAllowedToModifyExisting0WhileOffline" xml:space="preserve">
-    <value>Not allowed to modify existing {0} while offline</value>
+    <comment>DisconnectedMessage</comment>
   </data>
   <data name="The0WithId12IsLockedBy3" xml:space="preserve">
     <value>The {0} with Id {1} ({2}) is locked by {3}</value>
+    <comment>DisconnectedMessage</comment>
   </data>
   <data name="NotAllowedToSaveThis0WhileOffline" xml:space="preserve">
     <value>Not allowed to save this {0} while offline</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
     <value>There's not a registered user with that email address</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="TheProperty0" xml:space="preserve">
     <value>the property {0}</value>
+    <comment>HelpMessage</comment>
   </data>
 </root>

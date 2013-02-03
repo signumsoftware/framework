@@ -151,24 +151,6 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New Execute.
-        /// </summary>
-        public static string CustomTaskOperation_Execute {
-            get {
-                return ResourceManager.GetString("CustomTaskOperation_Execute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to (Deleted).
-        /// </summary>
-        public static string Deleted {
-            get {
-                return ResourceManager.GetString("Deleted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Each {0} hours from {1}.
         /// </summary>
         public static string Each0HoursFrom1 {
@@ -187,101 +169,11 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Resend emails.
-        /// </summary>
-        public static string EmailOperations_ReSendEmails {
-            get {
-                return ResourceManager.GetString("EmailOperations_ReSendEmails", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Num. Errors.
-        /// </summary>
-        public static string EmailPackageDN_NumErrors {
-            get {
-                return ResourceManager.GetString("EmailPackageDN_NumErrors", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Num. Lines.
-        /// </summary>
-        public static string EmailPackageDN_NumLines {
-            get {
-                return ResourceManager.GetString("EmailPackageDN_NumLines", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to End date must be higher than start date.
         /// </summary>
         public static string EndDateMustBeHigherThanStartDate {
             get {
                 return ResourceManager.GetString("EndDateMustBeHigherThanStartDate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Expression can not be an aggregate.
-        /// </summary>
-        public static string ExpressionCanNotBeAnAggregate {
-            get {
-                return ResourceManager.GetString("ExpressionCanNotBeAnAggregate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Expression should be some kind of aggregate.
-        /// </summary>
-        public static string ExpressionShouldBeSomeKindOfAggregate {
-            get {
-                return ResourceManager.GetString("ExpressionShouldBeSomeKindOfAggregate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Expression should have a continous amount of values.
-        /// </summary>
-        public static string ExpressionShouldHaveAContinousAmountOfValues {
-            get {
-                return ResourceManager.GetString("ExpressionShouldHaveAContinousAmountOfValues", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Expression should have a discrete amount of values.
-        /// </summary>
-        public static string ExpressionShouldHaveADiscreteAmountOfValues {
-            get {
-                return ResourceManager.GetString("ExpressionShouldHaveADiscreteAmountOfValues", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to File Length.
-        /// </summary>
-        public static string FilePathDN_FileLengthString {
-            get {
-                return ResourceManager.GetString("FilePathDN_FileLengthString", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Physical Path.
-        /// </summary>
-        public static string FilePathDN_FullPhysicalPath {
-            get {
-                return ResourceManager.GetString("FilePathDN_FullPhysicalPath", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to URL.
-        /// </summary>
-        public static string FilePathDN_FullWebPath {
-            get {
-                return ResourceManager.GetString("FilePathDN_FullWebPath", resourceCulture);
             }
         }
         
@@ -417,15 +309,6 @@ namespace Signum.Entities.Extensions.Properties {
         public static string Omnibox_Value {
             get {
                 return ResourceManager.GetString("Omnibox_Value", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to New Execution.
-        /// </summary>
-        public static string ProcessOperation_FromProcess {
-            get {
-                return ResourceManager.GetString("ProcessOperation_FromProcess", resourceCulture);
             }
         }
         
@@ -714,33 +597,6 @@ namespace Signum.Entities.Extensions.Properties {
         public static string TheUserStateMustBeDisabled {
             get {
                 return ResourceManager.GetString("TheUserStateMustBeDisabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to e-Mail.
-        /// </summary>
-        public static string UserDN_Email {
-            get {
-                return ResourceManager.GetString("UserDN_Email", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Save.
-        /// </summary>
-        public static string UserOperation_SaveNew {
-            get {
-                return ResourceManager.GetString("UserOperation_SaveNew", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User Query.
-        /// </summary>
-        public static string UserQueryDN {
-            get {
-                return ResourceManager.GetString("UserQueryDN", resourceCulture);
             }
         }
         

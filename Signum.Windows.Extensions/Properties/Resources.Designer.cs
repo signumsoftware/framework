@@ -124,24 +124,6 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Close.
-        /// </summary>
-        public static string Close {
-            get {
-                return ResourceManager.GetString("Close", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Create.
-        /// </summary>
-        public static string Create {
-            get {
-                return ResourceManager.GetString("Create", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Download File.
         /// </summary>
         public static string DownloadFile {
@@ -174,15 +156,6 @@ namespace Signum.Windows.Extensions.Properties {
         public static string ExcelReport {
             get {
                 return ResourceManager.GetString("ExcelReport", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Field.
-        /// </summary>
-        public static string Field {
-            get {
-                return ResourceManager.GetString("Field", resourceCulture);
             }
         }
         
@@ -286,15 +259,6 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Name.
-        /// </summary>
-        public static string Name {
-            get {
-                return ResourceManager.GetString("Name", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to New Alert.
         /// </summary>
         public static string NewAlert {
@@ -367,15 +331,6 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reload.
-        /// </summary>
-        public static string Reload {
-            get {
-                return ResourceManager.GetString("Reload", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Remaining characters.
         /// </summary>
         public static string RemainingCharacters {
@@ -444,24 +399,6 @@ namespace Signum.Windows.Extensions.Properties {
         public static string SelectFile {
             get {
                 return ResourceManager.GetString("SelectFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Select some rows first.
-        /// </summary>
-        public static string SelectSomeRowsFirst {
-            get {
-                return ResourceManager.GetString("SelectSomeRowsFirst", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Send Data.
-        /// </summary>
-        public static string SendData {
-            get {
-                return ResourceManager.GetString("SendData", resourceCulture);
             }
         }
         

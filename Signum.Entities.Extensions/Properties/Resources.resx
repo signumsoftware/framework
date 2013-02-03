@@ -117,241 +117,256 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Deleted" xml:space="preserve">
-    <value>(Deleted)</value>
-  </data>
-  <data name="ProcessOperation_FromProcess" xml:space="preserve">
-    <value>New Execution</value>
-  </data>
   <data name="ScheduleRuleDailyDN" xml:space="preserve">
     <value>Dialy</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
     <value>Days of week</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_AndHoliday" xml:space="preserve">
     <value>and holidays</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Calendar" xml:space="preserve">
     <value>Calendar</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_F" xml:space="preserve">
     <value>F</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Friday" xml:space="preserve">
     <value>Friday</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Holiday" xml:space="preserve">
     <value>Holiday</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_M" xml:space="preserve">
     <value>M</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Monday" xml:space="preserve">
     <value>Monday</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_S" xml:space="preserve">
     <value>S</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Sa" xml:space="preserve">
     <value>Sa</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Saturday" xml:space="preserve">
     <value>Saturday</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Sunday" xml:space="preserve">
     <value>Sunday</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_T" xml:space="preserve">
     <value>T</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Th" xml:space="preserve">
     <value>Th</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Thursday" xml:space="preserve">
     <value>Thursday</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Tuesday" xml:space="preserve">
     <value>Tuesday</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_W" xml:space="preserve">
     <value>W</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Wednesday" xml:space="preserve">
     <value>Wednesday</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeeklyDN" xml:space="preserve">
     <value>Weekly</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeeklyDN_DayOfTheWeek" xml:space="preserve">
     <value>Day of the week</value>
-  </data>
-  <data name="UserDN_Email" xml:space="preserve">
-    <value>e-Mail</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_ButHoliday" xml:space="preserve">
     <value>but holidays</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleWeekDaysDN_At" xml:space="preserve">
     <value>at</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleDailyDN_Everydayat" xml:space="preserve">
     <value>Every day at </value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="Holidayhavetobetrueorfalsewhenacalendarisset" xml:space="preserve">
     <value>Holiday have to be true or false when a calendar is set</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="Holidayhavetobenullwhennocalendarisset" xml:space="preserve">
     <value>Holiday have to be null when no calendar is set</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleDayDN_StartingOn" xml:space="preserve">
     <value>Starting On</value>
-  </data>
-  <data name="CustomTaskOperation_Execute" xml:space="preserve">
-    <value>New Execute</value>
-  </data>
-  <data name="UserOperation_SaveNew" xml:space="preserve">
-    <value>Save</value>
-  </data>
-  <data name="FilePathDN_FullPhysicalPath" xml:space="preserve">
-    <value>Physical Path</value>
-  </data>
-  <data name="FilePathDN_FullWebPath" xml:space="preserve">
-    <value>URL</value>
-  </data>
-  <data name="FilePathDN_FileLengthString" xml:space="preserve">
-    <value>File Length</value>
-  </data>
-  <data name="UserQueryDN" xml:space="preserve">
-    <value>User Query</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="NotUserLogged" xml:space="preserve">
     <value>Not user logged</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="TheUserStateMustBeDisabled" xml:space="preserve">
     <value>The user state must be disabled</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="ProcessStartIsGreaterThanProcessEnd" xml:space="preserve">
     <value>Process Start is greater than Process End</value>
+    <comment>ProcessMessage</comment>
   </data>
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
     <value>Process Start is null but Process End is not</value>
-  </data>
-  <data name="EmailOperations_ReSendEmails" xml:space="preserve">
-    <value>Resend emails</value>
-  </data>
-  <data name="EmailPackageDN_NumErrors" xml:space="preserve">
-    <value>Num. Errors</value>
-  </data>
-  <data name="EmailPackageDN_NumLines" xml:space="preserve">
-    <value>Num. Lines</value>
-  </data>
-  <data name="ExpressionShouldHaveAContinousAmountOfValues" xml:space="preserve">
-    <value>Expression should have a continous amount of values</value>
-  </data>
-  <data name="ExpressionShouldHaveADiscreteAmountOfValues" xml:space="preserve">
-    <value>Expression should have a discrete amount of values</value>
-  </data>
-  <data name="ExpressionShouldBeSomeKindOfAggregate" xml:space="preserve">
-    <value>Expression should be some kind of aggregate</value>
+    <comment>ProcessMessage</comment>
   </data>
   <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
     <value>Part {0} is in column {1} but panel has only {2} columns</value>
+    <comment>ControlPanelMessage</comment>
   </data>
   <data name="ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts" xml:space="preserve">
     <value>Part {0} is in column {1} of row {2} which already has other parts</value>
+    <comment>ControlPanelMessage</comment>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
     <value>There are not any parts in rows {0}</value>
+    <comment>ControlPanelMessage</comment>
   </data>
   <data name="CountSearchControlPartDN" xml:space="preserve">
     <value>Counter list</value>
+    <comment>ControlPanelMessage</comment>
   </data>
   <data name="CountUserQueryElement" xml:space="preserve">
     <value>Counter</value>
+    <comment>ControlPanelMessage</comment>
   </data>
   <data name="_0RulesFor1" xml:space="preserve">
     <value>{0} rules for {1}</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
     <value>The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter</value>
+    <comment>AuthMessage</comment>
   </data>
   <data name="EndDateMustBeHigherThanStartDate" xml:space="preserve">
     <value>End date must be higher than start date</value>
+    <comment>SmsMessages</comment>
   </data>
   <data name="ScheduleRuleHourlyDN" xml:space="preserve">
     <value>Each X Hours</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="ScheduleRuleMinutelyDN" xml:space="preserve">
     <value>Each X Minutes</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="Each0HoursFrom1" xml:space="preserve">
     <value>Each {0} hours from {1}</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="Each0MinutesFrom1" xml:space="preserve">
     <value>Each {0} minutes from {1}</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="_0IsNotMultiple1" xml:space="preserve">
     <value>{0} is not multiple of {1}</value>
-  </data>
-  <data name="ExpressionCanNotBeAnAggregate" xml:space="preserve">
-    <value>Expression can not be an aggregate</value>
+    <comment>SchedulerMessage</comment>
   </data>
   <data name="WebDownload" xml:space="preserve">
     <value>Download</value>
+    <comment>FileMessage</comment>
   </data>
   <data name="WebImage" xml:space="preserve">
     <value>Image</value>
+    <comment>FileMessage</comment>
   </data>
   <data name="ColorsFor0" xml:space="preserve">
     <value>Colors for {0}</value>
+    <comment>ChartMessage</comment>
   </data>
   <data name="ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero" xml:space="preserve">
     <value>{0} should be -1 (all), empty (default), or a number greater than zero</value>
+    <comment>UserQueryMessage</comment>
   </data>
   <data name="Yes" xml:space="preserve">
     <value>yes</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="No" xml:space="preserve">
     <value>no</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="NotFound" xml:space="preserve">
     <value>[Not found]</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Chart" xml:space="preserve">
     <value>Chart</value>
+    <comment>ChartMessage</comment>
   </data>
   <data name="ControlPanelDN_TitleMustBeSpecifiedFor0" xml:space="preserve">
     <value>Title must be specified for {0}</value>
+    <comment>ControlPanelMessage</comment>
   </data>
   <data name="Omnibox_Help" xml:space="preserve">
     <value>Help</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_DatabaseAccess" xml:space="preserve">
     <value>Searching between 'apostrophe' will make queries to the database</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_Field" xml:space="preserve">
     <value>Field</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_MatchingOptions" xml:space="preserve">
     <value>You can match results by (st)art, mid(dle) or (U)pper(C)ase</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_Query" xml:space="preserve">
     <value>Query</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_Type" xml:space="preserve">
     <value>Type</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_UserChart" xml:space="preserve">
     <value>UserChart</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_UserQuery" xml:space="preserve">
     <value>UserQuery</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_Value" xml:space="preserve">
     <value>Value</value>
+    <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_Disambiguate" xml:space="preserve">
     <value>With Shift+Enter you disambiguate you query</value>
+    <comment>OmniboxMessage</comment>
   </data>
 </root>
