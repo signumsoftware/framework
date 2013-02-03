@@ -115,6 +115,20 @@ namespace Signum.Web.Profiler
             return RedirectToAction("Heavy");
         }
 
+        public FileResult DownloadFile(string indices)
+        {
+            XDocument doc = indices == null ?
+                HeavyProfiler.ExportXml() :
+                HeavyProfiler.Find(indices).ExportXmlDocument();
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                HeavyProfiler.ExportXml().Save(ms);
+
+                return File(ms.ToArray(), "text/xml");
+            }
+        }
+
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Times()
         {

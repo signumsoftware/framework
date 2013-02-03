@@ -54,11 +54,11 @@ namespace Signum.Web.Extensions.Profiler.Views
 
 
 
-WriteLiteral("<h2>\r\n    Profiler Entry (\r\n");
+WriteLiteral("<h2>Profiler Entry (\r\n");
 
 
             
-            #line 6 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 5 "..\..\Profiler\Views\HeavyDetails.cshtml"
      foreach (var e in Model.FollowC(a => a.Parent).Skip(1).Reverse())
     {
         
@@ -66,7 +66,7 @@ WriteLiteral("<h2>\r\n    Profiler Entry (\r\n");
             #line default
             #line hidden
             
-            #line 8 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 7 "..\..\Profiler\Views\HeavyDetails.cshtml"
    Write(Html.ProfilerEntry(e.Index.ToString(), e.FullIndex()));
 
             
@@ -77,7 +77,7 @@ WriteLiteral(".\r\n");
 
 
             
-            #line 9 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 8 "..\..\Profiler\Views\HeavyDetails.cshtml"
         }
 
             
@@ -87,7 +87,7 @@ WriteLiteral("    ");
 
 
             
-            #line 10 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 9 "..\..\Profiler\Views\HeavyDetails.cshtml"
 Write(Model.Index.ToString());
 
             
@@ -97,61 +97,70 @@ WriteLiteral(")\r\n</h2>\r\n");
 
 
             
-            #line 12 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 11 "..\..\Profiler\Views\HeavyDetails.cshtml"
 Write(Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy()));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n<br />\r\n<h3>\r\n    Breakdown</h3>\r\n<div class=\"sf-profiler-chart\" data-detail-ur" +
-"l=\"");
+WriteLiteral("\r\n");
 
 
             
-            #line 16 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 12 "..\..\Profiler\Views\HeavyDetails.cshtml"
+Write(Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(Model.FullIndex())));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n<br />\r\n<h3>Breakdown</h3>\r\n<div class=\"sf-profiler-chart\" data-detail-url=\"");
+
+
+            
+            #line 15 "..\..\Profiler\Views\HeavyDetails.cshtml"
                                            Write(Url.Action("HeavyRoute", "Profiler"));
 
             
             #line default
             #line hidden
-WriteLiteral("\">\r\n</div>\r\n<br />\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>\r\n  " +
-"          Role\r\n        </th>\r\n        <td>\r\n            ");
+WriteLiteral("\">\r\n</div>\r\n<br />\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>Role" +
+"\r\n        </th>\r\n        <td>\r\n            ");
 
 
             
-            #line 25 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 23 "..\..\Profiler\Views\HeavyDetails.cshtml"
        Write(Model.Role);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            Time\r\n        </t" +
-"h>\r\n        <td>\r\n            ");
+WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>Time\r\n        </th>\r\n        <t" +
+"d>\r\n            ");
 
 
             
-            #line 33 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 30 "..\..\Profiler\Views\HeavyDetails.cshtml"
        Write(Model.Elapsed.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n</table>\r\n<br />\r\n<h3>\r\n    Aditional Data</h3>\r\n<div" +
-">\r\n    <pre>\r\n    <code>\r\n        ");
+WriteLiteral("\r\n        </td>\r\n    </tr>\r\n</table>\r\n<br />\r\n<h3>Aditional Data</h3>\r\n<div>\r\n   " +
+" <pre>\r\n    <code>\r\n        ");
 
 
             
-            #line 43 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 39 "..\..\Profiler\Views\HeavyDetails.cshtml"
    Write(Model.AditionalData);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </code>\r\n    </pre>\r\n</div>\r\n<br />\r\n<h3>\r\n    StackTrace</h3>\r\n");
+WriteLiteral("\r\n    </code>\r\n    </pre>\r\n</div>\r\n<br />\r\n<h3>StackTrace</h3>\r\n");
 
 
             
-            #line 50 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 45 "..\..\Profiler\Views\HeavyDetails.cshtml"
  if (Model.StackTrace == null)
 {
 
@@ -162,7 +171,7 @@ WriteLiteral("    <span>No StackTrace</span>\r\n");
 
 
             
-            #line 53 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 48 "..\..\Profiler\Views\HeavyDetails.cshtml"
 }
 else
 {
@@ -173,14 +182,11 @@ else
 WriteLiteral(@"    <table class=""sf-search-results"">
         <thead>
             <tr>
-                <th>
-                    Type
+                <th>Type
                 </th>
-                <th>
-                    Method
+                <th>Method
                 </th>
-                <th>
-                    FileLine
+                <th>FileLine
                 </th>
             </tr>
         </thead>
@@ -189,7 +195,7 @@ WriteLiteral(@"    <table class=""sf-search-results"">
 
 
             
-            #line 71 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 63 "..\..\Profiler\Views\HeavyDetails.cshtml"
              for (int i = 0; i < Model.StackTrace.FrameCount; i++)
             {
                 var frame = Model.StackTrace.GetFrame(i);
@@ -202,7 +208,7 @@ WriteLiteral("                <tr>\r\n                    <td>\r\n");
 
 
             
-            #line 77 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 69 "..\..\Profiler\Views\HeavyDetails.cshtml"
                          if (type != null)
                         {
                             var color = ColorExtensions.ToHtmlColor(type.Assembly.FullName.GetHashCode());
@@ -215,7 +221,7 @@ WriteLiteral("                            <span style=\"color:");
 
 
             
-            #line 81 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 73 "..\..\Profiler\Views\HeavyDetails.cshtml"
                                           Write(color);
 
             
@@ -225,7 +231,7 @@ WriteLiteral("\">");
 
 
             
-            #line 81 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 73 "..\..\Profiler\Views\HeavyDetails.cshtml"
                                                   Write(frame.GetMethod().DeclaringType.TryCC(t => t.TypeName()));
 
             
@@ -235,7 +241,7 @@ WriteLiteral("</span>\r\n");
 
 
             
-            #line 82 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 74 "..\..\Profiler\Views\HeavyDetails.cshtml"
                         }
 
             
@@ -245,7 +251,7 @@ WriteLiteral("                    </td>\r\n                    <td>\r\n         
 
 
             
-            #line 85 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 77 "..\..\Profiler\Views\HeavyDetails.cshtml"
                    Write(frame.GetMethod().Name);
 
             
@@ -255,7 +261,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n     
 
 
             
-            #line 88 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 80 "..\..\Profiler\Views\HeavyDetails.cshtml"
                    Write(frame.GetFileLineAndNumber());
 
             
@@ -265,7 +271,7 @@ WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
 
 
             
-            #line 91 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 83 "..\..\Profiler\Views\HeavyDetails.cshtml"
             }
 
             
@@ -275,7 +281,7 @@ WriteLiteral("        </tbody>\r\n    </table>\r\n");
 
 
             
-            #line 94 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 86 "..\..\Profiler\Views\HeavyDetails.cshtml"
 }
 
             
@@ -285,7 +291,7 @@ WriteLiteral("<br />\r\n");
 
 
             
-            #line 96 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 88 "..\..\Profiler\Views\HeavyDetails.cshtml"
 Write(Html.ScriptCss("~/Profiler/Content/SF_Profiler.css"));
 
             
@@ -295,7 +301,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 97 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 89 "..\..\Profiler\Views\HeavyDetails.cshtml"
 Write(Html.ScriptsJs("~/scripts/d3.v2.min.js",
                 "~/Profiler/Scripts/SF_Profiler.js"));
 
@@ -306,7 +312,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 99 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 91 "..\..\Profiler\Views\HeavyDetails.cshtml"
    
     var fullTree = Model.FollowC(e => e.Parent).ToList();
     fullTree.AddRange(Model.DescendantsAndSelf()); 
@@ -320,7 +326,7 @@ WriteLiteral("<script type=\"text/javascript\">\r\n    $(function() {\r\n       
 
 
             
-            #line 105 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 97 "..\..\Profiler\Views\HeavyDetails.cshtml"
                                  Write(Html.Raw(fullTree.Distinct().HeavyDetailsToJson()));
 
             
@@ -330,7 +336,7 @@ WriteLiteral(", ");
 
 
             
-            #line 105 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 97 "..\..\Profiler\Views\HeavyDetails.cshtml"
                                                                                       Write(Model.Depth);
 
             
